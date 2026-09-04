@@ -4854,6 +4854,262 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 }
 </style>
 
+<style id="papotas-v164-reparaciones-pantalla">
+/* ============================================================================
+   V164 — Reparaciones de composición encontradas revisando pantalla por
+   pantalla, midiendo cada elemento a 1400 px y a 390 px. Solo CSS.
+   ========================================================================== */
+
+/* --- Datos y salud · Nube y respaldo ---------------------------------------
+   Las filas de comprobación son frases largas, no tarjetas de cifra: al
+   ponerlas a dos columnas en el móvil (capa V162) cada fila se quedaba en
+   140 px y el texto se recortaba a 60 px, así que no se leía ni una. */
+@media(max-width:640px){
+  .seccion-pantalla .ps-health{grid-template-columns:minmax(0,1fr)!important; gap:7px!important}
+  .seccion-pantalla .ps-health-row{grid-template-columns:10px minmax(0,1fr) auto!important; align-items:center!important}
+  .seccion-pantalla .ps-health-row .ps-main{min-width:0!important}
+  .seccion-pantalla .ps-health-row .ps-main > *{
+    white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+  }
+}
+
+/* --- Cobros inteligentes ---------------------------------------------------
+   En la fila de cobro los tres botones no encogían y dejaban el bloque del
+   cliente en 0 px de ancho: el nombre desaparecía y la fila crecía a 152 px.
+   Nombre e importe arriba, acciones en su propia línea. */
+@media(max-width:640px){
+  .seccion-pantalla .ps-row{flex-wrap:wrap!important; row-gap:8px!important}
+  .seccion-pantalla .ps-row > .ps-main{flex:1 1 120px!important; min-width:0!important}
+  .seccion-pantalla .ps-row > .ps-amount{flex:0 0 auto!important; margin-left:auto!important; white-space:nowrap!important}
+  .seccion-pantalla .ps-row > .ps-actions{
+    flex:1 1 100%!important; display:flex!important; gap:6px!important; justify-content:stretch!important;
+  }
+  .seccion-pantalla .ps-row > .ps-actions > *{flex:1 1 auto!important; min-height:38px!important}
+}
+
+/* --- Botones de icono en filas de lista ------------------------------------
+   Se estrujaban hasta 9-24 px de ancho (WhatsApp y Ficha en Cobros, Renovar
+   en Renovaciones, Editar y Eliminar en Respuestas rápidas): imposibles de
+   acertar con el dedo. Mínimo 38 px y sin partir el rótulo en vertical. */
+@media(max-width:640px){
+  #cuerpo-app .seccion-pantalla .ib2,
+  #cuerpo-app .seccion-pantalla button:has(> svg:only-child),
+  #cuerpo-app .seccion-pantalla button:has(> i:only-child){
+    min-width:38px!important; min-height:38px!important; flex:0 0 auto!important;
+  }
+  .seccion-pantalla button.shrink-0,
+  #op-alertas button{white-space:nowrap!important; flex:0 0 auto!important}
+}
+
+/* --- Tablas (Inventario, Cuentas, Dinero) ----------------------------------
+   Ya viven dentro de un contenedor con scroll horizontal, pero una regla
+   antigua obligaba a las celdas a partir palabras, así que la tabla se
+   comprimía a columnas de 32 px en vez de desplazarse. */
+@media(max-width:720px){
+  .pap-tabla-scroll{overflow-x:auto!important; -webkit-overflow-scrolling:touch}
+  .pap-tabla-scroll > table{min-width:620px!important; width:max-content!important}
+  .pap-tabla-scroll > table th,
+  .pap-tabla-scroll > table td{
+    white-space:nowrap!important; overflow-wrap:normal!important; word-break:keep-all!important;
+  }
+}
+
+/* --- Combos y Club VIP -----------------------------------------------------
+   En el móvil el nombre de la plataforma se quedaba en 28-40 px ("NET…").
+   El precio se acota y la fila se reparte a lo ancho. */
+@media(max-width:640px){
+  #contenedor-plataformas-combo > div{gap:8px!important}
+  #contenedor-plataformas-combo label{flex:1 1 auto!important; min-width:0!important}
+  #contenedor-plataformas-combo label > span{font-size:11px!important}
+  #contenedor-plataformas-combo input[type="number"]{
+    width:70px!important; max-width:70px!important; flex:0 0 70px!important;
+  }
+  #contenedor-plataformas-combo .logo-badge{width:20px!important; height:20px!important; min-width:20px!important}
+}
+
+/* --- Cabeceras de panel con acción ------------------------------------------
+   En "Datos y salud" el botón "Revisar de nuevo" compartía fila con un párrafo
+   que no encogía: quedaba en 22 px de ancho por 219 de alto, con el rótulo
+   escrito en vertical. La cabecera pasa a dos líneas en el móvil. */
+@media(max-width:640px){
+  .seccion-pantalla .ps-head{flex-wrap:wrap!important; row-gap:9px!important; align-items:flex-start!important}
+  .seccion-pantalla .ps-head > *:first-child{flex:1 1 100%!important; min-width:0!important}
+  .seccion-pantalla .ps-head .ps-btn,
+  .seccion-pantalla .ps-head button{
+    flex:0 0 auto!important; white-space:nowrap!important; min-height:38px!important; width:auto!important;
+  }
+  #contenedor-plataformas-combo button{min-width:38px!important}
+}
+
+/* --- Filas de comprobación: nunca recortar la frase ------------------------
+   A 900 px "8 cliente(s) exceden el vencimiento de su Master" se cortaba. */
+.seccion-pantalla .ps-health-row .ps-main{min-width:0!important}
+.seccion-pantalla .ps-health-row .ps-main > *{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+}
+
+/* --- Cabecera de plataforma (Cuentas master) -------------------------------
+   Entre 640 y 900 px el bloque del título se quedaba corto y recortaba el
+   nombre de la plataforma, el rótulo "PLATAFORMA" y la etiqueta de categoría. */
+@media(max-width:900px){
+  #sec-servicios .platform-premium-titlebox,
+  #sec-cuentas .platform-premium-titlebox{flex-wrap:wrap!important; min-width:0!important; row-gap:4px!important}
+  #sec-servicios .platform-premium-titlebox > *,
+  #sec-cuentas .platform-premium-titlebox > *{
+    min-width:0!important; max-width:100%!important;
+    overflow:visible!important; text-overflow:clip!important; white-space:normal!important;
+  }
+  #sec-servicios .platform-premium-titlebox h3,
+  #sec-cuentas .platform-premium-titlebox h3{flex:1 1 100%!important}
+}
+
+/* --- Tablas propias del panel (.ps-table) ----------------------------------
+   Las de Rentabilidad, Caja y Reportes se comprimían a columnas de 18 px en
+   vez de desplazarse: quedaban ilegibles por debajo de 720 px. */
+@media(max-width:900px){
+  .seccion-pantalla .ps-body:has(> .ps-table){overflow-x:auto!important; -webkit-overflow-scrolling:touch}
+  .seccion-pantalla .ps-table{min-width:560px!important; width:max-content!important}
+  body#cuerpo-app .seccion-pantalla .ps-table th,
+  body#cuerpo-app .seccion-pantalla .ps-table td{
+    max-width:none!important; white-space:nowrap!important;
+    overflow-wrap:normal!important; word-break:keep-all!important;
+  }
+}
+
+/* --- Pantallas muy estrechas (<=375 px) ------------------------------------ */
+@media(max-width:375px){
+  /* Los importes de seis caracteres no cabían en la tarjeta de cifra. */
+  #sec-dashboard .pap-cifra-texto > :last-child,
+  .seccion-pantalla .pap-cifra-texto h3,
+  .seccion-pantalla .pap-cifra-texto p.text-lg,
+  .pap-rejilla-cifras h3,
+  .pap-rejilla-cifras .text-lg{font-size:14.5px!important; letter-spacing:-.025em!important}
+  #contenedor-plataformas-combo label > span{font-size:10px!important}
+
+  /* La cola de cobros se quedaba con 62 px para el nombre: pasa a dos líneas. */
+  #op-cola > div{flex-wrap:wrap!important; row-gap:7px!important}
+  #op-cola > div > .min-w-0{flex:1 1 100%!important; order:1}
+  #op-cola > div > .w-8{order:0}
+  #op-cola > div > b{order:2; margin-left:auto!important}
+  #op-cola > div > .flex.gap-1{order:3}
+}
+
+/* --- Últimos recortes por ancho -------------------------------------------- */
+/* El correo de la cuenta master tenía un tope del 68 % heredado de la V160. */
+@media(max-width:1200px){
+  #sec-servicios .mc-cell > b,
+  #sec-cuentas .mc-cell > b{
+    max-width:none!important; min-width:0!important;
+    white-space:normal!important; overflow-wrap:anywhere!important;
+    overflow:visible!important; text-overflow:clip!important; line-height:1.25!important;
+  }
+}
+/* El nombre de la plataforma prefiere dos líneas a quedarse en "AM…". */
+.seccion-pantalla .insignia-cuenta{flex-wrap:wrap!important}
+.seccion-pantalla .insignia-cuenta .marca-cuenta{
+  white-space:normal!important; overflow-wrap:normal!important; line-height:1.15!important;
+}
+/* Rótulos de las mini-cifras: prefieren dos líneas a perder palabras. */
+body#cuerpo-app .seccion-pantalla .pap-mini-stat .k{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important; line-height:1.2!important;
+}
+/* Nombre de plataforma en Combos: por debajo de 400 px cabe en dos líneas. */
+@media(max-width:1400px){
+  #contenedor-plataformas-combo label > span{
+    white-space:normal!important; overflow:visible!important; text-overflow:clip!important; line-height:1.15!important;
+  }
+}
+@media(max-width:400px){
+  #contenedor-plataformas-combo label > span{
+    white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+    line-height:1.15!important; font-size:10px!important;
+  }
+  #contenedor-plataformas-combo > div{min-height:46px!important}
+}
+
+/* --- Panel · "Cuentas y perfiles disponibles" ------------------------------
+   Dos columnas dentro de una tarjeta de 510 px dejaban 107 px para el bloque
+   de texto, y el nombre de la plataforma se quedaba en "AM…". Las tarjetas
+   piden 320 px: se ponen a dos columnas solo cuando de verdad caben. */
+#lista-perfiles-libres{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+@media(max-width:900px){
+  #lista-perfiles-libres{grid-template-columns:minmax(0,1fr)!important}
+}
+/* En la cabecera de cada plataforma el nombre se encogía mientras una línea
+   decorativa se quedaba con 360 px. Primero el texto, luego el adorno. */
+#lista-perfiles-libres > div > span{
+  flex:0 0 auto!important; white-space:nowrap!important;
+  overflow:visible!important; text-overflow:clip!important;
+}
+#lista-perfiles-libres > div > div[class*="flex-1"]{flex:1 1 0!important; min-width:8px!important}
+/* En tarjetas estrechas el título compartía fila con tres botones y se quedaba
+   en 107 px: pide 140 y, si no caben, los botones bajan de línea. */
+#lista-perfiles-libres > .glass-card > .flex:first-child{flex-wrap:wrap!important; row-gap:8px!important}
+#lista-perfiles-libres > .glass-card > .flex:first-child > div:first-child{flex:1 1 140px!important; min-width:0!important}
+#lista-perfiles-libres > .glass-card > .flex:first-child > div:last-child{margin-left:auto!important}
+/* El correo de la cuenta prefiere partirse a perder caracteres. */
+#lista-perfiles-libres p{
+  white-space:normal!important; overflow-wrap:anywhere!important;
+  overflow:visible!important; text-overflow:clip!important; line-height:1.25!important;
+}
+
+/* --- Casillas de verificación ----------------------------------------------
+   Una regla antigua estira todo input al 100 % por debajo de 430 px, y eso
+   incluía las casillas: la de cada plataforma en Combos medía 88 px de ancho
+   y dejaba el nombre en 29 px ("NET…"). Una casilla nunca debe estirarse. */
+.seccion-pantalla input[type="checkbox"],
+.seccion-pantalla input[type="radio"]{
+  width:18px!important; height:18px!important;
+  min-width:18px!important; max-width:18px!important; flex:0 0 18px!important;
+}
+#contenedor-plataformas-combo input[type="number"]{font-size:11px!important; padding-inline:6px!important}
+
+/* --- Inventario: botones dentro de la tabla --------------------------------
+   Quedaban en 32 px de alto, por debajo del mínimo cómodo para el dedo. */
+@media(max-width:640px){
+  .pap-tabla-scroll td button,
+  .pap-tabla-scroll th button{min-height:38px!important}
+}
+
+/* --- Cobros y Operación: subtítulo de la fila ------------------------------ */
+#op-cola > div > .min-w-0 > p{font-size:8.5px!important; letter-spacing:-.02em!important}
+
+/* --- Clientes: línea de datos ----------------------------------------------
+   "3 sep 2026 · Venció hace 1 d" necesitaba 171 px y tenía 134: se perdía
+   justo la parte que dice cuánto falta. Ahora pasa a dos líneas en vez de
+   recortarse; la tarjeta tiene sitio de sobra. */
+#sec-clientes .tarjeta-registro .dato-linea{align-items:flex-start!important; gap:10px!important}
+#sec-clientes .tarjeta-registro .dato-linea > span:first-child{flex:0 0 auto!important; white-space:nowrap!important}
+#sec-clientes .tarjeta-registro .dato-linea > span:last-child{
+  flex:1 1 auto!important; min-width:0!important; text-align:right!important;
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+  line-height:1.25!important;
+}
+
+/* --- Cuentas master: baldosas de perfil ------------------------------------
+   "PERFIL 2 · Venció hace 12 d" necesitaba 117 px en una baldosa de 100.
+   La baldosa puede crecer un poco y el texto ocupar dos líneas. */
+#sec-servicios .master-profile-premium,
+#sec-cuentas .master-profile-premium{min-height:72px!important}
+#sec-servicios .master-profile-premium .mpp-sub,
+#sec-cuentas .master-profile-premium .mpp-sub{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+  line-height:1.25!important; display:block!important;
+}
+
+/* --- Nombre de plataforma en insignias -------------------------------------
+   "AMAZON PRIME" se cortaba en el Panel y en Clientes por un ancho fijo. */
+.seccion-pantalla .insignia-cuenta{min-width:0!important; max-width:100%!important}
+.seccion-pantalla .insignia-cuenta .marca-cuenta{
+  max-width:none!important; overflow:visible!important; text-overflow:clip!important;
+}
+@media(max-width:520px){
+  .seccion-pantalla .insignia-cuenta .marca-cuenta{
+    overflow:hidden!important; text-overflow:ellipsis!important; max-width:46vw!important;
+  }
+}
+</style>
+
 <script id="papotas-v161-reparaciones">
 /* V161 — reparaciones sobre la base V160. No cambia datos ni lógica de negocio. */
 !function(){"use strict";
