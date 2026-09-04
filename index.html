@@ -22,6 +22,70 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/></noscript>
 <!-- Se puede instalar como app: el manifiesto y los iconos van dentro del
        propio archivo para que baste con subir este index.html. -->
+<script id="papotas-almacen-seguro">
+/* Algunos visores de archivos (los que abren un .html desde WhatsApp, Drive o
+   el explorador del móvil) niegan el almacenamiento local en file://. Ahí cada
+   lectura lanzaba SecurityError, la carga del guion principal se cortaba a
+   medias y variables como cacheEconomia se quedaban sin inicializar: a partir
+   de ese momento CADA repintado moría con "Cannot access ... before
+   initialization", salía el aviso "Algo fallo en esta accion", las listas se
+   quedaban vacías y los botones no respondían.
+   Si no hay almacén disponible se usa uno en memoria para que la app funcione
+   entera durante la sesión, y se avisa bien claro de que no se guardará nada. */
+(function(){
+  "use strict";
+  var vale=false;
+  try{
+    var k="__papotas_prueba__";
+    window.localStorage.setItem(k,"1");
+    window.localStorage.removeItem(k);
+    vale=true;
+  }catch(e){ vale=false; }
+  if(vale) return;
+
+  var datos=Object.create(null);
+  function almacen(){
+    return {
+      getItem:function(k){ k=String(k); return k in datos ? datos[k] : null; },
+      setItem:function(k,v){ datos[String(k)]=String(v); },
+      removeItem:function(k){ delete datos[String(k)]; },
+      clear:function(){ datos=Object.create(null); },
+      key:function(i){ var ks=Object.keys(datos); return i<ks.length?ks[i]:null; },
+      get length(){ return Object.keys(datos).length; }
+    };
+  }
+  var memoria=almacen();
+  try{ Object.defineProperty(window,"localStorage",{configurable:true,get:function(){ return memoria; }}); }catch(e){}
+  try{ Object.defineProperty(window,"sessionStorage",{configurable:true,get:function(){ return memoria; }}); }catch(e){}
+  window.__PAPOTAS_SIN_ALMACEN__=true;
+
+  /* Aviso permanente: sin este cartel el usuario daría de alta clientes y los
+     perdería al cerrar, que es peor que no poder usarla. */
+  function avisar(){
+    if(document.getElementById("pap-aviso-sin-almacen")) return;
+    var d=document.createElement("div");
+    d.id="pap-aviso-sin-almacen";
+    d.setAttribute("role","alert");
+    d.style.cssText=[
+      "position:fixed","left:8px","right:8px","z-index:9999",
+      "bottom:calc(74px + env(safe-area-inset-bottom))","max-width:640px","margin:0 auto",
+      "background:linear-gradient(180deg,#7f1d1d,#5b1414)","color:#fff",
+      "border:1px solid rgba(255,255,255,.22)","border-radius:12px",
+      "padding:10px 40px 10px 12px","font:600 12px/1.35 system-ui,-apple-system,Segoe UI,sans-serif",
+      "box-shadow:0 14px 34px -18px rgba(0,0,0,.9)"
+    ].join(";");
+    d.innerHTML='<b style="display:block;font-size:12.5px;margin-bottom:2px">Este visor no puede guardar nada</b>'+
+      'Estás viendo el archivo desde un visor que bloquea el almacenamiento. Puedes usar la app, pero <u>al cerrar se pierde todo</u>. '+
+      'Ábrela en Chrome (o guárdala y ábrela desde ahí) para que tus datos se conserven.'+
+      '<button type="button" aria-label="Cerrar aviso" style="position:absolute;top:6px;right:6px;width:28px;height:28px;'+
+      'border:0;border-radius:8px;background:rgba(0,0,0,.28);color:#fff;font-size:16px;line-height:1;cursor:pointer">&times;</button>';
+    d.querySelector("button").onclick=function(){ d.remove(); };
+    document.body.appendChild(d);
+  }
+  if(document.body) avisar();
+  else document.addEventListener("DOMContentLoaded", avisar, {once:true});
+})();
+</script>
 <script id="papotas-manifest-embebido">(()=>{try{var j=JSON.stringify({name:"PAPOTAS",short_name:"PAPOTAS",start_url:"./",scope:"./",display:"standalone",background_color:"#030305",theme_color:"#030305",orientation:"any",icons:[{src:"data:image/png;base64,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",sizes:"192x192",type:"image/png",purpose:"any"},{src:"data:image/png;base64,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",sizes:"512x512",type:"image/png",purpose:"maskable"}]}),h="";try{h=URL.createObjectURL(new Blob([j],{type:"application/manifest+json"}))}catch(e){h="data:application/manifest+json;charset=utf-8,"+encodeURIComponent(j)}if(h){var l=document.createElement("link");l.rel="manifest",l.href=h,document.head.appendChild(l)}}catch(e){}})();</script>
 <link href="data:image/png;base64,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" rel="apple-touch-icon"/>
 <link href="data:image/png;base64,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" rel="icon" type="image/png"/>
@@ -4664,8 +4728,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
    "auto" quedaban más estrechas que su contenido, así que "Nuevo cliente" y
    "Ordenar: vencimiento" se cortaban a media palabra. Vuelve a fluir. */
 #sec-clientes > .flex.glass-card{
-  display:flex!important; flex-wrap:wrap!important; gap:10px!important;
-  align-items:center!important; justify-content:space-between!important;
+  display:flex!important; flex-direction:row!important; flex-wrap:wrap!important;
+  gap:10px!important; align-items:center!important; justify-content:space-between!important;
   grid-template-columns:none!important;
 }
 #sec-clientes > .flex.glass-card > div:first-child{flex:1 1 210px!important; min-width:0!important}
@@ -5112,6 +5176,85 @@ body#cuerpo-app .seccion-pantalla .pap-mini-stat .k{
     overflow:hidden!important; text-overflow:ellipsis!important; max-width:46vw!important;
   }
 }
+</style>
+
+<style id="papotas-v166-movil-real">
+/* ============================================================================
+   V166 — Correcciones vistas en un teléfono real, no en un emulador:
+   pestañas cortadas, acciones apiladas a lo alto, distintivos encima del
+   título y filas de botones que se salían por la derecha.
+   ========================================================================== */
+
+/* --- Barras de pestañas ----------------------------------------------------
+   "Reportes" e "Historial" quedaban cortados. Caben más apretando el relleno,
+   y el resto se alcanza deslizando; el degradado del borde avisa de que hay
+   más a la derecha. */
+@media(max-width:720px){
+  .pap-pestanas{
+    display:flex!important; flex-wrap:nowrap!important;
+    overflow-x:auto!important; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; scroll-snap-type:x proximity;
+    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+            mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 26px),transparent 100%);
+  }
+  .pap-pestanas::-webkit-scrollbar{display:none}
+  .pap-pestanas > *{
+    flex:0 0 auto!important; scroll-snap-align:start;
+    padding-inline:11px!important; font-size:12px!important; white-space:nowrap!important;
+  }
+}
+
+/* --- Accesos rápidos de cada sección ---------------------------------------
+   Iban a lo ancho, uno por fila: en Dinero eran tres botones gigantes antes de
+   llegar a las cifras. Dos por fila en todas las secciones, no solo el Panel. */
+@media(max-width:640px){
+  .seccion-pantalla .pap-section-tools{
+    display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:7px!important;
+  }
+  .seccion-pantalla .pap-section-tools > *{width:100%!important; min-width:0!important}
+  .seccion-pantalla .pap-section-tools > .pap-screen-badge{grid-column:1/-1!important}
+  .seccion-pantalla .pap-section-tools > *:only-child,
+  .seccion-pantalla .pap-section-tools > .primary:first-child{grid-column:1/-1!important}
+}
+
+/* --- Distintivos de esquina ------------------------------------------------
+   "WHATSAPP API / WEBHOOK" y "ULTRA CLOUD" se montaban sobre el título en
+   pantallas estrechas. Ahí dejan de flotar y se colocan encima, en su fila. */
+@media(max-width:640px){
+  .seccion-pantalla .glass-card > .absolute.top-0.right-0{
+    position:static!important; display:inline-block!important;
+    margin:0 0 8px auto!important; border-radius:999px!important;
+    max-width:100%!important; white-space:normal!important;
+  }
+}
+
+/* --- Filas de botones que se salían ---------------------------------------- */
+@media(max-width:720px){
+  #sec-combos .flex.flex-wrap,
+  #sec-crecer .flex.flex-wrap{flex-wrap:wrap!important}
+  #sec-combos .flex.flex-wrap > *,
+  #sec-crecer .flex.flex-wrap > *{min-width:0!important}
+}
+
+/* --- Títulos de panel ------------------------------------------------------
+   "Combos & Promos con Memoria Guardada" ocupaba tres líneas enormes. */
+@media(max-width:640px){
+  .seccion-pantalla h2, .seccion-pantalla h3{line-height:1.2!important}
+  .seccion-pantalla h3.text-base, .seccion-pantalla h3.text-lg{font-size:14px!important}
+}
+
+/* --- Insignias que además son botones --------------------------------------
+   La cabecera de cada cuenta master en Clientes es pulsable pero medía 22 px. */
+@media(max-width:640px){
+  #cuerpo-app .seccion-pantalla .insignia-cuenta[role="button"],
+  #cuerpo-app .seccion-pantalla button.insignia-cuenta,
+  #cuerpo-app .seccion-pantalla button:has(> .insignia-cuenta){
+    min-height:38px!important; display:inline-flex!important; align-items:center!important;
+  }
+}
+
+/* --- El aviso de "sin almacén" no debe tapar la barra inferior ------------- */
+#pap-aviso-sin-almacen{pointer-events:auto}
 </style>
 
 <script id="papotas-v161-reparaciones">
