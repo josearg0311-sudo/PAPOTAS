@@ -4939,6 +4939,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     flex:0 0 auto!important; white-space:nowrap!important; min-height:38px!important; width:auto!important;
   }
   #contenedor-plataformas-combo button{min-width:38px!important}
+  /* Los accesos rápidos de cada sección quedaban justo en el mínimo. */
+  #cuerpo-app .seccion-pantalla .pap-section-tools > *:not(.pap-screen-badge),
+  #cuerpo-app .seccion-pantalla .pap-tool,
+  #cuerpo-app .seccion-pantalla select{min-height:40px!important}
 }
 
 /* --- Filas de comprobación: nunca recortar la frase ------------------------
@@ -5448,6 +5452,369 @@ body#cuerpo-app .seccion-pantalla .pap-mini-stat .k{
   "loading"===document.readyState
     ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,300); },{once:!0})
     : setTimeout(arrancar,300);
+}();
+</script>
+<style id="papotas-v165-diseno-moderno">
+/* ============================================================================
+   V165 — Lenguaje visual y movimiento.
+   Unifica superficie, tipografía y ritmo en las 27 pantallas, y le da respuesta
+   a la interfaz: al cambiar de sección el contenido entra escalonado, las
+   tarjetas responden al puntero y las barras y cifras se animan al aparecer.
+   Todo el movimiento se apaga con prefers-reduced-motion.
+   ========================================================================== */
+
+:root{
+  --pap-r-card:16px;
+  --pap-r-ctrl:11px;
+  --pap-r-pill:999px;
+  --pap-borde:rgba(255,255,255,.07);
+  --pap-borde-vivo:rgba(255,255,255,.15);
+  --pap-luz:rgba(255,255,255,.035);
+  --pap-sombra:0 18px 38px -30px rgba(0,0,0,.95), 0 2px 8px -6px rgba(0,0,0,.7);
+  --pap-sombra-alta:0 26px 52px -28px rgba(0,0,0,.95), 0 4px 14px -8px rgba(0,0,0,.75);
+  --pap-ease:cubic-bezier(.22,.61,.36,1);
+  --pap-rapido:140ms;
+  --pap-medio:260ms;
+}
+
+/* --- Superficie ------------------------------------------------------------
+   Un solo tratamiento de tarjeta en toda la app: borde fino, una luz muy sutil
+   arriba que da volumen sin ruido, y sombra ambiental en dos capas. */
+.seccion-pantalla .glass-card,
+.seccion-pantalla .ps-section,
+.seccion-pantalla .tarifa-card,
+.seccion-pantalla .master-premium-card{
+  border-radius:var(--pap-r-card);
+  border:1px solid var(--pap-borde);
+  background-image:linear-gradient(180deg,var(--pap-luz),transparent 42%);
+  box-shadow:var(--pap-sombra);
+  transition:border-color var(--pap-rapido) var(--pap-ease),
+             box-shadow var(--pap-medio) var(--pap-ease),
+             transform var(--pap-medio) var(--pap-ease);
+}
+@media(hover:hover){
+  .seccion-pantalla .glass-card.card-interactive:hover,
+  .seccion-pantalla .master-premium-card:hover,
+  .seccion-pantalla .tarifa-card:hover{
+    border-color:var(--pap-borde-vivo);
+    box-shadow:var(--pap-sombra-alta);
+    transform:translateY(-2px);
+  }
+}
+.seccion-pantalla .glass-card.card-interactive:active{transform:translateY(0) scale(.995)}
+
+/* --- Controles -------------------------------------------------------------
+   Misma altura, mismo radio y una respuesta física al pulsar. */
+.seccion-pantalla button,
+.seccion-pantalla .btn,
+.seccion-pantalla select,
+.seccion-pantalla input:not([type="checkbox"]):not([type="radio"]),
+.seccion-pantalla textarea{
+  border-radius:var(--pap-r-ctrl);
+  transition:background-color var(--pap-rapido) var(--pap-ease),
+             border-color var(--pap-rapido) var(--pap-ease),
+             color var(--pap-rapido) var(--pap-ease),
+             box-shadow var(--pap-rapido) var(--pap-ease),
+             transform 90ms var(--pap-ease);
+}
+.seccion-pantalla button:active,
+.seccion-pantalla .btn:active{transform:scale(.97)}
+.seccion-pantalla .chip,
+.seccion-pantalla .ultra-pill{border-radius:var(--pap-pill,var(--pap-r-pill))}
+
+/* El botón principal lleva un degradado suave y un halo del color de marca. */
+.seccion-pantalla .btn-primario,
+.seccion-pantalla .btn-glow-primary,
+#btn-accion-top{
+  background-image:linear-gradient(180deg,rgba(255,255,255,.16),rgba(255,255,255,0));
+  box-shadow:0 6px 16px -12px var(--color-papotas,#e50914), inset 0 1px 0 rgba(255,255,255,.14);
+}
+@media(hover:hover){
+  .seccion-pantalla .btn-primario:hover,
+  .seccion-pantalla .btn-glow-primary:hover,
+  #btn-accion-top:hover{box-shadow:0 10px 22px -12px var(--color-papotas,#e50914), inset 0 1px 0 rgba(255,255,255,.2)}
+}
+
+/* --- Tipografía de cifras --------------------------------------------------
+   Números tabulares para que no bailen al actualizarse, y rótulos más
+   tranquilos para que la cifra sea lo primero que se lee. */
+.seccion-pantalla .cifra,
+.seccion-pantalla .pap-cifra-texto > :last-child,
+.seccion-pantalla .ps-kpi .big,
+.seccion-pantalla .pap-mini-stat .v,
+.seccion-pantalla .numero-unificado{
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-.02em;
+}
+.seccion-pantalla .pap-cifra-texto > :first-child,
+.seccion-pantalla .ps-kpi .small,
+.seccion-pantalla .pap-mini-stat .k{
+  letter-spacing:.085em;
+  color:#8593a8;
+}
+
+/* --- Navegación ------------------------------------------------------------
+   La sección activa se marca con una barra que se desliza, no con un salto. */
+aside nav button, aside nav a{
+  position:relative;
+  transition:background-color var(--pap-rapido) var(--pap-ease), color var(--pap-rapido) var(--pap-ease);
+}
+aside nav button::before, aside nav a::before{
+  content:""; position:absolute; left:0; top:50%;
+  width:3px; height:0; border-radius:0 3px 3px 0;
+  background:var(--color-papotas,#e50914);
+  transform:translateY(-50%);
+  transition:height var(--pap-medio) var(--pap-ease);
+}
+aside nav .activo::before,
+aside nav [aria-current="page"]::before,
+aside nav button.bg-white\/10::before{height:60%}
+
+/* --- Pestañas de sección --------------------------------------------------- */
+.pap-pestanas{gap:2px}
+.pap-pestanas button{transition:background-color var(--pap-rapido) var(--pap-ease), color var(--pap-rapido) var(--pap-ease)}
+
+/* --- Tablas ---------------------------------------------------------------- */
+.seccion-pantalla table thead th{
+  position:sticky; top:0; z-index:2;
+  background:rgba(12,15,21,.96);
+  backdrop-filter:blur(6px);
+}
+.seccion-pantalla table tbody tr{transition:background-color var(--pap-rapido) var(--pap-ease)}
+@media(hover:hover){ .seccion-pantalla table tbody tr:hover{background:rgba(255,255,255,.035)} }
+
+/* --- Barras de ocupación --------------------------------------------------- */
+.seccion-pantalla .barra-simple > *,
+.seccion-pantalla .ps-bar > *,
+.seccion-pantalla [class*="barra"] > [style*="width"]{
+  transition:width 620ms var(--pap-ease);
+}
+
+/* --- Barras de desplazamiento ---------------------------------------------- */
+.seccion-pantalla *::-webkit-scrollbar{width:8px;height:8px}
+.seccion-pantalla *::-webkit-scrollbar-track{background:transparent}
+.seccion-pantalla *::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.10); border-radius:999px; border:2px solid transparent; background-clip:content-box;
+}
+.seccion-pantalla *::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2); background-clip:content-box}
+
+/* --- Entrada escalonada ----------------------------------------------------
+   Al abrir una sección sus bloques suben y aparecen uno detrás de otro. Solo
+   al cambiar de pantalla: los repintados de datos no vuelven a animar. */
+@keyframes papEntra{ from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none} }
+.pap-entrando > *{ animation:papEntra 420ms var(--pap-ease) both; }
+.pap-entrando > *:nth-child(1){animation-delay:0ms}
+.pap-entrando > *:nth-child(2){animation-delay:35ms}
+.pap-entrando > *:nth-child(3){animation-delay:70ms}
+.pap-entrando > *:nth-child(4){animation-delay:105ms}
+.pap-entrando > *:nth-child(5){animation-delay:140ms}
+.pap-entrando > *:nth-child(6){animation-delay:175ms}
+.pap-entrando > *:nth-child(7){animation-delay:210ms}
+.pap-entrando > *:nth-child(n+8){animation-delay:240ms}
+
+/* Aviso de vencidos: un latido muy leve para que el ojo lo encuentre. */
+@keyframes papLatido{ 0%,100%{opacity:1} 50%{opacity:.45} }
+#papotas-ultra-ribbon .ultra-dot.bad{animation:papLatido 1.9s ease-in-out infinite}
+
+/* --- Color con criterio ----------------------------------------------------
+   Cada tarjeta de cliente pintaba TODO su fondo con el color del estado, así
+   que una lista larga era un muro de rojo, ámbar y verde donde ya no destacaba
+   nada. Ahora la superficie es neutra y el estado se lee en el filo izquierdo,
+   en un velo muy tenue y en la etiqueta: se distingue igual de rápido y deja
+   respirar a los datos, que es lo que se viene a leer. */
+#sec-clientes .tarjeta-registro.tarjeta-cuenta,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta{
+  background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 46%),rgba(11,15,22,.94)!important;
+  border-color:rgba(255,255,255,.08)!important;
+}
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-vencido,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-vencido{
+  background:linear-gradient(150deg,rgba(248,113,113,.16),transparent 58%),rgba(11,15,22,.94)!important;
+  box-shadow:inset 4px 0 0 rgba(248,113,113,.85);
+}
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-aviso,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-aviso{
+  background:linear-gradient(150deg,rgba(251,191,36,.15),transparent 58%),rgba(11,15,22,.94)!important;
+  box-shadow:inset 4px 0 0 rgba(251,191,36,.85);
+}
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-activo,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-activo{
+  background:linear-gradient(150deg,rgba(52,211,153,.13),transparent 58%),rgba(11,15,22,.94)!important;
+  box-shadow:inset 4px 0 0 rgba(52,211,153,.8);
+}
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-neutro,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-neutro{
+  background:linear-gradient(150deg,rgba(148,163,184,.12),transparent 58%),rgba(11,15,22,.94)!important;
+  box-shadow:inset 4px 0 0 rgba(148,163,184,.7);
+}
+/* El filo de color ya marca el estado; el borde entero puede ser discreto. */
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-vencido,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-vencido{border-color:rgba(248,113,113,.30)!important}
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-aviso,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-aviso{border-color:rgba(251,191,36,.28)!important}
+#sec-clientes .tarjeta-registro.tarjeta-cuenta.estado-activo,
+#sec-servicios .tarjeta-registro.tarjeta-cuenta.estado-activo{border-color:rgba(52,211,153,.26)!important}
+#sec-clientes .cli-libre,
+#sec-servicios .cli-libre{border-color:rgba(52,211,153,.30)!important}
+
+/* Las baldosas de perfil seguían el mismo criterio: superficie tranquila, el
+   estado en el filo y en el texto. Una master con cinco perfiles ya no es una
+   fila de cinco colores compitiendo. */
+#sec-servicios .master-profile-premium,
+#sec-cuentas .master-profile-premium{
+  background:linear-gradient(180deg,rgba(255,255,255,.04),transparent 50%),rgba(11,15,22,.9)!important;
+  border-color:rgba(255,255,255,.09)!important;
+}
+#sec-servicios .master-profile-premium.state-expired,
+#sec-cuentas .master-profile-premium.state-expired{
+  border-color:rgba(248,113,113,.30)!important; box-shadow:inset 3px 0 0 rgba(248,113,113,.85)!important;
+}
+#sec-servicios .master-profile-premium.state-warning,
+#sec-cuentas .master-profile-premium.state-warning{
+  border-color:rgba(251,191,36,.28)!important; box-shadow:inset 3px 0 0 rgba(251,191,36,.85)!important;
+}
+#sec-servicios .master-profile-premium.state-ok,
+#sec-cuentas .master-profile-premium.state-ok{
+  border-color:rgba(52,211,153,.26)!important; box-shadow:inset 3px 0 0 rgba(52,211,153,.8)!important;
+}
+#sec-servicios .master-profile-premium.state-free,
+#sec-cuentas .master-profile-premium.state-free{border-color:rgba(52,211,153,.26)!important}
+
+/* El nombre del cliente es lo que se busca: que mande sobre el resto. */
+#sec-clientes .tarjeta-registro.tarjeta-cuenta > .flex:first-child b,
+#sec-clientes .tarjeta-registro.tarjeta-cuenta h4{
+  font-size:13.5px!important; letter-spacing:-.01em!important; color:#f1f5f9!important;
+}
+
+/* --- Estados vacíos --------------------------------------------------------- */
+.seccion-pantalla .estado-vacio{
+  border:1px dashed rgba(255,255,255,.10);
+  border-radius:var(--pap-r-card);
+  background:rgba(255,255,255,.015);
+}
+.seccion-pantalla .estado-vacio .ev-icono{
+  width:44px;height:44px;margin:0 auto 10px;border-radius:14px;
+  display:grid;place-items:center;background:rgba(255,255,255,.05);
+}
+
+/* --- Quien prefiera no ver movimiento -------------------------------------- */
+@media(prefers-reduced-motion:reduce){
+  .pap-entrando > *{animation:none!important}
+  #papotas-ultra-ribbon .ultra-dot.bad{animation:none!important}
+  .seccion-pantalla *,
+  .seccion-pantalla *::before,
+  .seccion-pantalla *::after{
+    transition-duration:1ms!important; animation-duration:1ms!important; scroll-behavior:auto!important;
+  }
+}
+</style>
+
+<script id="papotas-v165-dinamica">
+/* V165 — la parte de movimiento que el CSS solo no puede resolver. */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V165__) return; window.__PAPOTAS_V165__=!0;
+
+  var sinMovimiento = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* --- Entrada escalonada al cambiar de sección ---------------------------
+     Se marca solo la sección que se abre, y la marca se quita al terminar,
+     para que los repintados de datos no vuelvan a animar la pantalla. */
+  function animarSeccion(){
+    if(sinMovimiento) return;
+    var sec=document.querySelector('.seccion-pantalla:not(.hidden)');
+    if(!sec) return;
+    var caja=sec.querySelector('.pap-vistas > *:not(.hidden)') || sec;
+    caja.classList.remove("pap-entrando");
+    void caja.offsetWidth;              // reinicia la animación
+    caja.classList.add("pap-entrando");
+    setTimeout(function(){ caja.classList.remove("pap-entrando"); }, 900);
+  }
+
+  /* --- Cifras que suben hasta su valor ------------------------------------
+     Solo se anima cuando el número cambia de verdad y cuando la pantalla está
+     a la vista; se respeta el formato exacto que escribió la app. */
+  var RE_NUM=/^(\D*?)(-?[\d.,]+)(\D*)$/;
+  function animarCifra(el){
+    if(sinMovimiento) return;
+    var texto=(el.textContent||"").trim(), m=texto.match(RE_NUM);
+    if(!m) return;
+    var crudo=m[2].replace(/\./g, m[2].indexOf(",")>-1?"":".").replace(",", ".");
+    var fin=parseFloat(crudo);
+    if(!isFinite(fin)||Math.abs(fin)>1e9) return;
+    var previo=parseFloat(el.dataset.papValor);
+    el.dataset.papValor=String(fin);
+    if(!isFinite(previo)||previo===fin) return;
+    var decimales=(m[2].split(/[.,]/)[1]||"").length;
+    var sep=m[2].indexOf(",")>-1&&m[2].indexOf(".")===-1?",":".";
+    var ini=previo, t0=performance.now(), dur=420;
+    el.__papAnim && cancelAnimationFrame(el.__papAnim);
+    (function paso(t){
+      /* Si la app escribió otro valor mientras tanto, se abandona: manda el dato. */
+      if(String(fin)!==el.dataset.papValor){ el.__papAnim=0; return; }
+      var p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3);
+      var v=ini+(fin-ini)*e;
+      el.textContent=m[1]+v.toFixed(decimales).replace(".",sep)+m[3];
+      if(p<1) el.__papAnim=requestAnimationFrame(paso);
+      else { el.textContent=texto; el.__papAnim=0; }
+    })(t0);
+  }
+  var SEL='.pap-cifra-texto > :last-child, .ps-kpi .big, .pap-mini-stat .v, .cifra';
+  function anotarCifras(){
+    var sec=document.querySelector('.seccion-pantalla:not(.hidden)');
+    if(!sec) return;
+    sec.querySelectorAll(SEL).forEach(function(el){
+      if(el.children.length||el.__papAnim) return;
+      var m=(el.textContent||"").trim().match(RE_NUM);
+      if(m) el.dataset.papValor=String(parseFloat(m[2].replace(",", ".")));
+    });
+  }
+  function animarCifrasVisibles(){
+    if(sinMovimiento) return;
+    var sec=document.querySelector('.seccion-pantalla:not(.hidden)');
+    if(!sec) return;
+    sec.querySelectorAll('.pap-cifra-texto > :last-child, .ps-kpi .big, .pap-mini-stat .v, .cifra')
+       .forEach(function(el){ if(el.children.length===0) animarCifra(el); });
+  }
+
+  /* --- Enganches ----------------------------------------------------------
+     cambiarSeccion y renderizarTodo los envuelven varias capas posteriores;
+     se reintenta unos segundos y se reengancha si alguna los sustituye. */
+  function envolver(nombre, despues){
+    var actual=window[nombre];
+    if(typeof actual!=="function" || actual.__v165) return !1;
+    function envuelto(){
+      var r=actual.apply(this, arguments);
+      try{ despues(); }catch(_){}
+      return r;
+    }
+    envuelto.__v165=!0;
+    try{ window[nombre]=envuelto; }catch(_){ return !1; }
+    return !0;
+  }
+  function enganchar(){
+    envolver("cambiarSeccion", function(){ requestAnimationFrame(function(){ animarSeccion(); animarCifrasVisibles(); }); });
+    /* renderizarTodo NO anima: al registrar un cobro el número debe cambiar al
+       instante, no rodar. Solo se anota el valor para la próxima entrada. */
+    envolver("renderizarTodo", function(){ requestAnimationFrame(anotarCifras); });
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      enganchar();
+      if(++n<40) setTimeout(reintentar,250);
+    })();
+    requestAnimationFrame(function(){
+      document.querySelectorAll('.pap-cifra-texto > :last-child, .ps-kpi .big, .pap-mini-stat .v, .cifra')
+        .forEach(function(el){ if(el.children.length===0){ var m=(el.textContent||"").trim().match(RE_NUM);
+          if(m) el.dataset.papValor=String(parseFloat(m[2].replace(",", "."))); } });
+      animarSeccion();
+    });
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,320); },{once:!0})
+    : setTimeout(arrancar,320);
 }();
 </script>
 </body>
