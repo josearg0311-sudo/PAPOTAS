@@ -4846,10 +4846,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   #op-cola > div > .min-w-0 > .flex{flex-wrap:wrap!important; row-gap:3px!important; column-gap:6px!important}
   #op-cola > div > .min-w-0 > .flex > b{flex:1 1 100%!important; min-width:0!important}
 
-  /* Accesos rápidos: dos por fila en vez de cuatro botones a lo ancho. */
-  #sec-dashboard .pap-section-tools{display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:7px!important}
-  #sec-dashboard .pap-section-tools > *{width:100%!important; min-width:0!important}
-  #sec-dashboard .pap-section-tools .pap-screen-badge{grid-column:1/-1!important}
+  /* La barra de acciones la resuelve ahora la capa V166 (una fila que se
+     desliza); esta rejilla de dos columnas la dejaba en dos filas altas. */
 }
 
 /* --- 7. Afinado visual común ----------------------------------------------
@@ -5209,12 +5207,15 @@ body#cuerpo-app .seccion-pantalla .pap-mini-stat .k{
    llegar a las cifras. Dos por fila en todas las secciones, no solo el Panel. */
 @media(max-width:640px){
   .seccion-pantalla .pap-section-tools{
-    display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important; gap:7px!important;
+    display:flex!important; flex-wrap:nowrap!important; gap:6px!important;
+    overflow-x:auto!important; -webkit-overflow-scrolling:touch;
+    scrollbar-width:none; padding-bottom:2px!important;
+    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
+            mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 22px),transparent 100%);
   }
-  .seccion-pantalla .pap-section-tools > *{width:100%!important; min-width:0!important}
-  .seccion-pantalla .pap-section-tools > .pap-screen-badge{grid-column:1/-1!important}
-  .seccion-pantalla .pap-section-tools > *:only-child,
-  .seccion-pantalla .pap-section-tools > .primary:first-child{grid-column:1/-1!important}
+  .seccion-pantalla .pap-section-tools::-webkit-scrollbar{display:none}
+  .seccion-pantalla .pap-section-tools > *{flex:0 0 auto!important; width:auto!important; min-width:0!important}
+  .seccion-pantalla .pap-section-tools > .pap-screen-badge{display:none!important}
 }
 
 /* --- Distintivos de esquina ------------------------------------------------
@@ -5960,5 +5961,167 @@ aside nav button.bg-white\/10::before{height:60%}
     : setTimeout(arrancar,320);
 }();
 </script>
+<style id="papotas-v167-esqueleto">
+/* ============================================================================
+   V167 — Esqueleto común de las 27 pantallas.
+   Cuatro objetivos, en este orden: que se vea de un vistazo qué hay que hacer,
+   que quepa más sin desplazarse, que el color signifique algo, y que el aire
+   sea el de una herramienta de hoy y no el de una plantilla.
+   ========================================================================== */
+
+/* --- 1. Jerarquía de acciones ----------------------------------------------
+   Cada pantalla tenía cuatro o cinco botones con el mismo peso, así que no se
+   sabía cuál era LA acción. Ahora manda uno: el principal va relleno y el
+   resto quedan como contorno, presentes pero callados. */
+.seccion-pantalla .pap-section-tools{
+  background:transparent!important; border:0!important; box-shadow:none!important;
+  padding:0!important; gap:7px!important; align-items:center!important;
+}
+.seccion-pantalla .pap-tool{
+  height:38px; padding:0 13px!important; border-radius:10px!important;
+  border:1px solid var(--pap-borde,rgba(255,255,255,.07))!important;
+  background:transparent!important; color:#aab6c6!important;
+  font-weight:700!important; font-size:12px!important;
+}
+@media(hover:hover){
+  .seccion-pantalla .pap-tool:hover{
+    border-color:var(--pap-borde-vivo,rgba(255,255,255,.15))!important;
+    background:rgba(255,255,255,.045)!important; color:#e8eef7!important;
+  }
+}
+.seccion-pantalla .pap-tool.primary{
+  background:var(--color-papotas,#e50914)!important; border-color:transparent!important;
+  color:#fff!important; font-weight:800!important;
+  box-shadow:0 6px 16px -12px var(--color-papotas,#e50914), inset 0 1px 0 rgba(255,255,255,.16);
+}
+.seccion-pantalla .pap-screen-badge{
+  background:transparent!important; border:0!important; padding:0 6px 0 0!important;
+  color:#6f7d90!important; font-size:10px!important; letter-spacing:.1em!important; text-transform:uppercase;
+}
+
+/* --- 2. Tarjetas de cifra compactas ----------------------------------------
+   Medían 84 px de alto: ocho de ellas eran casi una pantalla entera antes de
+   llegar al trabajo. Con el mismo contenido bajan a ~62 y se ve el doble. */
+#cuerpo-app .seccion-pantalla .pap-rejilla-cifras > *,
+#cuerpo-app .seccion-pantalla .ps-kpi{
+  padding:11px 13px!important; border-radius:13px!important; min-height:64px!important;
+}
+#cuerpo-app .seccion-pantalla .pap-cifra-texto > :first-child{min-height:0!important}
+#cuerpo-app .seccion-pantalla .pap-cifra-texto > :first-child,
+#cuerpo-app .seccion-pantalla .ps-kpi .small{
+  font-size:9px!important; line-height:1.25!important; letter-spacing:.09em!important;
+  color:#77869a!important; margin:0 0 3px!important;
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+}
+#cuerpo-app .seccion-pantalla .pap-cifra-texto > :last-child,
+#cuerpo-app .seccion-pantalla .ps-kpi .big{font-size:21px!important; line-height:1.05!important; margin:0!important}
+.seccion-pantalla .ps-kpi .delta{font-size:9.5px!important; margin-top:3px!important; color:#6f7d90!important}
+/* El icono acompaña, no compite: más pequeño y con el fondo apagado. */
+#cuerpo-app .seccion-pantalla .pap-cifra-icono{
+  width:30px!important; height:30px!important; padding:0!important;
+  display:grid!important; place-items:center!important; border-radius:9px!important;
+  opacity:.72; box-shadow:none!important;
+}
+#cuerpo-app .seccion-pantalla .pap-cifra-icono svg{width:15px!important; height:15px!important}
+
+@media(max-width:640px){
+  #cuerpo-app .seccion-pantalla .pap-rejilla-cifras > *,
+  #cuerpo-app .seccion-pantalla .ps-kpi{padding:9px 11px!important; min-height:56px!important}
+  #cuerpo-app .seccion-pantalla .pap-cifra-texto > :last-child,
+  #cuerpo-app .seccion-pantalla .ps-kpi .big{font-size:18px!important}
+  #cuerpo-app .seccion-pantalla .pap-cifra-icono{width:26px!important; height:26px!important}
+  #cuerpo-app .seccion-pantalla .pap-cifra-icono svg{width:13px!important; height:13px!important}
+  #cuerpo-app .seccion-pantalla .glass-card{padding:11px 12px}
+}
+
+/* Cuando el rótulo ocupa dos líneas la cifra se metía debajo del icono: el
+   bloque de texto manda y el icono no encoge ni se solapa. */
+#cuerpo-app .seccion-pantalla .pap-rejilla-cifras > *{
+  display:flex!important; align-items:center!important; gap:10px!important;
+}
+#cuerpo-app .seccion-pantalla .pap-cifra-texto{flex:1 1 auto!important; min-width:0!important}
+#cuerpo-app .seccion-pantalla .pap-cifra-icono{flex:0 0 auto!important; align-self:flex-start!important}
+
+/* --- 3. Ritmo vertical -----------------------------------------------------
+   Menos aire muerto entre bloques: el contenido sube y se desplaza menos. */
+.seccion-pantalla.space-y-3 > * + *,
+.seccion-pantalla .space-y-3 > * + *{margin-top:10px!important}
+.seccion-pantalla.space-y-4 > * + *,
+.seccion-pantalla .space-y-4 > * + *{margin-top:12px!important}
+#cuerpo-app .seccion-pantalla .glass-card{padding:13px 14px}
+.seccion-pantalla .ps-section > .ps-head{padding-bottom:9px!important}
+
+/* --- 4. Tipografía ---------------------------------------------------------
+   Una escala corta y consistente en lugar de nueve tamaños distintos. */
+.seccion-pantalla h2{font-size:15px!important; font-weight:800!important; letter-spacing:-.01em!important}
+.seccion-pantalla h3{font-size:13px!important; font-weight:800!important; letter-spacing:-.005em!important}
+.seccion-pantalla .ps-head h3, .seccion-pantalla .ps-section h3{font-size:13.5px!important}
+.seccion-pantalla .ps-head p, .seccion-pantalla .ps-section > .ps-head p{font-size:10.5px!important; color:#77869a!important}
+
+/* --- 5. El color solo donde significa --------------------------------------
+   Los títulos de panel iban en ámbar, verde o cian sin más criterio que
+   decorar. El texto va en blanco; el color queda para los estados y para la
+   acción principal, que es lo único que de verdad hay que distinguir. */
+.seccion-pantalla .glass-card > h3,
+.seccion-pantalla .ps-section h3,
+.seccion-pantalla .ps-head h3{color:#eef3fa!important}
+.seccion-pantalla .glass-card > h3 svg,
+.seccion-pantalla .ps-head h3 svg{opacity:.62}
+
+/* Los chips informativos bajan de tono; los de estado se quedan como están. */
+.seccion-pantalla .chip:not(.chip-urgente):not(.chip-aviso):not(.chip-ok){
+  background:rgba(255,255,255,.05)!important; color:#93a1b3!important;
+  border:1px solid rgba(255,255,255,.07)!important;
+}
+
+/* --- Nada de recortes tras el cambio de escala ------------------------------
+   Al apretar la tipografía aparecieron cortes nuevos: las etiquetas y los
+   textos de apoyo prefieren una línea más a perder palabras. */
+#cuerpo-app .seccion-pantalla .chip{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+}
+#cuerpo-app .seccion-pantalla p[class*="text-[9px]"],
+#cuerpo-app .seccion-pantalla p[class*="text-[10px]"]{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important; line-height:1.3!important;
+}
+#cuerpo-app #op-cola > div > .min-w-0 > .flex > b,
+#cuerpo-app #op-cola > div > .min-w-0 > b,
+#cuerpo-app .seccion-pantalla .divide-y > div > .min-w-0 > b,
+#cuerpo-app .seccion-pantalla td > span.chip,
+#cuerpo-app .seccion-pantalla td .chip{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+}
+/* Las etiquetas dentro de tablas van más justas de sitio. */
+#cuerpo-app .seccion-pantalla td .chip{padding-inline:6px!important; font-size:9px!important}
+
+/* Por debajo de 375 px el icono de la tarjeta de cifra estorba más que ayuda. */
+@media(max-width:375px){
+  #cuerpo-app .seccion-pantalla .pap-cifra-icono{display:none!important}
+}
+
+/* --- 6. Filas de lista -----------------------------------------------------
+   Mismo alto y mismo ritmo en Cobros, Renovaciones, Caja y Auditoría. */
+.seccion-pantalla .ps-row,
+.seccion-pantalla #op-cola > div{padding:9px 12px!important; gap:10px!important}
+.seccion-pantalla .ps-row + .ps-row{border-top:1px solid rgba(255,255,255,.05)}
+
+/* --- 7. Formularios --------------------------------------------------------
+   Campos con el mismo alto y foco de marca en toda la app. */
+.seccion-pantalla input:not([type="checkbox"]):not([type="radio"]),
+.seccion-pantalla select,
+.seccion-pantalla textarea{
+  background:rgba(0,0,0,.42)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  color:#e7eef8!important;
+}
+.seccion-pantalla input:focus,
+.seccion-pantalla select:focus,
+.seccion-pantalla textarea:focus{
+  border-color:color-mix(in srgb,var(--color-papotas,#e50914) 55%,transparent)!important;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--color-papotas,#e50914) 18%,transparent)!important;
+  outline:none!important;
+}
+.seccion-pantalla label{color:#8c99ab!important; font-size:10.5px!important; letter-spacing:.02em!important}
+</style>
 </body>
 </html>
