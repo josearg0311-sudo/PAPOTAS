@@ -4391,7 +4391,10 @@ function localRows(){
     const a=arr(c)||[];a.forEach((item,i)=>{if(item)rows.push({coleccion:c,registro_id:idOf(item,i,c),datos:item,eliminado:false})});
   }
   rows.push({coleccion:'blocNotasTexto',registro_id:'singleton',datos:{value:String(blocNotasTexto||'')},eliminado:false});
-  rows.push({coleccion:'ajustes',registro_id:'singleton',datos:JSON.parse(JSON.stringify(ajustes||{})),eliminado:false});
+  const ajustesSinCredenciales=JSON.parse(JSON.stringify(ajustes||{}));
+  delete ajustesSinCredenciales.supabaseUrl;
+  delete ajustesSinCredenciales.supabaseKey;
+  rows.push({coleccion:'ajustes',registro_id:'singleton',datos:ajustesSinCredenciales,eliminado:false});
   return rows;
 }
 async function upsert(row){const x=sb();if(!x)throw new Error('Supabase no conectado');const {error}=await x.rpc('papotas_upsert_record',{p_coleccion:row.coleccion,p_registro_id:String(row.registro_id),p_datos:row.datos,p_dispositivo_id:idDispositivo});if(error)throw error}
@@ -6091,6 +6094,13 @@ aside nav button.bg-white\/10::before{height:60%}
 #cuerpo-app .seccion-pantalla td .chip{
   white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
 }
+/* Rótulos de las filas de una cuenta master: prefieren dos líneas a recortarse. */
+#cuerpo-app .seccion-pantalla .master-premium-label,
+#cuerpo-app .seccion-pantalla .master-premium-namebox > strong,
+#cuerpo-app .seccion-pantalla .master-premium-row > span:first-child{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important; line-height:1.25!important;
+}
+
 /* Las etiquetas dentro de tablas van más justas de sitio. */
 #cuerpo-app .seccion-pantalla td .chip{padding-inline:6px!important; font-size:9px!important}
 
@@ -6123,5 +6133,391 @@ aside nav button.bg-white\/10::before{height:60%}
 }
 .seccion-pantalla label{color:#8c99ab!important; font-size:10.5px!important; letter-spacing:.02em!important}
 </style>
+<script id="papotas-v168-nube-y-vinculos">
+/* ============================================================================
+   V168 — Dos cosas que faltaban:
+   1) Supabase se podía configurar pero no había forma de saber POR QUÉ fallaba,
+      ni de saber qué hay que crear en la base de datos. Además el sincronizador
+      subía la propia clave de acceso dentro de los datos.
+   2) Al borrar una cuenta master, sus ventas e inversiones se quedaban
+      apuntando a una cuenta que ya no existe: el dinero seguía contando en el
+      total pero desaparecía de la rentabilidad por cuenta.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V168__) return; window.__PAPOTAS_V168__=!0;
+
+  /* =========================================================================
+     1. NUBE — diagnóstico que dice qué pasa y qué hacer
+     ========================================================================= */
+
+  var TABLA="papotas_sync_records";
+  var RPC_ALTA="papotas_upsert_record";
+  var RPC_BAJA="papotas_delete_record";
+
+  /* El guion de sincronización habla con la base a través de dos funciones y
+     una tabla. Si no existen, hasta ahora solo salía un punto rojo. */
+  window.papotasSqlInstalacionNube = function(){
+    return [
+      "-- PAPOTAS · preparación de Supabase. Pégalo entero en SQL Editor y ejecútalo.",
+      "",
+      "create table if not exists public."+TABLA+" (",
+      "  coleccion       text        not null,",
+      "  registro_id     text        not null,",
+      "  datos           jsonb       not null default '{}'::jsonb,",
+      "  eliminado       boolean     not null default false,",
+      "  dispositivo_id  text,",
+      "  version         bigint      not null default 1,",
+      "  actualizado_en  timestamptz not null default now(),",
+      "  primary key (coleccion, registro_id)",
+      ");",
+      "",
+      "create index if not exists "+TABLA+"_actualizado_idx",
+      "  on public."+TABLA+" (actualizado_en);",
+      "",
+      "create or replace function public."+RPC_ALTA+"(",
+      "  p_coleccion text, p_registro_id text, p_datos jsonb, p_dispositivo_id text",
+      ") returns void language sql security definer as $$",
+      "  insert into public."+TABLA+" as t",
+      "    (coleccion, registro_id, datos, eliminado, dispositivo_id, version, actualizado_en)",
+      "  values (p_coleccion, p_registro_id, p_datos, false, p_dispositivo_id, 1, now())",
+      "  on conflict (coleccion, registro_id) do update set",
+      "    datos = excluded.datos,",
+      "    eliminado = false,",
+      "    dispositivo_id = excluded.dispositivo_id,",
+      "    version = t.version + 1,",
+      "    actualizado_en = now();",
+      "$$;",
+      "",
+      "create or replace function public."+RPC_BAJA+"(",
+      "  p_coleccion text, p_registro_id text, p_dispositivo_id text",
+      ") returns void language sql security definer as $$",
+      "  insert into public."+TABLA+" as t",
+      "    (coleccion, registro_id, datos, eliminado, dispositivo_id, version, actualizado_en)",
+      "  values (p_coleccion, p_registro_id, '{}'::jsonb, true, p_dispositivo_id, 1, now())",
+      "  on conflict (coleccion, registro_id) do update set",
+      "    eliminado = true,",
+      "    dispositivo_id = excluded.dispositivo_id,",
+      "    version = t.version + 1,",
+      "    actualizado_en = now();",
+      "$$;",
+      "",
+      "-- Acceso con la clave pública (anon). Si esta base solo la usas tú, vale.",
+      "-- Si vas a compartirla, cambia estas reglas por algo más estricto.",
+      "alter table public."+TABLA+" enable row level security;",
+      "drop policy if exists papotas_anon_todo on public."+TABLA+";",
+      "create policy papotas_anon_todo on public."+TABLA+"",
+      "  for all to anon using (true) with check (true);",
+      "grant usage on schema public to anon;",
+      "grant select, insert, update, delete on public."+TABLA+" to anon;",
+      "grant execute on function public."+RPC_ALTA+"(text,text,jsonb,text) to anon;",
+      "grant execute on function public."+RPC_BAJA+"(text,text,text) to anon;",
+      "",
+      "-- Para que los cambios lleguen al instante a los demás dispositivos:",
+      "alter publication supabase_realtime add table public."+TABLA+";"
+    ].join("\n");
+  };
+
+  function pinta(html){
+    var caja=document.getElementById("pap-nube-diagnostico");
+    if(!caja){
+      var ancla=document.getElementById("cfg-supabase-key");
+      if(!ancla) return;
+      var cont=ancla.closest(".glass-card"); if(!cont) return;
+      caja=document.createElement("div");
+      caja.id="pap-nube-diagnostico";
+      caja.style.cssText="margin-top:10px;border-radius:11px;border:1px solid rgba(255,255,255,.10);"+
+        "background:rgba(0,0,0,.34);padding:10px 11px;font-size:11px;line-height:1.45";
+      cont.appendChild(caja);
+    }
+    caja.innerHTML=html;
+  }
+  function fila(estado, titulo, detalle){
+    var c = estado==="ok" ? "#34d399" : estado==="aviso" ? "#fbbf24" : "#f87171";
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:4px 0">'+
+      '<span style="flex:0 0 auto;width:8px;height:8px;border-radius:99px;background:'+c+';margin-top:5px"></span>'+
+      '<div style="min-width:0"><b style="color:#e8eef7">'+titulo+'</b>'+
+      (detalle?'<div style="color:#93a1b3;margin-top:1px">'+detalle+'</div>':'')+'</div></div>';
+  }
+
+  window.papotasProbarNube = async function(){
+    pinta('<b style="color:#e8eef7">Comprobando…</b>');
+    var salida=[], todoBien=true;
+    function mal(){ todoBien=false; }
+
+    var a = window.ajustes || {};
+    if(!a.supabaseUrl || !a.supabaseKey){
+      mal();
+      salida.push(fila("error","Faltan las credenciales",
+        "Pega la URL del proyecto y la clave <i>anon</i> (Supabase → Project Settings → API) y pulsa Guardar."));
+      pinta(salida.join("")); return false;
+    }
+    salida.push(fila("ok","Credenciales guardadas", String(a.supabaseUrl).replace(/^https?:\/\//,"")));
+
+    if(typeof window.supabase==="undefined"){
+      mal();
+      salida.push(fila("error","No se pudo cargar la librería de Supabase",
+        "Se descarga de internet al arrancar. Sin conexión, o con el CDN bloqueado, la nube no puede funcionar. Comprueba la red y recarga."));
+      pinta(salida.join("")); return false;
+    }
+    salida.push(fila("ok","Librería de Supabase cargada",""));
+
+    var cli=null;
+    try{ cli = window.obtenerClienteSupabaseCacheado && window.obtenerClienteSupabaseCacheado(); }catch(_){}
+    if(!cli){
+      mal();
+      salida.push(fila("error","La URL o la clave no son válidas","Revisa que no sobre ningún espacio y que la clave sea la <i>anon public</i>, no la <i>service_role</i>."));
+      pinta(salida.join("")); return false;
+    }
+
+    /* Tabla */
+    var faltaTabla=false;
+    try{
+      var r = await cli.from(TABLA).select("registro_id",{count:"exact",head:true});
+      if(r && r.error) throw r.error;
+      salida.push(fila("ok","Tabla "+TABLA, (r&&typeof r.count==="number") ? (r.count+" registro(s) en la nube") : "accesible"));
+    }catch(e){
+      mal(); faltaTabla=true;
+      var m=String((e&&(e.message||e.hint))||e);
+      salida.push(fila("error","No se puede leer la tabla "+TABLA,
+        /does not exist|schema cache|42P01/i.test(m)
+          ? "La tabla no existe todavía. Usa el botón <b>Copiar SQL</b> y ejecútalo en Supabase → SQL Editor."
+          : /permission|denied|RLS|policy|42501/i.test(m)
+            ? "Existe, pero las reglas de acceso no dejan leerla con la clave anon. El SQL de instalación incluye la política que hace falta."
+            : "Respuesta de Supabase: "+m));
+    }
+
+    /* Funciones */
+    if(!faltaTabla){
+      for (var par of [[RPC_ALTA,{p_coleccion:"__prueba__",p_registro_id:"__prueba__",p_datos:{},p_dispositivo_id:"prueba"}],
+                       [RPC_BAJA,{p_coleccion:"__prueba__",p_registro_id:"__prueba__",p_dispositivo_id:"prueba"}]]){
+        try{
+          var rr = await cli.rpc(par[0], par[1]);
+          if(rr && rr.error) throw rr.error;
+          salida.push(fila("ok","Función "+par[0]+"()",""));
+        }catch(e2){
+          mal();
+          var m2=String((e2&&(e2.message||e2.hint))||e2);
+          salida.push(fila("error","Falta la función "+par[0]+"()",
+            /does not exist|schema cache|42883|PGRST202/i.test(m2)
+              ? "Sin ella no se puede guardar nada en la nube. Copia el SQL de instalación y ejecútalo."
+              : "Respuesta de Supabase: "+m2));
+        }
+      }
+      try{ await cli.from(TABLA).delete().eq("coleccion","__prueba__"); }catch(_){}
+    }
+
+    salida.push('<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">'+
+      (todoBien
+        ? '<b style="color:#34d399">Todo listo.</b> <span style="color:#93a1b3">Tus cambios se sincronizan solos entre dispositivos.</span>'
+        : '<b style="color:#fbbf24">Falta preparar la base de datos.</b> <span style="color:#93a1b3">Pulsa «Copiar SQL», pégalo en Supabase → SQL Editor y ejecútalo. Luego vuelve a probar.</span>')+
+      '</div>');
+    pinta(salida.join(""));
+    return todoBien;
+  };
+
+  window.papotasCopiarSqlNube = function(){
+    var sql=window.papotasSqlInstalacionNube();
+    try{
+      if(typeof window.copiarTextoDirecto==="function"){ window.copiarTextoDirecto(sql); return; }
+    }catch(_){}
+    try{ navigator.clipboard.writeText(sql).then(function(){
+      try{ mostrarToast("SQL copiado. Pégalo en Supabase → SQL Editor."); }catch(_){}
+    }); }catch(_){
+      try{ window.prompt("Copia este SQL y pégalo en Supabase → SQL Editor:", sql); }catch(_){}
+    }
+  };
+
+  /* Botones "Probar conexión" y "Copiar SQL" junto a Guardar/Bajar. */
+  function ponerBotones(){
+    var campo=document.getElementById("cfg-supabase-key"); if(!campo) return;
+    var tarjeta=campo.closest(".glass-card"); if(!tarjeta) return;
+    if(tarjeta.querySelector("#pap-btn-probar-nube")) return;
+    var fila=campo.parentElement.nextElementSibling;
+    if(!fila || !/flex/.test(String(fila.className))) fila=tarjeta.querySelector(".flex.gap-2");
+    if(!fila) return;
+    var base="background:rgba(0,0,0,.5);border:1px solid rgba(34,211,238,.35);color:#67e8f9;"+
+      "padding:0 11px;min-height:38px;border-radius:11px;font-size:11px;font-weight:800;cursor:pointer";
+    var b1=document.createElement("button");
+    b1.type="button"; b1.id="pap-btn-probar-nube"; b1.textContent="Probar conexión";
+    b1.style.cssText=base; b1.onclick=function(){ window.papotasProbarNube(); };
+    var b2=document.createElement("button");
+    b2.type="button"; b2.id="pap-btn-sql-nube"; b2.textContent="Copiar SQL";
+    b2.style.cssText=base; b2.onclick=function(){ window.papotasCopiarSqlNube(); };
+    fila.appendChild(b1); fila.appendChild(b2);
+  }
+
+  /* La clave de acceso no tiene por qué viajar dentro de los datos: quien
+     pueda leer la tabla vería la credencial del proyecto. */
+  function limpiarCredenciales(){
+    var orig=window.PAPOTAS_V93_SYNC;
+    if(!orig) return false;
+    if(window.__PAPOTAS_AJUSTES_LIMPIOS__) return true;
+    window.__PAPOTAS_AJUSTES_LIMPIOS__=!0;
+    return true;
+  }
+
+  /* =========================================================================
+     2. VÍNCULOS — que nada apunte a algo que ya no existe
+     ========================================================================= */
+
+  function idsDe(lista){ var s=new Set(); (lista||[]).forEach(function(x){ if(x&&x.id!=null) s.add(String(x.id)); }); return s; }
+
+  /* Devuelve los enlaces rotos sin tocar nada. */
+  window.papotasVinculosRotos = function(){
+    var masters=idsDe(window.servicios), clis=idsDe(window.clientes);
+    var porCliente={}; (window.clientes||[]).forEach(function(c){ porCliente[String(c.id)]=c; });
+    var ventasHuerfanas=(window.ventas||[]).filter(function(v){ return v && v.cuentaMasterId && !masters.has(String(v.cuentaMasterId)); });
+    var ventasSinCliente=(window.ventas||[]).filter(function(v){ return v && v.clienteId && !clis.has(String(v.clienteId)); });
+    var invHuerfanas=(window.inversiones||[]).filter(function(i){ return i && i.cuentaMasterId && !masters.has(String(i.cuentaMasterId)); });
+    var cliHuerfanos=(window.clientes||[]).filter(function(c){ return c && c.cuentaMasterId && !masters.has(String(c.cuentaMasterId)); });
+    /* De las ventas huérfanas, las que se pueden recolocar en la master actual
+       de su cliente en vez de perder la atribución. */
+    var recolocables=ventasHuerfanas.filter(function(v){
+      var c=v.clienteId && porCliente[String(v.clienteId)];
+      return !!(c && c.cuentaMasterId && masters.has(String(c.cuentaMasterId)));
+    });
+    return {ventasHuerfanas:ventasHuerfanas, ventasSinCliente:ventasSinCliente,
+            invHuerfanas:invHuerfanas, cliHuerfanos:cliHuerfanos, recolocables:recolocables,
+            total:ventasHuerfanas.length+ventasSinCliente.length+invHuerfanas.length+cliHuerfanos.length,
+            dineroSinAtribuir:ventasHuerfanas.reduce(function(a,v){return a+(Number(v.monto)||0)},0)};
+  };
+
+  /* Repara: primero intenta recolocar, y lo que no se puede recolocar se deja
+     sin cuenta (el importe se conserva; solo deja de atribuirse a una cuenta
+     que ya no existe). Nunca borra dinero. */
+  window.papotasRepararVinculos = function(silencioso){
+    var r=window.papotasVinculosRotos();
+    if(!r.total){
+      if(!silencioso) try{ mostrarToast("Todos los datos están bien enlazados."); }catch(_){}
+      return {recolocadas:0, sueltas:0, total:0};
+    }
+    var masters=idsDe(window.servicios);
+    var porCliente={}; (window.clientes||[]).forEach(function(c){ porCliente[String(c.id)]=c; });
+    var recolocadas=0, sueltas=0;
+    r.ventasHuerfanas.forEach(function(v){
+      var c=v.clienteId && porCliente[String(v.clienteId)];
+      if(c && c.cuentaMasterId && masters.has(String(c.cuentaMasterId))){ v.cuentaMasterId=c.cuentaMasterId; recolocadas++; }
+      else { v.cuentaMasterId=null; sueltas++; }
+    });
+    r.invHuerfanas.forEach(function(i){ i.cuentaMasterId=null; sueltas++; });
+    r.cliHuerfanos.forEach(function(c){ c.cuentaMasterId=null; sueltas++; });
+    r.ventasSinCliente.forEach(function(v){ v.clienteId=null; sueltas++; });
+    try{ if(typeof invalidarCacheEconomia==="function") invalidarCacheEconomia(); }catch(_){}
+    try{ if(typeof registrarAuditoria==="function")
+      registrarAuditoria("SISTEMA","Enlaces reparados: "+recolocadas+" venta(s) recolocada(s), "+sueltas+" referencia(s) suelta(s) limpiada(s)"); }catch(_){}
+    try{ sincronizarDatosLocales(); }catch(_){}
+    try{ renderizarTodo(); }catch(_){}
+    if(!silencioso) try{
+      mostrarToast(recolocadas+" venta(s) devueltas a su cuenta · "+sueltas+" referencia(s) sueltas limpiadas");
+    }catch(_){}
+    return {recolocadas:recolocadas, sueltas:sueltas, total:r.total};
+  };
+
+  /* Evitarlo en el origen: al borrar una cuenta master se recolocan sus ventas
+     e inversiones en el mismo gesto, no después. */
+  function envolverBorradoMaster(){
+    var orig=window.eliminarCuentaMaster;
+    if(typeof orig!=="function" || orig.__v168) return false;
+    function envuelto(id){
+      var antes=(window.servicios||[]).length;
+      var r=orig.apply(this, arguments);
+      try{
+        if((window.servicios||[]).length < antes) window.papotasRepararVinculos(true);
+      }catch(_){}
+      return r;
+    }
+    envuelto.__v168=!0;
+    window.eliminarCuentaMaster=envuelto;
+    return true;
+  }
+
+  /* Que el diagnóstico lo cuente: antes no miraba los enlaces de ventas ni de
+     inversiones, así que este daño era invisible. */
+  function envolverDiagnostico(){
+    var orig=window.detectarProblemas;
+    if(typeof orig!=="function" || orig.__v168) return false;
+    function envuelto(){
+      var lista=[];
+      try{ lista=orig.apply(this,arguments)||[]; }catch(_){ lista=[]; }
+      try{
+        var r=window.papotasVinculosRotos();
+        if(r.ventasHuerfanas.length||r.invHuerfanas.length){
+          var dinero=(typeof formatearMoneda==="function")?formatearMoneda(r.dineroSinAtribuir):r.dineroSinAtribuir;
+          lista.unshift({
+            nivel:"critico", icono:"unlink",
+            titulo:r.ventasHuerfanas.length+" venta(s) y "+r.invHuerfanas.length+" inversión(es) apuntan a una cuenta borrada",
+            detalle:"Ese dinero ("+dinero+") sigue contando en el total pero no aparece en la rentabilidad por cuenta. "+
+                    r.recolocables.length+" se pueden devolver a la cuenta actual de su cliente.",
+            accion:"Reparar enlaces", fn:"papotasRepararVinculos()"
+          });
+        }
+      }catch(_){}
+      return lista;
+    }
+    envuelto.__v168=!0;
+    window.detectarProblemas=envuelto;
+    return true;
+  }
+
+  /* "Datos y salud" arma su propia lista y no pasa por detectarProblemas, así
+     que este daño no se veía justo en la pantalla donde uno va a mirarlo.
+     Se añade una fila más, con su botón de reparar. */
+  function filaSalud(){
+    var caja=document.getElementById("dtHealth");
+    if(!caja) return;
+    var sec=document.getElementById("sec-datos-pro");
+    if(!sec || sec.classList.contains("hidden")) return;
+    var r;
+    try{ r=window.papotasVinculosRotos(); }catch(_){ return; }
+    var vieja=document.getElementById("pap-salud-vinculos");
+    if(vieja) vieja.remove();
+    var fila=document.createElement("div");
+    fila.id="pap-salud-vinculos";
+    fila.className="ps-health-row";
+    var roto=r.ventasHuerfanas.length+r.invHuerfanas.length;
+    var dinero=(typeof formatearMoneda==="function")?formatearMoneda(r.dineroSinAtribuir):r.dineroSinAtribuir;
+    fila.innerHTML =
+      '<span class="ps-dot '+(roto?"bad":"ok")+'"></span>'+
+      '<div class="ps-main"><b>'+(roto
+        ? roto+" registro(s) apuntan a una cuenta borrada"
+        : "Ventas e inversiones bien enlazadas")+'</b>'+
+      '<span>'+(roto
+        ? dinero+" fuera de la rentabilidad por cuenta"
+        : "Cada cobro y cada pago tiene su cuenta")+'</span></div>'+
+      (roto
+        ? '<button type="button" class="ps-btn" onclick="papotasRepararVinculos()">Reparar</button>'
+        : '<span class="ps-tag ok">OK</span>');
+    caja.appendChild(fila);
+  }
+  /* Se repinta cuando se abre la sección o cambian los datos. */
+  function engancharSalud(){
+    ["cambiarSeccion","renderizarTodo"].forEach(function(nombre){
+      var actual=window[nombre];
+      if(typeof actual!=="function" || actual.__v168salud) return;
+      function envuelto(){ var r=actual.apply(this,arguments);
+        [0,140,420].forEach(function(ms){ setTimeout(function(){ try{ filaSalud(); }catch(_){} }, ms); });
+        return r; }
+      envuelto.__v168salud=!0;
+      try{ window[nombre]=envuelto; }catch(_){}
+    });
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ ponerBotones(); }catch(_){}
+      envolverBorradoMaster();
+      envolverDiagnostico();
+      engancharSalud();
+      limpiarCredenciales();
+      if(++n<40) setTimeout(reintentar,300);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,600); },{once:!0})
+    : setTimeout(arrancar,600);
+}();
+</script>
 </body>
 </html>
