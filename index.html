@@ -6533,5 +6533,186 @@ aside nav button.bg-white\/10::before{height:60%}
     : setTimeout(arrancar,600);
 }();
 </script>
+<script id="papotas-v170-coherencia">
+/* ============================================================================
+   V170 — Primer bloque del documento de PAPOTAAAS.
+   · Los números del menú no cuadraban con los del cintillo ni con la realidad.
+   · Una cuenta llena seguía admitiendo clientes con solo confirmar.
+   · Nombres cortados en las baldosas de perfil y en la tabla de ventas.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V170__) return; window.__PAPOTAS_V170__=!0;
+
+  function hoyISO(){ try{ return obtenerFechaLocal(); }catch(_){ return ""; } }
+
+  /* --- 1. Que los contadores digan lo mismo ---------------------------------
+     Con 80 clientes, 45 vencidos y 7 que vencen hoy salían TRES cifras
+     distintas y ninguna etiquetada: el menú marcaba 52 en Cobros (vencidos +
+     hoy) y 58 en Clientes (vencidos + por vencer), mientras el cintillo decía
+     "45 vencidos · Hoy 7". Ahora cada insignia cuenta lo que hay en la pantalla
+     a la que lleva, y lo explica al pasar por encima. */
+  function contar(){
+    var cl=Array.isArray(window.clientes)?window.clientes:[];
+    var h=hoyISO(), vencidos=0, hoyN=0;
+    cl.forEach(function(c){
+      var v=c&&c.vencimiento;
+      if(!v||!h) return;
+      if(v<h) vencidos++; else if(v===h) hoyN++;
+    });
+    return {total:cl.length, vencidos:vencidos, hoy:hoyN, pendientes:vencidos+hoyN};
+  }
+  function pintarInsignias(){
+    var n=contar();
+    var cli=document.getElementById("badge-menu-clientes");
+    if(cli){
+      cli.textContent = n.total>999 ? "999+" : String(n.total);
+      cli.title = n.total+" cliente(s) en total";
+      cli.className = "ml-auto chip chip-neutro";
+    }
+    var cob=document.getElementById("badge-cobros-pro");
+    if(cob){
+      cob.textContent = n.pendientes>99 ? "99+" : String(n.pendientes);
+      cob.title = n.pendientes
+        ? n.vencidos+" vencido(s) + "+n.hoy+" que vencen hoy"
+        : "No hay cobros pendientes";
+      cob.className = n.pendientes
+        ? "ml-auto chip "+(n.vencidos?"chip-urgente":"chip-aviso")
+        : "ml-auto chip chip-neutro hidden";
+    }
+    /* La burbuja de la barra inferior del móvil, con el mismo criterio. */
+    var barra=document.getElementById("aviso-barra-clientes");
+    if(barra){
+      barra.innerText = n.pendientes>99 ? "99+" : String(n.pendientes);
+      barra.title = cob ? cob.title : "";
+      barra.classList.toggle("hidden", n.pendientes===0);
+    }
+  }
+
+  /* --- 2. Una cuenta llena no admite más clientes ---------------------------
+     Antes solo avisaba y dejaba continuar, así que una master de 6 perfiles
+     acababa con 8 clientes dentro y la ocupación dejaba de significar nada.
+     Ahora se bloquea y se dice exactamente cómo desbloquearlo. */
+  function envolverGuardarCliente(){
+    var orig=window.guardarCliente;
+    if(typeof orig!=="function" || orig.__v170) return !1;
+    function envuelto(ev){
+      try{
+        var sel=document.getElementById("cli-cuenta-master");
+        var idMaster=sel && sel.value;
+        var idCliente=(document.getElementById("cli-id")||{}).value||"";
+        if(idMaster){
+          var m=(window.servicios||[]).find(function(s){ return String(s.id)===String(idMaster); });
+          if(m){
+            var cabe=Math.max(0,Number(m.perfiles)||0);
+            var dentro=(window.clientes||[]).filter(function(c){
+              return String(c.cuentaMasterId)===String(idMaster) && String(c.id)!==String(idCliente);
+            }).length;
+            if(dentro>=cabe){
+              var nom=(typeof nombreCuenta==="function")?nombreCuenta(m):("cuenta "+idMaster);
+              try{ ev&&ev.preventDefault&&ev.preventDefault(); }catch(_){}
+              try{
+                alert(nom+" ya tiene sus "+cabe+" perfil(es) ocupados.\n\n"+
+                      "Para meter otro cliente, edita la cuenta y sube el número de perfiles, "+
+                      "o asígnalo a otra cuenta.");
+              }catch(_){}
+              try{ mostrarToast("Cuenta llena: "+dentro+"/"+cabe+" perfiles"); }catch(_){}
+              return false;
+            }
+          }
+        }
+      }catch(_){}
+      return orig.apply(this, arguments);
+    }
+    envuelto.__v170=!0;
+    window.guardarCliente=envuelto;
+    return !0;
+  }
+
+  /* --- 3. Enganches ------------------------------------------------------- */
+  function enganchar(){
+    var orig=window.renderizarTodo;
+    if(typeof orig==="function" && !orig.__v170badges){
+      function envuelto(){
+        var r=orig.apply(this,arguments);
+        /* Después del repintado propio de la app, que es quien las escribe. */
+        setTimeout(pintarInsignias,0);
+        return r;
+      }
+      envuelto.__v170badges=!0;
+      window.renderizarTodo=envuelto;
+    }
+    envolverGuardarCliente();
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      enganchar();
+      pintarInsignias();
+      if(++n<40) setTimeout(reintentar,300);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,500); },{once:!0})
+    : setTimeout(arrancar,500);
+}();
+</script>
+
+<style id="papotas-v170-recortes">
+/* Nombres cortados en las capturas del documento. */
+/* Baldosas de perfil: "DIEGUI…", "FLOR G…" — caben en dos líneas. */
+#cuerpo-app .seccion-pantalla .master-profile-premium .mpp-name{
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+  line-height:1.15!important; word-break:normal!important; overflow-wrap:normal!important;
+}
+#cuerpo-app .seccion-pantalla .master-profile-premium{min-height:80px!important}
+/* Tabla de ventas: "AMAZ ON PRIME", "NETF LIX", "SPOTI FY".
+   La causa no era el ancho de la columna sino "overflow-wrap:anywhere": ese
+   valor le dice al navegador que la palabra puede partirse por cualquier letra,
+   así que al repartir el ancho de la tabla considera que "NETFLIX" cabe en 4
+   píxeles y estruja la columna hasta dejarla en una letra por línea.
+   Con "break-word" la palabra sigue siendo indivisible al calcular el reparto
+   —la columna reserva el ancho de la palabra más larga— y solo se parte si aun
+   así no entra. Las tablas ya tienen desplazamiento lateral desde V164. */
+#cuerpo-app .seccion-pantalla th,
+#cuerpo-app .seccion-pantalla td,
+#cuerpo-app .seccion-pantalla th span, #cuerpo-app .seccion-pantalla td span,
+#cuerpo-app .seccion-pantalla td b,    #cuerpo-app .seccion-pantalla td strong,
+#cuerpo-app .seccion-pantalla td a,    #cuerpo-app .seccion-pantalla td div,
+#cuerpo-app .seccion-pantalla td p{
+  overflow-wrap:break-word!important; word-break:normal!important; hyphens:manual!important;
+}
+/* Los datos que sí conviene partir por donde sea: correos, claves, identificadores. */
+#cuerpo-app .seccion-pantalla td .font-mono,
+#cuerpo-app .seccion-pantalla td [class*="correo"],
+#cuerpo-app .seccion-pantalla td .pap-credencial-value{
+  overflow-wrap:anywhere!important;
+}
+/* Etiquetas cortas que nunca deberían partirse. */
+#cuerpo-app .seccion-pantalla td .chip,
+#cuerpo-app .seccion-pantalla td .insignia-cuenta,
+#cuerpo-app .seccion-pantalla td .num-cuenta{white-space:nowrap!important}
+/* Y una cifra o una fecha se leen de un tirón: "S/ 14.00", no "S/" y debajo "14.00". */
+#cuerpo-app .seccion-pantalla td.cifra,
+#cuerpo-app .seccion-pantalla td .cifra{white-space:nowrap!important}
+
+/* La otra mitad del mismo fallo: entre 768 y 1024 px una capa antigua ponía
+   "table-layout:fixed" en todas las tablas, y con eso el navegador reparte el
+   ancho a partes iguales sin mirar el contenido. Siete columnas en 686 px son
+   98 px cada una, y en la de SERVICIO caben el logo (24 px) y la insignia de
+   cuenta (23 px), así que a la palabra le quedaban 27: "NETF / LIX". Volviendo
+   al reparto automático cada columna pide lo que necesita, y si la suma no
+   entra, el contenedor ya se desplaza de lado. */
+@media (min-width:768px){
+  body#cuerpo-app .seccion-pantalla .pap-tabla-scroll > table,
+  body#cuerpo-app .seccion-pantalla .overflow-x-auto > table{
+    table-layout:auto!important; width:100%!important;
+    min-width:0!important; max-width:none!important;
+  }
+  body#cuerpo-app .seccion-pantalla .pap-tabla-scroll,
+  body#cuerpo-app .seccion-pantalla .overflow-x-auto{overflow-x:auto!important}
+}
+</style>
 </body>
 </html>
