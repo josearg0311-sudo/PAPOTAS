@@ -10683,5 +10683,220 @@ body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired{
 }();
 </script>
 
+<script id="papotas-v180-numeros-sanos">
+/* ============================================================================
+   V180 · "SIGUE TENIENDO FALLAS"
+
+   Las tenía, y eran de las que no dan error en la consola: salen escritas en
+   la pantalla. Con datos que no son perfectos —un "perfiles" donde alguien
+   escribió texto, un vencimiento que se quedó a medias, un costo vacío— el
+   programa mostraba:
+
+       "1 de NaN perfiles usados"      "NaN libres"      "Faltan NaN d"
+       "no es fecha · Faltan NaN d"    y un "NaN" suelto en casi cada pantalla
+
+   NaN es lo que devuelve una cuenta cuando uno de los números no era un
+   número, y se contagia: basta UNA cuenta master con el campo "perfiles" mal
+   para que el total de perfiles de todo el programa quede en NaN.
+
+   Se ataja en los dos sitios donde nace:
+     1. las fechas imposibles, que daban una resta sin sentido;
+     2. los números que llegan como texto vacío o como palabra.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V180__) return; window.__PAPOTAS_V180__=!0;
+
+  /* --- 1. Una fecha que no existe no son "NaN días": es "sin fecha" -------- */
+  function fechaValida(v){
+    var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v||"").trim());
+    if(!m) return null;
+    var a=+m[1], me=+m[2], d=+m[3];
+    if(me<1||me>12||d<1||d>31) return null;
+    var f=new Date(a,me-1,d);
+    /* El 31 de febrero se convierte solo en el 3 de marzo: si el día cambió,
+       la fecha que escribieron no existía. */
+    if(f.getFullYear()!==a || f.getMonth()!==me-1 || f.getDate()!==d) return null;
+    return f;
+  }
+  window.papotasFechaValida=fechaValida;
+
+  function envolverDiasHasta(){
+    var orig=window.diasHasta;
+    if(typeof orig!=="function" || orig.__v180) return !1;
+    function envuelto(v){
+      if(!v) return null;
+      if(!fechaValida(v)) return null;      /* antes: NaN, y de ahí "Faltan NaN d" */
+      var r=orig.apply(this,arguments);
+      return (typeof r==="number" && isFinite(r)) ? r : null;
+    }
+    envuelto.__v180=!0;
+    try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+    window.diasHasta=envuelto;
+    return !0;
+  }
+
+  /* --- 2. Ni una cifra en pantalla puede ser NaN --------------------------- */
+  function envolverMoneda(){
+    var orig=window.formatearMoneda;
+    if(typeof orig!=="function" || orig.__v180) return !1;
+    function envuelto(v){
+      var n=Number(v);
+      return orig.call(this, isFinite(n)?n:0);
+    }
+    envuelto.__v180=!0;
+    window.formatearMoneda=envuelto;
+    return !0;
+  }
+
+  /* --- 3. Enderezar los datos, una vez y sin perder nada que sirva --------
+     Solo se toca lo que NO se puede usar. Un número correcto se queda como
+     está; una palabra donde debería haber una cantidad pasa a cero, y una
+     fecha imposible se vacía, que es lo que el programa ya sabe enseñar como
+     "sin fecha". Lo demás no se toca. */
+  function entero(v,min,porDefecto){
+    var n=parseInt(v,10);
+    if(!isFinite(n)) return porDefecto;
+    return Math.max(min,n);
+  }
+  function decimal(v,porDefecto){
+    var n=parseFloat(v);
+    return isFinite(n) ? n : porDefecto;
+  }
+
+  var saneando=!1;
+  window.papotasSanearDatos=function(silencioso,sinGuardar){
+    var arreglos={perfiles:0,costo:0,numero:0,monto:0,ciclo:0,fechas:0,meses:0};
+
+    (window.servicios||[]).forEach(function(s){
+      if(!s) return;
+      var p=entero(s.perfiles,0,null);
+      if(p===null || String(s.perfiles).trim()==="" ){ s.perfiles=0; arreglos.perfiles++; }
+      else if(p!==s.perfiles){ s.perfiles=p; arreglos.perfiles++; }
+      var c=decimal(s.costo,null);
+      if(c===null){ if(s.costo!==0){ s.costo=0; arreglos.costo++; } }
+      else if(c!==s.costo){ s.costo=c; arreglos.costo++; }
+      var nu=entero(s.numero,1,null);
+      if(nu===null){ s.numero=1; arreglos.numero++; }
+      else if(nu!==s.numero){ s.numero=nu; arreglos.numero++; }
+      if(s.vencimiento && !fechaValida(s.vencimiento)){ s.vencimiento=""; arreglos.fechas++; }
+    });
+
+    (window.clientes||[]).forEach(function(c){
+      if(!c) return;
+      var m=decimal(c.monto,null);
+      if(m===null){ if(c.monto!==0){ c.monto=0; arreglos.monto++; } }
+      else if(m!==c.monto){ c.monto=m; arreglos.monto++; }
+      var q=entero(c.cicloCantidad,1,null);
+      if(q===null){ c.cicloCantidad=1; arreglos.ciclo++; }
+      else if(q!==c.cicloCantidad){ c.cicloCantidad=q; arreglos.ciclo++; }
+      ["inicio","vencimiento"].forEach(function(k){
+        if(c[k] && !fechaValida(c[k])){ c[k]=""; arreglos.fechas++; }
+      });
+    });
+
+    (window.ventas||[]).forEach(function(v){
+      if(!v) return;
+      var m=decimal(v.monto,null);
+      if(m===null){ if(v.monto!==0){ v.monto=0; arreglos.monto++; } }
+      else if(m!==v.monto){ v.monto=m; arreglos.monto++; }
+      var me=entero(v.meses,1,null);
+      if(me===null){ v.meses=1; arreglos.meses++; }
+      else if(me!==v.meses){ v.meses=me; arreglos.meses++; }
+      if(v.fecha && !fechaValida(v.fecha)){ v.fecha=""; arreglos.fechas++; }
+    });
+
+    var inv=window.inversiones;
+    if(Array.isArray(inv)) inv.forEach(function(i){
+      if(!i) return;
+      var m=decimal(i.monto,null);
+      if(m===null){ if(i.monto!==0){ i.monto=0; arreglos.monto++; } }
+      else if(m!==i.monto){ i.monto=m; arreglos.monto++; }
+      if(i.fecha && !fechaValida(i.fecha)){ i.fecha=""; arreglos.fechas++; }
+    });
+
+    var total=0; Object.keys(arreglos).forEach(function(k){ total+=arreglos[k]; });
+    if(total){
+      if(!sinGuardar){ try{ sincronizarDatosLocales(); }catch(_){} }
+      try{ registrarAuditoria("SANEAR", total+" dato(s) numéricos o de fecha corregidos"); }catch(_){}
+      if(!silencioso){
+        var partes=[];
+        if(arreglos.perfiles) partes.push(arreglos.perfiles+" en perfiles");
+        if(arreglos.costo)    partes.push(arreglos.costo+" en costos");
+        if(arreglos.monto)    partes.push(arreglos.monto+" en importes");
+        if(arreglos.fechas)   partes.push(arreglos.fechas+" fecha(s) imposibles");
+        if(arreglos.ciclo||arreglos.meses) partes.push((arreglos.ciclo+arreglos.meses)+" en ciclos");
+        if(arreglos.numero)   partes.push(arreglos.numero+" en numeración");
+        try{ mostrarToast("Datos enderezados: "+partes.join(", ")); }catch(_){}
+      }
+    }
+    return arreglos;
+  };
+
+  /* --- 4. Y que no vuelva a entrar basura por el formulario ---------------- */
+  /* Se endereza justo ANTES de guardar, así lo que queda escrito en el
+     teléfono ya está limpio, venga de donde venga: del formulario, de un
+     respaldo que se importa o de lo que baja de la nube. */
+  function envolverSincronizar(){
+    var orig=window.sincronizarDatosLocales;
+    if(typeof orig!=="function" || orig.__v180) return !1;
+    function envuelto(){
+      if(!saneando){
+        saneando=!0;
+        try{ window.papotasSanearDatos(!0,!0); }catch(_){}
+        saneando=!1;
+      }
+      return orig.apply(this,arguments);
+    }
+    envuelto.__v180=!0;
+    try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+    window.sincronizarDatosLocales=envuelto;
+    return !0;
+  }
+
+  function envolverGuardados(){
+    ["guardarCliente","guardarServicio","guardarVenta","guardarInversionDirecta"].forEach(function(n){
+      var orig=window[n];
+      if(typeof orig!=="function" || orig.__v180) return;
+      function envuelto(){
+        var r=orig.apply(this,arguments);
+        try{ window.papotasSanearDatos(!0); }catch(_){}
+        return r;
+      }
+      envuelto.__v180=!0;
+      try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+        if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+      window[n]=envuelto;
+    });
+  }
+
+  function enganchar(){
+    envolverDiasHasta(); envolverMoneda(); envolverSincronizar(); envolverGuardados();
+  }
+  function listo(){
+    var d=window.diasHasta, m=window.formatearMoneda, g=window.guardarCliente, si=window.sincronizarDatosLocales;
+    return !!(d&&d.__v180 && m&&m.__v180 && g&&g.__v180 && si&&si.__v180);
+  }
+
+  function arrancar(){
+    enganchar();
+    /* Una pasada al arrancar, en silencio: si el archivo traía datos torcidos
+       de antes, se enderezan sin dar la lata nada más abrir. */
+    try{ window.papotasSanearDatos(!0); }catch(_){}
+    try{ renderizarTodo(); }catch(_){}
+    var n=0;
+    (function reintentar(){
+      try{ enganchar(); }catch(e){ console.warn("V180:",e); }
+      if(++n<25 && !listo()) setTimeout(reintentar,300);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,420); },{once:!0})
+    : setTimeout(arrancar,420);
+}();
+</script>
+
 </body>
 </html>
