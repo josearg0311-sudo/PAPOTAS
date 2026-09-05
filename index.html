@@ -9098,5 +9098,673 @@ aside nav button.bg-white\/10::before{height:60%}
 #cuerpo-app .tarjeta-registro.pap-oculto-nivel{display:none!important}
 </style>
 
+<script id="papotas-v175-combos">
+/* ============================================================================
+   V175 · "ESTA SECCIÓN TAMBIÉN MEJÓRALA POR FAVOR. DALE UN MEJOR
+   FUNCIONAMIENTO" (Combos)
+
+   El generador de combos vivía de espaldas al resto del programa:
+
+   · Los precios de cada plataforma salían de una lista aparte, con 10 soles
+     por defecto, sin ninguna relación con lo que cobras de verdad.
+   · No decía lo que te cuestan esas plataformas, así que se podía poner un
+     precio de combo por debajo del coste sin enterarse.
+   · Y para mandarlo por WhatsApp pedía el número A MANO, teniendo el programa
+     la lista entera de clientes con sus teléfonos dentro.
+
+   Aquí se enchufa a los datos que ya tienes.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V175__) return; window.__PAPOTAS_V175__=!0;
+
+  function esc(t){ try{ return window.esc(t); }catch(_){ return String(t==null?"":t); } }
+  function toast(t){ try{ mostrarToast(t); }catch(_){} }
+  function dinero(n){ try{ return formatearMoneda(Number(n)||0); }catch(_){ return "S/ "+(Number(n)||0).toFixed(2); } }
+  function lexico(n){
+    try{ return new Function("return typeof "+n+'!=="undefined"?'+n+":null")(); }catch(_){ return null; }
+  }
+  function cache(){ var c=lexico("plataformasComboCache"); return Array.isArray(c)?c:[]; }
+  function norm(t){ return String(t||"").toUpperCase().trim(); }
+
+  /* ------------------------------------------------------------------------
+     1 · Lo que cobras de verdad por cada plataforma
+     No un promedio a ciegas: el precio que más se repite entre tus clientes,
+     que es el que realmente tienes puesto. Si hay empate, el más alto.
+     ---------------------------------------------------------------------- */
+  window.papotasPrecioRealPlataforma=function(plataforma){
+    var p=norm(plataforma), cuenta={}, n=0;
+    (window.clientes||[]).forEach(function(c){
+      if(norm(c.servicio)!==p) return;
+      var v=0; try{ v=cobroDeCliente(c); }catch(_){ v=Number(c.monto)||0; }
+      v=Math.round((Number(v)||0)*100)/100;
+      if(!v) return;
+      cuenta[v]=(cuenta[v]||0)+1; n++;
+    });
+    if(!n) return null;
+    var mejor=null, mejorN=0;
+    Object.keys(cuenta).forEach(function(k){
+      var v=Number(k);
+      if(cuenta[k]>mejorN || (cuenta[k]===mejorN && v>mejor)){ mejor=v; mejorN=cuenta[k]; }
+    });
+    return {precio:mejor, clientes:n, repeticiones:mejorN};
+  };
+
+  /* Lo que te cuesta un perfil de esa plataforma, según tus cuentas master. */
+  window.papotasCostePerfil=function(plataforma){
+    var p=norm(plataforma), coste=0, plazas=0;
+    (window.servicios||[]).forEach(function(s){
+      if(norm(s.nombre)!==p) return;
+      var np=Math.max(0,Number(s.perfiles)||0);
+      if(!np) return;
+      coste+=Number(s.costo)||0; plazas+=np;
+    });
+    return plazas ? Math.round((coste/plazas)*100)/100 : null;
+  };
+
+  window.papotasTraerPreciosReales=function(){
+    var lista=cache();
+    if(!lista.length) return toast("Todavía no hay plataformas en el combo.");
+    var cambiados=0, sinDatos=[];
+    lista.forEach(function(it){
+      var r=window.papotasPrecioRealPlataforma(it.nombre);
+      if(r && r.precio){ if(it.precio!==r.precio){ it.precio=r.precio; cambiados++; } }
+      else sinDatos.push(it.nombre);
+    });
+    try{ guardarClave("pap_precios_combo", JSON.stringify(lista)); }catch(_){}
+    try{ renderizarListaCombosHTML(); generarVistaPreviaCombo(!1); }catch(_){}
+    pintar();
+    toast(cambiados
+      ? ("Actualizados "+cambiados+" precio(s) con lo que cobras hoy"+(sinDatos.length?(" · "+sinDatos.length+" sin clientes todavía"):""))
+      : "Los precios ya coincidían con lo que cobras");
+  };
+
+  /* ------------------------------------------------------------------------
+     2 · Cuánto te cuesta el combo y cuánto ganas
+     ---------------------------------------------------------------------- */
+  function seleccion(){
+    return cache().filter(function(i){ return i && i.check; });
+  }
+  function cuentas(){
+    var sel=seleccion();
+    var normal=0, coste=0, sinCoste=[];
+    sel.forEach(function(i){
+      normal+=Number(i.precio)||0;
+      var c=window.papotasCostePerfil(i.nombre);
+      if(c===null) sinCoste.push(i.nombre); else coste+=c;
+    });
+    var final=0;
+    try{ final=parseFloat(document.getElementById("combo-precio-final").value)||0; }catch(_){}
+    return {
+      sel:sel, normal:Math.round(normal*100)/100, coste:Math.round(coste*100)/100,
+      final:final, margen:Math.round((final-coste)*100)/100,
+      descuento: normal>0 ? Math.round((1-final/normal)*100) : 0,
+      sinCoste:sinCoste
+    };
+  }
+
+  /* ------------------------------------------------------------------------
+     3 · A quién ofrecérselo
+     Los que ya tienen alguna de las plataformas del combo y les faltan las
+     otras: son los que pueden subir de plan sin buscar clientes nuevos.
+     ---------------------------------------------------------------------- */
+  window.papotasCandidatosCombo=function(){
+    var sel=seleccion().map(function(i){ return norm(i.nombre); });
+    if(sel.length<2) return [];
+    var porCliente={};
+    (window.clientes||[]).forEach(function(c){
+      var clave=(c.telefono&&String(c.telefono).trim()) || ("id:"+c.id);
+      porCliente[clave]=porCliente[clave]||{nombre:c.nombre, ref:c, tiene:{}, fichas:[]};
+      porCliente[clave].tiene[norm(c.servicio)]=!0;
+      porCliente[clave].fichas.push(c);
+    });
+    var salida=[];
+    Object.keys(porCliente).forEach(function(k){
+      var p=porCliente[k];
+      var tiene=sel.filter(function(s){ return p.tiene[s]; });
+      var falta=sel.filter(function(s){ return !p.tiene[s]; });
+      if(!tiene.length || !falta.length) return;
+      salida.push({cliente:p.ref, nombre:p.nombre, tiene:tiene, falta:falta});
+    });
+    salida.sort(function(a,b){ return b.tiene.length-a.tiene.length || a.falta.length-b.falta.length; });
+    return salida;
+  };
+
+  window.papotasEnviarComboA=function(id){
+    var c=(window.clientes||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!c) return;
+    var caja=document.getElementById("combo-texto-resultado");
+    var texto=caja ? caja.value : "";
+    if(!texto.trim()) return toast("El combo no tiene texto todavía.");
+    /* Si la plantilla trae {cliente} se sustituye; si no, se saluda por delante. */
+    texto = /\{cliente\}/.test(texto)
+      ? texto.replace(/\{cliente\}/g, c.nombre||"")
+      : ("Hola "+(c.nombre||"")+" 👋\n\n"+texto);
+    var enlace=(typeof window.papotasWaEnlace==="function") ? window.papotasWaEnlace(c,texto) : null;
+    if(!enlace){
+      var motivo=(typeof window.papotasTelefonoEstado==="function")
+        ? window.papotasTelefonoEstado(c).motivo : "sin teléfono válido";
+      return toast("No se puede escribir a "+(c.nombre||"este cliente")+": "+motivo);
+    }
+    window.open(enlace,"_blank","noopener");
+    try{ registrarAuditoria("COMBO","Combo ofrecido a "+(c.nombre||"")); }catch(_){}
+  };
+
+  /* ------------------------------------------------------------------------
+     4 · La pantalla
+     ---------------------------------------------------------------------- */
+  function montar(){
+    var sec=document.getElementById("sec-combos");
+    if(!sec || document.getElementById("pap-combo-panel")) return !1;
+    var d=document.createElement("div");
+    d.id="pap-combo-panel"; d.className="pap-combo-panel";
+    sec.appendChild(d);
+    return !0;
+  }
+
+  function pintar(){
+    var caja=document.getElementById("pap-combo-panel");
+    if(!caja) return;
+    var q=cuentas();
+
+    if(!q.sel.length){
+      caja.innerHTML='<div class="pap-combo-vacio"><b>Marca las plataformas del combo</b>'+
+        '<span>Al marcarlas se calcula aquí lo que te cuestan, lo que ganas y a qué clientes tuyos les puedes ofrecer el combo.</span></div>';
+      return;
+    }
+
+    var bajoCoste = q.coste>0 && q.final>0 && q.final<q.coste;
+    var sinPrecio = q.final<=0;
+
+    var cifras=
+      '<div class="pap-combo-cifras">'+
+        '<div class="pap-combo-cifra"><span>Suelto</span><b>'+esc(dinero(q.normal))+'</b>'+
+          '<i>lo que pagarían por separado</i></div>'+
+        '<div class="pap-combo-cifra"><span>Combo</span><b>'+esc(dinero(q.final))+'</b>'+
+          '<i>'+(q.descuento>0?(q.descuento+" % menos"):(q.descuento<0?("más caro que suelto"):"sin descuento"))+'</i></div>'+
+        '<div class="pap-combo-cifra"><span>Te cuesta</span><b>'+esc(dinero(q.coste))+'</b>'+
+          '<i>'+(q.sinCoste.length
+                 ? esc(q.sinCoste.length+" plataforma(s) sin cuenta master")
+                 : "según tus cuentas master")+'</i></div>'+
+        '<div class="pap-combo-cifra'+(q.margen<0?" mal":(q.margen>0?" bien":""))+'"><span>Ganas</span><b>'+
+          esc(dinero(q.margen))+'</b><i>por cada combo vendido</i></div>'+
+      '</div>';
+
+    var aviso="";
+    if(bajoCoste)
+      aviso='<div class="pap-combo-aviso mal">A ese precio pierdes '+esc(dinero(q.coste-q.final))+
+            ' en cada combo: te cuesta '+esc(dinero(q.coste))+' y lo vendes a '+esc(dinero(q.final))+'.</div>';
+    else if(sinPrecio)
+      aviso='<div class="pap-combo-aviso">Pon un precio de combo para ver el margen.</div>';
+    else if(q.sinCoste.length)
+      aviso='<div class="pap-combo-aviso">No tienes cuenta master de '+esc(q.sinCoste.join(", "))+
+            ', así que su coste no entra en el cálculo.</div>';
+
+    var cand=window.papotasCandidatosCombo();
+    var lista="";
+    if(q.sel.length<2){
+      lista='<p class="pap-combo-sub">Marca dos o más plataformas para ver a quién le puedes ofrecer el combo.</p>';
+    } else if(!cand.length){
+      lista='<p class="pap-combo-sub">Ningún cliente tuyo tiene ya parte de este combo. Sirve para captar nuevos, no para subir de plan a los de casa.</p>';
+    } else {
+      lista='<div class="pap-combo-gente">'+cand.slice(0,24).map(function(x){
+        var tel=(typeof window.papotasTelefonoEstado==="function")
+          ? window.papotasTelefonoEstado(x.cliente) : {ok:!0,motivo:""};
+        return '<div class="pap-combo-fila">'+
+          '<div class="pap-combo-quien">'+
+            '<b>'+esc(x.nombre||"Cliente")+'</b>'+
+            '<span class="pap-combo-sub">ya tiene '+esc(x.tiene.join(", "))+'</span>'+
+            '<span class="chip chip-aviso">le falta '+esc(x.falta.join(", "))+'</span>'+
+          '</div>'+
+          (tel.ok
+            ? '<button type="button" class="pap-tool primary" onclick="papotasEnviarComboA(\''+esc(x.cliente.id)+'\')">Ofrecérselo</button>'
+            : '<button type="button" class="pap-tool" title="'+esc(tel.motivo)+'" onclick="abrirFichaCliente(\''+esc(x.cliente.id)+'\')">'+esc(tel.motivo)+'</button>')+
+        '</div>';
+      }).join("")+'</div>'+
+      (cand.length>24?'<p class="pap-combo-sub">Y '+(cand.length-24)+' más.</p>':'');
+    }
+
+    caja.innerHTML=
+      '<div class="pap-combo-cab">'+
+        '<div><h3>Cuentas del combo</h3>'+
+        '<p>'+q.sel.length+' plataforma(s) marcadas · '+cand.length+' cliente(s) a quien ofrecérselo</p></div>'+
+        '<button type="button" class="pap-tool" onclick="papotasTraerPreciosReales()" '+
+          'title="Pone en cada plataforma el precio que más se repite entre tus clientes">Traer mis precios reales</button>'+
+      '</div>'+
+      cifras+aviso+
+      '<div class="pap-combo-cab pap-combo-cab2"><div><h3>A quién ofrecérselo</h3>'+
+        '<p>Clientes que ya tienen parte del combo y les falta el resto.</p></div></div>'+
+      lista;
+  }
+
+  /* ------------------------------------------------------------------------
+     5 · Enganches
+     ---------------------------------------------------------------------- */
+  function enganchar(){
+    ["generarVistaPreviaCombo","renderizarListaCombosHTML","cargarComboGuardado"].forEach(function(n){
+      var orig=window[n];
+      if(typeof orig!=="function" || orig.__v175) return;
+      function envuelto(){ var r=orig.apply(this,arguments); setTimeout(pintar,0); return r; }
+      envuelto.__v175=!0;
+      try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+        if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+      window[n]=envuelto;
+    });
+    /* Las casillas se marcan a mano en la lista: hay que enterarse igual. */
+    var cont=document.getElementById("contenedor-plataformas-combo");
+    if(cont && !cont.dataset.papV175){
+      cont.dataset.papV175="1";
+      cont.addEventListener("change", function(){ setTimeout(pintar,20); });
+      cont.addEventListener("input", function(){ setTimeout(pintar,60); });
+    }
+    var precio=document.getElementById("combo-precio-final");
+    if(precio && !precio.dataset.papV175){
+      precio.dataset.papV175="1";
+      precio.addEventListener("input", function(){ setTimeout(pintar,20); });
+    }
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ montar(); enganchar(); pintar(); }catch(e){ console.warn("V175:",e); }
+      if(++n<30) setTimeout(reintentar,350);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,800); },{once:!0})
+    : setTimeout(arrancar,800);
+}();
+</script>
+
+<style id="papotas-v175-estilo">
+#cuerpo-app .pap-combo-panel{
+  margin-top:var(--pap-e-2,10px); padding:var(--pap-e-3,14px);
+  border:1px solid rgba(251,191,36,.22); border-radius:16px;
+  background:rgba(251,191,36,.04); display:flex; flex-direction:column; gap:10px;
+}
+#cuerpo-app .pap-combo-cab{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap}
+#cuerpo-app .pap-combo-cab2{border-top:1px solid rgba(255,255,255,.08); padding-top:10px; margin-top:2px}
+#cuerpo-app .pap-combo-cab h3{font-size:12px; font-weight:900; color:#fcd34d; margin:0}
+#cuerpo-app .pap-combo-cab p{font-size:10px; font-weight:600; color:#94a3b8; margin:2px 0 0}
+#cuerpo-app .pap-combo-cifras{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,140px),1fr)); gap:8px;
+}
+#cuerpo-app .pap-combo-cifra{
+  padding:9px 11px; border-radius:12px; border:1px solid rgba(255,255,255,.08);
+  background:rgba(0,0,0,.28); display:flex; flex-direction:column; gap:1px;
+}
+#cuerpo-app .pap-combo-cifra span{font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em}
+#cuerpo-app .pap-combo-cifra b{font-size:15px; font-weight:900; color:#e2e8f0; font-variant-numeric:tabular-nums}
+#cuerpo-app .pap-combo-cifra i{font-size:9px; font-style:normal; font-weight:600; color:#64748b}
+#cuerpo-app .pap-combo-cifra.bien b{color:#6ee7b7}
+#cuerpo-app .pap-combo-cifra.mal b{color:#fca5a5}
+#cuerpo-app .pap-combo-aviso{
+  padding:9px 11px; border-radius:12px; font-size:11px; font-weight:700;
+  border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.03); color:#cbd5e1;
+}
+#cuerpo-app .pap-combo-aviso.mal{
+  border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.09); color:#fecaca;
+}
+#cuerpo-app .pap-combo-gente{display:flex; flex-direction:column; gap:6px}
+#cuerpo-app .pap-combo-fila{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  padding:8px 11px; border-radius:12px; border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.025);
+}
+#cuerpo-app .pap-combo-quien{display:flex; align-items:center; flex-wrap:wrap; gap:7px; min-width:0; flex:1 1 220px}
+#cuerpo-app .pap-combo-quien b{font-size:12px; font-weight:800; color:#e2e8f0}
+#cuerpo-app .pap-combo-sub{font-size:10px; font-weight:600; color:#94a3b8}
+#cuerpo-app .pap-combo-fila .pap-tool.primary{
+  background:rgba(16,185,129,.16); border-color:rgba(16,185,129,.45); color:#6ee7b7; flex:0 0 auto;
+}
+#cuerpo-app .pap-combo-fila .pap-tool.primary:hover{background:#10b981; color:#06281d}
+#cuerpo-app .pap-combo-vacio{
+  display:flex; flex-direction:column; gap:4px; align-items:center; text-align:center; padding:18px 12px;
+}
+#cuerpo-app .pap-combo-vacio b{font-size:12px; color:#fcd34d}
+#cuerpo-app .pap-combo-vacio span{font-size:10px; color:#94a3b8; font-weight:600; max-width:44ch}
+</style>
+
+<script id="papotas-v176-estilo">
+/* ============================================================================
+   V176 · "QUIERO QUE LA PARTE DE AJUSTES SEA UNA DE LAS PARTES MÁS COMPLEJAS
+   DEL PROGRAMA... Y LA PARTE DE MODIFICACIONES DEL ESTILO DEL PROGRAMA"
+
+   El programa ya sabía cambiar de color, de fondo, de tipografía, de densidad
+   y de tamaño de letra, pero cada cosa estaba en un sitio distinto de Ajustes,
+   sin ver el efecto hasta cerrar, y sin manera de guardar "mi estilo" ni de
+   llevártelo a otro teléfono.
+
+   Aquí se junta todo en un solo panel que se aplica según lo tocas, se añade
+   lo que faltaba (color libre, esquinas, animaciones), y se puede guardar,
+   copiar y volver al de fábrica.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V176__) return; window.__PAPOTAS_V176__=!0;
+
+  function esc(t){ try{ return window.esc(t); }catch(_){ return String(t==null?"":t); } }
+  function toast(t){ try{ mostrarToast(t); }catch(_){} }
+  function guardar(){
+    try{ sincronizarDatosLocales(); }catch(_){}
+    try{ aplicarTemaYEstilos(); }catch(_){}
+    aplicarExtras();
+  }
+
+  /* Lo que el programa admite de verdad. Fuera de estas listas, la capa que
+     resuelve el tema descarta el valor y vuelve a Inter sin decir nada. */
+  var FUENTES=["Inter","Outfit","Manrope","DM Sans","Plus Jakarta Sans","Poppins",
+               "Nunito","Rubik","Montserrat","Lato","Open Sans","Roboto","Space Grotesk"];
+  var FUENTES_NUM=["Roboto Mono","JetBrains Mono","Space Grotesk","DM Sans","Inter","monospace"];
+  /* Las únicas que el archivo trae incrustadas; el resto necesitan conexión. */
+  var SIN_CONEXION={"Inter":1,"Outfit":1,"Roboto Mono":1,"monospace":1};
+  var FONDOS=[["calma","Calma","#0b1220"],["grafito","Grafito","#151517"],["noche","Noche","#05070d"],
+              ["azul","Azul","#0a1730"],["esmeralda","Esmeralda","#04211a"],["lavanda","Lavanda","#150f26"],
+              ["arena","Arena","#1d1710"],["slate","Pizarra","#0f172a"],["cyber","Cyber","#0a0a12"],
+              ["nightblue","Azul noche","#070d1c"],["oled","Negro puro","#000000"],["perla","Perla","#12141a"]];
+  var COLORES=[["#e50914","#b90710","Rojo PAPOTAS"],["#10b981","#059669","Verde"],["#3b82f6","#2563eb","Azul"],
+               ["#a855f7","#9333ea","Morado"],["#f59e0b","#d97706","Ámbar"],["#ec4899","#db2777","Rosa"],
+               ["#06b6d4","#0891b2","Turquesa"],["#f97316","#ea580c","Naranja"]];
+
+  /* --- Lo que se añade: esquinas y animaciones ---------------------------- */
+  function aplicarExtras(){
+    var a=window.ajustes||{};
+    var raiz=document.documentElement;
+    var r=Number(a.radioEsquinas);
+    if(!isFinite(r)) r=16;
+    r=Math.max(0,Math.min(28,r));
+    raiz.style.setProperty("--pap-r-card", r+"px");
+    raiz.style.setProperty("--pap-r-chico", Math.max(0,Math.round(r*0.62))+"px");
+    raiz.dataset.papAnim = (a.animaciones===false) ? "no" : "si";
+  }
+  window.papotasAplicarExtras=aplicarExtras;
+
+  /* --- Cambiar una cosa --------------------------------------------------- */
+  window.papotasEstiloSet=function(clave,valor){
+    try{
+      if(clave==="colorPrimario"){
+        window.ajustes.colorPrimario=valor;
+        window.ajustes.colorHover=oscurecer(valor,18);
+      } else if(clave==="animaciones"){
+        window.ajustes.animaciones=!!valor;
+      } else if(clave==="radioEsquinas"){
+        window.ajustes.radioEsquinas=Number(valor)||0;
+      } else {
+        window.ajustes[clave]=valor;
+      }
+      if(clave==="fondoTema") window.ajustes.modoClaro=!1;
+    }catch(_){}
+    guardar(); pintar();
+  };
+
+  function oscurecer(hex,pct){
+    var m=/^#?([0-9a-f]{6})$/i.exec(String(hex||"")); if(!m) return hex;
+    var n=parseInt(m[1],16), r=(n>>16)&255, g=(n>>8)&255, b=n&255, f=1-pct/100;
+    function c(x){ return Math.max(0,Math.min(255,Math.round(x*f))); }
+    return "#"+[c(r),c(g),c(b)].map(function(x){ return ("0"+x.toString(16)).slice(-2); }).join("");
+  }
+
+  /* --- Estilos completos -------------------------------------------------- */
+  var PRESETS=[
+    {id:"papotas", nombre:"PAPOTAS", d:{colorPrimario:"#e50914",colorHover:"#b90710",fondoTema:"calma",
+      tipografia:"Outfit",tipografiaNumero:"Roboto Mono",densidad:"comoda",tamanoLetra:"normal",
+      radioEsquinas:16,animaciones:!0,modoClaro:!1}},
+    {id:"sobrio", nombre:"Sobrio", d:{colorPrimario:"#3b82f6",colorHover:"#2563eb",fondoTema:"slate",
+      tipografia:"Inter",tipografiaNumero:"Inter",densidad:"comoda",tamanoLetra:"normal",
+      radioEsquinas:10,animaciones:!1,modoClaro:!1}},
+    {id:"denso", nombre:"Muchos datos", d:{colorPrimario:"#10b981",colorHover:"#059669",fondoTema:"grafito",
+      tipografia:"Inter",tipografiaNumero:"Roboto Mono",densidad:"compacta",tamanoLetra:"pequena",
+      radioEsquinas:8,animaciones:!1,modoClaro:!1}},
+    {id:"noche", nombre:"Noche cerrada", d:{colorPrimario:"#a855f7",colorHover:"#9333ea",fondoTema:"oled",
+      tipografia:"Outfit",tipografiaNumero:"Roboto Mono",densidad:"comoda",tamanoLetra:"normal",
+      radioEsquinas:20,animaciones:!0,modoClaro:!1}},
+    {id:"grande", nombre:"Letra grande", d:{colorPrimario:"#e50914",colorHover:"#b90710",fondoTema:"noche",
+      tipografia:"Inter",tipografiaNumero:"Inter",densidad:"comoda",tamanoLetra:"grande",
+      radioEsquinas:16,animaciones:!0,modoClaro:!1}}
+  ];
+
+  window.papotasEstiloPreset=function(id){
+    var p=PRESETS.find(function(x){ return x.id===id; });
+    if(!p) return;
+    Object.keys(p.d).forEach(function(k){ window.ajustes[k]=p.d[k]; });
+    guardar(); pintar();
+    toast("Estilo «"+p.nombre+"» aplicado");
+  };
+
+  var CLAVES=["colorPrimario","colorHover","fondoTema","tipografia","tipografiaNumero",
+              "densidad","tamanoLetra","radioEsquinas","animaciones","modoClaro"];
+
+  window.papotasEstiloCopiar=function(){
+    var d={}; CLAVES.forEach(function(k){ if(window.ajustes[k]!==undefined) d[k]=window.ajustes[k]; });
+    var codigo="PAPOTAS-ESTILO:"+btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(codigo);
+        toast("Código del estilo copiado. Pégalo en el otro dispositivo.");
+      } else { prompt("Copia este código y pégalo en el otro dispositivo:", codigo); }
+    }catch(_){ prompt("Copia este código:", codigo); }
+    return codigo;
+  };
+
+  window.papotasEstiloPegar=function(){
+    var txt=prompt("Pega aquí el código del estilo (empieza por PAPOTAS-ESTILO:)");
+    if(!txt) return;
+    var m=/PAPOTAS-ESTILO:(.+)$/.exec(String(txt).trim());
+    if(!m) return toast("Ese código no es de un estilo de PAPOTAS.");
+    var d=null;
+    try{ d=JSON.parse(decodeURIComponent(escape(atob(m[1].trim())))); }catch(_){ d=null; }
+    if(!d || typeof d!=="object") return toast("El código está incompleto o mal copiado.");
+    var puestos=0;
+    CLAVES.forEach(function(k){ if(k in d){ window.ajustes[k]=d[k]; puestos++; } });
+    if(!puestos) return toast("Ese código no traía ningún ajuste.");
+    guardar(); pintar();
+    toast("Estilo aplicado ("+puestos+" ajustes)");
+  };
+
+  window.papotasEstiloFabrica=function(){
+    if(!confirm("Volver al estilo de fábrica?\n\nSolo cambia los colores y la letra. Tus datos no se tocan.")) return;
+    window.papotasEstiloPreset("papotas");
+  };
+
+  /* --- La pantalla -------------------------------------------------------- */
+  function montar(){
+    var sec=document.getElementById("sec-ajustes");
+    if(!sec || document.getElementById("pap-estilo")) return !1;
+    var d=document.createElement("div");
+    d.id="pap-estilo"; d.className="pap-estilo";
+    sec.insertBefore(d, sec.firstChild);
+    return !0;
+  }
+
+  function sel(id,etiqueta,clave,opciones,pie){
+    var a=window.ajustes||{};
+    return '<label class="pap-est-campo"><span>'+esc(etiqueta)+'</span>'+
+      '<select id="'+id+'" onchange="papotasEstiloSet(\''+clave+'\',this.value)">'+
+      opciones.map(function(o){
+        var v=o[0], t=o[1];
+        return '<option value="'+esc(v)+'"'+(String(a[clave])===String(v)?' selected':'')+'>'+esc(t)+'</option>';
+      }).join("")+'</select>'+
+      (pie?'<i>'+esc(pie)+'</i>':'')+'</label>';
+  }
+
+  function pintar(){
+    var caja=document.getElementById("pap-estilo");
+    if(!caja) return;
+    var a=window.ajustes||{};
+    var radio=isFinite(Number(a.radioEsquinas))?Number(a.radioEsquinas):16;
+
+    var colores=COLORES.map(function(c){
+      return '<button type="button" class="pap-est-color'+(String(a.colorPrimario).toLowerCase()===c[0]?" activo":"")+'" '+
+        'style="--c:'+c[0]+'" title="'+esc(c[2])+'" aria-label="'+esc(c[2])+'" '+
+        'onclick="papotasEstiloSet(\'colorPrimario\',\''+c[0]+'\')"></button>';
+    }).join("");
+
+    var fondos=FONDOS.map(function(f){
+      return '<button type="button" class="pap-est-fondo'+(String(a.fondoTema)===f[0]?" activo":"")+'" '+
+        'style="--c:'+f[2]+'" onclick="papotasEstiloSet(\'fondoTema\',\''+f[0]+'\')">'+esc(f[1])+'</button>';
+    }).join("");
+
+    var presets=PRESETS.map(function(p){
+      return '<button type="button" class="pap-tool" onclick="papotasEstiloPreset(\''+p.id+'\')">'+esc(p.nombre)+'</button>';
+    }).join("");
+
+    var fuentes=FUENTES.map(function(f){ return [f, f+(SIN_CONEXION[f]?"":" · necesita conexión")]; });
+    var fuentesNum=FUENTES_NUM.map(function(f){
+      return [f, (f==="monospace"?"La del sistema":f)+(SIN_CONEXION[f]?"":" · necesita conexión")];
+    });
+
+    caja.innerHTML=
+      '<div class="pap-est-cab"><div><h3>Estilo del programa</h3>'+
+        '<p>Se aplica al momento, sin guardar nada aparte. Solo cambia cómo se ve; tus datos no se tocan.</p></div>'+
+        '<div class="pap-est-acc">'+
+          '<button type="button" class="pap-tool" onclick="papotasEstiloCopiar()" title="Copia un código para aplicar este mismo estilo en otro dispositivo">Copiar mi estilo</button>'+
+          '<button type="button" class="pap-tool" onclick="papotasEstiloPegar()">Pegar un estilo</button>'+
+          '<button type="button" class="pap-tool" onclick="papotasEstiloFabrica()">De fábrica</button>'+
+        '</div></div>'+
+
+      '<div class="pap-est-bloque"><h4>Estilos hechos</h4><div class="pap-est-fila">'+presets+'</div></div>'+
+
+      '<div class="pap-est-bloque"><h4>Color de acento</h4>'+
+        '<div class="pap-est-fila">'+colores+
+          '<label class="pap-est-libre" title="Cualquier color">'+
+            '<input type="color" value="'+esc(a.colorPrimario||"#e50914")+'" '+
+            'oninput="papotasEstiloSet(\'colorPrimario\',this.value)" aria-label="Color a medida"/>'+
+            '<span>A medida</span></label>'+
+        '</div></div>'+
+
+      '<div class="pap-est-bloque"><h4>Fondo</h4><div class="pap-est-fila">'+fondos+'</div></div>'+
+
+      '<div class="pap-est-bloque"><h4>Letra y espacio</h4><div class="pap-est-rejilla">'+
+        sel("pap-est-fuente","Letra de los textos","tipografia",fuentes,
+            "Sin conexión solo se ven bien Inter y Outfit.")+
+        sel("pap-est-fuente-num","Letra de los números","tipografiaNumero",fuentesNum,
+            "Una de ancho fijo hace que las cifras cuadren en columna.")+
+        sel("pap-est-tam","Tamaño de letra","tamanoLetra",
+            [["pequena","Pequeña"],["normal","Normal"],["grande","Grande"]])+
+        sel("pap-est-den","Espaciado de las listas","densidad",
+            [["comoda","Cómodo · más aire"],["compacta","Compacto · más filas a la vista"]])+
+        '<label class="pap-est-campo"><span>Esquinas redondeadas</span>'+
+          '<input type="range" min="0" max="28" step="2" value="'+radio+'" '+
+          'oninput="papotasEstiloSet(\'radioEsquinas\',this.value)" aria-label="Esquinas redondeadas"/>'+
+          '<i>'+radio+' px'+(radio===0?" · esquinas rectas":"")+'</i></label>'+
+        '<label class="pap-est-campo pap-est-interruptor"><span>Animaciones</span>'+
+          '<button type="button" class="pap-sw'+(a.animaciones===false?"":" on")+'" role="switch" '+
+          'aria-checked="'+(a.animaciones===false?"false":"true")+'" '+
+          'onclick="papotasEstiloSet(\'animaciones\','+(a.animaciones===false?"true":"false")+')">'+
+          '<span></span></button>'+
+          '<i>'+(a.animaciones===false?"Apagadas: todo aparece sin transición":"Encendidas")+'</i></label>'+
+      '</div></div>'+
+
+      '<div class="pap-est-vista">'+
+        '<span class="pap-est-vista-t">Así queda</span>'+
+        '<div class="pap-est-demo">'+
+          '<div class="pap-est-tarjeta"><b>Cliente de ejemplo</b>'+
+            '<span class="chip chip-urgente">Vencido</span>'+
+            '<span class="cifra">S/ 15.00</span></div>'+
+          '<button type="button" class="pap-est-boton">Cobrar</button>'+
+        '</div>'+
+      '</div>';
+  }
+
+  function arrancar(){
+    aplicarExtras();
+    var n=0;
+    (function reintentar(){
+      try{ montar(); pintar(); aplicarExtras(); }catch(e){ console.warn("V176:",e); }
+      if(++n<25) setTimeout(reintentar,400);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,850); },{once:!0})
+    : setTimeout(arrancar,850);
+}();
+</script>
+
+<style id="papotas-v176-estilo-css">
+#cuerpo-app .pap-estilo{
+  border:1px solid rgba(255,255,255,.1); border-radius:var(--pap-r-card,16px);
+  background:rgba(255,255,255,.025); padding:var(--pap-e-3,14px);
+  display:flex; flex-direction:column; gap:12px; margin-bottom:var(--pap-e-2,10px);
+}
+#cuerpo-app .pap-est-cab{display:flex; align-items:flex-start; justify-content:space-between; gap:10px; flex-wrap:wrap}
+#cuerpo-app .pap-est-cab h3{margin:0; font-size:13px; font-weight:900; color:#e2e8f0}
+#cuerpo-app .pap-est-cab p{margin:3px 0 0; font-size:10px; font-weight:600; color:#94a3b8; max-width:56ch}
+#cuerpo-app .pap-est-acc{display:flex; gap:6px; flex-wrap:wrap}
+#cuerpo-app .pap-est-bloque h4{
+  margin:0 0 6px; font-size:9px; font-weight:800; color:#94a3b8;
+  text-transform:uppercase; letter-spacing:.08em;
+}
+#cuerpo-app .pap-est-fila{display:flex; flex-wrap:wrap; gap:6px; align-items:center}
+#cuerpo-app .pap-est-color{
+  /* 38 y no 30: por debajo de 36 px un dedo falla más de lo que acierta. */
+  width:38px; height:38px; border-radius:10px; border:2px solid rgba(255,255,255,.14);
+  background:var(--c); cursor:pointer; padding:0; flex:0 0 auto;
+}
+#cuerpo-app .pap-est-color.activo{border-color:#fff; box-shadow:0 0 0 2px var(--c)}
+#cuerpo-app .pap-est-libre{
+  display:inline-flex; align-items:center; gap:6px; padding:3px 10px 3px 4px;
+  border:1px solid rgba(255,255,255,.14); border-radius:10px; cursor:pointer;
+  flex:0 0 auto; min-height:38px;
+}
+#cuerpo-app .pap-est-libre input{width:30px; height:30px; border:0; background:none; padding:0; cursor:pointer; flex:0 0 auto}
+#cuerpo-app .pap-est-libre span{
+  font-size:10px; font-weight:700; color:#cbd5e1; white-space:nowrap; flex:0 0 auto;
+}
+#cuerpo-app .pap-est-fondo{
+  display:inline-flex; align-items:center; gap:6px; padding:6px 10px; min-height:38px; flex:0 0 auto;
+  border:1px solid rgba(255,255,255,.12); border-radius:10px; cursor:pointer;
+  background:var(--c); color:#e2e8f0; font-size:10px; font-weight:700;
+}
+#cuerpo-app .pap-est-fondo.activo{border-color:var(--papotas-primary,#e50914); box-shadow:inset 0 0 0 1px var(--papotas-primary,#e50914)}
+#cuerpo-app .pap-est-rejilla{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)); gap:9px;
+}
+#cuerpo-app .pap-est-campo{display:flex; flex-direction:column; gap:4px; min-width:0}
+#cuerpo-app .pap-est-campo > span{font-size:10px; font-weight:800; color:#cbd5e1}
+#cuerpo-app .pap-est-campo > i{font-size:9px; font-style:normal; font-weight:600; color:#64748b}
+#cuerpo-app .pap-est-campo select,
+#cuerpo-app .pap-est-campo input[type="range"]{
+  width:100%!important; min-width:0; padding:7px 9px; border-radius:9px;
+  border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.4); color:#e2e8f0;
+  font-size:11px; font-weight:700;
+}
+#cuerpo-app .pap-est-campo input[type="range"]{padding:0; height:26px; accent-color:var(--papotas-primary,#e50914)}
+#cuerpo-app .pap-est-interruptor .pap-sw{
+  width:46px; height:26px; border-radius:999px; border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.07); position:relative; cursor:pointer; padding:0; flex:0 0 auto;
+}
+#cuerpo-app .pap-est-interruptor .pap-sw span{
+  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+  background:#94a3b8; transition:left .18s ease, background .18s ease;
+}
+#cuerpo-app .pap-est-interruptor .pap-sw.on{background:color-mix(in srgb, var(--papotas-primary,#e50914) 35%, transparent); border-color:var(--papotas-primary,#e50914)}
+#cuerpo-app .pap-est-interruptor .pap-sw.on span{left:22px; background:#fff}
+#cuerpo-app .pap-est-vista{
+  border-top:1px solid rgba(255,255,255,.08); padding-top:10px;
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+}
+#cuerpo-app .pap-est-vista-t{font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.08em}
+#cuerpo-app .pap-est-demo{display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+#cuerpo-app .pap-est-tarjeta{
+  display:flex; align-items:center; gap:8px; padding:9px 12px;
+  border-radius:var(--pap-r-card,16px); border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);
+}
+#cuerpo-app .pap-est-tarjeta b{font-size:12px; color:#e2e8f0}
+#cuerpo-app .pap-est-tarjeta .cifra{font-size:12px; font-weight:800; color:#6ee7b7}
+#cuerpo-app .pap-est-boton{
+  padding:9px 16px; border-radius:var(--pap-r-chico,10px); border:0; cursor:pointer;
+  background:var(--papotas-primary,#e50914); color:#fff; font-size:12px; font-weight:800;
+}
+/* El interruptor de animaciones, de verdad. */
+html[data-pap-anim="no"] #cuerpo-app *,
+html[data-pap-anim="no"] #cuerpo-app *::before,
+html[data-pap-anim="no"] #cuerpo-app *::after{
+  animation-duration:0s!important; animation-delay:0s!important;
+  transition-duration:0s!important; transition-delay:0s!important;
+}
+</style>
+
 </body>
 </html>
