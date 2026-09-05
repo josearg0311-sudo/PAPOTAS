@@ -15,11 +15,18 @@
 
 
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- La librería de la nube ya no se pide aquí. Estaba en la cabecera y sin
+     "defer", así que el navegador PARABA de leer la página hasta recibirla:
+     con buena señal son décimas, sin señal son los segundos que tarda en
+     rendirse. Y era innecesaria, porque más abajo ya existe un cargador que
+     la pide sola y solo si tienes credenciales de Supabase puestas. -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Roboto+Mono:wght@400;500;700&amp;display=swap" onload="this.onload=null;this.rel='stylesheet'"/>
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/></noscript>
+<noscript><noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;family=Outfit:wght@300;400;500;600;700;800;900&amp;family=Roboto+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/></noscript>
+<!-- La misma hoja estaba dos veces: una con "preload" (no bloquea) y otra
+     normal (bloquea el pintado hasta que llega). Se queda la que no bloquea;
+     la copia normal pasa a <noscript>, para quien tenga el guion apagado. --></noscript>
 <!-- Se puede instalar como app: el manifiesto y los iconos van dentro del
        propio archivo para que baste con subir este index.html. -->
 <script id="papotas-almacen-seguro">
@@ -5979,11 +5986,19 @@ aside nav button.bg-white\/10::before{height:60%}
     envolver("renderizarTodo", function(){ requestAnimationFrame(anotarCifras); });
   }
 
+  function listo(){ var r=window.renderizarTodo, c=window.cambiarSeccion;
+      return !!(r&&r.__papAnim && c&&c.__papAnim); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       enganchar();
-      if(++n<40) setTimeout(reintentar,250);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<40 && !listo()) setTimeout(reintentar,250);
     })();
     requestAnimationFrame(function(){
       document.querySelectorAll('.pap-cifra-texto > :last-child, .ps-kpi .big, .pap-mini-stat .v, .cifra')
@@ -6536,6 +6551,8 @@ aside nav button.bg-white\/10::before{height:60%}
     });
   }
 
+  function listo(){ var m=window.eliminarCuentaMaster, r=window.renderizarTodo;
+      return !!(m&&m.__v168 && r&&r.__v168salud); }
   function arrancar(){
     var n=0;
     (function reintentar(){
@@ -6544,7 +6561,13 @@ aside nav button.bg-white\/10::before{height:60%}
       envolverDiagnostico();
       engancharSalud();
       limpiarCredenciales();
-      if(++n<40) setTimeout(reintentar,300);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<40 && !listo()) setTimeout(reintentar,300);
     })();
   }
   "loading"===document.readyState
@@ -6664,12 +6687,20 @@ aside nav button.bg-white\/10::before{height:60%}
     envolverGuardarCliente();
   }
 
+  function listo(){ var r=window.renderizarTodo, g=window.guardarCliente;
+      return !!(r&&r.__v170badges && g&&g.__v170); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       enganchar();
       pintarInsignias();
-      if(++n<40) setTimeout(reintentar,300);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<40 && !listo()) setTimeout(reintentar,300);
     })();
   }
   "loading"===document.readyState
@@ -7877,11 +7908,19 @@ aside nav button.bg-white\/10::before{height:60%}
     engancharHistorico();
     montarBotones();
   }
+  function listo(){ var e=window.exportarTablaCSV, f=window.renderizarFinanzas, c=window.darDeBajaCliente;
+      return !!(e&&e.__v171 && f&&f.__v171 && c&&c.__v171 && document.getElementById("tab-btn-clientes")); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       try{ enganchar(); }catch(err){ console.warn("V171:",err); }
-      if(++n<40) setTimeout(reintentar,300);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<40 && !listo()) setTimeout(reintentar,300);
     })();
     /* Al entrar en Dinero se repinta el histórico con lo que haya. */
     var mostrar=window.cambiarSeccion;
@@ -8267,11 +8306,18 @@ aside nav button.bg-white\/10::before{height:60%}
     }
   }
 
+  function listo(){ return !!document.querySelector("#sidebar-menu .menu-rotulo"); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       try{ envolverRotulos(); }catch(e){ console.warn("V172:",e); }
-      if(++n<25) setTimeout(reintentar,400);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<25 && !listo()) setTimeout(reintentar,400);
     })();
   }
   "loading"===document.readyState
@@ -8524,6 +8570,10 @@ aside nav button.bg-white\/10::before{height:60%}
   function pintar(){
     var caja=document.getElementById("pap-cobranza");
     if(!caja) return;
+    /* Si no estás en Cobros, no hay nada que pintar: rehacer este panel
+       recorre todos los clientes y sus teléfonos. */
+    var sec=document.getElementById("sec-cobros-pro");
+    if(sec && sec.classList.contains("hidden")) return;
     var todos=construirCola();
     var conWa=0, sinWa=[], yaHoy=0;
     todos.forEach(function(c){
@@ -8620,7 +8670,7 @@ aside nav button.bg-white\/10::before{height:60%}
      vence hoy mismo, aunque el cintillo de arriba sí los separa. */
   function marcarHoy(){
     var h=hoyISO(); if(!h) return;
-    document.querySelectorAll(".tarjeta-registro").forEach(function(t){
+    document.querySelectorAll(".seccion-pantalla:not(.hidden) .tarjeta-registro").forEach(function(t){
       var b=t.querySelector("button[onclick*='abrirFichaCliente']");
       if(!b) return;
       var m=/abrirFichaCliente\('([^']+)'\)/.exec(b.getAttribute("onclick")||"");
@@ -8658,11 +8708,19 @@ aside nav button.bg-white\/10::before{height:60%}
     }
   }
 
+  function listo(){ var r=window.renderizarTodo;
+      return !!(r&&r.__v173 && document.getElementById("pap-cobranza")); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       try{ enganchar(); montar(); pintar(); marcarHoy(); }catch(e){ console.warn("V173:",e); }
-      if(++n<30) setTimeout(reintentar,350);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<30 && !listo()) setTimeout(reintentar,350);
     })();
   }
   "loading"===document.readyState
@@ -8806,7 +8864,10 @@ aside nav button.bg-white\/10::before{height:60%}
 
   /* Marca en cada ficha, junto al estado de cobro. */
   function pintarAntiguedad(){
-    document.querySelectorAll(".tarjeta-registro").forEach(function(t){
+    /* Solo la pantalla que se está viendo. Antes se recorrían las fichas de
+       TODAS las secciones, escondidas incluidas: con ochenta clientes eso son
+       cientos de nodos revisados cada vez que se repinta algo, para nada. */
+    document.querySelectorAll(".seccion-pantalla:not(.hidden) .tarjeta-registro").forEach(function(t){
       var b=t.querySelector("button[onclick*='abrirFichaCliente']");
       if(!b) return;
       var m=/abrirFichaCliente\('([^']+)'\)/.exec(b.getAttribute("onclick")||"");
@@ -9020,12 +9081,20 @@ aside nav button.bg-white\/10::before{height:60%}
     }catch(_){}
   }
 
+  function listo(){ var f=document.getElementById("form-cliente");
+      return !!(window.__v174obs && document.getElementById("pap-filtro-nivel") && (!f || f.dataset.papCompacto)); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       try{ enganchar(); compactar(); vigilar(); montarFiltro(); pintarAntiguedad(); }
       catch(e){ console.warn("V174:",e); }
-      if(++n<30) setTimeout(reintentar,350);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<30 && !listo()) setTimeout(reintentar,350);
     })();
   }
   "loading"===document.readyState
@@ -9302,6 +9371,8 @@ aside nav button.bg-white\/10::before{height:60%}
   function pintar(){
     var caja=document.getElementById("pap-combo-panel");
     if(!caja) return;
+    var sec=document.getElementById("sec-combos");
+    if(sec && sec.classList.contains("hidden")) return;
     var q=cuentas();
 
     if(!q.sel.length){
@@ -9338,6 +9409,23 @@ aside nav button.bg-white\/10::before{height:60%}
             ', así que su coste no entra en el cálculo.</div>';
 
     var cand=window.papotasCandidatosCombo();
+
+    /* Lo que decide si el precio está bien no es el margen suelto, sino cuánto
+       da el combo si lo toma la gente que puede tomarlo. */
+    var proyeccion="";
+    if(cand.length && q.margen!==0){
+      var mitad=Math.max(1,Math.round(cand.length/2));
+      proyeccion='<div class="pap-combo-proy">'+
+        '<span>Si lo toman…</span>'+
+        [[1,"1 cliente"],[mitad,mitad+" clientes"],[cand.length,"los "+cand.length]]
+          .filter(function(x,i,a){ return i===0 || x[0]!==a[i-1][0]; })
+          .map(function(x){
+            var g=Math.round(q.margen*x[0]*100)/100;
+            return '<b class="'+(g<0?"mal":"bien")+'">'+esc(x[1])+': '+esc(dinero(g))+'/mes</b>';
+          }).join("")+
+        '</div>';
+    }
+
     var lista="";
     if(q.sel.length<2){
       lista='<p class="pap-combo-sub">Marca dos o más plataformas para ver a quién le puedes ofrecer el combo.</p>';
@@ -9368,7 +9456,7 @@ aside nav button.bg-white\/10::before{height:60%}
         '<button type="button" class="pap-tool" onclick="papotasTraerPreciosReales()" '+
           'title="Pone en cada plataforma el precio que más se repite entre tus clientes">Traer mis precios reales</button>'+
       '</div>'+
-      cifras+aviso+
+      cifras+aviso+proyeccion+
       '<div class="pap-combo-cab pap-combo-cab2"><div><h3>A quién ofrecérselo</h3>'+
         '<p>Clientes que ya tienen parte del combo y les falta el resto.</p></div></div>'+
       lista;
@@ -9401,11 +9489,19 @@ aside nav button.bg-white\/10::before{height:60%}
     }
   }
 
+  function listo(){ var g=window.generarVistaPreviaCombo;
+      return !!(g&&g.__v175 && document.getElementById("pap-combo-panel")); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       try{ montar(); enganchar(); pintar(); }catch(e){ console.warn("V175:",e); }
-      if(++n<30) setTimeout(reintentar,350);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<30 && !listo()) setTimeout(reintentar,350);
     })();
   }
   "loading"===document.readyState
@@ -9443,6 +9539,17 @@ aside nav button.bg-white\/10::before{height:60%}
 #cuerpo-app .pap-combo-aviso.mal{
   border-color:rgba(248,113,113,.4); background:rgba(248,113,113,.09); color:#fecaca;
 }
+#cuerpo-app .pap-combo-proy{
+  display:flex; align-items:center; flex-wrap:wrap; gap:8px;
+  padding:8px 11px; border-radius:12px; border:1px dashed rgba(255,255,255,.12);
+  background:rgba(255,255,255,.02);
+}
+#cuerpo-app .pap-combo-proy > span{
+  font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em;
+}
+#cuerpo-app .pap-combo-proy b{font-size:11px; font-weight:800; color:#cbd5e1; font-variant-numeric:tabular-nums}
+#cuerpo-app .pap-combo-proy b.bien{color:#6ee7b7}
+#cuerpo-app .pap-combo-proy b.mal{color:#fca5a5}
 #cuerpo-app .pap-combo-gente{display:flex; flex-direction:column; gap:6px}
 #cuerpo-app .pap-combo-fila{
   display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
@@ -9704,12 +9811,19 @@ aside nav button.bg-white\/10::before{height:60%}
       '</div>';
   }
 
+  function listo(){ return !!document.getElementById("pap-estilo"); }
   function arrancar(){
     aplicarExtras();
     var n=0;
     (function reintentar(){
       try{ montar(); pintar(); aplicarExtras(); }catch(e){ console.warn("V176:",e); }
-      if(++n<25) setTimeout(reintentar,400);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<25 && !listo()) setTimeout(reintentar,400);
     })();
   }
   "loading"===document.readyState
@@ -9856,7 +9970,7 @@ html[data-pap-anim="no"] #cuerpo-app *::after{
   }
 
   function ponerEconomia(){
-    document.querySelectorAll("#sec-servicios .master-premium-card, #sec-cuentas .master-premium-card").forEach(function(card){
+    document.querySelectorAll(".seccion-pantalla:not(.hidden) .master-premium-card").forEach(function(card){
       var m=/^bloque-cuenta-(.+)$/.exec(card.id||"");
       if(!m) return;
       var master=(window.servicios||[]).find(function(s){ return String(s.id)===String(m[1]); });
@@ -9900,7 +10014,7 @@ html[data-pap-anim="no"] #cuerpo-app *::after{
      La marca de antigüedad, donde no le quite sitio al nombre
      ---------------------------------------------------------------------- */
   function acomodarChips(){
-    document.querySelectorAll(".tarjeta-registro .pap-chip-nivel").forEach(function(chip){
+    document.querySelectorAll(".seccion-pantalla:not(.hidden) .tarjeta-registro .pap-chip-nivel").forEach(function(chip){
       var t=chip.closest(".tarjeta-registro");
       if(!t) return;
       /* Los dos chips juntos en su renglón, debajo del nombre: así ninguno
@@ -9981,11 +10095,19 @@ html[data-pap-anim="no"] #cuerpo-app *::after{
     window.cambiarSeccion=envuelto;
   }
 
+  function listo(){ var c=window.cambiarSeccion;
+      return !!(window.__v177obs && window.__v177secs && c&&c.__v177); }
   function arrancar(){
     var n=0;
     (function reintentar(){
       try{ vigilar(); engancharSeccion(); repintar(); }catch(e){ console.warn("V177:",e); }
-      if(++n<25) setTimeout(reintentar,400);
+      /* Antes esta tanda se repetía a ciegas: cuarenta pasadas cada 300 ms
+         aunque el trabajo estuviera hecho desde la primera. Diez capas
+         haciendo lo mismo son casi un segundo de trabajo repartido por los
+         quince primeros segundos, justo cuando estás intentando usar el
+         programa. Ahora, en cuanto los enganches están puestos, se dan tres
+         pasadas más de confirmación y se para. */
+      if(++n<25 && !listo()) setTimeout(reintentar,400);
     })();
   }
   "loading"===document.readyState
@@ -10279,6 +10401,287 @@ body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired{
   background:rgba(245,158,11,.12)!important; border:1px solid rgba(245,158,11,.32)!important; color:#fcd34d!important;
 }
 </style>
+
+<script id="papotas-v178-combos-reales">
+/* ============================================================================
+   V178 · "ESTA PARTE SE ESTANCÓ"
+
+   La lista de plataformas del generador de combos arrancaba con las 77 del
+   catálogo completo del programa, todas a 10 soles inventados, metidas en una
+   caja de 287 px de alto con desplazamiento propio. En un teléfono eso es una
+   ventanilla diminuta por la que hay que pasar setenta y siete filas —un
+   desplazamiento dentro de otro— para encontrar las cuatro o cinco que de
+   verdad vendes. De ahí la sensación de que la pantalla se traba.
+
+   Aquí se separa lo tuyo de lo demás: arriba, las plataformas que realmente
+   tienes; el catálogo entero queda detrás de un botón, por si algún día
+   quieres ofrecer algo que aún no vendes.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V178__) return; window.__PAPOTAS_V178__=!0;
+
+  function esc(t){ try{ return window.esc(t); }catch(_){ return String(t==null?"":t); } }
+  function norm(t){ return String(t||"").toUpperCase().trim(); }
+  function lexico(n){
+    try{ return new Function("return typeof "+n+'!=="undefined"?'+n+":null")(); }catch(_){ return null; }
+  }
+  function cache(){ var c=lexico("plataformasComboCache"); return Array.isArray(c)?c:[]; }
+
+  var verCatalogo=!1;
+
+  /* Las que tienes: las de tus cuentas master y las de tus clientes. */
+  function misPlataformas(){
+    var set={};
+    (window.servicios||[]).forEach(function(s){ var n=norm(s.nombre); if(n) set[n]=!0; });
+    (window.clientes||[]).forEach(function(c){ var n=norm(c.servicio); if(n) set[n]=!0; });
+    return set;
+  }
+
+  window.papotasComboCatalogo=function(v){
+    verCatalogo=!!v;
+    ordenar();
+    var b=document.getElementById("pap-combo-vertodo");
+    if(b) b.textContent = verCatalogo ? "Ocultar el resto del catálogo" : "Ver el catálogo completo";
+  };
+
+  function ordenar(){
+    var cont=document.getElementById("contenedor-plataformas-combo");
+    if(!cont) return;
+    var lista=cache();
+    var mias=misPlataformas();
+    var hayMias=0, hayOtras=0;
+
+    /* Cada fila lleva la casilla con su índice en la lista, así se sabe a qué
+       plataforma corresponde sin depender del texto. */
+    [].slice.call(cont.children).forEach(function(fila){
+      if(fila.classList && fila.classList.contains("pap-combo-sep")) return;
+      var chk=fila.querySelector('input[data-index]');
+      var i=chk?Number(chk.getAttribute("data-index")):-1;
+      var it=(i>=0)?lista[i]:null;
+      var nombre=it?norm(it.nombre):"";
+      var propia=!!(nombre && mias[nombre]);
+      /* Una plataforma marcada nunca se esconde, aunque no sea tuya. */
+      var marcada=!!(it && it.check);
+      fila.setAttribute("data-pap-mia", propia?"1":"0");
+      fila.classList.toggle("pap-combo-oculta", !propia && !marcada && !verCatalogo);
+      if(propia||marcada) hayMias++; else hayOtras++;
+    });
+
+    /* Un rótulo que explica qué se está viendo. */
+    var sep=document.getElementById("pap-combo-sep");
+    if(!sep){
+      sep=document.createElement("div");
+      sep.id="pap-combo-sep"; sep.className="pap-combo-sep";
+      cont.parentNode.insertBefore(sep, cont);
+    }
+    sep.innerHTML=
+      '<span>'+(hayMias?("Tus "+hayMias+" plataforma"+(hayMias===1?"":"s")):"Todavía no tienes plataformas")+'</span>'+
+      (hayOtras
+        ? '<button type="button" class="pap-tool" id="pap-combo-vertodo" '+
+          'onclick="papotasComboCatalogo('+(verCatalogo?"false":"true")+')">'+
+          (verCatalogo?"Ocultar el resto del catálogo":"Ver el catálogo completo")+' <b>'+hayOtras+'</b></button>'
+        : '');
+  }
+
+  /* ------------------------------------------------------------------------
+     Marcar de una vez las que tienes, con sus precios de verdad
+     ---------------------------------------------------------------------- */
+  window.papotasComboMisPlataformas=function(){
+    var lista=cache(), mias=misPlataformas(), n=0;
+    lista.forEach(function(it){
+      var propia=!!mias[norm(it.nombre)];
+      it.check=propia;
+      if(propia){
+        n++;
+        try{
+          var r=window.papotasPrecioRealPlataforma(it.nombre);
+          if(r&&r.precio) it.precio=r.precio;
+        }catch(_){}
+      }
+    });
+    try{ guardarClave("pap_precios_combo", JSON.stringify(lista)); }catch(_){}
+    try{ renderizarListaCombosHTML(); generarVistaPreviaCombo(!1); }catch(_){}
+    try{ mostrarToast(n?("Marcadas tus "+n+" plataformas con lo que cobras hoy"):"No tienes plataformas todavía"); }catch(_){}
+  };
+
+  function montarBoton(){
+    var barra=document.querySelector("#sec-combos .glass-card > div:first-child > div:last-child");
+    if(!barra || document.getElementById("pap-combo-mias")) return;
+    var b=document.createElement("button");
+    b.type="button"; b.id="pap-combo-mias";
+    /* "flex-1" en una fila que no envuelve deja el botón en 26 px de ancho y el
+       texto se apila letra a letra: 229 px de alto para tres palabras. */
+    b.className="shrink-0 whitespace-nowrap bg-amber-500/20 border border-amber-500/40 text-amber-300 font-extrabold text-xs px-3 py-1.5 rounded-lg transition";
+    b.textContent="Solo las mías";
+    b.title="Marca tus plataformas y les pone el precio que cobras de verdad";
+    b.onclick=window.papotasComboMisPlataformas;
+    barra.appendChild(b);
+  }
+
+  function enganchar(){
+    var orig=window.renderizarListaCombosHTML;
+    if(typeof orig==="function" && !orig.__v178){
+      function envuelto(){
+        var r=orig.apply(this,arguments);
+        setTimeout(ordenar,0);
+        return r;
+      }
+      envuelto.__v178=!0;
+      try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+        if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+      window.renderizarListaCombosHTML=envuelto;
+    }
+    montarBoton();
+  }
+
+  function listo(){
+    var r=window.renderizarListaCombosHTML;
+    return !!(r&&r.__v178 && document.getElementById("pap-combo-mias"));
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ enganchar(); ordenar(); }catch(e){ console.warn("V178:",e); }
+      if(++n<25 && !listo()) setTimeout(reintentar,400);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,950); },{once:!0})
+    : setTimeout(arrancar,950);
+}();
+</script>
+
+<style id="papotas-v178-css">
+/* La ventanilla con desplazamiento propio dentro de una página que ya se
+   desplaza es de lo peor que hay en un teléfono: no sabes cuál de los dos se
+   va a mover. Con la lista reducida a lo tuyo ya no hace falta. */
+#cuerpo-app #contenedor-plataformas-combo{
+  max-height:none!important; overflow:visible!important; padding-right:0!important;
+}
+@media (min-width:900px){
+  /* En el monitor sí tiene sentido acotarla, pero con sitio de sobra. */
+  #cuerpo-app #contenedor-plataformas-combo{
+    max-height:min(58vh,520px)!important; overflow-y:auto!important; padding-right:4px!important;
+  }
+}
+#cuerpo-app #contenedor-plataformas-combo > .pap-combo-oculta{display:none!important}
+#cuerpo-app .pap-combo-sep{
+  display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
+  margin:2px 0 8px; padding-bottom:6px; border-bottom:1px solid rgba(255,255,255,.08);
+}
+#cuerpo-app .pap-combo-sep > span{
+  font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.07em;
+}
+#cuerpo-app .pap-combo-sep .pap-tool b{opacity:.6; margin-left:3px}
+#cuerpo-app #pap-combo-mias{flex:0 0 auto!important; width:auto!important; white-space:nowrap!important}
+</style>
+
+<script id="papotas-v179-potencia">
+/* ============================================================================
+   V179 · "ESTÁ RALENTIZADO. DALE POTENCIA."
+
+   Medido con tus números —80 clientes, 19 cuentas master—, cada repintado
+   general costaba 46 milisegundos solo en rehacer las tablas de Dinero, y las
+   rehacía SIEMPRE: al cobrar, al renovar, al guardar un cliente… estuvieras o
+   no en esa pantalla. En un ordenador se nota poco; en un teléfono, que va
+   entre tres y cinco veces más lento, son dos décimas de tirón en cada gesto.
+
+   El programa ya traía esta idea aplicada a tres funciones (la capa V84):
+   si el sitio donde escribes no se ve, no lo escribas; anótalo y hazlo cuando
+   se abra. Aquí se extiende a las que de verdad pesan.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V179__) return; window.__PAPOTAS_V179__=!0;
+
+  /* Función pesada -> el elemento que escribe. Si ese elemento está en una
+     sección escondida, se aplaza. */
+  var PESADAS={
+    renderizarFinanzas:"tabla-ventas-body",
+    renderizarListaCombosHTML:"contenedor-plataformas-combo",
+    renderizarOperacionesExtra:null,
+    renderizarRenovacionesExtra:null
+  };
+  var pendiente={};
+
+  function seVe(id){
+    if(!id) return !0;
+    var el=document.getElementById(id);
+    if(!el) return !1;                       /* si no existe, no hay nada que pintar */
+    var sec=el.closest ? el.closest(".seccion-pantalla") : null;
+    return !sec || !sec.classList.contains("hidden");
+  }
+
+  function envolver(nombre){
+    var real=window[nombre];
+    if(typeof real!=="function" || real.__v179) return !1;
+    var destino=PESADAS[nombre];
+    function envuelto(){
+      if(seVe(destino)){ pendiente[nombre]=!1; return real.apply(this,arguments); }
+      pendiente[nombre]=!0;                  /* queda anotado para cuando se abra */
+      return undefined;
+    }
+    envuelto.__v179=!0;
+    envuelto.__v179real=real;
+    try{ Object.getOwnPropertyNames(real).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=real[k]; }); }catch(_){}
+    window[nombre]=envuelto;
+    return !0;
+  }
+
+  function alDia(){
+    Object.keys(PESADAS).forEach(function(nombre){
+      if(!pendiente[nombre]) return;
+      if(!seVe(PESADAS[nombre])) return;
+      pendiente[nombre]=!1;
+      var f=window[nombre];
+      var real=(f&&f.__v179real)||f;
+      try{ real.call(window); }catch(_){}
+    });
+  }
+  window.papotasAlDia=alDia;
+
+  function engancharSeccion(){
+    var orig=window.cambiarSeccion;
+    if(typeof orig!=="function" || orig.__v179) return !1;
+    function envuelto(){
+      var r=orig.apply(this,arguments);
+      /* Dos pasadas: una enseguida y otra cuando el navegador ya ha pintado. */
+      alDia();
+      requestAnimationFrame(alDia);
+      return r;
+    }
+    envuelto.__v179=!0;
+    try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+    window.cambiarSeccion=envuelto;
+    return !0;
+  }
+
+  function enganchar(){
+    Object.keys(PESADAS).forEach(envolver);
+    engancharSeccion();
+  }
+  function listo(){
+    var c=window.cambiarSeccion, f=window.renderizarFinanzas;
+    return !!(c&&c.__v179 && f&&f.__v179);
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ enganchar(); }catch(e){ console.warn("V179:",e); }
+      if(++n<25 && !listo()) setTimeout(reintentar,400);
+    })();
+  }
+  /* Cuanto antes se enganche, menos repintados inútiles se cuelan. */
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,300); },{once:!0})
+    : setTimeout(arrancar,300);
+}();
+</script>
 
 </body>
 </html>
