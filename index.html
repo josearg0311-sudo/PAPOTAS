@@ -8057,9 +8057,39 @@ aside nav button.bg-white\/10::before{height:60%}
 #cuerpo-app .seccion-pantalla .pap-rejilla-cifras,
 #cuerpo-app .seccion-pantalla .ps-grid.ps-kpis,
 #cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="lg:grid-cols-4"],
-#cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="md:grid-cols-4"]{
+#cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="md:grid-cols-4"],
+#cuerpo-app #sec-tarifas .tarifas-kpis{
   /* 176 y no 150: en una tarjeta de 150 px la cifra "S/ 1,234.00" se cortaba. */
   --pap-col:176px;
+}
+/* Pero en el móvil ese mínimo dejaba las cifras de una en una: cuatro tarjetas
+   son cuatro pantallazos. Con el tope del 47 % siempre caben dos, salvo en las
+   pantallas más estrechas, donde la cifra ya no entraría. */
+@media (min-width:361px){
+  #cuerpo-app .seccion-pantalla .pap-statline,
+  #cuerpo-app .seccion-pantalla .pap-rejilla-cifras,
+  #cuerpo-app .seccion-pantalla .ps-grid.ps-kpis,
+  #cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="lg:grid-cols-4"],
+  #cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="md:grid-cols-4"]{
+    grid-template-columns:repeat(auto-fit,minmax(min(var(--pap-col),47%),1fr))!important;
+  }
+}
+/* Las cinco cifras de Tarifas caían 4+1, con un hueco enorme en la segunda
+   fila. Repartidas por el ancho disponible salen las cinco en línea cuando
+   caben, y de dos en dos en el móvil. */
+#cuerpo-app #sec-tarifas .tarifas-kpis{
+  display:grid!important;
+  /* Con tope del 47 % nunca baja a una sola columna: cinco cifras cortas de
+     una en una en el teléfono son cinco pantallazos para nada. */
+  grid-template-columns:repeat(auto-fit,minmax(min(var(--pap-col),47%),1fr))!important;
+  gap:var(--pap-e-2)!important;
+}
+@media (max-width:360px){
+  /* Por debajo de 360 px dos columnas dejan la cifra en 87 px y "S/ 480.00"
+     no entra: mejor una sola y que se lea. */
+  #cuerpo-app #sec-tarifas .tarifas-kpis{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
 }
 
 #cuerpo-app .seccion-pantalla .master-profile-premium-grid{--pap-col:142px}
@@ -9081,6 +9111,13 @@ aside nav button.bg-white\/10::before{height:60%}
 
 /* --- Establecidos / regulares / nuevos ---------------------------------- */
 #cuerpo-app .pap-filtro-nivel{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 2px}
+/* En el teléfono, cuatro botones a línea completa son cuatro pantallazos
+   antes de ver un solo cliente. De dos en dos. */
+@media (max-width:640px){
+  #cuerpo-app .pap-filtro-nivel .pap-tool{
+    flex:1 1 calc(50% - 3px)!important; width:auto!important; min-width:0;
+  }
+}
 #cuerpo-app .pap-filtro-nivel b{opacity:.6; font-weight:800; margin-left:2px}
 #cuerpo-app .chip.pap-chip-nivel{margin-left:4px}
 #cuerpo-app .pap-nivel-establecido{
@@ -9763,6 +9800,483 @@ html[data-pap-anim="no"] #cuerpo-app *::before,
 html[data-pap-anim="no"] #cuerpo-app *::after{
   animation-duration:0s!important; animation-delay:0s!important;
   transition-duration:0s!important; transition-delay:0s!important;
+}
+</style>
+
+<script id="papotas-v177-rediseno">
+/* ============================================================================
+   V177 · El rediseño que faltaba
+     · "NO ME CUADRA LA FORMA DEL CUADRO NI EL COLOR QUE LE HAS DADO" (fichas)
+     · "NO ME TERMINA DE GUSTAR NI EL DISEÑO NI LOS COLORES" + "ES IMPORTANTE
+       SABER QUÉ PRECIOS SE PAGAN POR SUSCRIPCIÓN Y CUÁNTO SE VENDE CADA PERFIL
+       EN RELACIÓN A CUÁNTOS SON" (cuentas master)
+     · "PUEDES MEJORAR ESTA PANTALLA TAMBIÉN" (tarifas)
+     · "QUE NO SE VEAN TAN FRÍOS" (barra lateral y paneles)
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V177__) return; window.__PAPOTAS_V177__=!0;
+
+  function esc(t){ try{ return window.esc(t); }catch(_){ return String(t==null?"":t); } }
+  function dinero(n){ try{ return formatearMoneda(Number(n)||0); }catch(_){ return "S/ "+(Number(n)||0).toFixed(2); } }
+
+  /* ------------------------------------------------------------------------
+     Las cuentas de una master, dichas donde se miran
+     La tarjeta ya enseñaba lo que cobras por perfil, pero no lo que PAGAS por
+     la suscripción ni cuánto te sale cada plaza. Sin esas dos cifras no se
+     puede saber si una cuenta con seis perfiles a mitad de precio compensa
+     más que una de dos a precio entero, que es justo lo que preguntabas.
+     ---------------------------------------------------------------------- */
+  window.papotasEconomiaMaster=function(m){
+    if(!m) return null;
+    var plazas=Math.max(0,Number(m.perfiles)||0);
+    var costo=Number(m.costo)||0;
+    var hijos=[];
+    try{ hijos=clientesDeMaster(m.id)||[]; }catch(_){}
+    var ingreso=hijos.reduce(function(s,c){
+      var v=0; try{ v=cobroDeCliente(c); }catch(_){ v=Number(c.monto)||0; }
+      return s+(Number(v)||0);
+    },0);
+    return {
+      plazas:plazas, ocupados:hijos.length, libres:Math.max(0,plazas-hijos.length),
+      costo:costo,
+      costePorPerfil: plazas ? Math.round((costo/plazas)*100)/100 : null,
+      ingreso:Math.round(ingreso*100)/100,
+      ventaMedia: hijos.length ? Math.round((ingreso/hijos.length)*100)/100 : null,
+      margen:Math.round((ingreso-costo)*100)/100
+    };
+  };
+
+  function celda(rotulo,valor,clase){
+    var d=document.createElement("div");
+    d.className="mc-cell"+(clase?(" "+clase):"");
+    d.setAttribute("data-v177","1");
+    d.innerHTML="<span>"+esc(rotulo)+"</span><b>"+esc(valor)+"</b>";
+    return d;
+  }
+
+  function ponerEconomia(){
+    document.querySelectorAll("#sec-servicios .master-premium-card, #sec-cuentas .master-premium-card").forEach(function(card){
+      var m=/^bloque-cuenta-(.+)$/.exec(card.id||"");
+      if(!m) return;
+      var master=(window.servicios||[]).find(function(s){ return String(s.id)===String(m[1]); });
+      if(!master) return;
+      var info=card.querySelector(".mc-info");
+      if(!info) return;
+      var e=window.papotasEconomiaMaster(master);
+      if(!e) return;
+
+      info.querySelectorAll('[data-v177]').forEach(function(x){ x.remove(); });
+
+      /* Lo que pagas y lo que te sale cada plaza, al lado de lo que cobras. */
+      info.appendChild(celda("Suscripción", dinero(e.costo)));
+      info.appendChild(celda("Te cuesta el perfil",
+        e.costePorPerfil===null ? "—" : dinero(e.costePorPerfil)));
+
+      /* Y el resultado, en una frase que se lee sola. */
+      var pie=card.querySelector(".pap-mc-resumen");
+      if(!pie){
+        pie=document.createElement("p");
+        pie.className="pap-mc-resumen";
+        info.parentNode.insertBefore(pie, info.nextSibling);
+      }
+      pie.classList.toggle("mal", e.margen<0);
+      if(!e.plazas){
+        pie.textContent="Esta cuenta no tiene perfiles definidos, así que no se puede repartir el coste.";
+      } else if(!e.ocupados){
+        pie.textContent="Pagas "+dinero(e.costo)+" por "+e.plazas+" perfiles ("+dinero(e.costePorPerfil)+
+          " cada uno) y todavía no has vendido ninguno.";
+      } else {
+        pie.textContent="Pagas "+dinero(e.costo)+" por "+e.plazas+" perfiles ("+dinero(e.costePorPerfil)+
+          " cada uno), vendes "+e.ocupados+" a "+dinero(e.ventaMedia)+" de media"+
+          (e.libres?(" y te quedan "+e.libres+" libre"+(e.libres===1?"":"s")):"")+
+          ". "+(e.margen>=0?"Ganas ":"Pierdes ")+dinero(Math.abs(e.margen))+" al mes"+
+          (e.libres&&e.ventaMedia? (", y "+dinero(e.margen+e.libres*e.ventaMedia)+" si llenas la cuenta.") : ".");
+      }
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     La marca de antigüedad, donde no le quite sitio al nombre
+     ---------------------------------------------------------------------- */
+  function acomodarChips(){
+    document.querySelectorAll(".tarjeta-registro .pap-chip-nivel").forEach(function(chip){
+      var t=chip.closest(".tarjeta-registro");
+      if(!t) return;
+      /* Los dos chips juntos en su renglón, debajo del nombre: así ninguno
+         le come sitio al nombre y no ocupan dos líneas ellos solos. */
+      var fila=t.firstElementChild;
+      if(fila && chip.parentElement!==fila) fila.appendChild(chip);
+    });
+  }
+
+  window.papotasPintarMasters=ponerEconomia;
+
+  function repintar(){
+    try{ ponerEconomia(); }catch(e){ console.warn("V177:",e); }
+    try{ acomodarChips(); }catch(e){ console.warn("V177:",e); }
+  }
+
+  var pendiente=null;
+  function pronto(){
+    if(pendiente) return;
+    pendiente=setTimeout(function(){ pendiente=null; repintar(); },70);
+  }
+
+  /* Las secciones ya están en la página desde el arranque: abrir "Cuentas
+     master" no crea nada, solo le quita la clase que la escondía. Por eso
+     mirar solo si aparecen nodos no bastaba —cuando el usuario llegaba, la
+     tanda de reintentos del arranque ya había terminado— y la ficha se
+     quedaba sin sus cifras. Se vigila también ese cambio de clase. */
+  function vigilarSecciones(){
+    if(window.__v177secs) return;
+    var secs=document.querySelectorAll(".seccion-pantalla");
+    if(!secs.length) return;
+    try{
+      window.__v177secs=new MutationObserver(function(cs){
+        for(var i=0;i<cs.length;i++){
+          var t=cs[i].target;
+          if(t && t.classList && !t.classList.contains("hidden")){ pronto(); return; }
+        }
+      });
+      secs.forEach(function(s){ window.__v177secs.observe(s,{attributes:!0,attributeFilter:["class"]}); });
+    }catch(_){}
+  }
+
+  function vigilar(){
+    vigilarSecciones();
+    if(window.__v177obs) return;
+    var zona=document.getElementById("zona-contenido")||document.body;
+    if(!zona) return;
+    try{
+      window.__v177obs=new MutationObserver(function(cs){
+        for(var i=0;i<cs.length;i++){
+          var m=cs[i]; if(m.type!=="childList") continue;
+          var toca=!1;
+          [].forEach.call(m.addedNodes,function(n){
+            if(n.nodeType!==1) return;
+            if((n.classList&&(n.classList.contains("master-premium-card")||n.classList.contains("tarjeta-registro"))) ||
+               (n.querySelector&&n.querySelector(".master-premium-card,.tarjeta-registro"))) toca=!0;
+          });
+          if(toca){ pronto(); return; }
+        }
+      });
+      window.__v177obs.observe(zona,{childList:!0,subtree:!0});
+    }catch(_){}
+  }
+
+  /* Y, por si acaso, enganchado también al cambio de pantalla: es el momento
+     exacto en que estas fichas se miran. */
+  function engancharSeccion(){
+    var orig=window.cambiarSeccion;
+    if(typeof orig!=="function" || orig.__v177) return;
+    function envuelto(){
+      var r=orig.apply(this,arguments);
+      [0,90,320].forEach(function(ms){ setTimeout(repintar,ms); });
+      return r;
+    }
+    envuelto.__v177=!0;
+    try{ Object.getOwnPropertyNames(orig).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in envuelto)) envuelto[k]=orig[k]; }); }catch(_){}
+    window.cambiarSeccion=envuelto;
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ vigilar(); engancharSeccion(); repintar(); }catch(e){ console.warn("V177:",e); }
+      if(++n<25) setTimeout(reintentar,400);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,900); },{once:!0})
+    : setTimeout(arrancar,900);
+}();
+</script>
+
+<style id="papotas-v177-css">
+/* ===========================================================================
+   1 · Un solo acento por pantalla
+   El color estaba haciendo de decoración y de información a la vez: un chip
+   ámbar podía significar "cuidado" o simplemente "aquí hay un dato". Cuando
+   todo es de colores, ninguno avisa de nada.
+   A partir de aquí: las superficies son neutras, el color del acento es el
+   que tú elijas en Ajustes, y el rojo, el ámbar y el verde quedan reservados
+   para lo que de verdad es urgente, próximo o correcto.
+   ========================================================================= */
+
+/* Las cifras de cabecera dejan de ser cuatro cajas de cuatro colores. */
+#cuerpo-app .seccion-pantalla .pap-mini-stat{
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:none!important;
+}
+#cuerpo-app .seccion-pantalla .pap-mini-stat .k{
+  color:#94a3b8!important; font-weight:800!important; letter-spacing:.07em!important;
+}
+/* El número sí conserva su color, porque ahí el color significa algo. */
+#cuerpo-app .seccion-pantalla .pap-mini-stat.red .v{color:#f87171!important}
+#cuerpo-app .seccion-pantalla .pap-mini-stat.amber .v{color:#fbbf24!important}
+#cuerpo-app .seccion-pantalla .pap-mini-stat.green .v{color:#34d399!important}
+#cuerpo-app .seccion-pantalla .pap-mini-stat.blue .v{color:#e2e8f0!important}
+#cuerpo-app .seccion-pantalla .pap-mini-stat.violet .v{color:#e2e8f0!important}
+
+/* ===========================================================================
+   2 · La ficha de cliente
+   Tenía el fondo entero teñido del color del estado, un borde del mismo color,
+   dos chips peleándose por el sitio del nombre —tanto que el nombre se partía
+   en dos líneas— y seis botones iguales debajo.
+   Ahora la tarjeta es neutra y el estado se dice en el canto izquierdo y en un
+   único chip. El nombre manda.
+   ========================================================================= */
+#cuerpo-app .seccion-pantalla .tarjeta-registro,
+#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-vencido,
+#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-aviso,
+#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-activo,
+#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-neutro{
+  background:rgba(255,255,255,.035)!important;
+  border-width:1px!important; border-style:solid!important;
+  border-top-color:rgba(255,255,255,.09)!important;
+  border-right-color:rgba(255,255,255,.09)!important;
+  border-bottom-color:rgba(255,255,255,.09)!important;
+  border-left-width:0!important;
+  border-radius:var(--pap-r-card,16px)!important;
+  position:relative; overflow:hidden;
+  padding-left:calc(var(--pap-e-3,14px) + 4px)!important;
+}
+/* La tarjeta ya tenía una barra de color a la izquierda, hecha con una sombra
+   interior; lo que sobraba era el halo del mismo color alrededor de los otros
+   tres lados, que es lo que hacía que la ficha entera pareciera pintada. Se
+   deja la barra y se quita el halo. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro{
+  --pap-estado:#64748b;
+  box-shadow:inset 4px 0 0 0 var(--pap-estado)!important;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta.estado-vencido,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-vencido{--pap-estado:#ef4444}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta.estado-aviso,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-aviso{--pap-estado:#f59e0b}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta.estado-activo,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-activo{--pap-estado:#10b981}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.pap-vence-hoy{--pap-estado:#f59e0b}
+/* Un punto de tinte, no un baño de color. */
+#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-vencido{background:rgba(239,68,68,.055)!important}
+#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-aviso{background:rgba(245,158,11,.05)!important}
+
+/* El nombre, en su propia línea y sin competencia. */
+#cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child{
+  flex-wrap:wrap!important; align-items:center!important; gap:6px!important;
+}
+/* El nombre pide su sitio, pero no la línea entera: si los chips caben al
+   lado, van al lado. Con 100 % fijo cada ficha se llevaba un renglón de más y
+   la pantalla de clientes crecía casi el doble. */
+#cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child > .min-w-0{
+  flex:1 1 108px!important; min-width:0!important;
+}
+#cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child > .min-w-0 > button{
+  font-size:13px!important; font-weight:900!important; white-space:normal!important;
+  overflow:visible!important; text-overflow:clip!important; line-height:1.2!important;
+  /* Sin el ancho completo heredado: así el bloque del nombre mide lo que mide
+     el nombre y los chips caben a su lado en vez de bajar un renglón. */
+  width:auto!important; max-width:100%!important;
+}
+/* El teléfono deja de gritar en verde: es un dato de apoyo. */
+#cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child > .min-w-0 > p{
+  color:#64748b!important; font-weight:600!important;
+}
+#cuerpo-app .seccion-pantalla .tarjeta-registro .chip{flex:0 0 auto}
+
+/* Los datos, alineados en dos columnas legibles. */
+#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea{
+  border-bottom:1px dashed rgba(255,255,255,.06)!important;
+  padding-block:3px!important;
+}
+#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea:last-of-type{border-bottom:0!important}
+#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea > span:first-child{
+  color:#7f8ea3!important; font-weight:700!important; font-size:10px!important;
+}
+
+/* La fila de acciones: separada del contenido y con aire para el dedo. */
+#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono{
+  min-width:34px; min-height:34px; border-radius:var(--pap-r-chico,10px);
+  background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07);
+}
+#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono:hover{
+  background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.16);
+}
+
+/* ===========================================================================
+   3 · Las cuentas master
+   ========================================================================= */
+#cuerpo-app .seccion-pantalla .platform-premium-head{
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-left:4px solid var(--platform-accent, var(--papotas-primary,#e50914))!important;
+  border-radius:var(--pap-r-card,16px)!important;
+}
+#cuerpo-app .seccion-pantalla .master-premium-card{
+  background:rgba(255,255,255,.03)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-left:4px solid var(--master-accent,#64748b)!important;
+  border-radius:var(--pap-r-card,16px)!important;
+  box-shadow:none!important;
+}
+#cuerpo-app .seccion-pantalla .master-premium-card .mc-plat{
+  font-size:13px!important; font-weight:900!important; color:#e2e8f0!important;
+}
+#cuerpo-app .seccion-pantalla .master-premium-card .mc-cell > span{
+  color:#7f8ea3!important; font-weight:700!important;
+}
+#cuerpo-app .seccion-pantalla .master-premium-card .mc-info{
+  display:grid!important;
+  /* 168 y no 150: en 150 el correo de la cuenta se quedaba a cuatro píxeles
+     de caber y se cortaba con puntos suspensivos. */
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,168px),1fr))!important;
+  gap:var(--pap-e-2,9px)!important;
+}
+/* El correo es el dato más largo de la ficha y el que más se consulta: se
+   queda con la línea entera en vez de cortarse por cuatro píxeles. */
+#cuerpo-app .seccion-pantalla .master-premium-card .mc-cell:first-child{
+  /* Dos columnas y no todas: en una ficha ancha basta con eso para que entre
+     entero, y no se gasta un renglón cuando hay tres o cuatro columnas. */
+  grid-column:span 2;
+}
+/* La frase que resume la cuenta. */
+#cuerpo-app .pap-mc-resumen{
+  margin:8px 0 0; padding:8px 11px; border-radius:var(--pap-r-chico,10px);
+  border:1px solid rgba(16,185,129,.24); background:rgba(16,185,129,.07);
+  font-size:10.5px; font-weight:700; color:#a7f3d0; line-height:1.45;
+}
+#cuerpo-app .pap-mc-resumen.mal{
+  border-color:rgba(248,113,113,.3); background:rgba(248,113,113,.08); color:#fecaca;
+}
+
+/* Igual que en las fichas de cliente: la cuenta y la plataforma llevaban un
+   halo de su color alrededor, que es lo que hacía que la pantalla entera
+   pareciera pintada de cuatro colores a la vez. Se queda la barra del canto. */
+body#cuerpo-app .seccion-pantalla .master-premium-card{
+  box-shadow:none!important;
+  border-top-color:rgba(255,255,255,.08)!important;
+  border-right-color:rgba(255,255,255,.08)!important;
+  border-bottom-color:rgba(255,255,255,.08)!important;
+}
+body#cuerpo-app .seccion-pantalla .platform-premium-head{
+  box-shadow:none!important;
+  border-top-color:rgba(255,255,255,.08)!important;
+  border-right-color:rgba(255,255,255,.08)!important;
+  border-bottom-color:rgba(255,255,255,.08)!important;
+}
+/* La cinta con el nombre de la plataforma: el color, en la letra y no en un
+   bloque de fondo que compite con todo lo demás. */
+body#cuerpo-app .seccion-pantalla .platform-premium-titlebox{
+  background:transparent!important; border:0!important; box-shadow:none!important;
+}
+
+/* Las baldosas de perfil: el color, en el canto. */
+body#cuerpo-app .seccion-pantalla .master-profile-premium{
+  background:rgba(255,255,255,.035)!important;
+  border-width:1px 1px 1px 3px!important; border-style:solid!important;
+  border-top-color:rgba(255,255,255,.08)!important;
+  border-right-color:rgba(255,255,255,.08)!important;
+  border-bottom-color:rgba(255,255,255,.08)!important;
+  border-radius:var(--pap-r-chico,10px)!important;
+  box-shadow:none!important;
+}
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired{border-left-color:#ef4444!important}
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-warning{border-left-color:#f59e0b!important}
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-ok{border-left-color:#10b981!important}
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-free{
+  border-style:dashed!important;
+  border-left-color:rgba(255,255,255,.22)!important;
+  border-left-width:1px!important;
+  background:transparent!important;
+}
+/* El fondo de la baldosa también venía teñido con un degradado del color del
+   estado; sumado al canto, la baldosa entera se leía como un bloque de color.
+   El fondo se queda neutro y el estado lo dice el canto y el texto. */
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired,
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-warning,
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-ok,
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-dup,
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-over{
+  background:rgba(255,255,255,.035)!important;
+}
+body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired{
+  background:rgba(239,68,68,.06)!important;
+}
+
+/* ===========================================================================
+   4 · Tarifas
+   Seis bloques de presentación antes de ver una sola tarifa.
+   ========================================================================= */
+#cuerpo-app #sec-tarifas .tarifas-hero{
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  border-radius:var(--pap-r-card,16px)!important;
+}
+#cuerpo-app #sec-tarifas .tarifas-hero p{max-width:70ch}
+#cuerpo-app #sec-tarifas .caja.cifra{
+  background:rgba(255,255,255,.035)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+}
+#cuerpo-app #sec-tarifas .tarifa-note{
+  background:rgba(255,255,255,.03)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  color:#94a3b8!important;
+}
+
+/* ===========================================================================
+   5 · La barra lateral, menos fría
+   Era negro plano con texto gris. Ahora tiene un poco de temperatura: un
+   degradado muy suave, el color del acento asomando arriba, y el elemento
+   activo con su propio fondo en vez de solo una barrita.
+   ========================================================================= */
+#cuerpo-app #sidebar-menu{
+  background:linear-gradient(180deg,
+    color-mix(in srgb, var(--papotas-primary,#e50914) 7%, #0a0b10) 0%,
+    #08090e 42%, #06070b 100%)!important;
+  border-right:1px solid rgba(255,255,255,.07)!important;
+}
+#cuerpo-app #sidebar-menu .menu-btn{
+  border-radius:var(--pap-r-chico,11px)!important;
+  color:#93a1b5!important;
+}
+#cuerpo-app #sidebar-menu .menu-btn:hover{
+  background:rgba(255,255,255,.06)!important; color:#e2e8f0!important;
+}
+#cuerpo-app #sidebar-menu .menu-btn.activo,
+#cuerpo-app #sidebar-menu .menu-btn[aria-current="page"],
+#cuerpo-app #sidebar-menu .menu-btn.bg-papotas\/10,
+#cuerpo-app #sidebar-menu .menu-btn[class*="activo"]{
+  background:color-mix(in srgb, var(--papotas-primary,#e50914) 16%, transparent)!important;
+  color:#fff!important;
+}
+/* El pie de la nube, como una nota y no como un bloque. */
+#cuerpo-app #sidebar-menu > div:last-child{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid rgba(255,255,255,.07)!important;
+}
+
+/* ===========================================================================
+   6 · Chips: dos familias y no siete
+   ========================================================================= */
+#cuerpo-app .seccion-pantalla .chip,
+#cuerpo-app .seccion-pantalla .mc-chip,
+#cuerpo-app .seccion-pantalla .platform-stat,
+#cuerpo-app .seccion-pantalla .pap-ma-kpi{
+  border-radius:999px!important; font-weight:800!important; letter-spacing:.01em!important;
+}
+#cuerpo-app .seccion-pantalla .platform-stat,
+#cuerpo-app .seccion-pantalla .pap-ma-kpi,
+#cuerpo-app .seccion-pantalla .mc-chip:not(.warn):not(.bad):not(.danger){
+  background:rgba(255,255,255,.05)!important;
+  border:1px solid rgba(255,255,255,.09)!important;
+  color:#b6c2d2!important;
+}
+#cuerpo-app .seccion-pantalla .mc-chip.ok{color:#6ee7b7!important; border-color:rgba(16,185,129,.28)!important}
+#cuerpo-app .seccion-pantalla .mc-chip.warn{
+  background:rgba(245,158,11,.12)!important; border:1px solid rgba(245,158,11,.32)!important; color:#fcd34d!important;
 }
 </style>
 
