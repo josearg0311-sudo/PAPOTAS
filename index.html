@@ -7936,5 +7936,341 @@ aside nav button.bg-white\/10::before{height:60%}
 }
 </style>
 
+<style id="papotas-v172-adaptativo">
+/* ============================================================================
+   V172 · "NECESITO QUE EL ESTILO DEL PROGRAMA SEA ADAPTATIVO O SE ADAPTE A
+   CUALQUIER DISPOSITIVO"
+
+   El programa ya tenía reglas para móvil, para tableta y para escritorio, pero
+   todas preguntaban lo mismo: cuánto mide la PANTALLA. Y esa es la pregunta
+   equivocada, porque lo que decide si caben dos tarjetas o tres no es la
+   pantalla: es el hueco que queda después del menú lateral.
+
+   Se nota midiendo. La pantalla de clientes, con los mismos datos:
+
+       900 px de pantalla  ->  840 px de hueco  ->  3 columnas  ->  4668 px de alto
+       960 px de pantalla  ->  676 px de hueco  ->  2 columnas  ->  6404 px de alto
+
+   Con la pantalla 60 px MÁS ancha había que desplazarse un 37 % MÁS, porque a
+   los 940 px aparece el menú lateral y se lleva 284, más de lo que se había
+   ganado. Lo mismo en el panel entre 700 y 740 px, y en tarifas a los 860.
+   Una tableta en vertical (768 px) recibía la peor disposición de todas.
+
+   Aquí se cambia la pregunta: las rejillas se reparten según el ancho
+   DISPONIBLE, no según el de la pantalla, y los tamaños y los espacios crecen
+   de forma continua en lugar de dar saltos en unos anchos concretos. Así no
+   hay un ancho "raro" donde el diseño se rompa, y da igual el aparato.
+   ========================================================================== */
+
+/* --- 1. Escala continua ---------------------------------------------------
+   Cada medida va de un mínimo a un máximo y recorre todo lo de en medio. La
+   parte en "rem" hace que respete el tamaño de letra que el usuario tenga
+   puesto en su teléfono; la parte en "vw", que acompañe al ancho. */
+#cuerpo-app{
+  --pap-t-xxs: clamp(9px,   0.52rem + 0.16vw, 11px);
+  --pap-t-xs:  clamp(10px,  0.58rem + 0.20vw, 12.5px);
+  --pap-t-sm:  clamp(11.5px,0.66rem + 0.26vw, 14px);
+  --pap-t-md:  clamp(13px,  0.74rem + 0.34vw, 16.5px);
+  --pap-t-lg:  clamp(15px,  0.86rem + 0.55vw, 21px);
+  --pap-t-xl:  clamp(18px,  1.00rem + 0.95vw, 30px);
+
+  --pap-e-1:   clamp(4px,   0.24rem + 0.14vw, 7px);
+  --pap-e-2:   clamp(7px,   0.40rem + 0.28vw, 12px);
+  --pap-e-3:   clamp(10px,  0.54rem + 0.48vw, 18px);
+  --pap-e-4:   clamp(13px,  0.66rem + 0.85vw, 26px);
+
+  /* Ancho mínimo de una columna, por familia de rejilla. */
+  --pap-col: 240px;
+}
+
+/* --- 2. Rejillas que miran el hueco, no la pantalla ------------------------
+   "auto-fit" reparte tantas columnas como quepan y recoge las que sobran, así
+   que nunca deja huecos vacíos ni obliga a una tarjeta a ocupar media
+   pantalla. El "min(100%, ...)" es lo que evita que en un contenedor más
+   estrecho que la propia columna se desborde: ahí manda el 100 %. */
+#cuerpo-app .seccion-pantalla .grid[class*="sm:grid-cols-"],
+#cuerpo-app .seccion-pantalla .grid[class*="md:grid-cols-"],
+#cuerpo-app .seccion-pantalla .grid[class*="lg:grid-cols-"],
+#cuerpo-app .seccion-pantalla .grid[class*="xl:grid-cols-"],
+#cuerpo-app .seccion-pantalla .vista-tarjetas,
+#cuerpo-app .seccion-pantalla .pap-statline,
+#cuerpo-app .seccion-pantalla .pap-rejilla-cifras,
+#cuerpo-app .seccion-pantalla .ps-grid.ps-kpis,
+#cuerpo-app .seccion-pantalla .ps-grid.ps-two,
+#cuerpo-app .seccion-pantalla .platform-premium-grid,
+#cuerpo-app .seccion-pantalla .grupo-cuerpo,
+#cuerpo-app .seccion-pantalla .master-profile-premium-grid{
+  /* Sin tocar "display": algunas de estas rejillas están ocultas en el móvil a
+     propósito, y forzarlas a rejilla las hacía reaparecer. Todas son ya
+     rejillas cuando se ven, así que basta con cambiarles el reparto. */
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--pap-col)),1fr))!important;
+  gap:var(--pap-e-2)!important;
+  /* Y si alguna pieza ocupa dos columnas cuando solo cabe una, la columna que
+     el navegador se inventa para acomodarla queda en cero en vez de robar
+     ancho: la pieza ancha ocupa la línea entera y lo demás no se estruja. */
+  grid-auto-columns:0!important;
+}
+
+/* Cada familia pide un ancho mínimo distinto: una cifra suelta se lee en 150
+   píxeles, la ficha de un cliente necesita 240, y un panel con su tabla, 320. */
+#cuerpo-app .seccion-pantalla .pap-statline,
+#cuerpo-app .seccion-pantalla .pap-rejilla-cifras,
+#cuerpo-app .seccion-pantalla .ps-grid.ps-kpis,
+#cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="lg:grid-cols-4"],
+#cuerpo-app .seccion-pantalla .grid.grid-cols-2[class*="md:grid-cols-4"]{
+  /* 176 y no 150: en una tarjeta de 150 px la cifra "S/ 1,234.00" se cortaba. */
+  --pap-col:176px;
+}
+
+#cuerpo-app .seccion-pantalla .master-profile-premium-grid{--pap-col:142px}
+#cuerpo-app .seccion-pantalla .platform-premium-grid{--pap-col:190px}
+#cuerpo-app .seccion-pantalla .vista-tarjetas{--pap-col:210px}
+/* Los bloques de cuenta master solo se ponen de dos en dos cuando caben dos
+   enteros. Antes se partían en cuanto había 1150 px de pantalla, y entonces
+   las fichas de cliente de dentro se quedaban sin sitio: a 1200 px la página
+   era MÁS larga que a 1100 porque cada bloque tenía la mitad de ancho. */
+#cuerpo-app .seccion-pantalla .grupo-cuerpo{--pap-col:760px}
+/* Los perfiles libres: con el mínimo de 300 px heredado de su familia, en un
+   hueco de 302 px salía una sola columna y la lista se estiraba a lo alto; con
+   un mínimo fijo pequeño, en un hueco ancho salían celdas de 47 px y la
+   insignia de la cuenta no cabía. El mínimo se limita además a un 47 % del
+   contenedor: así nunca sale una sola columna por estrecho que sea el hueco, y
+   en cuanto hay sitio las celdas recuperan su ancho de verdad. */
+#cuerpo-app .seccion-pantalla #lista-perfiles-libres{
+  /* 250 y no menos: cada fila lleva logo, nombre de plataforma, insignia de
+     cuenta y perfil. En 197 px se parte en tres líneas, y entonces TRES
+     columnas ocupan más alto que dos. Y con tope del 47 %: sin él, en un hueco
+     estrecho sale una sola columna, la cabecera que cruza de lado a lado se
+     desborda sobre el panel vecino y el panel entero se estira. */
+  --pap-col:250px;
+  grid-template-columns:repeat(auto-fit,minmax(min(var(--pap-col),47%),1fr))!important;
+}
+#cuerpo-app .seccion-pantalla #contenedor-club-vip{--pap-col:240px}
+#cuerpo-app .seccion-pantalla .grid[class*="grid-cols-3"]:not([class*="grid-cols-1"]){--pap-col:210px}
+#cuerpo-app .seccion-pantalla .grid.grid-cols-1[class*="lg:grid-cols-3"]{--pap-col:250px}
+#cuerpo-app .seccion-pantalla .grid.grid-cols-1[class*="lg:grid-cols-2"],
+#cuerpo-app .seccion-pantalla .grid.grid-cols-1[class*="md:grid-cols-2"],
+#cuerpo-app .seccion-pantalla .grid.grid-cols-1[class*="sm:grid-cols-2"],
+#cuerpo-app .seccion-pantalla .grid.grid-cols-1[class*="xl:grid-cols-2"]{--pap-col:300px}
+#cuerpo-app .seccion-pantalla .ps-grid.ps-two{--pap-col:320px}
+
+/* El caso que destapó lo anterior: la lista de perfiles libres del panel
+   pasaba de 1150 a 2828 píxeles de alto al ensanchar la ventana de 700 a 740,
+   porque su cabecera cruza las dos columnas y obligaba al navegador a
+   inventarse una segunda columna de 29 px donde se apilaba todo lo demás. */
+
+/* Tarifas: por debajo de 900 px la barra de herramientas era una rejilla de dos
+   columnas fijas, y a 860 px se estiraba a 420 px de alto —cuatro veces más que
+   a 820— porque cada control se quedaba sin ancho. Se reparte por el hueco. */
+@media (max-width:900px){
+  /* Y algo peor: la barra lleva "flex:1 1 420px", una medida pensada para
+     cuando se coloca en fila, donde 420 px es un ANCHO. Por debajo de 900 px su
+     contenedor se pone en columna y entonces esos 420 px pasan a ser un ALTO:
+     seis controles de 40 px estirados dentro de una caja de 420. */
+  #cuerpo-app #sec-tarifas .tarifas-toolbar > .tarifas-tools{flex:0 0 auto!important}
+  #cuerpo-app #sec-tarifas .tarifas-tools,
+  #cuerpo-app #sec-tarifas .tarifas-general-grid{
+    display:grid!important; grid-auto-columns:0!important;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))!important;
+    gap:var(--pap-e-2)!important;
+  }
+}
+
+/* El calendario tiene siete días y la semana no se reparte: se queda como está. */
+#cuerpo-app .seccion-pantalla .grid.grid-cols-7{
+  grid-template-columns:repeat(7,minmax(0,1fr))!important;
+}
+
+/* --- 3. Aire proporcional --------------------------------------------------
+   Los márgenes eran los mismos en un teléfono de 320 px que en un monitor de
+   1600: o sobraban en uno o faltaban en el otro. */
+#cuerpo-app .zona-contenido{
+  padding-inline:var(--pap-e-3)!important;
+  padding-bottom:calc(var(--pap-e-4) + env(safe-area-inset-bottom))!important;
+}
+#cuerpo-app .seccion-pantalla > * + *{margin-top:var(--pap-e-2)}
+#cuerpo-app .seccion-pantalla .glass-card,
+#cuerpo-app .seccion-pantalla .ps-section{padding:var(--pap-e-3)}
+#cuerpo-app .seccion-pantalla .ps-body{padding:var(--pap-e-2) var(--pap-e-3) var(--pap-e-3)}
+
+/* --- 4. Títulos que caben ---------------------------------------------------
+   El de la cabecera se cortaba en "Cuentas ma…" en un teléfono. Con una escala
+   continua entra entero y sigue siendo grande en el monitor. */
+#cuerpo-app .cabecera-app h1,
+#cuerpo-app .cabecera-app h2,
+#cuerpo-app .encabezado-seccion h1,
+#cuerpo-app .encabezado-seccion h2{
+  font-size:var(--pap-t-lg)!important;
+  line-height:1.15!important;
+  white-space:normal!important;
+  overflow:visible!important;
+  text-overflow:clip!important;
+}
+#cuerpo-app .seccion-pantalla .ps-head h3,
+#cuerpo-app .seccion-pantalla .ps-section > h3{font-size:var(--pap-t-md)!important}
+#cuerpo-app .seccion-pantalla .ps-hero h2{font-size:var(--pap-t-xl)!important; line-height:1.1!important}
+
+/* --- 5. Aparatos que no son ni teléfono ni monitor -------------------------- */
+
+/* Teléfono tumbado y ventanas bajas: sobra alto, no ancho. Se recorta el aire
+   vertical para que quepa algo más que la cabecera. */
+@media (max-height:560px) and (orientation:landscape){
+  #cuerpo-app{--pap-e-3:9px; --pap-e-4:11px}
+  #cuerpo-app .cabecera-app{padding-block:6px!important}
+  #cuerpo-app .seccion-pantalla .ps-cover,
+  #cuerpo-app .seccion-pantalla .ps-hero{padding-block:10px!important}
+}
+
+/* Pantallas muy anchas: el texto no debe estirarse hasta el infinito, pero
+   tampoco quedarse en una columnita con dos palmos de negro a cada lado. */
+@media (min-width:1700px){
+  #cuerpo-app .zona-contenido > .seccion-pantalla{max-width:1720px; margin-inline:auto}
+}
+
+/* Pantallas muy estrechas (relojes, ventanas partidas, 280 px): que siga
+   siendo usable en una sola columna. */
+@media (max-width:340px){
+  #cuerpo-app .seccion-pantalla{--pap-col:100%}
+  #cuerpo-app .seccion-pantalla .pap-statline,
+  #cuerpo-app .seccion-pantalla .ps-grid.ps-kpis{--pap-col:130px}
+}
+
+/* La insignia de cuenta ("AMAZON PRIME 1") se quedaba en 42 px dentro de su
+   fila: como todo lo de la fila podía encogerse, encogía ella. Diciéndole que
+   NO se encoja, el que cede es el texto largo de al lado, que sí tiene sitio de
+   sobra. Si aun así no cupiera, se recorta con puntos suspensivos y no partida
+   por la mitad de la palabra, que es justo lo que se arregló en la tabla de
+   ventas. */
+#cuerpo-app .insignia-cuenta{
+  flex-shrink:0!important; max-width:100%!important;
+}
+/* Y en la lista de perfiles libres, si la fila no da de sí, la insignia baja a
+   la línea siguiente en vez de quedarse en 42 píxeles. */
+#cuerpo-app #lista-perfiles-libres .flex{flex-wrap:wrap!important}
+#cuerpo-app #lista-perfiles-libres .overflow-hidden{overflow:visible!important; min-width:0}
+#cuerpo-app .insignia-cuenta .marca-cuenta{
+  white-space:nowrap!important; overflow-wrap:normal!important; word-break:normal!important;
+  overflow:hidden!important; text-overflow:ellipsis!important;
+}
+
+/* Quien tenga puesto texto grande en el sistema no debería ver el diseño roto:
+   las tarjetas crecen a lo alto en vez de recortar. */
+#cuerpo-app .seccion-pantalla .pap-statline > *,
+#cuerpo-app .seccion-pantalla .ps-grid.ps-kpis > *{height:auto!important}
+</style>
+
+<script id="papotas-v172-carril">
+/* ============================================================================
+   V172 (2) · El menú lateral, que era el que apretaba
+   Entre 940 y 1180 px el menú pasaba de ser un cajón que se abre por encima a
+   ocupar 224 px fijos. Como el cajón no resta ancho y el menú fijo sí, al
+   ensanchar la ventana de 900 a 960 px el contenido PERDÍA 164 px y las
+   tarjetas caían de tres columnas a dos.
+   En esa franja el menú se queda ahora en un carril de iconos: sigue a la
+   vista y solo se lleva 76 px. Para poder esconder los rótulos hay que
+   envolverlos, porque en el HTML son texto suelto dentro del botón y el CSS
+   no puede ocultar un texto que no está dentro de una etiqueta.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V172__) return; window.__PAPOTAS_V172__=!0;
+
+  function envolverRotulos(){
+    var botones=document.querySelectorAll("#sidebar-menu .menu-btn");
+    for(var i=0;i<botones.length;i++){
+      var b=botones[i];
+      if(b.querySelector(".menu-rotulo")) continue;
+      var texto="";
+      for(var j=b.childNodes.length-1;j>=0;j--){
+        var n=b.childNodes[j];
+        if(n.nodeType!==3) continue;
+        var t=n.nodeValue;
+        if(!t || !t.trim()) continue;
+        texto=t.trim()+(texto?" "+texto:texto);
+        var s=document.createElement("span");
+        s.className="menu-rotulo";
+        s.textContent=t;
+        b.replaceChild(s,n);
+      }
+      if(texto && !b.getAttribute("title")) b.setAttribute("title",texto);
+      if(texto && !b.getAttribute("aria-label")) b.setAttribute("aria-label",texto);
+    }
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ envolverRotulos(); }catch(e){ console.warn("V172:",e); }
+      if(++n<25) setTimeout(reintentar,400);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,400); },{once:!0})
+    : setTimeout(arrancar,400);
+}();
+</script>
+
+<style id="papotas-v172-carril-estilo">
+/* La otra mitad del problema: el cuerpo de la página es una rejilla de dos
+   columnas y la primera estaba fijada a 224 px. Estrechar el menú no servía de
+   nada mientras su columna siguiera midiendo lo mismo; quedaban 148 px de
+   hueco muerto. El programa ya guardaba esa medida en una variable, así que
+   basta con cambiarla, sin pelear con ninguna regla.
+
+   Con el carril el contenido pasa a crecer siempre que crece la ventana:
+
+       900 px (cajón)  -> 882 de contenido      901 px (carril) -> 825
+      1200 px (carril) -> 1124                 1400 px (menú)   -> 1244
+      1600 px (menú)   -> 1411
+
+   Antes, entre 940 y 1180 px el contenido se quedaba en 698-858 mientras la
+   ventana crecía de 940 a 1180. */
+@media (min-width:901px) and (max-width:1279px){
+  body#cuerpo-app{--p52-sidebar:76px!important; --p52-sidebar-compact:76px!important}
+}
+/* A partir de ahí el menú vuelve a llevar rótulos y su ancho crece con la
+   pantalla en lugar de saltar de golpe. */
+@media (min-width:1280px){
+  body#cuerpo-app{--p52-sidebar:clamp(152px,11.8vw,252px)!important}
+  body#cuerpo-app #sidebar-menu.sidebar-responsive{
+    width:var(--p52-sidebar)!important; min-width:0!important;
+    flex:0 0 var(--p52-sidebar)!important;
+  }
+  body#cuerpo-app #sidebar-menu .menu-btn{padding-inline:clamp(8px,0.8vw,14px)!important}
+  body#cuerpo-app #sidebar-menu .menu-rotulo{
+    min-width:0; overflow-wrap:break-word; line-height:1.2;
+  }
+}
+
+/* El carril: solo iconos, y el rótulo aparece al pasar por encima como título
+   del navegador. */
+@media (min-width:901px) and (max-width:1279px){
+  body#cuerpo-app #sidebar-menu.sidebar-responsive{
+    width:76px!important; min-width:76px!important; flex:0 0 76px!important;
+    padding:10px 7px!important; overflow:visible!important;
+  }
+  body#cuerpo-app #sidebar-menu .menu-rotulo{display:none!important}
+  body#cuerpo-app #sidebar-menu .menu-btn{
+    position:relative!important; justify-content:center!important;
+    gap:0!important; padding:11px 0!important;
+  }
+  body#cuerpo-app #sidebar-menu .menu-btn svg{width:19px!important; height:19px!important}
+  /* La cifra pendiente no cabe al lado del icono: va encima, como en el móvil. */
+  body#cuerpo-app #sidebar-menu .menu-btn .chip{
+    position:absolute!important; top:3px!important; right:9px!important;
+    margin:0!important; min-width:0!important; padding:0 4px!important;
+    font-size:9px!important; line-height:15px!important; height:15px!important;
+  }
+  /* Marca y pie: solo el símbolo. */
+  body#cuerpo-app #sidebar-menu #titulo-marca-app,
+  body#cuerpo-app #sidebar-menu #titulo-marca-app + p,
+  body#cuerpo-app #sidebar-menu > div:last-child p{display:none!important}
+  body#cuerpo-app #sidebar-menu > div:first-child > div:first-child,
+  body#cuerpo-app #sidebar-menu > div:last-child{justify-content:center!important}
+  body#cuerpo-app #sidebar-menu > div:last-child{padding:8px 0!important}
+  body#cuerpo-app #sidebar-menu > div:first-child > div:first-child > div:first-child{gap:0!important}
+}
+</style>
+
 </body>
 </html>
