@@ -7487,6 +7487,8 @@ aside nav button.bg-white\/10::before{height:60%}
         {titulo:"Alta",ancho:12,tipo:"fecha"},{titulo:"Vence",ancho:12,tipo:"fecha"},
         {titulo:"Días",ancho:8,tipo:"entero"},{titulo:"Estado",ancho:12},
         {titulo:"Cobro",ancho:13,tipo:"dinero"},{titulo:"Ciclo",ancho:12},
+        {titulo:"Antigüedad",ancho:13},{titulo:"Meses",ancho:8,tipo:"entero"},
+        {titulo:"Pagos",ancho:8,tipo:"entero"},{titulo:"Total pagado",ancho:14,tipo:"dinero"},
         {titulo:"Referido por",ancho:16},{titulo:"Notas",ancho:30}
       ],
       filas:cl.map(function(c){
@@ -7496,9 +7498,13 @@ aside nav button.bg-white\/10::before{height:60%}
         try{ d=diasHasta(c.vencimiento); }catch(_){}
         try{ cob=cobroDeCliente(c); }catch(_){ cob=Number(c.monto)||0; }
         try{ var k=cicloDeCliente(c); ciclo=textoPeriodo(k.tipo,k.cantidad); }catch(_){}
+        var ant={rotulo:"",meses:0,pagos:0,pagado:0};
+        try{ if(typeof papotasAntiguedad==="function") ant=papotasAntiguedad(c); }catch(_){}
         return [c.nombre||"", c.telefono||"", c.servicio||"", cuentaDe(c.cuentaMasterId)||"Sin cuenta",
                 c.perfil||"", c.pin||"", c.correo||"", c.inicio||"", c.vencimiento||"",
-                d, e, cob, ciclo, c.referidoPor||"", c.notas||""];
+                d, e, cob, ciclo,
+                ant.rotulo, ant.meses, ant.pagos, ant.pagado,
+                c.referidoPor||"", c.notas||""];
       })
     };
   }
@@ -8700,6 +8706,396 @@ aside nav button.bg-white\/10::before{height:60%}
   border-color:rgba(251,191,36,.55)!important;
   box-shadow:inset 3px 0 0 0 #fbbf24;
 }
+</style>
+
+<script id="papotas-v174-cliente">
+/* ============================================================================
+   V174 · "EL FORMATO DE NUEVO CLIENTE ES MUY LARGO, QUISIERA QUE SEA MÁS
+   COMPACTO" · "ME IMPORTA DIFERENCIAR ESTABLECIDOS CON LOS CLIENTES, PORQUE
+   ESO PUEDE VARIAR EN EL TIEMPO"
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V174__) return; window.__PAPOTAS_V174__=!0;
+
+  function esc(t){ try{ return window.esc(t); }catch(_){ return String(t==null?"":t); } }
+  function heredarMarcas(nuevo,viejo){
+    try{ Object.getOwnPropertyNames(viejo).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in nuevo)){ try{ nuevo[k]=viejo[k]; }catch(_){} }
+    }); }catch(_){}
+    return nuevo;
+  }
+
+  /* ------------------------------------------------------------------------
+     1 · Establecidos y nuevos, calculado y no escrito a mano
+     Dijiste que eso "puede variar en el tiempo", así que ponerlo como una
+     casilla que alguien marca una vez sería condenarlo a quedarse viejo. Se
+     deduce de lo que ya hay: cuánto lleva contigo y cuántas veces te ha
+     pagado. Si deja de renovar, deja de salir establecido solo.
+     ---------------------------------------------------------------------- */
+  function mesesEntre(desde,hasta){
+    var a=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(desde||""));
+    var b=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(hasta||""));
+    if(!a||!b) return 0;
+    var m=(Number(b[1])-Number(a[1]))*12 + (Number(b[2])-Number(a[2]));
+    if(Number(b[3])<Number(a[3])) m--;
+    return Math.max(0,m);
+  }
+
+  window.papotasAntiguedad=function(c){
+    if(!c) return {nivel:"nuevo", meses:0, pagos:0, pagado:0, rotulo:"Nuevo"};
+    var hoy=""; try{ hoy=obtenerFechaLocal(); }catch(_){}
+    var pagos=0, pagado=0, primera=c.inicio||"";
+    (window.ventas||[]).forEach(function(v){
+      if(!v) return;
+      var suyo = (v.clienteId!=null && String(v.clienteId)===String(c.id)) ||
+                 (v.clienteId==null && v.cliente && c.nombre && String(v.cliente)===String(c.nombre));
+      if(!suyo) return;
+      pagos++; pagado+=Number(v.monto)||0;
+      if(v.fecha && (!primera || String(v.fecha)<String(primera))) primera=v.fecha;
+    });
+    var meses=mesesEntre(primera,hoy);
+    var nivel = (pagos>=4 && meses>=4) ? "establecido"
+              : (pagos>=2) ? "regular"
+              : "nuevo";
+    return {
+      nivel:nivel, meses:meses, pagos:pagos, pagado:Math.round(pagado*100)/100,
+      desde:primera||"",
+      rotulo: nivel==="establecido" ? "Establecido" : nivel==="regular" ? "Regular" : "Nuevo"
+    };
+  };
+
+  window.papotasResumenAntiguedad=function(c){
+    var a=window.papotasAntiguedad(c);
+    var partes=[];
+    partes.push(a.meses ? (a.meses+" mes"+(a.meses===1?"":"es")+" contigo") : "recién llegado");
+    partes.push(a.pagos+" pago"+(a.pagos===1?"":"s"));
+    if(a.pagado){ try{ partes.push(formatearMoneda(a.pagado)+" en total"); }catch(_){} }
+    return a.rotulo+" · "+partes.join(" · ");
+  };
+
+  /* Marca en cada ficha, junto al estado de cobro. */
+  function pintarAntiguedad(){
+    document.querySelectorAll(".tarjeta-registro").forEach(function(t){
+      var b=t.querySelector("button[onclick*='abrirFichaCliente']");
+      if(!b) return;
+      var m=/abrirFichaCliente\('([^']+)'\)/.exec(b.getAttribute("onclick")||"");
+      if(!m) return;
+      var c=(window.clientes||[]).find(function(x){ return String(x.id)===String(m[1]); });
+      if(!c) return;
+      var a=window.papotasAntiguedad(c);
+      t.setAttribute("data-pap-nivel", a.nivel);
+      var chip=t.querySelector(".pap-chip-nivel");
+      if(!chip){
+        chip=document.createElement("span");
+        chip.className="chip pap-chip-nivel";
+        var destino=b.parentElement && b.parentElement.parentElement;
+        (destino||t).appendChild(chip);
+      }
+      chip.classList.remove("pap-nivel-nuevo","pap-nivel-regular","pap-nivel-establecido");
+      chip.classList.add("pap-nivel-"+a.nivel);
+      chip.textContent=a.rotulo;
+      chip.title=window.papotasResumenAntiguedad(c);
+    });
+    aplicarFiltroNivel();
+  }
+  window.papotasPintarNiveles=pintarAntiguedad;
+
+  /* Un filtro propio, que se suma al de vencimientos sin estorbarlo. */
+  var filtroNivel="todos";
+  window.papotasFiltroNivel=function(n){ filtroNivel=n; montarFiltro(); aplicarFiltroNivel(); };
+  function aplicarFiltroNivel(){
+    document.querySelectorAll("#sec-clientes .tarjeta-registro").forEach(function(t){
+      var n=t.getAttribute("data-pap-nivel")||"";
+      t.classList.toggle("pap-oculto-nivel", filtroNivel!=="todos" && n!==filtroNivel);
+    });
+  }
+  function montarFiltro(){
+    var sec=document.getElementById("sec-clientes");
+    if(!sec) return;
+    var caja=document.getElementById("pap-filtro-nivel");
+    if(!caja){
+      var barra=sec.querySelector(".pap-section-tools") || sec.querySelector(".glass-card");
+      if(!barra) return;
+      caja=document.createElement("div");
+      caja.id="pap-filtro-nivel"; caja.className="pap-filtro-nivel";
+      barra.parentNode.insertBefore(caja, barra.nextSibling);
+    }
+    var cuenta={todos:0,nuevo:0,regular:0,establecido:0};
+    (window.clientes||[]).forEach(function(c){
+      cuenta.todos++; cuenta[window.papotasAntiguedad(c).nivel]++;
+    });
+    caja.innerHTML=[["todos","Todos"],["establecido","Establecidos"],["regular","Regulares"],["nuevo","Nuevos"]]
+      .map(function(f){
+        return '<button type="button" class="pap-tool'+(filtroNivel===f[0]?" primary":"")+'" '+
+          'title="Se calcula solo: establecido = 4 o más pagos y 4 o más meses contigo" '+
+          'onclick="papotasFiltroNivel(\''+f[0]+'\')">'+esc(f[1])+' <b>'+cuenta[f[0]]+'</b></button>';
+      }).join("");
+  }
+
+  /* ------------------------------------------------------------------------
+     2 · El formulario, en dos columnas y con lo secundario recogido
+     No se quita ningún campo: se reordena. Lo que hace falta para vender un
+     perfil queda a la vista; lo que casi nunca se toca —el referido, la nota
+     interna— se recoge detrás de "Más detalles" y sigue guardándose igual.
+     Se MUEVEN los bloques que ya existen, no se copian, así que los
+     identificadores y los manejadores siguen siendo los mismos.
+     ---------------------------------------------------------------------- */
+  function bloqueDe(id){
+    var el=document.getElementById(id);
+    while(el && el.parentElement && el.parentElement.id!=="form-cliente") el=el.parentElement;
+    return (el && el.parentElement && el.parentElement.id==="form-cliente") ? el : null;
+  }
+
+  function compactar(){
+    var f=document.getElementById("form-cliente");
+    if(!f || f.dataset.papCompacto) return !1;
+
+    /* Cuánto ocupa cada bloque de los que se quedan a la vista. */
+    [["cli-servicio",2],["cli-cuenta-master",1],["cli-pin",1],
+     ["cli-selector-meses",2],["cli-monto",2]].forEach(function(p){
+      var b=bloqueDe(p[0]); if(b) b.setAttribute("data-pap-ancho",String(p[1]));
+    });
+    /* Plataforma+perfil y PIN+fecha son parejas de campos cortos: en el móvil
+       se apilaban y costaban 138 px de más entre las dos, que es justo lo que
+       hacía largo el formulario en un teléfono. Caben de dos en dos. */
+    ["cli-servicio","cli-pin"].forEach(function(id){
+      var b=bloqueDe(id); if(b) b.setAttribute("data-pap-par","1");
+    });
+    var nombre=document.getElementById("cli-nombre");
+    var tel=document.getElementById("cli-telefono");
+    if(nombre) nombre.setAttribute("data-pap-ancho","1");
+    if(tel) tel.setAttribute("data-pap-ancho","1");
+    var botones=f.lastElementChild;
+    if(botones) botones.setAttribute("data-pap-ancho","2");
+
+    /* Lo secundario, detrás de un desplegable. */
+    var extra=document.createElement("div");
+    extra.className="pap-form-extra"; extra.setAttribute("data-pap-ancho","2");
+    extra.innerHTML='<button type="button" class="pap-form-extra-btn" aria-expanded="false" '+
+      'onclick="papotasMasDetalles(this)">Más detalles <span>+</span></button>'+
+      '<div class="pap-form-extra-caja" hidden></div>';
+    if(botones) f.insertBefore(extra, botones); else f.appendChild(extra);
+    var caja=extra.querySelector(".pap-form-extra-caja");
+    ["cli-referido","cli-notas"].forEach(function(id){
+      var b=bloqueDe(id); if(b) caja.appendChild(b);
+    });
+    /* El ciclo a mano ("meses completos / días sueltos" y la cantidad) también
+       se recoge: los cinco botones de arriba cubren lo normal, y quien necesite
+       días sueltos los tiene a un clic. */
+    var tipo=document.getElementById("cli-ciclo-tipo");
+    var rejillaCiclo=tipo && tipo.parentElement;
+    if(rejillaCiclo && rejillaCiclo!==caja){
+      var etiqueta=document.createElement("label");
+      etiqueta.className="pap-form-etq";
+      etiqueta.textContent="Ciclo a medida";
+      caja.appendChild(etiqueta);
+      caja.appendChild(rejillaCiclo);
+    }
+
+    /* Un renglón que dice, sin que haya que buscarlo, qué cliente es este. */
+    var ficha=document.createElement("p");
+    ficha.id="cli-antiguedad"; ficha.className="pap-form-antig"; ficha.setAttribute("data-pap-ancho","2");
+    f.insertBefore(ficha, botones || null);
+
+    f.dataset.papCompacto="1";
+    f.classList.add("pap-form-2col");
+    return !0;
+  }
+
+  window.papotasMasDetalles=function(btn){
+    var caja=btn.parentElement.querySelector(".pap-form-extra-caja");
+    if(!caja) return;
+    var abierto=!caja.hidden;
+    caja.hidden=abierto;
+    btn.setAttribute("aria-expanded",String(!abierto));
+    var s=btn.querySelector("span"); if(s) s.textContent=abierto?"+":"−";
+  };
+
+  function refrescarAntiguedadFicha(){
+    var p=document.getElementById("cli-antiguedad");
+    if(!p) return;
+    var id=(document.getElementById("cli-id")||{}).value||"";
+    var c=id ? (window.clientes||[]).find(function(x){ return String(x.id)===String(id); }) : null;
+    if(!c){
+      /* En un cliente nuevo no hay antigüedad que contar y la línea solo
+         ocuparía sitio en la pantalla que se quería acortar. */
+      p.hidden=!0; p.textContent="";
+      return;
+    }
+    p.hidden=!1;
+    var a=window.papotasAntiguedad(c);
+    p.textContent=window.papotasResumenAntiguedad(c);
+    p.className="pap-form-antig pap-nivel-"+a.nivel;
+  }
+
+  /* ------------------------------------------------------------------------
+     3 · Enganches
+     ---------------------------------------------------------------------- */
+  function enganchar(){
+    ["abrirModalCliente","editarCliente","abrirModalClienteEnCuenta"].forEach(function(n){
+      var orig=window[n];
+      if(typeof orig!=="function" || orig.__v174) return;
+      function envuelto(){
+        var r=orig.apply(this,arguments);
+        setTimeout(function(){ try{ compactar(); refrescarAntiguedadFicha(); }catch(e){ console.warn("V174:",e); } },0);
+        return r;
+      }
+      envuelto.__v174=!0; heredarMarcas(envuelto,orig);
+      window[n]=envuelto;
+    });
+    var orig=window.renderizarTodo;
+    if(typeof orig==="function" && !orig.__v174){
+      function envuelto(){
+        var r=orig.apply(this,arguments);
+        setTimeout(function(){ try{ montarFiltro(); pintarAntiguedad(); }catch(e){ console.warn("V174:",e); } },0);
+        return r;
+      }
+      envuelto.__v174=!0; heredarMarcas(envuelto,orig);
+      window.renderizarTodo=envuelto;
+    }
+  }
+
+  /* No basta con envolver renderizarTodo: hay capas que la REEMPLAZAN en vez
+     de envolverla, y entonces el envoltorio de aquí desaparece sin avisar. Se
+     vigila directamente el trozo de página donde salen las fichas, que es lo
+     único que de verdad importa: si cambian, se repintan las marcas. */
+  var pendiente=null;
+  function repintarPronto(){
+    if(pendiente) return;
+    pendiente=setTimeout(function(){
+      pendiente=null;
+      try{ montarFiltro(); pintarAntiguedad(); }catch(e){ console.warn("V174:",e); }
+    },60);
+  }
+  function vigilar(){
+    if(window.__v174obs) return;
+    var zona=document.getElementById("zona-contenido") || document.body;
+    if(!zona) return;
+    try{
+      window.__v174obs=new MutationObserver(function(cambios){
+        for(var i=0;i<cambios.length;i++){
+          var m=cambios[i];
+          if(m.type!=="childList") continue;
+          /* Solo interesa cuando aparecen o desaparecen fichas. */
+          var toca=!1;
+          [].forEach.call(m.addedNodes,function(nd){
+            if(nd.nodeType===1 && (nd.classList&&nd.classList.contains("tarjeta-registro") ||
+               nd.querySelector&&nd.querySelector(".tarjeta-registro"))) toca=!0;
+          });
+          if(toca){ repintarPronto(); return; }
+        }
+      });
+      window.__v174obs.observe(zona,{childList:!0,subtree:!0});
+    }catch(_){}
+  }
+
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ enganchar(); compactar(); vigilar(); montarFiltro(); pintarAntiguedad(); }
+      catch(e){ console.warn("V174:",e); }
+      if(++n<30) setTimeout(reintentar,350);
+    })();
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,750); },{once:!0})
+    : setTimeout(arrancar,750);
+}();
+</script>
+
+<style id="papotas-v174-estilo">
+/* --- El formulario de cliente, en dos columnas ---------------------------
+   El ancho de columna manda sobre el número de columnas: en un teléfono sale
+   una, en cuanto hay sitio salen dos, y no hay ningún ancho intermedio raro. */
+#cuerpo-app #modal-cliente > div{max-width:min(94vw,640px)!important}
+#cuerpo-app #form-cliente.pap-form-2col{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,238px),1fr))!important;
+  gap:9px!important;
+  align-items:start;
+}
+#cuerpo-app #form-cliente.pap-form-2col > *{margin:0!important; min-width:0}
+#cuerpo-app #form-cliente.pap-form-2col > [data-pap-ancho="2"]{grid-column:1 / -1}
+#cuerpo-app #form-cliente.pap-form-2col > input[type="hidden"]{display:none}
+/* Una capa anterior apilaba estas dos parejas por debajo de 640 px con una
+   regla de dos identificadores y tres clases; hace falta más peso para
+   devolverlas a dos columnas, que es donde caben perfectamente. */
+#cuerpo-app #modal-cliente #form-cliente > [data-pap-par],
+#cuerpo-app #form-cliente [data-pap-par]{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+
+/* "Más detalles" */
+#cuerpo-app .pap-form-extra{
+  border:1px dashed rgba(255,255,255,.14); border-radius:12px; padding:8px 10px;
+}
+#cuerpo-app .pap-form-extra-btn{
+  width:100%; display:flex; align-items:center; justify-content:space-between; gap:8px;
+  background:none; border:0; color:#94a3b8; font-size:10px; font-weight:800;
+  text-transform:uppercase; letter-spacing:.06em; cursor:pointer; padding:2px 0;
+}
+#cuerpo-app .pap-form-extra-btn:hover{color:#e2e8f0}
+#cuerpo-app .pap-form-extra-btn span{
+  font-size:14px; line-height:1; width:18px; height:18px; border-radius:6px;
+  background:rgba(255,255,255,.07); display:inline-flex; align-items:center; justify-content:center;
+}
+#cuerpo-app .pap-form-extra-caja{display:flex; flex-direction:column; gap:9px; padding-top:9px}
+#cuerpo-app .pap-form-etq{
+  font-size:9px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.06em;
+  margin-bottom:-4px;
+}
+
+/* La antigüedad, dicha en una línea */
+#cuerpo-app .pap-form-antig{
+  font-size:10px; font-weight:700; padding:7px 10px; border-radius:10px;
+  border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.03); color:#94a3b8;
+}
+#cuerpo-app .pap-form-antig.pap-nivel-establecido{
+  border-color:rgba(16,185,129,.35); background:rgba(16,185,129,.08); color:#6ee7b7;
+}
+#cuerpo-app .pap-form-antig.pap-nivel-regular{
+  border-color:rgba(56,189,248,.3); background:rgba(56,189,248,.07); color:#7dd3fc;
+}
+
+/* La equis de cerrar de las ventanas medía 229 px de ancho: heredaba un
+   "flex:1" pensado para los botones de acción del pie y se estiraba por toda
+   la cabecera. Un botón de icono no crece. */
+#cuerpo-app .modal-papotas > div > div:first-child > button,
+#cuerpo-app .modal-papotas button[onclick^="cerrar"]{
+  flex:0 0 auto!important; width:auto!important; min-width:0!important;
+}
+#cuerpo-app .modal-papotas button:has(> i:only-child),
+#cuerpo-app .modal-papotas button:has(> svg:only-child){
+  flex:0 0 auto!important; width:auto!important;
+}
+/* Pero que siga siendo fácil de acertar con el dedo. */
+@media (max-width:820px){
+  #cuerpo-app .modal-papotas > div > div:first-child > button{
+    min-width:40px!important; min-height:40px!important;
+    display:inline-flex!important; align-items:center; justify-content:center;
+  }
+}
+
+/* --- Establecidos / regulares / nuevos ---------------------------------- */
+#cuerpo-app .pap-filtro-nivel{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 2px}
+#cuerpo-app .pap-filtro-nivel b{opacity:.6; font-weight:800; margin-left:2px}
+#cuerpo-app .chip.pap-chip-nivel{margin-left:4px}
+#cuerpo-app .pap-nivel-establecido{
+  background:rgba(16,185,129,.14)!important; color:#6ee7b7!important;
+  border:1px solid rgba(16,185,129,.4)!important;
+}
+#cuerpo-app .pap-nivel-regular{
+  background:rgba(56,189,248,.12)!important; color:#7dd3fc!important;
+  border:1px solid rgba(56,189,248,.35)!important;
+}
+#cuerpo-app .pap-nivel-nuevo{
+  background:rgba(148,163,184,.12)!important; color:#cbd5e1!important;
+  border:1px solid rgba(148,163,184,.3)!important;
+}
+#cuerpo-app .tarjeta-registro.pap-oculto-nivel{display:none!important}
 </style>
 
 </body>
