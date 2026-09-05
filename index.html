@@ -6714,5 +6714,1227 @@ aside nav button.bg-white\/10::before{height:60%}
   body#cuerpo-app .seccion-pantalla .overflow-x-auto{overflow-x:auto!important}
 }
 </style>
+<script id="papotas-v171-papelera">
+/* ============================================================================
+   V171 · Segundo bloque del documento de PAPOTAAAS.
+     · "AGREGA UNA PAPELERA PARA RECUPERAR DATOS SI SE NECESITARAN RECUPERAR"
+     · "QUE TAMBIÉN FIGUREN LAS INVERSIONES DE LAS CUENTAS MASTER (INCLUSO LAS
+        QUE SE ELIMINAN), IGUALMENTE CON LOS CLIENTES"
+     · "QUE EL EXCEL QUE SE PROCESA TENGA UNA ESTRUCTURA Y ESTILO ORDENADO"
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V171__) return; window.__PAPOTAS_V171__=!0;
+
+  /* ------------------------------------------------------------------------
+     Acceso a las dos colecciones que no viven en window. Están declaradas con
+     "let" en el guion principal, así que no son propiedades del objeto global;
+     sí son alcanzables desde una función creada en ámbito global.
+     ---------------------------------------------------------------------- */
+  function lexico(nombre){
+    try{ return new Function("return typeof "+nombre+'!=="undefined"?'+nombre+":null")(); }
+    catch(_){ return null; }
+  }
+  function coleccion(col){
+    if(col==="mensajesRapidos") return lexico("mensajesRapidos");
+    return Array.isArray(window[col]) ? window[col] : null;
+  }
+  function olvidarBorradoNube(col,id){
+    try{
+      var b=lexico("papotasBorrados");
+      if(b && b[col]) { delete b[col][String(id)]; }
+      if(typeof window.guardarBorradosNube==="function") window.guardarBorradosNube();
+    }catch(_){}
+  }
+  function clon(x){ try{ return JSON.parse(JSON.stringify(x)); }catch(_){ return null; } }
+
+  /* ------------------------------------------------------------------------
+     Las capas anteriores (V93, V161, V168, V170...) envuelven las mismas
+     funciones globales y cada una se marca con su propia bandera para no
+     envolver dos veces. El problema es que una capa solo reconoce SU bandera:
+     si otra capa envuelve después, la nueva función ya no la lleva, la primera
+     cree que aún no ha hecho su trabajo y vuelve a envolver. Con los reintentos
+     de arranque eso se convierte en una torre de cuarenta envoltorios y un
+     borrado se apunta cuarenta veces.
+     La solución es que cada envoltorio herede las banderas del que tapa: así
+     todas las capas siguen viéndose reconocidas.
+     ---------------------------------------------------------------------- */
+  function heredarMarcas(nuevo,viejo){
+    try{
+      Object.getOwnPropertyNames(viejo).forEach(function(k){
+        if(k.indexOf("__")===0 && !(k in nuevo)) { try{ nuevo[k]=viejo[k]; }catch(_){} }
+      });
+    }catch(_){}
+    return nuevo;
+  }
+  function toast(t){ try{ mostrarToast(t); }catch(_){} }
+  function dinero(n){ try{ return formatearMoneda(Number(n)||0); }catch(_){ return "S/ "+(Number(n)||0).toFixed(2); } }
+  function escapa(t){ try{ return esc(t); }catch(_){ return String(t==null?"":t); } }
+
+  /* ------------------------------------------------------------------------
+     1 · El almacén de la papelera
+     ---------------------------------------------------------------------- */
+  var CLAVE="pap_papelera", TOPE=400, DIAS=180;
+
+  function leer(){
+    try{ var l=JSON.parse(localStorage.getItem(CLAVE)||"[]"); return Array.isArray(l)?l:[]; }
+    catch(_){ return []; }
+  }
+  function escribir(lista){
+    try{
+      if(typeof window.guardarClave==="function") guardarClave(CLAVE, JSON.stringify(lista));
+      else localStorage.setItem(CLAVE, JSON.stringify(lista));
+    }catch(_){}
+  }
+  /* Lo que se tiró hace más de medio año deja de ocupar sitio. */
+  function podar(lista){
+    var corte=Date.now()-DIAS*86400000;
+    var viva=lista.filter(function(e){
+      var t=Date.parse(e && e.cuando);
+      return isNaN(t) ? true : t>=corte;
+    });
+    return viva.slice(0,TOPE);
+  }
+
+  var ETIQUETAS={
+    clientes:"Cliente", servicios:"Cuenta master", ventas:"Venta",
+    inversiones:"Inversión", mensajesRapidos:"Respuesta rápida",
+    combosGuardados:"Combo guardado"
+  };
+
+  /* Cada tipo de registro se describe a sí mismo para que la papelera se lea
+     como una lista de cosas y no como un volcado de identificadores. */
+  function describir(col,reg){
+    var r=reg||{};
+    try{
+      if(col==="clientes")
+        return {titulo:r.nombre||"Cliente sin nombre",
+                detalle:[r.servicio, r.perfil, r.telefono].filter(Boolean).join(" · "),
+                importe:Number(r.monto)||0};
+      if(col==="servicios")
+        return {titulo:(typeof nombreCuenta==="function"?nombreCuenta(r):r.nombre)||"Cuenta",
+                detalle:[r.correo, (r.perfiles||0)+" perfiles"].filter(Boolean).join(" · "),
+                importe:Number(r.costo)||0};
+      if(col==="ventas")
+        return {titulo:(r.cliente||"Sin cliente")+" · "+(r.servicio||"—"),
+                detalle:[papotasFechaLegible(r.fecha), r.metodo].filter(Boolean).join(" · "),
+                importe:Number(r.monto)||0};
+      if(col==="inversiones")
+        return {titulo:(r.plataforma||r.concepto||(r.cuentaMasterId?("Cuenta "+r.cuentaMasterId):"")||"Inversión")+(r.persona?(" · "+r.persona):""),
+                detalle:papotasFechaLegible(r.fecha)||"",
+                importe:Number(r.monto)||0};
+      if(col==="mensajesRapidos")
+        return {titulo:r.titulo||"Respuesta", detalle:String(r.texto||"").slice(0,70), importe:0};
+      if(col==="combosGuardados")
+        return {titulo:r.nombre||"Combo", detalle:String(r.detalle||"").slice(0,70), importe:Number(r.precio)||0};
+    }catch(_){}
+    return {titulo:String(r.nombre||r.id||"Registro"), detalle:"", importe:0};
+  }
+
+  function guardarEnPapelera(col,reg,extra,arrastrados){
+    if(!reg) return;
+    var d=describir(col,reg);
+    var lista=leer();
+    lista.unshift({
+      id:"pap_"+Date.now()+"_"+Math.random().toString(36).slice(2,7),
+      col:col, reg:reg, extra:extra||null,
+      arrastrados:(arrastrados&&arrastrados.length)?arrastrados:null,
+      cuando:new Date().toISOString(),
+      titulo:d.titulo, detalle:d.detalle, importe:d.importe
+    });
+    escribir(podar(lista));
+    pintarContador();
+  }
+
+  window.papotasPapelera = function(){ return leer(); };
+  /* Devuelve lo borrado de una colección, y también lo que se fue arrastrado
+     por otro borrado —las ventas de un cliente dado de baja, por ejemplo—,
+     porque para el histórico y para el Excel eso es exactamente lo mismo:
+     dinero que estuvo apuntado y ya no está. Se restauran por la entrada
+     madre, así que conservan su identificador. */
+  window.papotasPapeleraDe = function(col){
+    var salida=[];
+    leer().forEach(function(e){
+      if(e.col===col) salida.push({id:e.id, col:col, reg:e.reg, cuando:e.cuando, titulo:e.titulo, conMadre:null});
+      if(Array.isArray(e.arrastrados)) e.arrastrados.forEach(function(x){
+        if(x && x.col===col) salida.push({id:e.id, col:col, reg:x.reg, cuando:e.cuando, titulo:e.titulo, conMadre:e.titulo});
+      });
+    });
+    return salida;
+  };
+
+  /* ------------------------------------------------------------------------
+     2 · Enganchar los borrados
+     Se guarda una copia ANTES y se comprueba DESPUÉS: si el registro ya no
+     está en su colección, es que el borrado se confirmó de verdad. Así la
+     papelera nunca se llena de cosas que el usuario canceló.
+     ---------------------------------------------------------------------- */
+  function sigueVivo(col,id){
+    var arr=coleccion(col);
+    if(!Array.isArray(arr)) return true;
+    return arr.some(function(x){ return x && String(x.id)===String(id); });
+  }
+  /* Borrar un cliente arrastra sus cobros: la propia aplicación avisa de que
+     "también se eliminarán N registros de cobro/venta vinculados". Si la
+     papelera guardase solo el cliente, al restaurarlo volvería sin su dinero y
+     las cuentas del mes no cuadrarían. Por eso se fotografían las colecciones
+     antes del borrado y se guarda con él todo lo que haya desaparecido de paso. */
+  var COLS_ARRASTRE=["ventas","inversiones","clientes"];
+  function fotografiar(){
+    var f={};
+    COLS_ARRASTRE.forEach(function(c){
+      var arr=coleccion(c); f[c]=Array.isArray(arr)?arr.slice():[];
+    });
+    return f;
+  }
+  function desaparecidos(antes,colPrincipal,idPrincipal){
+    var fuera=[];
+    COLS_ARRASTRE.forEach(function(c){
+      var ahora=coleccion(c); if(!Array.isArray(ahora)) return;
+      var vivos={};
+      ahora.forEach(function(x){ if(x&&x.id!=null) vivos[String(x.id)]=1; });
+      antes[c].forEach(function(x){
+        if(!x||x.id==null) return;
+        if(vivos[String(x.id)]) return;
+        if(c===colPrincipal && String(x.id)===String(idPrincipal)) return;
+        var copia=clon(x); if(copia) fuera.push({col:c, reg:copia});
+      });
+    });
+    return fuera;
+  }
+
+  function envolverBorrado(nombre,col,buscar,contexto){
+    var orig=window[nombre];
+    if(typeof orig!=="function" || orig.__v171) return !1;
+    function envuelto(){
+      var copia=null, extra=null;
+      try{ var reg=buscar.apply(null,arguments); if(reg){ copia=clon(reg); } }catch(_){}
+      try{ if(copia && contexto) extra=contexto(copia); }catch(_){}
+      var antes=null;
+      try{ if(copia) antes=fotografiar(); }catch(_){}
+      var r=orig.apply(this,arguments);
+      try{
+        if(copia && !sigueVivo(col,copia.id)){
+          var arrastre=antes?desaparecidos(antes,col,copia.id):[];
+          guardarEnPapelera(col,copia,extra,arrastre);
+        }
+      }catch(_){}
+      return r;
+    }
+    envuelto.__v171=!0; heredarMarcas(envuelto,orig);
+    window[nombre]=envuelto;
+    return !0;
+  }
+  function porId(col){
+    return function(id){
+      var arr=coleccion(col); if(!Array.isArray(arr)) return null;
+      return arr.find(function(x){ return x && String(x.id)===String(id); })||null;
+    };
+  }
+
+  function engancharBorrados(){
+    envolverBorrado("darDeBajaCliente","clientes",porId("clientes"));
+    envolverBorrado("eliminarVenta","ventas",porId("ventas"));
+    envolverBorrado("eliminarInversion","inversiones",porId("inversiones"));
+    envolverBorrado("eliminarMensajeRapido","mensajesRapidos",porId("mensajesRapidos"));
+    /* Al borrar una master sus clientes quedan sueltos; se anota a quiénes les
+       pasó y con qué correo estaban, para poder devolverlos si se restaura. */
+    envolverBorrado("eliminarCuentaMaster","servicios",porId("servicios"),function(reg){
+      try{
+        var hijos=(typeof clientesDeMaster==="function")?clientesDeMaster(reg.id):[];
+        return {clientes:hijos.map(function(c){
+          return {id:c.id, cuentaMasterId:c.cuentaMasterId, correo:c.correo};
+        })};
+      }catch(_){ return null; }
+    });
+    /* eliminarServicio y eliminarServicioDirectoDashboard delegan en
+       eliminarCuentaMaster, así que quedan cubiertos por el mismo enganche
+       siempre que llamen a la versión de window. */
+    ["eliminarServicio","eliminarServicioDirectoDashboard"].forEach(function(n){
+      var f=window[n];
+      if(typeof f!=="function" || f.__v171redir) return;
+      function redir(id){ return window.eliminarCuentaMaster(id); }
+      redir.__v171redir=!0; heredarMarcas(redir,f);
+      window[n]=redir;
+    });
+    /* El combo guardado se borra por el valor de un desplegable. */
+    var combo=window.eliminarComboGuardadoActual;
+    if(typeof combo==="function" && !combo.__v171){
+      function envueltoCombo(){
+        var copia=null;
+        try{
+          var sel=document.getElementById("select-combos-guardados");
+          var arr=coleccion("combosGuardados");
+          if(sel && sel.value && Array.isArray(arr)){
+            var reg=arr.find(function(x){ return x && String(x.id)===String(sel.value); });
+            if(reg) copia=clon(reg);
+          }
+        }catch(_){}
+        var r=combo.apply(this,arguments);
+        try{ if(copia && !sigueVivo("combosGuardados",copia.id)) guardarEnPapelera("combosGuardados",copia,null); }catch(_){}
+        return r;
+      }
+      envueltoCombo.__v171=!0; heredarMarcas(envueltoCombo,combo);
+      window.eliminarComboGuardadoActual=envueltoCombo;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     3 · Devolver a su sitio
+     ---------------------------------------------------------------------- */
+  window.papotasPapeleraRestaurar = function(idEntrada){
+    var lista=leer();
+    var i=lista.findIndex(function(e){ return e.id===idEntrada; });
+    if(i<0) return toast("Ese registro ya no está en la papelera");
+    var e=lista[i];
+    var arr=coleccion(e.col);
+    if(!Array.isArray(arr)) return toast("No se puede restaurar aquí: "+(ETIQUETAS[e.col]||e.col));
+
+    if(arr.some(function(x){ return x && String(x.id)===String(e.reg.id); })){
+      lista.splice(i,1); escribir(lista); pintarPapelera(); pintarContador();
+      return toast("Ya existía uno igual; se quitó de la papelera");
+    }
+
+    arr.push(e.reg);
+    olvidarBorradoNube(e.col, e.reg.id);
+
+    var aviso="";
+    /* Una master vuelve con sus inquilinos, si siguen sin cuenta. */
+    if(e.col==="servicios" && e.extra && Array.isArray(e.extra.clientes)){
+      var devueltos=0;
+      e.extra.clientes.forEach(function(h){
+        var c=(window.clientes||[]).find(function(x){ return x && String(x.id)===String(h.id); });
+        if(c && !c.cuentaMasterId){ c.cuentaMasterId=h.cuentaMasterId; c.correo=h.correo; devueltos++; }
+      });
+      if(devueltos) aviso=" · "+devueltos+" cliente(s) recuperaron su cuenta";
+    }
+    /* Un cliente vuelve a una cuenta que quizá ya no existe o ya está llena.
+       Se restaura igual —no se pierde nada— pero se dice en qué situación queda. */
+    if(e.col==="clientes" && e.reg.cuentaMasterId){
+      var m=(window.servicios||[]).find(function(s){ return String(s.id)===String(e.reg.cuentaMasterId); });
+      if(!m){ e.reg.cuentaMasterId=null; e.reg.correo="Sin asignar"; aviso=" · su cuenta ya no existe, queda sin asignar"; }
+      else {
+        var dentro=(window.clientes||[]).filter(function(c){ return String(c.cuentaMasterId)===String(m.id); }).length;
+        var cabe=Math.max(0,Number(m.perfiles)||0);
+        if(dentro>cabe) aviso=" · atención: la cuenta queda con "+dentro+"/"+cabe+" perfiles";
+      }
+    }
+
+    /* Y con él, todo lo que se llevó por delante. */
+    var extras=0;
+    if(Array.isArray(e.arrastrados)){
+      e.arrastrados.forEach(function(x){
+        var destino=coleccion(x.col);
+        if(!Array.isArray(destino)) return;
+        if(destino.some(function(y){ return y && String(y.id)===String(x.reg.id); })) return;
+        destino.push(x.reg);
+        olvidarBorradoNube(x.col, x.reg.id);
+        extras++;
+      });
+      if(extras) aviso+=" · "+extras+" apunte(s) de dinero recuperados";
+    }
+
+    lista.splice(i,1); escribir(lista);
+    try{ registrarAuditoria("RESTAURAR",(ETIQUETAS[e.col]||e.col)+" "+e.titulo); }catch(_){}
+    try{ sincronizarDatosLocales(); }catch(_){}
+    try{ guardarEstadoHistorial(); }catch(_){}
+    try{ renderizarTodo(); }catch(_){}
+    pintarPapelera(); pintarContador();
+    toast("Restaurado: "+e.titulo+aviso);
+  };
+
+  window.papotasPapeleraBorrar = function(idEntrada){
+    var lista=leer();
+    var e=lista.find(function(x){ return x.id===idEntrada; });
+    if(!e) return;
+    if(!confirm("Borrar definitivamente:\n\n"+e.titulo+"\n\nEsto ya no se puede deshacer.")) return;
+    escribir(lista.filter(function(x){ return x.id!==idEntrada; }));
+    pintarPapelera(); pintarContador();
+    toast("Borrado definitivo");
+  };
+
+  window.papotasPapeleraVaciar = function(){
+    var n=leer().length;
+    if(!n) return toast("La papelera ya está vacía");
+    if(!confirm("Vaciar la papelera y perder "+n+" registro(s) para siempre?\n\nEsto ya no se puede deshacer.")) return;
+    escribir([]); pintarPapelera(); pintarContador();
+    toast("Papelera vacía");
+  };
+
+  /* ------------------------------------------------------------------------
+     4 · La pantalla de la papelera
+     ---------------------------------------------------------------------- */
+  var filtroPapelera="todo";
+
+  function montarModal(){
+    if(document.getElementById("modal-papelera")) return;
+    var d=document.createElement("div");
+    d.id="modal-papelera";
+    d.className="modal-papotas fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-3 transition-opacity";
+    d.setAttribute("role","dialog");
+    d.setAttribute("aria-modal","true");
+    d.innerHTML=
+      '<div class="glass-card rounded-2xl w-full max-w-2xl p-4 sm:p-5 space-y-3 max-h-[85vh] overflow-y-auto shadow-2xl border border-white/15">'+
+        '<div class="flex justify-between items-center border-b border-white/10 pb-2">'+
+          '<div><h3 class="text-xs font-black text-white flex items-center gap-1.5">'+
+            '<i class="w-4 h-4" data-lucide="trash-2"></i> Papelera</h3>'+
+            '<p class="text-[10px] text-slate-400 font-semibold mt-0.5">Lo que borras se guarda aquí medio año por si te hace falta.</p></div>'+
+          '<button type="button" class="text-slate-400 hover:text-white p-1 rounded-lg bg-white/5 transition" '+
+            'onclick="papotasCerrarPapelera()" aria-label="Cerrar"><i class="w-4 h-4" data-lucide="x"></i></button>'+
+        '</div>'+
+        '<div class="pap-papelera-filtros" id="papelera-filtros"></div>'+
+        '<div id="papelera-lista" class="space-y-1.5"></div>'+
+        '<div class="flex items-center justify-between gap-2 border-t border-white/10 pt-2.5">'+
+          '<span class="text-[10px] text-slate-500 font-bold" id="papelera-pie"></span>'+
+          '<button type="button" class="pap-tool" onclick="papotasPapeleraVaciar()">Vaciar papelera</button>'+
+        '</div>'+
+      '</div>';
+    document.body.appendChild(d);
+    d.addEventListener("click",function(ev){ if(ev.target===d) window.papotasCerrarPapelera(); });
+  }
+
+  function pintarPapelera(){
+    var caja=document.getElementById("papelera-lista");
+    if(!caja) return;
+    var todo=leer();
+
+    var filtros=document.getElementById("papelera-filtros");
+    if(filtros){
+      var cuentas={};
+      todo.forEach(function(e){ cuentas[e.col]=(cuentas[e.col]||0)+1; });
+      var opciones=[["todo","Todo",todo.length]].concat(
+        Object.keys(ETIQUETAS).filter(function(c){ return cuentas[c]; })
+          .map(function(c){ return [c, ETIQUETAS[c], cuentas[c]]; }));
+      filtros.innerHTML=opciones.map(function(o){
+        return '<button type="button" class="pap-tool'+(filtroPapelera===o[0]?" primary":"")+'" '+
+               'onclick="papotasPapeleraFiltrar(\''+o[0]+'\')">'+escapa(o[1])+' <b>'+o[2]+'</b></button>';
+      }).join("");
+    }
+
+    var lista=filtroPapelera==="todo" ? todo : todo.filter(function(e){ return e.col===filtroPapelera; });
+
+    if(!lista.length){
+      caja.innerHTML='<div class="text-center py-8 px-3">'+
+        '<p class="text-xs font-black text-slate-300">'+(todo.length?"Nada de este tipo en la papelera":"La papelera está vacía")+'</p>'+
+        '<p class="text-[10px] text-slate-500 font-semibold mt-1">Cuando borres un cliente, una venta, una inversión o una cuenta master, aparecerá aquí.</p></div>';
+    } else {
+      caja.innerHTML=lista.map(function(e){
+        var cuando="";
+        try{ cuando=papotasFechaLegible(String(e.cuando).slice(0,10)+" "+String(e.cuando).slice(11,16)); }catch(_){ cuando=String(e.cuando||"").slice(0,16); }
+        var puede=!!coleccion(e.col);
+        return '<div class="pap-basura">'+
+          '<div class="pap-basura-txt">'+
+            '<span class="chip chip-neutro">'+escapa(ETIQUETAS[e.col]||e.col)+'</span>'+
+            '<b>'+escapa(e.titulo)+'</b>'+
+            (e.detalle?'<span class="pap-basura-sub">'+escapa(e.detalle)+'</span>':'')+
+            ((e.arrastrados&&e.arrastrados.length)
+              ?'<span class="pap-basura-sub">+ '+e.arrastrados.length+' apunte(s) de dinero que se fueron con él</span>':'')+
+            '<span class="pap-basura-sub">Borrado el '+escapa(cuando)+'</span>'+
+          '</div>'+
+          '<div class="pap-basura-acc">'+
+            (e.importe?'<span class="pap-basura-imp">'+escapa(dinero(e.importe))+'</span>':'')+
+            (puede?'<button type="button" class="pap-tool pap-devolver" onclick="papotasPapeleraRestaurar(\''+e.id+'\')">Restaurar</button>':'')+
+            '<button type="button" class="pap-tool pap-quemar" onclick="papotasPapeleraBorrar(\''+e.id+'\')" title="Borrar definitivamente" aria-label="Borrar definitivamente">Borrar</button>'+
+          '</div></div>';
+      }).join("");
+    }
+
+    var pie=document.getElementById("papelera-pie");
+    if(pie){
+      var total=window.papotasPapeleraDe("ventas")
+        .reduce(function(s,v){ return s+(Number(v.reg&&v.reg.monto)||0); },0);
+      pie.textContent = todo.length
+        ? todo.length+" registro(s) recuperables"+(total?" · "+dinero(total)+" en ventas borradas":"")
+        : "Sin nada guardado";
+    }
+    try{ if(window.lucide && lucide.createIcons) lucide.createIcons(); }catch(_){}
+  }
+
+  window.papotasPapeleraFiltrar=function(c){ filtroPapelera=c; pintarPapelera(); };
+  window.papotasAbrirPapelera=function(){
+    montarModal(); pintarPapelera();
+    try{ abrirModal("modal-papelera"); }catch(_){
+      var m=document.getElementById("modal-papelera");
+      if(m){ m.classList.remove("hidden"); m.classList.add("flex"); }
+    }
+  };
+  window.papotasCerrarPapelera=function(){
+    try{ cerrarModal("modal-papelera"); }catch(_){
+      var m=document.getElementById("modal-papelera");
+      if(m){ m.classList.add("hidden"); m.classList.remove("flex"); }
+    }
+  };
+
+  /* Botón de entrada en "Datos y salud" y en Ajustes, y contador a la vista. */
+  function pintarContador(){
+    var n=leer().length;
+    document.querySelectorAll("[data-papelera-cuenta]").forEach(function(el){
+      el.textContent = n ? ("Papelera ("+n+")") : "Papelera";
+    });
+  }
+  function montarBotones(){
+    var sitios=[
+      ["#sec-datos-pro .ps-list", "ps-btn"],
+      ["#sec-ajustes .ps-list", "ps-btn"],
+      ["#sec-config .ps-list", "ps-btn"]
+    ];
+    sitios.forEach(function(s){
+      var cont=document.querySelector(s[0]);
+      if(!cont || cont.querySelector("[data-papelera-cuenta]")) return;
+      var b=document.createElement("button");
+      b.type="button"; b.className=s[1];
+      b.setAttribute("data-papelera-cuenta","1");
+      b.onclick=window.papotasAbrirPapelera;
+      b.textContent="Papelera";
+      cont.appendChild(b);
+    });
+    pintarContador();
+  }
+
+  /* ========================================================================
+     5 · Un Excel de verdad, con estructura y estilo
+     Hasta ahora el botón "Excel" soltaba un CSV: texto separado por comas, sin
+     cabeceras fijas, sin formato de moneda y con las fechas convertidas en
+     texto. Ahora escribe un .xlsx auténtico.
+
+     Un .xlsx es un ZIP con varios XML dentro. No hace falta comprimir nada: el
+     formato admite entradas "almacenadas" (método 0), así que basta con
+     escribir las cabeceras del ZIP, el CRC de cada archivo y el índice final.
+     Son unas ochenta líneas y evitan depender de una librería externa, que es
+     justo lo que no podemos permitirnos si el programa tiene que abrir sin
+     conexión.
+     ====================================================================== */
+
+  var tablaCrc=null;
+  function crc32(datos){
+    if(!tablaCrc){
+      tablaCrc=new Int32Array(256);
+      for(var n=0;n<256;n++){
+        var c=n;
+        for(var k=0;k<8;k++) c = (c&1) ? (0xEDB88320 ^ (c>>>1)) : (c>>>1);
+        tablaCrc[n]=c;
+      }
+    }
+    var crc=-1;
+    for(var i=0;i<datos.length;i++) crc = (crc>>>8) ^ tablaCrc[(crc ^ datos[i]) & 0xFF];
+    return (crc ^ -1) >>> 0;
+  }
+  function aBytes(texto){ return new TextEncoder().encode(texto); }
+
+  function zip(archivos){
+    var trozos=[], indice=[], desplazamiento=0, total=0;
+    /* Fecha y hora en formato MS-DOS, que es lo que guarda el ZIP. */
+    var ahora=new Date();
+    var hora=((ahora.getHours()<<11)|(ahora.getMinutes()<<5)|(ahora.getSeconds()>>1))&0xFFFF;
+    var fecha=(((ahora.getFullYear()-1980)<<9)|((ahora.getMonth()+1)<<5)|ahora.getDate())&0xFFFF;
+
+    archivos.forEach(function(a){
+      var nombre=aBytes(a.nombre), datos=a.datos, crc=crc32(datos);
+      var cab=new Uint8Array(30+nombre.length), v=new DataView(cab.buffer);
+      v.setUint32(0,0x04034b50,!0); v.setUint16(4,20,!0); v.setUint16(6,0x0800,!0);
+      v.setUint16(8,0,!0); v.setUint16(10,hora,!0); v.setUint16(12,fecha,!0);
+      v.setUint32(14,crc,!0); v.setUint32(18,datos.length,!0); v.setUint32(22,datos.length,!0);
+      v.setUint16(26,nombre.length,!0); v.setUint16(28,0,!0);
+      cab.set(nombre,30);
+      trozos.push(cab,datos);
+
+      var ent=new Uint8Array(46+nombre.length), w=new DataView(ent.buffer);
+      w.setUint32(0,0x02014b50,!0); w.setUint16(4,20,!0); w.setUint16(6,20,!0);
+      w.setUint16(8,0x0800,!0); w.setUint16(10,0,!0); w.setUint16(12,hora,!0); w.setUint16(14,fecha,!0);
+      w.setUint32(16,crc,!0); w.setUint32(20,datos.length,!0); w.setUint32(24,datos.length,!0);
+      w.setUint16(28,nombre.length,!0); w.setUint16(30,0,!0); w.setUint16(32,0,!0);
+      w.setUint16(34,0,!0); w.setUint16(36,0,!0); w.setUint32(38,0,!0);
+      w.setUint32(42,desplazamiento,!0);
+      ent.set(nombre,46);
+      indice.push(ent);
+
+      desplazamiento+=cab.length+datos.length;
+    });
+
+    var tamIndice=indice.reduce(function(s,e){ return s+e.length; },0);
+    var fin=new Uint8Array(22), f=new DataView(fin.buffer);
+    f.setUint32(0,0x06054b50,!0); f.setUint16(4,0,!0); f.setUint16(6,0,!0);
+    f.setUint16(8,archivos.length,!0); f.setUint16(10,archivos.length,!0);
+    f.setUint32(12,tamIndice,!0); f.setUint32(16,desplazamiento,!0); f.setUint16(20,0,!0);
+
+    var partes=trozos.concat(indice); partes.push(fin);
+    partes.forEach(function(p){ total+=p.length; });
+    var salida=new Uint8Array(total), pos=0;
+    partes.forEach(function(p){ salida.set(p,pos); pos+=p.length; });
+    return salida;
+  }
+
+  /* --- Piezas del libro --------------------------------------------------- */
+  function xmlEsc(t){
+    return String(t==null?"":t)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&apos;")
+      /* Excel rechaza el archivo entero si se cuela un carácter de control. */
+      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,"");
+  }
+  function columna(n){ /* 1 -> A, 27 -> AA */
+    var s="";
+    while(n>0){ var r=(n-1)%26; s=String.fromCharCode(65+r)+s; n=Math.floor((n-1)/26); }
+    return s;
+  }
+  /* Excel cuenta los días desde el 30/12/1899. */
+  function serieFecha(iso){
+    var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso||""));
+    if(!m) return null;
+    var dias=(Date.UTC(+m[1],+m[2]-1,+m[3]) - Date.UTC(1899,11,30))/86400000;
+    return (isFinite(dias) && dias>0) ? dias : null;
+  }
+
+  var ESTILOS={ normal:0, titulo:1, subtitulo:2, cabecera:3, texto:4,
+                dinero:5, fecha:6, entero:7, totalTexto:8, totalDinero:9, apagado:10 };
+
+  function hojaXml(hoja){
+    var cols=hoja.columnas, filas=[], nf=1;
+
+    function celda(fila,col,valor,estilo,tipo){
+      var ref=columna(col)+fila;
+      if(valor===null||valor===undefined||valor==="")
+        return '<c r="'+ref+'" s="'+estilo+'"/>';
+      if(tipo==="n") return '<c r="'+ref+'" s="'+estilo+'"><v>'+valor+'</v></c>';
+      return '<c r="'+ref+'" t="inlineStr" s="'+estilo+'"><is><t xml:space="preserve">'+xmlEsc(valor)+'</t></is></c>';
+    }
+
+    /* Fila 1: el título. Fila 2: de qué va y cuándo se sacó. Fila 3: cabeceras. */
+    var t1=[celda(1,1,hoja.titulo,ESTILOS.titulo)];
+    for(var c=2;c<=cols.length;c++) t1.push(celda(1,c,"",ESTILOS.titulo));
+    filas.push('<row r="1" ht="24" customHeight="1">'+t1.join("")+"</row>");
+
+    var t2=[celda(2,1,hoja.subtitulo,ESTILOS.subtitulo)];
+    for(var c2=2;c2<=cols.length;c2++) t2.push(celda(2,c2,"",ESTILOS.subtitulo));
+    filas.push('<row r="2" ht="16" customHeight="1">'+t2.join("")+"</row>");
+
+    filas.push('<row r="3" ht="22" customHeight="1">'+
+      cols.map(function(col,i){ return celda(3,i+1,col.titulo,ESTILOS.cabecera); }).join("")+"</row>");
+
+    nf=3;
+    hoja.filas.forEach(function(f){
+      nf++;
+      filas.push('<row r="'+nf+'">'+cols.map(function(col,i){
+        var v=f[i];
+        if(col.tipo==="dinero"){
+          var n=Number(v); return celda(nf,i+1, isFinite(n)?n:null, ESTILOS.dinero, "n");
+        }
+        if(col.tipo==="fecha"){
+          var s=serieFecha(v);
+          return s===null ? celda(nf,i+1, v||"", ESTILOS.texto) : celda(nf,i+1, s, ESTILOS.fecha, "n");
+        }
+        if(col.tipo==="entero"){
+          var e=Number(v); return celda(nf,i+1, isFinite(e)?Math.round(e):null, ESTILOS.entero, "n");
+        }
+        return celda(nf,i+1, v, f.__apagada?ESTILOS.apagado:ESTILOS.texto);
+      }).join("")+"</row>");
+    });
+
+    /* Última fila: totales de las columnas de dinero. */
+    var hayTotales=cols.some(function(c){ return c.tipo==="dinero" && c.total!==!1; });
+    if(hayTotales && hoja.filas.length){
+      nf++;
+      filas.push('<row r="'+nf+'" ht="20" customHeight="1">'+cols.map(function(col,i){
+        if(i===0) return celda(nf,1,"TOTAL ("+hoja.filas.length+")",ESTILOS.totalTexto);
+        if(col.tipo!=="dinero"||col.total===!1) return celda(nf,i+1,"",ESTILOS.totalTexto);
+        var suma=hoja.filas.reduce(function(s,f){ var n=Number(f[i]); return s+(isFinite(n)?n:0); },0);
+        return celda(nf,i+1,Math.round(suma*100)/100,ESTILOS.totalDinero,"n");
+      }).join("")+"</row>");
+    }
+
+    var ultima=columna(cols.length)+nf;
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+      '<dimension ref="A1:'+ultima+'"/>'+
+      '<sheetViews><sheetView showGridLines="0" workbookViewId="0">'+
+        '<pane ySplit="3" topLeftCell="A4" activePane="bottomLeft" state="frozen"/>'+
+        '<selection pane="bottomLeft" activeCell="A4" sqref="A4"/>'+
+      '</sheetView></sheetViews>'+
+      '<sheetFormatPr defaultRowHeight="15"/>'+
+      '<cols>'+cols.map(function(c,i){
+        return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+(c.ancho||16)+'" customWidth="1"/>';
+      }).join("")+'</cols>'+
+      '<sheetData>'+filas.join("")+'</sheetData>'+
+      (hoja.filas.length ? '<autoFilter ref="A3:'+columna(cols.length)+(3+hoja.filas.length)+'"/>' : '')+
+      '<mergeCells count="2"><mergeCell ref="A1:'+columna(cols.length)+'1"/>'+
+        '<mergeCell ref="A2:'+columna(cols.length)+'2"/></mergeCells>'+
+      '<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/>'+
+      '</worksheet>';
+  }
+
+  var ESTILOS_XML='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'+
+    '<numFmts count="2">'+
+      '<numFmt numFmtId="164" formatCode="&quot;S/ &quot;#,##0.00"/>'+
+      '<numFmt numFmtId="165" formatCode="dd/mm/yyyy"/>'+
+    '</numFmts>'+
+    '<fonts count="6">'+
+      '<font><sz val="11"/><name val="Calibri"/><color rgb="FF1E293B"/></font>'+
+      '<font><b/><sz val="11"/><name val="Calibri"/><color rgb="FFFFFFFF"/></font>'+
+      '<font><b/><sz val="16"/><name val="Calibri"/><color rgb="FF0F172A"/></font>'+
+      '<font><i/><sz val="10"/><name val="Calibri"/><color rgb="FF64748B"/></font>'+
+      '<font><b/><sz val="11"/><name val="Calibri"/><color rgb="FF0F172A"/></font>'+
+      '<font><sz val="11"/><name val="Calibri"/><color rgb="FF94A3B8"/></font>'+
+    '</fonts>'+
+    '<fills count="5">'+
+      '<fill><patternFill patternType="none"/></fill>'+
+      '<fill><patternFill patternType="gray125"/></fill>'+
+      '<fill><patternFill patternType="solid"><fgColor rgb="FF0F172A"/><bgColor indexed="64"/></patternFill></fill>'+
+      '<fill><patternFill patternType="solid"><fgColor rgb="FFE2E8F0"/><bgColor indexed="64"/></patternFill></fill>'+
+      '<fill><patternFill patternType="solid"><fgColor rgb="FFF8FAFC"/><bgColor indexed="64"/></patternFill></fill>'+
+    '</fills>'+
+    '<borders count="2">'+
+      '<border><left/><right/><top/><bottom/><diagonal/></border>'+
+      '<border><left style="thin"><color rgb="FFCBD5E1"/></left><right style="thin"><color rgb="FFCBD5E1"/></right>'+
+        '<top style="thin"><color rgb="FFCBD5E1"/></top><bottom style="thin"><color rgb="FFCBD5E1"/></bottom><diagonal/></border>'+
+    '</borders>'+
+    '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'+
+    '<cellXfs count="11">'+
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'+
+      '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>'+
+      '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>'+
+      '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>'+
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>'+
+      '<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>'+
+      '<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'+
+      '<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center"/></xf>'+
+      '<xf numFmtId="0" fontId="4" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>'+
+      '<xf numFmtId="164" fontId="4" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center"/></xf>'+
+      '<xf numFmtId="0" fontId="5" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>'+
+    '</cellXfs>'+
+    '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'+
+    '</styleSheet>';
+
+  function libro(hojas){
+    var archivos=[];
+    archivos.push({nombre:"[Content_Types].xml", datos:aBytes(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'+
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'+
+      '<Default Extension="xml" ContentType="application/xml"/>'+
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'+
+      hojas.map(function(h,i){ return '<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>'; }).join("")+
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'+
+      '</Types>')});
+    archivos.push({nombre:"_rels/.rels", datos:aBytes(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'+
+      '</Relationships>')});
+    archivos.push({nombre:"xl/workbook.xml", datos:aBytes(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '+
+      'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'+
+      '<sheets>'+hojas.map(function(h,i){
+        return '<sheet name="'+xmlEsc(h.nombre.slice(0,31))+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>';
+      }).join("")+'</sheets></workbook>')});
+    archivos.push({nombre:"xl/_rels/workbook.xml.rels", datos:aBytes(
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+
+      hojas.map(function(h,i){
+        return '<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>';
+      }).join("")+
+      '<Relationship Id="rId'+(hojas.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'+
+      '</Relationships>')});
+    archivos.push({nombre:"xl/styles.xml", datos:aBytes(ESTILOS_XML)});
+    hojas.forEach(function(h,i){
+      archivos.push({nombre:"xl/worksheets/sheet"+(i+1)+".xml", datos:aBytes(hojaXml(h))});
+    });
+    return zip(archivos);
+  }
+
+  /* --- Las hojas del libro ------------------------------------------------ */
+  function hoy(){ try{ return obtenerFechaLocal(); }catch(_){ return new Date().toISOString().slice(0,10); } }
+  function cuentaDe(id){
+    var m=(window.servicios||[]).find(function(s){ return String(s.id)===String(id); });
+    if(!m) return "";
+    try{ return nombreCuenta(m); }catch(_){ return m.nombre||""; }
+  }
+  function sacado(){ return "Generado por PAPOTAS el "+hoy(); }
+
+  function hojaClientes(){
+    var cl=(window.clientes||[]).slice().sort(function(a,b){
+      return String(a.vencimiento||"").localeCompare(String(b.vencimiento||""));
+    });
+    return {
+      nombre:"Clientes",
+      titulo:"Clientes",
+      subtitulo:sacado()+" · "+cl.length+" cliente(s)",
+      columnas:[
+        {titulo:"Cliente",ancho:22},{titulo:"Teléfono",ancho:14},
+        {titulo:"Plataforma",ancho:16},{titulo:"Cuenta master",ancho:18},
+        {titulo:"Perfil",ancho:12},{titulo:"PIN",ancho:8},
+        {titulo:"Correo de acceso",ancho:26},
+        {titulo:"Alta",ancho:12,tipo:"fecha"},{titulo:"Vence",ancho:12,tipo:"fecha"},
+        {titulo:"Días",ancho:8,tipo:"entero"},{titulo:"Estado",ancho:12},
+        {titulo:"Cobro",ancho:13,tipo:"dinero"},{titulo:"Ciclo",ancho:12},
+        {titulo:"Referido por",ancho:16},{titulo:"Notas",ancho:30}
+      ],
+      filas:cl.map(function(c){
+        var estados={activo:"Al día",por_vencer:"Por vencer",vencido:"Vencido",sin_fecha:"Sin fecha"};
+        var e="", d=null, cob=0, ciclo="";
+        try{ e=estados[estadoCliente(c)]||""; }catch(_){}
+        try{ d=diasHasta(c.vencimiento); }catch(_){}
+        try{ cob=cobroDeCliente(c); }catch(_){ cob=Number(c.monto)||0; }
+        try{ var k=cicloDeCliente(c); ciclo=textoPeriodo(k.tipo,k.cantidad); }catch(_){}
+        return [c.nombre||"", c.telefono||"", c.servicio||"", cuentaDe(c.cuentaMasterId)||"Sin cuenta",
+                c.perfil||"", c.pin||"", c.correo||"", c.inicio||"", c.vencimiento||"",
+                d, e, cob, ciclo, c.referidoPor||"", c.notas||""];
+      })
+    };
+  }
+
+  function hojaVentas(incluirBorradas){
+    var v=(window.ventas||[]).slice().map(function(x){ return {v:x,borrada:!1}; });
+    if(incluirBorradas){
+      window.papotasPapeleraDe("ventas").forEach(function(e){ v.push({v:e.reg,borrada:!0,cuando:e.cuando}); });
+    }
+    v.sort(function(a,b){ return String(b.v.fecha||"").localeCompare(String(a.v.fecha||"")); });
+    return {
+      nombre:"Ventas",
+      titulo:"Ventas e ingresos",
+      subtitulo:sacado()+" · "+v.length+" apunte(s)"+(incluirBorradas?" (incluye las borradas)":""),
+      columnas:[
+        {titulo:"Fecha",ancho:12,tipo:"fecha"},{titulo:"Cliente",ancho:22},
+        {titulo:"Plataforma",ancho:16},{titulo:"Cuenta master",ancho:18},
+        {titulo:"Periodo",ancho:10,tipo:"entero"},{titulo:"Método",ancho:12},
+        {titulo:"Situación",ancho:14},{titulo:"Monto",ancho:13,tipo:"dinero"}
+      ],
+      filas:v.map(function(o){
+        var f=[o.v.fecha||"", o.v.cliente||"", o.v.servicio||"",
+               cuentaDe(o.v.cuentaMasterId)||"Sin cuenta",
+               Math.max(1,parseInt(o.v.meses,10)||1), o.v.metodo||"",
+               o.borrada?"Borrada":"Vigente", Number(o.v.monto)||0];
+        if(o.borrada) f.__apagada=!0;
+        return f;
+      })
+    };
+  }
+
+  function hojaInversiones(incluirBorradas){
+    var inv=(window.inversiones||[]).slice().map(function(x){ return {v:x,borrada:!1}; });
+    if(incluirBorradas){
+      window.papotasPapeleraDe("inversiones").forEach(function(e){ inv.push({v:e.reg,borrada:!0}); });
+    }
+    inv.sort(function(a,b){ return String(b.v.fecha||"").localeCompare(String(a.v.fecha||"")); });
+    return {
+      nombre:"Inversiones",
+      titulo:"Inversiones en cuentas master",
+      subtitulo:sacado()+" · "+inv.length+" apunte(s)"+(incluirBorradas?" (incluye las borradas)":""),
+      columnas:[
+        {titulo:"Fecha",ancho:12,tipo:"fecha"},{titulo:"Plataforma",ancho:16},
+        {titulo:"Cuenta master",ancho:18},{titulo:"Persona",ancho:18},
+        {titulo:"Situación",ancho:14},{titulo:"Inversión",ancho:13,tipo:"dinero"}
+      ],
+      filas:inv.map(function(o){
+        var f=[o.v.fecha||"", o.v.plataforma||o.v.concepto||"",
+               cuentaDe(o.v.cuentaMasterId)||"Toda la plataforma", o.v.persona||"",
+               o.borrada?"Borrada":"Vigente", Number(o.v.monto)||0];
+        if(o.borrada) f.__apagada=!0;
+        return f;
+      })
+    };
+  }
+
+  function hojaCuentas(){
+    var ms=(window.servicios||[]).slice().sort(function(a,b){
+      return String(a.nombre||"").localeCompare(String(b.nombre||""),"es") || (a.numero||0)-(b.numero||0);
+    });
+    return {
+      nombre:"Cuentas master",
+      titulo:"Cuentas master",
+      subtitulo:sacado()+" · "+ms.length+" cuenta(s)",
+      columnas:[
+        {titulo:"Plataforma",ancho:16},{titulo:"N.º",ancho:6,tipo:"entero"},
+        {titulo:"Etiqueta",ancho:14},{titulo:"Correo",ancho:28},{titulo:"Clave",ancho:16},
+        {titulo:"Perfiles",ancho:9,tipo:"entero"},{titulo:"Ocupados",ancho:10,tipo:"entero"},
+        {titulo:"Libres",ancho:8,tipo:"entero"},{titulo:"Vence",ancho:12,tipo:"fecha"},
+        {titulo:"Costo",ancho:13,tipo:"dinero"},
+        {titulo:"Cobro mensual",ancho:15,tipo:"dinero"},
+        {titulo:"Margen",ancho:13,tipo:"dinero"},
+        {titulo:"Precio por perfil",ancho:16,tipo:"dinero",total:!1}
+      ],
+      filas:ms.map(function(m){
+        var hijos=[];
+        try{ hijos=clientesDeMaster(m.id)||[]; }catch(_){}
+        var plazas=Math.max(0,Number(m.perfiles)||0);
+        var cobro=hijos.reduce(function(s,c){
+          var n=0; try{ n=cobroDeCliente(c); }catch(_){ n=Number(c.monto)||0; }
+          return s+(Number(n)||0);
+        },0);
+        var costo=Number(m.costo)||0;
+        return [m.nombre||"", m.numero||1, m.etiqueta||"", m.correo||"", m.contrasena||"",
+                plazas, hijos.length, Math.max(0,plazas-hijos.length), m.vencimiento||"",
+                costo, cobro, cobro-costo, plazas?(costo/plazas):0];
+      })
+    };
+  }
+
+  function hojaResumen(){
+    var meses={};
+    function apunta(f,campo,monto){
+      var m=String(f||"").slice(0,7);
+      if(!/^\d{4}-\d{2}$/.test(m)) return;
+      meses[m]=meses[m]||{ingresos:0,gastos:0,ventas:0,nuevos:0};
+      meses[m][campo]+=monto;
+    }
+    (window.ventas||[]).forEach(function(v){ apunta(v.fecha,"ingresos",Number(v.monto)||0); apunta(v.fecha,"ventas",1); });
+    (window.inversiones||[]).forEach(function(i){ apunta(i.fecha,"gastos",Number(i.monto)||0); });
+    (window.clientes||[]).forEach(function(c){ apunta(c.inicio,"nuevos",1); });
+    var claves=Object.keys(meses).sort().reverse();
+    return {
+      nombre:"Resumen por mes",
+      titulo:"Resumen mensual",
+      subtitulo:sacado()+" · "+claves.length+" mes(es) con movimiento",
+      columnas:[
+        {titulo:"Mes",ancho:12},{titulo:"Ingresos",ancho:14,tipo:"dinero"},
+        {titulo:"Inversiones",ancho:14,tipo:"dinero"},{titulo:"Neto",ancho:14,tipo:"dinero"},
+        {titulo:"Ventas",ancho:10,tipo:"entero"},{titulo:"Clientes nuevos",ancho:15,tipo:"entero"}
+      ],
+      filas:claves.map(function(k){
+        var m=meses[k];
+        return [k, m.ingresos, m.gastos, m.ingresos-m.gastos, m.ventas, m.nuevos];
+      })
+    };
+  }
+
+  function hojaPapelera(){
+    var l=leer();
+    return {
+      nombre:"Eliminados",
+      titulo:"Registros eliminados",
+      subtitulo:sacado()+" · "+l.length+" registro(s) recuperables desde la papelera",
+      columnas:[
+        {titulo:"Borrado el",ancho:12,tipo:"fecha"},{titulo:"Tipo",ancho:16},
+        {titulo:"Qué era",ancho:30},{titulo:"Detalle",ancho:34},
+        {titulo:"Importe",ancho:13,tipo:"dinero"}
+      ],
+      filas:l.map(function(e){
+        return [String(e.cuando||"").slice(0,10), ETIQUETAS[e.col]||e.col,
+                e.titulo||"", e.detalle||"", Number(e.importe)||0];
+      })
+    };
+  }
+
+  function descargar(bytes,nombre){
+    var a=document.createElement("a");
+    var url=URL.createObjectURL(new Blob([bytes],
+      {type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}));
+    a.href=url; a.download=nombre;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+  }
+
+  /* El botón "Excel" de cada pantalla trae su hoja delante, y detrás el resto
+     del negocio: así el archivo sirve tanto para mirar una cosa como para
+     mandárselo entero a alguien. */
+  window.papotasExcel=function(foco){
+    try{
+      var todas={
+        clientes:hojaClientes, ventas:function(){ return hojaVentas(!0); },
+        inversiones:function(){ return hojaInversiones(!0); },
+        cuentas:hojaCuentas, resumen:hojaResumen, papelera:hojaPapelera
+      };
+      var orden=["clientes","ventas","inversiones","cuentas","resumen","papelera"];
+      if(todas[foco]) orden=[foco].concat(orden.filter(function(k){ return k!==foco; }));
+      var hojas=orden.map(function(k){ return todas[k](); });
+      var conDatos=hojas.filter(function(h){ return h.filas.length; });
+      if(!conDatos.length) return toast("No hay datos para exportar todavía.");
+      descargar(libro(conDatos), "papotas_"+(foco||"completo")+"_"+hoy()+".xlsx");
+      toast("Excel descargado · "+conDatos.length+" hoja(s)");
+    }catch(err){
+      console.error("Excel:",err);
+      toast("No se pudo crear el Excel: "+(err&&err.message||err));
+    }
+  };
+
+  function engancharExcel(){
+    var orig=window.exportarTablaCSV;
+    if(typeof orig!=="function" || orig.__v171) return;
+    function envuelto(tipo){ return window.papotasExcel(tipo); }
+    envuelto.__v171=!0; heredarMarcas(envuelto,orig);
+    window.exportarTablaCSV=envuelto;
+    /* Quien prefiera el CSV plano lo sigue teniendo. */
+    window.papotasCSV=orig;
+  }
+
+  /* ========================================================================
+     6 · El histórico completo
+     El documento pedía que en el histórico figuren también las inversiones de
+     las cuentas master —incluidas las que se eliminan— y los clientes. Se
+     añade una tercera pestaña y un interruptor para ver lo borrado, que la
+     papelera ya conserva.
+     ====================================================================== */
+  var verBorrados=!1;
+
+  function montarHistorico(){
+    var btnInv=document.getElementById("tab-btn-inversiones");
+    if(!btnInv) return !1;
+    /* Los cuatro desplegables del histórico ocupaban una línea entera cada uno
+       —una regla general del programa pone width:100% a todo select— y dejaban
+       la barra de filtros con cuatro pisos de alto en una pantalla de 1400 px.
+       Marcando la barra se le puede devolver el ancho natural sin tocar los
+       formularios, donde el 100% sí tiene sentido. */
+    btnInv.parentNode.classList.add("pap-barra-filtros");
+
+    if(!document.getElementById("tab-btn-clientes")){
+      var b=document.createElement("button");
+      b.type="button"; b.id="tab-btn-clientes";
+      b.className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 transition";
+      b.textContent="Clientes";
+      b.onclick=function(){ window.cambiarTabFinanzas("clientes"); };
+      btnInv.parentNode.insertBefore(b, btnInv.nextSibling);
+
+      var t=document.createElement("button");
+      t.type="button"; t.id="pap-ver-borrados";
+      t.className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 transition";
+      t.title="Mostrar también lo que se ha borrado, recuperable desde la papelera";
+      t.textContent="+ Borrados";
+      t.onclick=function(){
+        verBorrados=!verBorrados;
+        t.className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-black transition"+
+          (verBorrados?" bg-amber-500 text-black shadow":" text-slate-400 font-bold");
+        try{ renderizarFinanzas(); }catch(_){}
+      };
+      b.parentNode.insertBefore(t, b.nextSibling);
+    }
+
+    var contInv=document.getElementById("tab-contenido-inversiones");
+    if(contInv && !document.getElementById("tab-contenido-clientes")){
+      var c=document.createElement("div");
+      c.id="tab-contenido-clientes"; c.className="hidden";
+      c.innerHTML=
+        '<div class="pap-tabla-scroll overflow-x-auto w-full pb-2">'+
+        '<table class="w-full text-left text-xs text-slate-200">'+
+        '<thead class="text-[10px] uppercase text-slate-400 border-b border-white/10">'+
+        '<tr><th class="p-2.5 pl-3">Cliente</th><th class="p-2.5">Plataforma</th>'+
+        '<th class="p-2.5">Cuenta master</th><th class="p-2.5 text-center">Alta</th>'+
+        '<th class="p-2.5 text-center">Vence</th><th class="p-2.5 text-center">Estado</th>'+
+        '<th class="p-2.5 text-right pr-3">Cobro</th><th class="p-2.5 text-center">Acción</th></tr>'+
+        '</thead><tbody class="divide-y divide-white/5" id="tabla-clientes-historico"></tbody>'+
+        '</table></div>';
+      contInv.parentNode.insertBefore(c, contInv.nextSibling);
+    }
+    return !0;
+  }
+
+  function filaClienteHistorico(c,borrado,idPapelera){
+    var estado="", cobro=0;
+    try{ estado=chipEstadoCliente(c); }catch(_){ estado=""; }
+    try{ cobro=cobroDeCliente(c); }catch(_){ cobro=Number(c.monto)||0; }
+    var cuenta=cuentaDe(c.cuentaMasterId)||"Sin cuenta";
+    return '<tr class="transition'+(borrado?" pap-fila-borrada":"")+'">'+
+      '<td class="p-2.5 pl-3 font-bold text-white">'+escapa(c.nombre||"—")+
+        (borrado?' <span class="chip chip-neutro">borrado</span>':'')+'</td>'+
+      '<td class="p-2.5 text-slate-300 font-semibold">'+escapa(c.servicio||"—")+'</td>'+
+      '<td class="p-2.5 text-slate-400">'+escapa(cuenta)+'</td>'+
+      '<td class="p-2.5 text-center cifra text-slate-400 text-xs">'+escapa(papotasFechaLegible(c.inicio)||"—")+'</td>'+
+      '<td class="p-2.5 text-center cifra text-slate-400 text-xs">'+escapa(papotasFechaLegible(c.vencimiento)||"—")+'</td>'+
+      '<td class="p-2.5 text-center">'+(borrado?'<span class="chip chip-neutro">fuera</span>':estado)+'</td>'+
+      '<td class="p-2.5 text-right pr-3 font-black text-emerald-400 cifra text-xs">'+escapa(dinero(cobro))+'</td>'+
+      '<td class="p-2.5 text-center">'+
+        (borrado
+          ? '<button type="button" class="pap-tool" onclick="papotasPapeleraRestaurar(\''+idPapelera+'\')">Restaurar</button>'
+          : '<button type="button" class="pap-tool" onclick="abrirFichaCliente(\''+escapa(c.id)+'\')">Ver ficha</button>')+
+      '</td></tr>';
+  }
+
+  function pintarHistorico(){
+    if(!montarHistorico()) return;
+
+    /* Pestaña de clientes */
+    var cuerpo=document.getElementById("tabla-clientes-historico");
+    if(cuerpo){
+      var filas=(window.clientes||[]).slice().sort(function(a,b){
+        return String(b.inicio||"").localeCompare(String(a.inicio||""));
+      }).map(function(c){ return filaClienteHistorico(c,!1,null); });
+      if(verBorrados){
+        window.papotasPapeleraDe("clientes").forEach(function(e){
+          filas.push(filaClienteHistorico(e.reg,!0,e.id));
+        });
+      }
+      cuerpo.innerHTML = filas.length ? filas.join("")
+        : '<tr><td colspan="8" class="p-6 text-center text-slate-400 font-semibold text-xs">Todavía no hay clientes registrados.</td></tr>';
+    }
+
+    /* Lo borrado, al final de las otras dos tablas */
+    if(verBorrados){
+      var tv=document.getElementById("tabla-ventas-body");
+      if(tv){
+        var cols=tv.previousElementSibling ? (tv.parentNode.querySelectorAll("thead th").length||7) : 7;
+        window.papotasPapeleraDe("ventas").forEach(function(e){
+          var v=e.reg, tr=document.createElement("tr");
+          tr.className="transition pap-fila-borrada";
+          tr.innerHTML='<td class="p-2.5 pl-3 font-bold text-white">'+escapa(v.cliente||"Sin cliente")+
+            ' <span class="chip chip-neutro">borrada</span></td>'+
+            '<td class="p-2.5 text-slate-300 font-semibold">'+escapa(v.servicio||"—")+'</td>'+
+            '<td class="p-2.5 text-center text-slate-400">'+escapa(v.metodo||"—")+'</td>'+
+            '<td class="p-2.5 text-center text-[10px] font-bold text-slate-400">'+
+              escapa(Math.max(1,parseInt(v.meses,10)||1)+" mes"+((parseInt(v.meses,10)||1)>1?"es":""))+'</td>'+
+            '<td class="p-2.5 text-center cifra text-slate-400 text-xs">'+escapa(papotasFechaLegible(v.fecha)||"—")+'</td>'+
+            '<td class="p-2.5 text-right pr-3 font-black text-slate-400 cifra text-xs">'+escapa(dinero(v.monto))+'</td>'+
+            '<td class="p-2.5 text-center"><button type="button" class="pap-tool" '+
+              'onclick="papotasPapeleraRestaurar(\''+e.id+'\')">Restaurar</button></td>';
+          while(tr.children.length>cols && cols>0) tr.removeChild(tr.lastElementChild);
+          tv.appendChild(tr);
+        });
+      }
+      var ti=document.getElementById("tabla-inversiones-body");
+      if(ti){
+        window.papotasPapeleraDe("inversiones").forEach(function(e){
+          var v=e.reg, tr=document.createElement("tr");
+          tr.className="transition pap-fila-borrada";
+          tr.innerHTML='<td class="p-2.5 pl-3 font-bold text-white">'+escapa(v.plataforma||v.concepto||"—")+
+            ' <span class="chip chip-neutro">borrada</span></td>'+
+            '<td class="p-2.5 text-slate-300 font-semibold">'+escapa(v.persona||"—")+'</td>'+
+            '<td class="p-2.5 text-center cifra text-slate-400 text-xs">'+escapa(papotasFechaLegible(v.fecha)||"—")+'</td>'+
+            '<td class="p-2.5 text-right pr-3 font-black text-slate-400 cifra text-xs">'+escapa(dinero(v.monto))+'</td>'+
+            '<td class="p-2.5 text-center"><button type="button" class="pap-tool" '+
+              'onclick="papotasPapeleraRestaurar(\''+e.id+'\')">Restaurar</button></td>';
+          ti.appendChild(tr);
+        });
+      }
+    }
+  }
+
+  function engancharHistorico(){
+    var orig=window.cambiarTabFinanzas;
+    if(typeof orig==="function" && !orig.__v171){
+      function envuelto(cual){
+        var btnC=document.getElementById("tab-btn-clientes");
+        var contC=document.getElementById("tab-contenido-clientes");
+        if(cual==="clientes"){
+          /* Se apaga lo que hubiera encendido y se enciende esta. */
+          try{ orig.call(this,"inversiones"); }catch(_){}
+          try{ window.tabFinanzasActual="clientes"; }catch(_){}
+          ["tab-contenido-ventas","tab-contenido-inversiones"].forEach(function(id){
+            var el=document.getElementById(id); if(el) el.classList.add("hidden");
+          });
+          ["btn-nueva-venta","btn-nueva-inversion"].forEach(function(id){
+            var el=document.getElementById(id); if(el) el.classList.add("hidden");
+          });
+          ["tab-btn-ventas","tab-btn-inversiones"].forEach(function(id){
+            var el=document.getElementById(id);
+            if(el) el.className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 transition";
+          });
+          if(btnC) btnC.className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-black bg-sky-600 text-white shadow transition";
+          if(contC) contC.classList.remove("hidden");
+          pintarHistorico();
+          return;
+        }
+        var r=orig.apply(this,arguments);
+        if(contC) contC.classList.add("hidden");
+        if(btnC) btnC.className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 transition";
+        return r;
+      }
+      envuelto.__v171=!0; heredarMarcas(envuelto,orig);
+      window.cambiarTabFinanzas=envuelto;
+    }
+
+    var orig2=window.renderizarFinanzas;
+    if(typeof orig2==="function" && !orig2.__v171){
+      function envuelto2(){
+        var r=orig2.apply(this,arguments);
+        try{ pintarHistorico(); }catch(err){ console.warn("histórico:",err); }
+        return r;
+      }
+      envuelto2.__v171=!0; heredarMarcas(envuelto2,orig2);
+      window.renderizarFinanzas=envuelto2;
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     7 · Arranque
+     ---------------------------------------------------------------------- */
+  function enganchar(){
+    engancharBorrados();
+    engancharExcel();
+    engancharHistorico();
+    montarBotones();
+  }
+  function arrancar(){
+    var n=0;
+    (function reintentar(){
+      try{ enganchar(); }catch(err){ console.warn("V171:",err); }
+      if(++n<40) setTimeout(reintentar,300);
+    })();
+    /* Al entrar en Dinero se repinta el histórico con lo que haya. */
+    var mostrar=window.cambiarSeccion;
+    if(typeof mostrar==="function" && !mostrar.__v171){
+      function envuelto(id){
+        var r=mostrar.apply(this,arguments);
+        if(String(id)==="dinero"||String(id)==="ventas") setTimeout(pintarHistorico,60);
+        setTimeout(pintarContador,60);
+        return r;
+      }
+      envuelto.__v171=!0; heredarMarcas(envuelto,mostrar);
+      window.cambiarSeccion=envuelto;
+    }
+    /* Limpieza de lo caducado, una vez por sesión. */
+    try{ var l=leer(); var p=podar(l); if(p.length!==l.length) escribir(p); }catch(_){}
+  }
+  "loading"===document.readyState
+    ? document.addEventListener("DOMContentLoaded",function(){ setTimeout(arrancar,600); },{once:!0})
+    : setTimeout(arrancar,600);
+}();
+</script>
+
+<style id="papotas-v171-estilo">
+/* Papelera */
+#cuerpo-app #modal-papelera .pap-papelera-filtros{
+  display:flex; flex-wrap:wrap; gap:6px; padding-bottom:2px;
+}
+#cuerpo-app #modal-papelera .pap-papelera-filtros b{opacity:.65; font-weight:800; margin-left:2px}
+#cuerpo-app .pap-basura{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+  padding:9px 11px; border:1px solid rgba(255,255,255,.09); border-radius:12px;
+  background:rgba(255,255,255,.03);
+}
+#cuerpo-app .pap-basura-txt{display:flex; align-items:center; flex-wrap:wrap; gap:6px; min-width:0; flex:1 1 220px}
+#cuerpo-app .pap-basura-txt b{font-size:12px; font-weight:800; color:#e2e8f0}
+#cuerpo-app .pap-basura-sub{font-size:10px; font-weight:600; color:#94a3b8}
+#cuerpo-app .pap-basura-acc{display:flex; align-items:center; gap:6px; flex-shrink:0}
+#cuerpo-app .pap-basura-imp{font-size:11px; font-weight:800; color:#cbd5e1; font-variant-numeric:tabular-nums}
+@media (max-width:520px){
+  #cuerpo-app .pap-basura{align-items:stretch}
+  #cuerpo-app .pap-basura-acc{width:100%; justify-content:flex-end}
+}
+/* En la papelera el botón que da miedo es "Borrar", no "Restaurar". */
+#cuerpo-app .pap-basura .pap-tool.pap-devolver{
+  background:rgba(16,185,129,.16); border-color:rgba(16,185,129,.45); color:#6ee7b7;
+}
+#cuerpo-app .pap-basura .pap-tool.pap-devolver:hover{background:#10b981; color:#06281d}
+#cuerpo-app .pap-basura .pap-tool.pap-quemar{color:#fca5a5; border-color:rgba(248,113,113,.3)}
+#cuerpo-app .pap-basura .pap-tool.pap-quemar:hover{background:rgba(248,113,113,.18); color:#fecaca}
+
+/* La barra de filtros del histórico, en línea y no en columna. */
+#cuerpo-app .pap-barra-filtros > select{
+  width:auto!important; flex:1 1 150px; min-width:0; max-width:100%;
+}
+@media (max-width:560px){
+  /* En el móvil cada desplegable ocupa su línea: el texto de las opciones es
+     largo y a media línea no cabe. Lo importante es que al hacerlo dejen la
+     fila siguiente libre para las pestañas. */
+  #cuerpo-app .pap-barra-filtros > select{flex:1 1 100%}
+}
+/* Y que las pestañas no se estrujen hasta quedar en vertical, letra por línea,
+   por compartir fila con un desplegable. */
+#cuerpo-app .pap-barra-filtros > button{
+  flex:1 1 auto!important; min-width:84px; white-space:nowrap;
+}
+
+/* Las pestañas se quedaban en 36 px de alto, justo por debajo de lo que un
+   dedo acierta con comodidad. En pantalla táctil, 42. */
+@media (max-width:820px){
+  #cuerpo-app .pap-pestanas .pap-pestana{min-height:42px!important}
+}
+
+/* Filas de lo borrado dentro del histórico: se ven, pero se ve que ya no cuentan. */
+#cuerpo-app .seccion-pantalla tr.pap-fila-borrada{opacity:.55}
+#cuerpo-app .seccion-pantalla tr.pap-fila-borrada td{
+  background:repeating-linear-gradient(135deg,rgba(148,163,184,.05) 0 6px,transparent 6px 12px);
+}
+</style>
+
 </body>
 </html>
