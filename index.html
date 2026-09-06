@@ -11301,21 +11301,46 @@ body#cuerpo-app #sec-tarifas .tarifa-card::before,
    convertía el desplegable en un cuadro de 240 px de alto que se comía la
    tarjeta entera. Se dice con width, que significa lo mismo en las dos
    direcciones. */
-#cuerpo-app #sec-dashboard select,
-#cuerpo-app #sec-dashboard .glass-card > .flex > select{
-  flex:0 0 auto!important;
+#cuerpo-app #sec-dashboard select{
+  flex:0 1 auto!important;
   min-width:0!important;
   max-width:100%!important;
   height:auto!important;
 }
+/* Los 240 px son SÓLO para el selector de plataformas, que va en su propia
+   fila. Dárselos a todos los desplegables del Panel ahogaba al título de al
+   lado: "Cobros pendientes" se quedaba en 50 px y salía letra a letra, en
+   vertical. */
 @media (min-width:640px){
-  #cuerpo-app #sec-dashboard select,
-  #cuerpo-app #sec-dashboard .glass-card > .flex > select{ width:240px!important; }
+  #cuerpo-app #sec-dashboard #flt-perfiles-plataforma{ width:240px!important; }
 }
 @media (max-width:639px){
-  #cuerpo-app #sec-dashboard select,
-  #cuerpo-app #sec-dashboard .glass-card > .flex > select{ width:100%!important; }
+  #cuerpo-app #sec-dashboard #flt-perfiles-plataforma{ width:100%!important; }
 }
+
+/* --- Un título no se estruja: cede el control que tiene al lado ------------
+   En una fila "título + desplegable", el que tiene que encoger es el
+   desplegable. Y si no hay sitio para los dos, la fila salta de línea. */
+#cuerpo-app .seccion-pantalla h1, #cuerpo-app .seccion-pantalla h2,
+#cuerpo-app .seccion-pantalla h3, #cuerpo-app .seccion-pantalla h4,
+#cuerpo-app .sub-pantalla h1, #cuerpo-app .sub-pantalla h2,
+#cuerpo-app .sub-pantalla h3, #cuerpo-app .sub-pantalla h4{
+  min-width:0;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+#cuerpo-app .seccion-pantalla .flex > h2,
+#cuerpo-app .seccion-pantalla .flex > h3,
+#cuerpo-app .sub-pantalla .flex > h2,
+#cuerpo-app .sub-pantalla .flex > h3{ flex:1 1 auto; min-width:0; }
+#cuerpo-app .seccion-pantalla .flex > h2 ~ select,
+#cuerpo-app .seccion-pantalla .flex > h3 ~ select,
+#cuerpo-app .sub-pantalla .flex > h2 ~ select,
+#cuerpo-app .sub-pantalla .flex > h3 ~ select{ flex:0 1 auto; min-width:0; max-width:62%; }
+#cuerpo-app .seccion-pantalla .flex:has(> h3 + select),
+#cuerpo-app .seccion-pantalla .flex:has(> h2 + select),
+#cuerpo-app .sub-pantalla .flex:has(> h3 + select),
+#cuerpo-app .sub-pantalla .flex:has(> h2 + select){ flex-wrap:wrap; gap:6px; }
 
 /* Red de seguridad para el mismo error en cualquier otro sitio: dentro de una
    columna, ningún campo hereda una base de flex con medida. */
@@ -11334,11 +11359,12 @@ body#cuerpo-app #sec-tarifas .tarifa-card::before,
   overflow-wrap:normal!important;
   word-break:normal!important;
 }
-/* Pero que no parta palabras no significa recortarlas: dentro de una pantalla
-   un rótulo puede saltar DE PALABRA, y una fila con dos o más botones se
-   reparte en varias líneas antes que dejar un rótulo a medias. */
-#cuerpo-app .seccion-pantalla button,
-#cuerpo-app .sub-pantalla button{ white-space:normal!important; }
+/* Pero que no parta palabras no significa recortarlas: una fila con botones se
+   reparte en varias líneas antes que dejar un rótulo a medias.
+   (Ojo: NO se toca el white-space de todos los botones. Se probó y salió mal:
+   muchos "botones" del programa son enlaces dentro de tablas y de fichas
+   —el nombre del cliente en Dinero, el precio en una cuenta master— y al
+   permitirles saltar de línea se partían en tres renglones de tres letras.) */
 #cuerpo-app .seccion-pantalla .flex:has(> button),
 #cuerpo-app .sub-pantalla .flex:has(> button){ flex-wrap:wrap; }
 /* Y en esas filas los botones no se encogen: si no caben, bajan de línea.
@@ -12155,6 +12181,101 @@ html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ anim
 #cuerpo-app #lista-perfiles-libres > [class*="col-span-2"]{
   grid-column:1 / -1!important;
   width:100%!important;
+}
+</style>
+
+<style id="papotas-v189-texto">
+/* ============================================================================
+   V189 · Ningún texto se lee en vertical
+
+   Barriendo el texto de las 25 pantallas en siete anchos aparecieron dos
+   familias de texto estrujado en pantallas estrechas:
+
+   · El nombre del cliente en las tablas de Dinero: la celda se quedaba en
+     69 px y "Cliente 1" salía en tres renglones de tres letras. Esas tablas
+     ya se arrastran a lo ancho: dentro de ellas nada se parte, se lee entero
+     y se arrastra si hace falta.
+
+   · El precio y la clave en la ficha de una cuenta master: la casilla del
+     dato medía 29 px y "S/ 45.00" salía en tres líneas. Su hoja de estilo ya
+     decía que no debía partirse, pero otra regla posterior la pisaba.
+   ========================================================================== */
+
+/* Sólo dentro de un envoltorio que DE VERDAD se desplaza a lo ancho. Con
+   "overflow-x-hidden" (que también contiene el texto "overflow-x") la celda no
+   podía ni partir ni desplazarse: se recortaba, que es peor. */
+#cuerpo-app .pap-tabla-scroll table td,
+#cuerpo-app .pap-tabla-scroll table th,
+#cuerpo-app .overflow-x-auto table td,
+#cuerpo-app .overflow-x-auto table th,
+#cuerpo-app .overflow-x-scroll table td,
+#cuerpo-app .overflow-x-scroll table th{
+  white-space:nowrap!important;
+}
+/* Y si la tabla se desplaza, la celda no necesita tope de ancho: que mida lo
+   que mide su contenido en vez de recortarlo con puntos suspensivos. */
+#cuerpo-app .pap-tabla-scroll table td,
+#cuerpo-app .pap-tabla-scroll table th,
+#cuerpo-app .overflow-x-auto table td,
+#cuerpo-app .overflow-x-auto table th{
+  max-width:none!important;
+  overflow:visible!important;
+}
+#cuerpo-app .pap-tabla-scroll table td *,
+#cuerpo-app .overflow-x-auto table td *,
+#cuerpo-app .overflow-x-scroll table td *{
+  white-space:nowrap!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+
+#cuerpo-app #sec-servicios .mc-cell > b,
+#cuerpo-app #sec-cuentas .mc-cell > b,
+#cuerpo-app .mc-cell > b{
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+#cuerpo-app .mc-cell > b > *{ white-space:nowrap!important; }
+
+/* La ficha de una cuenta master va a dos columnas. En un teléfono eso deja
+   90 px por casilla: la etiqueta y el dato se pisan ("Clave" encima de los
+   puntos, "Suscripción" sin su importe). Por debajo de 560 px, una columna. */
+@media (max-width:560px){
+  /* Se deja de ser rejilla y pasa a ser una lista: así ninguna de las cinco
+     reglas de columnas que se han ido acumulando puede volver a partirla. */
+  body#cuerpo-app .seccion-pantalla .mc-info,
+  body#cuerpo-app .sub-pantalla .mc-info,
+  body#cuerpo-app #sec-servicios .mc-info{
+    display:block!important;
+    padding:9px 12px!important;
+  }
+  body#cuerpo-app .seccion-pantalla .mc-info > .mc-cell,
+  body#cuerpo-app .sub-pantalla .mc-info > .mc-cell{ width:100%!important; }
+  body#cuerpo-app .mc-cell{ padding-block:2px; }
+
+  /* La barra de "Administración de plataformas" ponía cada cosa en su propia
+     línea: cinco filas para un buscador, un desplegable y tres botones cortos.
+     El buscador y el desplegable siguen a lo ancho; los tres botones comparten
+     una fila. */
+  body#cuerpo-app .pap-master-admin-tools{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+  }
+  body#cuerpo-app .pap-master-admin-tools > input,
+  body#cuerpo-app .pap-master-admin-tools > select{ grid-column:1 / -1!important; }
+  body#cuerpo-app .pap-master-admin-tools > .pap-master-tool-btn{
+    padding-left:6px!important; padding-right:6px!important;
+    font-size:11px!important; white-space:nowrap!important;
+  }
+}
+@media (max-width:365px){
+  /* En 320 px "Solo libres" se quedaba a un píxel de caber. */
+  body#cuerpo-app .pap-master-admin-tools > .pap-master-tool-btn{
+    font-size:10px!important; padding-left:4px!important; padding-right:4px!important;
+  }
 }
 </style>
 
