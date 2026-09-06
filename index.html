@@ -11260,12 +11260,63 @@ body#cuerpo-app #sec-tarifas .tarifa-card::before,
 /* --- 5. Un desplegable no es un titular ------------------------------------
    El selector de plataformas del panel ocupaba toda la fila y dejaba el
    título de la tarjeta arrinconado. */
+/* CUIDADO con expresar un ancho como base de flex: en un contenedor en
+   COLUMNA la base es la ALTURA. Aquí la fila del título es
+   "flex-col sm:flex-row", así que por debajo de 640 px aquel flex:0 1 240px
+   convertía el desplegable en un cuadro de 240 px de alto que se comía la
+   tarjeta entera. Se dice con width, que significa lo mismo en las dos
+   direcciones. */
 #cuerpo-app #sec-dashboard select,
 #cuerpo-app #sec-dashboard .glass-card > .flex > select{
-  width:auto!important; flex:0 1 240px; min-width:0; max-width:100%;
+  flex:0 0 auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+}
+@media (min-width:640px){
+  #cuerpo-app #sec-dashboard select,
+  #cuerpo-app #sec-dashboard .glass-card > .flex > select{ width:240px!important; }
+}
+@media (max-width:639px){
+  #cuerpo-app #sec-dashboard select,
+  #cuerpo-app #sec-dashboard .glass-card > .flex > select{ width:100%!important; }
+}
+
+/* Red de seguridad para el mismo error en cualquier otro sitio: dentro de una
+   columna, ningún campo hereda una base de flex con medida. */
+@media (max-width:639px){
+  #cuerpo-app .flex-col > select,
+  #cuerpo-app .flex-col > input,
+  #cuerpo-app .flex-col > textarea{ flex-basis:auto!important; }
+}
+
+/* --- Un botón no parte palabras por la mitad -------------------------------
+   En Ajustes · Nube los cuatro botones iban en una fila sin permiso para
+   saltar de línea: en 288 px se quedaban en 45-84 px y el texto se rompía en
+   "Prob / ar / cone / xión" y "Co / pia / r / SQL". Los botones dejan de
+   partir palabras, y esa fila se reparte en dos líneas antes que aplastarse. */
+#cuerpo-app button{
+  overflow-wrap:normal!important;
+  word-break:normal!important;
+}
+#cuerpo-app div:has(> #pap-btn-probar-nube),
+#cuerpo-app div:has(> #pap-btn-sql-nube){
+  flex-wrap:wrap!important;
+  row-gap:8px!important;
+}
+#cuerpo-app #pap-btn-probar-nube,
+#cuerpo-app #pap-btn-sql-nube{
+  flex:1 1 auto!important;
+  min-width:118px!important;
+  white-space:nowrap!important;
 }
 @media (max-width:520px){
-  #cuerpo-app #sec-dashboard select{flex:1 1 100%}
+  /* En un teléfono estrecho, dos por fila. */
+  #cuerpo-app div:has(> #pap-btn-probar-nube) > button,
+  #cuerpo-app div:has(> #pap-btn-sql-nube) > button{
+    flex:1 1 calc(50% - 4px)!important;
+    min-width:0!important;
+  }
 }
 </style>
 
