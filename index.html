@@ -4335,7 +4335,84 @@ if(t.servicios&&(servicios=fusionarPorId(servicios,t.servicios,"servicios")),t.c
 
 
 
-<script id="papotas-clientes-estado-plano-final-script">!function(){"use strict";function t(){document.querySelectorAll("#sec-clientes .tarjeta-registro.tarjeta-cuenta,#sec-servicios .tarjeta-registro.tarjeta-cuenta").forEach(function(t){t.classList.remove("estado-vencido","estado-aviso","estado-activo","estado-neutro");var e=(t.textContent||"").toLowerCase();/\bvencido\b/.test(e)||/venció hace/.test(e)?t.classList.add("estado-vencido"):/por vencer/.test(e)||/faltan\s+\d+\s*d/.test(e)||/faltan\s+\d+\s*día/.test(e)?t.classList.add("estado-aviso"):/\bal d[ií]a\b/.test(e)?t.classList.add("estado-activo"):t.classList.add("estado-neutro")})}function e(){window.requestAnimationFrame(t)}"loading"===document.readyState?document.addEventListener("DOMContentLoaded",e,{once:!0}):e();var a=window.renderizarTodo;"function"!=typeof a||window.__PAPOTAS_ESTADO_PLANO_WRAP__||(window.renderizarTodo=function(){var t=a.apply(this,arguments);return e(),t},window.__PAPOTAS_ESTADO_PLANO_WRAP__=!0);var o=window.cambiarSeccion;"function"!=typeof o||window.__PAPOTAS_ESTADO_PLANO_SECCION__||(window.cambiarSeccion=function(t){var a=o.apply(this,arguments);return"clientes"!==t&&"servicios"!==t||e(),a},window.__PAPOTAS_ESTADO_PLANO_SECCION__=!0),document.addEventListener("click",function(t){t.target.closest("#sec-clientes .tarjeta-registro.tarjeta-cuenta,#sec-servicios .tarjeta-registro.tarjeta-cuenta")&&e()},!0)}();</script>
+<script id="papotas-clientes-estado-plano-final-script">
+/* ============================================================================
+   El color de estado de cada tarjeta se decidía LEYENDO EL TEXTO de la propia
+   tarjeta, y la regla de "por vencer" era /faltan \d+ d/. Como una tarjeta al
+   día pone "Faltan 20 d", todos los clientes al día quedaban pintados de
+   ámbar: la etiqueta decía AL DÍA y la tarjeta decía "cuidado". Además esta
+   pasada corría después de CADA repintado y borraba las clases correctas que
+   el programa acababa de poner.
+
+   Ahora se pregunta al dato: se saca el id del cliente de la propia tarjeta y
+   se llama a estadoCliente(), que es de donde sale también la etiqueta. Si por
+   lo que sea no hay dato (por ejemplo en una cuenta master), se mira la
+   etiqueta ya pintada. Y si tampoco la hay, NO se toca nada: más vale dejar lo
+   que puso el programa que inventarse un color.
+   ========================================================================== */
+!function(){
+  "use strict";
+  var SEL="#sec-clientes .tarjeta-registro.tarjeta-cuenta,#sec-servicios .tarjeta-registro.tarjeta-cuenta";
+  var CLASES=["estado-vencido","estado-aviso","estado-activo","estado-neutro"];
+
+  function porDato(tarjeta){
+    try{
+      if(typeof estadoCliente!=="function" || !Array.isArray(window.clientes)) return "";
+      var b=tarjeta.querySelector('[onclick*="abrirFichaCliente"]');
+      var m=b && (b.getAttribute("onclick")||"").match(/abrirFichaCliente\('([^']+)'\)/);
+      if(!m) return "";
+      var c=window.clientes.find(function(x){ return x && String(x.id)===String(m[1]); });
+      if(!c) return "";
+      var e=estadoCliente(c);
+      return e==="vencido"    ? "estado-vencido"
+           : e==="por_vencer" ? "estado-aviso"
+           : e==="activo"     ? "estado-activo"
+           : "";
+    }catch(_){ return ""; }
+  }
+
+  function porEtiqueta(tarjeta){
+    var chip=tarjeta.querySelector(".chip-urgente,.chip-aviso,.chip-ok");
+    if(!chip) return "";
+    if(chip.classList.contains("chip-urgente")) return "estado-vencido";
+    if(chip.classList.contains("chip-aviso"))   return "estado-aviso";
+    if(chip.classList.contains("chip-ok"))      return "estado-activo";
+    return "";
+  }
+
+  function t(){
+    document.querySelectorAll(SEL).forEach(function(tarjeta){
+      var clase=porDato(tarjeta) || porEtiqueta(tarjeta);
+      if(!clase) return;                    /* sin respuesta fiable, no se toca */
+      if(tarjeta.classList.contains(clase) &&
+         CLASES.filter(function(c){ return tarjeta.classList.contains(c); }).length===1) return;
+      CLASES.forEach(function(c){ if(c!==clase) tarjeta.classList.remove(c); });
+      tarjeta.classList.add(clase);
+    });
+  }
+  window.papotasRepasarEstados=t;
+
+  function e(){ window.requestAnimationFrame(t); }
+  "loading"===document.readyState ? document.addEventListener("DOMContentLoaded",e,{once:!0}) : e();
+
+  var a=window.renderizarTodo;
+  if("function"==typeof a && !window.__PAPOTAS_ESTADO_PLANO_WRAP__){
+    window.renderizarTodo=function(){ var r=a.apply(this,arguments); e(); return r; };
+    try{ Object.getOwnPropertyNames(a).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in window.renderizarTodo)) window.renderizarTodo[k]=a[k]; }); }catch(_){}
+    window.__PAPOTAS_ESTADO_PLANO_WRAP__=!0;
+  }
+  var o=window.cambiarSeccion;
+  if("function"==typeof o && !window.__PAPOTAS_ESTADO_PLANO_SECCION__){
+    window.cambiarSeccion=function(s){ var r=o.apply(this,arguments); if("clientes"===s||"servicios"===s||"cuentas"===s) e(); return r; };
+    try{ Object.getOwnPropertyNames(o).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in window.cambiarSeccion)) window.cambiarSeccion[k]=o[k]; }); }catch(_){}
+    window.__PAPOTAS_ESTADO_PLANO_SECCION__=!0;
+  }
+  document.addEventListener("click",function(ev){
+    if(ev.target.closest && ev.target.closest(SEL)) e();
+  },!0);
+}();</script>
 
 
 
