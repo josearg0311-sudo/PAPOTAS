@@ -16,7 +16,39 @@ deja instalar ni funcionar sin conexión.
 
 `index.html` sigue funcionando solo, sin los demás archivos, como hasta ahora.
 
-## 2. Conectar Supabase (una sola vez)
+## 2. Conectar Supabase (una sola vez, para TODOS los dispositivos)
+
+La forma cómoda: escribir la conexión dentro del propio `index.html`. Así
+cualquier dispositivo que lo abra entra ya sincronizado, sin tocar Ajustes.
+
+1. En supabase.com, tu proyecto: **Settings → API**. Copia:
+   - **Project URL** (`https://xxxxxxxx.supabase.co`)
+   - **anon public** (la clave larga; la `service_role` NUNCA)
+2. Abre `index.html` con el Bloc de notas y busca, cerca del principio,
+   `TU CONEXIÓN A SUPABASE`. Rellena las dos líneas:
+
+       window.PAPOTAS_NUBE = {
+         url:  "https://xxxxxxxx.supabase.co",
+         anon: "eyJ...la clave larga..."
+       };
+
+3. Guarda. Si aún no has preparado la base, abre el programa una vez, ve a
+   **Ajustes → Nube**, pulsa **Copiar SQL** y ejecútalo en Supabase
+   (**SQL Editor → New query → Run**). Eso crea la tabla, las funciones, los
+   permisos y activa el tiempo real. Solo hace falta una vez, no por
+   dispositivo.
+4. Ya está. Ese mismo archivo, abierto en el móvil o subido a tu enlace, entra
+   solo y con todos los datos.
+
+Si en un dispositivo escribes a mano otra conexión distinta en Ajustes, ese
+dispositivo se queda con la tuya y deja de hacer caso a la del archivo.
+
+Aviso, una vez: la clave anon viaja dentro del archivo. Quien tenga el archivo
+o la dirección donde lo publiques puede leer y escribir tus datos. Para uso
+personal con un enlace que no repartes, va bien. Si subes el archivo a un
+repositorio público, la clave queda a la vista de cualquiera.
+
+### La forma manual (si prefieres no escribir nada en el archivo)
 
 1. Crea un proyecto en supabase.com.
 2. En el proyecto: **Settings → API**. Copia dos cosas:

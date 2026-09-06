@@ -234,6 +234,30 @@
   })();
 }();
 </script>
+<script id="papotas-conexion-de-fabrica">
+/* ============================================================================
+   ░░  TU CONEXIÓN A SUPABASE  ░░  (lo único de este archivo que se toca a mano)
+
+   Rellena estas dos líneas UNA VEZ y guarda el archivo. A partir de ahí,
+   cualquier dispositivo que abra este PAPOTAS entra ya sincronizado: no hay
+   que escribir nada en Ajustes, ni en el móvil ni en el portátil.
+
+   Dónde salen las dos:  supabase.com -> tu proyecto -> Settings -> API
+     url  = "Project URL"        (https://xxxxxxxx.supabase.co)
+     anon = "anon public"        (la clave larga; la "service_role" NUNCA)
+
+   Si las dejas vacías, el programa se comporta como siempre: cada dispositivo
+   con sus datos, y la nube se configura a mano desde Ajustes.
+
+   Aviso, y lo digo una vez: la clave anon viaja dentro de este archivo. Quien
+   tenga el archivo o la dirección donde lo publiques puede leer y escribir tus
+   datos. Para uso personal con un enlace que no repartes, va bien.
+   ========================================================================== */
+window.PAPOTAS_NUBE = {
+  url:  "",
+  anon: ""
+};
+</script>
 <script id="papotas-v173-dias-aviso">
 /* ============================================================================
    V173 · Un solo criterio para "está por vencer"
@@ -12481,6 +12505,98 @@ html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ anim
       }).catch(function(){});
     }
   }catch(_){}
+}();
+</script>
+
+<script id="papotas-v191-nube-automatica">
+/* ============================================================================
+   V191 · Que cada dispositivo entre ya conectado
+
+   Con la conexión escrita arriba (window.PAPOTAS_NUBE), abrir el programa en
+   el móvil o en otro ordenador basta: coge esa conexión, la guarda en ese
+   dispositivo y arranca la sincronización sola. No hay que pasar por Ajustes.
+
+   Reglas:
+   · Solo rellena lo que falta. Si en ese dispositivo ya escribiste tú una
+     conexión distinta a mano, se respeta la tuya.
+   · Si la de fábrica cambia (porque cambiaste de proyecto), se actualiza en
+     todos los dispositivos que no tengan una puesta a mano.
+   · Si está vacía, el programa funciona como siempre.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V191__) return; window.__PAPOTAS_V191__=!0;
+
+  function limpio(v){ return String(v==null?"":v).trim(); }
+
+  function fabrica(){
+    var c=window.PAPOTAS_NUBE||{};
+    var url=limpio(c.url), anon=limpio(c.anon);
+    if(!url || !anon) return null;
+    if(!/^https?:\/\//i.test(url)) url="https://"+url;
+    url=url.replace(/\/rest\/v1\/?$/i,"").replace(/\/+$/,"");
+    return {url:url, anon:anon};
+  }
+
+  function aplicar(){
+    var f=fabrica();
+    if(!f || !window.ajustes) return !1;
+
+    var yaUrl=limpio(ajustes.supabaseUrl), yaKey=limpio(ajustes.supabaseKey);
+    var puestaAMano = ajustes.nubeManual===!0;
+
+    /* Ya está puesta la de fábrica: nada que hacer. */
+    if(yaUrl===f.url && yaKey===f.anon) return !1;
+
+    /* Este dispositivo tiene una conexión propia escrita a mano: manda la suya. */
+    if(puestaAMano && yaUrl && yaKey) return !1;
+
+    ajustes.supabaseUrl=f.url;
+    ajustes.supabaseKey=f.anon;
+    try{ guardarClave("pap_ajustes", JSON.stringify(ajustes)); }catch(_){}
+
+    /* Que se vea en Ajustes lo que hay puesto. */
+    try{
+      var iu=document.getElementById("cfg-supabase-url"), ik=document.getElementById("cfg-supabase-key");
+      if(iu) iu.value=f.url;
+      if(ik) ik.value=f.anon;
+    }catch(_){}
+
+    try{ if(window.papotasEncenderNube) window.papotasEncenderNube();
+         else if(window.PAPOTAS_V93_SYNC) window.PAPOTAS_V93_SYNC.initial().then(function(){ window.PAPOTAS_V93_SYNC.activate(); }); }catch(e){ console.warn("V191:",e); }
+    try{ if(window.actualizarEstadoNubeUI) actualizarEstadoNubeUI("conectando"); }catch(_){}
+    return !0;
+  }
+  window.papotasAplicarConexionDeFabrica=aplicar;
+
+  /* Si tú escribes una conexión a mano, ese dispositivo queda marcado y la de
+     fábrica deja de sobrescribirla. */
+  function marcarManual(){
+    var orig=window.guardarCredencialesSupabase;
+    if(typeof orig!=="function" || orig.__v191) return !1;
+    function envuelto(){
+      var r=orig.apply(this,arguments);
+      try{
+        var f=fabrica();
+        var u=limpio(ajustes.supabaseUrl), k=limpio(ajustes.supabaseKey);
+        ajustes.nubeManual = !!(u && k && (!f || u!==f.url || k!==f.anon));
+        guardarClave("pap_ajustes", JSON.stringify(ajustes));
+      }catch(_){}
+      return r;
+    }
+    envuelto.__v191=!0;
+    try{ Object.getOwnPropertyNames(orig).forEach(function(x){
+      if(x.indexOf("__")===0 && !(x in envuelto)) envuelto[x]=orig[x]; }); }catch(_){}
+    window.guardarCredencialesSupabase=envuelto;
+    return !0;
+  }
+
+  var n=0;
+  (function arrancar(){
+    try{ marcarManual(); aplicar(); }catch(e){ console.warn("V191:",e); }
+    var listo = window.guardarCredencialesSupabase && window.guardarCredencialesSupabase.__v191;
+    if(++n<20 && !listo) setTimeout(arrancar, 500);
+  })();
 }();
 </script>
 </body>
