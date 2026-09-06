@@ -65,6 +65,19 @@ repositorio público, la clave queda a la vista de cualquiera.
 
 **Probar conexión** te dice si la tabla y las funciones están bien.
 
+### El enlace de emparejamiento (la forma rápida desde el móvil)
+
+Sirve para no volver a escribir la URL ni la clave nunca más.
+
+1. En el dispositivo que YA está conectado: **Ajustes → Nube → Enlace para
+   otro dispositivo**. Se copia un enlace al portapapeles (si el navegador no
+   deja copiar, sale en pantalla para copiarlo a mano).
+2. Mándate ese enlace por WhatsApp, correo o como quieras, y ábrelo en el otro
+   dispositivo. Con abrirlo basta: queda conectado y se trae todos los datos.
+3. El enlace lleva la clave dentro, así que el programa la borra de la barra de
+   direcciones nada más entrar. Aun así, trátalo como una contraseña: no lo
+   publiques en ningún sitio abierto.
+
 ## 3. Cómo sincroniza
 
 - Registro a registro: cada cliente, cuenta, venta e inversión viaja por

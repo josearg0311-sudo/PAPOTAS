@@ -12599,5 +12599,131 @@ html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ anim
   })();
 }();
 </script>
+
+<script id="papotas-v192-enlace-conexion">
+/* ============================================================================
+   V192 · Un enlace que conecta el dispositivo, sin escribir nada
+
+   Escribir la URL y la clave en cada aparato es un fastidio, y editar el
+   index.html desde un móvil, más. Con esto se configura UNA vez donde sea y
+   el resto de dispositivos entran con un enlace:
+
+     Ajustes -> Nube -> "Enlace para otro dispositivo"  copia algo así:
+        https://tu-direccion/index.html#nube=aHR0cHM6...
+
+     Ese enlace se abre en el móvil (te lo mandas por WhatsApp) y el programa
+     coge la conexión, la guarda y empieza a sincronizar. La parte del enlace
+     con la clave se borra de la barra de direcciones en cuanto se aplica.
+
+   Ojo: ese enlace lleva tu clave dentro. Mándatelo a ti, no lo repartas.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V192__) return; window.__PAPOTAS_V192__=!0;
+
+  function limpio(v){ return String(v==null?"":v).trim(); }
+
+  function empaquetar(url,key){
+    try{
+      var b=btoa(limpio(url)+"|"+limpio(key));
+      return b.replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+    }catch(_){ return ""; }
+  }
+  function desempaquetar(txt){
+    try{
+      var b=String(txt||"").replace(/-/g,"+").replace(/_/g,"/");
+      while(b.length%4) b+="=";
+      var p=atob(b).split("|");
+      if(p.length<2) return null;
+      var url=limpio(p[0]), key=limpio(p.slice(1).join("|"));
+      if(!url || !key) return null;
+      if(!/^https?:\/\//i.test(url)) url="https://"+url;
+      return {url:url.replace(/\/+$/,""), key:key};
+    }catch(_){ return null; }
+  }
+
+  window.papotasEnlaceConexion=function(){
+    var url=limpio(window.ajustes&&ajustes.supabaseUrl), key=limpio(window.ajustes&&ajustes.supabaseKey);
+    if(!url || !key) return "";
+    var base=location.href.split("#")[0].split("?")[0];
+    return base+"#nube="+empaquetar(url,key);
+  };
+
+  function copiar(txt, aviso){
+    try{ if(typeof window.copiarTextoDirecto==="function"){ window.copiarTextoDirecto(txt); return; } }catch(_){}
+    try{
+      navigator.clipboard.writeText(txt).then(function(){
+        try{ mostrarToast(aviso); }catch(_){}
+      }).catch(function(){ try{ window.prompt("Copia este enlace:", txt); }catch(_){} });
+    }catch(_){
+      try{ window.prompt("Copia este enlace:", txt); }catch(_){}
+    }
+  }
+
+  window.papotasCopiarEnlaceConexion=function(){
+    var e=window.papotasEnlaceConexion();
+    if(!e){ try{ mostrarToast("Primero pon la URL y la clave de Supabase."); }catch(_){} return; }
+    if(location.protocol==="file:"){
+      try{ mostrarToast("Aviso: este enlace solo sirve si el programa está publicado en una dirección web."); }catch(_){}
+    }
+    copiar(e, "Enlace copiado. Ábrelo en el otro dispositivo.");
+  };
+
+  /* ---- Al abrir con #nube=... : conectar y limpiar la dirección ---------- */
+  function aplicarDelEnlace(){
+    var m=/[#?&]nube=([^#&]+)/.exec(location.href);
+    if(!m) return !1;
+    var c=desempaquetar(decodeURIComponent(m[1]));
+    if(!c || !window.ajustes) return !1;
+
+    ajustes.supabaseUrl=c.url;
+    ajustes.supabaseKey=c.key;
+    ajustes.nubeManual=!0;                 /* vino de ti, manda sobre la de fábrica */
+    try{ guardarClave("pap_ajustes", JSON.stringify(ajustes)); }catch(_){}
+    try{
+      var iu=document.getElementById("cfg-supabase-url"), ik=document.getElementById("cfg-supabase-key");
+      if(iu) iu.value=c.url; if(ik) ik.value=c.key;
+    }catch(_){}
+
+    /* Fuera de la barra de direcciones, para que no quede la clave a la vista. */
+    try{
+      var limpia=location.href.replace(/([#?&])nube=[^#&]+&?/,"$1").replace(/[#?]$/,"");
+      history.replaceState(null,"",limpia);
+    }catch(_){}
+
+    try{ if(window.papotasEncenderNube) window.papotasEncenderNube();
+         else if(window.PAPOTAS_V93_SYNC) window.PAPOTAS_V93_SYNC.initial().then(function(){ window.PAPOTAS_V93_SYNC.activate(); }); }catch(e){ console.warn("V192:",e); }
+    try{ mostrarToast("☁️ Conectado a tu nube. Trayendo los datos…"); }catch(_){}
+    return !0;
+  }
+
+  /* ---- Botón en Ajustes -> Nube ------------------------------------------ */
+  function ponerBoton(){
+    var campo=document.getElementById("cfg-supabase-key"); if(!campo) return !1;
+    var tarjeta=campo.closest(".glass-card"); if(!tarjeta) return !1;
+    if(tarjeta.querySelector("#pap-btn-enlace-nube")) return !0;
+    var fila=tarjeta.querySelector("#pap-btn-probar-nube");
+    fila = fila ? fila.parentElement : tarjeta.querySelector(".flex.gap-2");
+    if(!fila) return !1;
+    var b=document.createElement("button");
+    b.type="button"; b.id="pap-btn-enlace-nube"; b.textContent="Enlace para otro dispositivo";
+    b.title="Copia un enlace que deja conectado cualquier otro dispositivo al abrirlo";
+    b.style.cssText="background:rgba(0,0,0,.5);border:1px solid rgba(34,211,238,.35);color:#67e8f9;"+
+      "padding:0 11px;min-height:38px;border-radius:11px;font-size:11px;font-weight:800;cursor:pointer";
+    b.onclick=function(){ window.papotasCopiarEnlaceConexion(); };
+    fila.appendChild(b);
+    return !0;
+  }
+
+  var n=0;
+  (function arrancar(){
+    try{ ponerBoton(); }catch(e){ console.warn("V192:",e); }
+    if(++n<24) setTimeout(arrancar, 700);
+  })();
+
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", function(){ setTimeout(aplicarDelEnlace,300); }, {once:!0});
+  else setTimeout(aplicarDelEnlace,300);
+}();
+</script>
 </body>
 </html>
