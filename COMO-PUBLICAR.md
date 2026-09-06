@@ -2,13 +2,14 @@
 
 ## 1. Qué subir
 
-Sube estos **cuatro archivos juntos**, en la misma carpeta:
+Sube estos archivos juntos, en la misma carpeta:
 
     index.html            el programa
     sw.js                 para que se instale y abra sin conexión
     manifest.webmanifest  nombre e iconos de la aplicación
     icon-192.png
     icon-512.png
+    respaldo.json         opcional: tus datos de partida (ver punto 3)
 
 Sirve cualquier alojamiento gratuito con **https** (Netlify arrastrando la
 carpeta, GitHub Pages, Vercel). Tiene que ser https: sin él el navegador no
@@ -78,7 +79,38 @@ Sirve para no volver a escribir la URL ni la clave nunca más.
    direcciones nada más entrar. Aun así, trátalo como una contraseña: no lo
    publiques en ningún sitio abierto.
 
-## 3. Cómo sincroniza
+## 3. Que el sitio abra ya con tus datos
+
+Al publicar, el navegador ve una dirección nueva y el programa abre vacío: tus
+datos siguen guardados bajo el archivo viejo, no se han perdido. Para no tener
+que importarlos a mano en cada aparato:
+
+1. En el dispositivo que tiene los datos buenos: **Ajustes → Exportar
+   respaldo**. Te baja un `papotas_respaldo_completo_….json`.
+2. Renómbralo a **`respaldo.json`** y déjalo dentro de la carpeta, al lado de
+   `index.html`.
+3. Sube la carpeta. Listo.
+
+A partir de ahí, cada dispositivo que abra el sitio por primera vez entra ya
+con todo: clientes, cuentas, ventas, inversiones, ajustes y notas.
+
+Las reglas, para que no te lleves sustos:
+
+- Solo actúa si ese dispositivo está **completamente vacío**. Nunca pisa datos
+  que ya tengas.
+- Lo hace **una sola vez** por dispositivo. Si borras algo a propósito, no
+  vuelve en la siguiente recarga.
+- El primer arranque se recarga solo una vez. Es normal, dura un parpadeo.
+- Si no pones `respaldo.json`, no pasa nada: el programa abre como siempre.
+- Cuando quieras cambiar el punto de partida, exporta un respaldo nuevo y
+  súbelo con el mismo nombre encima del anterior.
+
+Y ojo con lo mismo de siempre: ese `respaldo.json` lleva tus datos dentro y
+queda accesible para quien conozca la dirección del sitio. Es la contrapartida
+de la comodidad. Si prefieres no dejarlo publicado, bórralo del sitio en cuanto
+hayas sembrado tus dispositivos: los que ya entraron conservan todo.
+
+## 4. Cómo sincroniza
 
 - Registro a registro: cada cliente, cuenta, venta e inversión viaja por
   separado. No se pisan bloques enteros.
@@ -90,7 +122,7 @@ Sirve para no volver a escribir la URL ni la clave nunca más.
 - Sin internet sigues trabajando con normalidad; al volver la conexión, sube.
 - Tus claves de Supabase NO se suben a la nube: se quedan en cada dispositivo.
 
-## 4. Instalar como aplicación
+## 5. Instalar como aplicación
 
 - **Android (Chrome)**: menú ⋮ → *Instalar aplicación*.
 - **iPhone / iPad (Safari)**: Compartir → *Añadir a pantalla de inicio*.
@@ -99,7 +131,7 @@ Sirve para no volver a escribir la URL ni la clave nunca más.
 
 Queda con su icono, a pantalla completa y abre sin conexión.
 
-## 5. Si actualizas el programa
+## 6. Si actualizas el programa
 
 Sube el `index.html` nuevo encima. La próxima vez que se abra con internet se
 coge la versión nueva (la copia guardada solo se usa cuando no hay red).

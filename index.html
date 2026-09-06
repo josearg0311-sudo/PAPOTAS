@@ -12725,5 +12725,118 @@ html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ anim
   else setTimeout(aplicarDelEnlace,300);
 }();
 </script>
+
+<script id="papotas-v193-respaldo-de-arranque">
+/* ============================================================================
+   V193 · El sitio arranca con tus datos dentro
+
+   Al publicar en Netlify el navegador ve una direccion nueva, asi que el
+   programa abre vacio y hay que importar el respaldo a mano en cada aparato.
+   Esto lo evita: si dejas tu respaldo junto al index.html, el primer arranque
+   de cada dispositivo se sirve solo.
+
+   De donde saca el respaldo, por orden:
+     1. window.PAPOTAS_RESPALDO   (pegado dentro del propio index.html)
+     2. ./respaldo.json           (el archivo, al lado del index.html)
+
+   Cuando lo aplica: SOLO si ese dispositivo esta completamente vacio y no ha
+   aplicado ya ese mismo respaldo. Nunca pisa datos existentes, ni resucita lo
+   que hayas borrado a proposito.
+   ========================================================================== */
+!function(){
+  "use strict";
+  var MARCA = "pap_semilla_aplicada";
+
+  function leer(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } }
+
+  /* Vacio = ninguna de las colecciones tiene un solo registro. */
+  function estaVacio(){
+    var llaves = ["pap_clientes","pap_servicios","pap_ventas","pap_inversiones","pap_combos_guardados"];
+    for(var i=0;i<llaves.length;i++){
+      var v = leer(llaves[i]);
+      if(!v) continue;
+      try{ var a = JSON.parse(v); if(Array.isArray(a) && a.length) return !1; }catch(_){}
+    }
+    return !0;
+  }
+
+  function sello(raw){
+    var r = raw && typeof raw==="object" ? raw : {};
+    return String(r.exportadoEl || r.exportedAt || r.fecha || r.generadoEl || r.schema || r.version || "sin-fecha");
+  }
+
+  /* Reaprovecha los lectores del importador de siempre; si no estan, tira del
+     formato propio, que es el unico que genera "Exportar respaldo".         */
+  function instantanea(raw){
+    try{
+      if(typeof __papBuildLocalSnapshot==="function" && typeof __papExtractBackupRoot==="function")
+        return __papBuildLocalSnapshot(raw, __papExtractBackupRoot(raw)) || {};
+    }catch(_){}
+    var s = raw && (raw.localStorage || (raw.datos && raw.datos.localStorage));
+    return (s && typeof s==="object" && !Array.isArray(s)) ? s : {};
+  }
+
+  function util(snap){
+    var n=0;
+    for(var k in snap) if(Object.prototype.hasOwnProperty.call(snap,k) && k.indexOf("pap_")===0) n++;
+    return n;
+  }
+
+  function aplicar(raw){
+    if(!raw || typeof raw!=="object" || Array.isArray(raw)) return !1;
+    var marca = sello(raw);
+    if(leer(MARCA) === marca) return !1;            /* ya se aplico este mismo */
+    if(!estaVacio()) { try{ localStorage.setItem(MARCA, marca); }catch(_){} return !1; }
+
+    var snap = instantanea(raw);
+    if(util(snap) < 1){ console.warn("V193: el respaldo no trae datos de PAPOTAS."); return !1; }
+
+    var puestos = 0;
+    for(var k in snap){
+      if(!Object.prototype.hasOwnProperty.call(snap,k)) continue;
+      if(k.indexOf("pap_")!==0) continue;
+      if(k==="pap_device_id" || k===MARCA) continue;   /* cada aparato conserva el suyo */
+      var v = snap[k];
+      try{ localStorage.setItem(k, typeof v==="string" ? v : JSON.stringify(v)); puestos++; }
+      catch(e){ console.warn("V193: no cupo",k,e); }
+    }
+    if(!puestos) return !1;
+
+    try{ localStorage.setItem(MARCA, marca); }catch(_){}
+    try{ sessionStorage.setItem("pap_semilla_recien","1"); }catch(_){}
+    location.reload();                                /* una sola vez, y ya */
+    return !0;
+  }
+
+  function avisar(){
+    try{
+      if(sessionStorage.getItem("pap_semilla_recien")!=="1") return;
+      sessionStorage.removeItem("pap_semilla_recien");
+      if(typeof mostrarToast==="function") mostrarToast("✅ Datos restaurados desde el respaldo del sitio");
+    }catch(_){}
+  }
+
+  function arrancar(){
+    avisar();
+    if(leer(MARCA) || !estaVacio()) return;
+
+    if(window.PAPOTAS_RESPALDO && typeof window.PAPOTAS_RESPALDO==="object"){
+      if(aplicar(window.PAPOTAS_RESPALDO)) return;
+    }
+    /* Abierto como archivo suelto no hay servidor del que pedir nada. */
+    if(location.protocol==="file:") return;
+    if(typeof fetch!=="function") return;
+
+    fetch("respaldo.json", {cache:"no-store"})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){ if(j) aplicar(j); })
+      .catch(function(){ /* no hay respaldo.json: normal, se sigue igual */ });
+  }
+
+  if(document.readyState==="loading")
+    document.addEventListener("DOMContentLoaded", function(){ setTimeout(arrancar, 400); }, {once:!0});
+  else setTimeout(arrancar, 400);
+}();
+</script>
 </body>
 </html>
