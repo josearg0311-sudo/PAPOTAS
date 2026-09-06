@@ -93,6 +93,118 @@
   else document.addEventListener("DOMContentLoaded", avisar, {once:true});
 })();
 </script>
+<script id="papotas-v182-navegacion">
+/* ============================================================================
+   V182 · "EN ESA BARRA HAY UN RETARDO PARA CAMBIAR LAS PANTALLAS"
+
+   Lo medido con tus números (80 clientes, 19 cuentas master, teléfono):
+   al pulsar un botón del menú el programa hacía, en el mismo instante del
+   clic, todo esto antes de dejar ver nada:
+
+     · repasar TODAS las tarjetas del documento para marcarlas como pulsables,
+       leyendo su texto con innerText, que obliga al navegador a recalcular la
+       página entera una y otra vez ............................ 288 ms
+     · reiniciar la animación de entrada leyendo offsetWidth, que vuelve a
+       forzar ese mismo recálculo .............................. 179 ms
+     · repintar los datos de la pantalla nueva ................. 50-95 ms
+
+   Las dos primeras ya están corregidas en su sitio (repaso idempotente, con
+   textContent y en un hueco libre; animación sin lectura forzada).
+   Aquí queda la tercera: la pantalla se enseña primero y los datos se
+   refrescan en el fotograma siguiente. La primera vez que se abre una sección
+   sí se pinta en el acto, porque todavía no hay nada que enseñar.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V182__) return; window.__PAPOTAS_V182__=!0;
+
+  var yaVistas={}, enCola=!1;
+
+  /* ---- Volver arriba al cambiar de pantalla, sin preguntar --------------
+     Preguntarle al navegador "¿por dónde vas?" (leer scrollTop) le obliga a
+     recalcular la página entera: 173 ms medidos en el propio clic. Se apunta
+     la posición según se hace scroll, y solo se rebobina cuando de verdad
+     hay algo que rebobinar. */
+  var desplazado=0, vigilando=!1;
+  function vigilar(){
+    if(vigilando) return !0;
+    var z=document.getElementById("zona-contenido");
+    if(!z) return !1;
+    z.addEventListener("scroll", function(){ desplazado=z.scrollTop; }, {passive:!0});
+    vigilando=!0;
+    return !0;
+  }
+  window.papotasRebobinar=function(){
+    if(!desplazado) return;
+    var z=document.getElementById("zona-contenido");
+    if(z) z.scrollTop=0;
+    desplazado=0;
+  };
+  (function esperar(n){
+    if(vigilar()) return;
+    if(n<40) setTimeout(function(){ esperar(n+1); }, 150);
+  })(0);
+
+  function refrescar(){
+    enCola=!1;
+    try{ if(typeof renderizarTodo==="function") renderizarTodo(); }catch(e){ console.warn("V182:",e); }
+  }
+
+  window.papotasPintarPrimero=function(){
+    var s=window.seccionActual||"";
+    if(!yaVistas[s]){                    /* nunca abierta: hay que pintarla ya */
+      yaVistas[s]=1;
+      return refrescar();
+    }
+    if(enCola) return;                   /* ya hay un refresco esperando */
+    enCola=!0;
+    requestAnimationFrame(function(){ requestAnimationFrame(refrescar); });
+  };
+
+  /* Por si algo necesita los datos al día sin esperar al fotograma. */
+  window.papotasRefrescarYa=function(){ if(enCola) refrescar(); };
+
+  /* ---- Los gráficos se dibujan una vez por fotograma, no tres -------------
+     Cada dibujo pregunta al navegador cuánto mide su caja, y esa pregunta le
+     obliga a recalcular la pantalla entera de Dinero (4.500 elementos). Al
+     abrirla se dibujaban tres veces seguidas: 277 ms tirados. Ahora las
+     llamadas seguidas se juntan en una sola, con los últimos datos recibidos. */
+  function heredar(nuevo,viejo){
+    try{ Object.getOwnPropertyNames(viejo).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in nuevo)) nuevo[k]=viejo[k]; }); }catch(_){}
+    return nuevo;
+  }
+  var GRAFICOS=["actualizarGraficoFinanzas","actualizarGraficoCrecimientoAnual"];
+  function juntarGraficos(){
+    var puestos=0;
+    GRAFICOS.forEach(function(nombre){
+      var real=window[nombre];
+      if(typeof real!=="function" || real.__v182) return;
+      var pendiente=!1, ultimos=null;
+      function envuelto(){
+        ultimos=arguments;
+        if(pendiente) return;
+        pendiente=!0;
+        requestAnimationFrame(function(){
+          pendiente=!1;
+          try{ real.apply(window, ultimos||[]); }catch(e){ console.warn("V182:",e); }
+        });
+      }
+      envuelto.__v182=!0;
+      envuelto.__v182real=real;
+      window[nombre]=heredar(envuelto,real);
+      puestos++;
+    });
+    return puestos;
+  }
+  var intentos=0;
+  (function poner(){
+    try{ juntarGraficos(); }catch(e){ console.warn("V182:",e); }
+    var listos=GRAFICOS.every(function(n){ return typeof window[n]==="function" && window[n].__v182; });
+    if(++intentos<14 && !listos) setTimeout(poner,700);
+  })();
+}();
+</script>
 <script id="papotas-v173-dias-aviso">
 /* ============================================================================
    V173 · Un solo criterio para "está por vencer"
@@ -4116,7 +4228,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 </form>
 </div>
 </div>
-<script>function obtenerFechaLocal(e=new Date){const t=6e4*e.getTimezoneOffset();return new Date(e.getTime()-t).toISOString().split("T")[0]}function fechaMasDias(e,t=new Date){const a=new Date(t.getTime());return a.setDate(a.getDate()+Number(e||0)),obtenerFechaLocal(a)}function sumarDiasAFechaISO(e,t){if(!e)return"";const a=e.split("-"),n=new Date(Number(a[0]),Number(a[1])-1,Number(a[2]));return n.setDate(n.getDate()+Number(t)),obtenerFechaLocal(n)}function sumarMesesAFechaISO(e,t){if(!e)return"";const a=e.split("-"),n=Number(a[0]),o=Number(a[1])-1,i=Number(a[2]),r=o+Math.round(Number(t)||0),s=n+Math.floor(r/12),c=(r%12+12)%12,l=new Date(s,c+1,0).getDate(),d=Math.min(i,l);return`${s}-${String(c+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}function avanzarPeriodo(e,t,a){const n=Math.max(1,Math.round(Number(a)||1));return"dias"===t?sumarDiasAFechaISO(e,n):sumarMesesAFechaISO(e,n)}function cicloPorDefecto(){const e="dias"===ajustes.cicloRenovacion?"dias":"meses";return{tipo:e,cantidad:"dias"===e?Math.max(1,parseInt(ajustes.diasRenovacion,10)||30):Math.max(1,parseInt(ajustes.mesesRenovacion,10)||1)}}function cicloDeCliente(e){return!e||"dias"!==e.cicloTipo&&"meses"!==e.cicloTipo?cicloPorDefecto():{tipo:e.cicloTipo,cantidad:Math.max(1,parseInt(e.cicloCantidad,10)||1)}}function textoPeriodo(e,t){const a=Math.max(1,Math.round(Number(t)||1));return"dias"===e?`${a} día${1===a?"":"s"}`:`${a} mes${1===a?"":"es"}`}const MESES_CORTOS=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];function fechaBonita(e){if(!e)return"—";const t=String(e).split("-");return 3!==t.length?e:`${Number(t[2])} ${MESES_CORTOS[Number(t[1])-1]||""} ${t[0]}`}function diasHasta(e){if(!e)return null;const t=e.split("-"),a=new Date(Number(t[0]),Number(t[1])-1,Number(t[2])),n=new Date;return n.setHours(0,0,0,0),a.setHours(0,0,0,0),Math.round((a-n)/864e5)}function textoDiasRestantes(e){const t=diasHasta(e);return null===t?"Sin fecha":t<0?`Venció hace ${Math.abs(t)} d`:0===t?"Vence hoy":1===t?"Vence mañana":`Faltan ${t} d`}function estadoCliente(e){const t=diasHasta(e&&e.vencimiento);return null===t?"sin_fecha":t<0?"vencido":t<=Number(ajustes.diasAlerta||5)?"por_vencer":"activo"}function chipEstadoCliente(e){const t=estadoCliente(e);return"vencido"===t?'<span class="chip chip-urgente">Vencido</span>':"por_vencer"===t?'<span class="chip chip-aviso">Por vencer</span>':"sin_fecha"===t?'<span class="chip chip-neutro">Sin fecha</span>':'<span class="chip chip-ok">Al día</span>'}function formatearMoneda(e){return`${ajustes.moneda||"S/"} ${(Number(e)||0).toFixed(2)}`}function normalizarTelefono(e){let t=String(e||"").replace(/[^0-9]/g,"");const a=String(ajustes.prefijoPais||"").replace(/[^0-9]/g,"");return a&&t.length>0&&t.length<=9&&!t.startsWith(a)&&(t=a+t),t}function estadoVacio(e,t,a,n=""){return`<div class="estado-vacio">\n        <div class="ev-icono"><i data-lucide="${e}" class="w-5 h-5 text-slate-400"></i></div>\n        <p class="ev-titulo">${t}</p>\n        <p class="ev-texto">${a}</p>\n        ${n}\n      </div>`}function escParaAtributo(e){return encodeURIComponent(String(null==e?"":e)).replace(/'/g,"%27")}function esc(e){return null==e?"":String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}function debounce(e,t=220){let a=null;return function(...n){clearTimeout(a),a=setTimeout(()=>e.apply(this,n),t)}}let contadorIdSecuencial=0;function generarId(e){return contadorIdSecuencial=(contadorIdSecuencial+1)%1e5,`${e}_${Date.now()}_${contadorIdSecuencial}`}const PLATAFORMAS_COMPLETAS=["NETFLIX","DISNEY+","DISNEY+ESPN","HBO MAX","AMAZON PRIME","PARAMOUNT+","APPLE TV+","VIX+","CRUNCHYROLL","UNIVERSAL+","LIONSGATE+","DISCOVERY+","MUBI","PLUTO TV","RAKUTEN TV","PLEX","ROKU","ROKU CHANNEL","TUBI","PEACOCK","AMC+","STARZ","MGM+","SHUDDER","HIDIVE","BRITBOX","ACORN TV","HALLMARK+","BET+","KANOPY","THE CW","FANDOR","DIRECTV / DGO","MOVISTAR PLAY","CLARO VIDEO","ZAPPING","FLOW","FUBO","ESPN","SPOTIFY","YOUTUBE PREMIUM","YOUTUBE MUSIC","APPLE MUSIC","AMAZON MUSIC","DEEZER","TIDAL","AUDIBLE","STORYTEL","XBOX GAME PASS","PLAYSTATION PLUS","NINTENDO SWITCH ONLINE","EA PLAY","UBISOFT+","GEFORCE NOW","CHATGPT PLUS","GEMINI","CLAUDE","PERPLEXITY","MICROSOFT COPILOT","CANVA","MICROSOFT 365","GOOGLE ONE","ADOBE CREATIVE CLOUD","CAPCUT PRO","PICSART","DUOLINGO SUPER","SCRIBD","KINDLE UNLIMITED","COURSERA","PLATZI","NOTION","DROPBOX PLUS","1PASSWORD","NORDVPN","EXPRESSVPN","SURFSHARK","PROTON VPN"],PLATAFORMA_CATEGORIAS={Video:["NETFLIX","DISNEY+","DISNEY+ESPN","HBO MAX","AMAZON PRIME","PARAMOUNT+","APPLE TV+","VIX+","CRUNCHYROLL","UNIVERSAL+","LIONSGATE+","DISCOVERY+","MUBI","PLUTO TV","RAKUTEN TV","PLEX","ROKU","ROKU CHANNEL","TUBI","PEACOCK","AMC+","STARZ","MGM+","SHUDDER","HIDIVE","BRITBOX","ACORN TV","HALLMARK+","BET+","KANOPY","THE CW","FANDOR"],"TV en vivo":["DIRECTV / DGO","MOVISTAR PLAY","CLARO VIDEO","ZAPPING","FLOW","FUBO","ESPN"],"Música y audio":["SPOTIFY","YOUTUBE PREMIUM","YOUTUBE MUSIC","APPLE MUSIC","AMAZON MUSIC","DEEZER","TIDAL","AUDIBLE","STORYTEL"],Gaming:["XBOX GAME PASS","PLAYSTATION PLUS","NINTENDO SWITCH ONLINE","EA PLAY","UBISOFT+","GEFORCE NOW"],IA:["CHATGPT PLUS","GEMINI","CLAUDE","PERPLEXITY","MICROSOFT COPILOT"],Productividad:["CANVA","MICROSOFT 365","GOOGLE ONE","ADOBE CREATIVE CLOUD","CAPCUT PRO","PICSART","DUOLINGO SUPER","SCRIBD","KINDLE UNLIMITED","COURSERA","PLATZI","NOTION","DROPBOX PLUS","1PASSWORD"],Seguridad:["NORDVPN","EXPRESSVPN","SURFSHARK","PROTON VPN"]};try{window.PAPOTAS_PLATAFORMAS={lista:PLATAFORMAS_COMPLETAS.slice(),categorias:PLATAFORMA_CATEGORIAS}}catch{}const MARCAS={"DISNEY+ESPN":{logo:"espn.com",color:"#d50a0a"},"DISNEY+ ESPN":{logo:"espn.com",color:"#d50a0a"},"DISNEY ESPN":{logo:"espn.com",color:"#d50a0a"},ESPN:{logo:"espn.com",color:"#d50a0a"},CRUNCHYROLL:{logo:"crunchyroll.com",color:"#f47521"},PARAMOUNT:{logo:"paramountplus.com",color:"#0064ff"},NETFLIX:{logo:"netflix.com",color:"#e50914"},DISNEY:{logo:"disneyplus.com",color:"#0063e5"},YOUTUBE:{logo:"youtube.com",color:"#ff0000"},SPOTIFY:{logo:"spotify.com",color:"#1db954"},AMAZON:{logo:"primevideo.com",color:"#00a8e1"},PRIME:{logo:"primevideo.com",color:"#00a8e1"},DIRECTV:{logo:"directvgo.com",color:"#00a1e0"},DGO:{logo:"directvgo.com",color:"#00a1e0"},MAGIS:{logo:"magistv.vip",color:"#e11d48"},RAKUTEN:{logo:"rakuten.tv",color:"#bf0000"},APPLE:{logo:"tv.apple.com",color:"#a3a3a3"},DEEZER:{logo:"deezer.com",color:"#a238ff"},CANVA:{logo:"canva.com",color:"#00c4cc"},TIDAL:{logo:"tidal.com",color:"#38bdf8"},PLEX:{logo:"plex.tv",color:"#e5a00d"},ROKU:{logo:"roku.com",color:"#6f1ab1"},IPTV:{logo:"iptv.org",color:"#14b8a6"},HBO:{logo:"max.com",color:"#991eeb"},MAX:{logo:"max.com",color:"#991eeb"},VIX:{logo:"vix.com",color:"#f30074"},"NINTENDO SWITCH ONLINE":{logo:"nintendo.com",color:"#e60012"},"ADOBE CREATIVE CLOUD":{logo:"adobe.com",color:"#ff0000"},"PLAYSTATION PLUS":{logo:"playstation.com",color:"#0070d1"},"XBOX GAME PASS":{logo:"xbox.com",color:"#107c10"},"YOUTUBE PREMIUM":{logo:"youtube.com",color:"#ff0000"},"MICROSOFT 365":{logo:"microsoft.com",color:"#0067b8"},"DUOLINGO SUPER":{logo:"duolingo.com",color:"#58cc02"},"KINDLE UNLIMITED":{logo:"amazon.com",color:"#ff9900"},"AMAZON MUSIC":{logo:"music.amazon.com",color:"#25d1da"},"MOVISTAR PLAY":{logo:"movistarplus.es",color:"#019df4"},"CLARO VIDEO":{logo:"clarovideo.com",color:"#da291c"},"CHATGPT PLUS":{logo:"openai.com",color:"#10a37f"},"APPLE MUSIC":{logo:"music.apple.com",color:"#fa243c"},CAPCUT:{logo:"capcut.com",color:"#000000"},"GOOGLE ONE":{logo:"one.google.com",color:"#4285f4"},PLUTO:{logo:"pluto.tv",color:"#ffe000"},UNIVERSAL:{logo:"universalplus.com",color:"#0f4bd8"},LIONSGATE:{logo:"lionsgateplus.com",color:"#d4af37"},DISCOVERY:{logo:"discoveryplus.com",color:"#0057ff"},PERPLEXITY:{logo:"perplexity.ai",color:"#20808d"},EXPRESSVPN:{logo:"expressvpn.com",color:"#da3940"},PLAYSTATION:{logo:"playstation.com",color:"#0070d1"},NINTENDO:{logo:"nintendo.com",color:"#e60012"},DUOLINGO:{logo:"duolingo.com",color:"#58cc02"},MICROSOFT:{logo:"microsoft.com",color:"#0067b8"},CHATGPT:{logo:"openai.com",color:"#10a37f"},STORYTEL:{logo:"storytel.com",color:"#ff5a00"},COURSERA:{logo:"coursera.org",color:"#0056d2"},ZAPPING:{logo:"zappingtv.com",color:"#ff3b30"},NORDVPN:{logo:"nordvpn.com",color:"#4687ff"},MOVISTAR:{logo:"movistarplus.es",color:"#019df4"},AUDIBLE:{logo:"audible.com",color:"#f8991c"},PICSART:{logo:"picsart.com",color:"#c209c1"},SCRIBD:{logo:"scribd.com",color:"#1e7b85"},GEMINI:{logo:"gemini.google.com",color:"#8e75ff"},PLATZI:{logo:"platzi.com",color:"#98ca3f"},CLARO:{logo:"clarovideo.com",color:"#da291c"},CLAUDE:{logo:"claude.ai",color:"#d97757"},ADOBE:{logo:"adobe.com",color:"#ff0000"},"STAR+":{logo:"starplus.com",color:"#7b2ff7"},STAR:{logo:"starplus.com",color:"#7b2ff7"},XBOX:{logo:"xbox.com",color:"#107c10"},FUBO:{logo:"fubo.tv",color:"#e8ae00"},FLOW:{logo:"flow.com.ar",color:"#00b0ff"},MUBI:{logo:"mubi.com",color:"#001489"},"ROKU CHANNEL":{logo:"roku.com",color:"#6f1ab1"},TUBI:{logo:"tubitv.com",color:"#f58220"},PEACOCK:{logo:"peacocktv.com",color:"#6b35e8"},"AMC+":{logo:"amcplus.com",color:"#ffffff"},STARZ:{logo:"starz.com",color:"#d6b36a"},"MGM+":{logo:"mgmplus.com",color:"#c7a35a"},SHUDDER:{logo:"shudder.com",color:"#e50914"},HIDIVE:{logo:"hidive.com",color:"#4b2cff"},BRITBOX:{logo:"britbox.com",color:"#5a43ff"},"ACORN TV":{logo:"acorn.tv",color:"#0d7f4f"},"HALLMARK+":{logo:"hallmarkplus.com",color:"#8c1d40"},"BET+":{logo:"bet.plus",color:"#f2b900"},KANOPY:{logo:"kanopy.com",color:"#2f7f6f"},"THE CW":{logo:"cwtv.com",color:"#9b59b6"},FANDOR:{logo:"fandor.com",color:"#ff6a00"},"RAKUTEN TV":{logo:"rakuten.tv",color:"#bf0000"},"YOUTUBE MUSIC":{logo:"music.youtube.com",color:"#ff0000"},"EA PLAY":{logo:"ea.com",color:"#e34f26"},"UBISOFT+":{logo:"ubisoft.com",color:"#ffffff"},"GEFORCE NOW":{logo:"nvidia.com",color:"#76b900"},"MICROSOFT COPILOT":{logo:"copilot.microsoft.com",color:"#7c3aed"},NOTION:{logo:"notion.so",color:"#ffffff"},"DROPBOX PLUS":{logo:"dropbox.com",color:"#0061ff"},"1PASSWORD":{logo:"1password.com",color:"#0a68ff"},SURFSHARK:{logo:"surfshark.com",color:"#4cc9f0"},"PROTON VPN":{logo:"protonvpn.com",color:"#6d4aff"}},CLAVES_MARCA=Object.keys(MARCAS).sort((e,t)=>t.length-e.length);function buscarMarca(e){const t=String(e||"").trim().toUpperCase();if(!t)return null;if(MARCAS[t])return MARCAS[t];for(const e of CLAVES_MARCA)if(t.includes(e))return MARCAS[e];return null}const PALETA_CUENTAS=["#38bdf8","#a78bfa","#fb923c","#34d399","#f472b6","#facc15","#22d3ee","#f87171","#c084fc","#4ade80"];function colorCuenta(e){const t=Math.max(1,parseInt(e,10)||1);return PALETA_CUENTAS[(t-1)%PALETA_CUENTAS.length]}function insigniaCuenta(e,t={}){if(!e)return"";const a=e.numero||1,n=String(e.etiqueta||"").trim(),o=n&&!1!==t.conEtiqueta?`<span class="alias-cuenta">${esc(n)}</span>`:"",i=t.conPlataforma?`<span class="marca-cuenta">${esc(e.nombre)}</span>`:"",r=t.mini?" mini":"",s=t.sinEnlace?"":` role="button" tabindex="0" style="cursor:pointer" onclick="verClientesDeCuenta('${esc(e.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verClientesDeCuenta('${esc(e.id)}')}"`,c=t.sinEnlace?"":";cursor:pointer",l=t.sinEnlace?esc(nombreCuenta(e)):`${esc(nombreCuenta(e))} — ver sus clientes`;return`<span class="insignia-cuenta${r}" style="--cta:${colorCuenta(a)}${c}" title="${l}"${s}>${i}<span class="num-cuenta">${esc(a)}</span>${o}</span>`}function nombreCuenta(e){if(!e)return"";const t=String(e.etiqueta||"").trim();return`${e.nombre} ${e.numero||1}${t?` · ${t}`:""}`}function colorPlataforma(e){const t=buscarMarca(e);if(t)return t.color;const a=String(e||"").trim().toUpperCase();let n=0;for(let e=0;e<a.length;e++)n=(31*n+a.charCodeAt(e))%360;return`hsl(${n}, 62%, 52%)`}function obtenerLogoPlataforma(e){const t=buscarMarca(e);if(!t){const t=String(e||"?").trim().charAt(0).toUpperCase()||"?";return`<span style="font-size:15px;font-weight:900;color:${colorPlataforma(e)};">${esc(t)}</span>`}return`<img src="https://www.google.com/s2/favicons?domain=${t.logo}&sz=128" alt="${esc(e)}" loading="lazy" data-plataforma="${esc(e)}" onerror="papotasLogoFallback(this)">`}function inicializarSelectoresPlataformas(){const e=servicios.map(e=>(e.nombre||"").toUpperCase().trim()).filter(Boolean),t=(window.ajustes?.plataformasTarifas||[]).map(e=>String(e).toUpperCase().trim()).filter(Boolean),a=[...new Set([...PLATAFORMAS_COMPLETAS,...e,...t])],n={};Object.entries(PLATAFORMA_CATEGORIAS).forEach(([e,t])=>{n[e]=t.filter(e=>a.includes(e))});const o=a.filter(e=>!Object.values(PLATAFORMA_CATEGORIAS).some(t=>t.includes(e))).sort((e,t)=>e.localeCompare(t,"es",{numeric:!0})),i=(e,t,i=!1)=>{if(e.innerHTML="",i&&(e.innerHTML+='<option value="TODAS">🌟 Todas las plataformas</option>'),Object.entries(n).forEach(([t,a])=>{if(!a.length)return;const n=document.createElement("optgroup");n.label=t,a.forEach(e=>{const t=document.createElement("option");t.value=e,t.textContent=e,n.appendChild(t)}),e.appendChild(n)}),o.length){const t=document.createElement("optgroup");t.label="Otras / personalizadas",o.forEach(e=>{const a=document.createElement("option");a.value=e,a.textContent=e,t.appendChild(a)}),e.appendChild(t)}t&&("TODAS"===t||a.includes(t))&&(e.value=t)},r=e=>{const t=document.getElementById(e);t&&i(t,t.value,!1)};r("serv-nombre"),r("cli-servicio"),r("inv-plataforma"),r("ven-servicio");const s=document.getElementById("flt-perfiles-plataforma");if(s){const e=s.value;i(s,e||"TODAS",!0)}}let servicios=[],clientes=[],mensajesRapidos=[{id:"m_1",titulo:"Bienvenida",categoria:"Bienvenida",texto:"¡Hola! Bienvenido. Cualquier duda con tu cuenta, escríbeme por aquí 🎬"}],ventas=[],inversiones=[],combosGuardados=[],auditoriaLog=[],blocNotasTexto="",ajustes={nombre:"PAPOTAS",moneda:"S/",diasAlerta:"5",prefijoPais:"+51",precioDefecto:"15",diasRenovacion:"30",cicloRenovacion:"meses",mesesRenovacion:"1",densidad:"comoda",tamanoLetra:"normal",metodoDefecto:"PLIN",avisoInicio:!0,avisarRespaldo:!0,preciosPlataforma:{},historialPrecios:[],metaMensual:"0",horaAviso:"09:00",ultimoAvisoDiario:"",firmaWs:"— PAPOTAS 🎬",ultimoRespaldo:"",alertaVistaEl:"",colorPrimario:"#e50914",colorHover:"#b90710",tipografia:"Outfit",tipografiaNumero:"Roboto Mono",fondoTema:"calma",modoClaro:!1,supabaseUrl:"",supabaseKey:"",apiUrl:"",apiKey:"",plantillaCobro:"Hola {cliente} 👋 🎬 Te recordamos que tu servicio de {servicio} vence el {vencimiento}. ¡Renueva hoy mismo! 💳✨",plantillaEntrega:"¡Hola {cliente}! 🎉 Accesos para {servicio} 📺:\n📧 Correo: {correo}\n🔐 Clave: {contrasena}\n👤 Perfil: {perfil} | PIN: {pin}\n\n¡Disfruta sin cortes! 🍿🔥",plantillaVencido:"Hola {cliente} ⚠️ Tu servicio de {servicio} ha vencido el {vencimiento}. Escríbenos para reactivarlo al instante. 🚀",plantillaFidelizacion:"¡Hola {cliente}! 🌟 Renueva hoy tu cuenta {servicio} antes de vencer y aprovecha un descuento especial VIP. 🎁🔥",plantillaOferta:"¡Hola {cliente}! 👋 Tenemos cuentas disponibles de {servicio} con entrega inmediata y garantía total 🎬 ¿Deseas activar la tuya hoy? ✨",plantillaCombo:"¡Hola {cliente}! 🔥 Llévate un combo increíble con tus plataformas favoritas al mejor precio del mercado 🍿 ¡Escríbenos para armar tu pack Ultra! ⚡"};const clavesDanadas=[];function leerLista(e,t){let a=null;try{a=localStorage.getItem(e)}catch(a){return console.error(`No se pudo leer "${e}":`,a),t}if(!a)return t;try{const e=JSON.parse(a);if(!Array.isArray(e))throw new Error("formato inesperado");return e}catch(n){console.error(`Datos dañados en "${e}":`,n),clavesDanadas.push(e);try{localStorage.setItem(`${e}_danado`,a)}catch(e){}return t}}servicios=leerLista("pap_servicios",servicios),clientes=leerLista("pap_clientes",clientes),ventas=leerLista("pap_ventas",ventas),inversiones=leerLista("pap_inversiones",inversiones),mensajesRapidos=leerLista("pap_mensajes",mensajesRapidos),combosGuardados=leerLista("pap_combos_guardados",combosGuardados),auditoriaLog=leerLista("pap_auditoria",auditoriaLog);try{const e=localStorage.getItem("pap_bloc_notas");e&&(blocNotasTexto=e)}catch(e){console.error("No se pudo leer el bloc de notas:",e)}try{const e=localStorage.getItem("pap_ajustes");if(e){const t=JSON.parse(e);t&&"object"==typeof t&&(ajustes={...ajustes,...t})}}catch(e){console.error("Ajustes dañados, se usan los de fábrica:",e),clavesDanadas.push("pap_ajustes")}Array.isArray(ajustes.historialPrecios)||(ajustes.historialPrecios=[]),clavesDanadas.length&&window.addEventListener("load",()=>{setTimeout(()=>mostrarToast(`⚠️ ${clavesDanadas.length} bloque(s) de datos dañados. Restaura un respaldo.`),1200)});let idDispositivo="";try{idDispositivo=localStorage.getItem("pap_device_id")||""}catch(e){}if(!idDispositivo){idDispositivo=generarId("dev");try{localStorage.setItem("pap_device_id",idDispositivo)}catch(e){}}function registrarAuditoria(e,t){const a=new Date,n=e=>String(e).padStart(2,"0"),o=`${obtenerFechaLocal(a)} ${n(a.getHours())}:${n(a.getMinutes())}`;auditoriaLog.unshift({id:generarId("aud"),fecha:o,accion:e,detalle:t}),auditoriaLog.length>100&&auditoriaLog.pop(),guardarClave("pap_auditoria",JSON.stringify(auditoriaLog));try{window.sincronizarConNube?.()}catch(_){}}function abrirMenuMovil(){document.getElementById("sidebar-menu").classList.add("abierto"),document.getElementById("sidebar-overlay").classList.remove("hidden")}function cerrarMenuMovil(){document.getElementById("sidebar-menu").classList.remove("abierto"),document.getElementById("sidebar-overlay").classList.add("hidden")}let seccionActual="dashboard",terminoBusqueda="",filtroEstadoActual="todos",filtroFechaExacta=null,ordenClientes="vencimiento",clavesVisibles={},clienteSeleccionadoWs=null,textareaActivoEmoji=null;function cambiarSeccion(e){seccionActual=e,document.querySelectorAll(".seccion-pantalla").forEach(e=>e.classList.add("hidden"));const t=document.getElementById(`sec-${e}`);if(t){t.classList.remove("hidden");let p=t.parentElement;for(;p;)p.classList&&p.classList.contains("seccion-pantalla")&&p.classList.remove("hidden"),p=p.parentElement}const a="menu-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition font-semibold text-xs";document.querySelectorAll(".menu-btn").forEach(e=>{e.className=`${a} pap-menu-item`,e.removeAttribute("aria-current")});const n=document.getElementById(`btn-${e}`);n&&(n.className=`${a} pap-menu-item pap-menu-active`,n.setAttribute("aria-current","page"));document.getElementById("titulo-pagina")&&(document.getElementById("titulo-pagina").innerText={dashboard:"Panel",servicios:"Cuentas master",clientes:"Clientes","precios-margen":"Tarifas por plataforma",tarifas:"Tarifas por plataforma",clubvip:"Club VIP y referidos",combos:"Generador de combos",masivos:"Envíos por WhatsApp",mensajes:"Respuestas rápidas",plantillas:"Plantillas de WhatsApp",ventas:"Ventas y finanzas",operacion:"Operación hoy",renovaciones:"Renovaciones",inventario:"Inventario de plazas",reportes:"Reportes",auditoria:"Historial de actividad",ajustes:"Ajustes","cobros-pro":"Cobros inteligentes",recordatorios:"Recordatorios",rentabilidad:"Rentabilidad","caja-pro":"Caja y cierre","nube-pro":"Nube y respaldo","datos-pro":"Datos y salud","center-pro":"Centro de mando"}[e]||"PAPOTAS"),actualizarBotonAccionTop(e),actualizarBarraInferior(e),cerrarMenuMovil();const i=document.getElementById("zona-contenido");i&&i.scrollTo({top:0,behavior:"auto"}),"combos"===e&&(inicializarGeneradorCombos(),actualizarSelectCombosGuardados()),renderizarTodo()}function actualizarSubtituloCabecera(){const e=document.getElementById("subtitulo-pagina");if(!e)return;const t=new Date,a=t.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"}),n=obtenerFechaLocal(t),o=clientes.filter(e=>e.vencimiento===n).length,i=clientes.filter(e=>"vencido"===estadoCliente(e)).length,r=[a.charAt(0).toUpperCase()+a.slice(1)];o&&r.push(`${o} vence${1===o?"":"n"} hoy`),i&&r.push(`${i} vencido${1===i?"":"s"}`),o||i||!clientes.length||r.push("todo al día"),e.innerText=r.join(" · ")}function actualizarBarraInferior(e){document.querySelectorAll("#barra-inferior button").forEach(t=>{t.classList.toggle("activo",t.dataset.sec===e)})}function volverArriba(){const e=document.getElementById("zona-contenido");e&&e.scrollTo({top:0,behavior:"smooth"})}function alDesplazarContenido(e){const t=document.getElementById("btn-arriba");t&&t.classList.toggle("visible",e.scrollTop>320)}let avisoInstalacion=null;async function instalarAplicacion(){if(avisoInstalacion){avisoInstalacion.prompt();const{outcome:e}=await avisoInstalacion.userChoice;return"accepted"!==e&&mostrarToast("Instalación cancelada"),void(avisoInstalacion=null)}const e=/iphone|ipad|ipod/i.test(navigator.userAgent);papAviso(e?'Para instalarla en iPhone:\n\n1. Toca el botón Compartir (el cuadrito con la flecha).\n2. Elige "Añadir a pantalla de inicio".\n3. Confirma con "Añadir".':'Para instalarla:\n\n1. Abre el menú del navegador (los tres puntos).\n2. Elige "Instalar aplicación" o "Añadir a pantalla de inicio".\n\nSi no aparece, entra desde Chrome con la página abierta en https.')}function actualizarBotonAccionTop(e){const t=document.getElementById("btn-accion-top"),a=document.getElementById("lbl-btn-accion");if(!t||!a)return;const n={servicios:"Nueva cuenta",clientes:"Nuevo cliente",mensajes:"Nueva respuesta",ventas:"Nueva venta",dashboard:"Nuevo cliente"};Object.keys(n).includes(e)?(a.innerText=n[e],t.style.display="flex",t.setAttribute("aria-label",n[e])):t.style.display="none"}function irAClientesConFiltro(e){cambiarSeccion("clientes"),filtrarEstadoCliente(e)}function ejecutarAccionPrincipal(){"servicios"===seccionActual?abrirModalServicio():"mensajes"===seccionActual?abrirModalMensajeRapido():"ventas"===seccionActual?abrirModalVenta():abrirModalCliente()}function getSupabaseClient(){if(!ajustes.supabaseUrl||!ajustes.supabaseKey||"undefined"==typeof supabase)return null;let e=ajustes.supabaseUrl.trim();e.startsWith("http")||(e="https://"+e),e=e.replace(/\/rest\/v1\/?$/i,"").replace(/\/+$/,"");try{return supabase.createClient(e,ajustes.supabaseKey.trim())}catch(e){return null}}window.addEventListener("beforeinstallprompt",e=>{e.preventDefault(),avisoInstalacion=e;const t=document.getElementById("btn-instalar-app");t&&(t.classList.remove("hidden"),t.innerText="Instalar PAPOTAS en este dispositivo")}),window.addEventListener("appinstalled",()=>{avisoInstalacion=null,mostrarToast("PAPOTAS quedó instalada en tu dispositivo")});let clienteSupabaseActual=null,clienteSupabaseFirmaCredenciales="";function obtenerClienteSupabaseCacheado(){const e=`${ajustes.supabaseUrl||""}|${ajustes.supabaseKey||""}`;return ajustes.supabaseUrl&&ajustes.supabaseKey?(clienteSupabaseActual&&e===clienteSupabaseFirmaCredenciales||(clienteSupabaseActual=getSupabaseClient(),clienteSupabaseFirmaCredenciales=e),clienteSupabaseActual):(clienteSupabaseActual=null,clienteSupabaseFirmaCredenciales="",null)}function actualizarEstadoNubeUI(e){const t={sincronizado:"🟢 Sincronizado",pendiente:"🟡 Cambios sin subir…",conectando:"📡 Conectando…",local:"⚪ Solo en este dispositivo",error:"🔴 Sin conexión con la nube"},a=document.getElementById("txt-estado-nube");a&&(a.innerText=t[e]||t.local);const n=document.getElementById("txt-estado-nube-detalle");n&&(n.innerText=t[e]||t.local)}let temporizadorSubida=null,subidaPendiente=!1,ultimaMarcaNubeAplicada=localStorage.getItem("pap_ultima_marca_nube")||"",marcaPendienteDesde=0;
+<script>function obtenerFechaLocal(e=new Date){const t=6e4*e.getTimezoneOffset();return new Date(e.getTime()-t).toISOString().split("T")[0]}function fechaMasDias(e,t=new Date){const a=new Date(t.getTime());return a.setDate(a.getDate()+Number(e||0)),obtenerFechaLocal(a)}function sumarDiasAFechaISO(e,t){if(!e)return"";const a=e.split("-"),n=new Date(Number(a[0]),Number(a[1])-1,Number(a[2]));return n.setDate(n.getDate()+Number(t)),obtenerFechaLocal(n)}function sumarMesesAFechaISO(e,t){if(!e)return"";const a=e.split("-"),n=Number(a[0]),o=Number(a[1])-1,i=Number(a[2]),r=o+Math.round(Number(t)||0),s=n+Math.floor(r/12),c=(r%12+12)%12,l=new Date(s,c+1,0).getDate(),d=Math.min(i,l);return`${s}-${String(c+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}function avanzarPeriodo(e,t,a){const n=Math.max(1,Math.round(Number(a)||1));return"dias"===t?sumarDiasAFechaISO(e,n):sumarMesesAFechaISO(e,n)}function cicloPorDefecto(){const e="dias"===ajustes.cicloRenovacion?"dias":"meses";return{tipo:e,cantidad:"dias"===e?Math.max(1,parseInt(ajustes.diasRenovacion,10)||30):Math.max(1,parseInt(ajustes.mesesRenovacion,10)||1)}}function cicloDeCliente(e){return!e||"dias"!==e.cicloTipo&&"meses"!==e.cicloTipo?cicloPorDefecto():{tipo:e.cicloTipo,cantidad:Math.max(1,parseInt(e.cicloCantidad,10)||1)}}function textoPeriodo(e,t){const a=Math.max(1,Math.round(Number(t)||1));return"dias"===e?`${a} día${1===a?"":"s"}`:`${a} mes${1===a?"":"es"}`}const MESES_CORTOS=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];function fechaBonita(e){if(!e)return"—";const t=String(e).split("-");return 3!==t.length?e:`${Number(t[2])} ${MESES_CORTOS[Number(t[1])-1]||""} ${t[0]}`}function diasHasta(e){if(!e)return null;const t=e.split("-"),a=new Date(Number(t[0]),Number(t[1])-1,Number(t[2])),n=new Date;return n.setHours(0,0,0,0),a.setHours(0,0,0,0),Math.round((a-n)/864e5)}function textoDiasRestantes(e){const t=diasHasta(e);return null===t?"Sin fecha":t<0?`Venció hace ${Math.abs(t)} d`:0===t?"Vence hoy":1===t?"Vence mañana":`Faltan ${t} d`}function estadoCliente(e){const t=diasHasta(e&&e.vencimiento);return null===t?"sin_fecha":t<0?"vencido":t<=Number(ajustes.diasAlerta||5)?"por_vencer":"activo"}function chipEstadoCliente(e){const t=estadoCliente(e);return"vencido"===t?'<span class="chip chip-urgente">Vencido</span>':"por_vencer"===t?'<span class="chip chip-aviso">Por vencer</span>':"sin_fecha"===t?'<span class="chip chip-neutro">Sin fecha</span>':'<span class="chip chip-ok">Al día</span>'}function formatearMoneda(e){return`${ajustes.moneda||"S/"} ${(Number(e)||0).toFixed(2)}`}function normalizarTelefono(e){let t=String(e||"").replace(/[^0-9]/g,"");const a=String(ajustes.prefijoPais||"").replace(/[^0-9]/g,"");return a&&t.length>0&&t.length<=9&&!t.startsWith(a)&&(t=a+t),t}function estadoVacio(e,t,a,n=""){return`<div class="estado-vacio">\n        <div class="ev-icono"><i data-lucide="${e}" class="w-5 h-5 text-slate-400"></i></div>\n        <p class="ev-titulo">${t}</p>\n        <p class="ev-texto">${a}</p>\n        ${n}\n      </div>`}function escParaAtributo(e){return encodeURIComponent(String(null==e?"":e)).replace(/'/g,"%27")}function esc(e){return null==e?"":String(e).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}function debounce(e,t=220){let a=null;return function(...n){clearTimeout(a),a=setTimeout(()=>e.apply(this,n),t)}}let contadorIdSecuencial=0;function generarId(e){return contadorIdSecuencial=(contadorIdSecuencial+1)%1e5,`${e}_${Date.now()}_${contadorIdSecuencial}`}const PLATAFORMAS_COMPLETAS=["NETFLIX","DISNEY+","DISNEY+ESPN","HBO MAX","AMAZON PRIME","PARAMOUNT+","APPLE TV+","VIX+","CRUNCHYROLL","UNIVERSAL+","LIONSGATE+","DISCOVERY+","MUBI","PLUTO TV","RAKUTEN TV","PLEX","ROKU","ROKU CHANNEL","TUBI","PEACOCK","AMC+","STARZ","MGM+","SHUDDER","HIDIVE","BRITBOX","ACORN TV","HALLMARK+","BET+","KANOPY","THE CW","FANDOR","DIRECTV / DGO","MOVISTAR PLAY","CLARO VIDEO","ZAPPING","FLOW","FUBO","ESPN","SPOTIFY","YOUTUBE PREMIUM","YOUTUBE MUSIC","APPLE MUSIC","AMAZON MUSIC","DEEZER","TIDAL","AUDIBLE","STORYTEL","XBOX GAME PASS","PLAYSTATION PLUS","NINTENDO SWITCH ONLINE","EA PLAY","UBISOFT+","GEFORCE NOW","CHATGPT PLUS","GEMINI","CLAUDE","PERPLEXITY","MICROSOFT COPILOT","CANVA","MICROSOFT 365","GOOGLE ONE","ADOBE CREATIVE CLOUD","CAPCUT PRO","PICSART","DUOLINGO SUPER","SCRIBD","KINDLE UNLIMITED","COURSERA","PLATZI","NOTION","DROPBOX PLUS","1PASSWORD","NORDVPN","EXPRESSVPN","SURFSHARK","PROTON VPN"],PLATAFORMA_CATEGORIAS={Video:["NETFLIX","DISNEY+","DISNEY+ESPN","HBO MAX","AMAZON PRIME","PARAMOUNT+","APPLE TV+","VIX+","CRUNCHYROLL","UNIVERSAL+","LIONSGATE+","DISCOVERY+","MUBI","PLUTO TV","RAKUTEN TV","PLEX","ROKU","ROKU CHANNEL","TUBI","PEACOCK","AMC+","STARZ","MGM+","SHUDDER","HIDIVE","BRITBOX","ACORN TV","HALLMARK+","BET+","KANOPY","THE CW","FANDOR"],"TV en vivo":["DIRECTV / DGO","MOVISTAR PLAY","CLARO VIDEO","ZAPPING","FLOW","FUBO","ESPN"],"Música y audio":["SPOTIFY","YOUTUBE PREMIUM","YOUTUBE MUSIC","APPLE MUSIC","AMAZON MUSIC","DEEZER","TIDAL","AUDIBLE","STORYTEL"],Gaming:["XBOX GAME PASS","PLAYSTATION PLUS","NINTENDO SWITCH ONLINE","EA PLAY","UBISOFT+","GEFORCE NOW"],IA:["CHATGPT PLUS","GEMINI","CLAUDE","PERPLEXITY","MICROSOFT COPILOT"],Productividad:["CANVA","MICROSOFT 365","GOOGLE ONE","ADOBE CREATIVE CLOUD","CAPCUT PRO","PICSART","DUOLINGO SUPER","SCRIBD","KINDLE UNLIMITED","COURSERA","PLATZI","NOTION","DROPBOX PLUS","1PASSWORD"],Seguridad:["NORDVPN","EXPRESSVPN","SURFSHARK","PROTON VPN"]};try{window.PAPOTAS_PLATAFORMAS={lista:PLATAFORMAS_COMPLETAS.slice(),categorias:PLATAFORMA_CATEGORIAS}}catch{}const MARCAS={"DISNEY+ESPN":{logo:"espn.com",color:"#d50a0a"},"DISNEY+ ESPN":{logo:"espn.com",color:"#d50a0a"},"DISNEY ESPN":{logo:"espn.com",color:"#d50a0a"},ESPN:{logo:"espn.com",color:"#d50a0a"},CRUNCHYROLL:{logo:"crunchyroll.com",color:"#f47521"},PARAMOUNT:{logo:"paramountplus.com",color:"#0064ff"},NETFLIX:{logo:"netflix.com",color:"#e50914"},DISNEY:{logo:"disneyplus.com",color:"#0063e5"},YOUTUBE:{logo:"youtube.com",color:"#ff0000"},SPOTIFY:{logo:"spotify.com",color:"#1db954"},AMAZON:{logo:"primevideo.com",color:"#00a8e1"},PRIME:{logo:"primevideo.com",color:"#00a8e1"},DIRECTV:{logo:"directvgo.com",color:"#00a1e0"},DGO:{logo:"directvgo.com",color:"#00a1e0"},MAGIS:{logo:"magistv.vip",color:"#e11d48"},RAKUTEN:{logo:"rakuten.tv",color:"#bf0000"},APPLE:{logo:"tv.apple.com",color:"#a3a3a3"},DEEZER:{logo:"deezer.com",color:"#a238ff"},CANVA:{logo:"canva.com",color:"#00c4cc"},TIDAL:{logo:"tidal.com",color:"#38bdf8"},PLEX:{logo:"plex.tv",color:"#e5a00d"},ROKU:{logo:"roku.com",color:"#6f1ab1"},IPTV:{logo:"iptv.org",color:"#14b8a6"},HBO:{logo:"max.com",color:"#991eeb"},MAX:{logo:"max.com",color:"#991eeb"},VIX:{logo:"vix.com",color:"#f30074"},"NINTENDO SWITCH ONLINE":{logo:"nintendo.com",color:"#e60012"},"ADOBE CREATIVE CLOUD":{logo:"adobe.com",color:"#ff0000"},"PLAYSTATION PLUS":{logo:"playstation.com",color:"#0070d1"},"XBOX GAME PASS":{logo:"xbox.com",color:"#107c10"},"YOUTUBE PREMIUM":{logo:"youtube.com",color:"#ff0000"},"MICROSOFT 365":{logo:"microsoft.com",color:"#0067b8"},"DUOLINGO SUPER":{logo:"duolingo.com",color:"#58cc02"},"KINDLE UNLIMITED":{logo:"amazon.com",color:"#ff9900"},"AMAZON MUSIC":{logo:"music.amazon.com",color:"#25d1da"},"MOVISTAR PLAY":{logo:"movistarplus.es",color:"#019df4"},"CLARO VIDEO":{logo:"clarovideo.com",color:"#da291c"},"CHATGPT PLUS":{logo:"openai.com",color:"#10a37f"},"APPLE MUSIC":{logo:"music.apple.com",color:"#fa243c"},CAPCUT:{logo:"capcut.com",color:"#000000"},"GOOGLE ONE":{logo:"one.google.com",color:"#4285f4"},PLUTO:{logo:"pluto.tv",color:"#ffe000"},UNIVERSAL:{logo:"universalplus.com",color:"#0f4bd8"},LIONSGATE:{logo:"lionsgateplus.com",color:"#d4af37"},DISCOVERY:{logo:"discoveryplus.com",color:"#0057ff"},PERPLEXITY:{logo:"perplexity.ai",color:"#20808d"},EXPRESSVPN:{logo:"expressvpn.com",color:"#da3940"},PLAYSTATION:{logo:"playstation.com",color:"#0070d1"},NINTENDO:{logo:"nintendo.com",color:"#e60012"},DUOLINGO:{logo:"duolingo.com",color:"#58cc02"},MICROSOFT:{logo:"microsoft.com",color:"#0067b8"},CHATGPT:{logo:"openai.com",color:"#10a37f"},STORYTEL:{logo:"storytel.com",color:"#ff5a00"},COURSERA:{logo:"coursera.org",color:"#0056d2"},ZAPPING:{logo:"zappingtv.com",color:"#ff3b30"},NORDVPN:{logo:"nordvpn.com",color:"#4687ff"},MOVISTAR:{logo:"movistarplus.es",color:"#019df4"},AUDIBLE:{logo:"audible.com",color:"#f8991c"},PICSART:{logo:"picsart.com",color:"#c209c1"},SCRIBD:{logo:"scribd.com",color:"#1e7b85"},GEMINI:{logo:"gemini.google.com",color:"#8e75ff"},PLATZI:{logo:"platzi.com",color:"#98ca3f"},CLARO:{logo:"clarovideo.com",color:"#da291c"},CLAUDE:{logo:"claude.ai",color:"#d97757"},ADOBE:{logo:"adobe.com",color:"#ff0000"},"STAR+":{logo:"starplus.com",color:"#7b2ff7"},STAR:{logo:"starplus.com",color:"#7b2ff7"},XBOX:{logo:"xbox.com",color:"#107c10"},FUBO:{logo:"fubo.tv",color:"#e8ae00"},FLOW:{logo:"flow.com.ar",color:"#00b0ff"},MUBI:{logo:"mubi.com",color:"#001489"},"ROKU CHANNEL":{logo:"roku.com",color:"#6f1ab1"},TUBI:{logo:"tubitv.com",color:"#f58220"},PEACOCK:{logo:"peacocktv.com",color:"#6b35e8"},"AMC+":{logo:"amcplus.com",color:"#ffffff"},STARZ:{logo:"starz.com",color:"#d6b36a"},"MGM+":{logo:"mgmplus.com",color:"#c7a35a"},SHUDDER:{logo:"shudder.com",color:"#e50914"},HIDIVE:{logo:"hidive.com",color:"#4b2cff"},BRITBOX:{logo:"britbox.com",color:"#5a43ff"},"ACORN TV":{logo:"acorn.tv",color:"#0d7f4f"},"HALLMARK+":{logo:"hallmarkplus.com",color:"#8c1d40"},"BET+":{logo:"bet.plus",color:"#f2b900"},KANOPY:{logo:"kanopy.com",color:"#2f7f6f"},"THE CW":{logo:"cwtv.com",color:"#9b59b6"},FANDOR:{logo:"fandor.com",color:"#ff6a00"},"RAKUTEN TV":{logo:"rakuten.tv",color:"#bf0000"},"YOUTUBE MUSIC":{logo:"music.youtube.com",color:"#ff0000"},"EA PLAY":{logo:"ea.com",color:"#e34f26"},"UBISOFT+":{logo:"ubisoft.com",color:"#ffffff"},"GEFORCE NOW":{logo:"nvidia.com",color:"#76b900"},"MICROSOFT COPILOT":{logo:"copilot.microsoft.com",color:"#7c3aed"},NOTION:{logo:"notion.so",color:"#ffffff"},"DROPBOX PLUS":{logo:"dropbox.com",color:"#0061ff"},"1PASSWORD":{logo:"1password.com",color:"#0a68ff"},SURFSHARK:{logo:"surfshark.com",color:"#4cc9f0"},"PROTON VPN":{logo:"protonvpn.com",color:"#6d4aff"}},CLAVES_MARCA=Object.keys(MARCAS).sort((e,t)=>t.length-e.length);function buscarMarca(e){const t=String(e||"").trim().toUpperCase();if(!t)return null;if(MARCAS[t])return MARCAS[t];for(const e of CLAVES_MARCA)if(t.includes(e))return MARCAS[e];return null}const PALETA_CUENTAS=["#38bdf8","#a78bfa","#fb923c","#34d399","#f472b6","#facc15","#22d3ee","#f87171","#c084fc","#4ade80"];function colorCuenta(e){const t=Math.max(1,parseInt(e,10)||1);return PALETA_CUENTAS[(t-1)%PALETA_CUENTAS.length]}function insigniaCuenta(e,t={}){if(!e)return"";const a=e.numero||1,n=String(e.etiqueta||"").trim(),o=n&&!1!==t.conEtiqueta?`<span class="alias-cuenta">${esc(n)}</span>`:"",i=t.conPlataforma?`<span class="marca-cuenta">${esc(e.nombre)}</span>`:"",r=t.mini?" mini":"",s=t.sinEnlace?"":` role="button" tabindex="0" style="cursor:pointer" onclick="verClientesDeCuenta('${esc(e.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();verClientesDeCuenta('${esc(e.id)}')}"`,c=t.sinEnlace?"":";cursor:pointer",l=t.sinEnlace?esc(nombreCuenta(e)):`${esc(nombreCuenta(e))} — ver sus clientes`;return`<span class="insignia-cuenta${r}" style="--cta:${colorCuenta(a)}${c}" title="${l}"${s}>${i}<span class="num-cuenta">${esc(a)}</span>${o}</span>`}function nombreCuenta(e){if(!e)return"";const t=String(e.etiqueta||"").trim();return`${e.nombre} ${e.numero||1}${t?` · ${t}`:""}`}function colorPlataforma(e){const t=buscarMarca(e);if(t)return t.color;const a=String(e||"").trim().toUpperCase();let n=0;for(let e=0;e<a.length;e++)n=(31*n+a.charCodeAt(e))%360;return`hsl(${n}, 62%, 52%)`}function obtenerLogoPlataforma(e){const t=buscarMarca(e);if(!t){const t=String(e||"?").trim().charAt(0).toUpperCase()||"?";return`<span style="font-size:15px;font-weight:900;color:${colorPlataforma(e)};">${esc(t)}</span>`}return`<img src="https://www.google.com/s2/favicons?domain=${t.logo}&sz=128" alt="${esc(e)}" loading="lazy" data-plataforma="${esc(e)}" onerror="papotasLogoFallback(this)">`}function inicializarSelectoresPlataformas(){const e=servicios.map(e=>(e.nombre||"").toUpperCase().trim()).filter(Boolean),t=(window.ajustes?.plataformasTarifas||[]).map(e=>String(e).toUpperCase().trim()).filter(Boolean),a=[...new Set([...PLATAFORMAS_COMPLETAS,...e,...t])],n={};Object.entries(PLATAFORMA_CATEGORIAS).forEach(([e,t])=>{n[e]=t.filter(e=>a.includes(e))});const o=a.filter(e=>!Object.values(PLATAFORMA_CATEGORIAS).some(t=>t.includes(e))).sort((e,t)=>e.localeCompare(t,"es",{numeric:!0})),i=(e,t,i=!1)=>{if(e.innerHTML="",i&&(e.innerHTML+='<option value="TODAS">🌟 Todas las plataformas</option>'),Object.entries(n).forEach(([t,a])=>{if(!a.length)return;const n=document.createElement("optgroup");n.label=t,a.forEach(e=>{const t=document.createElement("option");t.value=e,t.textContent=e,n.appendChild(t)}),e.appendChild(n)}),o.length){const t=document.createElement("optgroup");t.label="Otras / personalizadas",o.forEach(e=>{const a=document.createElement("option");a.value=e,a.textContent=e,t.appendChild(a)}),e.appendChild(t)}t&&("TODAS"===t||a.includes(t))&&(e.value=t)},r=e=>{const t=document.getElementById(e);t&&i(t,t.value,!1)};r("serv-nombre"),r("cli-servicio"),r("inv-plataforma"),r("ven-servicio");const s=document.getElementById("flt-perfiles-plataforma");if(s){const e=s.value;i(s,e||"TODAS",!0)}}let servicios=[],clientes=[],mensajesRapidos=[{id:"m_1",titulo:"Bienvenida",categoria:"Bienvenida",texto:"¡Hola! Bienvenido. Cualquier duda con tu cuenta, escríbeme por aquí 🎬"}],ventas=[],inversiones=[],combosGuardados=[],auditoriaLog=[],blocNotasTexto="",ajustes={nombre:"PAPOTAS",moneda:"S/",diasAlerta:"5",prefijoPais:"+51",precioDefecto:"15",diasRenovacion:"30",cicloRenovacion:"meses",mesesRenovacion:"1",densidad:"comoda",tamanoLetra:"normal",metodoDefecto:"PLIN",avisoInicio:!0,avisarRespaldo:!0,preciosPlataforma:{},historialPrecios:[],metaMensual:"0",horaAviso:"09:00",ultimoAvisoDiario:"",firmaWs:"— PAPOTAS 🎬",ultimoRespaldo:"",alertaVistaEl:"",colorPrimario:"#e50914",colorHover:"#b90710",tipografia:"Outfit",tipografiaNumero:"Roboto Mono",fondoTema:"calma",modoClaro:!1,supabaseUrl:"",supabaseKey:"",apiUrl:"",apiKey:"",plantillaCobro:"Hola {cliente} 👋 🎬 Te recordamos que tu servicio de {servicio} vence el {vencimiento}. ¡Renueva hoy mismo! 💳✨",plantillaEntrega:"¡Hola {cliente}! 🎉 Accesos para {servicio} 📺:\n📧 Correo: {correo}\n🔐 Clave: {contrasena}\n👤 Perfil: {perfil} | PIN: {pin}\n\n¡Disfruta sin cortes! 🍿🔥",plantillaVencido:"Hola {cliente} ⚠️ Tu servicio de {servicio} ha vencido el {vencimiento}. Escríbenos para reactivarlo al instante. 🚀",plantillaFidelizacion:"¡Hola {cliente}! 🌟 Renueva hoy tu cuenta {servicio} antes de vencer y aprovecha un descuento especial VIP. 🎁🔥",plantillaOferta:"¡Hola {cliente}! 👋 Tenemos cuentas disponibles de {servicio} con entrega inmediata y garantía total 🎬 ¿Deseas activar la tuya hoy? ✨",plantillaCombo:"¡Hola {cliente}! 🔥 Llévate un combo increíble con tus plataformas favoritas al mejor precio del mercado 🍿 ¡Escríbenos para armar tu pack Ultra! ⚡"};const clavesDanadas=[];function leerLista(e,t){let a=null;try{a=localStorage.getItem(e)}catch(a){return console.error(`No se pudo leer "${e}":`,a),t}if(!a)return t;try{const e=JSON.parse(a);if(!Array.isArray(e))throw new Error("formato inesperado");return e}catch(n){console.error(`Datos dañados en "${e}":`,n),clavesDanadas.push(e);try{localStorage.setItem(`${e}_danado`,a)}catch(e){}return t}}servicios=leerLista("pap_servicios",servicios),clientes=leerLista("pap_clientes",clientes),ventas=leerLista("pap_ventas",ventas),inversiones=leerLista("pap_inversiones",inversiones),mensajesRapidos=leerLista("pap_mensajes",mensajesRapidos),combosGuardados=leerLista("pap_combos_guardados",combosGuardados),auditoriaLog=leerLista("pap_auditoria",auditoriaLog);try{const e=localStorage.getItem("pap_bloc_notas");e&&(blocNotasTexto=e)}catch(e){console.error("No se pudo leer el bloc de notas:",e)}try{const e=localStorage.getItem("pap_ajustes");if(e){const t=JSON.parse(e);t&&"object"==typeof t&&(ajustes={...ajustes,...t})}}catch(e){console.error("Ajustes dañados, se usan los de fábrica:",e),clavesDanadas.push("pap_ajustes")}Array.isArray(ajustes.historialPrecios)||(ajustes.historialPrecios=[]),clavesDanadas.length&&window.addEventListener("load",()=>{setTimeout(()=>mostrarToast(`⚠️ ${clavesDanadas.length} bloque(s) de datos dañados. Restaura un respaldo.`),1200)});let idDispositivo="";try{idDispositivo=localStorage.getItem("pap_device_id")||""}catch(e){}if(!idDispositivo){idDispositivo=generarId("dev");try{localStorage.setItem("pap_device_id",idDispositivo)}catch(e){}}function registrarAuditoria(e,t){const a=new Date,n=e=>String(e).padStart(2,"0"),o=`${obtenerFechaLocal(a)} ${n(a.getHours())}:${n(a.getMinutes())}`;auditoriaLog.unshift({id:generarId("aud"),fecha:o,accion:e,detalle:t}),auditoriaLog.length>100&&auditoriaLog.pop(),guardarClave("pap_auditoria",JSON.stringify(auditoriaLog));try{window.sincronizarConNube?.()}catch(_){}}function abrirMenuMovil(){document.getElementById("sidebar-menu").classList.add("abierto"),document.getElementById("sidebar-overlay").classList.remove("hidden")}function cerrarMenuMovil(){document.getElementById("sidebar-menu").classList.remove("abierto"),document.getElementById("sidebar-overlay").classList.add("hidden")}let seccionActual="dashboard",terminoBusqueda="",filtroEstadoActual="todos",filtroFechaExacta=null,ordenClientes="vencimiento",clavesVisibles={},clienteSeleccionadoWs=null,textareaActivoEmoji=null;function cambiarSeccion(e){seccionActual=e;window.papotasRebobinar&&window.papotasRebobinar();document.querySelectorAll(".seccion-pantalla").forEach(e=>e.classList.add("hidden"));const t=document.getElementById(`sec-${e}`);if(t){t.classList.remove("hidden");let p=t.parentElement;for(;p;)p.classList&&p.classList.contains("seccion-pantalla")&&p.classList.remove("hidden"),p=p.parentElement}const a="menu-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition font-semibold text-xs";document.querySelectorAll(".menu-btn").forEach(e=>{e.className=`${a} pap-menu-item ${e.dataset.acento||""}`,e.removeAttribute("aria-current")});const n=document.getElementById(`btn-${e}`);n&&(n.className=`${a} pap-menu-item pap-menu-active ${n.dataset.acento||""}`,n.setAttribute("aria-current","page"));document.getElementById("titulo-pagina")&&(document.getElementById("titulo-pagina").innerText={dashboard:"Panel",servicios:"Cuentas master",clientes:"Clientes","precios-margen":"Tarifas por plataforma",tarifas:"Tarifas por plataforma",clubvip:"Club VIP y referidos",combos:"Generador de combos",masivos:"Envíos por WhatsApp",mensajes:"Respuestas rápidas",plantillas:"Plantillas de WhatsApp",ventas:"Ventas y finanzas",operacion:"Operación hoy",renovaciones:"Renovaciones",inventario:"Inventario de plazas",reportes:"Reportes",auditoria:"Historial de actividad",ajustes:"Ajustes","cobros-pro":"Cobros inteligentes",recordatorios:"Recordatorios",rentabilidad:"Rentabilidad","caja-pro":"Caja y cierre","nube-pro":"Nube y respaldo","datos-pro":"Datos y salud","center-pro":"Centro de mando"}[e]||"PAPOTAS"),actualizarBotonAccionTop(e),actualizarBarraInferior(e),cerrarMenuMovil();"combos"===e&&(inicializarGeneradorCombos(),actualizarSelectCombosGuardados()),window.papotasPintarPrimero?window.papotasPintarPrimero():renderizarTodo()}function actualizarSubtituloCabecera(){const e=document.getElementById("subtitulo-pagina");if(!e)return;const t=new Date,a=t.toLocaleDateString("es-ES",{weekday:"long",day:"numeric",month:"long"}),n=obtenerFechaLocal(t),o=clientes.filter(e=>e.vencimiento===n).length,i=clientes.filter(e=>"vencido"===estadoCliente(e)).length,r=[a.charAt(0).toUpperCase()+a.slice(1)];o&&r.push(`${o} vence${1===o?"":"n"} hoy`),i&&r.push(`${i} vencido${1===i?"":"s"}`),o||i||!clientes.length||r.push("todo al día"),e.innerText=r.join(" · ")}function actualizarBarraInferior(e){document.querySelectorAll("#barra-inferior button").forEach(t=>{t.classList.toggle("activo",t.dataset.sec===e)})}function volverArriba(){const e=document.getElementById("zona-contenido");e&&e.scrollTo({top:0,behavior:"smooth"})}function alDesplazarContenido(e){const t=document.getElementById("btn-arriba");t&&t.classList.toggle("visible",e.scrollTop>320)}let avisoInstalacion=null;async function instalarAplicacion(){if(avisoInstalacion){avisoInstalacion.prompt();const{outcome:e}=await avisoInstalacion.userChoice;return"accepted"!==e&&mostrarToast("Instalación cancelada"),void(avisoInstalacion=null)}const e=/iphone|ipad|ipod/i.test(navigator.userAgent);papAviso(e?'Para instalarla en iPhone:\n\n1. Toca el botón Compartir (el cuadrito con la flecha).\n2. Elige "Añadir a pantalla de inicio".\n3. Confirma con "Añadir".':'Para instalarla:\n\n1. Abre el menú del navegador (los tres puntos).\n2. Elige "Instalar aplicación" o "Añadir a pantalla de inicio".\n\nSi no aparece, entra desde Chrome con la página abierta en https.')}function actualizarBotonAccionTop(e){const t=document.getElementById("btn-accion-top"),a=document.getElementById("lbl-btn-accion");if(!t||!a)return;const n={servicios:"Nueva cuenta",clientes:"Nuevo cliente",mensajes:"Nueva respuesta",ventas:"Nueva venta",dashboard:"Nuevo cliente"};Object.keys(n).includes(e)?(a.innerText=n[e],t.style.display="flex",t.setAttribute("aria-label",n[e])):t.style.display="none"}function irAClientesConFiltro(e){cambiarSeccion("clientes"),filtrarEstadoCliente(e)}function ejecutarAccionPrincipal(){"servicios"===seccionActual?abrirModalServicio():"mensajes"===seccionActual?abrirModalMensajeRapido():"ventas"===seccionActual?abrirModalVenta():abrirModalCliente()}function getSupabaseClient(){if(!ajustes.supabaseUrl||!ajustes.supabaseKey||"undefined"==typeof supabase)return null;let e=ajustes.supabaseUrl.trim();e.startsWith("http")||(e="https://"+e),e=e.replace(/\/rest\/v1\/?$/i,"").replace(/\/+$/,"");try{return supabase.createClient(e,ajustes.supabaseKey.trim())}catch(e){return null}}window.addEventListener("beforeinstallprompt",e=>{e.preventDefault(),avisoInstalacion=e;const t=document.getElementById("btn-instalar-app");t&&(t.classList.remove("hidden"),t.innerText="Instalar PAPOTAS en este dispositivo")}),window.addEventListener("appinstalled",()=>{avisoInstalacion=null,mostrarToast("PAPOTAS quedó instalada en tu dispositivo")});let clienteSupabaseActual=null,clienteSupabaseFirmaCredenciales="";function obtenerClienteSupabaseCacheado(){const e=`${ajustes.supabaseUrl||""}|${ajustes.supabaseKey||""}`;return ajustes.supabaseUrl&&ajustes.supabaseKey?(clienteSupabaseActual&&e===clienteSupabaseFirmaCredenciales||(clienteSupabaseActual=getSupabaseClient(),clienteSupabaseFirmaCredenciales=e),clienteSupabaseActual):(clienteSupabaseActual=null,clienteSupabaseFirmaCredenciales="",null)}function actualizarEstadoNubeUI(e){const t={sincronizado:"🟢 Sincronizado",pendiente:"🟡 Cambios sin subir…",conectando:"📡 Conectando…",local:"⚪ Solo en este dispositivo",error:"🔴 Sin conexión con la nube"},a=document.getElementById("txt-estado-nube");a&&(a.innerText=t[e]||t.local);const n=document.getElementById("txt-estado-nube-detalle");n&&(n.innerText=t[e]||t.local)}let temporizadorSubida=null,subidaPendiente=!1,ultimaMarcaNubeAplicada=localStorage.getItem("pap_ultima_marca_nube")||"",marcaPendienteDesde=0;
 const PAPOTAS_BORRADOS_KEY="pap_borrados_nube_v1";
 let papotasBorrados=(()=>{try{const x=JSON.parse(localStorage.getItem(PAPOTAS_BORRADOS_KEY)||"{}");return x&&typeof x==="object"?x:{}}catch(e){return{}}})();
 function guardarBorradosNube(){try{localStorage.setItem(PAPOTAS_BORRADOS_KEY,JSON.stringify(papotasBorrados))}catch(e){}}
@@ -4226,7 +4338,7 @@ if(t.servicios&&(servicios=fusionarPorId(servicios,t.servicios,"servicios")),t.c
 <script id="papotas-single-boot-final">!function(){"use strict";function o(){if(!window.__PAPOTAS_CORE_STARTED__){window.__PAPOTAS_CORE_STARTED__=!0;try{"function"==typeof arrancarPapotasCore?arrancarPapotasCore():"function"==typeof window.cambiarSeccion&&window.cambiarSeccion("dashboard")}catch(o){console.error("[PAPOTAS boot final]",o);try{"function"==typeof window.cambiarSeccion&&window.cambiarSeccion("dashboard")}catch(o){}}}}window.__PAPOTAS_SINGLE_BOOT__||(window.__PAPOTAS_SINGLE_BOOT__=!0,"loading"===document.readyState?document.addEventListener("DOMContentLoaded",o,{once:!0}):o())}();</script>
 
 
-<script id="papotas-selectable-cards-script">!function(){"use strict";if(window.__PAPOTAS_SELECTABLE_CARDS__)return;window.__PAPOTAS_SELECTABLE_CARDS__=!0;const e=(e,c=document)=>Array.from(c.querySelectorAll(e)),c=e=>e.closest(".seccion-pantalla");function a(e,c,a){e&&!e.matches("button,a,input,select,textarea,[data-pap-ignore]")&&(e.classList.add("pap-selectable"),e.dataset.papAction=c||"",a&&e.setAttribute("title",a),e.setAttribute("tabindex","0"),e.setAttribute("role","button"))}function t(){e("#sec-dashboard .glass-card.card-interactive").forEach(e=>{const c=(e.innerText||"").toLowerCase();let t="cambiarSeccion('dashboard')";c.includes("cuentas master")?t="cambiarSeccion('servicios')":c.includes("clientes")?t="cambiarSeccion('clientes')":c.includes("perfiles")?t="cambiarSeccion('servicios')":c.includes("cobros")&&(t="cambiarSeccion('cobros-pro')"),a(e,t,"Abrir detalle")}),e(".ps-kpi,.caja.cifra,.tarifas-kpi,.tarifa-card").forEach(e=>{const t=c(e);t&&a(e,`cambiarSeccion('${t.id.replace(/^sec-/,"")}')`,"Abrir sección")}),e("#sec-servicios .grupo-plataforma").forEach(e=>a(e,"cambiarSeccion('servicios')","Abrir administración de cuentas master")),e("#sec-servicios .bloque-cuenta").forEach(e=>{const c=e.querySelector('[onclick*="verClientesDeCuenta"]'),t=c?.getAttribute("onclick")?.match(/verClientesDeCuenta\('([^']+)'\)/);t?a(e,`verClientesDeCuenta('${t[1]}')`,"Ver clientes de esta cuenta"):a(e,"cambiarSeccion('servicios')","Abrir cuenta master")}),e("#sec-clientes .tarjeta-registro").forEach(e=>{const c=e.querySelector('[onclick*="abrirFichaCliente"]'),t=c?.getAttribute("onclick")?.match(/abrirFichaCliente\('([^']+)'\)/);t?a(e,`abrirFichaCliente('${t[1]}')`,"Abrir ficha del cliente"):a(e,"cambiarSeccion('clientes')","Abrir clientes")}),e(".ps-section,.ps-cover,.glass-card").forEach(e=>{if(e.closest("#papotas-command-palette,#pap-command-palette,.modal-papotas"))return;if(e.querySelector("form")||e.matches(".modal-papotas"))return;if(e.matches(".grupo-plataforma,.bloque-cuenta,.tarjeta-registro"))return;if("true"===e.dataset.papIgnore)return;const t=function(e){if(e.dataset.papAction)return e.dataset.papAction;const a=c(e),t=a?.id||"",i=e.id||"",r=(e.innerText||"").toLowerCase();if("sec-dashboard"===t&&""===i){if(r.includes("cuentas master"))return"cambiarSeccion('servicios')";if(r.includes("clientes"))return"cambiarSeccion('clientes')";if(r.includes("perfiles totales")||r.includes("perfiles libres"))return"cambiarSeccion('servicios')";if(r.includes("cobros"))return"cambiarSeccion('cobros-pro')"}const o={"sec-clientes":"cambiarSeccion('clientes')","sec-servicios":"cambiarSeccion('servicios')","sec-tarifas":"cambiarSeccion('tarifas')","sec-cobros-pro":"cambiarSeccion('cobros-pro')","sec-recordatorios":"cambiarSeccion('recordatorios')","sec-rentabilidad":"cambiarSeccion('rentabilidad')","sec-caja-pro":"cambiarSeccion('caja-pro')","sec-ventas":"cambiarSeccion('ventas')","sec-masivos":"cambiarSeccion('masivos')","sec-combos":"cambiarSeccion('combos')","sec-ajustes":"cambiarSeccion('ajustes')","sec-reportes":"cambiarSeccion('reportes')","sec-diagnostico":"cambiarSeccion('diagnostico')"};return o[t]?o[t]:""}(e);t&&a(e,t,"Abrir")})}function i(e){if(e)try{Function(e)()}catch(e){console.error("[PAPOTAS selectable]",e)}}document.addEventListener("click",e=>{const c=e.target.closest(".pap-selectable");c&&!e.target.closest("button,a,input,select,textarea")&&i(c.dataset.papAction)}),document.addEventListener("keydown",e=>{"Enter"!==e.key&&" "!==e.key||!document.activeElement?.classList.contains("pap-selectable")||(e.preventDefault(),i(document.activeElement.dataset.papAction))});const r=()=>{t()};"loading"===document.readyState?document.addEventListener("DOMContentLoaded",r,{once:!0}):r();const o=window.cambiarSeccion;"function"!=typeof o||window.__PAPOTAS_SELECTABLE_WRAP__||(window.cambiarSeccion=function(e){const c=o.apply(this,arguments);return requestAnimationFrame(t),c},window.__PAPOTAS_SELECTABLE_WRAP__=!0)}();</script>
+<script id="papotas-selectable-cards-script">!function(){"use strict";if(window.__PAPOTAS_SELECTABLE_CARDS__)return;window.__PAPOTAS_SELECTABLE_CARDS__=!0;let raiz=document;const e=(e,c=raiz)=>Array.from(c.querySelectorAll(e)),c=e=>e.closest(".seccion-pantalla");function a(e,c,a){if(!e||e.matches("button,a,input,select,textarea,[data-pap-ignore]"))return;const n=c||"";if(e.dataset.papAction===n&&e.classList.contains("pap-selectable"))return;e.classList.add("pap-selectable"),e.dataset.papAction=n,a&&e.getAttribute("title")!==a&&e.setAttribute("title",a),"0"!==e.getAttribute("tabindex")&&e.setAttribute("tabindex","0"),"button"!==e.getAttribute("role")&&e.setAttribute("role","button")}function t(){e("#sec-dashboard .glass-card.card-interactive").forEach(e=>{const c=(e.textContent||"").toLowerCase();let t="cambiarSeccion('dashboard')";c.includes("cuentas master")?t="cambiarSeccion('servicios')":c.includes("clientes")?t="cambiarSeccion('clientes')":c.includes("perfiles")?t="cambiarSeccion('servicios')":c.includes("cobros")&&(t="cambiarSeccion('cobros-pro')"),a(e,t,"Abrir detalle")}),e(".ps-kpi,.caja.cifra,.tarifas-kpi,.tarifa-card").forEach(e=>{const t=c(e);t&&a(e,`cambiarSeccion('${t.id.replace(/^sec-/,"")}')`,"Abrir sección")}),e("#sec-servicios .grupo-plataforma").forEach(e=>a(e,"cambiarSeccion('servicios')","Abrir administración de cuentas master")),e("#sec-servicios .bloque-cuenta").forEach(e=>{const c=e.querySelector('[onclick*="verClientesDeCuenta"]'),t=c?.getAttribute("onclick")?.match(/verClientesDeCuenta\('([^']+)'\)/);t?a(e,`verClientesDeCuenta('${t[1]}')`,"Ver clientes de esta cuenta"):a(e,"cambiarSeccion('servicios')","Abrir cuenta master")}),e("#sec-clientes .tarjeta-registro").forEach(e=>{const c=e.querySelector('[onclick*="abrirFichaCliente"]'),t=c?.getAttribute("onclick")?.match(/abrirFichaCliente\('([^']+)'\)/);t?a(e,`abrirFichaCliente('${t[1]}')`,"Abrir ficha del cliente"):a(e,"cambiarSeccion('clientes')","Abrir clientes")}),e(".ps-section,.ps-cover,.glass-card").forEach(e=>{if(e.closest("#papotas-command-palette,#pap-command-palette,.modal-papotas"))return;if(e.querySelector("form")||e.matches(".modal-papotas"))return;if(e.matches(".grupo-plataforma,.bloque-cuenta,.tarjeta-registro"))return;if("true"===e.dataset.papIgnore)return;const t=function(e){if(e.dataset.papAction)return e.dataset.papAction;const a=c(e),t=a?.id||"",i=e.id||"",r=(e.textContent||"").toLowerCase();if("sec-dashboard"===t&&""===i){if(r.includes("cuentas master"))return"cambiarSeccion('servicios')";if(r.includes("clientes"))return"cambiarSeccion('clientes')";if(r.includes("perfiles totales")||r.includes("perfiles libres"))return"cambiarSeccion('servicios')";if(r.includes("cobros"))return"cambiarSeccion('cobros-pro')"}const o={"sec-clientes":"cambiarSeccion('clientes')","sec-servicios":"cambiarSeccion('servicios')","sec-tarifas":"cambiarSeccion('tarifas')","sec-cobros-pro":"cambiarSeccion('cobros-pro')","sec-recordatorios":"cambiarSeccion('recordatorios')","sec-rentabilidad":"cambiarSeccion('rentabilidad')","sec-caja-pro":"cambiarSeccion('caja-pro')","sec-ventas":"cambiarSeccion('ventas')","sec-masivos":"cambiarSeccion('masivos')","sec-combos":"cambiarSeccion('combos')","sec-ajustes":"cambiarSeccion('ajustes')","sec-reportes":"cambiarSeccion('reportes')","sec-diagnostico":"cambiarSeccion('diagnostico')"};return o[t]?o[t]:""}(e);t&&a(e,t,"Abrir")})}function i(e){if(e)try{Function(e)()}catch(e){console.error("[PAPOTAS selectable]",e)}}document.addEventListener("click",e=>{const c=e.target.closest(".pap-selectable");c&&!e.target.closest("button,a,input,select,textarea")&&i(c.dataset.papAction)}),document.addEventListener("keydown",e=>{"Enter"!==e.key&&" "!==e.key||!document.activeElement?.classList.contains("pap-selectable")||(e.preventDefault(),i(document.activeElement.dataset.papAction))});const r=()=>{t()};"loading"===document.readyState?document.addEventListener("DOMContentLoaded",r,{once:!0}):r();const o=window.cambiarSeccion;"function"!=typeof o||window.__PAPOTAS_SELECTABLE_WRAP__||(window.cambiarSeccion=function(e){const c=o.apply(this,arguments);return requestAnimationFrame(function(){(window.requestIdleCallback||function(f){setTimeout(f,1)})(function(){const p=raiz;try{raiz=document.querySelector(".seccion-pantalla:not(.hidden)")||document;t()}finally{raiz=p}},{timeout:400})}),c},window.__PAPOTAS_SELECTABLE_WRAP__=!0)}();</script>
 
 
 
@@ -5426,8 +5538,15 @@ body#cuerpo-app .seccion-pantalla .pap-mini-stat .k{
     var w=Math.round(caja.clientWidth||0), h=Math.round(caja.clientHeight||0);
     if(w<40||h<32) return null;
     var dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
-    c.width=Math.round(w*dpr); c.height=Math.round(h*dpr);
-    c.style.width="100%"; c.style.height="100%";
+    /* Escribir width/height o el estilo invalida las medidas de la página: si
+       se hace en cada gráfico, el navegador recalcula la pantalla entera una
+       vez por lienzo (medido: 263 ms al abrir Dinero). Solo se toca lo que
+       de verdad cambia. */
+    var aw=Math.round(w*dpr), ah=Math.round(h*dpr);
+    if(c.width!==aw) c.width=aw;
+    if(c.height!==ah) c.height=ah;
+    if(c.style.width!=="100%") c.style.width="100%";
+    if(c.style.height!=="100%") c.style.height="100%";
     var ctx=c.getContext("2d"); if(!ctx) return null;
     ctx.setTransform(dpr,0,0,dpr,0,0);
     ctx.clearRect(0,0,w,h);
@@ -5913,9 +6032,13 @@ aside nav button.bg-white\/10::before{height:60%}
     if(!sec) return;
     var caja=sec.querySelector('.pap-vistas > *:not(.hidden)') || sec;
     caja.classList.remove("pap-entrando");
-    void caja.offsetWidth;              // reinicia la animación
-    caja.classList.add("pap-entrando");
-    setTimeout(function(){ caja.classList.remove("pap-entrando"); }, 900);
+    /* Reiniciar la animación leyendo offsetWidth obliga al navegador a recalcular
+       toda la pantalla en mitad del clic (medido: 179 ms con 80 clientes). Se
+       consigue lo mismo esperando al siguiente fotograma, y sin bloquear. */
+    requestAnimationFrame(function(){
+      caja.classList.add("pap-entrando");
+      setTimeout(function(){ caja.classList.remove("pap-entrando"); }, 900);
+    });
   }
 
   /* --- Cifras que suben hasta su valor ------------------------------------
@@ -8377,9 +8500,12 @@ aside nav button.bg-white\/10::before{height:60%}
   body#cuerpo-app #sidebar-menu .menu-btn svg{width:19px!important; height:19px!important}
   /* La cifra pendiente no cabe al lado del icono: va encima, como en el móvil. */
   body#cuerpo-app #sidebar-menu .menu-btn .chip{
-    position:absolute!important; top:3px!important; right:9px!important;
+    position:absolute!important; top:0!important; left:auto!important; right:1px!important;
     margin:0!important; min-width:0!important; padding:0 4px!important;
     font-size:9px!important; line-height:15px!important; height:15px!important;
+    border-radius:999px!important;
+    box-shadow:0 0 0 2px #0a0b10!important;
+    animation:none!important;
   }
   /* Marca y pie: solo el símbolo. */
   body#cuerpo-app #sidebar-menu #titulo-marca-app,
@@ -10673,9 +10799,10 @@ body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired{
     if(typeof orig!=="function" || orig.__v179) return !1;
     function envuelto(){
       var r=orig.apply(this,arguments);
-      /* Dos pasadas: una enseguida y otra cuando el navegador ya ha pintado. */
-      alDia();
-      requestAnimationFrame(alDia);
+      /* El trabajo aplazado se hace DESPUÉS de que la pantalla nueva esté a la
+         vista. Hacerlo en el mismo instante del clic era lo que retrasaba casi
+         un segundo la apertura de Dinero (V182). */
+      requestAnimationFrame(function(){ requestAnimationFrame(alDia); });
       return r;
     }
     envuelto.__v179=!0;
@@ -11013,5 +11140,316 @@ body#cuerpo-app #sec-tarifas .tarifa-card::before,
 }
 </style>
 
+
+<style id="papotas-v182-css">
+/* V182 · Las tarjetas que no se ven no se miden.
+   Con 80 clientes, destapar la pantalla de Clientes obligaba al navegador a
+   medir 7.700 elementos y 1.066 iconos: 763 ms en un teléfono. Con esto solo
+   mide las tarjetas que caben en la pantalla: 69 ms. Al imprimir se desactiva,
+   para que salga todo. */
+@supports (content-visibility:auto){
+  @media screen{
+    /* La medida de reserva es la altura real de una tarjeta: 210 px de 480 px
+       para arriba, 238 px en pantallas muy estrechas. Si se queda corta, la
+       barra de desplazamiento pega saltos al bajar. Los bloques de cuenta NO
+       llevan esto: miden entre 520 y 1.400 px según el ancho, no hay medida de
+       reserva que valga, y lo que ahorraban era poco. */
+    #cuerpo-app .seccion-pantalla .tarjeta-registro{
+      content-visibility:auto;
+      contain-intrinsic-size:auto 212px;
+    }
+    @media (max-width:420px){
+      #cuerpo-app .seccion-pantalla .tarjeta-registro{ contain-intrinsic-size:auto 224px; }
+    }
+    @media (max-width:359px){
+      #cuerpo-app .seccion-pantalla .tarjeta-registro{ contain-intrinsic-size:auto 240px; }
+    }
+  }
+}
+</style>
+
+<style id="papotas-v183-css">
+/* ============================================================================
+   V183 · "QUE EL COLOR DEJE CLARA LA SITUACIÓN DEL CLIENTE" + "DALE MÁS VIDA
+   A ESA BARRA"
+
+   Dos ideas, y la segunda depende de la primera:
+
+   1. El color de estado era una raya de 4 px y un velo del 5 %: a un palmo de
+      distancia las tres tarjetas eran idénticas. Ahora el estado tiñe la
+      tarjeta entera con un degradado que nace en el borde, la etiqueta pasa a
+      ser una pastilla maciza y la fecha se escribe del color del estado.
+      La escala se lee sola: cuanto más color, más urgencia.
+
+   2. Para que ese color signifique algo, tiene que ser el único fuerte de la
+      tarjeta. Los seis botones de acción venían en ámbar, verde, azul, celeste
+      y rojo, y el teléfono en verde: nueve colores compitiendo. Se apagan a
+      gris y recuperan el suyo al pasar por encima. Hay MENOS color que antes y
+      se distingue MUCHO más, que es justo lo que pedías en el Word.
+
+   3. La barra lateral estaba apagada porque cambiarSeccion reescribía la clase
+      de cada botón y borraba su color (el atributo data-acento lo guardaba,
+      pero nadie lo devolvía). Ya está corregido en su sitio; aquí se le da la
+      forma: icono en su color dentro de una placa, pastilla activa con marca
+      roja, y las cifras urgentes con latido.
+   ========================================================================== */
+
+/* ---------- 1. Estado del cliente ---------------------------------------- */
+
+body#cuerpo-app .seccion-pantalla .tarjeta-registro,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta{
+  --pap-estado:#64748b;
+  position:relative;
+  box-shadow:inset 6px 0 0 0 var(--pap-estado)!important;
+  border-color:rgba(255,255,255,.07)!important;
+  transition:background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro > *{ position:relative; z-index:1; }
+
+/* Vencido: rojo franco, es lo que hay que atender hoy. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-vencido{
+  --pap-estado:#ef4444;
+  background:linear-gradient(103deg,
+      rgba(239,68,68,.30) 0%,
+      rgba(239,68,68,.13) 34%,
+      rgba(239,68,68,.04) 62%,
+      rgba(255,255,255,.035) 100%)!important;
+  border-color:rgba(239,68,68,.30)!important;
+}
+/* Por vencer: ámbar, aviso claro pero sin alarma. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-aviso{
+  --pap-estado:#f59e0b;
+  background:linear-gradient(103deg,
+      rgba(245,158,11,.26) 0%,
+      rgba(245,158,11,.10) 34%,
+      rgba(245,158,11,.03) 62%,
+      rgba(255,255,255,.035) 100%)!important;
+  border-color:rgba(245,158,11,.26)!important;
+}
+/* Al día: verde apenas insinuado. No hay nada que hacer, no debe llamar. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-activo{
+  --pap-estado:#10b981;
+  background:linear-gradient(103deg,
+      rgba(16,185,129,.15) 0%,
+      rgba(16,185,129,.05) 34%,
+      rgba(255,255,255,.03) 72%)!important;
+  border-color:rgba(16,185,129,.20)!important;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-neutro{
+  --pap-estado:#64748b;
+  background:rgba(255,255,255,.035)!important;
+}
+/* Vence HOY. Venía marcado a la vez como "vence hoy" y como "neutro", y ganaba
+   el neutro: la tarjeta más urgente después de las vencidas salía gris. Va la
+   última y con más peso para que no vuelva a pasar. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.pap-vence-hoy,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta.pap-vence-hoy,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.pap-vence-hoy.estado-neutro,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.tarjeta-cuenta.pap-vence-hoy.estado-neutro{
+  --pap-estado:#f59e0b;
+  background:linear-gradient(103deg,
+      rgba(245,158,11,.26) 0%,
+      rgba(245,158,11,.10) 34%,
+      rgba(245,158,11,.03) 62%,
+      rgba(255,255,255,.035) 100%)!important;
+  border-color:rgba(245,158,11,.26)!important;
+}
+
+/* La etiqueta de estado: maciza cuando urge, perfilada cuando está al día. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .chip-urgente{
+  background:#ef4444!important; color:#1b0505!important;
+  border:1px solid #ef4444!important; font-weight:900!important;
+  letter-spacing:.02em;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .chip-aviso{
+  background:#f59e0b!important; color:#241704!important;
+  border:1px solid #f59e0b!important; font-weight:900!important;
+  letter-spacing:.02em;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .chip-ok{
+  background:rgba(16,185,129,.14)!important; color:#6ee7b7!important;
+  border:1px solid rgba(16,185,129,.42)!important; font-weight:800!important;
+}
+
+/* La fecha de vencimiento, del color del estado y en negrita. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-vencido .dato-linea > span:last-child,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-aviso .dato-linea > span:last-child{ }
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea .text-red-400,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea .text-amber-400{
+  font-weight:900!important;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea .text-red-400{ color:#fca5a5!important; }
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea .text-amber-400{ color:#fcd34d!important; }
+
+/* Etiquetas de la izquierda un punto más legibles sobre el color. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea > span:first-child{
+  color:#94a3b8!important;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-vencido .dato-linea,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro.estado-aviso .dato-linea{
+  border-bottom-color:rgba(255,255,255,.10)!important;
+}
+
+/* ---------- 2. Menos ruido para que el estado se vea ---------------------- */
+
+/* Los seis botones de acción, en gris; su color aparece al apuntarlos. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono{
+  color:#94a3b8!important;
+  transition:color .15s ease, background .15s ease, border-color .15s ease;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono:hover,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono:focus-visible{
+  background:rgba(255,255,255,.10)!important;
+  border-color:rgba(255,255,255,.20)!important;
+}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-amber-400:hover{color:#fbbf24!important}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-emerald-400:hover{color:#34d399!important}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-blue-400:hover{color:#60a5fa!important}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-cyan-400:hover{color:#22d3ee!important}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-red-400:hover{color:#f87171!important}
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-violet-400:hover,
+body#cuerpo-app .seccion-pantalla .tarjeta-registro .btn-icono.text-purple-400:hover{color:#c084fc!important}
+
+/* El teléfono es un dato, no una alerta. */
+body#cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child > .min-w-0 > p{
+  color:#8fa0b5!important;
+}
+
+/* ---------- 3. La barra lateral ------------------------------------------ */
+
+/* Cada botón lleva su color en data-acento; aquí se traduce a una variable
+   para pintar el icono, y así da igual que la clase se reescriba. */
+#cuerpo-app #sidebar-menu .menu-btn{ --acento:#94a3b8; }
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-red-300"]{--acento:#f87171}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-red-400"]{--acento:#f87171}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-emerald-300"],
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-emerald-400"]{--acento:#34d399}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-amber-400"],
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-amber-300"]{--acento:#fbbf24}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-cyan-400"]{--acento:#22d3ee}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-blue-400"]{--acento:#60a5fa}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-violet-300"],
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-purple-400"]{--acento:#c084fc}
+#cuerpo-app #sidebar-menu .menu-btn[data-acento="text-slate-400"]{--acento:#94a3b8}
+
+#cuerpo-app #sidebar-menu{
+  background:
+    radial-gradient(120% 55% at 0% 0%,
+      color-mix(in srgb, var(--papotas-primary,#e50914) 16%, transparent) 0%,
+      transparent 62%),
+    linear-gradient(180deg,#0c0d14 0%,#08090f 46%,#05060a 100%)!important;
+  border-right:1px solid rgba(255,255,255,.08)!important;
+}
+
+/* Bloque de marca: separado del menú por una línea, como una cabecera. */
+#cuerpo-app #sidebar-menu > div > div:first-child{
+  padding-bottom:14px!important;
+  border-bottom:1px solid rgba(255,255,255,.07)!important;
+}
+
+#cuerpo-app #sidebar-menu nav{ display:flex; flex-direction:column; gap:4px; }
+/* Un pelo más estrecho para que "Cuentas master" quepa en una línea y todas
+   las filas midan igual. */
+#cuerpo-app #sidebar-menu .menu-btn .menu-rotulo{
+  min-width:0;
+  font-size:11.5px!important;
+  letter-spacing:-.012em;
+}
+
+#cuerpo-app #sidebar-menu .menu-btn{
+  position:relative;
+  align-items:center!important;
+  text-align:left!important;
+  line-height:1.25!important;
+  color:#9aa8bc!important;
+  border:1px solid transparent!important;
+  border-radius:12px!important;
+  padding:9px 10px!important;
+  gap:9px!important;
+  overflow:hidden;
+  transition:background .16s ease, color .16s ease, border-color .16s ease, transform .16s ease;
+}
+#cuerpo-app #sidebar-menu .menu-btn > span:not(.chip){ text-align:left!important; }
+
+/* El icono vive en su propia placa, teñida con el color del apartado. */
+#cuerpo-app #sidebar-menu .menu-btn > svg{
+  flex:0 0 auto!important;
+  width:18px!important; height:18px!important;
+  opacity:1!important;
+  box-sizing:content-box;
+  padding:5px;
+  border-radius:10px;
+  color:var(--acento)!important;
+  background:color-mix(in srgb, var(--acento) 20%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--acento) 26%, transparent);
+  transition:background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+#cuerpo-app #sidebar-menu .menu-btn:hover{
+  background:rgba(255,255,255,.055)!important;
+  color:#e8eef7!important;
+  transform:translateX(2px);
+}
+#cuerpo-app #sidebar-menu .menu-btn:hover > svg{
+  background:color-mix(in srgb, var(--acento) 26%, transparent);
+}
+
+/* Pastilla activa: la marca roja va DENTRO, no colgando por fuera. */
+#cuerpo-app #sidebar-menu .menu-btn.pap-menu-active,
+#cuerpo-app #sidebar-menu .menu-btn[aria-current="page"]{
+  background:linear-gradient(90deg,
+    color-mix(in srgb, var(--papotas-primary,#e50914) 30%, transparent) 0%,
+    color-mix(in srgb, var(--papotas-primary,#e50914) 10%, transparent) 58%,
+    transparent 100%)!important;
+  border:1px solid color-mix(in srgb, var(--papotas-primary,#e50914) 34%, transparent)!important;
+  border-left:1px solid color-mix(in srgb, var(--papotas-primary,#e50914) 34%, transparent)!important;
+  color:#fff!important;
+  transform:none;
+  box-shadow:inset 3px 0 0 0 var(--papotas-primary,#e50914)!important;
+}
+#cuerpo-app #sidebar-menu .menu-btn.pap-menu-active > svg,
+#cuerpo-app #sidebar-menu .menu-btn[aria-current="page"] > svg{
+  color:#fff!important;
+  filter:none!important;
+  background:color-mix(in srgb, var(--papotas-primary,#e50914) 70%, transparent);
+  box-shadow:0 3px 12px -3px color-mix(in srgb, var(--papotas-primary,#e50914) 80%, transparent);
+}
+
+/* Las cifras del menú: la urgente late despacio, el resto callado. */
+#cuerpo-app #sidebar-menu .menu-btn .chip{
+  margin-left:auto; flex:0 0 auto;
+  font-weight:900!important;
+  padding:1px 7px!important;
+}
+#cuerpo-app #sidebar-menu .menu-btn .chip-urgente{
+  background:#ef4444!important; color:#1b0505!important; border-color:#ef4444!important;
+  animation:papLatido 2.6s ease-in-out infinite;
+}
+@keyframes papLatido{
+  0%,100%{ box-shadow:0 0 0 0 rgba(239,68,68,.45) }
+  55%    { box-shadow:0 0 0 5px rgba(239,68,68,0) }
+}
+html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ animation:none }
+@media (prefers-reduced-motion:reduce){
+  #cuerpo-app #sidebar-menu .menu-btn{ transition:none }
+  #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ animation:none }
+}
+
+/* Pie de la nube: separado con una línea, no flotando en el vacío. */
+#cuerpo-app #sidebar-menu > div:last-child{
+  border-top:1px solid rgba(255,255,255,.07)!important;
+  background:rgba(0,0,0,.38)!important;
+}
+
+/* En modo carril (pantallas medianas) solo se ve el icono: se centra. */
+@media (min-width:901px) and (max-width:1279px){
+  #cuerpo-app #sidebar-menu .menu-btn{
+    justify-content:center!important;
+    padding:9px 6px!important;
+    overflow:visible;
+  }
+  #cuerpo-app #sidebar-menu .menu-btn:hover{ transform:none }
+}
+</style>
 </body>
 </html>
