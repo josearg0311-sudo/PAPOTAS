@@ -12399,5 +12399,89 @@ html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ anim
   body#cuerpo-app .pap-section-tools > .pap-tool{ flex:1 1 100%!important; }
 }
 </style>
+
+<script id="papotas-v190-nube">
+/* ============================================================================
+   V190 · Que la nube empiece a funcionar sin recargar, y que se pueda instalar
+
+   1. Al guardar las credenciales por primera vez, el programa subía los datos
+      y ponía "Sincronizado"... pero NO abría el canal de escucha. Comprobado
+      con un Supabase simulado: 0 canales abiertos. Resultado: hasta que no
+      recargabas, los cambios hechos en el otro dispositivo no llegaban.
+      La función que abre el canal se llamaba por su nombre interno, y la
+      versión buena de esa función es otra, la que instala la capa de
+      sincronización. Aquí se llama a la buena.
+
+   2. Registro del "service worker" (sw.js) para poder INSTALAR el programa
+      como una aplicación y que abra sin conexión. Sólo se intenta cuando la
+      página se sirve por http/https —abriendo el archivo suelto (file://) el
+      navegador no lo permite—, y si el archivo no está, no pasa nada.
+   ========================================================================== */
+!function(){
+  "use strict";
+  if(window.__PAPOTAS_V190__) return; window.__PAPOTAS_V190__=!0;
+
+  /* ---- 1. Arrancar la escucha en cuanto se guarda la conexión ------------ */
+  function heredar(nuevo,viejo){
+    try{ Object.getOwnPropertyNames(viejo).forEach(function(k){
+      if(k.indexOf("__")===0 && !(k in nuevo)) nuevo[k]=viejo[k]; }); }catch(_){}
+    return nuevo;
+  }
+  function encender(){
+    var S=window.PAPOTAS_V93_SYNC;
+    if(!S) return;
+    try{
+      var p=S.initial();
+      if(p && p.then) p.then(function(){ try{ S.activate(); }catch(_){} })
+                       .catch(function(){ try{ S.activate(); }catch(_){} });
+      else S.activate();
+    }catch(e){ console.warn("V190:",e); }
+  }
+  window.papotasEncenderNube=encender;
+
+  function envolverGuardar(){
+    var orig=window.guardarCredencialesSupabase;
+    if(typeof orig!=="function" || orig.__v190) return !1;
+    function envuelto(){
+      var r=orig.apply(this,arguments);
+      setTimeout(encender,900);   /* tras subir los datos, abrir el canal */
+      return r;
+    }
+    envuelto.__v190=!0;
+    window.guardarCredencialesSupabase=heredar(envuelto,orig);
+    return !0;
+  }
+  var n=0;
+  (function reintentar(){
+    try{ envolverGuardar(); }catch(e){ console.warn("V190:",e); }
+    var listo=window.guardarCredencialesSupabase && window.guardarCredencialesSupabase.__v190;
+    if(++n<16 && !listo) setTimeout(reintentar,600);
+  })();
+
+  /* ---- 2. Instalable y sin conexión -------------------------------------- */
+  try{
+    var enServidor = location.protocol==="https:" ||
+                     location.hostname==="localhost" || location.hostname==="127.0.0.1";
+    if(enServidor && "serviceWorker" in navigator){
+      window.addEventListener("load", function(){
+        navigator.serviceWorker.register("sw.js").catch(function(){
+          /* Sin sw.js el programa funciona igual; sólo no se instala. */
+        });
+      });
+    }
+    /* Servido desde una dirección web, se usa el manifiesto en archivo (con sus
+       iconos de verdad), que es lo que el navegador pide para ofrecer
+       "Instalar". Abriendo el archivo suelto se queda el de siempre. */
+    if(enServidor && window.fetch){
+      fetch("manifest.webmanifest", {method:"GET"}).then(function(r){
+        if(!r || !r.ok) return;
+        var l=document.querySelector('link[rel="manifest"]');
+        if(!l){ l=document.createElement("link"); l.rel="manifest"; document.head.appendChild(l); }
+        l.href="manifest.webmanifest";
+      }).catch(function(){});
+    }
+  }catch(_){}
+}();
+</script>
 </body>
 </html>
