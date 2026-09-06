@@ -8151,7 +8151,10 @@ aside nav button.bg-white\/10::before{height:60%}
      columnas ocupan más alto que dos. Y con tope del 47 %: sin él, en un hueco
      estrecho sale una sola columna, la cabecera que cruza de lado a lado se
      desborda sobre el panel vecino y el panel entero se estira. */
-  --pap-col:250px;
+  /* 300 y no 250: cada fila lleva logo, plataforma, insignia de cuenta y
+     perfil. En 272 px se parte en más líneas, y entonces TRES columnas ocupan
+     más alto que dos: el panel medía 964 px a 1600 y 608 a 1400. */
+  --pap-col:300px;
   grid-template-columns:repeat(auto-fit,minmax(min(var(--pap-col),47%),1fr))!important;
 }
 #cuerpo-app .seccion-pantalla #contenedor-club-vip{--pap-col:240px}
@@ -8887,6 +8890,11 @@ aside nav button.bg-white\/10::before{height:60%}
       chip.classList.add("pap-nivel-"+a.nivel);
       chip.textContent=a.rotulo;
       chip.title=window.papotasResumenAntiguedad(c);
+      /* "Nuevo" es el estado de partida: si sale en todas las fichas no informa
+         de nada y encima le roba media línea al nombre, que sí importa. La
+         marca aparece cuando dice algo —regular o establecido—; el filtro de
+         arriba sigue contándolos a todos igual. */
+      chip.hidden = (a.nivel==="nuevo");
     });
     aplicarFiltroNivel();
   }
@@ -10017,10 +10025,20 @@ html[data-pap-anim="no"] #cuerpo-app *::after{
     document.querySelectorAll(".seccion-pantalla:not(.hidden) .tarjeta-registro .pap-chip-nivel").forEach(function(chip){
       var t=chip.closest(".tarjeta-registro");
       if(!t) return;
-      /* Los dos chips juntos en su renglón, debajo del nombre: así ninguno
-         le come sitio al nombre y no ocupan dos líneas ellos solos. */
+      /* Los dos chips van juntos SIEMPRE, dentro de su propia cajita. Si se
+         dejan sueltos en la fila, el bloque del nombre crece hasta empujar al
+         segundo a la línea de abajo y la ficha gasta un renglón de más. */
       var fila=t.firstElementChild;
-      if(fila && chip.parentElement!==fila) fila.appendChild(chip);
+      if(!fila) return;
+      var caja=fila.querySelector(".pap-chips");
+      if(!caja){
+        caja=document.createElement("span");
+        caja.className="pap-chips";
+        fila.appendChild(caja);
+      }
+      var estado=fila.querySelector(":scope > .chip:not(.pap-chip-nivel)");
+      if(estado && estado.parentElement!==caja) caja.appendChild(estado);
+      if(chip.parentElement!==caja) caja.appendChild(chip);
     });
   }
 
@@ -10193,8 +10211,12 @@ body#cuerpo-app .seccion-pantalla .tarjeta-registro.pap-vence-hoy{--pap-estado:#
 /* El nombre pide su sitio, pero no la línea entera: si los chips caben al
    lado, van al lado. Con 100 % fijo cada ficha se llevaba un renglón de más y
    la pantalla de clientes crecía casi el doble. */
+/* Base cero: el bloque del nombre no reserva sitio antes de repartir, así los
+   chips caben a su lado y luego el nombre se estira con lo que sobre. Con una
+   base de 108 px el nombre pedía su hueco primero y empujaba los chips a un
+   renglón nuevo, que es lo que descuadró la ficha. */
 #cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child > .min-w-0{
-  flex:1 1 108px!important; min-width:0!important;
+  flex:1 1 0%!important; min-width:0!important;
 }
 #cuerpo-app .seccion-pantalla .tarjeta-registro > .flex:first-child > .min-w-0 > button{
   font-size:13px!important; font-weight:900!important; white-space:normal!important;
@@ -10208,6 +10230,9 @@ body#cuerpo-app .seccion-pantalla .tarjeta-registro.pap-vence-hoy{--pap-estado:#
   color:#64748b!important; font-weight:600!important;
 }
 #cuerpo-app .seccion-pantalla .tarjeta-registro .chip{flex:0 0 auto}
+#cuerpo-app .seccion-pantalla .tarjeta-registro .pap-chips{
+  display:flex; align-items:center; gap:5px; flex:0 0 auto; margin-left:auto;
+}
 
 /* Los datos, alineados en dos columnas legibles. */
 #cuerpo-app .seccion-pantalla .tarjeta-registro .dato-linea{
@@ -10897,6 +10922,96 @@ body#cuerpo-app .seccion-pantalla .master-profile-premium.state-expired{
     : setTimeout(arrancar,420);
 }();
 </script>
+
+<style id="papotas-v181-consistencia">
+/* ============================================================================
+   V181 · "SE DESCONFIGURÓ EL ESTILO"
+
+   Al mirar pantalla por pantalla —que es lo que no hice antes de dar el
+   rediseño por bueno— aparecieron cuatro incoherencias. Ninguna rompía nada;
+   todas hacían que el programa pareciera de tres autores distintos.
+   ========================================================================= */
+
+/* --- 1. Mis botones dejan de estirarse a lo ancho en el móvil -------------
+   Una regla general del programa pone width:100% a todo <button> en pantalla
+   pequeña. Pensada para los botones de acción de un formulario, convierte
+   cualquier fila de filtros en una columna de barras enormes: cuatro filtros
+   de cobranza ocupaban cuatro pantallazos antes del primer cliente.
+   Son filtros, no acciones: van de dos en dos. */
+@media (max-width:640px){
+  #cuerpo-app .pap-cob-filtros .pap-tool,
+  #cuerpo-app .pap-filtro-nivel .pap-tool,
+  #cuerpo-app #papelera-filtros .pap-tool,
+  #cuerpo-app .pap-combo-sep .pap-tool,
+  #cuerpo-app .pap-est-acc .pap-tool,
+  #cuerpo-app .pap-est-bloque .pap-tool{
+    flex:1 1 calc(50% - 3px)!important; width:auto!important; min-width:0!important;
+  }
+  /* La acción de verdad sí ocupa la línea entera: es la que quieres pulsar. */
+  #cuerpo-app #pap-cobranza .ps-actions .ps-btn{width:100%!important}
+}
+
+/* Un filtro no es un botón rojo. El rojo es para actuar, no para elegir. */
+#cuerpo-app .pap-cob-filtros .pap-tool.primary,
+#cuerpo-app .pap-filtro-nivel .pap-tool.primary,
+#cuerpo-app #papelera-filtros .pap-tool.primary{
+  background:color-mix(in srgb, var(--papotas-primary,#e50914) 16%, transparent)!important;
+  border-color:color-mix(in srgb, var(--papotas-primary,#e50914) 55%, transparent)!important;
+  color:#fff!important;
+}
+
+/* --- 2. Las cifras dejan de ser un arcoíris -------------------------------
+   En Tarifas, cinco cifras en cinco colores: blanca, verde, morada, cian y
+   amarilla, sin que ninguno significara nada. El color en una cifra tiene que
+   querer decir algo —vencido, cobrado, en riesgo— o no estar. */
+#cuerpo-app #sec-tarifas .caja.cifra .n,
+#cuerpo-app #sec-tarifas .tarifas-kpis .n{
+  color:#e2e8f0!important;
+}
+/* Salvo estas dos, que sí dicen algo: lo que entra y lo que está ocupado. */
+#cuerpo-app #sec-tarifas .caja.cifra:nth-child(4) .n{color:#6ee7b7!important}
+#cuerpo-app #sec-tarifas .caja.cifra:nth-child(5) .n{color:#fbbf24!important}
+
+/* --- 3. Una sola acción principal, del color del programa -----------------
+   Convivían botones verdes, rojos y ámbar haciendo lo mismo (guardar) en
+   pantallas distintas. La acción principal usa el color que tú elijas en
+   Ajustes; el resto son secundarios. */
+#cuerpo-app #sec-tarifas .btn.btn-ok,
+#cuerpo-app #sec-tarifas .tarifas-hero .btn-ok,
+#cuerpo-app #sec-tarifas .tarifa-guardar{
+  background:var(--papotas-primary,#e50914)!important;
+  border-color:var(--papotas-primary,#e50914)!important;
+  color:#fff!important;
+}
+#cuerpo-app #sec-tarifas .btn.btn-ok:hover,
+#cuerpo-app #sec-tarifas .tarifa-guardar:hover{
+  background:var(--papotas-hover,#b90710)!important;
+}
+
+/* --- 4. El color de la plataforma, siempre en el mismo sitio --------------
+   En Cuentas master y en las fichas de cliente va en el canto izquierdo; en
+   Tarifas iba en una banda arriba. Misma información, dos lenguajes. */
+#cuerpo-app #sec-tarifas .tarifa-card{
+  border-top-width:1px!important;
+  border-left:4px solid var(--tarifa-brand, var(--papotas-primary,#e50914))!important;
+  border-radius:var(--pap-r-card,16px)!important;
+}
+body#cuerpo-app #sec-tarifas .tarifa-card::before,
+#cuerpo-app #sec-tarifas .tarifa-card::before{
+  display:none!important; height:0!important; content:none!important;
+}
+
+/* --- 5. Un desplegable no es un titular ------------------------------------
+   El selector de plataformas del panel ocupaba toda la fila y dejaba el
+   título de la tarjeta arrinconado. */
+#cuerpo-app #sec-dashboard select,
+#cuerpo-app #sec-dashboard .glass-card > .flex > select{
+  width:auto!important; flex:0 1 240px; min-width:0; max-width:100%;
+}
+@media (max-width:520px){
+  #cuerpo-app #sec-dashboard select{flex:1 1 100%}
+}
+</style>
 
 </body>
 </html>
