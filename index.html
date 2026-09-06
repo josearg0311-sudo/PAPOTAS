@@ -8350,8 +8350,16 @@ aside nav button.bg-white\/10::before{height:60%}
   /* 300 y no 250: cada fila lleva logo, plataforma, insignia de cuenta y
      perfil. En 272 px se parte en más líneas, y entonces TRES columnas ocupan
      más alto que dos: el panel medía 964 px a 1600 y 608 a 1400. */
-  --pap-col:300px;
-  grid-template-columns:repeat(auto-fit,minmax(min(var(--pap-col),47%),1fr))!important;
+  /* V187: el tope del 47 % se quita. Estaba para que la cabecera que cruza de
+     lado a lado no se desbordara cuando salía una sola columna; ahora esa
+     cabecera ocupa la fila entera por su cuenta (grid-column:1/-1), así que ya
+     no hace falta forzar dos columnas. Y forzarlas en un teléfono dejaba
+     celdas de 129 px: el nombre en "AMAZON PRI…", el correo en dos líneas, los
+     tres botones en dos filas y el aviso del master en tres.
+     340 y no 300: con 300, en una ventana de 1600 px salían TRES columnas y el
+     panel volvía a estirarse a lo alto. */
+  --pap-col:340px;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--pap-col)),1fr))!important;
 }
 #cuerpo-app .seccion-pantalla .grid[class*="grid-cols-3"]:not([class*="grid-cols-1"]){--pap-col:210px}
 #cuerpo-app .seccion-pantalla .grid.grid-cols-1[class*="lg:grid-cols-3"]{--pap-col:250px}
@@ -12025,6 +12033,29 @@ html[data-pap-anim="no"] #cuerpo-app #sidebar-menu .menu-btn .chip-urgente{ anim
   })();
 }();
 </script>
+
+<style id="papotas-v187-cabeceras">
+/* ============================================================================
+   V187 · La cabecera de plataforma del Panel se metía en la rejilla
+
+   En "Cuentas y perfiles disponibles" cada plataforma lleva encima una franja
+   con su logotipo, su nombre y las plazas libres. Esa franja se apoyaba en
+   `sm:col-span-2`, que sólo existe a partir de 640 px porque la rejilla
+   original era de una sola columna en el móvil.
+
+   Al hacer la rejilla adaptativa (V172) pasó a haber DOS columnas también en
+   el teléfono, y ahí la franja dejó de ocupar la fila entera: se quedaba en
+   una celda de 129 px, al lado de la primera cuenta, con el logotipo
+   aplastado. De ahí ese hueco raro con "DISNEY+ESPN · 2 LIBRES" suelto a la
+   izquierda y la cuenta a la derecha.
+
+   Ahora ocupa la fila entera haya las columnas que haya.
+   ========================================================================== */
+#cuerpo-app #lista-perfiles-libres > [class*="col-span-2"]{
+  grid-column:1 / -1!important;
+  width:100%!important;
+}
+</style>
 
 <style id="papotas-v186-panel-movil">
 /* ============================================================================
