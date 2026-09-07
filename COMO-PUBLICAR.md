@@ -11,6 +11,10 @@ Sube estos archivos juntos, en la misma carpeta:
     icon-512.png
     respaldo.json         opcional: tus datos de partida (ver punto 3)
 
+Y aparte, para preparar Supabase una sola vez (no se sube al sitio):
+
+    supabase.sql          lo pegas en el SQL Editor de Supabase
+
 Sirve cualquier alojamiento gratuito con **https** (Netlify arrastrando la
 carpeta, GitHub Pages, Vercel). Tiene que ser https: sin él el navegador no
 deja instalar ni funcionar sin conexión.
@@ -33,11 +37,13 @@ cualquier dispositivo que lo abra entra ya sincronizado, sin tocar Ajustes.
          anon: "eyJ...la clave larga..."
        };
 
-3. Guarda. Si aún no has preparado la base, abre el programa una vez, ve a
-   **Ajustes → Nube**, pulsa **Copiar SQL** y ejecútalo en Supabase
-   (**SQL Editor → New query → Run**). Eso crea la tabla, las funciones, los
-   permisos y activa el tiempo real. Solo hace falta una vez, no por
-   dispositivo.
+3. Guarda. Si aún no has preparado la base, ejecuta el SQL una vez en
+   Supabase: **SQL Editor → New query**, pega el contenido de `supabase.sql`
+   (viene en esta carpeta; el botón **Copiar SQL** de Ajustes → Nube da lo
+   mismo) y pulsa **Run**. Eso crea la tabla, las funciones, los permisos y
+   activa el tiempo real. Se puede ejecutar las veces que quieras sin romper
+   nada, y hace falta una sola vez para todos los dispositivos, no uno por
+   aparato.
 4. Ya está. Ese mismo archivo, abierto en el móvil o subido a tu enlace, entra
    solo y con todos los datos.
 

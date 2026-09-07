@@ -6507,8 +6507,14 @@ aside nav button.bg-white\/10::before{height:60%}
       "grant execute on function public."+RPC_ALTA+"(text,text,jsonb,text) to anon;",
       "grant execute on function public."+RPC_BAJA+"(text,text,text) to anon;",
       "",
-      "-- Para que los cambios lleguen al instante a los demás dispositivos:",
-      "alter publication supabase_realtime add table public."+TABLA+";"
+      "-- Para que los cambios lleguen al instante a los demás dispositivos.",
+      "-- (Si ya estaba publicada, no pasa nada: se puede ejecutar las veces que haga falta.)",
+      "do $do$",
+      "begin",
+      "  alter publication supabase_realtime add table public."+TABLA+";",
+      "exception when duplicate_object then null;",
+      "end",
+      "$do$;"
     ].join("\n");
   };
 
