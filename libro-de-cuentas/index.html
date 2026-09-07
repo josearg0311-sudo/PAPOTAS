@@ -1214,6 +1214,16 @@ body.en-blanco .tarjeta-cabeza{ display:none !important }
 body.en-blanco .balance{ opacity:.72 }
 body.en-blanco .tendencia{ display:none }
 </style>
+
+<style id="css-aviso-suelto">
+.aviso-suelto{
+  font-size:12.5px; line-height:1.55; color:var(--oro);
+  padding:12px 13px; border-radius:var(--r-m);
+  background:var(--oro-piso);
+  border:1px solid color-mix(in srgb, var(--oro) 32%, transparent);
+}
+.aviso-suelto strong{ color:var(--oro) }
+</style>
 </head>
 <body>
 <div class="app">
@@ -1572,6 +1582,12 @@ body.en-blanco .tendencia{ display:none }
       </button>
     </div>
     <div class="modal-cuerpo" style="display:grid; gap:18px">
+      <div id="avisoSuelto" class="aviso-suelto oculto">
+        <strong>Esto no va a funcionar desde un archivo suelto.</strong>
+        Estás abriendo el programa con doble clic, y el navegador no le deja hablar con
+        jsonbin.io. Sube los archivos a tu dirección <strong>https</strong> y hazlo desde ahí.
+        Todo lo demás —anotar, Excel, PDF, respaldo— sí funciona así.
+      </div>
       <p style="margin:0; font-size:13.5px; color:var(--tinta-2); line-height:1.6">
         El libro guarda una copia en <strong>jsonbin.io</strong>, un servicio gratuito.
         Se configura una vez en un dispositivo y los demás se conectan con un código.
@@ -3156,36 +3172,101 @@ function bajarDeNube(silencioso){
     .catch(function(){ estadoNube('err'); });
 }
 
+/* Limpia lo que suele venir pegado de más: comillas, espacios, saltos de
+   linea y un "X-Master-Key:" copiado junto con el valor. */
+function limpiarClave(v){
+  return String(v || '')
+    .replace(/^\s*X-?MASTER-?KEY\s*:?\s*/i, '')
+    .replace(/[\r\n\t]/g, '')
+    .replace(/^["'\s]+|["'\s]+$/g, '');
+}
+
+/* El archivo abierto suelto (file://) no puede hablar con jsonbin: el
+   navegador manda el origen como "null" y el servicio lo rechaza. No es un
+   fallo de la clave ni de la red, y hay que decirlo con esas palabras. */
+function sueltoEnDisco(){
+  return location.protocol === 'file:';
+}
+
+/* Traduce lo que pasó a algo accionable, en vez de un "revisa la clave". */
+function porQueFallo(estadoHttp, cuerpo){
+  if(estadoHttp === 401) return { t:'La clave no vale',
+    m:'jsonbin dice que esa X-Master-Key no es correcta. Cópiala otra vez desde Account → API Keys, entera y sin espacios.' };
+  if(estadoHttp === 403) return { t:'La clave no tiene permiso',
+    m:'La clave es válida pero no puede crear bases. Comprueba que sea la X-MASTER-KEY y no la Access Key.' };
+  if(estadoHttp === 429) return { t:'Demasiadas peticiones',
+    m:'jsonbin te está limitando. Espera un minuto y vuelve a intentarlo.' };
+  if(estadoHttp === 422) return { t:'jsonbin rechazó los datos',
+    m:'Respuesta 422. Si acabas de crear la cuenta, entra una vez a jsonbin.io y vuelve.' };
+  if(estadoHttp) return { t:'jsonbin respondió ' + estadoHttp,
+    m:(mensajeDelCuerpo(cuerpo) || 'Inténtalo de nuevo en un momento.') };
+  if(!navigator.onLine) return { t:'Sin internet',
+    m:'Este dispositivo no tiene conexión ahora mismo.' };
+  return { t:'El navegador bloqueó la petición',
+    m:'No llegó a salir. Suele pasar con un bloqueador de anuncios, una VPN o una red que filtra. Prueba en otra red o desactiva el bloqueador para esta página.' };
+}
+function mensajeDelCuerpo(c){
+  try{ return (c && (c.message || c.error)) ? String(c.message || c.error) : ''; }catch(e){ return ''; }
+}
+
 function crearBase(){
   if(creandoBase) return;
-  var clave = $('nubeClave').value.trim();
+
+  if(sueltoEnDisco()){
+    aviso('Hay que publicarlo primero',
+          'Abierto como archivo suelto, el navegador no deja hablar con jsonbin. Súbelo a tu dirección https y hazlo desde ahí.');
+    return;
+  }
+
+  var clave = limpiarClave($('nubeClave').value);
+  $('nubeClave').value = clave;
   if(!clave){ aviso('Falta la clave', 'Pega tu X-Master-Key de jsonbin.io.'); return; }
+  if(clave.length < 20){
+    aviso('Esa clave parece incompleta',
+          'Una X-Master-Key es larga y empieza por $2a$ o $2b$. Cópiala entera.');
+    return;
+  }
+
   creandoBase = true;
   var btn = $('btnCrearBase');
   btn.disabled = true; btn.textContent = 'Creando…';
-
-  fetch(JSONBIN, {
-    method:'POST',
-    headers:{ 'Content-Type':'application/json', 'X-Master-Key':clave, 'X-Bin-Name':'libro-de-cuentas' },
-    body: JSON.stringify(estado.movimientos || [])
-  }).then(function(r){
-    if(!r.ok) throw new Error('http ' + r.status);
-    return r.json();
-  }).then(function(d){
-    var bin = d && d.metadata && d.metadata.id;
-    if(!bin) throw new Error('sin id');
-    ponerConfigNube({ key:clave, bin:bin });
+  function terminar(){
     creandoBase = false;
     btn.disabled = false; btn.textContent = 'Crear la base automáticamente';
+  }
+
+  var httpEstado = 0;
+  fetch(JSONBIN, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'X-Master-Key':clave, 'X-Bin-Name':'cuentas' },
+    body: JSON.stringify(estado.movimientos || [])
+  }).then(function(r){
+    httpEstado = r.status;
+    return r.json().catch(function(){ return null; });
+  }).then(function(d){
+    if(httpEstado < 200 || httpEstado >= 300){
+      var q = porQueFallo(httpEstado, d);
+      terminar();
+      aviso(q.t, q.m);
+      return;
+    }
+    var bin = d && d.metadata && d.metadata.id;
+    if(!bin){
+      terminar();
+      aviso('Respuesta inesperada', 'jsonbin contestó bien pero sin identificador de base. Vuelve a intentarlo.');
+      return;
+    }
+    ponerConfigNube({ key:clave, bin:bin });
+    terminar();
     refrescarPanelNube();
     estadoNube('ok');
     cerrar('veloNube');
     abrirCodigo();
     aviso('Base creada', 'Copia el código y pégalo en tus otros dispositivos.');
   }).catch(function(){
-    creandoBase = false;
-    btn.disabled = false; btn.textContent = 'Crear la base automáticamente';
-    aviso('No se pudo crear', 'Revisa que la clave sea correcta y que tengas internet.');
+    terminar();
+    var q = porQueFallo(0, null);
+    aviso(q.t, q.m);
   });
 }
 
@@ -3195,7 +3276,12 @@ function decodificar(codigo){
 }
 
 function conectarConCodigo(){
-  var cfg = decodificar($('nubeCodigo').value);
+  if(sueltoEnDisco()){
+    aviso('Hay que publicarlo primero',
+          'Abierto como archivo suelto, el navegador no deja hablar con jsonbin. Súbelo a tu dirección https y hazlo desde ahí.');
+    return;
+  }
+  var cfg = decodificar(String($('nubeCodigo').value).replace(/\s+/g, ''));
   if(!cfg || !cfg.key || !cfg.bin){
     aviso('Código inválido', 'Cópialo entero, sin espacios ni saltos de línea.');
     return;
@@ -3209,6 +3295,12 @@ function conectarConCodigo(){
 }
 
 function refrescarPanelNube(){
+  var av = $('avisoSuelto');
+  if(av) av.classList.toggle('oculto', !sueltoEnDisco());
+  var bc = $('btnCrearBase'), bk = $('btnConectarCodigo');
+  if(bc) bc.disabled = sueltoEnDisco();
+  if(bk) bk.disabled = sueltoEnDisco();
+
   var cfg = configNube();
   var caja = $('nubeConectada');
   if(hayNube()){
