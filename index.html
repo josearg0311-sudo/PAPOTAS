@@ -13199,11 +13199,11 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     var nuevo = function(tipo, cantidad){
       var c = clienteEnEdicion();
       if(c){
-        /* Se arranca donde acaba lo que ya pagó. Si ya venció, desde hoy. */
-        var h = hoy();
-        var desde = (c.vencimiento && c.vencimiento >= h) ? c.vencimiento : h;
+        /* Siempre se empalma con SU vencimiento, haya pasado o no. El cobro va
+           por fecha fija: si vence el 24, renovar un mes lleva al 24 del mes
+           siguiente. Que se haya pagado tarde no mueve el aniversario. */
         var campo = document.getElementById("cli-inicio");
-        if(campo) campo.value = desde;
+        if(campo) campo.value = c.vencimiento || hoy();
       }
       var r = orig.apply(this, arguments);
       try{ pintarNota(); }catch(e){}
@@ -13227,14 +13227,20 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
     var h = hoy();
     var venciaAntes = c.vencimiento;
     var inicio = (document.getElementById("cli-inicio") || {}).value || "";
-    if(inicio !== venciaAntes && inicio !== h) return;    /* no lo tocó un botón */
+    if(inicio !== venciaAntes) return;                    /* no lo tocó un botón */
+
+    var nuevoVenc = (document.getElementById("cli-vencimiento") || {}).value || "";
+    var sigueVencido = nuevoVenc && nuevoVenc < h;
 
     var n = document.createElement("div");
     n.id = "pap-nota-empalme";
-    n.style.cssText = "margin-top:5px;font-size:10px;font-weight:700;color:#67e8f9";
-    n.textContent = venciaAntes >= h
-      ? "↔ Se suma sobre su vencimiento actual (" + fechaCortaSegura(venciaAntes) + "), no desde hoy: no pierde días."
-      : "↔ Venció el " + fechaCortaSegura(venciaAntes) + ", así que el periodo nuevo arranca hoy.";
+    n.style.cssText = "margin-top:5px;font-size:10px;font-weight:700;line-height:1.45;color:" +
+      (sigueVencido ? "#fbbf24" : "#67e8f9");
+    n.textContent = sigueVencido
+      ? "⚠ Ojo: sumando desde su vencimiento (" + fechaCortaSegura(venciaAntes) + ") queda en " +
+        fechaCortaSegura(nuevoVenc) + ", que ya pasó. Debe más de un periodo: súmale más meses."
+      : "↔ Se suma sobre su vencimiento (" + fechaCortaSegura(venciaAntes) + "), no desde hoy: " +
+        "la fecha de cobro no se mueve.";
     caja.parentElement && caja.parentElement.insertBefore(n, caja.nextSibling);
   }
   function fechaCortaSegura(iso){
