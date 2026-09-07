@@ -37,8 +37,17 @@ y unas decenas de KB. 240 movimientos → 7 páginas en 132 ms.
 ### Diseño
 De una columna de teléfono perdida en medio de una pantalla ancha, a un libro
 contable: barra lateral con el balance y el periodo, tabla con columnas y
-reglas horizontales en pantalla grande, fichas en el teléfono. Tema claro y
-oscuro.
+reglas horizontales en pantalla grande, fichas en el teléfono. **Arranca en
+oscuro**; el botón del sol cambia a claro y la elección queda guardada.
+
+### Entra o sale: cuatro señales a la vez
+No basta con el color de la cifra. Cada movimiento lleva, apuntando todas al
+mismo sitio: una banda de color de alto completo a la izquierda, el fondo de
+la fila teñido, un disco con una flecha (arriba entra, abajo sale) y el signo
+más el color del monto. Al ser cuatro señales redundantes, quien no distingue
+el rojo del verde sigue sabiendo cuál es cuál por la flecha. La ficha de alta
+también se tiñe según lo que estés anotando, y las barras del desglose de
+gastos van todas en rojo, con la intensidad marcando el orden.
 
 ### Funciones nuevas
 - Categorías (campo opcional; los lectores antiguos lo ignoran).

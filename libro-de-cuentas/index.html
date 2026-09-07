@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema="oscuro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1F4B3F" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0F1211" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0E1110">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Libro de Cuentas">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +18,7 @@
    ========================================================================== */
 
 :root{
-  color-scheme: light;
+  color-scheme: dark;
 
   --papel:      #F6F5F1;
   --hoja:       #FFFFFF;
@@ -52,6 +51,8 @@
 
   --barra: 64px;   /* alto de la barra inferior en movil */
 }
+
+:root[data-tema="claro"]{ color-scheme: light }
 
 :root[data-tema="oscuro"]{
   color-scheme: dark;
@@ -664,6 +665,125 @@ textarea.control{ min-height:72px; resize:vertical }
   .nav-escritorio{ display:flex; max-width:380px }
   .nav-escritorio button{ min-height:38px; font-size:13.5px }
 }
+</style>
+
+<style id="entra-sale">
+/* ==========================================================================
+   QUE SE VEA DE UN VISTAZO SI ENTRA O SALE DINERO
+
+   Con el color del monto no basta: hay que distinguirlo sin leer la cifra,
+   desde el otro lado de la mesa. Cuatro señales a la vez, y las cuatro
+   apuntan al mismo sitio:
+     1. una banda de color a la izquierda, gruesa y de alto completo
+     2. un fondo teñido de toda la fila
+     3. una flecha en un disco: arriba entra, abajo sale
+     4. el signo y el color del monto
+   Cuatro señales redundantes tambien significan que quien no distingue el
+   rojo del verde sigue sabiendo cual es cual, por la flecha.
+   ========================================================================== */
+
+:root{
+  --entra-tinte:  color-mix(in srgb, var(--haber) 7%, transparent);
+  --entra-borde:  color-mix(in srgb, var(--haber) 30%, transparent);
+  --sale-tinte:   color-mix(in srgb, var(--debe) 7%, transparent);
+  --sale-borde:   color-mix(in srgb, var(--debe) 30%, transparent);
+}
+:root[data-tema="oscuro"]{
+  --entra-tinte:  color-mix(in srgb, var(--haber) 9%, transparent);
+  --sale-tinte:   color-mix(in srgb, var(--debe) 9%, transparent);
+}
+
+/* --- La fila ---
+   La banda de color pasa a ser absoluta para poder ocupar todo el alto, asi
+   que ya no gasta una columna de la rejilla: hay que recolocarlo todo. */
+.linea{
+  position:relative;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  padding-left:18px;
+}
+@media (min-width:1000px){
+  .linea{
+    grid-template-columns:104px minmax(0,1fr) 150px 136px 76px;
+    padding-left:20px;
+  }
+  .linea .meta     { grid-column:1 }
+  .linea .desc-fila{ grid-column:2; grid-row:1 }
+  .linea .cat-celda{ grid-column:3 }
+  .linea .monto    { grid-column:4 }
+  .linea .mandos   { grid-column:5 }
+  .encabezado-tabla{
+    grid-template-columns:104px minmax(0,1fr) 150px 136px 76px;
+    padding-left:20px;
+  }
+  .encabezado-tabla span:first-child{ display:none }
+}
+.linea[data-tipo="Ingreso"]{ background:linear-gradient(90deg, var(--entra-tinte), transparent 62%) }
+.linea[data-tipo="Gasto"]  { background:linear-gradient(90deg, var(--sale-tinte),  transparent 62%) }
+.linea[data-tipo="Ingreso"]:hover{ background:linear-gradient(90deg, color-mix(in srgb,var(--haber) 15%,transparent), transparent 70%) }
+.linea[data-tipo="Gasto"]:hover  { background:linear-gradient(90deg, color-mix(in srgb,var(--debe)  15%,transparent), transparent 70%) }
+
+/* La banda: de alto completo, no un palito centrado.
+   Al ser absoluta dentro de una rejilla, si conserva grid-column/grid-row se
+   coloca respecto a SU CELDA y no respecto a la fila: por eso se montaba
+   encima de la fecha. Se le quita la posicion en la rejilla. */
+.linea .filo{
+  grid-column:auto !important; grid-row:auto !important;
+  position:absolute; left:0; top:0; bottom:0;
+  width:4px !important; height:auto !important;
+  border-radius:0 !important;
+}
+
+/* --- El disco con la flecha --- */
+.senal{
+  width:26px; height:26px; flex:0 0 auto; border-radius:99px;
+  display:inline-grid; place-items:center;
+  background:var(--haber-piso); color:var(--haber);
+  border:1px solid color-mix(in srgb, var(--haber) 32%, transparent);
+}
+.linea[data-tipo="Gasto"] .senal{
+  background:var(--debe-piso); color:var(--debe);
+  border-color:color-mix(in srgb, var(--debe) 32%, transparent);
+}
+.senal svg{ width:14px; height:14px; display:block }
+
+.linea .desc-fila{ display:flex; align-items:center; gap:9px; min-width:0 }
+.linea .desc{ flex:1 1 auto; min-width:0 }
+
+/* --- Los filtros también llevan su color --- */
+#filtroTipo button[data-filtro="Ingreso"][aria-pressed="true"]{
+  color:var(--haber); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--haber) 40%,transparent), var(--sombra);
+}
+#filtroTipo button[data-filtro="Ingreso"][aria-pressed="true"] .n{ background:var(--haber-piso); color:var(--haber) }
+#filtroTipo button[data-filtro="Gasto"][aria-pressed="true"]{
+  color:var(--debe); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--debe) 40%,transparent), var(--sombra);
+}
+#filtroTipo button[data-filtro="Gasto"][aria-pressed="true"] .n{ background:var(--debe-piso); color:var(--debe) }
+
+/* --- El selector del modal: verde de verdad para ingreso, rojo para gasto --- */
+.segmentado.entra-sale button[data-tipo="Ingreso"][aria-pressed="true"]{
+  background:var(--haber-piso); color:var(--haber);
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--haber) 55%,transparent);
+}
+.segmentado.entra-sale button[data-tipo="Gasto"][aria-pressed="true"]{
+  background:var(--debe-piso); color:var(--debe);
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--debe) 55%,transparent);
+}
+
+/* El monto de la ficha se tiñe según lo que estés anotando */
+#veloMov[data-tipo="Ingreso"] #movMonto{ color:var(--haber); border-color:color-mix(in srgb,var(--haber) 40%,var(--regla)) }
+#veloMov[data-tipo="Gasto"]   #movMonto{ color:var(--debe);  border-color:color-mix(in srgb,var(--debe)  40%,var(--regla)) }
+
+/* --- Cabecera del día --- */
+.dia .neto.entra::before{ content:"▲ "; font-size:9px; vertical-align:1px }
+.dia .neto.sale::before { content:"▼ "; font-size:9px; vertical-align:1px }
+
+/* --- Las dos cifras del balance, con su disco --- */
+.balance-partes .r{ display:inline-flex; align-items:center; gap:5px }
+.balance-partes .r::before{
+  content:""; width:8px; height:8px; border-radius:2px; display:inline-block;
+}
+.balance-partes div:first-child .r::before{ background:var(--haber) }
+.balance-partes div:last-child  .r::before{ background:var(--debe) }
 </style>
 </head>
 <body>
@@ -1281,6 +1401,15 @@ function categorias(){
   return Object.keys(m).sort(function(a,b){ return m[b]-m[a]; });
 }
 
+/* Todas estas barras son GASTO, así que todas son rojas: lo que cambia es la
+   intensidad, de más a menos. Pintarlas de azul o de verde rompía el único
+   codigo de color que importa aquí, que es entra/sale. */
+function tonoGasto(posicion, total){
+  var t = total > 1 ? posicion / (total - 1) : 0;      /* 0 = la mayor */
+  var alfa = 1 - t * 0.62;
+  return 'color-mix(in srgb, var(--debe) ' + Math.round(alfa * 100) + '%, transparent)';
+}
+
 /* Color estable por categoría: el mismo nombre da siempre el mismo tono. */
 function colorCat(nombre){
   var h = 0, s = String(nombre || '');
@@ -1323,9 +1452,17 @@ function filaHTML(t){
     : '';
   return '' +
   '<div class="linea" data-tipo="' + t.type + '" data-id="' + esc(t.id) + '">' +
+    '<span class="solo-lectores">' + (esIng ? 'Ingreso' : 'Gasto') + '. </span>' +
     '<span class="filo"></span>' +
     '<div class="texto">' +
-      '<div class="desc">' + esc(t.desc) + '</div>' +
+      '<div class="desc-fila">' +
+        '<span class="senal" aria-hidden="true">' +
+          (esIng
+            ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>') +
+        '</span>' +
+        '<div class="desc">' + esc(t.desc) + '</div>' +
+      '</div>' +
       '<div class="meta"><span class="f">' + fechaCorta(t.date) + '</span>' +
         '<span class="solo-movil">' + cat + '</span>' +
       '</div>' +
@@ -1480,7 +1617,7 @@ function pintarCategorias(lista){
   $('rotCategorias').textContent = dinero(totalGasto) + ' en ' + claves.length + (claves.length === 1 ? ' categoría' : ' categorías');
 
   var mayor = m[claves[0]] || 1;
-  caja.innerHTML = claves.slice(0,12).map(function(c){
+  caja.innerHTML = claves.slice(0,12).map(function(c, i){
     var pct = totalGasto ? (m[c]/totalGasto*100) : 0;
     var ancho = Math.max(2, (m[c]/mayor)*100);
     return '<div class="barra-fila">' +
@@ -1489,7 +1626,7 @@ function pintarCategorias(lista){
                '<span class="val cifra" style="color:var(--debe)">' + dinero(m[c]) + '</span>' +
                '<span class="pct">' + pct.toFixed(0) + '%</span>' +
              '</div>' +
-             '<div class="canal"><div class="relleno" style="width:' + ancho + '%; background:' + colorCat(c === 'Sin categoría' ? '' : c) + '"></div></div>' +
+             '<div class="canal"><div class="relleno" style="width:' + ancho + '%; background:' + tonoGasto(i, claves.length) + '"></div></div>' +
            '</div>';
   }).join('');
 }
@@ -2539,6 +2676,8 @@ function ponerTipo(tipo){
   Array.prototype.forEach.call($('segTipo').children, function(b){
     b.setAttribute('aria-pressed', String(b.dataset.tipo === estado.tipoNuevo));
   });
+  /* Que el campo del monto se tiña: al escribir la cifra ya sabes de que lado va */
+  $('veloMov').dataset.tipo = estado.tipoNuevo;
 }
 
 function guardarMovimiento(){
@@ -2626,10 +2765,11 @@ function aplicarTema(t){
   if(m) m.setAttribute('content', t === 'oscuro' ? '#0F1211' : '#1F4B3F');
 }
 function temaInicial(){
+  /* Oscuro de partida. Es lo que se pidio: si alguien quiere claro, lo
+     enciende con el boton y su eleccion queda guardada para siempre. */
   var g = null;
   try{ g = localStorage.getItem(CLAVE_TEMA); }catch(e){}
-  if(g) return g;
-  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
+  return g === 'claro' ? 'claro' : 'oscuro';
 }
 
 /* ---------- Cambio de hoja ------------------------------------------------ */
