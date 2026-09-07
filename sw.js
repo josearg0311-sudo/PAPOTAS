@@ -10,7 +10,7 @@
    Ojo: esto NO guarda tus datos. Tus datos viven en el propio navegador y, si
    configuras la nube, en Supabase. Esto solo guarda el programa. */
 
-const CACHE = 'papotas-v1';
+const CACHE = 'papotas-v2';
 const BASICOS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (ev) => {
@@ -38,6 +38,10 @@ self.addEventListener('fetch', (ev) => {
   /* A Supabase nunca se le contesta con una copia guardada: los datos han de
      ser los de verdad. */
   if (!mismoOrigen && /supabase/i.test(url.hostname)) return;
+
+  /* El respaldo de arranque tampoco se guarda: si algún día lo quitas del
+     sitio, no queremos que siga vivo en una copia vieja. */
+  if (mismoOrigen && /\/respaldo\.json$/i.test(url.pathname)) return;
 
   ev.respondWith(
     fetch(req)
