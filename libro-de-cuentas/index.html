@@ -3146,6 +3146,9 @@ function cuerpoParaNube(){
 
 function subirANube(){
   if(!hayNube()){ estadoNube('off'); return; }
+  /* Acabas de tocar algo: es justo cuando el otro aparato puede estar
+     tocando también. Se acelera la escucha durante un rato. */
+  if(window.cuentasHuboCambio) window.cuentasHuboCambio();
   var cfg = configNube();
   var json = cuerpoParaNube();
   ultimoJSONSubido = json;
@@ -3179,6 +3182,8 @@ function bajarDeNube(silencioso){
       guardarLocal();
       pintarTodo();
       estadoNube('ok');
+      /* Llegó algo: seguramente venga más detrás. Se acelera la escucha. */
+      if(window.cuentasHuboCambio) window.cuentasHuboCambio();
       if(!silencioso) aviso('Actualizado', 'Llegaron cambios hechos en otro dispositivo.');
     })
     .catch(function(){ estadoNube('err'); });
@@ -3675,7 +3680,15 @@ function conectarTodo(){
     if(estado.hoja === 'resumen') pintarResumen();
   });
   $('btnMenu').addEventListener('click', function(){ abrir('veloMenu'); });
-  $('pastillaNube').addEventListener('click', function(){ refrescarPanelNube(); abrir('veloNube'); });
+  /* Un toque en la pastilla comprueba AHORA. Sin nube configurada, abre el
+     panel; teniéndola, el panel sigue en Opciones → Sincronizar. */
+  $('pastillaNube').addEventListener('click', function(){
+    if(!hayNube()){ refrescarPanelNube(); abrir('veloNube'); return; }
+    estadoNube('busy');
+    if(window.cuentasSigoAqui) window.cuentasSigoAqui();
+    ultimoJSONSubido = null;
+    bajarDeNube(false);
+  });
 
   /* --- Alta --- */
   $('btnNuevo').addEventListener('click', function(){ abrirMovimiento(null); });
@@ -3889,9 +3902,82 @@ function conectarTodo(){
   $('mDemo').addEventListener('click', datosEjemplo);
   $('mBorrar').addEventListener('click', borrarTodo);
 
-  /* --- Sincronización periódica --- */
-  setInterval(function(){ if(!document.hidden) bajarDeNube(false); }, 25000);
-  document.addEventListener('visibilitychange', function(){ if(!document.hidden) bajarDeNube(false); });
+  /* ---- Sincronización: rápida cuando importa, quieta cuando no ---------
+     jsonbin no avisa de nada: hay que preguntarle. Y su plan gratuito da
+     10.000 peticiones al mes, así que preguntar cada dos segundos todo el
+     día se las come en una semana.
+
+     La regla: se pregunta seguido mientras hay CONVERSACIÓN —acabas de
+     tocar algo, o acaba de llegar algo del otro aparato—, más despacio si
+     solo estás mirando, y NADA si la pestaña está escondida o llevas cinco
+     minutos sin tocarla. En cuanto vuelves, se pregunta al instante.      */
+  (function(){
+    var VIVO = 2500, MIRANDO = 12000, DORMIDO = 0;
+    var VENTANA_VIVA = 90000;      /* lo que dura el ritmo rápido tras un cambio */
+    var PACIENCIA    = 300000;     /* 5 min sin tocar nada y se para */
+
+    var ultimoToque = Date.now();
+    var ultimoCambio = 0;
+    var temporizador = null;
+    var ritmoActual = null;
+
+    window.cuentasHuboCambio = function(){ ultimoCambio = Date.now(); replanificar(); };
+    window.cuentasSigoAqui   = function(){ ultimoToque  = Date.now(); replanificar(); };
+
+    function ritmoQueToca(){
+      if(document.hidden || !hayNube()) return DORMIDO;
+      var ahora = Date.now();
+      if(ahora - ultimoToque > PACIENCIA) return DORMIDO;
+      if(ahora - ultimoCambio < VENTANA_VIVA) return VIVO;
+      return MIRANDO;
+    }
+
+    function replanificar(){
+      var r = ritmoQueToca();
+      if(r === ritmoActual) return;
+      ritmoActual = r;
+      if(temporizador){ clearInterval(temporizador); temporizador = null; }
+      if(r) temporizador = setInterval(latido, r);
+      pintarRitmo(r);
+    }
+
+    function latido(){
+      if(document.hidden){ replanificar(); return; }
+      bajarDeNube(false);
+      replanificar();
+    }
+
+    function pintarRitmo(r){
+      var p = $('pastillaNube');
+      if(!p) return;
+      p.title = !hayNube() ? 'Sin nube. Pulsa para configurarla.'
+              : r === VIVO ? 'Comprobando cada 2,5 s. Pulsa para comprobar ahora.'
+              : r === MIRANDO ? 'Comprobando cada 12 s. Pulsa para comprobar ahora.'
+              : 'En reposo. Pulsa para comprobar ahora.';
+    }
+
+    ['pointerdown','keydown','touchstart'].forEach(function(ev){
+      window.addEventListener(ev, function(){ window.cuentasSigoAqui(); }, { passive:true, capture:true });
+    });
+
+    document.addEventListener('visibilitychange', function(){
+      if(document.hidden){ replanificar(); return; }
+      ultimoToque = Date.now();
+      bajarDeNube(false);
+      replanificar();
+    });
+    window.addEventListener('focus', function(){
+      ultimoToque = Date.now();
+      bajarDeNube(false);
+      replanificar();
+    });
+    window.addEventListener('online',  function(){
+      estadoNube('busy'); ultimoToque = Date.now(); bajarDeNube(true); replanificar();
+    });
+    window.addEventListener('offline', function(){ estadoNube('err'); });
+
+    replanificar();
+  })();
   var tRedim = null;
   window.addEventListener('resize', function(){
     clearTimeout(tRedim);
@@ -3900,8 +3986,6 @@ function conectarTodo(){
       if(e) encajarCifra(e, e.textContent);
     }, 140);
   });
-  window.addEventListener('online',  function(){ estadoNube('busy'); bajarDeNube(true); });
-  window.addEventListener('offline', function(){ estadoNube('err'); });
 }
 
 /* ---------- Aplicación instalable (sin archivos aparte) ------------------- */

@@ -42,6 +42,24 @@ Viven en el navegador de cada aparato. Para tenerlos en todos:
 Y aparte, **Opciones → Descargar respaldo JSON** guarda una copia completa
 cuando quieras.
 
+### Cada cuánto se sincroniza
+
+jsonbin no avisa de nada: hay que preguntarle. Así que el programa pregunta
+**cada 2,5 segundos mientras hay conversación** —acabas de anotar algo, o
+acaba de llegar algo del otro aparato—, cada 12 segundos si solo estás
+mirando, y **nada** si la pestaña está escondida o llevas cinco minutos sin
+tocarla. Al volver a la pestaña se pone al día al instante.
+
+En la práctica: un cambio hecho en el móvil aparece en la laptop **en algo
+más de un segundo**, si las dos están abiertas y en uso.
+
+Si tienes prisa, **toca la pastilla de estado** de la cabecera (donde pone
+"Sincronizado"): comprueba en ese mismo momento.
+
+Esto no es tacañería: el plan gratuito de jsonbin da 10.000 peticiones al
+mes. Preguntando cada dos segundos con la pestaña abierta todo el día se
+gastan en menos de una semana.
+
 ## Al actualizar
 
 Sube el `index.html` nuevo encima. La próxima vez que se abra con internet se
