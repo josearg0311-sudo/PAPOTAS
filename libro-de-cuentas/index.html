@@ -1,0 +1,2872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F4B3F" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1211" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Libro de Cuentas">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Libro de ingresos y gastos: registro, resumen, exportación a Excel y PDF, y sincronización entre dispositivos.">
+<title>Libro de Cuentas · Ingresos y Gastos</title>
+<style>
+/* ==========================================================================
+   LIBRO DE CUENTAS
+   Un libro contable, no una aplicación de neón. Papel, tinta, reglas
+   horizontales y cifras alineadas: lo que hace legible una cuenta desde
+   que existen las cuentas. Sin una sola descarga de internet.
+   ========================================================================== */
+
+:root{
+  color-scheme: light;
+
+  --papel:      #F6F5F1;
+  --hoja:       #FFFFFF;
+  --hoja-2:     #FBFAF7;
+  --tinta:      #14181A;
+  --tinta-2:    #5B6570;
+  --tinta-3:    #8A939C;
+  --regla:      #E4E1D8;
+  --regla-2:    #EFEDE6;
+
+  --verde:      #1F4B3F;   /* el verde de los libros de contabilidad */
+  --verde-sube: #2A6353;
+  --verde-piso: #EAF1EE;
+  --haber:      #12805C;   /* entra dinero */
+  --debe:       #B3261E;   /* sale dinero */
+  --haber-piso: #E7F4EF;
+  --debe-piso:  #FBEAE8;
+  --oro:        #9A6E12;
+  --oro-piso:   #FBF3E0;
+
+  --sombra:     0 1px 2px rgba(20,24,26,.05), 0 4px 16px rgba(20,24,26,.05);
+  --sombra-alta:0 8px 32px rgba(20,24,26,.13), 0 2px 8px rgba(20,24,26,.07);
+
+  --r-s: 8px;
+  --r-m: 12px;
+  --r-l: 18px;
+
+  --letra: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --cifra: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --barra: 64px;   /* alto de la barra inferior en movil */
+}
+
+:root[data-tema="oscuro"]{
+  color-scheme: dark;
+  --papel:      #0E1110;
+  --hoja:       #161A18;
+  --hoja-2:     #1B201D;
+  --tinta:      #ECEFEA;
+  --tinta-2:    #9AA5A0;
+  --tinta-3:    #6E7A75;
+  --regla:      #262C29;
+  --regla-2:    #1F2422;
+  --verde:      #4FA88C;
+  --verde-sube: #6FC2A7;
+  --verde-piso: #13251F;
+  --haber:      #3ED598;
+  --debe:       #FF6B5E;
+  --haber-piso: #10241C;
+  --debe-piso:  #2A1512;
+  --oro:        #E0B457;
+  --oro-piso:   #241C0C;
+  --sombra:     0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  --sombra-alta:0 10px 40px rgba(0,0,0,.6);
+}
+
+*,*::before,*::after{ box-sizing:border-box }
+
+html{ -webkit-text-size-adjust:100% }
+
+body{
+  margin:0;
+  font-family:var(--letra);
+  font-size:15px;
+  line-height:1.5;
+  color:var(--tinta);
+  background:var(--papel);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overscroll-behavior-y:none;
+}
+
+/* Las cifras SIEMPRE alineadas en columna. Es media legibilidad de un libro. */
+.cifra{ font-family:var(--cifra); font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1; letter-spacing:-.01em }
+
+button,input,select,textarea{ font:inherit; color:inherit }
+button{ cursor:pointer; background:none; border:none; padding:0 }
+a{ color:var(--verde) }
+
+:focus-visible{ outline:2px solid var(--verde); outline-offset:2px; border-radius:4px }
+
+.oculto{ display:none !important }
+.solo-lectores{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{ animation-duration:.001ms !important; transition-duration:.001ms !important }
+}
+</style>
+<style>
+/* ===== ARMAZÓN ==========================================================
+   Móvil: una columna con barra inferior.
+   Escritorio: barra lateral fija + contenido ancho. El original dejaba una
+   columna de teléfono perdida en medio de una pantalla de 1400 px.
+   ====================================================================== */
+
+.app{ min-height:100dvh; display:flex; flex-direction:column }
+
+/* --- Cabecera --- */
+.cabecera{
+  position:sticky; top:0; z-index:40;
+  background:color-mix(in srgb, var(--papel) 88%, transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--regla);
+  padding-top:env(safe-area-inset-top);
+}
+.cabecera-fila{
+  display:flex; align-items:center; gap:12px;
+  padding:10px 16px; max-width:1280px; margin:0 auto;
+}
+.marca{ display:flex; align-items:center; gap:10px; min-width:0 }
+.sello{
+  width:34px; height:34px; flex:0 0 auto; border-radius:9px;
+  background:var(--verde); color:#fff;
+  display:grid; place-items:center;
+  font-weight:800; font-size:12px; letter-spacing:.04em;
+}
+:root[data-tema="oscuro"] .sello{ color:#0E1110 }
+.marca h1{ margin:0; font-size:15px; font-weight:750; letter-spacing:-.01em; white-space:nowrap }
+.marca p{ margin:0; font-size:10.5px; color:var(--tinta-3); letter-spacing:.09em; text-transform:uppercase; font-weight:650 }
+
+.cabecera-acciones{ margin-left:auto; display:flex; align-items:center; gap:6px }
+
+.pastilla-nube{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 10px; border-radius:99px;
+  border:1px solid var(--regla); background:var(--hoja);
+  font-size:11px; font-weight:650; color:var(--tinta-2);
+  white-space:nowrap;
+}
+.pastilla-nube .punto{ width:7px; height:7px; border-radius:99px; background:var(--tinta-3); flex:0 0 auto }
+.pastilla-nube[data-estado="ok"]{ color:var(--haber); border-color:color-mix(in srgb,var(--haber) 35%,var(--regla)) }
+.pastilla-nube[data-estado="ok"] .punto{ background:var(--haber) }
+.pastilla-nube[data-estado="busy"] .punto{ background:var(--oro); animation:latir 1s ease-in-out infinite }
+.pastilla-nube[data-estado="err"]{ color:var(--debe); border-color:color-mix(in srgb,var(--debe) 35%,var(--regla)) }
+.pastilla-nube[data-estado="err"] .punto{ background:var(--debe) }
+@keyframes latir{ 0%,100%{opacity:1} 50%{opacity:.25} }
+
+.btn-icono{
+  width:36px; height:36px; border-radius:10px;
+  display:grid; place-items:center;
+  border:1px solid var(--regla); background:var(--hoja);
+  color:var(--tinta-2); transition:background .15s, color .15s, border-color .15s;
+}
+.btn-icono:hover{ background:var(--hoja-2); color:var(--tinta); border-color:var(--tinta-3) }
+.btn-icono svg{ width:17px; height:17px; display:block }
+
+/* --- Cuerpo --- */
+.cuerpo{
+  flex:1; width:100%; max-width:1280px; margin:0 auto;
+  padding:16px 16px calc(var(--barra) + env(safe-area-inset-bottom) + 20px);
+  display:grid; gap:16px;
+}
+@media (min-width:1000px){
+  .cuerpo{
+    grid-template-columns:296px minmax(0,1fr);
+    align-items:start;
+    padding-bottom:32px;
+    gap:24px;
+  }
+}
+
+/* --- Columna lateral (solo escritorio) --- */
+.lateral{ display:grid; gap:14px; position:sticky; top:74px }
+@media (max-width:999px){ .lateral{ position:static; top:auto } }
+
+/* --- Tarjeta genérica --- */
+.tarjeta{
+  background:var(--hoja);
+  border:1px solid var(--regla);
+  border-radius:var(--r-l);
+  box-shadow:var(--sombra);
+}
+.tarjeta-cabeza{
+  display:flex; align-items:center; gap:10px;
+  padding:13px 16px; border-bottom:1px solid var(--regla-2);
+}
+.tarjeta-cabeza h2{
+  margin:0; font-size:11px; font-weight:750; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--tinta-3);
+}
+.tarjeta-cabeza .a-la-derecha{ margin-left:auto }
+.tarjeta-cuerpo{ padding:16px }
+
+/* --- Barra inferior (solo móvil) --- */
+.barra-inferior{
+  position:fixed; left:0; right:0; bottom:0; z-index:45;
+  display:grid; grid-template-columns:repeat(3,1fr);
+  background:color-mix(in srgb, var(--papel) 92%, transparent);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-top:1px solid var(--regla);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+@media (min-width:1000px){ .barra-inferior{ display:none } }
+.barra-inferior button{
+  height:var(--barra);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  font-size:10.5px; font-weight:650; color:var(--tinta-3);
+  transition:color .15s;
+}
+.barra-inferior button svg{ width:20px; height:20px }
+.barra-inferior button[aria-current="page"]{ color:var(--verde) }
+
+/* --- Botón flotante (solo móvil) --- */
+.flotante{
+  position:fixed; right:16px; z-index:46;
+  bottom:calc(var(--barra) + env(safe-area-inset-bottom) + 16px);
+  width:56px; height:56px; border-radius:18px;
+  background:var(--verde); color:#fff;
+  display:grid; place-items:center;
+  box-shadow:0 8px 24px color-mix(in srgb, var(--verde) 40%, transparent);
+  transition:transform .15s;
+}
+.flotante:active{ transform:scale(.94) }
+.flotante svg{ width:24px; height:24px }
+:root[data-tema="oscuro"] .flotante{ color:#0E1110 }
+@media (min-width:1000px){ .flotante{ display:none } }
+</style>
+<style>
+/* ===== EL BALANCE =======================================================
+   Una sola cifra manda en esta pantalla. Todo lo demas se aparta.
+   ====================================================================== */
+.balance{
+  background:var(--hoja); border:1px solid var(--regla);
+  border-radius:var(--r-l); box-shadow:var(--sombra);
+  padding:20px 18px 16px; text-align:center; position:relative; overflow:hidden;
+}
+.balance::before{
+  content:""; position:absolute; inset:0 0 auto; height:3px;
+  background:linear-gradient(90deg, var(--haber), var(--verde) 55%, var(--oro));
+}
+.balance .rotulo{
+  font-size:10.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--tinta-3); margin-bottom:6px;
+}
+.balance .cantidad{
+  font-family:var(--cifra); font-variant-numeric:tabular-nums;
+  font-size:clamp(30px, 8vw, 40px); font-weight:750; letter-spacing:-.035em;
+  line-height:1.06; color:var(--tinta); word-break:break-word;
+}
+.balance .cantidad.negativo{ color:var(--debe) }
+.balance .periodo{ font-size:11.5px; color:var(--tinta-3); margin-top:5px }
+
+.balance-partes{
+  display:grid; grid-template-columns:1fr 1fr; gap:1px;
+  margin-top:16px; padding-top:15px; border-top:1px dashed var(--regla);
+}
+.balance-partes > div{ padding:0 6px }
+.balance-partes .r{
+  font-size:9.5px; font-weight:700; letter-spacing:.11em; text-transform:uppercase;
+  color:var(--tinta-3); margin-bottom:3px;
+}
+.balance-partes .v{ font-family:var(--cifra); font-variant-numeric:tabular-nums; font-size:16px; font-weight:700 }
+.balance-partes .v.entra{ color:var(--haber) }
+.balance-partes .v.sale{ color:var(--debe) }
+
+/* ===== CONTROLES ======================================================== */
+.campo{ display:grid; gap:5px }
+.campo label{
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--tinta-3);
+}
+.control{
+  width:100%; padding:10px 12px; min-height:42px;
+  background:var(--hoja); color:var(--tinta);
+  border:1px solid var(--regla); border-radius:var(--r-m);
+  transition:border-color .15s, box-shadow .15s;
+}
+.control::placeholder{ color:var(--tinta-3) }
+.control:focus{
+  outline:none; border-color:var(--verde);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--verde) 16%, transparent);
+}
+select.control{
+  appearance:none; padding-right:34px;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A939C' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat; background-position:right 11px center; background-size:15px;
+}
+textarea.control{ min-height:72px; resize:vertical }
+
+.buscador{ position:relative }
+.buscador .lupa{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:16px; height:16px; color:var(--tinta-3); pointer-events:none;
+}
+.buscador .control{ padding-left:36px; padding-right:36px }
+.buscador .limpiar{
+  position:absolute; right:8px; top:50%; transform:translateY(-50%);
+  width:26px; height:26px; border-radius:7px; display:grid; place-items:center; color:var(--tinta-3);
+}
+.buscador .limpiar:hover{ background:var(--regla-2); color:var(--tinta) }
+.buscador .limpiar svg{ width:14px; height:14px }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  padding:0 16px; min-height:42px; border-radius:var(--r-m);
+  border:1px solid var(--regla); background:var(--hoja); color:var(--tinta);
+  font-size:13.5px; font-weight:650; white-space:nowrap;
+  transition:background .15s, border-color .15s, transform .1s;
+}
+.btn:hover{ background:var(--hoja-2); border-color:var(--tinta-3) }
+.btn:active{ transform:translateY(1px) }
+.btn svg{ width:16px; height:16px; flex:0 0 auto }
+.btn-lleno{ background:var(--verde); border-color:var(--verde); color:#fff }
+.btn-lleno:hover{ background:var(--verde-sube); border-color:var(--verde-sube) }
+:root[data-tema="oscuro"] .btn-lleno{ color:#0E1110 }
+.btn-peligro{ color:var(--debe); border-color:color-mix(in srgb,var(--debe) 30%,var(--regla)) }
+.btn-peligro:hover{ background:var(--debe-piso); border-color:var(--debe) }
+.btn-ancho{ width:100% }
+.btn[disabled]{ opacity:.5; pointer-events:none }
+
+/* Grupo de pestañas / segmentado */
+.segmentado{
+  display:flex; gap:3px; padding:3px; min-width:0;
+  background:var(--regla-2); border-radius:var(--r-m); border:1px solid var(--regla);
+}
+/* min-width:0 en los botones tambien: sin eso un grupo de tres no puede
+   encogerse por debajo de su texto y empuja la pagina entera a lo ancho. */
+.segmentado button{
+  flex:1 1 0; min-width:0; min-height:34px; padding:0 8px; border-radius:9px;
+  font-size:12.5px; font-weight:650; color:var(--tinta-2);
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  transition:background .15s, color .15s, box-shadow .15s;
+}
+.segmentado button[aria-pressed="true"]{
+  background:var(--hoja); color:var(--tinta); box-shadow:var(--sombra);
+}
+.segmentado button .n{
+  font-family:var(--cifra); font-size:10.5px; font-weight:700;
+  padding:1px 5px; border-radius:99px; background:var(--regla); color:var(--tinta-2);
+}
+.segmentado button[aria-pressed="true"] .n{ background:var(--verde-piso); color:var(--verde) }
+.segmentado.entra-sale button[aria-pressed="true"][data-tipo="Ingreso"]{ color:var(--haber) }
+.segmentado.entra-sale button[aria-pressed="true"][data-tipo="Gasto"]{ color:var(--debe) }
+
+/* ===== ETIQUETA DE CATEGORÍA ============================================ */
+.etiqueta{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:2px 8px; border-radius:99px;
+  font-size:11px; font-weight:650; line-height:1.6;
+  background:var(--regla-2); color:var(--tinta-2); border:1px solid transparent;
+  white-space:nowrap;
+}
+.etiqueta .gota{ width:7px; height:7px; border-radius:99px; flex:0 0 auto }
+</style>
+
+<style>
+/* En pantallas muy estrechas los contadores sobran: el numero ya esta arriba. */
+@media (max-width:359px){
+  .segmentado button .n{ display:none }
+  .segmentado button{ font-size:12px; padding:0 6px }
+}
+</style>
+<style>
+/* ===== EL LIBRO: las filas del mayor ====================================
+   En movil, fichas. En pantalla ancha, una tabla de verdad, con sus reglas
+   horizontales y sus columnas de cifras alineadas. Un libro de cuentas se
+   lee en columnas o no se lee.
+   ====================================================================== */
+
+.dia{
+  display:flex; align-items:baseline; gap:4px 10px; flex-wrap:wrap;
+  padding:14px 16px 7px;
+  border-bottom:1px solid var(--regla-2);
+  background:var(--hoja-2);
+  position:sticky; top:57px; z-index:5;
+}
+@media (min-width:1000px){ .dia{ position:static } }
+.dia .fecha{ font-size:12.5px; font-weight:700; color:var(--tinta); min-width:0 }
+.dia .relativo{ font-size:11px; color:var(--tinta-3) }
+.dia .neto{ margin-left:auto; font-family:var(--cifra); font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:700; white-space:nowrap }
+.dia .neto.entra{ color:var(--haber) }
+.dia .neto.sale{ color:var(--debe) }
+
+.linea{
+  display:grid; align-items:center; gap:10px;
+  grid-template-columns:3px minmax(0,1fr) auto auto;
+  padding:11px 16px; border-bottom:1px solid var(--regla-2);
+  transition:background .12s;
+}
+.linea:hover{ background:var(--hoja-2) }
+.linea:last-child{ border-bottom:none }
+.linea .filo{ width:3px; height:30px; border-radius:99px; background:var(--haber) }
+.linea[data-tipo="Gasto"] .filo{ background:var(--debe) }
+
+.linea .texto{ min-width:0 }
+.linea .desc{
+  font-size:14px; font-weight:600; color:var(--tinta);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.linea .meta{ display:flex; align-items:center; gap:7px; margin-top:2px; flex-wrap:wrap }
+.linea .meta .f{ font-family:var(--cifra); font-size:11px; color:var(--tinta-3) }
+
+.linea .monto{
+  font-family:var(--cifra); font-variant-numeric:tabular-nums;
+  font-size:14.5px; font-weight:700; color:var(--haber); text-align:right; white-space:nowrap;
+}
+.linea[data-tipo="Gasto"] .monto{ color:var(--debe) }
+
+.linea .mandos{ display:flex; gap:2px; margin-left:6px }
+.linea .mandos button{
+  width:30px; height:30px; border-radius:8px; display:grid; place-items:center;
+  color:var(--tinta-3); transition:background .12s, color .12s;
+}
+.linea .mandos button:hover{ background:var(--regla-2); color:var(--tinta) }
+.linea .mandos button.borrar:hover{ background:var(--debe-piso); color:var(--debe) }
+.linea .mandos svg{ width:15px; height:15px }
+
+/* En pantalla ancha, la linea se convierte en fila de tabla */
+@media (min-width:1000px){
+  .linea{
+    grid-template-columns:3px 104px minmax(0,1fr) 150px 136px 76px;
+    gap:14px; padding:10px 18px;
+  }
+  /* La fila se reparte en columnas. Hay que fijar TAMBIEN la linea de la
+     rejilla: si no, .meta va detras de .desc en el marcado y la colocacion
+     automatica la empuja a una segunda fila, que es justo lo que rompia. */
+  .linea .texto{ display:contents }
+  .linea .filo{ grid-column:1; grid-row:1; height:24px }
+  .linea .desc{ grid-column:3; grid-row:1 }
+  .linea .meta{ grid-column:2; grid-row:1; margin-top:0 }
+  .linea .meta .f{ font-size:12px; color:var(--tinta-2) }
+  .linea .solo-movil{ display:none }
+  .linea .cat-celda{ grid-column:4; grid-row:1; min-width:0; overflow:hidden }
+  .linea .monto{ grid-column:5; grid-row:1 }
+  .linea .mandos{ grid-column:6; grid-row:1; margin-left:0; justify-content:flex-end }
+  .linea .mandos button{ opacity:0; transition:opacity .12s, background .12s, color .12s }
+  .linea:hover .mandos button, .linea:focus-within .mandos button{ opacity:1 }
+}
+@media (max-width:999px){ .linea .cat-celda{ display:none } }
+
+.encabezado-tabla{
+  display:none; gap:14px; padding:9px 18px;
+  grid-template-columns:3px 104px minmax(0,1fr) 150px 136px 76px;
+  border-bottom:1px solid var(--regla);
+  background:var(--hoja-2);
+  font-size:10px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta-3);
+}
+@media (min-width:1000px){ .encabezado-tabla{ display:grid } }
+.encabezado-tabla .der{ text-align:right }
+
+/* Fila en edicion */
+.linea.editando{ background:var(--oro-piso); grid-template-columns:1fr; gap:10px; padding:14px 16px }
+.linea.editando .rejilla-edicion{ display:grid; gap:10px; grid-template-columns:1fr }
+@media (min-width:700px){
+  .linea.editando .rejilla-edicion{ grid-template-columns:130px 1fr 150px 130px }
+}
+.linea.editando .acciones-edicion{ display:flex; gap:8px; justify-content:flex-end }
+
+/* Vacio */
+.vacio{ padding:44px 20px; text-align:center; color:var(--tinta-3) }
+.vacio svg{ width:38px; height:38px; margin-bottom:10px; opacity:.5 }
+.vacio h3{ margin:0 0 4px; font-size:14.5px; font-weight:700; color:var(--tinta-2) }
+.vacio p{ margin:0 0 14px; font-size:13px; max-width:340px; margin-inline:auto }
+
+/* Pie de totales del listado */
+.pie-total{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:13px 18px; border-top:2px solid var(--regla); background:var(--hoja-2);
+  border-radius:0 0 var(--r-l) var(--r-l);
+}
+.pie-total .r{ font-size:11px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--tinta-3) }
+.pie-total .v{ margin-left:auto; font-family:var(--cifra); font-variant-numeric:tabular-nums; font-size:16px; font-weight:750 }
+</style>
+<style>
+/* ===== RESUMEN ========================================================== */
+.rejilla-kpi{ display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)) }
+.kpi{
+  background:var(--hoja); border:1px solid var(--regla); border-radius:var(--r-m);
+  padding:13px 14px;
+}
+.kpi .r{ font-size:10px; font-weight:750; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta-3) }
+.kpi .v{ font-family:var(--cifra); font-variant-numeric:tabular-nums; font-size:20px; font-weight:750; margin-top:5px; letter-spacing:-.02em }
+.kpi .n{ font-size:11.5px; color:var(--tinta-3); margin-top:2px }
+.kpi.entra .v{ color:var(--haber) }
+.kpi.sale  .v{ color:var(--debe) }
+
+/* Grafico dibujado a mano, sin libreria */
+.gr-envoltura{ overflow-x:auto; -webkit-overflow-scrolling:touch }
+.gr{ display:block; width:100%; min-width:340px; height:auto }
+.gr-leyenda{ display:flex; gap:16px; justify-content:center; padding:10px 16px 0; flex-wrap:wrap }
+.gr-leyenda span{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--tinta-2); font-weight:600 }
+.gr-leyenda i{ width:10px; height:10px; border-radius:3px; display:block }
+
+/* Barras por categoria / por mes */
+.barras{ display:grid; gap:11px; padding:4px 0 }
+.barra-fila .arriba{ display:flex; align-items:baseline; gap:8px; margin-bottom:4px }
+.barra-fila .nom{ font-size:13px; font-weight:600; color:var(--tinta); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.barra-fila .val{ margin-left:auto; font-family:var(--cifra); font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:700 }
+.barra-fila .pct{ font-size:11px; color:var(--tinta-3); font-family:var(--cifra); min-width:38px; text-align:right }
+.barra-fila .canal{ height:8px; border-radius:99px; background:var(--regla-2); overflow:hidden }
+.barra-fila .relleno{ height:100%; border-radius:99px; transition:width .5s cubic-bezier(.22,1,.36,1) }
+
+/* Tabla mensual */
+.tabla-mes{ width:100%; border-collapse:collapse; font-size:13.5px }
+.tabla-mes th{
+  text-align:left; padding:8px 10px; border-bottom:1px solid var(--regla);
+  font-size:10px; font-weight:750; letter-spacing:.09em; text-transform:uppercase; color:var(--tinta-3);
+}
+.tabla-mes th.der, .tabla-mes td.der{ text-align:right }
+.tabla-mes td{ padding:9px 10px; border-bottom:1px solid var(--regla-2) }
+.tabla-mes tr:last-child td{ border-bottom:none }
+.tabla-mes .cifra{ font-weight:650 }
+.tabla-mes .entra{ color:var(--haber) }
+.tabla-mes .sale{ color:var(--debe) }
+
+/* ===== MODALES ========================================================== */
+.velo{
+  position:fixed; inset:0; z-index:80;
+  background:rgba(12,16,14,.5);
+  backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity .2s;
+}
+@media (min-width:700px){ .velo{ align-items:center; padding:24px } }
+.velo.abierto{ opacity:1; pointer-events:auto }
+
+.modal{
+  width:100%; max-width:520px; max-height:92dvh; overflow-y:auto;
+  background:var(--hoja); border:1px solid var(--regla);
+  border-radius:22px 22px 0 0;
+  box-shadow:var(--sombra-alta);
+  transform:translateY(18px); transition:transform .24s cubic-bezier(.22,1,.36,1);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+@media (min-width:700px){ .modal{ border-radius:20px } }
+.velo.abierto .modal{ transform:none }
+.modal.ancho{ max-width:640px }
+
+.modal-cabeza{
+  position:sticky; top:0; z-index:2;
+  display:flex; align-items:center; gap:12px;
+  padding:16px 18px 13px; background:var(--hoja);
+  border-bottom:1px solid var(--regla-2);
+}
+.modal-cabeza h2{ margin:0; font-size:16.5px; font-weight:750; letter-spacing:-.01em }
+.modal-cabeza .cerrar{ margin-left:auto }
+.modal-cuerpo{ padding:18px }
+.modal-pie{
+  display:flex; gap:10px; padding:14px 18px;
+  border-top:1px solid var(--regla-2); background:var(--hoja-2);
+  position:sticky; bottom:0;
+}
+.modal-pie .btn{ flex:1 }
+
+.asa{
+  width:38px; height:4px; border-radius:99px; background:var(--regla);
+  margin:9px auto 0;
+}
+@media (min-width:700px){ .asa{ display:none } }
+
+/* Menú de opciones */
+.menu-lista{ display:grid; gap:2px; padding:8px }
+.menu-lista button{
+  display:flex; align-items:center; gap:12px; width:100%;
+  padding:12px 12px; border-radius:var(--r-m); text-align:left;
+  font-size:14px; font-weight:600; color:var(--tinta);
+  transition:background .12s;
+}
+.menu-lista button:hover{ background:var(--hoja-2) }
+.menu-lista button svg{ width:18px; height:18px; color:var(--tinta-3); flex:0 0 auto }
+.menu-lista button .sub{ display:block; font-size:11.5px; font-weight:500; color:var(--tinta-3); margin-top:1px }
+.menu-lista button.peligro{ color:var(--debe) }
+.menu-lista button.peligro svg{ color:var(--debe) }
+.menu-separador{ height:1px; background:var(--regla-2); margin:6px 10px }
+
+/* ===== AVISO (toast) ==================================================== */
+.aviso{
+  position:fixed; z-index:95; left:16px; right:16px;
+  bottom:calc(var(--barra) + env(safe-area-inset-bottom) + 78px);
+  background:var(--tinta); color:var(--papel);
+  border-radius:var(--r-m); padding:12px 14px;
+  box-shadow:var(--sombra-alta);
+  display:flex; align-items:flex-start; gap:11px;
+  transform:translateY(16px); opacity:0; pointer-events:none;
+  transition:transform .24s cubic-bezier(.22,1,.36,1), opacity .2s;
+}
+@media (min-width:700px){ .aviso{ left:auto; right:24px; bottom:24px; max-width:400px } }
+.aviso.abierto{ transform:none; opacity:1; pointer-events:auto }
+.aviso .t{ font-size:13.5px; font-weight:700 }
+.aviso .m{ font-size:12.5px; opacity:.82; margin-top:1px }
+.aviso .accion{
+  margin-left:auto; align-self:center; flex:0 0 auto;
+  padding:6px 11px; border-radius:8px; font-size:12.5px; font-weight:700;
+  background:color-mix(in srgb, var(--papel) 18%, transparent); color:var(--papel);
+}
+.aviso .accion:hover{ background:color-mix(in srgb, var(--papel) 30%, transparent) }
+
+/* ===== IMPRESION ========================================================
+   Por si alguien le da a imprimir: que no salga la aplicacion entera.
+   El PDF de verdad se genera aparte, vectorial.
+   ====================================================================== */
+@media print{
+  .cabecera,.barra-inferior,.flotante,.velo,.aviso,.lateral{ display:none !important }
+  body{ background:#fff }
+  .cuerpo{ padding:0; max-width:none; display:block }
+}
+</style>
+<style>
+/* ===== MÓVIL: que los movimientos se vean sin hacer scroll ===============
+   En el teléfono, las tarjetas de "Periodo" y "Exportar" ocupaban toda la
+   primera pantalla y el libro quedaba debajo del pliegue. Exportar ya está
+   en la barra de abajo, y el periodo cabe en una sola línea.
+   ====================================================================== */
+@media (max-width:999px){
+  #tarjetaAtajos{ display:none }
+
+  .lateral{ gap:10px }
+
+  .balance{ padding:16px 16px 13px }
+  .balance .cantidad{ font-size:clamp(28px, 9vw, 38px) }
+  .balance-partes{ margin-top:12px; padding-top:11px }
+
+  /* La tarjeta de periodo se queda en el select y nada más */
+  #tarjetaPeriodo{ border:none; background:none; box-shadow:none; border-radius:0 }
+  #tarjetaPeriodo .tarjeta-cabeza{ display:none }
+  #tarjetaPeriodo .tarjeta-cuerpo{ padding:0 }
+  #tarjetaPeriodo .campo label{ display:none }
+  #tarjetaPeriodo select.control{ background:var(--hoja); font-weight:600 }
+}
+</style>
+<style>
+/* En el teléfono la descripción es lo que se lee: los botones de editar y
+   duplicar sobran, porque tocar la fila ya abre la ficha y ahí está todo. */
+@media (max-width:999px){
+  .linea .mandos button[data-accion="editar"],
+  .linea .mandos button[data-accion="duplicar"]{ display:none }
+  .linea{ gap:8px }
+  .linea .monto{ font-size:14px }
+  .linea .desc{ font-size:13.5px }
+  #btnNuevoEsc{ display:none }
+  .tarjeta-cabeza{ padding:12px 14px }
+}
+</style>
+<style>
+.nav-escritorio{ display:none }
+@media (min-width:1000px){
+  .nav-escritorio{ display:flex; max-width:380px }
+  .nav-escritorio button{ min-height:38px; font-size:13.5px }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= CABECERA ================= -->
+  <header class="cabecera">
+    <div class="cabecera-fila">
+      <div class="marca">
+        <div class="sello" aria-hidden="true">LC</div>
+        <div>
+          <h1>Libro de Cuentas</h1>
+          <p>Ingresos &amp; Gastos</p>
+        </div>
+      </div>
+      <div class="cabecera-acciones">
+        <button type="button" id="pastillaNube" class="pastilla-nube" data-estado="off"
+                title="Estado de la sincronización">
+          <span class="punto"></span><span id="pastillaNubeTexto">Sin nube</span>
+        </button>
+        <button type="button" id="btnTema" class="btn-icono" title="Cambiar entre claro y oscuro" aria-label="Cambiar tema">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+        </button>
+        <button type="button" id="btnMenu" class="btn-icono" title="Más opciones" aria-label="Más opciones">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= CUERPO ================= -->
+  <main class="cuerpo">
+
+    <!-- ---- Columna lateral ---- -->
+    <aside class="lateral">
+
+      <section class="balance" aria-labelledby="rotBalance">
+        <div class="rotulo" id="rotBalance">Balance del periodo</div>
+        <div class="cantidad cifra" id="kpiBalance">S/ 0.00</div>
+        <div class="periodo" id="kpiPeriodo">Todo el libro</div>
+        <div class="balance-partes">
+          <div>
+            <div class="r">Ingresos</div>
+            <div class="v entra cifra" id="kpiIngresos">S/ 0.00</div>
+          </div>
+          <div>
+            <div class="r">Gastos</div>
+            <div class="v sale cifra" id="kpiGastos">S/ 0.00</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tarjeta" id="tarjetaPeriodo">
+        <div class="tarjeta-cabeza"><h2>Periodo</h2></div>
+        <div class="tarjeta-cuerpo" style="display:grid; gap:11px">
+          <div class="campo">
+            <label for="selPeriodo">Ver</label>
+            <select class="control" id="selPeriodo">
+              <option value="todo">Todo el libro</option>
+              <option value="mes">Este mes</option>
+              <option value="mes-1">Mes pasado</option>
+              <option value="anio">Este año</option>
+              <option value="90">Últimos 90 días</option>
+              <option value="rango">Rango de fechas…</option>
+            </select>
+          </div>
+          <div id="cajaRango" class="oculto" style="display:grid; gap:10px; grid-template-columns:1fr 1fr">
+            <div class="campo">
+              <label for="rangoDesde">Desde</label>
+              <input type="date" class="control" id="rangoDesde">
+            </div>
+            <div class="campo">
+              <label for="rangoHasta">Hasta</label>
+              <input type="date" class="control" id="rangoHasta">
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tarjeta" id="tarjetaAtajos">
+        <div class="tarjeta-cabeza"><h2>Exportar</h2></div>
+        <div class="tarjeta-cuerpo" style="display:grid; gap:8px">
+          <button type="button" class="btn btn-ancho" id="btnExcel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 6M15 13l-6 6"/></svg>
+            Excel (.xlsx)
+          </button>
+          <button type="button" class="btn btn-ancho" id="btnPDF">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+            Informe PDF
+          </button>
+        </div>
+      </section>
+    </aside>
+
+    <!-- ---- Columna principal ---- -->
+    <div style="display:grid; gap:16px; min-width:0">
+
+      <!-- Navegación de escritorio: en el móvil esto vive en la barra de abajo -->
+      <div class="segmentado nav-escritorio" id="navHojas" role="tablist" aria-label="Secciones">
+        <button type="button" data-hoja="mov" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+          Movimientos
+        </button>
+        <button type="button" data-hoja="resumen" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+          Resumen
+        </button>
+      </div>
+
+      <!-- HOJA: MOVIMIENTOS -->
+      <section id="hojaMov">
+        <div class="tarjeta">
+          <div class="tarjeta-cabeza">
+            <h2>Movimientos</h2>
+            <div class="a-la-derecha" style="display:flex; gap:6px; align-items:center">
+              <button type="button" class="btn" id="btnNuevoEsc" style="min-height:34px; padding:0 12px; font-size:12.5px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Nuevo
+              </button>
+            </div>
+          </div>
+
+          <div class="tarjeta-cuerpo" style="display:grid; gap:11px; border-bottom:1px solid var(--regla-2)">
+            <div class="buscador">
+              <svg class="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+              <input type="search" class="control" id="buscar" placeholder="Buscar descripción, categoría o monto…"
+                     autocomplete="off" spellcheck="false" aria-label="Buscar movimientos">
+              <button type="button" class="limpiar oculto" id="buscarLimpiar" aria-label="Limpiar búsqueda">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap">
+              <div class="segmentado" id="filtroTipo" style="flex:1 1 230px; min-width:0" role="group" aria-label="Filtrar por tipo">
+                <button type="button" data-filtro="Todos"   aria-pressed="true">Todos <span class="n" id="nTodos">0</span></button>
+                <button type="button" data-filtro="Ingreso" aria-pressed="false">Ingresos <span class="n" id="nIng">0</span></button>
+                <button type="button" data-filtro="Gasto"   aria-pressed="false">Gastos <span class="n" id="nGas">0</span></button>
+              </div>
+              <select class="control" id="selOrden" style="flex:1 1 170px; min-width:0" aria-label="Ordenar">
+                <option value="fecha-desc">Más recientes primero</option>
+                <option value="fecha-asc">Más antiguos primero</option>
+                <option value="monto-desc">Mayor monto</option>
+                <option value="monto-asc">Menor monto</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="encabezado-tabla" aria-hidden="true">
+            <span></span><span>Fecha</span><span>Descripción</span><span>Categoría</span><span class="der">Monto</span><span></span>
+          </div>
+
+          <div id="listaMov"></div>
+          <div class="pie-total oculto" id="pieTotal">
+            <span class="r">Total mostrado</span>
+            <span class="v cifra" id="pieTotalValor">S/ 0.00</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- HOJA: RESUMEN -->
+      <section id="hojaResumen" class="oculto" style="display:grid; gap:16px">
+        <div class="rejilla-kpi" id="rejillaKpi"></div>
+
+        <div class="tarjeta">
+          <div class="tarjeta-cabeza"><h2>Ingresos y gastos por mes</h2></div>
+          <div class="gr-envoltura"><div id="graficoMes"></div></div>
+          <div class="gr-leyenda">
+            <span><i style="background:var(--haber)"></i> Ingresos</span>
+            <span><i style="background:var(--debe)"></i> Gastos</span>
+            <span><i style="background:var(--verde)"></i> Balance</span>
+          </div>
+        </div>
+
+        <div class="tarjeta">
+          <div class="tarjeta-cabeza">
+            <h2>En qué se va el dinero</h2>
+            <span class="a-la-derecha" style="font-size:11px; color:var(--tinta-3)" id="rotCategorias"></span>
+          </div>
+          <div class="tarjeta-cuerpo"><div class="barras" id="barrasCategoria"></div></div>
+        </div>
+
+        <div class="tarjeta">
+          <div class="tarjeta-cabeza"><h2>Detalle por mes</h2></div>
+          <div class="tarjeta-cuerpo" style="overflow-x:auto">
+            <table class="tabla-mes" id="tablaMes"></table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ================= BARRA INFERIOR (móvil) ================= -->
+  <nav class="barra-inferior" aria-label="Secciones">
+    <button type="button" data-hoja="mov" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+      Movimientos
+    </button>
+    <button type="button" data-hoja="resumen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+      Resumen
+    </button>
+    <button type="button" id="btnExportarMovil">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4M4 21h16"/></svg>
+      Exportar
+    </button>
+  </nav>
+
+  <button type="button" class="flotante" id="btnNuevo" aria-label="Nuevo movimiento">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+</div>
+<!-- ================= MODAL: NUEVO / EDITAR ================= -->
+<div class="velo" id="veloMov" role="dialog" aria-modal="true" aria-labelledby="tituloMov">
+  <div class="modal">
+    <div class="asa"></div>
+    <div class="modal-cabeza">
+      <h2 id="tituloMov">Nuevo movimiento</h2>
+      <button type="button" class="btn-icono cerrar" data-cerrar="veloMov" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <form class="modal-cuerpo" id="formMov" style="display:grid; gap:14px" novalidate>
+      <div class="segmentado entra-sale" id="segTipo" role="group" aria-label="Tipo de movimiento">
+        <button type="button" data-tipo="Ingreso" aria-pressed="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          Ingreso
+        </button>
+        <button type="button" data-tipo="Gasto" aria-pressed="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          Gasto
+        </button>
+      </div>
+
+      <div class="campo">
+        <label for="movMonto">Monto (S/)</label>
+        <input type="text" inputmode="decimal" class="control cifra" id="movMonto"
+               placeholder="0.00" autocomplete="off" style="font-size:22px; font-weight:700; min-height:54px">
+      </div>
+
+      <div class="campo">
+        <label for="movDesc">Descripción</label>
+        <input type="text" class="control" id="movDesc" placeholder="Ej. Sueldo, alquiler, supermercado…"
+               autocomplete="off" maxlength="120" list="sugerenciasDesc">
+        <datalist id="sugerenciasDesc"></datalist>
+      </div>
+
+      <div style="display:grid; gap:12px; grid-template-columns:1fr 1fr">
+        <div class="campo">
+          <label for="movFecha">Fecha</label>
+          <input type="date" class="control" id="movFecha">
+        </div>
+        <div class="campo">
+          <label for="movCat">Categoría</label>
+          <input type="text" class="control" id="movCat" placeholder="Opcional"
+                 autocomplete="off" maxlength="40" list="sugerenciasCat">
+          <datalist id="sugerenciasCat"></datalist>
+        </div>
+      </div>
+
+      <div id="atajosCat" style="display:flex; gap:6px; flex-wrap:wrap"></div>
+      <input type="hidden" id="movId">
+    </form>
+    <div class="modal-pie">
+      <button type="button" class="btn" data-cerrar="veloMov">Cancelar</button>
+      <button type="button" class="btn btn-lleno" id="btnGuardarMov">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: MENÚ ================= -->
+<div class="velo" id="veloMenu" role="dialog" aria-modal="true" aria-label="Más opciones">
+  <div class="modal">
+    <div class="asa"></div>
+    <div class="modal-cabeza">
+      <h2>Opciones</h2>
+      <button type="button" class="btn-icono cerrar" data-cerrar="veloMenu" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="menu-lista">
+      <button type="button" id="mExcel">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 13 6 6M15 13l-6 6"/></svg>
+        <span>Exportar a Excel<span class="sub">Archivo .xlsx con movimientos, resumen y categorías</span></span>
+      </button>
+      <button type="button" id="mPDF">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+        <span>Informe en PDF<span class="sub">Texto nítido y seleccionable, con varias páginas</span></span>
+      </button>
+      <button type="button" id="mCSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        <span>Exportar a CSV<span class="sub">Para abrirlo en cualquier programa de hojas de cálculo</span></span>
+      </button>
+
+      <div class="menu-separador"></div>
+
+      <button type="button" id="mRespaldo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span>Descargar respaldo JSON<span class="sub">Copia completa del libro, para guardar o pasar a otro aparato</span></span>
+      </button>
+      <button type="button" id="mImportar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        <span>Importar respaldo<span class="sub">Fusionar con lo que tienes o reemplazarlo</span></span>
+      </button>
+      <button type="button" id="mNube">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 .5-8.97A6 6 0 0 0 6.2 9.5 4 4 0 0 0 6.5 19z"/></svg>
+        <span>Sincronizar entre dispositivos<span class="sub">Base de datos gratuita en jsonbin.io</span></span>
+      </button>
+      <button type="button" id="mCodigo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18-6-6 6-6M15 6l6 6-6 6"/></svg>
+        <span>Ver código de sincronización<span class="sub">Para conectar otro dispositivo a la misma base</span></span>
+      </button>
+
+      <div class="menu-separador"></div>
+
+      <button type="button" id="mDemo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
+        <span>Cargar datos de ejemplo<span class="sub">Para ver cómo funciona antes de usarlo en serio</span></span>
+      </button>
+      <button type="button" id="mBorrar" class="peligro">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        <span>Borrar todo el libro<span class="sub">No se puede deshacer</span></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: NUBE ================= -->
+<div class="velo" id="veloNube" role="dialog" aria-modal="true" aria-labelledby="tituloNube">
+  <div class="modal ancho">
+    <div class="asa"></div>
+    <div class="modal-cabeza">
+      <h2 id="tituloNube">Sincronizar entre dispositivos</h2>
+      <button type="button" class="btn-icono cerrar" data-cerrar="veloNube" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-cuerpo" style="display:grid; gap:18px">
+      <p style="margin:0; font-size:13.5px; color:var(--tinta-2); line-height:1.6">
+        El libro guarda una copia en <strong>jsonbin.io</strong>, un servicio gratuito.
+        Se configura una vez en un dispositivo y los demás se conectan con un código.
+      </p>
+
+      <div style="display:grid; gap:11px; padding:15px; background:var(--hoja-2); border:1px solid var(--regla); border-radius:var(--r-m)">
+        <div style="font-size:11px; font-weight:750; letter-spacing:.09em; text-transform:uppercase; color:var(--verde)">
+          Paso 1 · Crear la base (solo la primera vez)
+        </div>
+        <ol style="margin:0; padding-left:18px; font-size:13px; color:var(--tinta-2); line-height:1.75">
+          <li>Entra a <a href="https://jsonbin.io" target="_blank" rel="noopener">jsonbin.io</a> y crea una cuenta gratis.</li>
+          <li>Dentro, ve a <strong>Account → API Keys</strong>.</li>
+          <li>Copia el valor de <strong>X-MASTER-KEY</strong> y pégalo aquí abajo.</li>
+        </ol>
+        <div class="campo">
+          <label for="nubeClave">Tu X-Master-Key</label>
+          <input type="password" class="control cifra" id="nubeClave" placeholder="$2a$10$…"
+                 autocomplete="off" spellcheck="false" style="font-size:12.5px">
+        </div>
+        <button type="button" class="btn btn-lleno btn-ancho" id="btnCrearBase">Crear la base automáticamente</button>
+      </div>
+
+      <div style="display:grid; gap:11px; padding:15px; background:var(--hoja-2); border:1px solid var(--regla); border-radius:var(--r-m)">
+        <div style="font-size:11px; font-weight:750; letter-spacing:.09em; text-transform:uppercase; color:var(--verde)">
+          Paso 2 · Conectar otro dispositivo
+        </div>
+        <p style="margin:0; font-size:13px; color:var(--tinta-2); line-height:1.6">
+          En el dispositivo que ya está conectado, abre <strong>Opciones → Ver código de sincronización</strong>
+          y pega aquí ese código.
+        </p>
+        <div class="campo">
+          <label for="nubeCodigo">Código de sincronización</label>
+          <input type="text" class="control cifra" id="nubeCodigo" placeholder="Pega el código aquí…"
+                 autocomplete="off" spellcheck="false" style="font-size:12.5px">
+        </div>
+        <button type="button" class="btn btn-ancho" id="btnConectarCodigo">Conectar con este código</button>
+      </div>
+
+      <div id="nubeConectada" class="oculto" style="display:grid; gap:10px; padding:15px; background:var(--haber-piso); border:1px solid color-mix(in srgb,var(--haber) 30%,var(--regla)); border-radius:var(--r-m)">
+        <div style="font-size:13px; font-weight:700; color:var(--haber)">✓ Este dispositivo está conectado</div>
+        <div style="font-size:12px; color:var(--tinta-2)">Base: <span class="cifra" id="nubeBinId">—</span></div>
+        <button type="button" class="btn" id="btnDesconectar">Desconectar este dispositivo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: CÓDIGO ================= -->
+<div class="velo" id="veloCodigo" role="dialog" aria-modal="true" aria-labelledby="tituloCodigo">
+  <div class="modal">
+    <div class="asa"></div>
+    <div class="modal-cabeza">
+      <h2 id="tituloCodigo">Código de sincronización</h2>
+      <button type="button" class="btn-icono cerrar" data-cerrar="veloCodigo" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-cuerpo" style="display:grid; gap:13px">
+      <p style="margin:0; font-size:13.5px; color:var(--tinta-2); line-height:1.6">
+        Copia esto y pégalo en el otro dispositivo, en <strong>Opciones → Sincronizar → Paso 2</strong>.
+      </p>
+      <textarea class="control cifra" id="codigoTexto" readonly rows="4"
+                style="font-size:11.5px; word-break:break-all; line-height:1.6"></textarea>
+      <p style="margin:0; font-size:12px; color:var(--debe); line-height:1.55">
+        Este código contiene tu clave: trátalo como una contraseña.
+      </p>
+    </div>
+    <div class="modal-pie">
+      <button type="button" class="btn btn-lleno" id="btnCopiarCodigo">Copiar código</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="ficheroImportar" accept=".json,application/json" class="oculto">
+
+<!-- ================= AVISO ================= -->
+<div class="aviso" id="aviso" role="status" aria-live="polite">
+  <div style="min-width:0">
+    <div class="t" id="avisoTitulo"></div>
+    <div class="m" id="avisoMensaje"></div>
+  </div>
+  <button type="button" class="accion oculto" id="avisoAccion"></button>
+</div>
+<script>
+/* ==========================================================================
+   LIBRO DE CUENTAS · núcleo
+   Sin librerías externas. Ni una sola descarga: ni tipografías, ni gráficos,
+   ni generador de PDF. Todo lo que hace falta va aquí dentro, porque una red
+   que bloquea un CDN no debe dejarte sin poder anotar un gasto.
+   ========================================================================== */
+(function(){
+'use strict';
+
+/* ---------- Claves de almacenamiento -------------------------------------
+   Se conservan EXACTAMENTE las del libro anterior, para que al abrir esta
+   versión encima de la otra no se pierda nada.                            */
+var CLAVE_DATOS = 'ledger_finanzas_simple_v1';
+var CLAVE_NUBE  = 'libro_cuentas_db_cfg';      // { key: X-Master-Key, bin: binId }
+var CLAVE_TEMA  = 'libro_cuentas_tema';
+var JSONBIN     = 'https://api.jsonbin.io/v3/b';
+var MONEDA      = 'S/';
+
+/* ---------- Estado -------------------------------------------------------- */
+var estado = {
+  movimientos: [],
+  hoja: 'mov',
+  tipoNuevo: 'Ingreso',
+  filtros: { texto:'', tipo:'Todos', periodo:'todo', desde:'', hasta:'' },
+  orden: 'fecha-desc',
+  editando: null
+};
+
+var ultimoJSONSubido = null;
+var guardandoLocal = false;
+var creandoBase = false;
+var deshacer = null;      // { movimientos:[...], que:'texto' }
+var temporizadorAviso = null;
+
+/* ---------- Utilidades ---------------------------------------------------- */
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function nid(){ return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function num(v){ var n = Number(v); return isFinite(n) ? n : 0; }
+
+function hoyISO(){
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function aFecha(iso){
+  var p = String(iso || '').split('-');
+  return new Date(Number(p[0]), Number(p[1])-1, Number(p[2]) || 1);
+}
+function dinero(v){
+  var n = num(v);
+  return MONEDA + ' ' + Math.abs(n).toLocaleString('es-PE', { minimumFractionDigits:2, maximumFractionDigits:2 });
+}
+function dineroConSigno(v){
+  var n = num(v);
+  return (n < 0 ? '− ' : '') + dinero(n);
+}
+function fechaCorta(iso){
+  var d = aFecha(iso);
+  return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + String(d.getFullYear()).slice(2);
+}
+function fechaLarga(iso){
+  var d = aFecha(iso);
+  var s = d.toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function etiquetaMes(ym){
+  var p = String(ym).split('-');
+  var d = new Date(Number(p[0]), Number(p[1])-1, 1);
+  var s = d.toLocaleDateString('es-PE', { month:'long', year:'numeric' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function diasDesdeHoy(iso){
+  var a = aFecha(iso), b = new Date();
+  a.setHours(0,0,0,0); b.setHours(0,0,0,0);
+  return Math.round((b - a) / 86400000);
+}
+function etiquetaRelativa(iso){
+  var d = diasDesdeHoy(iso);
+  if(d === 0) return 'hoy';
+  if(d === 1) return 'ayer';
+  if(d > 1 && d < 7) return 'hace ' + d + ' días';
+  if(d === -1) return 'mañana';
+  if(d < -1) return 'en ' + Math.abs(d) + ' días';
+  return '';
+}
+
+/* ---------- Modelo -------------------------------------------------------
+   `cat` es nuevo. Es opcional y los lectores antiguos lo ignoran, así que el
+   respaldo y la base en la nube siguen siendo compatibles en los dos
+   sentidos: lo viejo se abre aquí y lo de aquí se abre allá.              */
+function sanear(t){
+  t = t || {};
+  return {
+    id:     t.id || nid(),
+    date:   /^\d{4}-\d{2}-\d{2}$/.test(t.date) ? t.date : hoyISO(),
+    desc:   String(t.desc == null || t.desc === '' ? 'Sin descripción' : t.desc).slice(0,160),
+    type:   t.type === 'Gasto' ? 'Gasto' : 'Ingreso',
+    amount: Math.round(Math.abs(num(t.amount)) * 100) / 100,
+    cat:    t.cat ? String(t.cat).slice(0,40) : ''
+  };
+}
+
+/* ---------- Guardar y cargar --------------------------------------------- */
+function guardarLocal(){
+  try{
+    localStorage.setItem(CLAVE_DATOS, JSON.stringify({ transactions: estado.movimientos }));
+  }catch(e){
+    aviso('No se pudo guardar', 'El almacenamiento del navegador está lleno o bloqueado.');
+  }
+}
+function cargarLocal(){
+  try{
+    var raw = JSON.parse(localStorage.getItem(CLAVE_DATOS) || 'null');
+    var lista = raw && Array.isArray(raw.transactions) ? raw.transactions : (Array.isArray(raw) ? raw : []);
+    estado.movimientos = lista.map(sanear);
+  }catch(e){ estado.movimientos = []; }
+}
+
+function guardar(){
+  guardarLocal();
+  subirANube();
+}
+
+/* ---------- Cálculos ------------------------------------------------------ */
+function totales(lista){
+  var ing = 0, gas = 0;
+  for(var i=0;i<lista.length;i++){
+    if(lista[i].type === 'Ingreso') ing += lista[i].amount; else gas += lista[i].amount;
+  }
+  return { ing:ing, gas:gas, bal:ing-gas, n:lista.length };
+}
+
+function limitesPeriodo(){
+  var f = estado.filtros, hoy = new Date();
+  var y = hoy.getFullYear(), m = hoy.getMonth();
+  function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+  switch(f.periodo){
+    case 'mes':   return { desde: iso(new Date(y,m,1)),     hasta: iso(new Date(y,m+1,0)),  nombre:'Este mes' };
+    case 'mes-1': return { desde: iso(new Date(y,m-1,1)),   hasta: iso(new Date(y,m,0)),    nombre:'Mes pasado' };
+    case 'anio':  return { desde: iso(new Date(y,0,1)),     hasta: iso(new Date(y,11,31)),  nombre:'Año ' + y };
+    case '90':    var d90 = new Date(hoy); d90.setDate(d90.getDate()-89);
+                  return { desde: iso(d90), hasta: iso(hoy), nombre:'Últimos 90 días' };
+    case 'rango':
+      if(f.desde || f.hasta){
+        return { desde: f.desde || '0000-01-01', hasta: f.hasta || '9999-12-31',
+                 nombre: (f.desde ? fechaCorta(f.desde) : '…') + ' – ' + (f.hasta ? fechaCorta(f.hasta) : '…') };
+      }
+      return { desde:null, hasta:null, nombre:'Todo el libro' };
+    default:      return { desde:null, hasta:null, nombre:'Todo el libro' };
+  }
+}
+
+/* Movimientos dentro del periodo, sin filtro de texto ni de tipo.
+   Es la base de TODO lo que se muestra: balance, resumen, Excel y PDF. */
+function delPeriodo(){
+  var l = limitesPeriodo();
+  if(!l.desde && !l.hasta) return estado.movimientos.slice();
+  return estado.movimientos.filter(function(t){
+    return (!l.desde || t.date >= l.desde) && (!l.hasta || t.date <= l.hasta);
+  });
+}
+
+function visibles(){
+  var base = delPeriodo();
+  var f = estado.filtros;
+  var q = f.texto.trim().toLowerCase();
+
+  var lista = base.filter(function(t){
+    if(f.tipo !== 'Todos' && t.type !== f.tipo) return false;
+    if(!q) return true;
+    return t.desc.toLowerCase().indexOf(q) >= 0
+        || (t.cat || '').toLowerCase().indexOf(q) >= 0
+        || String(t.amount).indexOf(q) >= 0
+        || fechaCorta(t.date).indexOf(q) >= 0;
+  });
+
+  var o = estado.orden;
+  lista.sort(function(a,b){
+    if(o === 'monto-desc') return b.amount - a.amount || (a.date < b.date ? 1 : -1);
+    if(o === 'monto-asc')  return a.amount - b.amount || (a.date < b.date ? 1 : -1);
+    if(o === 'fecha-asc')  return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0);
+    return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0);
+  });
+  return lista;
+}
+
+function categorias(){
+  var m = {};
+  estado.movimientos.forEach(function(t){ if(t.cat) m[t.cat] = (m[t.cat]||0) + 1; });
+  return Object.keys(m).sort(function(a,b){ return m[b]-m[a]; });
+}
+
+/* Color estable por categoría: el mismo nombre da siempre el mismo tono. */
+function colorCat(nombre){
+  var h = 0, s = String(nombre || '');
+  for(var i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) % 360;
+  return 'hsl(' + h + ' 52% 45%)';
+}
+
+/* ==========================================================================
+   PINTAR
+   ========================================================================== */
+function pintarTodo(){
+  pintarBalance();
+  pintarLista();
+  if(estado.hoja === 'resumen') pintarResumen();
+  pintarSugerencias();
+}
+
+function pintarBalance(){
+  var t = totales(delPeriodo());
+  var l = limitesPeriodo();
+  var caja = $('kpiBalance');
+  caja.textContent = dineroConSigno(t.bal);
+  caja.classList.toggle('negativo', t.bal < 0);
+  $('kpiIngresos').textContent = dinero(t.ing);
+  $('kpiGastos').textContent   = dinero(t.gas);
+  $('kpiPeriodo').textContent  = l.nombre + ' · ' + t.n + (t.n === 1 ? ' movimiento' : ' movimientos');
+
+  var base = delPeriodo();
+  var nT = base.length;
+  var nI = base.filter(function(x){ return x.type === 'Ingreso'; }).length;
+  $('nTodos').textContent = nT;
+  $('nIng').textContent   = nI;
+  $('nGas').textContent   = nT - nI;
+}
+
+function filaHTML(t){
+  var esIng = t.type === 'Ingreso';
+  var cat = t.cat
+    ? '<span class="etiqueta"><span class="gota" style="background:' + colorCat(t.cat) + '"></span>' + esc(t.cat) + '</span>'
+    : '';
+  return '' +
+  '<div class="linea" data-tipo="' + t.type + '" data-id="' + esc(t.id) + '">' +
+    '<span class="filo"></span>' +
+    '<div class="texto">' +
+      '<div class="desc">' + esc(t.desc) + '</div>' +
+      '<div class="meta"><span class="f">' + fechaCorta(t.date) + '</span>' +
+        '<span class="solo-movil">' + cat + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="cat-celda">' + cat + '</div>' +
+    '<div class="monto cifra">' + (esIng ? '+ ' : '− ') + dinero(t.amount) + '</div>' +
+    '<div class="mandos">' +
+      '<button type="button" data-accion="editar" title="Editar" aria-label="Editar movimiento">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>' +
+      '</button>' +
+      '<button type="button" data-accion="duplicar" title="Duplicar" aria-label="Duplicar movimiento">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>' +
+      '</button>' +
+      '<button type="button" data-accion="borrar" class="borrar" title="Eliminar" aria-label="Eliminar movimiento">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
+      '</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function pintarLista(){
+  var lista = visibles();
+  var caja = $('listaMov');
+  var pie  = $('pieTotal');
+
+  if(!lista.length){
+    var hayAlgo = estado.movimientos.length > 0;
+    caja.innerHTML =
+      '<div class="vacio">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>' +
+        '<h3>' + (hayAlgo ? 'Nada coincide con la búsqueda' : 'El libro está en blanco') + '</h3>' +
+        '<p>' + (hayAlgo
+            ? 'Prueba con otro texto, otro periodo, o quita el filtro de tipo.'
+            : 'Anota tu primer ingreso o gasto y el balance empieza a contar solo.') + '</p>' +
+        (hayAlgo ? '' : '<button type="button" class="btn btn-lleno" id="btnVacioNuevo">Anotar el primero</button>') +
+      '</div>';
+    pie.classList.add('oculto');
+    var bv = $('btnVacioNuevo');
+    if(bv) bv.addEventListener('click', function(){ abrirMovimiento(null); });
+    return;
+  }
+
+  var html = '';
+  if(estado.orden.indexOf('fecha') === 0){
+    /* Agrupado por día: así se lee un libro de caja. */
+    var dias = {}, orden = [];
+    lista.forEach(function(t){
+      if(!dias[t.date]){ dias[t.date] = []; orden.push(t.date); }
+      dias[t.date].push(t);
+    });
+    orden.forEach(function(f){
+      var tt = totales(dias[f]);
+      var rel = etiquetaRelativa(f);
+      html += '<div class="dia">' +
+                '<span class="fecha">' + esc(fechaLarga(f)) + '</span>' +
+                (rel ? '<span class="relativo">' + rel + '</span>' : '') +
+                '<span class="neto cifra ' + (tt.bal < 0 ? 'sale' : 'entra') + '">' +
+                  (tt.bal < 0 ? '− ' : '+ ') + dinero(tt.bal) +
+                '</span>' +
+              '</div>';
+      html += dias[f].map(filaHTML).join('');
+    });
+  } else {
+    html = lista.map(filaHTML).join('');
+  }
+  caja.innerHTML = html;
+
+  var t = totales(lista);
+  pie.classList.remove('oculto');
+  var v = $('pieTotalValor');
+  v.textContent = dineroConSigno(t.bal);
+  v.style.color = t.bal < 0 ? 'var(--debe)' : 'var(--haber)';
+}
+
+function pintarSugerencias(){
+  var descs = {}, cats = categorias();
+  estado.movimientos.forEach(function(t){ if(t.desc) descs[t.desc] = 1; });
+  $('sugerenciasDesc').innerHTML = Object.keys(descs).slice(0,60)
+    .map(function(d){ return '<option value="' + esc(d) + '">'; }).join('');
+  $('sugerenciasCat').innerHTML = cats.slice(0,40)
+    .map(function(c){ return '<option value="' + esc(c) + '">'; }).join('');
+
+  var sug = cats.slice(0,6);
+  $('atajosCat').innerHTML = sug.map(function(c){
+    return '<button type="button" class="etiqueta" data-cat="' + esc(c) + '" style="cursor:pointer">' +
+             '<span class="gota" style="background:' + colorCat(c) + '"></span>' + esc(c) +
+           '</button>';
+  }).join('');
+}
+
+/* ---------- Resumen ------------------------------------------------------- */
+function pintarResumen(){
+  var lista = delPeriodo();
+  var t = totales(lista);
+
+  /* Meses del periodo */
+  var porMes = {};
+  lista.forEach(function(x){
+    var m = x.date.slice(0,7);
+    if(!porMes[m]) porMes[m] = { ing:0, gas:0 };
+    if(x.type === 'Ingreso') porMes[m].ing += x.amount; else porMes[m].gas += x.amount;
+  });
+  var meses = Object.keys(porMes).sort();
+  var nMeses = Math.max(1, meses.length);
+
+  /* KPIs */
+  var gastoMayor = null;
+  lista.forEach(function(x){ if(x.type === 'Gasto' && (!gastoMayor || x.amount > gastoMayor.amount)) gastoMayor = x; });
+  var tasa = t.ing > 0 ? (t.bal / t.ing) * 100 : 0;
+
+  $('rejillaKpi').innerHTML = '' +
+    tarjetaKpi('Balance', dineroConSigno(t.bal), t.n + ' movimientos', t.bal < 0 ? 'sale' : 'entra') +
+    tarjetaKpi('Ingresos', dinero(t.ing), 'promedio ' + dinero(t.ing/nMeses) + '/mes', 'entra') +
+    tarjetaKpi('Gastos', dinero(t.gas), 'promedio ' + dinero(t.gas/nMeses) + '/mes', 'sale') +
+    tarjetaKpi('Ahorro', (t.ing > 0 ? tasa.toFixed(1) + '%' : '—'),
+               (t.ing > 0 ? 'de cada S/ 100 que entran, guardas S/ ' + Math.max(0,tasa).toFixed(0) : 'sin ingresos en el periodo'),
+               tasa < 0 ? 'sale' : 'entra') +
+    tarjetaKpi('Mayor gasto', gastoMayor ? dinero(gastoMayor.amount) : '—',
+               gastoMayor ? gastoMayor.desc : 'ninguno', 'sale') +
+    tarjetaKpi('Meses con registro', String(meses.length),
+               meses.length ? etiquetaMes(meses[0]) + ' – ' + etiquetaMes(meses[meses.length-1]) : '—', '');
+
+  dibujarGrafico(meses, porMes);
+  pintarCategorias(lista);
+  pintarTablaMes(meses, porMes);
+}
+
+function tarjetaKpi(rotulo, valor, nota, clase){
+  return '<div class="kpi ' + clase + '">' +
+           '<div class="r">' + esc(rotulo) + '</div>' +
+           '<div class="v cifra">' + esc(valor) + '</div>' +
+           '<div class="n">' + esc(nota) + '</div>' +
+         '</div>';
+}
+
+function pintarCategorias(lista){
+  var m = {}, totalGasto = 0;
+  lista.forEach(function(x){
+    if(x.type !== 'Gasto') return;
+    var c = x.cat || 'Sin categoría';
+    m[c] = (m[c] || 0) + x.amount;
+    totalGasto += x.amount;
+  });
+  var claves = Object.keys(m).sort(function(a,b){ return m[b]-m[a]; });
+  var caja = $('barrasCategoria');
+
+  if(!claves.length){
+    caja.innerHTML = '<div class="vacio" style="padding:22px 8px"><p style="margin:0">Todavía no hay gastos en este periodo.</p></div>';
+    $('rotCategorias').textContent = '';
+    return;
+  }
+  $('rotCategorias').textContent = dinero(totalGasto) + ' en ' + claves.length + (claves.length === 1 ? ' categoría' : ' categorías');
+
+  var mayor = m[claves[0]] || 1;
+  caja.innerHTML = claves.slice(0,12).map(function(c){
+    var pct = totalGasto ? (m[c]/totalGasto*100) : 0;
+    var ancho = Math.max(2, (m[c]/mayor)*100);
+    return '<div class="barra-fila">' +
+             '<div class="arriba">' +
+               '<span class="nom">' + esc(c) + '</span>' +
+               '<span class="val cifra" style="color:var(--debe)">' + dinero(m[c]) + '</span>' +
+               '<span class="pct">' + pct.toFixed(0) + '%</span>' +
+             '</div>' +
+             '<div class="canal"><div class="relleno" style="width:' + ancho + '%; background:' + colorCat(c === 'Sin categoría' ? '' : c) + '"></div></div>' +
+           '</div>';
+  }).join('');
+}
+
+function pintarTablaMes(meses, porMes){
+  var tabla = $('tablaMes');
+  if(!meses.length){
+    tabla.innerHTML = '<tbody><tr><td style="color:var(--tinta-3); padding:18px 10px">Sin movimientos en este periodo.</td></tr></tbody>';
+    return;
+  }
+  var filas = meses.slice().reverse().map(function(m){
+    var d = porMes[m], bal = d.ing - d.gas;
+    return '<tr>' +
+             '<td>' + esc(etiquetaMes(m)) + '</td>' +
+             '<td class="der cifra entra">' + dinero(d.ing) + '</td>' +
+             '<td class="der cifra sale">' + dinero(d.gas) + '</td>' +
+             '<td class="der cifra" style="color:' + (bal < 0 ? 'var(--debe)' : 'var(--haber)') + '">' + dineroConSigno(bal) + '</td>' +
+           '</tr>';
+  }).join('');
+  tabla.innerHTML =
+    '<thead><tr><th>Mes</th><th class="der">Ingresos</th><th class="der">Gastos</th><th class="der">Balance</th></tr></thead>' +
+    '<tbody>' + filas + '</tbody>';
+}
+
+/* ==========================================================================
+   GRÁFICO
+   Dibujado a mano en SVG. Chart.js pesaba 200 KB y se descargaba de un CDN
+   para hacer seis barras; esto son cuarenta líneas y no depende de nadie.
+   ========================================================================== */
+function dibujarGrafico(meses, porMes){
+  var caja = $('graficoMes');
+  if(!meses.length){
+    caja.innerHTML = '<div class="vacio" style="padding:34px 8px"><p style="margin:0">Sin datos para dibujar.</p></div>';
+    return;
+  }
+
+  var datos = meses.slice(-14);                 /* como mucho 14 meses a la vista */
+  var W = Math.max(340, datos.length * 78 + 60);
+  var H = 250, arriba = 16, abajo = 46, izq = 54, der = 12;
+  var alto = H - arriba - abajo;
+  var ancho = W - izq - der;
+
+  var tope = 0;
+  datos.forEach(function(m){ tope = Math.max(tope, porMes[m].ing, porMes[m].gas); });
+  tope = tope || 1;
+  /* Redondeo del techo a una cifra "limpia", para que la escala se lea */
+  var mag = Math.pow(10, Math.floor(Math.log10(tope)));
+  tope = Math.ceil(tope / (mag/2)) * (mag/2);
+
+  var paso = ancho / datos.length;
+  var anchoBarra = Math.min(20, paso * 0.28);
+  var s = [];
+
+  /* Rejilla y escala */
+  for(var i=0;i<=4;i++){
+    var y = arriba + alto - (alto * i / 4);
+    var val = tope * i / 4;
+    s.push('<line x1="' + izq + '" y1="' + y.toFixed(1) + '" x2="' + (W-der) + '" y2="' + y.toFixed(1) +
+           '" stroke="var(--regla-2)" stroke-width="1"/>');
+    s.push('<text x="' + (izq-8) + '" y="' + (y+3.5).toFixed(1) + '" text-anchor="end" ' +
+           'font-size="10" fill="var(--tinta-3)" font-family="ui-monospace,monospace">' +
+           (val >= 1000 ? (val/1000).toFixed(val % 1000 ? 1 : 0) + 'k' : val.toFixed(0)) + '</text>');
+  }
+
+  /* Barras + línea de balance */
+  var puntos = [];
+  datos.forEach(function(m, k){
+    var centro = izq + paso * k + paso/2;
+    var d = porMes[m];
+    var hIng = (d.ing / tope) * alto;
+    var hGas = (d.gas / tope) * alto;
+    var bal  = d.ing - d.gas;
+
+    s.push('<rect x="' + (centro - anchoBarra - 2).toFixed(1) + '" y="' + (arriba + alto - hIng).toFixed(1) +
+           '" width="' + anchoBarra.toFixed(1) + '" height="' + Math.max(1,hIng).toFixed(1) +
+           '" rx="3" fill="var(--haber)"><title>' + esc(etiquetaMes(m)) + ' · ingresos ' + dinero(d.ing) + '</title></rect>');
+    s.push('<rect x="' + (centro + 2).toFixed(1) + '" y="' + (arriba + alto - hGas).toFixed(1) +
+           '" width="' + anchoBarra.toFixed(1) + '" height="' + Math.max(1,hGas).toFixed(1) +
+           '" rx="3" fill="var(--debe)"><title>' + esc(etiquetaMes(m)) + ' · gastos ' + dinero(d.gas) + '</title></rect>');
+
+    puntos.push([centro, arriba + alto - Math.max(0, Math.min(alto, (bal / tope) * alto))]);
+
+    var p = m.split('-');
+    var nom = new Date(Number(p[0]), Number(p[1])-1, 1)
+      .toLocaleDateString('es-PE', { month:'short' }).replace('.','');
+    s.push('<text x="' + centro.toFixed(1) + '" y="' + (H - abajo + 17) +
+           '" text-anchor="middle" font-size="10.5" fill="var(--tinta-3)">' + esc(nom) + '</text>');
+    s.push('<text x="' + centro.toFixed(1) + '" y="' + (H - abajo + 30) +
+           '" text-anchor="middle" font-size="9.5" fill="var(--tinta-3)" opacity=".75">' + p[0].slice(2) + '</text>');
+  });
+
+  if(puntos.length > 1){
+    s.push('<polyline points="' + puntos.map(function(p){ return p[0].toFixed(1)+','+p[1].toFixed(1); }).join(' ') +
+           '" fill="none" stroke="var(--verde)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>');
+  }
+  puntos.forEach(function(p){
+    s.push('<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="3" fill="var(--hoja)" stroke="var(--verde)" stroke-width="2"/>');
+  });
+
+  /* Eje base */
+  s.push('<line x1="' + izq + '" y1="' + (arriba+alto) + '" x2="' + (W-der) + '" y2="' + (arriba+alto) +
+         '" stroke="var(--regla)" stroke-width="1.5"/>');
+
+  caja.innerHTML = '<svg class="gr" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
+    'aria-label="Ingresos y gastos por mes">' + s.join('') + '</svg>';
+}
+
+/* ==========================================================================
+   EXCEL DE VERDAD (.xlsx)
+   Antes esto era un CSV con el nombre cambiado: sin formatos, sin columnas
+   anchas, sin totales y sin fórmulas. Un .xlsx es un ZIP con unos XML
+   dentro, así que se puede escribir a mano. Eso es lo que hay aquí: el ZIP
+   (sin comprimir, con su CRC-32) y el OOXML mínimo que Excel, LibreOffice y
+   Google Sheets abren sin rechistar.
+
+   Tres hojas: Movimientos (con fórmulas de total), Resumen por mes y
+   Categorías. Cabeceras fijas, anchos pensados y moneda con dos decimales.
+   ========================================================================== */
+
+/* ---- CRC-32, que es lo único que un ZIP exige de verdad ---- */
+var tablaCRC = (function(){
+  var t = new Uint32Array(256);
+  for(var n=0;n<256;n++){
+    var c = n;
+    for(var k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(bytes){
+  var c = 0xFFFFFFFF;
+  for(var i=0;i<bytes.length;i++) c = tablaCRC[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+function aBytes(texto){
+  return new TextEncoder().encode(texto);
+}
+
+/* ---- ZIP mínimo, método 0 (guardado, sin comprimir) ---- */
+function crearZip(archivos){
+  var trozos = [], central = [], desplazamiento = 0;
+
+  function u16(n){ return [n & 255, (n>>>8) & 255]; }
+  function u32(n){ return [n & 255, (n>>>8) & 255, (n>>>16) & 255, (n>>>24) & 255]; }
+
+  archivos.forEach(function(f){
+    var nombre = aBytes(f.nombre);
+    var datos  = aBytes(f.datos);
+    var crc    = crc32(datos);
+
+    var local = [].concat(
+      u32(0x04034b50), u16(20), u16(0), u16(0), u16(0), u16(0),
+      u32(crc), u32(datos.length), u32(datos.length),
+      u16(nombre.length), u16(0)
+    );
+    trozos.push(new Uint8Array(local), nombre, datos);
+
+    central.push([].concat(
+      u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
+      u32(crc), u32(datos.length), u32(datos.length),
+      u16(nombre.length), u16(0), u16(0), u16(0), u16(0), u32(0),
+      u32(desplazamiento)
+    ), nombre);
+
+    desplazamiento += local.length + nombre.length + datos.length;
+  });
+
+  var dirTrozos = [], dirLargo = 0;
+  for(var i=0;i<central.length;i+=2){
+    var cab = new Uint8Array(central[i]), nom = central[i+1];
+    dirTrozos.push(cab, nom);
+    dirLargo += cab.length + nom.length;
+  }
+  var n = archivos.length;
+  dirTrozos.push(new Uint8Array([].concat(
+    u32(0x06054b50), u16(0), u16(0), u16(n), u16(n),
+    u32(dirLargo), u32(desplazamiento), u16(0)
+  )));
+
+  var todo = trozos.concat(dirTrozos);
+  var total = todo.reduce(function(a,b){ return a + b.length; }, 0);
+  var salida = new Uint8Array(total), p = 0;
+  todo.forEach(function(b){ salida.set(b, p); p += b.length; });
+  return new Blob([salida], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+
+/* ---- Piezas de OOXML ---- */
+function xmlEsc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&apos;')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');
+}
+function letraCol(i){
+  var s = '';
+  i = i + 1;
+  while(i > 0){ var r = (i - 1) % 26; s = String.fromCharCode(65 + r) + s; i = Math.floor((i - 1) / 26); }
+  return s;
+}
+/* c = { v:valor, t:'n'|'s'|'d'|'f', s:estilo } */
+function celdaXML(c, fila, col){
+  var ref = letraCol(col) + fila;
+  var est = c.s ? ' s="' + c.s + '"' : '';
+  if(c.t === 'f') return '<c r="' + ref + '"' + est + '><f>' + xmlEsc(c.v) + '</f></c>';
+  if(c.t === 'n' || c.t === 'd') return '<c r="' + ref + '"' + est + '><v>' + (num(c.v)) + '</v></c>';
+  if(c.v === '' || c.v == null) return '<c r="' + ref + '"' + est + '/>';
+  return '<c r="' + ref + '" t="inlineStr"' + est + '><is><t xml:space="preserve">' + xmlEsc(c.v) + '</t></is></c>';
+}
+/* Excel cuenta los días desde 1899-12-30 */
+function fechaSerie(iso){
+  var d = aFecha(iso);
+  return Math.round((Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) - Date.UTC(1899,11,30)) / 86400000);
+}
+
+function hojaXML(hoja){
+  var filas = hoja.filas.map(function(fila, i){
+    var celdas = fila.map(function(c, j){ return celdaXML(c, i+1, j); }).join('');
+    return '<row r="' + (i+1) + '"' + (i === 0 ? ' ht="22" customHeight="1"' : '') + '>' + celdas + '</row>';
+  }).join('');
+
+  var cols = (hoja.anchos || []).map(function(w, i){
+    return '<col min="' + (i+1) + '" max="' + (i+1) + '" width="' + w + '" customWidth="1"/>';
+  }).join('');
+
+  var ultima = letraCol(Math.max(0, (hoja.anchos || []).length - 1)) + Math.max(1, hoja.filas.length);
+
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+      '<sheetPr><outlinePr summaryBelow="1" summaryRight="1"/></sheetPr>' +
+      '<dimension ref="A1:' + ultima + '"/>' +
+      '<sheetViews><sheetView' + (hoja.activa ? ' tabSelected="1"' : '') + ' workbookViewId="0">' +
+        '<pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/>' +
+      '</sheetView></sheetViews>' +
+      '<sheetFormatPr defaultRowHeight="15"/>' +
+      (cols ? '<cols>' + cols + '</cols>' : '') +
+      '<sheetData>' + filas + '</sheetData>' +
+      '<autoFilter ref="A1:' + ultima + '"/>' +
+    '</worksheet>';
+}
+
+/* Estilos: 0 normal · 1 cabecera · 2 moneda · 3 fecha · 4 total · 5 título */
+var ESTILOS_XML = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">' +
+  '<numFmts count="2">' +
+    '<numFmt numFmtId="164" formatCode="&quot;S/&quot;\\ #,##0.00"/>' +
+    '<numFmt numFmtId="165" formatCode="dd/mm/yyyy"/>' +
+  '</numFmts>' +
+  '<fonts count="4">' +
+    '<font><sz val="11"/><color theme="1"/><name val="Calibri"/></font>' +
+    '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>' +
+    '<font><b/><sz val="11"/><color rgb="FF1F4B3F"/><name val="Calibri"/></font>' +
+    '<font><b/><sz val="14"/><color rgb="FF1F4B3F"/><name val="Calibri"/></font>' +
+  '</fonts>' +
+  '<fills count="4">' +
+    '<fill><patternFill patternType="none"/></fill>' +
+    '<fill><patternFill patternType="gray125"/></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FF1F4B3F"/><bgColor indexed="64"/></patternFill></fill>' +
+    '<fill><patternFill patternType="solid"><fgColor rgb="FFEAF1EE"/><bgColor indexed="64"/></patternFill></fill>' +
+  '</fills>' +
+  '<borders count="2">' +
+    '<border><left/><right/><top/><bottom/><diagonal/></border>' +
+    '<border><left/><right/><top style="thin"><color rgb="FF1F4B3F"/></top><bottom style="double"><color rgb="FF1F4B3F"/></bottom><diagonal/></border>' +
+  '</borders>' +
+  '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+  '<cellXfs count="6">' +
+    '<xf numFmtId="0"   fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+    '<xf numFmtId="0"   fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>' +
+    '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+    '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>' +
+    '<xf numFmtId="164" fontId="2" fillId="3" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>' +
+    '<xf numFmtId="0"   fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>' +
+  '</cellXfs>' +
+  '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>' +
+'</styleSheet>';
+
+function construirXlsx(hojas){
+  var libro = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" ' +
+    'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>' +
+    hojas.map(function(h,i){
+      return '<sheet name="' + xmlEsc(h.nombre) + '" sheetId="' + (i+1) + '" r:id="rId' + (i+1) + '"/>';
+    }).join('') + '</sheets></workbook>';
+
+  var relLibro = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    hojas.map(function(h,i){
+      return '<Relationship Id="rId' + (i+1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet' + (i+1) + '.xml"/>';
+    }).join('') +
+    '<Relationship Id="rId' + (hojas.length+1) + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+    '</Relationships>';
+
+  var tipos = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/>' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+    hojas.map(function(h,i){
+      return '<Override PartName="/xl/worksheets/sheet' + (i+1) + '.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>';
+    }).join('') +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+    '</Types>';
+
+  var relRaiz = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+    '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>' +
+    '</Relationships>';
+
+  var archivos = [
+    { nombre:'[Content_Types].xml', datos:tipos },
+    { nombre:'_rels/.rels',         datos:relRaiz },
+    { nombre:'xl/workbook.xml',     datos:libro },
+    { nombre:'xl/_rels/workbook.xml.rels', datos:relLibro },
+    { nombre:'xl/styles.xml',       datos:ESTILOS_XML }
+  ];
+  hojas.forEach(function(h,i){
+    archivos.push({ nombre:'xl/worksheets/sheet' + (i+1) + '.xml', datos:hojaXML(h) });
+  });
+  return crearZip(archivos);
+}
+
+function exportarExcel(){
+  var lista = delPeriodo().slice().sort(function(a,b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+  if(!lista.length){ aviso('Nada que exportar', 'No hay movimientos en el periodo elegido.'); return; }
+
+  var lim = limitesPeriodo();
+  var T = { n:'n' }, S = { n:'s' };
+
+  /* --- Hoja 1: movimientos, con fórmulas para que sumen solas --- */
+  var f1 = [[
+    { v:'Fecha', s:1 }, { v:'Descripción', s:1 }, { v:'Categoría', s:1 },
+    { v:'Tipo', s:1 }, { v:'Ingreso', s:1 }, { v:'Gasto', s:1 }, { v:'Acumulado', s:1 }
+  ]];
+  var acumulado = 0;
+  lista.forEach(function(t, i){
+    var esIng = t.type === 'Ingreso';
+    acumulado += esIng ? t.amount : -t.amount;
+    f1.push([
+      { v:fechaSerie(t.date), t:'n', s:3 },
+      { v:t.desc },
+      { v:t.cat || '' },
+      { v:t.type },
+      { v: esIng ? t.amount : '', t: esIng ? 'n' : 's', s:2 },
+      { v: esIng ? '' : t.amount, t: esIng ? 's' : 'n', s:2 },
+      { v:acumulado, t:'n', s:2 }
+    ]);
+  });
+  var ult = lista.length + 1;
+  f1.push([
+    { v:'TOTAL', s:4 }, { v:'', s:4 }, { v:'', s:4 }, { v:'', s:4 },
+    { v:'SUM(E2:E' + ult + ')', t:'f', s:4 },
+    { v:'SUM(F2:F' + ult + ')', t:'f', s:4 },
+    { v:'E' + (ult+1) + '-F' + (ult+1), t:'f', s:4 }
+  ]);
+
+  /* --- Hoja 2: resumen por mes --- */
+  var porMes = {};
+  lista.forEach(function(t){
+    var m = t.date.slice(0,7);
+    if(!porMes[m]) porMes[m] = { ing:0, gas:0, n:0 };
+    porMes[m].n++;
+    if(t.type === 'Ingreso') porMes[m].ing += t.amount; else porMes[m].gas += t.amount;
+  });
+  var meses = Object.keys(porMes).sort();
+  var f2 = [[
+    { v:'Mes', s:1 }, { v:'Ingresos', s:1 }, { v:'Gastos', s:1 },
+    { v:'Balance', s:1 }, { v:'Movimientos', s:1 }, { v:'% ahorro', s:1 }
+  ]];
+  meses.forEach(function(m){
+    var d = porMes[m];
+    f2.push([
+      { v:etiquetaMes(m) },
+      { v:d.ing, t:'n', s:2 },
+      { v:d.gas, t:'n', s:2 },
+      { v:d.ing - d.gas, t:'n', s:2 },
+      { v:d.n, t:'n' },
+      { v: d.ing > 0 ? Math.round((d.ing-d.gas)/d.ing*1000)/10 : 0, t:'n' }
+    ]);
+  });
+  var u2 = meses.length + 1;
+  if(meses.length){
+    f2.push([
+      { v:'TOTAL', s:4 },
+      { v:'SUM(B2:B' + u2 + ')', t:'f', s:4 },
+      { v:'SUM(C2:C' + u2 + ')', t:'f', s:4 },
+      { v:'SUM(D2:D' + u2 + ')', t:'f', s:4 },
+      { v:'SUM(E2:E' + u2 + ')', t:'f', s:4 },
+      { v:'', s:4 }
+    ]);
+  }
+
+  /* --- Hoja 3: categorías de gasto --- */
+  var porCat = {}, totalGasto = 0;
+  lista.forEach(function(t){
+    if(t.type !== 'Gasto') return;
+    var c = t.cat || 'Sin categoría';
+    if(!porCat[c]) porCat[c] = { total:0, n:0 };
+    porCat[c].total += t.amount; porCat[c].n++;
+    totalGasto += t.amount;
+  });
+  var cats = Object.keys(porCat).sort(function(a,b){ return porCat[b].total - porCat[a].total; });
+  var f3 = [[
+    { v:'Categoría', s:1 }, { v:'Gastado', s:1 }, { v:'Movimientos', s:1 },
+    { v:'Promedio', s:1 }, { v:'% del gasto', s:1 }
+  ]];
+  cats.forEach(function(c){
+    var d = porCat[c];
+    f3.push([
+      { v:c },
+      { v:d.total, t:'n', s:2 },
+      { v:d.n, t:'n' },
+      { v:Math.round(d.total/d.n*100)/100, t:'n', s:2 },
+      { v: totalGasto ? Math.round(d.total/totalGasto*1000)/10 : 0, t:'n' }
+    ]);
+  });
+  var u3 = cats.length + 1;
+  if(cats.length){
+    f3.push([
+      { v:'TOTAL', s:4 },
+      { v:'SUM(B2:B' + u3 + ')', t:'f', s:4 },
+      { v:'SUM(C2:C' + u3 + ')', t:'f', s:4 },
+      { v:'', s:4 }, { v:'', s:4 }
+    ]);
+  }
+
+  var blob = construirXlsx([
+    { nombre:'Movimientos', filas:f1, anchos:[12,42,20,11,14,14,15], activa:true },
+    { nombre:'Resumen por mes', filas:f2, anchos:[22,15,15,15,14,12] },
+    { nombre:'Categorías', filas:f3, anchos:[26,15,14,14,13] }
+  ]);
+
+  bajarArchivo(blob, 'libro_de_cuentas_' + hoyISO() + '.xlsx');
+  aviso('Excel generado', lista.length + ' movimientos en tres hojas · ' + lim.nombre);
+}
+
+/* ==========================================================================
+   PDF VECTORIAL
+   Antes se hacía una foto de la pantalla con html2canvas y se pegaba dentro
+   de un PDF: texto borroso, imposible de seleccionar o buscar, archivo
+   pesado y una sola página por mucho que crecieran los movimientos. Y la
+   librería se descargaba de un CDN.
+
+   Esto escribe el PDF byte a byte. Texto real, nítido a cualquier zoom,
+   seleccionable y buscable; pesa unas decenas de KB; y pagina solo, con
+   cabecera y numeración en todas las hojas.
+   ========================================================================== */
+
+/* --- Anchos de Helvetica (unidades de 1/1000 em) para poder centrar y
+       alinear a la derecha de verdad, y para cortar textos largos. ------- */
+var ANCHOS_HELV = (function(){
+  var w = {}, i;
+  var def = 556;
+  var pares = {
+    ' ':278,'!':278,'"':355,'#':556,'$':556,'%':889,'&':667,"'":191,'(':333,')':333,'*':389,
+    '+':584,',':278,'-':333,'.':278,'/':278,':':278,';':278,'<':584,'=':584,'>':584,'?':556,
+    '@':1015,'[':278,'\\':278,']':278,'^':469,'_':556,'`':333,'{':334,'|':260,'}':334,'~':584,
+    'a':556,'b':556,'c':500,'d':556,'e':556,'f':278,'g':556,'h':556,'i':222,'j':222,'k':500,
+    'l':222,'m':833,'n':556,'o':556,'p':556,'q':556,'r':333,'s':500,'t':278,'u':556,'v':500,
+    'w':722,'x':500,'y':500,'z':500,
+    'A':667,'B':667,'C':722,'D':722,'E':667,'F':611,'G':778,'H':722,'I':278,'J':500,'K':667,
+    'L':556,'M':833,'N':722,'O':778,'P':667,'Q':778,'R':722,'S':667,'T':611,'U':722,'V':667,
+    'W':944,'X':667,'Y':667,'Z':611
+  };
+  for(i=48;i<=57;i++) pares[String.fromCharCode(i)] = 556;   /* dígitos */
+  for(var k in pares) w[k] = pares[k];
+  w.__def = def;
+  return w;
+})();
+
+function anchoTexto(txt, tam, negrita){
+  var t = String(txt == null ? '' : txt).replace(/[\u2212\u2013\u2014]/g,'-').replace(/[\u00A0\u2009\u202F]/g,' ');
+  var total = 0;
+  for(var i=0;i<t.length;i++){
+    var c = t.charAt(i);
+    var a = Object.prototype.hasOwnProperty.call(ANCHOS_HELV, c) ? ANCHOS_HELV[c] : ANCHOS_HELV.__def;
+    total += a;
+  }
+  /* La negrita de Helvetica es un pelín más ancha */
+  return total / 1000 * tam * (negrita ? 1.055 : 1);
+}
+function recortar(txt, tam, maxAncho, negrita){
+  var t = String(txt == null ? '' : txt);
+  if(anchoTexto(t, tam, negrita) <= maxAncho) return t;
+  while(t.length > 1 && anchoTexto(t + '…', tam, negrita) > maxAncho) t = t.slice(0, -1);
+  return t + '…';
+}
+
+/* WinAnsi (CP1252): así salen bien las tildes y la eñe. */
+var WINANSI = { '€':128,'‚':130,'ƒ':131,'„':132,'…':133,'†':134,
+  '‡':135,'ˆ':136,'‰':137,'Š':138,'‹':139,'Œ':140,'Ž':142,
+  '‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151,
+  '˜':152,'™':153,'š':154,'›':155,'œ':156,'ž':158,'Ÿ':159 };
+
+/* Signos tipograficos que no existen en WinAnsi pero si tienen un equivalente
+   razonable. Sin esto, el menos de "- S/ 418.00" salia como una interrogacion. */
+var EQUIVALENTES = { '\u2212':'-', '\u2013':'-', '\u2014':'-', '\u2018':"'", '\u2019':"'",
+                     '\u201C':'"', '\u201D':'"', '\u00A0':' ', '\u2009':' ', '\u202F':' ' };
+
+function textoPDF(s){
+  var t = String(s == null ? '' : s), fuera = '';
+  for(var i=0;i<t.length;i++){
+    var ch = t.charAt(i);
+    if(Object.prototype.hasOwnProperty.call(EQUIVALENTES, ch)) ch = EQUIVALENTES[ch];
+    var c = ch.charCodeAt(0);
+    if(Object.prototype.hasOwnProperty.call(WINANSI, ch)) c = WINANSI[ch];
+    else if(c > 255) c = 63;                       /* '?' solo para lo verdaderamente raro */
+    if(c === 40 || c === 41 || c === 92) fuera += '\\';   /* ( ) \ */
+    fuera += String.fromCharCode(c);
+  }
+  return fuera;
+}
+
+/* ---- Constructor de páginas ---- */
+function LienzoPDF(){
+  this.paginas = [];
+  this.actual = null;
+  this.nueva();
+}
+LienzoPDF.prototype.nueva = function(){
+  this.actual = [];
+  this.paginas.push(this.actual);
+  return this.actual;
+};
+LienzoPDF.prototype.op = function(s){ this.actual.push(s); };
+LienzoPDF.prototype.color = function(hex, relleno){
+  var r = parseInt(hex.slice(1,3),16)/255, g = parseInt(hex.slice(3,5),16)/255, b = parseInt(hex.slice(5,7),16)/255;
+  this.op(r.toFixed(3)+' '+g.toFixed(3)+' '+b.toFixed(3)+' '+(relleno ? 'rg' : 'RG'));
+};
+LienzoPDF.prototype.rect = function(x,y,w,h,hex){
+  this.color(hex, true);
+  this.op(x.toFixed(2)+' '+y.toFixed(2)+' '+w.toFixed(2)+' '+h.toFixed(2)+' re f');
+};
+LienzoPDF.prototype.linea = function(x1,y1,x2,y2,hex,grosor){
+  this.color(hex, false);
+  this.op((grosor||0.5).toFixed(2)+' w '+x1.toFixed(2)+' '+y1.toFixed(2)+' m '+x2.toFixed(2)+' '+y2.toFixed(2)+' l S');
+};
+LienzoPDF.prototype.texto = function(txt,x,y,tam,hex,negrita,alineacion,anchoDisp){
+  var t = String(txt == null ? '' : txt);
+  var xx = x;
+  if(alineacion === 'der')   xx = x - anchoTexto(t,tam,negrita);
+  if(alineacion === 'centro')xx = x - anchoTexto(t,tam,negrita)/2;
+  this.color(hex || '#000000', true);
+  this.op('BT /'+(negrita ? 'F2' : 'F1')+' '+tam+' Tf '+xx.toFixed(2)+' '+y.toFixed(2)+' Td ('+textoPDF(t)+') Tj ET');
+};
+
+function ensamblarPDF(lienzo, ancho, alto){
+  var objetos = [];
+  function agregar(s){ objetos.push(s); return objetos.length; }
+
+  var nCat = agregar('');          /* 1 catálogo, se rellena luego */
+  var nPags = agregar('');         /* 2 árbol de páginas */
+  var nF1 = agregar('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  var nF2 = agregar('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+
+  var idsPag = [];
+  lienzo.paginas.forEach(function(ops){
+    var flujo = ops.join('\n');
+    var nCont = agregar('<< /Length ' + flujo.length + ' >>\nstream\n' + flujo + '\nendstream');
+    var nPag = agregar('<< /Type /Page /Parent ' + nPags + ' 0 R /MediaBox [0 0 ' + ancho + ' ' + alto + '] ' +
+      '/Resources << /Font << /F1 ' + nF1 + ' 0 R /F2 ' + nF2 + ' 0 R >> >> /Contents ' + nCont + ' 0 R >>');
+    idsPag.push(nPag);
+  });
+
+  objetos[nCat-1]  = '<< /Type /Catalog /Pages ' + nPags + ' 0 R >>';
+  objetos[nPags-1] = '<< /Type /Pages /Count ' + idsPag.length + ' /Kids [' +
+                     idsPag.map(function(i){ return i + ' 0 R'; }).join(' ') + '] >>';
+
+  var salida = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+  var posiciones = [];
+  objetos.forEach(function(cuerpo, i){
+    posiciones.push(salida.length);
+    salida += (i+1) + ' 0 obj\n' + cuerpo + '\nendobj\n';
+  });
+  var inicioXref = salida.length;
+  salida += 'xref\n0 ' + (objetos.length+1) + '\n0000000000 65535 f \n';
+  posiciones.forEach(function(p){ salida += String(p).padStart(10,'0') + ' 00000 n \n'; });
+  salida += 'trailer\n<< /Size ' + (objetos.length+1) + ' /Root ' + nCat + ' 0 R >>\nstartxref\n' + inicioXref + '\n%%EOF';
+
+  var bytes = new Uint8Array(salida.length);
+  for(var i=0;i<salida.length;i++) bytes[i] = salida.charCodeAt(i) & 0xFF;
+  return new Blob([bytes], { type:'application/pdf' });
+}
+
+/* ---- El informe en sí ---------------------------------------------------- */
+function exportarPDF(){
+  var lista = delPeriodo().slice().sort(function(a,b){ return a.date < b.date ? 1 : (a.date > b.date ? -1 : 0); });
+  if(!lista.length){ aviso('Nada que exportar', 'No hay movimientos en el periodo elegido.'); return; }
+
+  var A4 = { w:595.28, h:841.89 };
+  var M  = 42;                                  /* margen */
+  var anchoUtil = A4.w - M*2;
+  var C = { tinta:'#14181A', suave:'#5B6570', tenue:'#8A939C', regla:'#E4E1D8',
+            verde:'#1F4B3F', haber:'#12805C', debe:'#B3261E', piso:'#F6F5F1' };
+
+  var lim = limitesPeriodo();
+  var t = totales(lista);
+  var pdf = new LienzoPDF();
+  var y = 0;
+  var numeroPagina = 0;
+
+  function cabecera(primera){
+    numeroPagina++;
+    /* Banda superior */
+    pdf.rect(0, A4.h - 92, A4.w, 92, C.verde);
+    pdf.texto('LIBRO DE CUENTAS', M, A4.h - 44, 17, '#FFFFFF', true);
+    pdf.texto('Informe de ingresos y gastos', M, A4.h - 61, 9.5, '#C9DAD3', false);
+    var sello = new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' });
+    pdf.texto('Generado el ' + sello, A4.w - M, A4.h - 44, 8.5, '#C9DAD3', false, 'der');
+    pdf.texto(lim.nombre, A4.w - M, A4.h - 58, 9.5, '#FFFFFF', true, 'der');
+    y = A4.h - 92 - (primera ? 26 : 22);
+  }
+
+  function pie(){
+    pdf.linea(M, 42, A4.w - M, 42, C.regla, 0.6);
+    pdf.texto('Libro de Cuentas', M, 30, 7.5, C.tenue, false);
+    pdf.texto('Página ' + numeroPagina, A4.w - M, 30, 7.5, C.tenue, false, 'der');
+  }
+
+  function espacio(alto){
+    if(y - alto < 62){ pie(); pdf.nueva(); cabecera(false); return true; }
+    return false;
+  }
+
+  cabecera(true);
+
+  /* ---- Tres cajas con las cifras que importan ---- */
+  var anchoCaja = (anchoUtil - 16) / 3;
+  var altoCaja = 56;
+  var cajas = [
+    { r:'INGRESOS', v:dinero(t.ing), c:C.haber },
+    { r:'GASTOS',   v:dinero(t.gas), c:C.debe },
+    { r:'BALANCE',  v:dineroConSigno(t.bal), c: t.bal < 0 ? C.debe : C.verde }
+  ];
+  cajas.forEach(function(c, i){
+    var x = M + i * (anchoCaja + 8);
+    pdf.rect(x, y - altoCaja, anchoCaja, altoCaja, C.piso);
+    pdf.rect(x, y - altoCaja, 2.5, altoCaja, c.c);
+    pdf.texto(c.r, x + 12, y - 19, 7.5, C.tenue, true);
+    pdf.texto(c.v, x + 12, y - 40, 14, c.c, true);
+  });
+  y -= altoCaja + 20;
+
+  pdf.texto(t.n + (t.n === 1 ? ' movimiento' : ' movimientos') +
+            '  ·  del ' + fechaCorta(lista[lista.length-1].date) + ' al ' + fechaCorta(lista[0].date),
+            M, y, 8.5, C.suave, false);
+  y -= 22;
+
+  /* ---- Resumen por mes ---- */
+  var porMes = {};
+  lista.forEach(function(x){
+    var m = x.date.slice(0,7);
+    if(!porMes[m]) porMes[m] = { ing:0, gas:0 };
+    if(x.type === 'Ingreso') porMes[m].ing += x.amount; else porMes[m].gas += x.amount;
+  });
+  var meses = Object.keys(porMes).sort();
+
+  if(meses.length > 1){
+    espacio(40);
+    pdf.texto('RESUMEN POR MES', M, y, 9, C.verde, true);
+    y -= 6; pdf.linea(M, y, A4.w - M, y, C.verde, 1); y -= 16;
+
+    var tope = 1;
+    meses.forEach(function(m){ tope = Math.max(tope, porMes[m].ing, porMes[m].gas); });
+    var anchoBarra = anchoUtil - 210;
+
+    meses.slice().reverse().forEach(function(m){
+      if(espacio(34)){ /* la cabecera ya reposicionó y */ }
+      var d = porMes[m], bal = d.ing - d.gas;
+      pdf.texto(etiquetaMes(m), M, y, 9, C.tinta, true);
+      pdf.texto(dineroConSigno(bal), A4.w - M, y, 9, bal < 0 ? C.debe : C.haber, true, 'der');
+      y -= 11;
+      /* dos barritas */
+      var wIng = Math.max(1, (d.ing/tope) * anchoBarra);
+      var wGas = Math.max(1, (d.gas/tope) * anchoBarra);
+      pdf.texto('Ingresos', M, y - 1, 7, C.tenue, false);
+      pdf.rect(M + 46, y - 4, anchoBarra, 5, '#EFEDE6');
+      pdf.rect(M + 46, y - 4, wIng, 5, C.haber);
+      pdf.texto(dinero(d.ing), A4.w - M, y - 1, 7.5, C.suave, false, 'der');
+      y -= 10;
+      pdf.texto('Gastos', M, y - 1, 7, C.tenue, false);
+      pdf.rect(M + 46, y - 4, anchoBarra, 5, '#EFEDE6');
+      pdf.rect(M + 46, y - 4, wGas, 5, C.debe);
+      pdf.texto(dinero(d.gas), A4.w - M, y - 1, 7.5, C.suave, false, 'der');
+      y -= 16;
+    });
+    y -= 4;
+  }
+
+  /* ---- Gasto por categoría ---- */
+  var porCat = {}, totalGasto = 0;
+  lista.forEach(function(x){
+    if(x.type !== 'Gasto') return;
+    var c = x.cat || 'Sin categoría';
+    porCat[c] = (porCat[c] || 0) + x.amount;
+    totalGasto += x.amount;
+  });
+  var cats = Object.keys(porCat).sort(function(a,b){ return porCat[b] - porCat[a]; });
+
+  if(cats.length){
+    espacio(46);
+    pdf.texto('EN QUÉ SE VA EL DINERO', M, y, 9, C.verde, true);
+    y -= 6; pdf.linea(M, y, A4.w - M, y, C.verde, 1); y -= 16;
+
+    var mayor = porCat[cats[0]] || 1;
+    var anchoB2 = anchoUtil - 230;
+    cats.slice(0,14).forEach(function(c){
+      espacio(18);
+      var pct = totalGasto ? (porCat[c]/totalGasto*100) : 0;
+      pdf.texto(recortar(c, 8.5, 120, false), M, y, 8.5, C.tinta, false);
+      pdf.rect(M + 128, y - 2, anchoB2, 6, '#EFEDE6');
+      pdf.rect(M + 128, y - 2, Math.max(1,(porCat[c]/mayor)*anchoB2), 6, C.debe);
+      pdf.texto(pct.toFixed(0) + '%', M + 128 + anchoB2 + 32, y, 7.5, C.tenue, false, 'der');
+      pdf.texto(dinero(porCat[c]), A4.w - M, y, 8.5, C.tinta, true, 'der');
+      y -= 15;
+    });
+    y -= 6;
+  }
+
+  /* ---- Detalle: todas las líneas ---- */
+  espacio(50);
+  pdf.texto('DETALLE DE MOVIMIENTOS', M, y, 9, C.verde, true);
+  y -= 6; pdf.linea(M, y, A4.w - M, y, C.verde, 1); y -= 4;
+
+  var cols = { fecha:M, desc:M+64, cat:A4.w-M-206, monto:A4.w-M };
+  function cabeceraTabla(){
+    pdf.rect(M, y - 15, anchoUtil, 15, C.piso);
+    pdf.texto('FECHA', cols.fecha + 4, y - 10.5, 7, C.tenue, true);
+    pdf.texto('DESCRIPCIÓN', cols.desc, y - 10.5, 7, C.tenue, true);
+    pdf.texto('CATEGORÍA', cols.cat, y - 10.5, 7, C.tenue, true);
+    pdf.texto('MONTO', cols.monto - 4, y - 10.5, 7, C.tenue, true, 'der');
+    y -= 19;
+  }
+  cabeceraTabla();
+
+  lista.forEach(function(tx, i){
+    if(y - 15 < 62){ pie(); pdf.nueva(); cabecera(false); cabeceraTabla(); }
+    if(i % 2 === 0) pdf.rect(M, y - 11, anchoUtil, 14, '#FAFAF7');
+    var esIng = tx.type === 'Ingreso';
+    pdf.texto(fechaCorta(tx.date), cols.fecha + 4, y - 7, 7.5, C.suave, false);
+    pdf.texto(recortar(tx.desc, 8.5, cols.cat - cols.desc - 10, false), cols.desc, y - 7, 8.5, C.tinta, false);
+    pdf.texto(recortar(tx.cat || '—', 7.5, 96, false), cols.cat, y - 7, 7.5, C.tenue, false);
+    pdf.texto((esIng ? '+ ' : '- ') + dinero(tx.amount), cols.monto - 4, y - 7, 8.5,
+              esIng ? C.haber : C.debe, true, 'der');
+    y -= 14;
+  });
+
+  /* Cierre de la tabla */
+  if(y - 26 < 62){ pie(); pdf.nueva(); cabecera(false); }
+  y -= 3;
+  pdf.linea(M, y, A4.w - M, y, C.verde, 1.2);
+  y -= 15;
+  pdf.texto('TOTAL DEL PERIODO', M + 4, y, 9, C.verde, true);
+  pdf.texto(dineroConSigno(t.bal), A4.w - M - 4, y, 11, t.bal < 0 ? C.debe : C.verde, true, 'der');
+  y -= 8;
+  pdf.linea(M, y, A4.w - M, y, C.verde, 1.2);
+
+  pie();
+
+  var blob = ensamblarPDF(pdf, A4.w, A4.h);
+  bajarArchivo(blob, 'libro_de_cuentas_' + hoyISO() + '.pdf');
+  aviso('Informe generado', numeroPagina + (numeroPagina === 1 ? ' página' : ' páginas') +
+        ' · texto nítido y seleccionable');
+}
+
+/* ---- CSV, que sigue siendo útil para pegar en cualquier sitio ---- */
+function exportarCSV(){
+  var lista = delPeriodo().slice().sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+  if(!lista.length){ aviso('Nada que exportar', 'No hay movimientos en el periodo elegido.'); return; }
+  function campo(v){ return '"' + String(v == null ? '' : v).replace(/"/g,'""') + '"'; }
+  var csv = '﻿' + ['Fecha','Descripcion','Categoria','Tipo','Ingreso','Gasto'].join(',') + '\n';
+  lista.forEach(function(t){
+    var esIng = t.type === 'Ingreso';
+    csv += [campo(t.date), campo(t.desc), campo(t.cat), campo(t.type),
+            esIng ? t.amount.toFixed(2) : '', esIng ? '' : t.amount.toFixed(2)].join(',') + '\n';
+  });
+  bajarArchivo(new Blob([csv], { type:'text/csv;charset=utf-8;' }), 'libro_de_cuentas_' + hoyISO() + '.csv');
+  aviso('CSV exportado', lista.length + ' movimientos.');
+}
+
+function bajarArchivo(blob, nombre){
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+/* ==========================================================================
+   NUBE · jsonbin.io con X-Master-Key
+   Se mantiene EXACTAMENTE el mismo servicio, la misma cabecera, la misma
+   clave de configuración y el mismo formato en la base (un array pelado de
+   movimientos). Un libro de la versión anterior se conecta a esta y al
+   revés, sin convertir nada.
+   ========================================================================== */
+function configNube(){
+  try{ return JSON.parse(localStorage.getItem(CLAVE_NUBE) || 'null'); }catch(e){ return null; }
+}
+function ponerConfigNube(cfg){
+  try{ localStorage.setItem(CLAVE_NUBE, JSON.stringify(cfg)); }catch(e){}
+}
+function hayNube(){
+  var c = configNube();
+  return !!(c && c.key && c.bin);
+}
+function estadoNube(cual){
+  var p = $('pastillaNube'), txt = $('pastillaNubeTexto');
+  if(!p) return;
+  p.dataset.estado = cual;
+  txt.textContent = cual === 'ok'   ? 'Sincronizado'
+                  : cual === 'busy' ? 'Guardando…'
+                  : cual === 'err'  ? 'Sin conexión'
+                  : 'Sin nube';
+}
+
+function subirANube(){
+  if(!hayNube()){ estadoNube('off'); return; }
+  var cfg = configNube();
+  var json = JSON.stringify(estado.movimientos);
+  ultimoJSONSubido = json;
+  estadoNube('busy');
+  guardandoLocal = true;
+  fetch(JSONBIN + '/' + cfg.bin, {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json', 'X-Master-Key':cfg.key },
+    body: json
+  }).then(function(r){
+    guardandoLocal = false;
+    estadoNube(r.ok ? 'ok' : 'err');
+  }).catch(function(){
+    guardandoLocal = false;
+    estadoNube('err');
+  });
+}
+
+function bajarDeNube(silencioso){
+  if(!hayNube() || guardandoLocal || estado.editando) return;
+  var cfg = configNube();
+  fetch(JSONBIN + '/' + cfg.bin + '/latest', { headers:{ 'X-Master-Key':cfg.key } })
+    .then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function(d){
+      var arr = (d && d.record && Array.isArray(d.record)) ? d.record
+              : (d && Array.isArray(d.record && d.record.transactions) ? d.record.transactions : []);
+      var crudo = JSON.stringify(arr);
+      if(crudo === ultimoJSONSubido){ estadoNube('ok'); return; }
+      estado.movimientos = arr.map(sanear);
+      ultimoJSONSubido = crudo;
+      guardarLocal();
+      pintarTodo();
+      estadoNube('ok');
+      if(!silencioso) aviso('Actualizado', 'Llegaron cambios hechos en otro dispositivo.');
+    })
+    .catch(function(){ estadoNube('err'); });
+}
+
+function crearBase(){
+  if(creandoBase) return;
+  var clave = $('nubeClave').value.trim();
+  if(!clave){ aviso('Falta la clave', 'Pega tu X-Master-Key de jsonbin.io.'); return; }
+  creandoBase = true;
+  var btn = $('btnCrearBase');
+  btn.disabled = true; btn.textContent = 'Creando…';
+
+  fetch(JSONBIN, {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'X-Master-Key':clave, 'X-Bin-Name':'libro-de-cuentas' },
+    body: JSON.stringify(estado.movimientos || [])
+  }).then(function(r){
+    if(!r.ok) throw new Error('http ' + r.status);
+    return r.json();
+  }).then(function(d){
+    var bin = d && d.metadata && d.metadata.id;
+    if(!bin) throw new Error('sin id');
+    ponerConfigNube({ key:clave, bin:bin });
+    creandoBase = false;
+    btn.disabled = false; btn.textContent = 'Crear la base automáticamente';
+    refrescarPanelNube();
+    estadoNube('ok');
+    cerrar('veloNube');
+    abrirCodigo();
+    aviso('Base creada', 'Copia el código y pégalo en tus otros dispositivos.');
+  }).catch(function(){
+    creandoBase = false;
+    btn.disabled = false; btn.textContent = 'Crear la base automáticamente';
+    aviso('No se pudo crear', 'Revisa que la clave sea correcta y que tengas internet.');
+  });
+}
+
+function codificar(cfg){ return btoa(unescape(encodeURIComponent(JSON.stringify(cfg)))); }
+function decodificar(codigo){
+  try{ return JSON.parse(decodeURIComponent(escape(atob(String(codigo).trim())))); }catch(e){ return null; }
+}
+
+function conectarConCodigo(){
+  var cfg = decodificar($('nubeCodigo').value);
+  if(!cfg || !cfg.key || !cfg.bin){
+    aviso('Código inválido', 'Cópialo entero, sin espacios ni saltos de línea.');
+    return;
+  }
+  ponerConfigNube(cfg);
+  refrescarPanelNube();
+  cerrar('veloNube');
+  aviso('Conectado', 'Trayendo los datos de la base…');
+  ultimoJSONSubido = null;
+  bajarDeNube(true);
+}
+
+function refrescarPanelNube(){
+  var cfg = configNube();
+  var caja = $('nubeConectada');
+  if(hayNube()){
+    caja.classList.remove('oculto');
+    $('nubeBinId').textContent = cfg.bin;
+    $('nubeClave').value = cfg.key;
+    estadoNube('ok');
+  } else {
+    caja.classList.add('oculto');
+    estadoNube('off');
+  }
+}
+
+function abrirCodigo(){
+  var cfg = configNube();
+  if(!hayNube()){ aviso('Todavía no hay base', 'Primero crea o conecta una base de datos.'); abrir('veloNube'); return; }
+  $('codigoTexto').value = codificar(cfg);
+  abrir('veloCodigo');
+}
+
+/* ==========================================================================
+   RESPALDO JSON
+   El formato se mantiene idéntico al anterior para que los respaldos viejos
+   sigan abriendo y los nuevos se puedan leer con la versión antigua.
+   ========================================================================== */
+function exportarRespaldo(){
+  var carga = {
+    app: 'libro-de-cuentas',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    transactions: estado.movimientos
+  };
+  bajarArchivo(new Blob([JSON.stringify(carga, null, 2)], { type:'application/json' }),
+               'respaldo_libro_de_cuentas_' + hoyISO() + '.json');
+  aviso('Respaldo descargado', estado.movimientos.length + ' movimientos guardados.');
+}
+
+function leerRespaldo(archivo){
+  var lector = new FileReader();
+  lector.onload = function(){
+    try{
+      var d = JSON.parse(lector.result);
+      var lista = Array.isArray(d) ? d : (d && Array.isArray(d.transactions) ? d.transactions : null);
+      if(!lista) throw new Error('formato');
+      aplicarImportacion(lista);
+    }catch(e){
+      aviso('Archivo inválido', 'Ese JSON no parece un respaldo del libro.');
+    }
+  };
+  lector.onerror = function(){ aviso('No se pudo leer', 'Vuelve a intentarlo con el archivo.'); };
+  lector.readAsText(archivo);
+}
+
+function aplicarImportacion(lista){
+  if(!Array.isArray(lista) || !lista.length){
+    aviso('Sin datos', 'No se encontraron movimientos en el archivo.');
+    return;
+  }
+  var fusionar = confirm(
+    'Se encontraron ' + lista.length + ' movimiento(s).\n\n' +
+    'Aceptar = FUSIONAR con lo que ya tienes (no borra nada).\n' +
+    'Cancelar = REEMPLAZAR todo tu libro por estos datos.'
+  );
+  if(fusionar){
+    var tengo = {};
+    estado.movimientos.forEach(function(t){ tengo[t.id] = true; });
+    var nuevos = 0;
+    lista.map(sanear).forEach(function(t){
+      if(!tengo[t.id]){ estado.movimientos.push(t); nuevos++; }
+    });
+    guardar(); pintarTodo();
+    aviso('Importado', nuevos + ' movimiento(s) nuevo(s) agregado(s).');
+  } else {
+    if(!confirm('Esto borra tus movimientos actuales y los reemplaza. ¿Seguro?')) return;
+    guardarDeshacer('la importación');
+    estado.movimientos = lista.map(sanear);
+    guardar(); pintarTodo();
+    aviso('Libro reemplazado', estado.movimientos.length + ' movimiento(s) cargado(s).', 'Deshacer', restaurarDeshacer);
+  }
+}
+
+/* ==========================================================================
+   AVISOS, DESHACER Y MODALES
+   ========================================================================== */
+function aviso(titulo, mensaje, textoAccion, alPulsar){
+  var caja = $('aviso'), btn = $('avisoAccion');
+  $('avisoTitulo').textContent = titulo || '';
+  $('avisoMensaje').textContent = mensaje || '';
+  btn.classList.toggle('oculto', !textoAccion);
+  btn.textContent = textoAccion || '';
+  btn.onclick = function(){
+    caja.classList.remove('abierto');
+    if(typeof alPulsar === 'function') alPulsar();
+  };
+  caja.classList.add('abierto');
+  clearTimeout(temporizadorAviso);
+  temporizadorAviso = setTimeout(function(){ caja.classList.remove('abierto'); }, textoAccion ? 8000 : 3600);
+}
+
+function guardarDeshacer(que){
+  deshacer = { movimientos: JSON.parse(JSON.stringify(estado.movimientos)), que: que };
+}
+function restaurarDeshacer(){
+  if(!deshacer) return;
+  estado.movimientos = deshacer.movimientos.map(sanear);
+  deshacer = null;
+  guardar(); pintarTodo();
+  aviso('Deshecho', 'El libro volvió a como estaba.');
+}
+
+function abrir(id){
+  var v = $(id);
+  v.classList.add('abierto');
+  document.body.style.overflow = 'hidden';
+  var primero = v.querySelector('input:not([type=hidden]), select, textarea, button');
+  if(primero && window.matchMedia('(min-width:700px)').matches) setTimeout(function(){ primero.focus(); }, 120);
+}
+function cerrar(id){
+  $(id).classList.remove('abierto');
+  if(!document.querySelector('.velo.abierto')) document.body.style.overflow = '';
+}
+
+/* ---------- Alta y edición ------------------------------------------------ */
+function abrirMovimiento(id){
+  var t = id ? estado.movimientos.find(function(x){ return x.id === id; }) : null;
+  estado.editando = t ? t.id : null;
+  $('tituloMov').textContent = t ? 'Editar movimiento' : 'Nuevo movimiento';
+  $('movId').value    = t ? t.id : '';
+  $('movMonto').value = t ? String(t.amount) : '';
+  $('movDesc').value  = t ? t.desc : '';
+  $('movFecha').value = t ? t.date : hoyISO();
+  $('movCat').value   = t ? (t.cat || '') : '';
+  ponerTipo(t ? t.type : estado.tipoNuevo);
+  abrir('veloMov');
+  if(!t) setTimeout(function(){ $('movMonto').focus(); }, 160);
+}
+
+function ponerTipo(tipo){
+  estado.tipoNuevo = tipo === 'Gasto' ? 'Gasto' : 'Ingreso';
+  Array.prototype.forEach.call($('segTipo').children, function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.tipo === estado.tipoNuevo));
+  });
+}
+
+function guardarMovimiento(){
+  var monto = parseFloat(String($('movMonto').value).replace(',', '.'));
+  if(!isFinite(monto) || monto <= 0){
+    aviso('Falta el monto', 'Escribe una cantidad mayor que cero.');
+    $('movMonto').focus();
+    return;
+  }
+  var reg = sanear({
+    id:     $('movId').value || null,
+    date:   $('movFecha').value || hoyISO(),
+    desc:   $('movDesc').value.trim() || (estado.tipoNuevo === 'Ingreso' ? 'Ingreso' : 'Gasto'),
+    type:   estado.tipoNuevo,
+    amount: monto,
+    cat:    $('movCat').value.trim()
+  });
+
+  var i = estado.movimientos.findIndex(function(x){ return x.id === reg.id; });
+  if(i >= 0) estado.movimientos[i] = reg; else estado.movimientos.unshift(reg);
+
+  estado.editando = null;
+  guardar(); pintarTodo(); cerrar('veloMov');
+  aviso(i >= 0 ? 'Movimiento actualizado' : 'Movimiento anotado',
+        (reg.type === 'Ingreso' ? '+ ' : '− ') + dinero(reg.amount) + ' · ' + reg.desc);
+}
+
+function borrarMovimiento(id){
+  var t = estado.movimientos.find(function(x){ return x.id === id; });
+  if(!t) return;
+  guardarDeshacer('el borrado');
+  estado.movimientos = estado.movimientos.filter(function(x){ return x.id !== id; });
+  guardar(); pintarTodo();
+  aviso('Eliminado', t.desc + ' · ' + dinero(t.amount), 'Deshacer', restaurarDeshacer);
+}
+
+function duplicarMovimiento(id){
+  var t = estado.movimientos.find(function(x){ return x.id === id; });
+  if(!t) return;
+  var copia = sanear({ date:hoyISO(), desc:t.desc, type:t.type, amount:t.amount, cat:t.cat });
+  estado.movimientos.unshift(copia);
+  guardar(); pintarTodo();
+  aviso('Duplicado', 'Se copió con la fecha de hoy.');
+}
+
+/* ---------- Datos de ejemplo --------------------------------------------- */
+function datosEjemplo(){
+  if(estado.movimientos.length && !confirm('Esto añade movimientos de ejemplo a tu libro. ¿Continuar?')) return;
+  var hoy = new Date();
+  function haceDias(n){
+    var d = new Date(hoy); d.setDate(d.getDate() - n);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  var muestra = [
+    ['Sueldo mensual','Ingreso',3200,'Sueldo',2],  ['Proyecto freelance','Ingreso',650,'Freelance',9],
+    ['Alquiler','Gasto',950,'Vivienda',3],         ['Supermercado','Gasto',310,'Comida',6],
+    ['Gasolina','Gasto',90,'Transporte',11],       ['Internet y teléfono','Gasto',119,'Servicios',14],
+    ['Sueldo mensual','Ingreso',3200,'Sueldo',33], ['Alquiler','Gasto',950,'Vivienda',34],
+    ['Supermercado','Gasto',285,'Comida',38],      ['Cena fuera','Gasto',96,'Ocio',41],
+    ['Venta de equipo','Ingreso',420,'Otros',45],  ['Sueldo mensual','Ingreso',3200,'Sueldo',63],
+    ['Alquiler','Gasto',950,'Vivienda',64],        ['Supermercado','Gasto',340,'Comida',69],
+    ['Medicinas','Gasto',78,'Salud',72]
+  ];
+  muestra.forEach(function(m){
+    estado.movimientos.push(sanear({ desc:m[0], type:m[1], amount:m[2], cat:m[3], date:haceDias(m[4]) }));
+  });
+  guardar(); pintarTodo(); cerrar('veloMenu');
+  aviso('Ejemplo cargado', muestra.length + ' movimientos de muestra. Bórralos cuando quieras.');
+}
+
+function borrarTodo(){
+  if(!estado.movimientos.length){ aviso('Ya está vacío', 'No hay nada que borrar.'); return; }
+  if(!confirm('Se borrarán los ' + estado.movimientos.length + ' movimientos del libro.\n\n¿Seguro?')) return;
+  guardarDeshacer('el borrado total');
+  estado.movimientos = [];
+  guardar(); pintarTodo(); cerrar('veloMenu');
+  aviso('Libro vaciado', 'Todos los movimientos fueron eliminados.', 'Deshacer', restaurarDeshacer);
+}
+
+/* ---------- Tema ---------------------------------------------------------- */
+function aplicarTema(t){
+  document.documentElement.setAttribute('data-tema', t);
+  try{ localStorage.setItem(CLAVE_TEMA, t); }catch(e){}
+  var m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', t === 'oscuro' ? '#0F1211' : '#1F4B3F');
+}
+function temaInicial(){
+  var g = null;
+  try{ g = localStorage.getItem(CLAVE_TEMA); }catch(e){}
+  if(g) return g;
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
+}
+
+/* ---------- Cambio de hoja ------------------------------------------------ */
+function irAHoja(cual){
+  estado.hoja = cual;
+  $('hojaMov').classList.toggle('oculto', cual !== 'mov');
+  $('hojaResumen').classList.toggle('oculto', cual !== 'resumen');
+  Array.prototype.forEach.call(document.querySelectorAll('.barra-inferior [data-hoja]'), function(b){
+    if(b.dataset.hoja === cual) b.setAttribute('aria-current','page');
+    else b.removeAttribute('aria-current');
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('.nav-escritorio [data-hoja]'), function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.hoja === cual));
+  });
+  if(cual === 'resumen') pintarResumen();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ==========================================================================
+   CONEXIONES Y ARRANQUE
+   ========================================================================== */
+function conectarTodo(){
+
+  /* --- Cerrar modales: botón, velo y Escape --- */
+  document.addEventListener('click', function(e){
+    var c = e.target.closest('[data-cerrar]');
+    if(c){ cerrar(c.dataset.cerrar); return; }
+    if(e.target.classList && e.target.classList.contains('velo')) cerrar(e.target.id);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){
+      var v = document.querySelector('.velo.abierto');
+      if(v){ cerrar(v.id); return; }
+    }
+    /* Atajos: sólo cuando no estás escribiendo */
+    var enCampo = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if(enCampo) return;
+    if(e.key === 'n' || e.key === 'N'){ e.preventDefault(); abrirMovimiento(null); }
+    if(e.key === '/'){ e.preventDefault(); $('buscar').focus(); }
+    if(e.key === '1'){ irAHoja('mov'); }
+    if(e.key === '2'){ irAHoja('resumen'); }
+  });
+
+  /* --- Cabecera --- */
+  $('btnTema').addEventListener('click', function(){
+    aplicarTema(document.documentElement.getAttribute('data-tema') === 'oscuro' ? 'claro' : 'oscuro');
+    if(estado.hoja === 'resumen') pintarResumen();
+  });
+  $('btnMenu').addEventListener('click', function(){ abrir('veloMenu'); });
+  $('pastillaNube').addEventListener('click', function(){ refrescarPanelNube(); abrir('veloNube'); });
+
+  /* --- Alta --- */
+  $('btnNuevo').addEventListener('click', function(){ abrirMovimiento(null); });
+  $('btnNuevoEsc').addEventListener('click', function(){ abrirMovimiento(null); });
+  $('btnGuardarMov').addEventListener('click', guardarMovimiento);
+  $('formMov').addEventListener('submit', function(e){ e.preventDefault(); guardarMovimiento(); });
+  $('movMonto').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); $('movDesc').focus(); } });
+  $('movDesc').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); guardarMovimiento(); } });
+
+  Array.prototype.forEach.call($('segTipo').children, function(b){
+    b.addEventListener('click', function(){ ponerTipo(b.dataset.tipo); });
+  });
+  $('atajosCat').addEventListener('click', function(e){
+    var b = e.target.closest('[data-cat]');
+    if(b) $('movCat').value = b.dataset.cat;
+  });
+
+  /* --- Lista: editar, duplicar, borrar --- */
+  $('listaMov').addEventListener('click', function(e){
+    var btn = e.target.closest('[data-accion]');
+    if(!btn) return;
+    var fila = btn.closest('.linea');
+    if(!fila) return;
+    var id = fila.dataset.id;
+    if(btn.dataset.accion === 'editar')   abrirMovimiento(id);
+    if(btn.dataset.accion === 'duplicar') duplicarMovimiento(id);
+    if(btn.dataset.accion === 'borrar')   borrarMovimiento(id);
+  });
+  /* Tocar la fila también abre la edición, que en móvil es lo natural */
+  $('listaMov').addEventListener('click', function(e){
+    if(e.target.closest('[data-accion]')) return;
+    var fila = e.target.closest('.linea');
+    if(fila) abrirMovimiento(fila.dataset.id);
+  });
+
+  /* --- Búsqueda, filtros, orden, periodo --- */
+  var temporizadorBuscar = null;
+  $('buscar').addEventListener('input', function(e){
+    $('buscarLimpiar').classList.toggle('oculto', !e.target.value);
+    clearTimeout(temporizadorBuscar);
+    temporizadorBuscar = setTimeout(function(){
+      estado.filtros.texto = e.target.value;
+      pintarLista();
+    }, 130);
+  });
+  $('buscarLimpiar').addEventListener('click', function(){
+    $('buscar').value = '';
+    estado.filtros.texto = '';
+    $('buscarLimpiar').classList.add('oculto');
+    pintarLista();
+    $('buscar').focus();
+  });
+
+  $('filtroTipo').addEventListener('click', function(e){
+    var b = e.target.closest('[data-filtro]');
+    if(!b) return;
+    estado.filtros.tipo = b.dataset.filtro;
+    Array.prototype.forEach.call($('filtroTipo').children, function(x){
+      x.setAttribute('aria-pressed', String(x === b));
+    });
+    pintarLista();
+  });
+
+  $('selOrden').addEventListener('change', function(e){
+    estado.orden = e.target.value;
+    pintarLista();
+  });
+
+  $('selPeriodo').addEventListener('change', function(e){
+    estado.filtros.periodo = e.target.value;
+    $('cajaRango').classList.toggle('oculto', e.target.value !== 'rango');
+    pintarTodo();
+  });
+  $('rangoDesde').addEventListener('change', function(e){ estado.filtros.desde = e.target.value; pintarTodo(); });
+  $('rangoHasta').addEventListener('change', function(e){ estado.filtros.hasta = e.target.value; pintarTodo(); });
+
+  /* --- Barra inferior --- */
+  Array.prototype.forEach.call(document.querySelectorAll('.barra-inferior [data-hoja], .nav-escritorio [data-hoja]'), function(b){
+    b.addEventListener('click', function(){ irAHoja(b.dataset.hoja); });
+  });
+  $('btnExportarMovil').addEventListener('click', function(){ abrir('veloMenu'); });
+
+  /* --- Exportaciones --- */
+  function conCierre(fn){ return function(){ cerrar('veloMenu'); setTimeout(fn, 120); }; }
+  $('btnExcel').addEventListener('click', exportarExcel);
+  $('btnPDF').addEventListener('click', exportarPDF);
+  $('mExcel').addEventListener('click', conCierre(exportarExcel));
+  $('mPDF').addEventListener('click', conCierre(exportarPDF));
+  $('mCSV').addEventListener('click', conCierre(exportarCSV));
+  $('mRespaldo').addEventListener('click', conCierre(exportarRespaldo));
+  $('mImportar').addEventListener('click', function(){ $('ficheroImportar').click(); });
+  $('ficheroImportar').addEventListener('change', function(e){
+    var f = e.target.files && e.target.files[0];
+    if(f){ cerrar('veloMenu'); leerRespaldo(f); }
+    e.target.value = '';
+  });
+
+  /* --- Nube --- */
+  $('mNube').addEventListener('click', function(){ cerrar('veloMenu'); refrescarPanelNube(); abrir('veloNube'); });
+  $('mCodigo').addEventListener('click', function(){ cerrar('veloMenu'); abrirCodigo(); });
+  $('btnCrearBase').addEventListener('click', crearBase);
+  $('btnConectarCodigo').addEventListener('click', conectarConCodigo);
+  $('btnDesconectar').addEventListener('click', function(){
+    if(!confirm('Este dispositivo dejará de sincronizar. Tus datos locales se quedan. ¿Seguro?')) return;
+    try{ localStorage.removeItem(CLAVE_NUBE); }catch(e){}
+    refrescarPanelNube();
+    cerrar('veloNube');
+    aviso('Desconectado', 'El libro sigue funcionando solo en este dispositivo.');
+  });
+  $('btnCopiarCodigo').addEventListener('click', function(){
+    var txt = $('codigoTexto').value;
+    function ok(){ aviso('Copiado', 'Pégalo en el otro dispositivo.'); }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(ok).catch(function(){ $('codigoTexto').select(); });
+    } else {
+      $('codigoTexto').select();
+      try{ document.execCommand('copy'); ok(); }catch(e){}
+    }
+  });
+
+  /* --- Ejemplo y borrado --- */
+  $('mDemo').addEventListener('click', datosEjemplo);
+  $('mBorrar').addEventListener('click', borrarTodo);
+
+  /* --- Sincronización periódica --- */
+  setInterval(function(){ if(!document.hidden) bajarDeNube(false); }, 25000);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) bajarDeNube(false); });
+  window.addEventListener('online',  function(){ estadoNube('busy'); bajarDeNube(true); });
+  window.addEventListener('offline', function(){ estadoNube('err'); });
+}
+
+/* ---------- Aplicación instalable (sin archivos aparte) ------------------- */
+function prepararPWA(){
+  var manifiesto = {
+    name:'Libro de Cuentas · Ingresos y Gastos',
+    short_name:'Libro de Cuentas',
+    description:'Registro de ingresos y gastos',
+    start_url:'.', scope:'.', display:'standalone',
+    background_color:'#F6F5F1', theme_color:'#1F4B3F',
+    icons:[{ src:iconoDataURL(192), sizes:'192x192', type:'image/png', purpose:'any maskable' },
+           { src:iconoDataURL(512), sizes:'512x512', type:'image/png', purpose:'any maskable' }]
+  };
+  try{
+    var blob = new Blob([JSON.stringify(manifiesto)], { type:'application/manifest+json' });
+    var l = document.createElement('link');
+    l.rel = 'manifest'; l.href = URL.createObjectURL(blob);
+    document.head.appendChild(l);
+  }catch(e){}
+}
+
+/* Icono dibujado al vuelo: un libro contable con su lomo verde. */
+function iconoDataURL(tam){
+  var c = document.createElement('canvas');
+  c.width = c.height = tam;
+  var g = c.getContext('2d');
+  g.fillStyle = '#1F4B3F'; g.fillRect(0,0,tam,tam);
+  var m = tam * 0.19, w = tam - m*2, h = w * 0.78, y = (tam - h)/2;
+  g.fillStyle = '#F6F5F1';
+  g.fillRect(m, y, w, h);
+  g.fillStyle = '#12805C';
+  g.fillRect(m, y, w * 0.13, h);
+  g.strokeStyle = '#C7CFC3'; g.lineWidth = Math.max(1, tam*0.012);
+  for(var i=1;i<=3;i++){
+    var yy = y + h * (i/4);
+    g.beginPath(); g.moveTo(m + w*0.24, yy); g.lineTo(m + w*0.86, yy); g.stroke();
+  }
+  return c.toDataURL('image/png');
+}
+
+/* ==========================================================================
+   ARRANQUE
+   ========================================================================== */
+function arrancar(){
+  aplicarTema(temaInicial());
+  cargarLocal();
+  conectarTodo();
+  prepararPWA();
+  refrescarPanelNube();
+  $('movFecha').value = hoyISO();
+  pintarTodo();
+  if(hayNube()) bajarDeNube(true);
+}
+
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', arrancar);
+else arrancar();
+
+})();
+</script>
+</body>
+</html>
