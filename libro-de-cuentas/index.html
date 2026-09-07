@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0E1110">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Libro de Cuentas">
+<meta name="apple-mobile-web-app-title" content="Cuentas">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="Libro de ingresos y gastos: registro, resumen, exportación a Excel y PDF, y sincronización entre dispositivos.">
-<title>Libro de Cuentas · Ingresos y Gastos</title>
+<title>Cuentas · Ingresos y gastos</title>
 <style>
 /* ==========================================================================
-   LIBRO DE CUENTAS
+   CUENTAS
    Un libro contable, no una aplicación de neón. Papel, tinta, reglas
    horizontales y cifras alineadas: lo que hace legible una cuenta desde
    que existen las cuentas. Sin una sola descarga de internet.
@@ -543,7 +543,7 @@ textarea.control{ min-height:72px; resize:vertical }
 .velo.abierto{ opacity:1; pointer-events:auto }
 
 .modal{
-  width:100%; max-width:520px; max-height:92dvh; overflow-y:auto;
+  width:100%; max-width:min(520px, 100vw); min-width:0; max-height:92dvh; overflow-y:auto;
   background:var(--hoja); border:1px solid var(--regla);
   border-radius:22px 22px 0 0;
   box-shadow:var(--sombra-alta);
@@ -552,7 +552,7 @@ textarea.control{ min-height:72px; resize:vertical }
 }
 @media (min-width:700px){ .modal{ border-radius:20px } }
 .velo.abierto .modal{ transform:none }
-.modal.ancho{ max-width:640px }
+.modal.ancho{ max-width:min(640px, 100vw) }
 
 .modal-cabeza{
   position:sticky; top:0; z-index:2;
@@ -898,6 +898,240 @@ textarea.control{ min-height:72px; resize:vertical }
   #hojaMov:not(.oculto),#hojaResumen:not(.oculto){ animation:none !important }
 }
 </style>
+
+<style id="paletas">
+/* ==========================================================================
+   PALETAS
+   El color no se elige por uno: se elige por quien mira la pantalla todos
+   los dias. Aqui hay cuatro, todas pensadas en oscuro, y cada una con su
+   propio par de entra/sale. Se cambian en Opciones y la eleccion se guarda.
+
+   Cada paleta define los mismos tokens, asi que TODO el programa -incluidos
+   el grafico, las barras y los tintes de las filas- cambia con ella.
+   ========================================================================== */
+:root[data-paleta="medianoche"][data-tema="oscuro"], :root[data-paleta="medianoche"]:not([data-tema="claro"]){
+  --papel:#0A0D14; --hoja:#121724; --hoja-2:#171D2D;
+  --tinta:#E9EDF7; --tinta-2:#98A2BC; --tinta-3:#6B7793;
+  --regla:#242C40; --regla-2:#1C2333;
+  --verde:#7C8CF8; --verde-sube:#98A5FF; --verde-piso:#1A1F34;
+  --haber:#3DDC97; --haber-piso:#112825;
+  --debe:#FF6B81;  --debe-piso:#2A1922;
+  --oro:#F2C14E;   --oro-piso:#28241C;
+}
+:root[data-paleta="medianoche"][data-tema="claro"]{
+  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
+  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
+  --regla:#E2E5EC; --regla-2:#EDEFF4;
+  --verde:#616DC1; --verde-sube:#4D579A; --verde-piso:#F1F2FE;
+  --haber:#289164; --haber-piso:#E6FAF1;
+  --debe:#B84D5D;  --debe-piso:#FFEDF0;
+  --oro:#967830;   --oro-piso:#FDF5E3;
+}
+:root[data-paleta="carbon"][data-tema="oscuro"], :root[data-paleta="carbon"]:not([data-tema="claro"]){
+  --papel:#0D0D0C; --hoja:#171716; --hoja-2:#1D1D1B;
+  --tinta:#EFEDE7; --tinta-2:#A3A099; --tinta-3:#75726B;
+  --regla:#2B2B28; --regla-2:#212120;
+  --verde:#E0A72E; --verde-sube:#F2BC4E; --verde-piso:#2B2311;
+  --haber:#8FD14F; --haber-piso:#1E2615;
+  --debe:#F2622E;  --debe-piso:#2B1810;
+  --oro:#E0A72E;   --oro-piso:#282110;
+}
+:root[data-paleta="carbon"][data-tema="claro"]{
+  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
+  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
+  --regla:#E2E5EC; --regla-2:#EDEFF4;
+  --verde:#AF8224; --verde-sube:#8B681D; --verde-piso:#FCF5E8;
+  --haber:#5E8A34; --haber-piso:#F0F9E8;
+  --debe:#AE4721;  --debe-piso:#FDECE6;
+  --oro:#8B681D;   --oro-piso:#FAF1DE;
+}
+:root[data-paleta="violeta"][data-tema="oscuro"], :root[data-paleta="violeta"]:not([data-tema="claro"]){
+  --papel:#0C0912; --hoja:#16111F; --hoja-2:#1C1628;
+  --tinta:#EDE7F7; --tinta-2:#A296B8; --tinta-3:#776C8C;
+  --regla:#2B2239; --regla-2:#211A2D;
+  --verde:#B478F5; --verde-sube:#C899FF; --verde-piso:#241932;
+  --haber:#31D0C6; --haber-piso:#112329;
+  --debe:#F2568F;  --debe-piso:#2A1322;
+  --oro:#E8B04B;   --oro-piso:#291F19;
+}
+:root[data-paleta="violeta"][data-tema="claro"]{
+  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
+  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
+  --regla:#E2E5EC; --regla-2:#EDEFF4;
+  --verde:#8C5EBF; --verde-sube:#704A98; --verde-piso:#F7F0FE;
+  --haber:#208983; --haber-piso:#E4F9F8;
+  --debe:#AE3E67;  --debe-piso:#FDEBF2;
+  --oro:#906D2E;   --oro-piso:#FBF2E2;
+}
+:root[data-paleta="bosque"][data-tema="oscuro"], :root[data-paleta="bosque"]:not([data-tema="claro"]){
+  --papel:#0E1110; --hoja:#161A18; --hoja-2:#1B201D;
+  --tinta:#ECEFEA; --tinta-2:#9AA5A0; --tinta-3:#6E7A75;
+  --regla:#262C29; --regla-2:#1F2422;
+  --verde:#4FA88C; --verde-sube:#6FC2A7; --verde-piso:#172621;
+  --haber:#3ED598; --haber-piso:#142A22;
+  --debe:#FF6B5E;  --debe-piso:#2D1D1A;
+  --oro:#E0B457;   --oro-piso:#292619;
+}
+:root[data-paleta="bosque"][data-tema="claro"]{
+  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
+  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
+  --regla:#E2E5EC; --regla-2:#EDEFF4;
+  --verde:#3E836D; --verde-sube:#316857; --verde-piso:#ECF5F2;
+  --haber:#298D64; --haber-piso:#E6FAF2;
+  --debe:#B84D44;  --debe-piso:#FFEDEC;
+  --oro:#8B7036;   --oro-piso:#FAF3E4;
+}
+</style>
+
+<style id="css-paletas-ui">
+.bloque-paletas{ padding:10px 12px 12px }
+.rotulo-paletas{
+  font-size:10.5px; font-weight:750; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--tinta-3); margin-bottom:9px;
+}
+/* Cuatro columnas solo si caben. Sin min-width:0 la rejilla no puede
+   encogerse por debajo de la palabra mas larga y ensancha el menu entero. */
+.rejilla-paletas{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; min-width:0 }
+@media (min-width:460px){ .rejilla-paletas{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
+.muestra{
+  display:grid; gap:6px; padding:9px 8px 8px; border-radius:var(--r-m);
+  border:1.5px solid var(--regla); background:var(--hoja-2);
+  transition:border-color .15s, transform .1s, background .15s;
+}
+.muestra:hover{ border-color:var(--tinta-3) }
+.muestra:active{ transform:translateY(1px) }
+.muestra[aria-pressed="true"]{ border-color:var(--verde); background:var(--verde-piso) }
+.muestra .gotas{ display:flex; gap:3px; justify-content:center }
+.muestra .gotas i{ width:11px; height:11px; border-radius:99px; display:block }
+.muestra{ min-width:0 }
+.muestra .nom{
+  font-size:10.5px; font-weight:650; color:var(--tinta-2); text-align:center;
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.muestra[aria-pressed="true"] .nom{ color:var(--verde) }
+</style>
+
+<style id="estilo-nuevo">
+/* ==========================================================================
+   OTRO ESTILO
+   Antes: papel y reglas horizontales, un libro de contabilidad de toda la
+   vida. Ahora: superficies elevadas sobre un fondo profundo, esquinas mas
+   suaves, tipografia mas apretada y un acento que recorre el balance. Menos
+   cuaderno y mas panel.
+   ========================================================================== */
+
+:root{
+  --r-s: 10px;
+  --r-m: 14px;
+  --r-l: 20px;
+  --sombra: 0 1px 0 0 color-mix(in srgb, var(--tinta) 5%, transparent) inset,
+            0 2px 14px rgba(0,0,0,.22);
+  --sombra-alta: 0 24px 60px rgba(0,0,0,.5), 0 2px 10px rgba(0,0,0,.3);
+}
+:root[data-tema="claro"]{
+  --sombra: 0 1px 2px rgba(20,23,31,.05), 0 6px 20px rgba(20,23,31,.06);
+  --sombra-alta: 0 20px 60px rgba(20,23,31,.16), 0 2px 8px rgba(20,23,31,.08);
+}
+
+/* Un halo tenue del acento al fondo: quita la sensacion de agujero negro */
+body{
+  background:
+    radial-gradient(900px 480px at 78% -8%, color-mix(in srgb, var(--verde) 11%, transparent), transparent 68%),
+    radial-gradient(700px 420px at 4% 4%, color-mix(in srgb, var(--haber) 6%, transparent), transparent 62%),
+    var(--papel);
+  background-attachment:fixed;
+}
+
+/* --- Cabecera --- */
+.cabecera{ border-bottom:1px solid color-mix(in srgb, var(--tinta) 8%, transparent) }
+.sello{
+  border-radius:11px;
+  background:linear-gradient(150deg, var(--verde-sube), var(--verde));
+  box-shadow:0 4px 14px color-mix(in srgb, var(--verde) 35%, transparent);
+  font-size:15px; letter-spacing:0;
+}
+.marca h1{ font-size:16px; font-weight:800; letter-spacing:-.02em }
+.marca p{ font-size:10px; letter-spacing:.14em }
+
+/* --- Tarjetas: borde fino y una luz arriba --- */
+.tarjeta, .balance, .kpi, .modal{
+  border-color:color-mix(in srgb, var(--tinta) 9%, transparent);
+  background-image:linear-gradient(180deg, color-mix(in srgb, var(--tinta) 2.5%, transparent), transparent 84px);
+}
+.tarjeta-cabeza h2{ letter-spacing:.13em; font-size:10.5px }
+
+/* --- El balance manda --- */
+.balance::before{
+  height:2px;
+  background:linear-gradient(90deg, var(--haber), var(--verde) 46%, var(--debe));
+  opacity:.9;
+}
+.balance{ padding-top:24px }
+.balance .rotulo{ letter-spacing:.16em; font-size:10px }
+.balance .cantidad{
+  font-weight:800; letter-spacing:-.045em;
+  font-size:clamp(30px, 8.4vw, 42px);
+  white-space:nowrap;
+}
+/* En escritorio la cifra vive en una columna de 296 px, no en toda la
+   pantalla: 8vw la partia en dos lineas. Se ata al ancho de la columna. */
+@media (min-width:1000px){
+  .balance .cantidad{ font-size:clamp(24px, 2.3vw, 33px) }
+}
+.balance .periodo{ font-size:11px; opacity:.85 }
+.balance-partes{ border-top-style:solid; border-top-color:color-mix(in srgb,var(--tinta) 8%,transparent) }
+
+/* --- Filas: mas aire y la banda redondeada por dentro --- */
+.linea{ border-bottom-color:color-mix(in srgb, var(--tinta) 6%, transparent) }
+.linea .filo{ width:3px !important; left:0; border-radius:0 3px 3px 0 !important }
+.linea .desc{ font-weight:650; letter-spacing:-.005em }
+.dia{
+  background:transparent;
+  border-bottom-color:color-mix(in srgb, var(--tinta) 6%, transparent);
+  padding-top:16px;
+}
+.dia .fecha{ font-size:11.5px; font-weight:750; letter-spacing:.01em; text-transform:none }
+
+/* --- El disco de la flecha, mas presente --- */
+.senal{ width:28px; height:28px; border-width:1.5px }
+.senal svg{ width:13px; height:13px }
+
+/* --- Controles --- */
+.control{ border-radius:var(--r-m) }
+.control:focus{ box-shadow:0 0 0 3.5px color-mix(in srgb, var(--verde) 20%, transparent) }
+.btn{ border-radius:var(--r-m); font-weight:700 }
+.btn-lleno{
+  background:linear-gradient(150deg, var(--verde-sube), var(--verde));
+  border-color:transparent;
+  box-shadow:0 3px 14px color-mix(in srgb, var(--verde) 30%, transparent);
+}
+.btn-lleno:hover{ filter:brightness(1.08) }
+.flotante{
+  border-radius:20px;
+  background:linear-gradient(150deg, var(--verde-sube), var(--verde));
+  box-shadow:0 10px 28px color-mix(in srgb, var(--verde) 42%, transparent);
+}
+.segmentado{ border-radius:var(--r-m); background:color-mix(in srgb, var(--tinta) 5%, transparent) }
+.segmentado button{ border-radius:10px; font-weight:700 }
+
+/* --- KPI --- */
+.kpi .r{ letter-spacing:.12em }
+.kpi .v{ font-weight:800; letter-spacing:-.03em; font-size:21px }
+
+/* --- Barra inferior --- */
+.barra-inferior{ border-top:1px solid color-mix(in srgb, var(--tinta) 8%, transparent) }
+.barra-inferior button[aria-current="page"]{ color:var(--verde) }
+.barra-inferior button[aria-current="page"] svg{ filter:drop-shadow(0 0 8px color-mix(in srgb,var(--verde) 55%,transparent)) }
+
+/* --- Modales --- */
+.modal{ border-radius:24px 24px 0 0 }
+@media (min-width:700px){ .modal{ border-radius:22px } }
+.modal-cabeza h2{ letter-spacing:-.02em; font-weight:800 }
+.velo{ background:color-mix(in srgb, var(--papel) 62%, rgba(0,0,0,.55)) }
+
+/* --- Aviso --- */
+.aviso{ border-radius:var(--r-m); border:1px solid color-mix(in srgb,var(--tinta) 12%,transparent) }
+</style>
 </head>
 <body>
 <div class="app">
@@ -906,9 +1140,9 @@ textarea.control{ min-height:72px; resize:vertical }
   <header class="cabecera">
     <div class="cabecera-fila">
       <div class="marca">
-        <div class="sello" aria-hidden="true">LC</div>
+        <div class="sello" aria-hidden="true">C</div>
         <div>
-          <h1>Libro de Cuentas</h1>
+          <h1>Cuentas</h1>
           <p>Ingresos &amp; Gastos</p>
         </div>
       </div>
@@ -1213,6 +1447,13 @@ textarea.control{ min-height:72px; resize:vertical }
 
       <div class="menu-separador"></div>
 
+      <div class="bloque-paletas">
+        <div class="rotulo-paletas">Colores</div>
+        <div class="rejilla-paletas" id="rejillaPaletas"></div>
+      </div>
+
+      <div class="menu-separador"></div>
+
       <button type="button" id="mDemo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="4"/></svg>
         <span>Cargar datos de ejemplo<span class="sub">Para ver cómo funciona antes de usarlo en serio</span></span>
@@ -1321,7 +1562,7 @@ textarea.control{ min-height:72px; resize:vertical }
 </div>
 <script>
 /* ==========================================================================
-   LIBRO DE CUENTAS · núcleo
+   CUENTAS · núcleo
    Sin librerías externas. Ni una sola descarga: ni tipografías, ni gráficos,
    ni generador de PDF. Todo lo que hace falta va aquí dentro, porque una red
    que bloquea un CDN no debe dejarte sin poder anotar un gasto.
@@ -1453,11 +1694,38 @@ function guardar(){
    que se ve QUE cambió y CUÁNTO, sin tener que acordarse de lo que ponía.  */
 var SIN_MOVIMIENTO = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* La cifra del balance tiene que caber siempre, den lo que den las cuentas.
+   Se mide con un lienzo -sin tocar el DOM, sin parpadeos- y si el texto final
+   no entra en su caja, se baja el tamaño hasta que entre. */
+var lienzoMedidor = null;
+function encajarCifra(el, texto){
+  if(!el) return;
+  var caja = el.clientWidth;
+  if(!caja) return;
+  if(!lienzoMedidor) lienzoMedidor = document.createElement('canvas').getContext('2d');
+
+  el.style.fontSize = '';
+  var cs = getComputedStyle(el);
+  var base = parseFloat(cs.fontSize);
+  if(!isFinite(base) || !base) return;
+
+  lienzoMedidor.font = cs.fontWeight + ' ' + base + 'px ' + cs.fontFamily;
+  var ancho = lienzoMedidor.measureText(texto).width;
+  /* letter-spacing negativo: el ancho real es algo menor */
+  var esp = parseFloat(cs.letterSpacing);
+  if(isFinite(esp)) ancho += esp * texto.length;
+
+  if(ancho <= caja) return;
+  var nuevo = Math.max(17, Math.floor(base * (caja / ancho) * 0.985));
+  el.style.fontSize = nuevo + 'px';
+}
+
 function animarCifra(el, hasta, formatear){
   if(!el) return;
   var desde = Number(el.dataset.valor);
   if(!isFinite(desde)) desde = 0;
   el.dataset.valor = hasta;
+  encajarCifra(el, formatear(hasta));
 
   if(SIN_MOVIMIENTO || desde === hasta){ el.textContent = formatear(hasta); return; }
 
@@ -2277,7 +2545,7 @@ function exportarExcel(){
     { nombre:'Categorías', filas:f3, anchos:[26,15,14,14,13] }
   ]);
 
-  bajarArchivo(blob, 'libro_de_cuentas_' + hoyISO() + '.xlsx');
+  bajarArchivo(blob, 'cuentas_' + hoyISO() + '.xlsx');
   aviso('Excel generado', lista.length + ' movimientos en tres hojas · ' + lim.nombre);
 }
 
@@ -2450,7 +2718,7 @@ function exportarPDF(){
     numeroPagina++;
     /* Banda superior */
     pdf.rect(0, A4.h - 92, A4.w, 92, C.verde);
-    pdf.texto('LIBRO DE CUENTAS', M, A4.h - 44, 17, '#FFFFFF', true);
+    pdf.texto('CUENTAS', M, A4.h - 44, 17, '#FFFFFF', true);
     pdf.texto('Informe de ingresos y gastos', M, A4.h - 61, 9.5, '#C9DAD3', false);
     var sello = new Date().toLocaleDateString('es-PE', { day:'2-digit', month:'long', year:'numeric' });
     pdf.texto('Generado el ' + sello, A4.w - M, A4.h - 44, 8.5, '#C9DAD3', false, 'der');
@@ -2460,7 +2728,7 @@ function exportarPDF(){
 
   function pie(){
     pdf.linea(M, 42, A4.w - M, 42, C.regla, 0.6);
-    pdf.texto('Libro de Cuentas', M, 30, 7.5, C.tenue, false);
+    pdf.texto('Cuentas', M, 30, 7.5, C.tenue, false);
     pdf.texto('Página ' + numeroPagina, A4.w - M, 30, 7.5, C.tenue, false, 'der');
   }
 
@@ -2605,7 +2873,7 @@ function exportarPDF(){
   pie();
 
   var blob = ensamblarPDF(pdf, A4.w, A4.h);
-  bajarArchivo(blob, 'libro_de_cuentas_' + hoyISO() + '.pdf');
+  bajarArchivo(blob, 'cuentas_' + hoyISO() + '.pdf');
   aviso('Informe generado', numeroPagina + (numeroPagina === 1 ? ' página' : ' páginas') +
         ' · texto nítido y seleccionable');
 }
@@ -2621,7 +2889,7 @@ function exportarCSV(){
     csv += [campo(t.date), campo(t.desc), campo(t.cat), campo(t.type),
             esIng ? t.amount.toFixed(2) : '', esIng ? '' : t.amount.toFixed(2)].join(',') + '\n';
   });
-  bajarArchivo(new Blob([csv], { type:'text/csv;charset=utf-8;' }), 'libro_de_cuentas_' + hoyISO() + '.csv');
+  bajarArchivo(new Blob([csv], { type:'text/csv;charset=utf-8;' }), 'cuentas_' + hoyISO() + '.csv');
   aviso('CSV exportado', lista.length + ' movimientos.');
 }
 
@@ -2786,7 +3054,7 @@ function exportarRespaldo(){
     transactions: estado.movimientos
   };
   bajarArchivo(new Blob([JSON.stringify(carga, null, 2)], { type:'application/json' }),
-               'respaldo_libro_de_cuentas_' + hoyISO() + '.json');
+               'respaldo_cuentas_' + hoyISO() + '.json');
   aviso('Respaldo descargado', estado.movimientos.length + ' movimientos guardados.');
 }
 
@@ -3014,12 +3282,49 @@ function borrarTodo(){
   aviso('Libro vaciado', 'Todos los movimientos fueron eliminados.', 'Deshacer', restaurarDeshacer);
 }
 
+/* ---------- Paletas ------------------------------------------------------- */
+var CLAVE_PALETA = 'cuentas_paleta';
+var PALETAS = [
+  { id:'medianoche', nom:'Medianoche', gotas:['#7C8CF8','#3DDC97','#FF6B81'] },
+  { id:'carbon',     nom:'Carbón',     gotas:['#E0A72E','#8FD14F','#F2622E'] },
+  { id:'violeta',    nom:'Violeta',    gotas:['#B478F5','#31D0C6','#F2568F'] },
+  { id:'bosque',     nom:'Bosque',     gotas:['#4FA88C','#3ED598','#FF6B5E'] }
+];
+
+function aplicarPaleta(id){
+  if(!PALETAS.some(function(p){ return p.id === id; })) id = PALETAS[0].id;
+  document.documentElement.setAttribute('data-paleta', id);
+  try{ localStorage.setItem(CLAVE_PALETA, id); }catch(e){}
+  pintarPaletas();
+  /* El color de la barra del navegador debe seguir a la paleta */
+  var m = document.querySelector('meta[name="theme-color"]');
+  if(m) m.setAttribute('content', getComputedStyle(document.body).backgroundColor);
+  /* El gráfico y las barras se dibujan con los colores leídos: hay que rehacerlos */
+  if(estado.hoja === 'resumen') pintarResumen();
+}
+
+function paletaInicial(){
+  try{ return localStorage.getItem(CLAVE_PALETA) || PALETAS[0].id; }catch(e){ return PALETAS[0].id; }
+}
+
+function pintarPaletas(){
+  var caja = $('rejillaPaletas');
+  if(!caja) return;
+  var actual = document.documentElement.getAttribute('data-paleta');
+  caja.innerHTML = PALETAS.map(function(p){
+    return '<button type="button" class="muestra" data-paleta="' + p.id + '" aria-pressed="' + (p.id === actual) + '">' +
+             '<span class="gotas">' + p.gotas.map(function(c){ return '<i style="background:' + c + '"></i>'; }).join('') + '</span>' +
+             '<span class="nom">' + esc(p.nom) + '</span>' +
+           '</button>';
+  }).join('');
+}
+
 /* ---------- Tema ---------------------------------------------------------- */
 function aplicarTema(t){
   document.documentElement.setAttribute('data-tema', t);
   try{ localStorage.setItem(CLAVE_TEMA, t); }catch(e){}
   var m = document.querySelector('meta[name="theme-color"]');
-  if(m) m.setAttribute('content', t === 'oscuro' ? '#0F1211' : '#1F4B3F');
+  if(m) m.setAttribute('content', getComputedStyle(document.body).backgroundColor);
 }
 function temaInicial(){
   /* Oscuro de partida. Es lo que se pidio: si alguien quiere claro, lo
@@ -3276,6 +3581,15 @@ function conectarTodo(){
     }
   });
 
+  /* --- Paletas --- */
+  $('rejillaPaletas').addEventListener('click', function(e){
+    var b = e.target.closest('[data-paleta]');
+    if(!b) return;
+    aplicarPaleta(b.dataset.paleta);
+    var p = PALETAS.find(function(x){ return x.id === b.dataset.paleta; });
+    aviso('Colores cambiados', p ? p.nom : '');
+  });
+
   /* --- Ejemplo y borrado --- */
   $('mDemo').addEventListener('click', datosEjemplo);
   $('mBorrar').addEventListener('click', borrarTodo);
@@ -3283,6 +3597,14 @@ function conectarTodo(){
   /* --- Sincronización periódica --- */
   setInterval(function(){ if(!document.hidden) bajarDeNube(false); }, 25000);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) bajarDeNube(false); });
+  var tRedim = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(tRedim);
+    tRedim = setTimeout(function(){
+      var e = $('kpiBalance');
+      if(e) encajarCifra(e, e.textContent);
+    }, 140);
+  });
   window.addEventListener('online',  function(){ estadoNube('busy'); bajarDeNube(true); });
   window.addEventListener('offline', function(){ estadoNube('err'); });
 }
@@ -3290,8 +3612,8 @@ function conectarTodo(){
 /* ---------- Aplicación instalable (sin archivos aparte) ------------------- */
 function prepararPWA(){
   var manifiesto = {
-    name:'Libro de Cuentas · Ingresos y Gastos',
-    short_name:'Libro de Cuentas',
+    name:'Cuentas · Ingresos y gastos',
+    short_name:'Cuentas',
     description:'Registro de ingresos y gastos',
     start_url:'.', scope:'.', display:'standalone',
     background_color:'#F6F5F1', theme_color:'#1F4B3F',
@@ -3329,6 +3651,7 @@ function iconoDataURL(tam){
    ARRANQUE
    ========================================================================== */
 function arrancar(){
+  aplicarPaleta(paletaInicial());
   aplicarTema(temaInicial());
   cargarLocal();
   conectarTodo();

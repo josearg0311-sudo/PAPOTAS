@@ -1,4 +1,4 @@
-# Libro de Cuentas · rediseño
+# Cuentas · rediseño
 
 Reescritura completa a partir del `index.html` original, que se conserva aquí
 como `original.html` para poder comparar.
@@ -84,3 +84,34 @@ directo a sus movimientos, con un *Ver todo* para volver.
 saltar; las filas entran en cascada; la que acabas de anotar se enciende un
 segundo; las barras crecen desde el suelo. Nada se mueve porque sí, y todo se
 apaga si el sistema pide menos movimiento.
+
+## Se llama Cuentas
+
+El nombre visible cambia en todas partes: pestaña, cabecera, aplicación
+instalada, informe PDF y nombres de los archivos que descarga
+(`cuentas_2026-09-07.xlsx`). Lo **interno no se toca**: la clave de
+almacenamiento, la de la nube y el campo `app` del respaldo siguen igual,
+para no romper la compatibilidad con lo que ya tienes guardado.
+
+## Cuatro paletas, y eliges tú
+
+En **Opciones → Colores** hay cuatro juegos de color, todos pensados en
+oscuro y cada uno con su propio par de entra/sale:
+
+| Paleta | Acento | Entra | Sale |
+|---|---|---|---|
+| Medianoche | índigo | menta | coral |
+| Carbón | ámbar | lima | naranja quemado |
+| Violeta | violeta | turquesa | magenta |
+| Bosque | verde | esmeralda | rojo |
+
+Cambian el programa entero —gráfico, barras y tintes de las filas incluidos—
+porque todo se dibuja leyendo los mismos tokens. La elección se guarda.
+
+## Y otro estilo
+
+Menos cuaderno y más panel: superficies elevadas sobre un fondo profundo con
+un halo tenue del acento, esquinas más suaves, tipografía más apretada, y el
+balance como pieza central con una línea de acento que va del color de
+ingreso al de gasto. La cifra del balance se mide y se ajusta sola para caber
+en su caja, den lo que den las cuentas.

@@ -13,12 +13,12 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 11327 >>
+<< /Length 11309 >>
 stream
 0.122 0.294 0.247 rg
 0.00 749.89 595.28 92.00 re f
 1.000 1.000 1.000 rg
-BT /F2 17 Tf 42.00 797.89 Td (LIBRO DE CUENTAS) Tj ET
+BT /F2 17 Tf 42.00 797.89 Td (CUENTAS) Tj ET
 0.788 0.855 0.827 rg
 BT /F1 9.5 Tf 42.00 780.89 Td (Informe de ingresos y gastos) Tj ET
 0.788 0.855 0.827 rg
@@ -360,7 +360,7 @@ BT /F2 11 Tf 489.92 76.89 Td (S/ 6,502.00) Tj ET
 0.894 0.882 0.847 RG
 0.60 w 42.00 42.00 m 553.28 42.00 l S
 0.541 0.576 0.612 rg
-BT /F1 7.5 Tf 42.00 30.00 Td (Libro de Cuentas) Tj ET
+BT /F1 7.5 Tf 42.00 30.00 Td (Cuentas) Tj ET
 0.541 0.576 0.612 rg
 BT /F1 7.5 Tf 523.68 30.00 Td (Página 1) Tj ET
 endstream
@@ -376,9 +376,9 @@ xref
 0000000121 00000 n 
 0000000218 00000 n 
 0000000320 00000 n 
-0000011700 00000 n 
+0000011682 00000 n 
 trailer
 << /Size 7 /Root 1 0 R >>
 startxref
-11842
+11824
 %%EOF
