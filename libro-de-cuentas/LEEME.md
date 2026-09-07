@@ -64,3 +64,23 @@ gastos van todas en rojo, con la intensidad marcando el orden.
     index.html      el programa
     original.html   la versión de partida, para comparar
     salidas/        ejemplos generados por el propio programa (xlsx, pdf, csv)
+
+## Más ágil de usar, y con movimiento
+
+**Anotar cuesta menos.** La ficha ofrece *Repetir algo de siempre*: los cuatro
+movimientos que más repites, con su monto, para dejarlos puestos de un toque.
+Y si escribes una descripción que ya usaste, se completan solos el monto, la
+categoría y el tipo, como la última vez — solo lo que esté vacío, nunca pisa
+lo que hayas escrito tú, y un rótulo te dice qué completó.
+
+**Deslizar para borrar.** En el teléfono, arrastra una fila hacia la izquierda.
+Hay que pasar de la mitad para que cuente, así que un roce al hacer scroll no
+borra nada, y siempre queda el *Deshacer*.
+
+**El gráfico es un atajo.** Toca el mes que te llame la atención y saltas
+directo a sus movimientos, con un *Ver todo* para volver.
+
+**Se ve lo que cambia.** Las cifras suben contando hasta su valor en vez de
+saltar; las filas entran en cascada; la que acabas de anotar se enciende un
+segundo; las barras crecen desde el suelo. Nada se mueve porque sí, y todo se
+apaga si el sistema pide menos movimiento.

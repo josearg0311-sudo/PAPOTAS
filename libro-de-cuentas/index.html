@@ -785,6 +785,119 @@ textarea.control{ min-height:72px; resize:vertical }
 .balance-partes div:first-child .r::before{ background:var(--haber) }
 .balance-partes div:last-child  .r::before{ background:var(--debe) }
 </style>
+
+<style id="vida">
+/* ==========================================================================
+   QUE SE MUEVA, PERO CON MOTIVO
+   Cada animación aquí responde a una pregunta: ¿qué acaba de cambiar? Nada
+   se mueve porque sí, y todo se apaga si el sistema pide menos movimiento.
+   ========================================================================== */
+
+/* --- Las filas entran, y en cascada --- */
+@keyframes entrar{
+  from{ opacity:0; transform:translateY(7px) }
+  to  { opacity:1; transform:none }
+}
+.linea{ animation:entrar .28s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i, 0) * 18ms) }
+.dia  { animation:entrar .24s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i, 0) * 18ms) }
+
+/* --- La que acabas de anotar o editar se enciende un momento --- */
+@keyframes destacar{
+  0%  { box-shadow:inset 0 0 0 2px var(--haber), 0 0 0 0 color-mix(in srgb,var(--haber) 45%,transparent) }
+  100%{ box-shadow:inset 0 0 0 0 transparent, 0 0 0 10px transparent }
+}
+.linea.recien{ animation:entrar .28s cubic-bezier(.22,1,.36,1) both, destacar 1.5s ease-out .1s both }
+.linea.recien[data-tipo="Gasto"]{
+  animation:entrar .28s cubic-bezier(.22,1,.36,1) both, destacarSale 1.5s ease-out .1s both;
+}
+@keyframes destacarSale{
+  0%  { box-shadow:inset 0 0 0 2px var(--debe), 0 0 0 0 color-mix(in srgb,var(--debe) 45%,transparent) }
+  100%{ box-shadow:inset 0 0 0 0 transparent, 0 0 0 10px transparent }
+}
+
+/* --- Al pulsar, la fila responde --- */
+.linea:active{ transform:scale(.995) }
+
+/* --- Las barras del gráfico crecen desde el suelo --- */
+@keyframes crecer{ from{ transform:scaleY(0) } to{ transform:scaleY(1) } }
+.barra-cr{ transform-origin:center var(--y); animation:crecer .5s cubic-bezier(.22,1,.36,1) both }
+.mes-zona:hover ~ .barra-cr{ filter:brightness(1.15) }
+.gr .mes-zona{ transition:fill .15s }
+.gr .mes-zona:hover{ fill:color-mix(in srgb, var(--tinta) 5%, transparent) }
+
+/* --- Las barras del desglose se despliegan --- */
+.barra-fila .relleno{ animation:desplegar .6s cubic-bezier(.22,1,.36,1) both }
+@keyframes desplegar{ from{ transform:scaleX(0) } to{ transform:scaleX(1) } }
+.barra-fila .relleno{ transform-origin:left center }
+
+/* --- Cambio de hoja --- */
+@keyframes aparecer{ from{ opacity:0; transform:translateY(9px) } to{ opacity:1; transform:none } }
+#hojaMov:not(.oculto), #hojaResumen:not(.oculto){ animation:aparecer .3s cubic-bezier(.22,1,.36,1) both }
+
+/* --- Los KPI también entran en cascada --- */
+.kpi{ animation:entrar .3s cubic-bezier(.22,1,.36,1) both; animation-delay:calc(var(--i,0) * 45ms) }
+
+/* ==========================================================================
+   ATAJOS PARA ANOTAR RÁPIDO
+   ========================================================================== */
+.habituales{ display:grid; gap:8px }
+.rotulo-habituales{
+  font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--tinta-3);
+}
+.habituales .tiras{ display:grid; gap:7px; grid-template-columns:1fr 1fr }
+@media (max-width:420px){ .habituales .tiras{ grid-template-columns:1fr } }
+.habituales .tira{
+  display:flex; align-items:center; gap:8px; min-width:0;
+  padding:9px 11px; border-radius:var(--r-m);
+  border:1px solid var(--regla); background:var(--hoja-2);
+  text-align:left; transition:border-color .15s, background .15s, transform .1s;
+}
+.habituales .tira:hover{ border-color:var(--tinta-3); background:var(--hoja) }
+.habituales .tira:active{ transform:translateY(1px) }
+.habituales .tira .p{
+  flex:1 1 auto; min-width:0; font-size:12.5px; font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.habituales .tira .m{ flex:0 0 auto; font-size:11.5px; font-weight:700 }
+.habituales .tira[data-tipo="Ingreso"] .m{ color:var(--haber) }
+.habituales .tira[data-tipo="Gasto"]   .m{ color:var(--debe) }
+.habituales .tira[data-tipo="Ingreso"]{ box-shadow:inset 3px 0 0 0 var(--haber) }
+.habituales .tira[data-tipo="Gasto"]  { box-shadow:inset 3px 0 0 0 var(--debe) }
+
+/* El rótulo de "te lo completé" */
+.aviso-relleno{
+  font-size:11.5px; color:var(--oro); line-height:1.45;
+  padding:6px 9px; border-radius:8px;
+  background:var(--oro-piso); border:1px solid color-mix(in srgb,var(--oro) 25%,transparent);
+}
+.aviso-relleno.parpadeo{ animation:entrar .3s ease-out both }
+
+/* ==========================================================================
+   DESLIZAR PARA BORRAR (teléfono)
+   ========================================================================== */
+.linea{ touch-action:pan-y }
+.linea.deslizando{ transition:none }
+.linea.volviendo{ transition:transform .22s cubic-bezier(.22,1,.36,1) }
+.linea .fondo-borrar{
+  position:absolute; inset:0; display:none;
+  align-items:center; justify-content:flex-end; gap:7px;
+  padding-right:18px; background:var(--debe); color:#fff;
+  font-size:12.5px; font-weight:700; border-radius:0; z-index:0;
+}
+.linea.con-deslizamiento .fondo-borrar{ display:flex }
+.linea .fondo-borrar svg{ width:17px; height:17px }
+/* Solo el CONTENIDO va por encima del fondo rojo. Antes esta regla alcanzaba
+   tambien a la banda de color y al texto para lectores de pantalla, les quitaba
+   el posicionamiento absoluto y los convertia en celdas de la rejilla: la fila
+   pasaba de 75 a 113 px y la banda desaparecia. */
+.linea > *:not(.fondo-borrar):not(.solo-lectores):not(.filo){ position:relative; z-index:1 }
+.linea .filo{ z-index:2 }
+
+@media (prefers-reduced-motion: reduce){
+  .linea,.dia,.kpi,.barra-cr,.barra-fila .relleno,
+  #hojaMov:not(.oculto),#hojaResumen:not(.oculto){ animation:none !important }
+}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1028,6 +1141,7 @@ textarea.control{ min-height:72px; resize:vertical }
         <input type="text" class="control" id="movDesc" placeholder="Ej. Sueldo, alquiler, supermercado…"
                autocomplete="off" maxlength="120" list="sugerenciasDesc">
         <datalist id="sugerenciasDesc"></datalist>
+        <div id="avisoRelleno" class="aviso-relleno oculto"></div>
       </div>
 
       <div style="display:grid; gap:12px; grid-template-columns:1fr 1fr">
@@ -1044,6 +1158,7 @@ textarea.control{ min-height:72px; resize:vertical }
       </div>
 
       <div id="atajosCat" style="display:flex; gap:6px; flex-wrap:wrap"></div>
+      <div id="habituales" class="habituales oculto"></div>
       <input type="hidden" id="movId">
     </form>
     <div class="modal-pie">
@@ -1228,7 +1343,7 @@ var estado = {
   movimientos: [],
   hoja: 'mov',
   tipoNuevo: 'Ingreso',
-  filtros: { texto:'', tipo:'Todos', periodo:'todo', desde:'', hasta:'' },
+  filtros: { texto:'', tipo:'Todos', periodo:'todo', desde:'', hasta:'', ym:'' },
   orden: 'fecha-desc',
   editando: null
 };
@@ -1238,6 +1353,7 @@ var guardandoLocal = false;
 var creandoBase = false;
 var deshacer = null;      // { movimientos:[...], que:'texto' }
 var temporizadorAviso = null;
+var huboDeslizamiento = false;
 
 /* ---------- Utilidades ---------------------------------------------------- */
 function $(id){ return document.getElementById(id); }
@@ -1332,6 +1448,33 @@ function guardar(){
   subirANube();
 }
 
+/* ---------- Movimiento -----------------------------------------------------
+   Las cifras no aparecen de golpe: suben hasta su valor. No es adorno, es
+   que se ve QUE cambió y CUÁNTO, sin tener que acordarse de lo que ponía.  */
+var SIN_MOVIMIENTO = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function animarCifra(el, hasta, formatear){
+  if(!el) return;
+  var desde = Number(el.dataset.valor);
+  if(!isFinite(desde)) desde = 0;
+  el.dataset.valor = hasta;
+
+  if(SIN_MOVIMIENTO || desde === hasta){ el.textContent = formatear(hasta); return; }
+
+  var t0 = 0, dur = Math.min(620, 260 + Math.abs(hasta - desde) / 40);
+  if(el.__anim) cancelAnimationFrame(el.__anim);
+
+  function paso(t){
+    if(!t0) t0 = t;
+    var k = Math.min(1, (t - t0) / dur);
+    var suave = 1 - Math.pow(1 - k, 3);            /* frena al llegar */
+    el.textContent = formatear(desde + (hasta - desde) * suave);
+    if(k < 1) el.__anim = requestAnimationFrame(paso);
+    else el.__anim = null;
+  }
+  el.__anim = requestAnimationFrame(paso);
+}
+
 /* ---------- Cálculos ------------------------------------------------------ */
 function totales(lista){
   var ing = 0, gas = 0;
@@ -1355,6 +1498,13 @@ function limitesPeriodo(){
       if(f.desde || f.hasta){
         return { desde: f.desde || '0000-01-01', hasta: f.hasta || '9999-12-31',
                  nombre: (f.desde ? fechaCorta(f.desde) : '…') + ' – ' + (f.hasta ? fechaCorta(f.hasta) : '…') };
+      }
+      return { desde:null, hasta:null, nombre:'Todo el libro' };
+    case 'ym':
+      if(/^\d{4}-\d{2}$/.test(f.ym || '')){
+        var p = f.ym.split('-');
+        var fin = new Date(Number(p[0]), Number(p[1]), 0);
+        return { desde: f.ym + '-01', hasta: iso(fin), nombre: etiquetaMes(f.ym) };
       }
       return { desde:null, hasta:null, nombre:'Todo el libro' };
     default:      return { desde:null, hasta:null, nombre:'Todo el libro' };
@@ -1395,6 +1545,34 @@ function visibles(){
   return lista;
 }
 
+/* Lo que ya anotaste antes con ese mismo nombre. Sirve para no volver a
+   escribir el monto y la categoría de algo que se repite cada mes.       */
+function ultimoIgual(descripcion){
+  var q = String(descripcion || '').trim().toLowerCase();
+  if(q.length < 2) return null;
+  var mejor = null;
+  for(var i=0;i<estado.movimientos.length;i++){
+    var t = estado.movimientos[i];
+    if(t.desc.toLowerCase() !== q) continue;
+    if(!mejor || t.date > mejor.date) mejor = t;
+  }
+  return mejor;
+}
+
+/* Lo que más repites, para ofrecerlo de un toque. */
+function habituales(cuantos){
+  var cuenta = {}, ultimo = {};
+  estado.movimientos.forEach(function(t){
+    var k = t.type + '|' + t.desc;
+    cuenta[k] = (cuenta[k] || 0) + 1;
+    if(!ultimo[k] || t.date > ultimo[k].date) ultimo[k] = t;
+  });
+  return Object.keys(cuenta)
+    .sort(function(a,b){ return cuenta[b] - cuenta[a] || (ultimo[b].date < ultimo[a].date ? -1 : 1); })
+    .slice(0, cuantos || 4)
+    .map(function(k){ return ultimo[k]; });
+}
+
 function categorias(){
   var m = {};
   estado.movimientos.forEach(function(t){ if(t.cat) m[t.cat] = (m[t.cat]||0) + 1; });
@@ -1431,10 +1609,10 @@ function pintarBalance(){
   var t = totales(delPeriodo());
   var l = limitesPeriodo();
   var caja = $('kpiBalance');
-  caja.textContent = dineroConSigno(t.bal);
+  animarCifra(caja, t.bal, dineroConSigno);
   caja.classList.toggle('negativo', t.bal < 0);
-  $('kpiIngresos').textContent = dinero(t.ing);
-  $('kpiGastos').textContent   = dinero(t.gas);
+  animarCifra($('kpiIngresos'), t.ing, dinero);
+  animarCifra($('kpiGastos'),   t.gas, dinero);
   $('kpiPeriodo').textContent  = l.nombre + ' · ' + t.n + (t.n === 1 ? ' movimiento' : ' movimientos');
 
   var base = delPeriodo();
@@ -1445,14 +1623,20 @@ function pintarBalance(){
   $('nGas').textContent   = nT - nI;
 }
 
-function filaHTML(t){
+var recienTocado = null;
+
+function filaHTML(t, indice){
   var esIng = t.type === 'Ingreso';
   var cat = t.cat
     ? '<span class="etiqueta"><span class="gota" style="background:' + colorCat(t.cat) + '"></span>' + esc(t.cat) + '</span>'
     : '';
   return '' +
-  '<div class="linea" data-tipo="' + t.type + '" data-id="' + esc(t.id) + '">' +
+  '<div class="linea' + (t.id === recienTocado ? ' recien' : '') + '" data-tipo="' + t.type +
+      '" data-id="' + esc(t.id) + '" style="--i:' + (indice || 0) + '">' +
     '<span class="solo-lectores">' + (esIng ? 'Ingreso' : 'Gasto') + '. </span>' +
+    '<span class="fondo-borrar" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
+      'Eliminar</span>' +
     '<span class="filo"></span>' +
     '<div class="texto">' +
       '<div class="desc-fila">' +
@@ -1508,7 +1692,7 @@ function pintarLista(){
   var html = '';
   if(estado.orden.indexOf('fecha') === 0){
     /* Agrupado por día: así se lee un libro de caja. */
-    var dias = {}, orden = [];
+    var dias = {}, orden = [], n = 0;
     lista.forEach(function(t){
       if(!dias[t.date]){ dias[t.date] = []; orden.push(t.date); }
       dias[t.date].push(t);
@@ -1516,17 +1700,17 @@ function pintarLista(){
     orden.forEach(function(f){
       var tt = totales(dias[f]);
       var rel = etiquetaRelativa(f);
-      html += '<div class="dia">' +
+      html += '<div class="dia" style="--i:' + (n++) + '">' +
                 '<span class="fecha">' + esc(fechaLarga(f)) + '</span>' +
                 (rel ? '<span class="relativo">' + rel + '</span>' : '') +
                 '<span class="neto cifra ' + (tt.bal < 0 ? 'sale' : 'entra') + '">' +
                   (tt.bal < 0 ? '− ' : '+ ') + dinero(tt.bal) +
                 '</span>' +
               '</div>';
-      html += dias[f].map(filaHTML).join('');
+      html += dias[f].map(function(x){ return filaHTML(x, n++); }).join('');
     });
   } else {
-    html = lista.map(filaHTML).join('');
+    html = lista.map(function(x, k){ return filaHTML(x, k); }).join('');
   }
   caja.innerHTML = html;
 
@@ -1573,6 +1757,7 @@ function pintarResumen(){
   lista.forEach(function(x){ if(x.type === 'Gasto' && (!gastoMayor || x.amount > gastoMayor.amount)) gastoMayor = x; });
   var tasa = t.ing > 0 ? (t.bal / t.ing) * 100 : 0;
 
+  iKpi = 0;
   $('rejillaKpi').innerHTML = '' +
     tarjetaKpi('Balance', dineroConSigno(t.bal), t.n + ' movimientos', t.bal < 0 ? 'sale' : 'entra') +
     tarjetaKpi('Ingresos', dinero(t.ing), 'promedio ' + dinero(t.ing/nMeses) + '/mes', 'entra') +
@@ -1590,8 +1775,9 @@ function pintarResumen(){
   pintarTablaMes(meses, porMes);
 }
 
+var iKpi = 0;
 function tarjetaKpi(rotulo, valor, nota, clase){
-  return '<div class="kpi ' + clase + '">' +
+  return '<div class="kpi ' + clase + '" style="--i:' + (iKpi++) + '">' +
            '<div class="r">' + esc(rotulo) + '</div>' +
            '<div class="v cifra">' + esc(valor) + '</div>' +
            '<div class="n">' + esc(nota) + '</div>' +
@@ -1700,12 +1886,19 @@ function dibujarGrafico(meses, porMes){
     var hGas = (d.gas / tope) * alto;
     var bal  = d.ing - d.gas;
 
-    s.push('<rect x="' + (centro - anchoBarra - 2).toFixed(1) + '" y="' + (arriba + alto - hIng).toFixed(1) +
+    /* Toda la franja del mes es pulsable, no solo la barra: en un teléfono
+       acertarle a una barra de 12 px con el dedo es imposible. */
+    s.push('<rect class="mes-zona" data-mes="' + m + '" x="' + (izq + paso*k).toFixed(1) + '" y="' + arriba +
+           '" width="' + paso.toFixed(1) + '" height="' + (alto + 26) +
+           '" fill="transparent"><title>' + esc(etiquetaMes(m)) + ' · ingresos ' + dinero(d.ing) +
+           ' · gastos ' + dinero(d.gas) + ' · toca para ver sus movimientos</title></rect>');
+
+    s.push('<rect class="barra-cr" x="' + (centro - anchoBarra - 2).toFixed(1) + '" y="' + (arriba + alto - hIng).toFixed(1) +
            '" width="' + anchoBarra.toFixed(1) + '" height="' + Math.max(1,hIng).toFixed(1) +
-           '" rx="3" fill="var(--haber)"><title>' + esc(etiquetaMes(m)) + ' · ingresos ' + dinero(d.ing) + '</title></rect>');
-    s.push('<rect x="' + (centro + 2).toFixed(1) + '" y="' + (arriba + alto - hGas).toFixed(1) +
+           '" rx="3" fill="var(--haber)" style="--h:' + Math.max(1,hIng).toFixed(1) + 'px; --y:' + (arriba+alto).toFixed(1) + 'px"/>');
+    s.push('<rect class="barra-cr" x="' + (centro + 2).toFixed(1) + '" y="' + (arriba + alto - hGas).toFixed(1) +
            '" width="' + anchoBarra.toFixed(1) + '" height="' + Math.max(1,hGas).toFixed(1) +
-           '" rx="3" fill="var(--debe)"><title>' + esc(etiquetaMes(m)) + ' · gastos ' + dinero(d.gas) + '</title></rect>');
+           '" rx="3" fill="var(--debe)" style="--h:' + Math.max(1,hGas).toFixed(1) + 'px; --y:' + (arriba+alto).toFixed(1) + 'px"/>');
 
     puntos.push([centro, arriba + alto - Math.max(0, Math.min(alto, (bal / tope) * alto))]);
 
@@ -1732,6 +1925,32 @@ function dibujarGrafico(meses, porMes){
 
   caja.innerHTML = '<svg class="gr" viewBox="0 0 ' + W + ' ' + H + '" role="img" ' +
     'aria-label="Ingresos y gastos por mes">' + s.join('') + '</svg>';
+
+  /* Pulsar un mes lleva a sus movimientos. Es el atajo que más se usa: ves
+     un mes con mucho gasto y quieres saber en qué. */
+  var svg = caja.querySelector('svg');
+  Array.prototype.forEach.call(svg.querySelectorAll('.mes-zona'), function(z){
+    z.style.cursor = 'pointer';
+    z.addEventListener('click', function(){
+      estado.filtros.periodo = 'ym';
+      estado.filtros.ym = z.dataset.mes;
+      var sel = $('selPeriodo');
+      if(!sel.querySelector('option[value="ym"]')){
+        var o = document.createElement('option'); o.value = 'ym'; sel.appendChild(o);
+      }
+      sel.querySelector('option[value="ym"]').textContent = etiquetaMes(z.dataset.mes);
+      sel.value = 'ym';
+      $('cajaRango').classList.add('oculto');
+      irAHoja('mov');
+      pintarTodo();
+      aviso('Mes seleccionado', etiquetaMes(z.dataset.mes) + ' · ' + delPeriodo().length + ' movimientos',
+            'Ver todo', function(){
+              estado.filtros.periodo = 'todo';
+              sel.value = 'todo';
+              pintarTodo();
+            });
+    });
+  });
 }
 
 /* ==========================================================================
@@ -2657,6 +2876,23 @@ function cerrar(id){
 }
 
 /* ---------- Alta y edición ------------------------------------------------ */
+function pintarHabituales(){
+  var caja = $('habituales');
+  if(!caja) return;
+  var lista = habituales(4);
+  if(!lista.length){ caja.innerHTML = ''; caja.classList.add('oculto'); return; }
+  caja.classList.remove('oculto');
+  caja.innerHTML =
+    '<div class="rotulo-habituales">Repetir algo de siempre</div>' +
+    '<div class="tiras">' + lista.map(function(t){
+      var esIng = t.type === 'Ingreso';
+      return '<button type="button" class="tira" data-repetir="' + esc(t.id) + '" data-tipo="' + t.type + '">' +
+               '<span class="p">' + esc(t.desc) + '</span>' +
+               '<span class="m cifra">' + (esIng ? '+' : '−') + ' ' + dinero(t.amount) + '</span>' +
+             '</button>';
+    }).join('') + '</div>';
+}
+
 function abrirMovimiento(id){
   var t = id ? estado.movimientos.find(function(x){ return x.id === id; }) : null;
   estado.editando = t ? t.id : null;
@@ -2667,8 +2903,25 @@ function abrirMovimiento(id){
   $('movFecha').value = t ? t.date : hoyISO();
   $('movCat').value   = t ? (t.cat || '') : '';
   ponerTipo(t ? t.type : estado.tipoNuevo);
+  $('avisoRelleno').classList.add('oculto');
+  $('habituales').classList.toggle('oculto', !!t);
+  if(!t) pintarHabituales();
   abrir('veloMov');
   if(!t) setTimeout(function(){ $('movMonto').focus(); }, 160);
+}
+
+/* Un rótulo pequeño bajo la descripción: se ve que el programa completó algo
+   y qué fue, sin robar la atención ni tapar nada. */
+function marcarRelleno(cosas){
+  var caja = $('avisoRelleno');
+  if(!caja) return;
+  caja.textContent = 'Se completó ' + cosas.join(' y ') + ' como la última vez. Cámbialo si toca.';
+  caja.classList.remove('oculto');
+  caja.classList.remove('parpadeo');
+  void caja.offsetWidth;
+  caja.classList.add('parpadeo');
+  clearTimeout(marcarRelleno.t);
+  marcarRelleno.t = setTimeout(function(){ caja.classList.add('oculto'); }, 5000);
 }
 
 function ponerTipo(tipo){
@@ -2700,7 +2953,9 @@ function guardarMovimiento(){
   if(i >= 0) estado.movimientos[i] = reg; else estado.movimientos.unshift(reg);
 
   estado.editando = null;
+  recienTocado = reg.id;
   guardar(); pintarTodo(); cerrar('veloMov');
+  setTimeout(function(){ recienTocado = null; }, 2200);
   aviso(i >= 0 ? 'Movimiento actualizado' : 'Movimiento anotado',
         (reg.type === 'Ingreso' ? '+ ' : '− ') + dinero(reg.amount) + ' · ' + reg.desc);
 }
@@ -2719,7 +2974,9 @@ function duplicarMovimiento(id){
   if(!t) return;
   var copia = sanear({ date:hoyISO(), desc:t.desc, type:t.type, amount:t.amount, cat:t.cat });
   estado.movimientos.unshift(copia);
+  recienTocado = copia.id;
   guardar(); pintarTodo();
+  setTimeout(function(){ recienTocado = null; }, 2200);
   aviso('Duplicado', 'Se copió con la fecha de hoy.');
 }
 
@@ -2837,6 +3094,33 @@ function conectarTodo(){
     if(b) $('movCat').value = b.dataset.cat;
   });
 
+  /* Repetir de un toque algo que ya anotas siempre */
+  $('habituales').addEventListener('click', function(e){
+    var b = e.target.closest('[data-repetir]');
+    if(!b) return;
+    var t = estado.movimientos.find(function(x){ return x.id === b.dataset.repetir; });
+    if(!t) return;
+    ponerTipo(t.type);
+    $('movMonto').value = String(t.amount);
+    $('movDesc').value  = t.desc;
+    $('movCat').value   = t.cat || '';
+    $('movFecha').value = hoyISO();
+    $('movMonto').focus();
+    $('movMonto').select();
+  });
+
+  /* Al escribir una descripción que ya usaste, se completa el resto solo.
+     Solo rellena lo que esté vacío: nunca pisa lo que hayas escrito tú. */
+  $('movDesc').addEventListener('change', function(){
+    var t = ultimoIgual(this.value);
+    if(!t) return;
+    var relleno = [];
+    if(!$('movMonto').value.trim()){ $('movMonto').value = String(t.amount); relleno.push('el monto'); }
+    if(!$('movCat').value.trim() && t.cat){ $('movCat').value = t.cat; relleno.push('la categoría'); }
+    if(estado.tipoNuevo !== t.type && !$('movId').value){ ponerTipo(t.type); relleno.push('el tipo'); }
+    if(relleno.length) marcarRelleno(relleno);
+  });
+
   /* --- Lista: editar, duplicar, borrar --- */
   $('listaMov').addEventListener('click', function(e){
     var btn = e.target.closest('[data-accion]');
@@ -2851,9 +3135,61 @@ function conectarTodo(){
   /* Tocar la fila también abre la edición, que en móvil es lo natural */
   $('listaMov').addEventListener('click', function(e){
     if(e.target.closest('[data-accion]')) return;
+    if(huboDeslizamiento) return;                 /* no abrir si venias arrastrando */
     var fila = e.target.closest('.linea');
     if(fila) abrirMovimiento(fila.dataset.id);
   });
+
+  /* ---- Deslizar una fila hacia la izquierda para eliminarla -------------
+     Es el gesto que todo el mundo ya conoce del correo. Solo se activa con
+     el dedo, nunca con el ratón, y hace falta pasar de la mitad para que
+     cuente: un roce al hacer scroll no borra nada.                       */
+  (function(){
+    var fila = null, x0 = 0, y0 = 0, dx = 0, decidido = '', UMBRAL = 96;
+
+    $('listaMov').addEventListener('touchstart', function(e){
+      if(e.touches.length !== 1) return;
+      var f = e.target.closest('.linea');
+      if(!f || e.target.closest('[data-accion]')) return;
+      fila = f; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY;
+      dx = 0; decidido = ''; huboDeslizamiento = false;
+      fila.classList.remove('volviendo');
+    }, { passive:true });
+
+    $('listaMov').addEventListener('touchmove', function(e){
+      if(!fila) return;
+      var x = e.touches[0].clientX - x0, y = e.touches[0].clientY - y0;
+      if(!decidido){
+        if(Math.abs(x) < 8 && Math.abs(y) < 8) return;
+        decidido = Math.abs(x) > Math.abs(y) * 1.4 ? 'lado' : 'vertical';
+        if(decidido === 'lado') fila.classList.add('deslizando','con-deslizamiento');
+      }
+      if(decidido !== 'lado') return;
+      dx = Math.min(0, x);                                /* solo hacia la izquierda */
+      huboDeslizamiento = Math.abs(dx) > 8;
+      fila.style.transform = 'translateX(' + dx + 'px)';
+      var f = fila.querySelector('.fondo-borrar');
+      if(f) f.style.opacity = Math.min(1, Math.abs(dx) / UMBRAL);
+    }, { passive:true });
+
+    function soltar(){
+      if(!fila) return;
+      var f = fila, pasado = Math.abs(dx) >= UMBRAL, id = f.dataset.id;
+      f.classList.remove('deslizando');
+      f.classList.add('volviendo');
+      if(pasado){
+        f.style.transform = 'translateX(-100%)';
+        setTimeout(function(){ borrarMovimiento(id); }, 170);
+      } else {
+        f.style.transform = '';
+        setTimeout(function(){ f.classList.remove('con-deslizamiento','volviendo'); }, 240);
+      }
+      fila = null; dx = 0; decidido = '';
+      setTimeout(function(){ huboDeslizamiento = false; }, 60);
+    }
+    $('listaMov').addEventListener('touchend', soltar, { passive:true });
+    $('listaMov').addEventListener('touchcancel', soltar, { passive:true });
+  })();
 
   /* --- Búsqueda, filtros, orden, periodo --- */
   var temporizadorBuscar = null;
