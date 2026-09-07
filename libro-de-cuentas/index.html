@@ -3132,10 +3132,22 @@ function estadoNube(cual){
                   : 'Sin nube';
 }
 
+/* jsonbin rechaza guardar un contenido "vacio": con el libro en blanco, un
+   [] pelado devuelve 400 "Bin cannot be blank". Asi que cuando no hay nada
+   se manda {"transactions":[]}, que para jsonbin si es contenido.
+
+   Y sigue siendo compatible en las dos direcciones: al bajar se entienden
+   los dos formatos, y la version anterior, al encontrarse un objeto en vez
+   de un array, se queda con una lista vacia... que es justo lo que hay.  */
+function cuerpoParaNube(){
+  var l = estado.movimientos;
+  return (l && l.length) ? JSON.stringify(l) : JSON.stringify({ transactions: [] });
+}
+
 function subirANube(){
   if(!hayNube()){ estadoNube('off'); return; }
   var cfg = configNube();
-  var json = JSON.stringify(estado.movimientos);
+  var json = cuerpoParaNube();
   ultimoJSONSubido = json;
   estadoNube('busy');
   guardandoLocal = true;
@@ -3160,7 +3172,7 @@ function bajarDeNube(silencioso){
     .then(function(d){
       var arr = (d && d.record && Array.isArray(d.record)) ? d.record
               : (d && Array.isArray(d.record && d.record.transactions) ? d.record.transactions : []);
-      var crudo = JSON.stringify(arr);
+      var crudo = (arr && arr.length) ? JSON.stringify(arr) : JSON.stringify({ transactions: [] });
       if(crudo === ultimoJSONSubido){ estadoNube('ok'); return; }
       estado.movimientos = arr.map(sanear);
       ultimoJSONSubido = crudo;
@@ -3196,6 +3208,8 @@ function porQueFallo(estadoHttp, cuerpo){
     m:'La clave es válida pero no puede crear bases. Comprueba que sea la X-MASTER-KEY y no la Access Key.' };
   if(estadoHttp === 429) return { t:'Demasiadas peticiones',
     m:'jsonbin te está limitando. Espera un minuto y vuelve a intentarlo.' };
+  if(estadoHttp === 400) return { t:'jsonbin rechazó el contenido',
+    m:(mensajeDelCuerpo(cuerpo) || 'Respuesta 400.') + ' Si dice que la base no puede estar vacía, anota un movimiento y vuelve a intentarlo.' };
   if(estadoHttp === 422) return { t:'jsonbin rechazó los datos',
     m:'Respuesta 422. Si acabas de crear la cuenta, entra una vez a jsonbin.io y vuelve.' };
   if(estadoHttp) return { t:'jsonbin respondió ' + estadoHttp,
@@ -3239,7 +3253,7 @@ function crearBase(){
   fetch(JSONBIN, {
     method:'POST',
     headers:{ 'Content-Type':'application/json', 'X-Master-Key':clave, 'X-Bin-Name':'cuentas' },
-    body: JSON.stringify(estado.movimientos || [])
+    body: cuerpoParaNube()
   }).then(function(r){
     httpEstado = r.status;
     return r.json().catch(function(){ return null; });
