@@ -13853,5 +13853,429 @@ body#cuerpo-app .modal-papotas input[type="radio"]{
   })();
 }();
 </script>
+
+<script id="papotas-v200-reparaciones">
+/* ============================================================================
+   V200 · Seis reparaciones encontradas revisando el programa entero
+
+   1. EL RESPALDO SE DEJABA ATRÁS EL BLOC DE NOTAS Y LOS MENSAJES RÁPIDOS.
+      Las listas de datos (clientes, cuentas, ventas, inversiones, combos,
+      auditoría, ajustes) están publicadas en `window` desde la V21, porque el
+      programa está declarado con `let` y eso NO crea propiedad de window. A
+      esa lista de la V21 se le olvidaron dos: `mensajesRapidos` y
+      `blocNotasTexto`. Como la función que arma el respaldo lee de window,
+      exportaba blocNotasTexto:"" y mensajesRapidos:[] por muy llenos que
+      estuvieran. Comprobado: se escribe una nota, se exporta y en el archivo
+      sale vacía; al reimportar, la nota se pierde.
+
+   2. POR LO MISMO, EL ENVÍO DE WHATSAPP POR API NO MANDABA NADA.
+      La capa V196/V197 lee `window.colaEnvioMasivo`, `window.indiceEnvioMasivo`
+      y `window.clienteSeleccionadoWs`. Los tres eran `undefined`, así que la
+      cola le llegaba vacía y daba el envío por terminado sin mandar un solo
+      mensaje, y el envío de uno en uno se quedaba sin cliente.
+
+   3. LAS FECHAS SALÍAN EN CRUDO EN LOS MENSAJES. {vencimiento} escribía
+      "2026-08-01" en vez de "1 ago 2026". Al cliente le llegaba así.
+
+   4. FALTABAN ETIQUETAS ÚTILES EN LOS MENSAJES. Para un aviso de cobro lo
+      primero que hace falta es cuánto debe y cuántos días lleva. Se añaden
+      {monto}, {dias}, {telefono} y {negocio}.
+
+   5. UN TELÉFONO APUNTADO CON CERO DELANTE NO SE ARREGLABA. "0999111222" se
+      mandaba tal cual y el mensaje no llegaba.
+
+   6. LAS CIFRAS GRANDES SE LEÍAN MAL: "S/ 1234.57". Ahora "S/ 1,234.57".
+
+   Y una mejora: al elegir la cuenta master en la ficha del cliente, el perfil
+   se propone solo con el primer hueco libre y avisa si escribes uno ocupado.
+   ==========================================================================*/
+!function(){
+  "use strict";
+
+  function heredar(nuevo, viejo){
+    try{ Object.keys(viejo).forEach(function(k){ nuevo[k]=viejo[k]; }); }catch(_){}
+    return nuevo;
+  }
+
+  /* ---- 1 y 2. Publicar en window lo que estaba sólo en el ámbito léxico --- */
+  function puente(nombre, leer, escribir){
+    try{
+      var d = Object.getOwnPropertyDescriptor(window, nombre);
+      if(d && (d.get || d.set)) return false;          /* ya hay puente */
+      Object.defineProperty(window, nombre, {
+        configurable: true,
+        get: function(){ try{ return leer(); }catch(_){ return undefined; } },
+        set: function(v){ try{ escribir(v); }catch(_){} }
+      });
+      return true;
+    }catch(e){ return false; }
+  }
+
+  var puentes = 0;
+  puentes += puente("mensajesRapidos",
+      function(){ return mensajesRapidos; },      function(v){ mensajesRapidos = v; }) ? 1 : 0;
+  puentes += puente("blocNotasTexto",
+      function(){ return blocNotasTexto; },       function(v){ blocNotasTexto = v; }) ? 1 : 0;
+  puentes += puente("colaEnvioMasivo",
+      function(){ return colaEnvioMasivo; },      function(v){ colaEnvioMasivo = v; }) ? 1 : 0;
+  puentes += puente("indiceEnvioMasivo",
+      function(){ return indiceEnvioMasivo; },    function(v){ indiceEnvioMasivo = v; }) ? 1 : 0;
+  puentes += puente("clienteSeleccionadoWs",
+      function(){ return clienteSeleccionadoWs; },function(v){ clienteSeleccionadoWs = v; }) ? 1 : 0;
+  puentes += puente("masterRenovando",
+      function(){ return masterRenovando; },      function(v){ masterRenovando = v; }) ? 1 : 0;
+  puentes += puente("mesesRenovandoMaster",
+      function(){ return mesesRenovandoMaster; }, function(v){ mesesRenovandoMaster = v; }) ? 1 : 0;
+
+  /* ---- 6. Miles con coma ------------------------------------------------- */
+  function envolverMoneda(){
+    var orig = window.formatearMoneda;
+    if(typeof orig !== "function" || orig.__v200) return false;
+    var nuevo = function(n){
+      var simbolo = (window.ajustes && ajustes.moneda) || "S/";
+      var v = Number(n);
+      if(!isFinite(v)) v = 0;
+      var negativo = v < 0;
+      var partes = Math.abs(v).toFixed(2).split(".");
+      partes[0] = partes[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      return simbolo + " " + (negativo ? "-" : "") + partes.join(".");
+    };
+    nuevo.__v200 = true;
+    window.formatearMoneda = heredar(nuevo, orig);
+    return true;
+  }
+
+  /* ---- 5. Teléfonos con ceros delante ------------------------------------ */
+  function envolverTelefono(){
+    var orig = window.normalizarTelefono;
+    if(typeof orig !== "function" || orig.__v200) return false;
+    var nuevo = function(t){
+      /* "0999111222" y "0051999111222" son la misma persona que "999111222" */
+      var limpio = String(t == null ? "" : t).replace(/[^0-9]/g, "").replace(/^0+/, "");
+      return orig.call(this, limpio);
+    };
+    nuevo.__v200 = true;
+    window.normalizarTelefono = heredar(nuevo, orig);
+    return true;
+  }
+
+  /* ---- 3 y 4. Mensajes: fechas legibles y etiquetas nuevas ---------------- */
+  function bonita(iso){
+    try{ if(typeof fechaBonita === "function") return fechaBonita(iso); }catch(_){}
+    return iso;
+  }
+  function hoyISO(){
+    try{ if(typeof obtenerFechaLocal === "function") return obtenerFechaLocal(); }catch(_){}
+    return new Date().toISOString().slice(0,10);
+  }
+  function diasHasta(iso){
+    if(!iso) return "";
+    var a = Date.parse(iso + "T00:00:00"), b = Date.parse(hoyISO() + "T00:00:00");
+    if(isNaN(a) || isNaN(b)) return "";
+    return Math.round((a - b) / 86400000);
+  }
+  function textoDias(iso){
+    var d = diasHasta(iso);
+    if(d === "") return "";
+    if(d < 0)  return "vencida hace " + Math.abs(d) + (Math.abs(d) === 1 ? " día" : " días");
+    if(d === 0) return "vence hoy";
+    if(d === 1) return "vence mañana";
+    return "vence en " + d + " días";
+  }
+  function cuanto(c){
+    try{
+      if(typeof cobroDeCliente === "function") return formatearMoneda(cobroDeCliente(c));
+    }catch(_){}
+    try{ return formatearMoneda(Number(c && c.monto) || 0); }catch(_){}
+    return "";
+  }
+
+  /* Cambia las fechas ISO sueltas por fechas escritas, y resuelve las
+     etiquetas que el programa no conocía. */
+  function rematar(texto, c){
+    var t = String(texto == null ? "" : texto);
+    if(c){
+      t = t.replace(/\{monto\}/g,     cuanto(c))
+           .replace(/\{dias\}/g,      textoDias(c.vencimiento))
+           .replace(/\{telefono\}/g,  String(c.telefono || ""))
+           .replace(/\{nombre\}/g,    String(c.nombre || ""))
+           .replace(/\{plataforma\}/g,String(c.servicio || ""));
+    }
+    try{
+      t = t.replace(/\{negocio\}/g, (window.ajustes && ajustes.nombre) || "PAPOTAS");
+    }catch(_){}
+    return t.replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, function(m){ return bonita(m); });
+  }
+
+  function envolverMensajeMasivo(){
+    var orig = window.mensajeMasivoPara;
+    if(typeof orig !== "function" || orig.__v200) return false;
+    var nuevo = function(c){ return rematar(orig.apply(this, arguments), c); };
+    nuevo.__v200 = true;
+    window.mensajeMasivoPara = heredar(nuevo, orig);
+    return true;
+  }
+
+  function envolverPlantillaWs(){
+    var orig = window.seleccionarPlantillaWs;
+    if(typeof orig !== "function" || orig.__v200) return false;
+    var nuevo = function(){
+      var r = orig.apply(this, arguments);
+      try{
+        var caja = document.getElementById("ws-mensaje-preview");
+        if(caja) caja.value = rematar(caja.value, window.clienteSeleccionadoWs);
+      }catch(_){}
+      return r;
+    };
+    nuevo.__v200 = true;
+    window.seleccionarPlantillaWs = heredar(nuevo, orig);
+    return true;
+  }
+
+  /* Las etiquetas nuevas también hay que enseñarlas donde se listan */
+  function ampliarChips(){
+    var chips = document.querySelectorAll('span.bg-black\\/60');
+    var yaEsta = false, ultimo = null;
+    chips.forEach(function(s){
+      var t = (s.textContent || "").trim();
+      if(t === "{monto}") yaEsta = true;
+      if(t === "{pin}" || t === "{vencimiento}") ultimo = s;
+    });
+    if(yaEsta || !ultimo || !ultimo.parentNode) return false;
+    [["{monto}","lo que debe"],["{dias}","cuánto le falta"],["{negocio}","tu nombre"]]
+      .forEach(function(par){
+        var s = document.createElement("span");
+        s.className = ultimo.className;
+        s.textContent = par[0];
+        s.title = par[1];
+        ultimo.parentNode.insertBefore(s, ultimo.nextSibling);
+        ultimo.parentNode.insertBefore(document.createTextNode(" "), s);
+      });
+    return true;
+  }
+
+  /* La pantalla de envío por lotes no decía en ninguna parte qué etiquetas
+     existen. Se pone la lista debajo del cuadro de texto, y al pulsar una se
+     escribe donde tengas el cursor. */
+  var ETIQUETAS = [
+    ["{cliente}","su nombre"], ["{servicio}","la plataforma"],
+    ["{vencimiento}","cuándo vence"], ["{dias}","cuánto le falta"],
+    ["{monto}","lo que debe"], ["{perfil}","su perfil"],
+    ["{correo}","el correo"], ["{contrasena}","la contraseña"],
+    ["{pin}","su PIN"], ["{negocio}","tu nombre"]
+  ];
+
+  function ayudaMasivos(){
+    var caja = document.getElementById("masivo-mensaje-texto");
+    if(!caja || document.getElementById("pap-etiquetas-masivo")) return false;
+    var fila = document.createElement("div");
+    fila.id = "pap-etiquetas-masivo";
+    fila.style.cssText = "display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;align-items:center";
+    var rotulo = document.createElement("span");
+    rotulo.textContent = "Pulsa para insertar:";
+    rotulo.style.cssText = "font-size:9px;font-weight:900;color:#f59e0b;text-transform:uppercase;letter-spacing:.04em;margin-right:2px";
+    fila.appendChild(rotulo);
+
+    ETIQUETAS.forEach(function(par){
+      var t = document.createElement("button");
+      t.type = "button";
+      t.textContent = par[0];
+      t.title = par[1];
+      t.style.cssText = "font-family:ui-monospace,monospace;font-size:9px;padding:2px 6px;border-radius:6px;"+
+        "border:1px solid rgba(255,255,255,.10);background:rgba(0,0,0,.55);color:#cbd5e1;cursor:pointer";
+      t.addEventListener("click", function(){
+        var i = caja.selectionStart, f = caja.selectionEnd, v = caja.value;
+        caja.value = v.slice(0,i) + par[0] + v.slice(f);
+        caja.focus();
+        caja.selectionStart = caja.selectionEnd = i + par[0].length;
+        caja.dispatchEvent(new Event("input", {bubbles:true}));
+      });
+      fila.appendChild(t);
+    });
+    caja.parentNode.insertBefore(fila, caja.nextSibling);
+    return true;
+  }
+
+  /* ---- Mejora. El buscador ignora tildes y separadores del teléfono ------- */
+  function sinTildes(t){
+    return String(t == null ? "" : t)
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  function envolverBuscador(){
+    var orig = window.construirResultadosBusqueda;
+    if(typeof orig !== "function" || orig.__v200) return false;
+
+    var nuevo = function(consulta){
+      var r = orig.apply(this, arguments);
+      if(r && r.length) return r;
+
+      var q = String(consulta || "").trim();
+      if(q.length < 2) return r;
+
+      /* Un teléfono escrito con espacios, guiones o prefijo: "987 654 321" */
+      var digitos = q.replace(/[^0-9]/g, "");
+      if(digitos.length >= 6){
+        var intentos = [digitos];
+        if(digitos.length > 9) intentos.push(digitos.slice(-9));
+        for(var i = 0; i < intentos.length; i++){
+          var otra = orig.call(this, intentos[i]);
+          if(otra && otra.length) return otra;
+        }
+      }
+
+      /* "jose" tiene que encontrar a "JOSÉ"; "nanez" a "ÑAÑEZ" */
+      var t = sinTildes(q);
+      if(!t) return r;
+      var salida = [];
+      try{
+        (window.clientes || []).forEach(function(c){
+          if(!c) return;
+          var m = (typeof masterDeCliente === "function") ? masterDeCliente(c) : null;
+          var campos = [c.nombre, c.telefono, c.servicio, c.perfil, c.pin, c.correo, c.referidoPor,
+                        m && typeof nombreCuenta === "function" ? nombreCuenta(m) : ""];
+          if(!campos.some(function(x){ return sinTildes(x).indexOf(t) >= 0; })) return;
+          var n = sinTildes(c.nombre);
+          salida.push({ tipo:"cliente", id:c.id, peso: n.indexOf(t) === 0 ? 0 : 1, dato:c, master:m });
+        });
+        (window.servicios || []).forEach(function(v){
+          if(!v) return;
+          var etiqueta = (typeof nombreCuenta === "function") ? nombreCuenta(v) : (v.nombre || "");
+          if(![etiqueta, v.nombre, v.correo, v.etiqueta].some(function(x){ return sinTildes(x).indexOf(t) >= 0; })) return;
+          salida.push({ tipo:"cuenta", id:v.id, peso: sinTildes(etiqueta).indexOf(t) === 0 ? 0 : 1, dato:v });
+        });
+      }catch(e){ return r; }
+
+      salida.sort(function(a, b){
+        return a.peso - b.peso ||
+          String(a.dato.nombre || "").localeCompare(String(b.dato.nombre || ""));
+      });
+      var cli = salida.filter(function(x){ return x.tipo === "cliente"; }).slice(0, 8);
+      var cta = salida.filter(function(x){ return x.tipo === "cuenta";  }).slice(0, 5);
+      return cli.concat(cta);
+    };
+
+    nuevo.__v200 = true;
+    window.construirResultadosBusqueda = heredar(nuevo, orig);
+    return true;
+  }
+
+  /* ---- Mejora. Proponer el perfil libre al elegir la cuenta master -------- */
+  function perfilOcupado(masterId, perfil, idCliente){
+    var p = String(perfil || "").trim().toLowerCase();
+    if(!p || !masterId || !Array.isArray(window.clientes)) return null;
+    return window.clientes.find(function(c){
+      return c && String(c.cuentaMasterId) === String(masterId)
+          && String(c.id) !== String(idCliente || "")
+          && String(c.perfil || "").trim().toLowerCase() === p;
+    }) || null;
+  }
+
+  function avisoPerfil(texto){
+    var campo = document.getElementById("cli-perfil");
+    if(!campo || !campo.parentNode) return;
+    var n = document.getElementById("pap-aviso-perfil");
+    if(!texto){ if(n) n.remove(); return; }
+    if(!n){
+      n = document.createElement("div");
+      n.id = "pap-aviso-perfil";
+      n.style.cssText = "margin-top:4px;font-size:9.5px;font-weight:800;line-height:1.4;color:#fbbf24";
+      campo.parentNode.insertBefore(n, campo.nextSibling);
+    }
+    n.textContent = texto;
+  }
+
+  function repasarPerfil(proponer){
+    var sel   = document.getElementById("cli-cuenta-master");
+    var campo = document.getElementById("cli-perfil");
+    if(!sel || !campo) return;
+    var masterId = sel.value || "";
+    if(!masterId){ avisoPerfil(""); return; }
+    var master = (window.servicios || []).find(function(s){
+      return s && String(s.id) === String(masterId);
+    });
+    if(!master){ avisoPerfil(""); return; }
+    var idCliente = (document.getElementById("cli-id") || {}).value || "";
+
+    var choca = perfilOcupado(masterId, campo.value, idCliente);
+    if(proponer && (!String(campo.value || "").trim() || choca)){
+      try{
+        if(typeof siguientePerfilLibre === "function") campo.value = siguientePerfilLibre(master);
+      }catch(_){}
+      choca = perfilOcupado(masterId, campo.value, idCliente);
+    }
+    avisoPerfil(choca ? ("⚠ Ese perfil ya es de " + (choca.nombre || "otro cliente") + ".") : "");
+  }
+
+  function engancharPerfil(){
+    var sel   = document.getElementById("cli-cuenta-master");
+    var campo = document.getElementById("cli-perfil");
+    if(!sel || !campo || sel.dataset.papV200) return false;
+    sel.dataset.papV200 = "1";
+    sel.addEventListener("change", function(){ setTimeout(function(){ repasarPerfil(true); }, 0); });
+    campo.addEventListener("input",  function(){ repasarPerfil(false); });
+    return true;
+  }
+
+  /* ---- puesta en marcha --------------------------------------------------- */
+  var n = 0;
+  (function reintentar(){
+    try{
+      envolverMoneda();
+      envolverTelefono();
+      envolverMensajeMasivo();
+      envolverPlantillaWs();
+      envolverBuscador();
+      engancharPerfil();
+      ampliarChips();
+      ayudaMasivos();
+    }catch(e){ console.warn("V200:", e); }
+    var listo = window.formatearMoneda && window.formatearMoneda.__v200
+             && window.normalizarTelefono && window.normalizarTelefono.__v200
+             && window.mensajeMasivoPara && window.mensajeMasivoPara.__v200;
+    if(++n < 24 && !listo) setTimeout(reintentar, 500);
+  })();
+}();
+</script>
+
+<style id="papotas-v201-palabras">
+/* ============================================================================
+   V201 · Las palabras se partían por la mitad
+
+   Una capa antigua puso `overflow-wrap: anywhere` a casi todo el programa.
+   Esa regla no sólo parte una palabra cuando no cabe: le dice al navegador
+   que la anchura mínima de la caja es CERO, así que en una fila de varias
+   columnas el nombre se quedaba con las migajas y salía "MARIA / FERNAND /
+   A QUISPE" en la cola de cobranza del teléfono.
+
+   `break-word` parte sólo cuando de verdad no cabe la palabra entera y
+   respeta la anchura mínima, así que las columnas vuelven a repartirse bien.
+   Las cajas que sí necesitan partir por donde sea -correos, contraseñas y
+   celdas de tabla- lo piden con !important y se quedan como estaban.
+   ==========================================================================*/
+body#cuerpo-app,
+body#cuerpo-app *{ overflow-wrap:break-word; }
+
+/* En el telefono, el nombre se quedaba con 71 px de los 293 de la fila: el
+   resto se lo repartian el avatar, la cifra y los dos botones. Ahora el
+   nombre ocupa su propia linea y el importe con los botones bajan debajo,
+   alineados con el. Sobre 560 px la fila sigue en una sola linea. */
+@media (max-width:560px){
+  body#cuerpo-app #op-cola > div,
+  body#cuerpo-app .seccion-pantalla .divide-y > div.flex{ flex-wrap:wrap; row-gap:6px; }
+  body#cuerpo-app #op-cola > div > .min-w-0.flex-1,
+  body#cuerpo-app .seccion-pantalla .divide-y > div.flex > .min-w-0.flex-1{ flex-basis:calc(100% - 46px); }
+  body#cuerpo-app #op-cola > div > .min-w-0.flex-1 + *,
+  body#cuerpo-app .seccion-pantalla .divide-y > div.flex > .min-w-0.flex-1 + *{ margin-inline-start:42px; }
+}
+
+/* Una pastilla de recuento nunca debe partirse: "0 destinat / arios" */
+body#cuerpo-app #masivo-contador-clientes,
+body#cuerpo-app .rounded-full[id*="contador"],
+body#cuerpo-app .chip,
+body#cuerpo-app .badge{ white-space:nowrap; }
+body#cuerpo-app #masivo-contador-clientes{ flex:0 0 auto; }
+</style>
 </body>
 </html>
