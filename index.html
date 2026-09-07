@@ -13150,6 +13150,244 @@ Resources:`;for(let t of c){if(!t||typeof t!=`string`)throw Error(`@supabase/aut
 }();
 </script>
 
+<script id="papotas-v198-renovar-desde-vencimiento">
+/* ============================================================================
+   V198 · Renovar suma sobre el vencimiento, y el cobro llega a Caja
+
+   Dos fallos que iban juntos y se notaban al renovar desde "Editar cliente":
+
+   1. AL SUMAR MESES SE PERDÍAN DÍAS. El botón "1 mes" calculaba
+      vencimiento = inicio + 1 mes, y al editar un cliente "inicio" es el
+      arranque del periodo que ya está corriendo. Si a alguien le quedaban
+      quince días pagados y le sumabas un mes, esos quince días se volatilizaban.
+      Lo correcto, y lo que ya hacía el modal de Renovar, es empalmar: el
+      periodo nuevo arranca donde termina el que tiene. Si ya venció, arranca
+      hoy, porque los días en los que no tuvo servicio no se cobran.
+
+   2. EL DINERO NO SE REGISTRABA. Guardar una edición nunca creaba una venta
+      -a propósito, para que corregir un teléfono no inventara ingresos-, así
+      que renovar por aquí no aparecía en Dinero ni en Caja y cierre.
+      Ahora, cuando la edición ALARGA el vencimiento, aparece una casilla
+      para registrar el cobro. Marcada por defecto, porque alargar es cobrar;
+      pero visible y desmarcable, para cuando solo estás corrigiendo una fecha.
+   ========================================================================== */
+!function(){
+  "use strict";
+
+  function heredar(nuevo, viejo){
+    try{ Object.keys(viejo).forEach(function(k){ nuevo[k] = viejo[k]; }); }catch(e){}
+    return nuevo;
+  }
+  function hoy(){
+    try{ return obtenerFechaLocal(); }catch(e){ return new Date().toISOString().slice(0,10); }
+  }
+  function editando(){
+    var c = document.getElementById("cli-id");
+    return c && c.value ? String(c.value) : "";
+  }
+  function clienteEnEdicion(){
+    var id = editando();
+    if(!id || !window.clientes) return null;
+    return clientes.find(function(x){ return String(x.id) === id; }) || null;
+  }
+
+  /* ---- 1. Empalmar el periodo nuevo con el que ya corre ------------------ */
+  function envolverFijarCiclo(){
+    var orig = window.fijarCicloCliente;
+    if(typeof orig !== "function" || orig.__v198) return false;
+
+    var nuevo = function(tipo, cantidad){
+      var c = clienteEnEdicion();
+      if(c){
+        /* Se arranca donde acaba lo que ya pagó. Si ya venció, desde hoy. */
+        var h = hoy();
+        var desde = (c.vencimiento && c.vencimiento >= h) ? c.vencimiento : h;
+        var campo = document.getElementById("cli-inicio");
+        if(campo) campo.value = desde;
+      }
+      var r = orig.apply(this, arguments);
+      try{ pintarNota(); }catch(e){}
+      return r;
+    };
+    heredar(nuevo, orig);
+    nuevo.__v198 = true;
+    window.fijarCicloCliente = nuevo;
+    return true;
+  }
+
+  /* Una línea que explica de dónde sale la cuenta, para que no haya sorpresas */
+  function pintarNota(){
+    var caja = document.getElementById("cli-resumen-ciclo");
+    if(!caja) return;
+    var c = clienteEnEdicion();
+    var anterior = document.getElementById("pap-nota-empalme");
+    if(anterior) anterior.remove();
+    if(!c || !c.vencimiento) return;
+
+    var h = hoy();
+    var venciaAntes = c.vencimiento;
+    var inicio = (document.getElementById("cli-inicio") || {}).value || "";
+    if(inicio !== venciaAntes && inicio !== h) return;    /* no lo tocó un botón */
+
+    var n = document.createElement("div");
+    n.id = "pap-nota-empalme";
+    n.style.cssText = "margin-top:5px;font-size:10px;font-weight:700;color:#67e8f9";
+    n.textContent = venciaAntes >= h
+      ? "↔ Se suma sobre su vencimiento actual (" + fechaCortaSegura(venciaAntes) + "), no desde hoy: no pierde días."
+      : "↔ Venció el " + fechaCortaSegura(venciaAntes) + ", así que el periodo nuevo arranca hoy.";
+    caja.parentElement && caja.parentElement.insertBefore(n, caja.nextSibling);
+  }
+  function fechaCortaSegura(iso){
+    try{ return fechaBonita(iso); }catch(e){ return iso; }
+  }
+
+  /* ---- 2. La casilla de cobrar, solo cuando se alarga -------------------- */
+  var vencimientoAlAbrir = null;
+
+  function envolverEditar(){
+    var orig = window.editarCliente;
+    if(typeof orig !== "function" || orig.__v198) return false;
+    var nuevo = function(id){
+      var r = orig.apply(this, arguments);
+      try{
+        var c = (window.clientes || []).find(function(x){ return String(x.id) === String(id); });
+        vencimientoAlAbrir = c ? (c.vencimiento || null) : null;
+        setTimeout(function(){ ponerCasilla(); vigilar(); }, 60);
+      }catch(e){}
+      return r;
+    };
+    heredar(nuevo, orig);
+    nuevo.__v198 = true;
+    window.editarCliente = nuevo;
+    return true;
+  }
+
+  function ponerCasilla(){
+    if(document.getElementById("pap-cobrar-al-editar")) return;
+    var monto = document.getElementById("cli-monto");
+    if(!monto) return;
+    var bloque = monto.closest("div.p-2\\.5, div.rounded-xl, div") || monto.parentElement;
+    if(!bloque || !bloque.parentElement) return;
+
+    var caja = document.createElement("label");
+    caja.id = "pap-caja-cobrar";
+    caja.style.cssText = "display:none;align-items:flex-start;gap:9px;margin-top:9px;padding:10px 11px;" +
+      "border-radius:11px;border:1px solid rgba(52,211,153,.4);background:rgba(16,185,129,.10);cursor:pointer";
+    caja.innerHTML =
+      '<input type="checkbox" id="pap-cobrar-al-editar" checked ' +
+        'style="width:17px;height:17px;flex:0 0 auto;margin-top:1px;accent-color:#10b981;cursor:pointer">' +
+      '<span style="min-width:0">' +
+        '<b style="display:block;font-size:11.5px;color:#6ee7b7">Registrar el cobro como venta</b>' +
+        '<span id="pap-cobrar-detalle" style="display:block;font-size:10px;color:#93a1b3;margin-top:2px;line-height:1.45"></span>' +
+      '</span>';
+    bloque.parentElement.insertBefore(caja, bloque.nextSibling);
+  }
+
+  /* Se mira si el vencimiento del formulario va MÁS ALLÁ del que tenía */
+  function vigilar(){
+    var caja = document.getElementById("pap-caja-cobrar");
+    if(!caja) return;
+    var venc = document.getElementById("cli-vencimiento");
+    var monto = document.getElementById("cli-monto");
+    if(!venc || !editando()){ caja.style.display = "none"; return; }
+
+    var alarga = !!(vencimientoAlAbrir && venc.value && venc.value > vencimientoAlAbrir);
+    caja.style.display = alarga ? "flex" : "none";
+
+    if(alarga){
+      var det = document.getElementById("pap-cobrar-detalle");
+      var m = parseFloat(monto && monto.value) || 0;
+      var cant = 1;
+      try{ cant = "meses" === cicloClienteActual.tipo ? Math.max(1, cicloClienteActual.cantidad) : 1; }catch(e){}
+      var total = m * cant;
+      if(det) det.textContent =
+        "Alargas de " + fechaCortaSegura(vencimientoAlAbrir) + " a " + fechaCortaSegura(venc.value) +
+        ". Se anotará " + (function(){ try{ return formatearMoneda(total); }catch(e){ return "S/ " + total.toFixed(2); } })() +
+        " en Dinero y en Caja y cierre.";
+    }
+  }
+
+  /* ---- 3. Al guardar, crear la venta si toca --------------------------- */
+  function envolverGuardar(){
+    var orig = window.guardarCliente;
+    if(typeof orig !== "function" || orig.__v198) return false;
+
+    var nuevo = function(ev){
+      var id = editando();
+      var antes = vencimientoAlAbrir;
+      var quiereCobrar = !!(document.getElementById("pap-cobrar-al-editar") || {}).checked;
+      var cajaVisible = (document.getElementById("pap-caja-cobrar") || {}).style;
+      var seVe = cajaVisible && cajaVisible.display === "flex";
+
+      var antesDeVentas = (window.ventas || []).length;
+      var r = orig.apply(this, arguments);
+
+      try{
+        if(!id || !seVe || !quiereCobrar) return r;
+        if((window.ventas || []).length !== antesDeVentas) return r;   /* ya la creó alguien */
+
+        var c = (window.clientes || []).find(function(x){ return String(x.id) === String(id); });
+        if(!c || !c.vencimiento || !antes || c.vencimiento <= antes) return r;
+
+        var m = Number(c.monto) || 0;
+        if(m <= 0) return r;
+        var cant = ("meses" === c.cicloTipo) ? Math.max(1, Number(c.cicloCantidad) || 1) : 1;
+
+        ventas.push({
+          id: generarId("v"),
+          clienteId: c.id,
+          cliente: c.nombre,
+          servicio: c.servicio,
+          cuentaMasterId: c.cuentaMasterId || null,
+          monto: m * cant,
+          metodo: c.metodo || (window.ajustes && ajustes.metodoDefecto) || "PLIN",
+          fecha: hoy(),
+          concepto: "Renovación",
+          meses: cant
+        });
+
+        try{ registrarAuditoria("RENOVAR",
+          "Renovación de " + c.nombre + " hasta " + c.vencimiento + " · " + formatearMoneda(m * cant)); }catch(e){}
+        try{ sincronizarDatosLocales(!1); }catch(e){}
+        try{ renderizarTodo(); }catch(e){}
+        try{ mostrarToast("💰 Cobro registrado: " + formatearMoneda(m * cant)); }catch(e){}
+      }catch(e){ console.warn("V198:", e); }
+      return r;
+    };
+    heredar(nuevo, orig);
+    nuevo.__v198 = true;
+    window.guardarCliente = nuevo;
+    return true;
+  }
+
+  /* ---- Arranque --------------------------------------------------------- */
+  document.addEventListener("input", function(e){
+    if(e.target && /^cli-(vencimiento|inicio|monto)$/.test(e.target.id)) vigilar();
+  }, true);
+  document.addEventListener("change", function(e){
+    if(e.target && /^cli-(vencimiento|inicio|monto|ciclo-tipo|ciclo-cantidad)$/.test(e.target.id)) vigilar();
+  }, true);
+  document.addEventListener("click", function(e){
+    if(e.target && e.target.closest && e.target.closest("#cli-selector-meses")) setTimeout(vigilar, 30);
+  }, true);
+
+  var n = 0;
+  (function arrancar(){
+    try{
+      envolverFijarCiclo();
+      envolverEditar();
+      envolverGuardar();
+      /* Nuevo cliente: nunca debe salir la casilla */
+      if(!editando()){
+        var c = document.getElementById("pap-caja-cobrar");
+        if(c) c.style.display = "none";
+      }
+    }catch(e){ console.warn("V198:", e); }
+    if(++n < 40) setTimeout(arrancar, 700);
+  })();
+}();
+</script>
+
 <script id="papotas-v195-cuadros-al-dia">
 /* ============================================================================
    V195 · Los cuadros del Panel no se quedan en cero
