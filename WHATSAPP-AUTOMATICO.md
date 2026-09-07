@@ -42,15 +42,17 @@ lo bloquean por mezclar https con http.
 1. Instala **Docker Desktop** (docker.com, gratis para uso personal).
 2. Abre una terminal y pega esto, cambiando la clave por una tuya:
 
-        docker run -d --name evolution --restart unless-stopped \
-          -p 8080:8080 \
-          -v evolution_datos:/evolution/instances \
-          -e AUTHENTICATION_API_KEY=pon-aqui-una-clave-larga \
-          -e CORS_ORIGIN='*' \
-          atendai/evolution-api:latest
+        docker run -d --name evolution --restart unless-stopped -p 8080:8080 -v evolution_datos:/evolution/instances -e "AUTHENTICATION_API_KEY=pon-aqui-una-clave-larga" -e "AUTHENTICATION_TYPE=apikey" -e "DATABASE_ENABLED=false" -e "CORS_ORIGIN=*" -e "LOG_LEVEL=ERROR" evoapicloud/evolution-api:v1.8.7
 
-   El `-v` es importante: guarda la sesión de WhatsApp, para no volver a
-   escanear el QR cada vez.
+   Tres detalles que importan:
+
+   - **`evoapicloud/evolution-api`**, no `atendai/...`. El proyecto movió la
+     imagen y la vieja ya no existe: `pull access denied`.
+   - **`v1.8.7`, no `latest`.** La `latest` es la rama 2, que exige un
+     PostgreSQL y un Redis aparte. La 1.8.7 se apaña sola con archivos, que
+     es justo lo que quieres en una laptop.
+   - El `-v` guarda la sesión de WhatsApp, para no reescanear el QR en cada
+     arranque.
 
 3. Abre `http://localhost:8080/manager` en el navegador, entra con tu clave,
    crea una instancia llamada `papotas` y **escanea el QR** con el WhatsApp
