@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Cuentas">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="Libro de ingresos y gastos: registro, resumen, exportación a Excel y PDF, y sincronización entre dispositivos.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='116' fill='%23141A28'/%3E%3Cpath d='M 355 157 A 140 140 0 0 0 120.8 292.2' fill='none' stroke='%233DDC97' stroke-width='66' stroke-linecap='round'/%3E%3Cpath d='M 116 256 A 140 140 0 0 0 355 355' fill='none' stroke='%23FF6B81' stroke-width='66' stroke-linecap='round'/%3E%3C/svg%3E">
 <title>Cuentas · Ingresos y gastos</title>
 <style>
 /* ==========================================================================
@@ -1132,6 +1133,87 @@ body{
 /* --- Aviso --- */
 .aviso{ border-radius:var(--r-m); border:1px solid color-mix(in srgb,var(--tinta) 12%,transparent) }
 </style>
+
+<style id="css-logo">
+/* ==========================================================================
+   LA MARCA
+   Una C partida en dos: la mitad que sube es lo que entra, la que baja lo
+   que sale. Es el mismo codigo de color que usa todo el programa, asi que
+   el logo cambia con la paleta y nunca se queda descolgado.
+   ========================================================================== */
+.sello{
+  width:36px; height:36px;
+  background:linear-gradient(145deg,
+    color-mix(in srgb, var(--verde) 26%, var(--hoja)),
+    var(--papel));
+  border:1px solid color-mix(in srgb, var(--tinta) 10%, transparent);
+  border-radius:11px;
+  box-shadow:0 4px 14px rgba(0,0,0,.28);
+  padding:3px;
+}
+.sello svg{ width:100%; height:100%; display:block }
+</style>
+
+<style id="css-tendencia">
+.tendencia{ margin:12px -4px 0; display:grid; gap:3px }
+.tendencia svg{ width:100%; height:34px; display:block; overflow:visible }
+.tendencia .pie-tend{
+  font-size:9.5px; color:var(--tinta-3); text-align:center;
+  letter-spacing:.03em;
+}
+</style>
+
+<style id="css-bienvenida">
+/* ==========================================================================
+   LA PRIMERA VEZ
+   Un cartel de "no hay nada" no ayuda a nadie. Esto dice en tres lineas para
+   que sirve el programa y ofrece dos maneras de empezar: en serio, o mirando.
+   ========================================================================== */
+.bienvenida{ padding:34px 22px 30px; text-align:center; max-width:520px; margin:0 auto }
+.marca-grande{
+  width:72px; height:72px; margin:0 auto 16px; padding:9px;
+  border-radius:20px;
+  background:linear-gradient(145deg, color-mix(in srgb,var(--verde) 26%, var(--hoja)), var(--papel));
+  border:1px solid color-mix(in srgb,var(--tinta) 10%,transparent);
+  box-shadow:0 10px 30px rgba(0,0,0,.3);
+}
+.marca-grande svg{ width:100%; height:100% }
+.bienvenida h3{ margin:0 0 5px; font-size:19px; font-weight:800; letter-spacing:-.02em; color:var(--tinta) }
+.bienvenida > p{ margin:0 0 20px; font-size:13.5px; color:var(--tinta-2) }
+
+.pasos{ list-style:none; margin:0 0 22px; padding:0; display:grid; gap:11px; text-align:left }
+.pasos li{
+  display:grid; gap:2px; padding:12px 14px 12px 46px; position:relative;
+  border-radius:var(--r-m); background:var(--hoja-2);
+  border:1px solid color-mix(in srgb,var(--tinta) 7%,transparent);
+  counter-increment:paso;
+}
+.pasos{ counter-reset:paso }
+.pasos li::before{
+  content:counter(paso);
+  position:absolute; left:13px; top:12px;
+  width:22px; height:22px; border-radius:99px;
+  display:grid; place-items:center;
+  font-size:11.5px; font-weight:800;
+  background:var(--verde-piso); color:var(--verde);
+}
+.pasos li b{ font-size:13.5px; font-weight:700; color:var(--tinta) }
+.pasos li span{ font-size:12.5px; color:var(--tinta-2); line-height:1.45 }
+
+.botones-bienvenida{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap }
+.botones-bienvenida .btn{ flex:1 1 160px; max-width:220px }
+</style>
+
+<style id="css-en-blanco">
+body.en-blanco .herramientas,
+body.en-blanco #tarjetaPeriodo,
+body.en-blanco #tarjetaAtajos,
+body.en-blanco .encabezado-tabla,
+body.en-blanco #navHojas,
+body.en-blanco .tarjeta-cabeza{ display:none !important }
+body.en-blanco .balance{ opacity:.72 }
+body.en-blanco .tendencia{ display:none }
+</style>
 </head>
 <body>
 <div class="app">
@@ -1140,7 +1222,12 @@ body{
   <header class="cabecera">
     <div class="cabecera-fila">
       <div class="marca">
-        <div class="sello" aria-hidden="true">C</div>
+        <div class="sello" aria-hidden="true">
+          <svg viewBox="0 0 512 512" width="34" height="34">
+            <path d="M 355 157 A 140 140 0 0 0 120.8 292.2" fill="none" stroke="var(--haber)" stroke-width="66" stroke-linecap="round"/>
+            <path d="M 116 256 A 140 140 0 0 0 355 355" fill="none" stroke="var(--debe)" stroke-width="66" stroke-linecap="round"/>
+          </svg>
+        </div>
         <div>
           <h1>Cuentas</h1>
           <p>Ingresos &amp; Gastos</p>
@@ -1171,6 +1258,7 @@ body{
         <div class="rotulo" id="rotBalance">Balance del periodo</div>
         <div class="cantidad cifra" id="kpiBalance">S/ 0.00</div>
         <div class="periodo" id="kpiPeriodo">Todo el libro</div>
+        <div class="tendencia" id="tendencia"></div>
         <div class="balance-partes">
           <div>
             <div class="r">Ingresos</div>
@@ -1253,7 +1341,7 @@ body{
             </div>
           </div>
 
-          <div class="tarjeta-cuerpo" style="display:grid; gap:11px; border-bottom:1px solid var(--regla-2)">
+          <div class="tarjeta-cuerpo herramientas" style="display:grid; gap:11px; border-bottom:1px solid var(--regla-2)">
             <div class="buscador">
               <svg class="lupa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
               <input type="search" class="control" id="buscar" placeholder="Buscar descripción, categoría o monto…"
@@ -1451,6 +1539,13 @@ body{
         <div class="rotulo-paletas">Colores</div>
         <div class="rejilla-paletas" id="rejillaPaletas"></div>
       </div>
+
+      <div class="menu-separador"></div>
+
+      <button type="button" id="mInstalar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>
+        <span>Instalar en este dispositivo<span class="sub">Queda con su icono, a pantalla completa y abre sin conexión</span></span>
+      </button>
 
       <div class="menu-separador"></div>
 
@@ -1867,10 +1962,67 @@ function colorCat(nombre){
    PINTAR
    ========================================================================== */
 function pintarTodo(){
+  /* Con el libro en blanco no hay nada que buscar, filtrar ni acotar: esos
+     controles solo estorban la primera vez. Aparecen con el primer apunte. */
+  var enBlanco = estado.movimientos.length === 0;
+  document.body.classList.toggle('en-blanco', enBlanco);
+
   pintarBalance();
   pintarLista();
   if(estado.hoja === 'resumen') pintarResumen();
   pintarSugerencias();
+}
+
+/* Una linea con el balance acumulado de los ultimos meses. Ocupa 34 px y
+   contesta de un vistazo la unica pregunta que importa: ¿voy hacia arriba o
+   hacia abajo? Sin ella hay que entrar al resumen para saberlo.          */
+function pintarTendencia(){
+  var caja = $('tendencia');
+  if(!caja) return;
+
+  var porMes = {};
+  estado.movimientos.forEach(function(t){
+    var m = t.date.slice(0,7);
+    if(!porMes[m]) porMes[m] = 0;
+    porMes[m] += (t.type === 'Ingreso' ? t.amount : -t.amount);
+  });
+  var meses = Object.keys(porMes).sort().slice(-9);
+  if(meses.length < 2){ caja.innerHTML = ''; caja.classList.add('oculto'); return; }
+  caja.classList.remove('oculto');
+
+  /* Acumulado: la foto de como va el bolsillo, no de cada mes suelto */
+  var acum = [], suma = 0;
+  meses.forEach(function(m){ suma += porMes[m]; acum.push(suma); });
+
+  var W = 240, H = 34, pad = 3;
+  var min = Math.min.apply(null, acum.concat([0]));
+  var max = Math.max.apply(null, acum.concat([0]));
+  var rango = (max - min) || 1;
+  var px = function(i){ return pad + i * ((W - pad*2) / (acum.length - 1)); };
+  var py = function(v){ return H - pad - ((v - min) / rango) * (H - pad*2); };
+
+  var puntos = acum.map(function(v,i){ return px(i).toFixed(1) + ',' + py(v).toFixed(1); }).join(' ');
+  var area = 'M ' + px(0).toFixed(1) + ',' + (H - pad) + ' L ' +
+             acum.map(function(v,i){ return px(i).toFixed(1) + ' ' + py(v).toFixed(1); }).join(' L ') +
+             ' L ' + px(acum.length-1).toFixed(1) + ',' + (H - pad) + ' Z';
+
+  var sube = acum[acum.length-1] >= acum[0];
+  var col = sube ? 'var(--haber)' : 'var(--debe)';
+  var ult = acum.length - 1;
+
+  caja.innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<defs><linearGradient id="degTend" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="' + col + '" stop-opacity=".26"/>' +
+        '<stop offset="1" stop-color="' + col + '" stop-opacity="0"/>' +
+      '</linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#degTend)"/>' +
+      '<polyline points="' + puntos + '" fill="none" stroke="' + col +
+        '" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
+      '<circle cx="' + px(ult).toFixed(1) + '" cy="' + py(acum[ult]).toFixed(1) +
+        '" r="2.6" fill="' + col + '" vector-effect="non-scaling-stroke"/>' +
+    '</svg>' +
+    '<span class="pie-tend">' + esc(etiquetaMes(meses[0])) + ' → ' + esc(etiquetaMes(meses[meses.length-1])) + '</span>';
 }
 
 function pintarBalance(){
@@ -1882,6 +2034,7 @@ function pintarBalance(){
   animarCifra($('kpiIngresos'), t.ing, dinero);
   animarCifra($('kpiGastos'),   t.gas, dinero);
   $('kpiPeriodo').textContent  = l.nombre + ' · ' + t.n + (t.n === 1 ? ' movimiento' : ' movimientos');
+  pintarTendencia();
 
   var base = delPeriodo();
   var nT = base.length;
@@ -1942,18 +2095,53 @@ function pintarLista(){
 
   if(!lista.length){
     var hayAlgo = estado.movimientos.length > 0;
-    caja.innerHTML =
-      '<div class="vacio">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>' +
-        '<h3>' + (hayAlgo ? 'Nada coincide con la búsqueda' : 'El libro está en blanco') + '</h3>' +
-        '<p>' + (hayAlgo
-            ? 'Prueba con otro texto, otro periodo, o quita el filtro de tipo.'
-            : 'Anota tu primer ingreso o gasto y el balance empieza a contar solo.') + '</p>' +
-        (hayAlgo ? '' : '<button type="button" class="btn btn-lleno" id="btnVacioNuevo">Anotar el primero</button>') +
-      '</div>';
+    if(hayAlgo){
+      caja.innerHTML =
+        '<div class="vacio">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>' +
+          '<h3>Nada coincide</h3>' +
+          '<p>Prueba con otro texto, otro periodo, o quita el filtro de tipo.</p>' +
+          '<button type="button" class="btn" id="btnQuitarFiltros">Quitar los filtros</button>' +
+        '</div>';
+      var bq = $('btnQuitarFiltros');
+      if(bq) bq.addEventListener('click', function(){
+        estado.filtros.texto = ''; estado.filtros.tipo = 'Todos'; estado.filtros.periodo = 'todo';
+        $('buscar').value = ''; $('buscarLimpiar').classList.add('oculto');
+        $('selPeriodo').value = 'todo'; $('cajaRango').classList.add('oculto');
+        Array.prototype.forEach.call($('filtroTipo').children, function(x){
+          x.setAttribute('aria-pressed', String(x.dataset.filtro === 'Todos'));
+        });
+        pintarTodo();
+      });
+    } else {
+      /* Primera vez: en vez de un cartel de "no hay nada", se explica en tres
+         pasos qué hace el programa y se ofrece empezar de dos maneras. */
+      caja.innerHTML =
+        '<div class="bienvenida">' +
+          '<div class="marca-grande">' +
+            '<svg viewBox="0 0 512 512" aria-hidden="true">' +
+              '<path d="M 355 157 A 140 140 0 0 0 120.8 292.2" fill="none" stroke="var(--haber)" stroke-width="66" stroke-linecap="round"/>' +
+              '<path d="M 116 256 A 140 140 0 0 0 355 355" fill="none" stroke="var(--debe)" stroke-width="66" stroke-linecap="round"/>' +
+            '</svg>' +
+          '</div>' +
+          '<h3>Tu libro está en blanco</h3>' +
+          '<p>Anota lo que entra y lo que sale. El resto lo hace solo.</p>' +
+          '<ol class="pasos">' +
+            '<li><b>Anota</b><span>Monto, en qué fue, y ya. La fecha se pone sola.</span></li>' +
+            '<li><b>Mira</b><span>Balance, gráfico por mes y en qué se te va el dinero.</span></li>' +
+            '<li><b>Llévatelo</b><span>Excel, PDF, respaldo, y sincronizado entre tus aparatos.</span></li>' +
+          '</ol>' +
+          '<div class="botones-bienvenida">' +
+            '<button type="button" class="btn btn-lleno" id="btnVacioNuevo">Anotar el primero</button>' +
+            '<button type="button" class="btn" id="btnVacioDemo">Ver un ejemplo</button>' +
+          '</div>' +
+        '</div>';
+      var bv = $('btnVacioNuevo');
+      if(bv) bv.addEventListener('click', function(){ abrirMovimiento(null); });
+      var bd = $('btnVacioDemo');
+      if(bd) bd.addEventListener('click', datosEjemplo);
+    }
     pie.classList.add('oculto');
-    var bv = $('btnVacioNuevo');
-    if(bv) bv.addEventListener('click', function(){ abrirMovimiento(null); });
     return;
   }
 
@@ -3591,6 +3779,7 @@ function conectarTodo(){
   });
 
   /* --- Ejemplo y borrado --- */
+  $('mInstalar').addEventListener('click', function(){ cerrar('veloMenu'); setTimeout(instalar, 140); });
   $('mDemo').addEventListener('click', datosEjemplo);
   $('mBorrar').addEventListener('click', borrarTodo);
 
@@ -3610,6 +3799,53 @@ function conectarTodo(){
 }
 
 /* ---------- Aplicación instalable (sin archivos aparte) ------------------- */
+/* ---------- Instalable de verdad ----------------------------------------
+   Para que Android y el escritorio ofrezcan "Instalar" hace falta https, un
+   manifiesto y un trabajador de servicio con manejador de descargas. En un
+   archivo suelto (file://) nada de eso existe, asi que el programa se
+   apaña con un manifiesto generado al vuelo -suficiente para el "Anadir a
+   pantalla de inicio" de iPhone- y, cuando esta publicado, usa los archivos
+   de al lado si estan.                                                   */
+var promesaInstalar = null;
+
+function prepararInstalacion(){
+  var hospedado = location.protocol === 'https:' ||
+                  location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+  if(hospedado && 'serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(function(){ /* sin sw.js al lado: normal */ });
+  }
+
+  window.addEventListener('beforeinstallprompt', function(e){
+    e.preventDefault();
+    promesaInstalar = e;
+    var b = $('mInstalar');
+    if(b) b.classList.remove('oculto');
+  });
+
+  window.addEventListener('appinstalled', function(){
+    promesaInstalar = null;
+    var b = $('mInstalar');
+    if(b) b.classList.add('oculto');
+    aviso('Instalada', 'Cuentas ya está en tu pantalla de inicio.');
+  });
+}
+
+function instalar(){
+  if(promesaInstalar){
+    promesaInstalar.prompt();
+    promesaInstalar.userChoice.then(function(){ promesaInstalar = null; });
+    return;
+  }
+  /* Sin la invitación automática hay que explicarlo: iPhone nunca la da. */
+  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var enApp = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if(enApp){ aviso('Ya está instalada', 'Estás usando Cuentas como aplicación.'); return; }
+  aviso('Cómo instalarla',
+        iOS ? 'Safari → Compartir → Añadir a pantalla de inicio.'
+            : 'Chrome → menú ⋮ → Instalar aplicación. Hace falta abrirla por su dirección https, no como archivo suelto.');
+}
+
 function prepararPWA(){
   var manifiesto = {
     name:'Cuentas · Ingresos y gastos',
@@ -3617,33 +3853,70 @@ function prepararPWA(){
     description:'Registro de ingresos y gastos',
     start_url:'.', scope:'.', display:'standalone',
     background_color:'#F6F5F1', theme_color:'#1F4B3F',
-    icons:[{ src:iconoDataURL(192), sizes:'192x192', type:'image/png', purpose:'any maskable' },
-           { src:iconoDataURL(512), sizes:'512x512', type:'image/png', purpose:'any maskable' }]
+    icons:[
+      { src:iconoDataURL(192),       sizes:'192x192', type:'image/png', purpose:'any' },
+      { src:iconoDataURL(512),       sizes:'512x512', type:'image/png', purpose:'any' },
+      { src:iconoDataURL(512, true), sizes:'512x512', type:'image/png', purpose:'maskable' }
+    ]
   };
   try{
-    var blob = new Blob([JSON.stringify(manifiesto)], { type:'application/manifest+json' });
     var l = document.createElement('link');
-    l.rel = 'manifest'; l.href = URL.createObjectURL(blob);
+    l.rel = 'manifest';
+    /* Publicado, se usa el manifiesto de al lado: un blob no vale para que
+       Android ofrezca instalar. Como archivo suelto, el blob es lo unico
+       que hay, y a iPhone le basta.                                      */
+    if(location.protocol === 'https:' || location.hostname === 'localhost'){
+      l.href = 'manifest.webmanifest';
+    } else {
+      var blob = new Blob([JSON.stringify(manifiesto)], { type:'application/manifest+json' });
+      l.href = URL.createObjectURL(blob);
+    }
     document.head.appendChild(l);
   }catch(e){}
 }
 
-/* Icono dibujado al vuelo: un libro contable con su lomo verde. */
-function iconoDataURL(tam){
+/* El icono de la aplicación se dibuja con la MISMA marca y con los colores
+   de la paleta que tengas puesta. `margen` deja aire alrededor para los
+   iconos recortables de Android, que se comen los bordes.               */
+function iconoDataURL(tam, margen){
   var c = document.createElement('canvas');
   c.width = c.height = tam;
   var g = c.getContext('2d');
-  g.fillStyle = '#1F4B3F'; g.fillRect(0,0,tam,tam);
-  var m = tam * 0.19, w = tam - m*2, h = w * 0.78, y = (tam - h)/2;
-  g.fillStyle = '#F6F5F1';
-  g.fillRect(m, y, w, h);
-  g.fillStyle = '#12805C';
-  g.fillRect(m, y, w * 0.13, h);
-  g.strokeStyle = '#C7CFC3'; g.lineWidth = Math.max(1, tam*0.012);
-  for(var i=1;i<=3;i++){
-    var yy = y + h * (i/4);
-    g.beginPath(); g.moveTo(m + w*0.24, yy); g.lineTo(m + w*0.86, yy); g.stroke();
+  var cs = getComputedStyle(document.body);
+  function color(nombre, porDefecto){
+    var v = cs.getPropertyValue(nombre).trim();
+    return v || porDefecto;
   }
+  var fondo  = color('--papel', '#0A0D14');
+  var entra  = color('--haber', '#3DDC97');
+  var sale   = color('--debe',  '#FF6B81');
+  var acento = color('--verde', '#7C8CF8');
+
+  /* Fondo: cuadrado redondeado con un degradado del acento */
+  g.fillStyle = fondo; g.fillRect(0,0,tam,tam);
+  var deg = g.createLinearGradient(0,0,tam,tam);
+  deg.addColorStop(0, acento); deg.addColorStop(1, fondo);
+  g.globalAlpha = margen ? 1 : 0.30;
+  if(margen){ g.fillStyle = fondo; g.fillRect(0,0,tam,tam); }
+  else {
+    g.fillStyle = deg;
+    var r = tam * 0.228;
+    g.beginPath();
+    g.moveTo(r,0); g.arcTo(tam,0,tam,tam,r); g.arcTo(tam,tam,0,tam,r);
+    g.arcTo(0,tam,0,0,r); g.arcTo(0,0,tam,0,r); g.closePath(); g.fill();
+  }
+  g.globalAlpha = 1;
+
+  /* La C, a escala */
+  var e = tam / 512, d = margen ? 0.74 : 1;          /* recortable: más pequeña */
+  var cx = tam/2, cy = tam/2, rad = 140 * e * d, grosor = 66 * e * d;
+  g.lineWidth = grosor; g.lineCap = 'round';
+
+  g.strokeStyle = entra;
+  g.beginPath(); g.arc(cx, cy, rad, -Math.PI/4, -Math.PI*1.0833, true); g.stroke();
+  g.strokeStyle = sale;
+  g.beginPath(); g.arc(cx, cy, rad, Math.PI, Math.PI/4, true); g.stroke();
+
   return c.toDataURL('image/png');
 }
 
@@ -3656,6 +3929,7 @@ function arrancar(){
   cargarLocal();
   conectarTodo();
   prepararPWA();
+  prepararInstalacion();
   refrescarPanelNube();
   $('movFecha').value = hoyISO();
   pintarTodo();

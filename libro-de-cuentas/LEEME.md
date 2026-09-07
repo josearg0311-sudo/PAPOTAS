@@ -115,3 +115,34 @@ un halo tenue del acento, esquinas más suaves, tipografía más apretada, y el
 balance como pieza central con una línea de acento que va del color de
 ingreso al de gasto. La cifra del balance se mide y se ajusta sola para caber
 en su caja, den lo que den las cuentas.
+
+## Marca propia
+
+Una **C partida en dos**: la mitad que sube es lo que entra, la que baja lo
+que sale. Es el mismo código de color que usa todo el programa, así que el
+logo cambia con la paleta y nunca queda descolgado. Se usa en la cabecera, en
+la pestaña del navegador, en la pantalla de bienvenida y en los iconos de la
+aplicación instalada, que se dibujan con la misma figura.
+
+## Instalable de verdad
+
+Manifiesto en archivo (no un blob: Android no acepta blobs para instalar),
+trabajador de servicio con manejador de descargas, e iconos de 192, 512 y uno
+recortable para Android. Botón **Instalar en este dispositivo** en Opciones,
+que usa el aviso del navegador cuando existe y explica los pasos cuando no —
+en iPhone nunca existe. Comprobado servido por http: manifiesto y sw
+registrados, los tres iconos respondiendo, y la aplicación abriendo con la
+red cortada.
+
+## Primera vez
+
+En vez de un cartel de "no hay nada", una bienvenida que dice en tres pasos
+para qué sirve el programa y ofrece dos maneras de empezar: anotar en serio, o
+cargar un ejemplo. Mientras el libro está en blanco se ocultan el buscador,
+los filtros y el selector de periodo, que no tienen nada que filtrar.
+
+## Tendencia
+
+Bajo el balance, una línea con el saldo acumulado de los últimos nueve meses.
+Ocupa 34 px y contesta de un vistazo si vas hacia arriba o hacia abajo, sin
+tener que entrar al resumen.

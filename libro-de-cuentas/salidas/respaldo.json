@@ -1,0 +1,15 @@
+{
+  "app": "libro-de-cuentas",
+  "version": 1,
+  "exportedAt": "2026-09-07T04:19:55.019Z",
+  "transactions": [
+    {
+      "id": "n1",
+      "date": "2026-09-01",
+      "desc": "Venta",
+      "type": "Ingreso",
+      "amount": 500,
+      "cat": "Otros"
+    }
+  ]
+}
