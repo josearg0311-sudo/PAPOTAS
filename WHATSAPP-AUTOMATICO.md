@@ -26,30 +26,63 @@ Evolution). Eso ya no es PAPOTAS: es otro programa al lado.
 
 El texto del panel se corrigió para que no prometa eso.
 
-## Qué necesitas
+## Qué necesitas: Evolution API. En tu propia laptop, gratis.
 
-Un servidor con Evolution API. Es gratis y de código abierto. En una máquina
-con Docker:
+Evolution es gratis y de código abierto. Lo que suele costar es *dónde*
+ponerlo — pero si envías unas pocas veces al mes, **no hace falta pagar
+ningún servidor: se ejecuta en tu laptop, solo cuando lo vas a usar.**
 
-    docker run -d --name evolution -p 8080:8080 \
-      -e AUTHENTICATION_API_KEY=inventate-una-clave-larga \
-      -e CORS_ORIGIN='*' \
-      atendai/evolution-api:latest
+Comprobado: PAPOTAS puede hablar con un Evolution en `localhost` tanto
+abierto como archivo suelto (`file://`) como desde una dirección **https**
+publicada. Los navegadores tratan `localhost` como de confianza, así que no
+lo bloquean por mezclar https con http.
 
-Tres avisos importantes:
+### Una sola vez
 
-1. **Tiene que ser https** si PAPOTAS está publicado en https. Un navegador
-   no deja que una página https llame a un servidor http. Ponle un dominio
-   con certificado (Caddy o Nginx delante lo resuelven en dos líneas).
-2. **CORS**: el servidor tiene que permitir llamadas desde la dirección de
-   PAPOTAS. Eso es lo que hace `CORS_ORIGIN`. Sin ello el navegador corta la
-   llamada y no llega ni a salir.
-3. **La API Key viaja en el navegador.** Cualquiera que abra tu PAPOTAS
-   publicado puede leerla y mandar mensajes con tu WhatsApp. No publiques el
-   archivo con la clave dentro en una dirección que reparta a nadie.
+1. Instala **Docker Desktop** (docker.com, gratis para uso personal).
+2. Abre una terminal y pega esto, cambiando la clave por una tuya:
 
-Luego, en Evolution, crea una instancia (por ejemplo `papotas`) y escanea el
-QR con el WhatsApp desde el que quieres escribir.
+        docker run -d --name evolution --restart unless-stopped \
+          -p 8080:8080 \
+          -v evolution_datos:/evolution/instances \
+          -e AUTHENTICATION_API_KEY=pon-aqui-una-clave-larga \
+          -e CORS_ORIGIN='*' \
+          atendai/evolution-api:latest
+
+   El `-v` es importante: guarda la sesión de WhatsApp, para no volver a
+   escanear el QR cada vez.
+
+3. Abre `http://localhost:8080/manager` en el navegador, entra con tu clave,
+   crea una instancia llamada `papotas` y **escanea el QR** con el WhatsApp
+   desde el que quieras escribir.
+
+### Cada vez que vayas a enviar
+
+Enciende Docker Desktop y comprueba que el contenedor `evolution` está en
+marcha. Si lo paraste:
+
+        docker start evolution
+
+Y ya. Con `--restart unless-stopped` arranca solo al encender la laptop.
+
+### Lo que hay que saber
+
+- **Solo envía desde esa laptop.** Desde el móvil no, porque el móvil no
+  llega al `localhost` de tu laptop. Si algún día lo necesitas desde el
+  móvil, ahí sí haría falta un servidor de verdad.
+- **Con la laptop apagada no sale nada.** Es un programa en tu máquina.
+- **La clave viaja en el navegador.** Como PAPOTAS lo usas solo tú y el
+  servidor vive en tu propia laptop, no sale a internet: nadie de fuera
+  puede llegar a `localhost`. Riesgo bajo.
+- **WhatsApp puede bloquear números que mandan ráfagas.** Esto usa tu número
+  normal, no una cuenta de empresa. Unas pocas decenas de mensajes al mes,
+  espaciados, no llaman la atención. Mandar cientos de golpe, sí.
+
+### Si algún día lo quieres siempre encendido
+
+Entonces sí toca un servidor (un VPS de unos S/ 18 al mes), con un dominio y
+certificado https delante. Mismo `docker run`, pero con Caddy o Nginx por
+delante. No hace falta hasta que lo necesites.
 
 ## Cómo se configura en PAPOTAS
 
@@ -57,7 +90,7 @@ QR con el WhatsApp desde el que quieres escribir.
 
 | Casilla | Qué va |
 |---|---|
-| URL del servidor | `https://tu-evolution.tudominio.com` (sin nada más detrás) |
+| URL del servidor | `http://localhost:8080` si lo corres en tu laptop |
 | API Key | la `AUTHENTICATION_API_KEY` que pusiste |
 | Nombre de la instancia | `papotas`, o como la hayas llamado |
 
