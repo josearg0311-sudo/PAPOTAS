@@ -14277,5 +14277,233 @@ body#cuerpo-app .chip,
 body#cuerpo-app .badge{ white-space:nowrap; }
 body#cuerpo-app #masivo-contador-clientes{ flex:0 0 auto; }
 </style>
+
+<script id="papotas-v202-rentabilidad">
+/* ============================================================================
+   V202 · Dos números equivocados en "Rentabilidad"
+
+   1. UNA FILA FANTASMA. La tabla "Rentabilidad por plataforma" sacaba los
+      nombres de tres sitios: las ventas, las inversiones y las cuentas master.
+      De una venta lee `servicio`, de una inversión lee `plataforma`... y de una
+      cuenta master no lee nada, porque la master guarda su plataforma en
+      `nombre`. Así que TODAS las masters caían en el mismo saco y aparecía una
+      fila "Sin plataforma" con ceros que no corresponde a nada.
+
+   2. EL REPARTO NO ERA UN REPARTO. El panel "Distribución · Participación de
+      ingresos del mes" enseñaba, junto a cada barra, el MARGEN de la
+      plataforma en vez de su parte del ingreso. Con 45 de NETFLIX y 15 de MAX
+      sobre 60 cobrados ponía "56 %" y "-167 %", cuando la participación es
+      75 % y 25 %. Un -167 % debajo de "participación de ingresos" no
+      significa nada.
+
+   Ahora las filas sin un solo movimiento no se listan, y el porcentaje y la
+   barra son los dos la parte del ingreso del mes. Suman 100.
+   ==========================================================================*/
+!function(){
+  "use strict";
+
+  var arreglando = false;
+
+  function numero(txt){
+    var t = String(txt || "").replace(/[^0-9,.\-]/g, "").replace(/,/g, "");
+    var v = parseFloat(t);
+    return isFinite(v) ? v : 0;
+  }
+
+  function arreglar(){
+    if(arreglando) return;
+    var tabla = document.getElementById("rpTabla");
+    var caja  = document.getElementById("rpDistrib");
+    if(!tabla && !caja) return;
+    arreglando = true;
+    try{
+      /* --- 1. Fuera las filas sin movimiento ---------------------------- */
+      if(tabla){
+        [].slice.call(tabla.querySelectorAll("tr")).forEach(function(fila){
+          var c = fila.querySelectorAll("td");
+          if(c.length < 3) return;                       /* la fila de "sin movimientos" */
+          if(numero(c[1].textContent) === 0 && numero(c[2].textContent) === 0) fila.remove();
+        });
+        if(!tabla.querySelector("tr"))
+          tabla.innerHTML = '<tr><td colspan="5">Sin movimientos del mes.</td></tr>';
+      }
+
+      /* --- 2. El reparto, que sea un reparto ----------------------------- */
+      if(caja){
+        var bloques = [].slice.call(caja.children).map(function(b){
+          var textos = b.querySelectorAll("span");
+          var medidor = b.querySelector(".ps-meter");
+          return {
+            nodo: b,
+            monto: textos.length > 1 ? numero(textos[1].textContent) : 0,
+            pinta: medidor ? medidor.querySelector("span") : null,
+            barra: b.querySelector(".ps-progress > i")
+          };
+        });
+        var total = bloques.reduce(function(s, b){ return s + Math.max(0, b.monto); }, 0);
+        bloques.forEach(function(b){
+          if(b.monto <= 0){ b.nodo.remove(); return; }
+          var parte = total > 0 ? Math.round(b.monto / total * 100) : 0;
+          if(b.pinta) b.pinta.textContent = parte + "%";
+          if(b.barra) b.barra.style.width = parte + "%";
+        });
+        if(!caja.children.length)
+          caja.innerHTML = '<div class="ps-empty"><b>Sin datos</b>'+
+            '<span>Registra ventas para ver rendimiento.</span></div>';
+      }
+    }catch(e){ console.warn("V202:", e); }
+    arreglando = false;
+  }
+
+  function vigilar(){
+    var tabla = document.getElementById("rpTabla");
+    var caja  = document.getElementById("rpDistrib");
+    if(!tabla || !caja || tabla.dataset.papV202) return false;
+    tabla.dataset.papV202 = "1";
+    var ojo = new MutationObserver(function(){ setTimeout(arreglar, 0); });
+    ojo.observe(tabla, {childList:true});
+    ojo.observe(caja,  {childList:true});
+    arreglar();
+    return true;
+  }
+
+  var n = 0;
+  (function reintentar(){
+    try{ if(vigilar()) return; }catch(e){}
+    if(++n < 40) setTimeout(reintentar, 500);
+  })();
+}();
+</script>
+
+<script id="papotas-v203-dos-pestanas">
+/* ============================================================================
+   V203 · Dos pestañas abiertas se borraban el trabajo la una a la otra
+
+   El programa guarda en el almacén del navegador, que es UNO SOLO para todas
+   las pestañas del mismo sitio. Cada pestaña, en cambio, tiene su propia copia
+   en memoria y no se enteraba de nada de lo que hiciera la otra: al guardar
+   escribía su copia entera encima. Gana la última que guarde y lo de la otra
+   desaparece sin avisar.
+
+   Reproducido: pestaña A añade un cliente, pestaña B añade otro, y en el
+   almacén sólo queda el de B. Al recargar A, el suyo ya no está.
+
+   Pasa de verdad: basta con dejarte una pestaña vieja abierta en el portátil.
+   La sincronización con la nube no cubre este caso, porque es entre
+   dispositivos, no entre pestañas del mismo navegador.
+
+   Ahora cada pestaña escucha los cambios del almacén -el navegador avisa a las
+   DEMÁS pestañas, nunca a la que escribió- y se pone al día antes de volver a
+   guardar. Si estás escribiendo en un formulario o tienes una ventana abierta,
+   se espera a que termines.
+   ==========================================================================*/
+!function(){
+  "use strict";
+
+  var LISTAS = [
+    ["pap_servicios",       "servicios"],
+    ["pap_clientes",        "clientes"],
+    ["pap_ventas",          "ventas"],
+    ["pap_inversiones",     "inversiones"],
+    ["pap_mensajes",        "mensajesRapidos"],
+    ["pap_combos_guardados","combosGuardados"],
+    ["pap_auditoria",       "auditoriaLog"]
+  ];
+
+  var temporizador = null, pendiente = false;
+
+  function ocupado(){
+    /* No se toca nada mientras haya una ventana abierta o estés escribiendo. */
+    try{
+      /* Ojo: mirar la clase "hidden" no vale, hay ventanas que se ocultan de
+         otra forma y contaban como abiertas siempre. Se mira si de verdad se
+         está pintando. (Y no sirve `offsetParent`: estas ventanas van con
+         position:fixed y ahí siempre es null.) */
+      var ventanas = document.querySelectorAll(".modal-papotas");
+      for(var i = 0; i < ventanas.length; i++){
+        var v = ventanas[i];
+        if(getComputedStyle(v).display !== "none" && v.getBoundingClientRect().height > 0) return true;
+      }
+      var f = document.activeElement;
+      if(f && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName)) return true;
+    }catch(_){}
+    return false;
+  }
+
+  function releer(){
+    var cambio = 0;
+    LISTAS.forEach(function(par){
+      var crudo = null;
+      try{ crudo = localStorage.getItem(par[0]); }catch(_){ return; }
+      if(crudo == null) return;
+      var lista;
+      try{ lista = JSON.parse(crudo); }catch(_){ return; }
+      if(!Array.isArray(lista)) return;
+      var ahora;
+      try{ ahora = JSON.stringify(window[par[1]]); }catch(_){ ahora = null; }
+      if(ahora === crudo) return;
+      window[par[1]] = lista;
+      cambio++;
+    });
+
+    try{
+      var nota = localStorage.getItem("pap_bloc_notas");
+      if(nota != null && nota !== window.blocNotasTexto){ window.blocNotasTexto = nota; cambio++; }
+    }catch(_){}
+
+    try{
+      var aj = localStorage.getItem("pap_ajustes");
+      if(aj){
+        var obj = JSON.parse(aj);
+        if(obj && typeof obj === "object" && !Array.isArray(obj)
+           && JSON.stringify(window.ajustes) !== aj){ window.ajustes = obj; cambio++; }
+      }
+    }catch(_){}
+
+    return cambio;
+  }
+
+  function ponerseAlDia(){
+    /* Los datos se adoptan SIEMPRE, aunque estés ocupado: es justo lo que
+       evita que al guardar escribas encima de lo de la otra pestaña. Lo que
+       se aplaza es sólo repintar la pantalla, que sí molestaría en mitad de
+       un formulario. */
+    var cambio = 0;
+    try{ cambio = releer(); }catch(e){ console.warn("V203:", e); return; }
+    if(!cambio && !pendiente) return;
+    if(ocupado()){ pendiente = true; return; }
+    pendiente = false;
+    try{ if(typeof renderizarTodo === "function") renderizarTodo(); }catch(_){}
+    try{
+      var c = document.getElementById("dashboard-bloc-notas");
+      if(c && document.activeElement !== c) c.value = window.blocNotasTexto || "";
+    }catch(_){}
+    try{ if(typeof mostrarToast === "function")
+      mostrarToast("Actualizado con lo que hiciste en la otra pestaña"); }catch(_){}
+  }
+
+  function programar(){
+    clearTimeout(temporizador);
+    temporizador = setTimeout(ponerseAlDia, 450);
+  }
+
+  window.addEventListener("storage", function(ev){
+    /* El navegador sólo avisa a las OTRAS pestañas, nunca a la que escribió. */
+    if(ev && ev.key && String(ev.key).indexOf("pap_") !== 0) return;
+    programar();
+  });
+
+  /* Si estabas ocupado cuando llegó el aviso, se recoge en cuanto sueltas. */
+  document.addEventListener("focusout", function(){ if(pendiente) programar(); }, true);
+  document.addEventListener("click",    function(){ if(pendiente) programar(); }, true);
+  window.addEventListener("focus",      function(){ if(pendiente) programar(); });
+
+  /* Al volver a una pestaña que llevaba rato en segundo plano, se mira igual:
+     el aviso pudo llegar mientras el navegador la tenía congelada. */
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible") programar();
+  });
+}();
+</script>
 </body>
 </html>
