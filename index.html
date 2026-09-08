@@ -14629,6 +14629,28 @@ body#cuerpo-app .pap-copiar-clave:hover{ opacity:1!important; }
     var celda = b.closest ? b.closest(".mc-cell") : null;
     if(celda) celda.classList.toggle("pap-clave-abierta", visible);
 
+    /* Un ojo bien visible para destaparla: los puntitos solos no parecían
+       pulsables y no había forma de adivinar que la clave estaba ahí. */
+    var caja0 = b.parentNode;
+    if(caja0 && !caja0.querySelector(".pap-ojo-clave")){
+      var ojo = document.createElement("button");
+      ojo.type = "button";
+      ojo.className = "pap-ojo-clave";
+      ojo.style.cssText = "margin-left:7px;cursor:pointer;background:none;border:0;"+
+        "padding:2px 3px;font-size:12px;line-height:1;color:inherit;opacity:.75";
+      ojo.addEventListener("click", function(ev){
+        ev.stopPropagation();
+        try{ alternarClave(id); }catch(_){}
+        setTimeout(pintarClaves, 0);
+      });
+      caja0.appendChild(ojo);
+    }
+    var ojoYa = caja0 && caja0.querySelector(".pap-ojo-clave");
+    if(ojoYa){
+      ojoYa.textContent = visible ? "🙈" : "👁";
+      ojoYa.title = visible ? "Ocultar la contraseña" : "Ver la contraseña";
+    }
+
     /* Un botón para copiarla, al lado */
     var caja = b.parentNode;
     if(caja && !caja.querySelector(".pap-copiar-clave")){
@@ -14653,6 +14675,8 @@ body#cuerpo-app .pap-copiar-clave:hover{ opacity:1!important; }
 
   function pintarClaves(){
     try{
+      var s0 = window.seccionActual;
+      if(typeof s0 === "string" && s0 && !/^(cuentas|servicios|dashboard|clientes)$/.test(s0)) return;
       var bs = document.querySelectorAll('button[onclick*="alternarClave"]');
       for(var i = 0; i < bs.length; i++) pintarUna(bs[i]);
       refrescarInterruptor();
@@ -14704,20 +14728,39 @@ body#cuerpo-app .pap-copiar-clave:hover{ opacity:1!important; }
   /* ---- Puesta en marcha y vigilancia ------------------------------------- */
   function repasar(){ ponerInterruptor(); pintarClaves(); }
 
-  var pendiente = null;
+  /* Igual que en la capa de "abrir plataforma": con el cuerpo entero vigilado,
+     un retardo a secas no llega a dispararse nunca. Se asegura una pasada
+     cada 400 ms como mucho. */
+  var pendiente = null, ultimaPasada = 0;
+  function ahoraMismo(){ ultimaPasada = Date.now(); repasar(); }
   function programar(){
+    if(Date.now() - ultimaPasada > 700){ ahoraMismo(); return; }
     clearTimeout(pendiente);
-    pendiente = setTimeout(repasar, 60);
+    pendiente = setTimeout(ahoraMismo, 130);
+  }
+
+  function engancharRepintado(nombre){
+    var orig = window[nombre];
+    if(typeof orig !== "function" || orig.__v204) return;
+    var nuevo = function(){
+      var r = orig.apply(this, arguments);
+      programar();
+      return r;
+    };
+    try{ Object.keys(orig).forEach(function(k){ nuevo[k] = orig[k]; }); }catch(_){}
+    nuevo.__v204 = true;
+    window[nombre] = nuevo;
   }
 
   function arrancar(){
     repasar();
-    ["sec-cuentas", "sec-servicios", "sec-dashboard", "sec-clientes"].forEach(function(id){
-      var sec = document.getElementById(id);
-      if(!sec || sec.dataset.papV204) return;
-      sec.dataset.papV204 = "1";
-      new MutationObserver(programar).observe(sec, {childList:true, subtree:true});
-    });
+    ["cambiarSeccion","renderizarTodo","renderizarServiciosAgrupados","renderizarClientesAgrupados"]
+      .forEach(engancharRepintado);
+    /* Igual que arriba: el cuerpo es lo único que no se reemplaza. */
+    if(document.body && !document.body.dataset.papV204){
+      document.body.dataset.papV204 = "1";
+      new MutationObserver(programar).observe(document.body, {childList:true, subtree:true});
+    }
   }
 
   var n = 0;
@@ -15271,6 +15314,266 @@ body#cuerpo-app.light-mode #sec-servicios .mpp-name{ color:#0f172a!important }
 body#cuerpo-app.light-mode #sec-cuentas .mpp-sub,
 body#cuerpo-app.light-mode #sec-servicios .mpp-sub{ color:#5b6676!important }
 body#cuerpo-app.light-mode #sec-cuentas .master-profile-premium.state-free .mpp-name{ color:#047857!important }
+</style>
+
+<script id="papotas-v207-abrir-plataforma">
+/* ============================================================================
+   V207 · Entrar a la plataforma desde el propio programa
+
+   Tenías la cuenta, el correo y la clave delante, pero para entrar a Disney+ o
+   a Netflix había que salir del programa, abrir el navegador y buscar la
+   página a mano. Ahora cada cuenta master trae un botón que abre directamente
+   la página de la plataforma en otra pestaña, y de paso te copia la contraseña
+   al portapapeles para que sólo tengas que pegarla.
+
+   La lista cubre las 75 plataformas del catálogo. Si algún día das de alta una
+   que no esté en la lista, el botón la busca en Google en vez de quedarse
+   parado.
+   ==========================================================================*/
+!function(){
+  "use strict";
+
+  var CASAS = {
+    "NETFLIX":"https://www.netflix.com/login",
+    "DISNEY+":"https://www.disneyplus.com/login",
+    "DISNEY+ESPN":"https://www.disneyplus.com/login",
+    "HBO MAX":"https://play.max.com/",
+    "MAX":"https://play.max.com/",
+    "AMAZON PRIME":"https://www.primevideo.com/",
+    "PRIME VIDEO":"https://www.primevideo.com/",
+    "PARAMOUNT+":"https://www.paramountplus.com/account/signin/",
+    "APPLE TV+":"https://tv.apple.com/",
+    "VIX+":"https://vix.com/",
+    "VIX":"https://vix.com/",
+    "CRUNCHYROLL":"https://www.crunchyroll.com/login",
+    "UNIVERSAL+":"https://www.universalplus.com/",
+    "LIONSGATE+":"https://www.lionsgateplus.com/",
+    "DISCOVERY+":"https://www.discoveryplus.com/",
+    "MUBI":"https://mubi.com/login",
+    "PLUTO TV":"https://pluto.tv/",
+    "RAKUTEN TV":"https://rakuten.tv/",
+    "PLEX":"https://app.plex.tv/",
+    "ROKU":"https://therokuchannel.roku.com/",
+    "ROKU CHANNEL":"https://therokuchannel.roku.com/",
+    "TUBI":"https://tubitv.com/",
+    "PEACOCK":"https://www.peacocktv.com/",
+    "AMC+":"https://www.amcplus.com/",
+    "STARZ":"https://www.starz.com/",
+    "MGM+":"https://www.mgmplus.com/",
+    "SHUDDER":"https://www.shudder.com/",
+    "HIDIVE":"https://www.hidive.com/",
+    "BRITBOX":"https://www.britbox.com/",
+    "ACORN TV":"https://acorn.tv/",
+    "HALLMARK+":"https://www.hallmarkplus.com/",
+    "BET+":"https://www.bet.plus/",
+    "KANOPY":"https://www.kanopy.com/",
+    "THE CW":"https://www.cwtv.com/",
+    "DIRECTV / DGO":"https://www.dgo.com/",
+    "MOVISTAR PLAY":"https://www.movistarplay.com.pe/",
+    "CLARO VIDEO":"https://www.clarovideo.com/",
+    "ZAPPING":"https://zappingtv.com/",
+    "FLOW":"https://www.flow.com.ar/",
+    "FUBO":"https://www.fubo.tv/",
+    "ESPN":"https://www.espn.com/watch/",
+    "SPOTIFY":"https://accounts.spotify.com/login",
+    "YOUTUBE PREMIUM":"https://www.youtube.com/paid_memberships",
+    "YOUTUBE MUSIC":"https://music.youtube.com/",
+    "APPLE MUSIC":"https://music.apple.com/",
+    "AMAZON MUSIC":"https://music.amazon.com/",
+    "DEEZER":"https://www.deezer.com/login",
+    "TIDAL":"https://listen.tidal.com/",
+    "AUDIBLE":"https://www.audible.com/",
+    "STORYTEL":"https://www.storytel.com/",
+    "XBOX GAME PASS":"https://www.xbox.com/xbox-game-pass",
+    "PLAYSTATION PLUS":"https://www.playstation.com/",
+    "NINTENDO SWITCH ONLINE":"https://accounts.nintendo.com/",
+    "EA PLAY":"https://www.ea.com/ea-play",
+    "UBISOFT+":"https://plus.ubisoft.com/",
+    "GEFORCE NOW":"https://play.geforcenow.com/",
+    "CHATGPT PLUS":"https://chat.openai.com/",
+    "GEMINI":"https://gemini.google.com/",
+    "CLAUDE":"https://claude.ai/",
+    "PERPLEXITY":"https://www.perplexity.ai/",
+    "MICROSOFT COPILOT":"https://copilot.microsoft.com/",
+    "CANVA":"https://www.canva.com/login",
+    "MICROSOFT 365":"https://www.office.com/",
+    "GOOGLE ONE":"https://one.google.com/",
+    "ADOBE CREATIVE CLOUD":"https://account.adobe.com/",
+    "CAPCUT PRO":"https://www.capcut.com/",
+    "PICSART":"https://picsart.com/",
+    "DUOLINGO SUPER":"https://www.duolingo.com/",
+    "SCRIBD":"https://www.scribd.com/",
+    "KINDLE UNLIMITED":"https://www.amazon.com/kindle-dbs/hz/subscribe/ku",
+    "COURSERA":"https://www.coursera.org/",
+    "PLATZI":"https://platzi.com/",
+    "NOTION":"https://www.notion.so/login",
+    "DROPBOX PLUS":"https://www.dropbox.com/login",
+    "1PASSWORD":"https://my.1password.com/",
+    "NORDVPN":"https://my.nordaccount.com/",
+    "EXPRESSVPN":"https://www.expressvpn.com/sign-in",
+    "SURFSHARK":"https://my.surfshark.com/",
+    "PROTON VPN":"https://account.protonvpn.com/"
+  };
+
+  function casaDe(nombre){
+    var n = String(nombre || "").toUpperCase().trim();
+    if(CASAS[n]) return CASAS[n];
+    /* Por si lo escribiste con alguna variación: "NETFLIX 4K", "HBO", ... */
+    var claves = Object.keys(CASAS);
+    for(var i = 0; i < claves.length; i++){
+      if(n.indexOf(claves[i]) === 0 || claves[i].indexOf(n) === 0) return CASAS[claves[i]];
+    }
+    return "https://www.google.com/search?q=" + encodeURIComponent(nombre + " iniciar sesión");
+  }
+
+  function avisar(t){ try{ if(typeof mostrarToast === "function") mostrarToast(t); }catch(_){} }
+
+  function copiarClave(clave){
+    if(!clave) return false;
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(clave); return true;
+      }
+    }catch(_){}
+    try{
+      var a = document.createElement("textarea");
+      a.value = clave; a.style.cssText = "position:fixed;top:-1000px;opacity:0";
+      document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove();
+      return true;
+    }catch(_){ return false; }
+  }
+
+  window.papotasAbrirPlataforma = function(id){
+    var m = (window.servicios || []).find(function(s){ return s && String(s.id) === String(id); });
+    if(!m) return;
+    var clave = String(m.contrasena == null ? "" : m.contrasena);
+    var copiada = clave ? copiarClave(clave) : false;
+    var destino = casaDe(m.nombre);
+    try{
+      var v = window.open(destino, "_blank", "noopener");
+      if(!v) return avisar("El navegador bloqueó la ventana. Permite las ventanas emergentes.");
+    }catch(e){ return avisar("No se pudo abrir la página"); }
+    avisar(copiada
+      ? ("Abriendo " + (m.nombre || "la plataforma") + " · clave copiada, sólo pégala")
+      : ("Abriendo " + (m.nombre || "la plataforma")));
+    try{ registrarAuditoria("SISTEMA", "Abrió " + (m.nombre || "") + " desde la ficha"); }catch(_){}
+  };
+
+  /* ---- El botón, en el pie de cada tarjeta de cuenta ---------------------- */
+  function idDeLaTarjeta(pie){
+    var b = pie.querySelector('[onclick*="abrirModalClienteEnCuenta"], [onclick*="renovarCuentaMaster"], [onclick*="verClientesDeCuenta"]');
+    if(!b) return null;
+    var m = /\(\s*['"]([^'"]+)['"]/.exec(b.getAttribute("onclick") || "");
+    return m ? m[1] : null;
+  }
+
+  function aquiPinta(){
+    /* Estos botones sólo existen en las pantallas de cuentas. Salir pronto
+       cuando no toca evita repasar el documento en cada aviso del vigilante. */
+    try{
+      var s = window.seccionActual;
+      if(typeof s === "string" && s && !/^(cuentas|servicios|dashboard)$/.test(s)) return false;
+    }catch(_){}
+    return true;
+  }
+
+  function ponerBotones(){
+    if(!aquiPinta()) return;
+    var pies = document.querySelectorAll(".mc-foot");
+    for(var i = 0; i < pies.length; i++){
+      var pie = pies[i];
+      if(pie.querySelector(".pap-abrir-plat")) continue;
+      var id = idDeLaTarjeta(pie);
+      if(!id) continue;
+      var m = (window.servicios || []).find(function(s){ return s && String(s.id) === String(id); });
+      if(!m) continue;
+
+      var modelo = pie.querySelector(".mc-btn");
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = (modelo ? modelo.className.replace(/\bok\b/, "") + " " : "mc-btn ") + "pap-abrir-plat";
+      b.title = "Abrir " + (m.nombre || "la plataforma") + " en el navegador y copiar la clave";
+      b.textContent = "↗ " + (m.nombre || "Abrir");
+      b.setAttribute("data-pap-id", id);
+      b.addEventListener("click", function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        window.papotasAbrirPlataforma(this.getAttribute("data-pap-id"));
+      });
+      if(modelo) pie.insertBefore(b, modelo);
+      else pie.appendChild(b);
+    }
+  }
+
+  /* Ojo con el retardo: vigilando el cuerpo entero llegan avisos sin parar
+     (relojes, avisos, animaciones). Con un retardo a secas se reiniciaba la
+     cuenta una y otra vez y el trabajo no llegaba a hacerse NUNCA. Por eso,
+     además del retardo, se garantiza una pasada cada 400 ms como mucho. */
+  var pendiente = null, ultimaPasada = 0;
+  function ahoraMismo(){ ultimaPasada = Date.now(); ponerBotones(); }
+  function programar(){
+    if(Date.now() - ultimaPasada > 700){ ahoraMismo(); return; }
+    clearTimeout(pendiente);
+    pendiente = setTimeout(ahoraMismo, 130);
+  }
+
+  /* Vigilar el DOM solo no basta: cuando el programa reemplaza la sección
+     entera, el vigilante se queda mirando un trozo de página que ya no está.
+     Así que además nos colgamos de los repintados del propio programa, que es
+     el momento exacto en que aparecen las tarjetas nuevas. */
+  function engancharRepintado(nombre){
+    var orig = window[nombre];
+    if(typeof orig !== "function" || orig.__v207) return;
+    var nuevo = function(){
+      var r = orig.apply(this, arguments);
+      programar();
+      return r;
+    };
+    try{ Object.keys(orig).forEach(function(k){ nuevo[k] = orig[k]; }); }catch(_){}
+    nuevo.__v207 = true;
+    window[nombre] = nuevo;
+  }
+
+  function arrancar(){
+    ponerBotones();
+    ["cambiarSeccion","renderizarTodo","renderizarServiciosAgrupados","renderizarClientesAgrupados"]
+      .forEach(engancharRepintado);
+    /* Vigilar cada sección por su cuenta no valía: el programa REEMPLAZA la
+       sección entera al cambiar de pantalla, y el vigilante se quedaba mirando
+       un trozo de página que ya no existía; el botón desaparecía al volver.
+       Comprobado. Se vigila el cuerpo, que ese no lo cambia nadie. */
+    if(document.body && !document.body.dataset.papV207){
+      document.body.dataset.papV207 = "1";
+      new MutationObserver(programar).observe(document.body, {childList:true, subtree:true});
+    }
+  }
+
+  var n = 0;
+  (function reintentar(){
+    try{ arrancar(); }catch(e){ console.warn("V207:", e); }
+    if(++n < 30) setTimeout(reintentar, 600);
+  })();
+}();
+</script>
+
+<style id="papotas-v207-estilo">
+body#cuerpo-app .pap-abrir-plat{
+  border-color:rgba(125,211,252,.34)!important;
+  background:rgba(125,211,252,.10)!important;
+  color:#7dd3fc!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+body#cuerpo-app .pap-abrir-plat:hover{
+  border-color:rgba(125,211,252,.60)!important;
+  background:rgba(125,211,252,.18)!important;
+  color:#bae6fd!important;
+}
+body#cuerpo-app.light-mode .pap-abrir-plat{
+  border-color:rgba(2,132,199,.35)!important;
+  background:rgba(2,132,199,.09)!important;
+  color:#0369a1!important;
+}
+body#cuerpo-app .pap-ojo-clave:hover{ opacity:1!important }
 </style>
 </body>
 </html>
