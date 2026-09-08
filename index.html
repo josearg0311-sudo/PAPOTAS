@@ -14727,5 +14727,550 @@ body#cuerpo-app .pap-copiar-clave:hover{ opacity:1!important; }
   })();
 }();
 </script>
+
+<style id="papotas-v206-estilo-clientes-cuentas">
+/* ============================================================================
+   V206 · Pulido de estilo de "Clientes" y "Cuentas master"
+
+   Las dos pantallas funcionaban, pero se habían ido llenando de estilos de
+   distintas épocas y competían entre ellas:
+
+   · Ocho formas distintas de pastilla. "3 CLIENTES" gritaba lo mismo que
+     "3 POR COBRAR", así que lo urgente no destacaba.
+   · La barra de filtros tenía seis botones de seis colores -rojo, rojo, ámbar,
+     granate, gris y azul- en fila. Ninguno mandaba.
+   · Una ficha vencida era un bloque rojo entero. Con diecinueve vencidos la
+     pantalla se volvía una pared roja y volvía a no distinguirse nada.
+   · Los huecos libres iban con rayas diagonales, que hacían más ruido que la
+     información.
+   · En "Cuentas master" había cuatro barras a lo ancho antes de ver una sola
+     cuenta.
+
+   Se ordena todo con una sola gramática: el color SOLO significa estado
+   -rojo vencido, ámbar por vencer, verde al día o libre, gris dato neutro-,
+   una única forma de pastilla, y el fondo de las fichas vuelve a ser oscuro
+   con un filo de color a la izquierda. Sigue distinguiéndose de un vistazo y
+   deja de cansar la vista.
+   ==========================================================================*/
+
+/* ---- 1. Paleta local ---------------------------------------------------- */
+body#cuerpo-app #sec-clientes,
+body#cuerpo-app #sec-cuentas,
+body#cuerpo-app #sec-servicios{
+  --pp-linea:  rgba(255,255,255,.075);
+  --pp-linea2: rgba(255,255,255,.13);
+  --pp-piso:   rgba(255,255,255,.022);
+  --pp-hondo:  rgba(0,0,0,.30);
+  --pp-txt:    #e7ecf4;
+  --pp-txt2:   #97a3b5;
+  --pp-txt3:   #6c7889;
+  --pp-rojo:   #ff5f73;
+  --pp-ambar:  #f5b544;
+  --pp-verde:  #3ddc97;
+  --pp-frio:   #7dd3fc;
+}
+
+/* ---- 2. Una sola pastilla ----------------------------------------------- */
+body#cuerpo-app #sec-clientes .chip,
+body#cuerpo-app #sec-cuentas .mc-chip,
+body#cuerpo-app #sec-servicios .mc-chip{
+  height:19px; padding:0 8px; border-radius:999px;
+  font-size:8.5px; font-weight:900; letter-spacing:.055em; text-transform:uppercase;
+  border:1px solid var(--pp-linea2); background:var(--pp-hondo); color:var(--pp-txt2);
+  display:inline-flex; align-items:center; gap:4px; white-space:nowrap;
+}
+/* lo neutro se retira al fondo para que lo urgente se vea */
+body#cuerpo-app #sec-clientes .chip-neutro,
+body#cuerpo-app #sec-clientes .pap-chip-nivel{
+  border-color:var(--pp-linea)!important; background:transparent!important; color:var(--pp-txt3)!important;
+}
+body#cuerpo-app #sec-clientes .chip-urgente,
+body#cuerpo-app #sec-cuentas .mc-chip.bad,
+body#cuerpo-app #sec-servicios .mc-chip.bad{
+  border-color:rgba(255,95,115,.42)!important; background:rgba(255,95,115,.13)!important; color:var(--pp-rojo)!important;
+}
+body#cuerpo-app #sec-clientes .chip-aviso,
+body#cuerpo-app #sec-cuentas .mc-chip.warn,
+body#cuerpo-app #sec-servicios .mc-chip.warn{
+  border-color:rgba(245,181,68,.40)!important; background:rgba(245,181,68,.12)!important; color:var(--pp-ambar)!important;
+}
+body#cuerpo-app #sec-clientes .chip-ok,
+body#cuerpo-app #sec-cuentas .mc-chip.ok,
+body#cuerpo-app #sec-servicios .mc-chip.ok{
+  border-color:rgba(61,220,151,.36)!important; background:rgba(61,220,151,.11)!important; color:var(--pp-verde)!important;
+}
+
+/* ---- 3. Los recuadros de cifras, con filo de color ----------------------- */
+body#cuerpo-app #sec-clientes .pap-mini-stat,
+body#cuerpo-app #sec-cuentas .pap-mini-stat,
+body#cuerpo-app #sec-servicios .pap-mini-stat{
+  position:relative; overflow:hidden;
+  padding:10px 12px 10px 14px!important;
+  border:1px solid var(--pp-linea)!important;
+  border-radius:13px!important;
+  background:linear-gradient(180deg,var(--pp-piso),rgba(0,0,0,.16))!important;
+}
+body#cuerpo-app #sec-clientes .pap-mini-stat::before,
+body#cuerpo-app #sec-cuentas .pap-mini-stat::before,
+body#cuerpo-app #sec-servicios .pap-mini-stat::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--pp-txt3); opacity:.55;
+}
+body#cuerpo-app #sec-clientes .pap-mini-stat.red::before,
+body#cuerpo-app #sec-cuentas .pap-mini-stat.red::before{ background:var(--pp-rojo); opacity:1 }
+body#cuerpo-app #sec-clientes .pap-mini-stat.amber::before,
+body#cuerpo-app #sec-cuentas .pap-mini-stat.amber::before{ background:var(--pp-ambar); opacity:1 }
+body#cuerpo-app #sec-clientes .pap-mini-stat.green::before,
+body#cuerpo-app #sec-cuentas .pap-mini-stat.green::before{ background:var(--pp-verde); opacity:1 }
+body#cuerpo-app #sec-clientes .pap-mini-stat.blue::before,
+body#cuerpo-app #sec-cuentas .pap-mini-stat.blue::before{ background:var(--pp-frio); opacity:1 }
+body#cuerpo-app #sec-clientes .pap-mini-stat .k,
+body#cuerpo-app #sec-cuentas .pap-mini-stat .k{
+  font-size:8.5px!important; letter-spacing:.12em!important; color:var(--pp-txt3)!important;
+}
+body#cuerpo-app #sec-clientes .pap-mini-stat .v,
+body#cuerpo-app #sec-cuentas .pap-mini-stat .v{
+  margin-top:3px!important; font-variant-numeric:tabular-nums;
+}
+
+/* ---- 4. La barra de filtros deja de gritar ------------------------------- */
+/* Sólo "Nuevo cliente" es de color. Todo lo demás, botones tranquilos. */
+body#cuerpo-app #sec-clientes .pap-section-tools .pap-tool{
+  border:1px solid var(--pp-linea)!important;
+  background:var(--pp-hondo)!important;
+  color:var(--pp-txt2)!important;
+  box-shadow:none!important;
+}
+body#cuerpo-app #sec-clientes .pap-section-tools .pap-tool:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.06)!important; color:var(--pp-txt)!important;
+}
+body#cuerpo-app #sec-clientes .pap-section-tools .pap-tool.primary{
+  border-color:rgba(229,9,20,.55)!important;
+  background:linear-gradient(180deg,#e11d2e,#b7121f)!important;
+  color:#fff!important;
+}
+/* Los tres filtros de estado venian cada uno con su relleno de color -blanco,
+   ambar y granate- y al lado un boton rojo y otro azul. Cinco colores en una
+   fila y ninguno mandaba. Se les deja el mismo fondo tranquilo a los tres; el
+   significado lo sigue llevando el color de la LETRA, que para eso esta. */
+body#cuerpo-app #sec-clientes button.flex-1.sm\:flex-none{
+  background:var(--pp-hondo)!important;
+  border:1px solid var(--pp-linea)!important;
+  border-radius:9px!important;
+}
+body#cuerpo-app #sec-clientes button.flex-1.sm\:flex-none:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.06)!important;
+}
+/* Imprimir y Excel son acciones secundarias, no titulares */
+body#cuerpo-app #sec-clientes button[class*="bg-blue-600"],
+body#cuerpo-app #sec-clientes button[class*="bg-slate-700"]{
+  background:var(--pp-hondo)!important;
+  border-color:var(--pp-linea)!important;
+  color:var(--pp-txt2)!important;
+}
+body#cuerpo-app #sec-clientes button[class*="bg-blue-600"]:hover,
+body#cuerpo-app #sec-clientes button[class*="bg-slate-700"]:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.07)!important; color:var(--pp-txt)!important;
+}
+
+/* el filtro activo se marca con el filo, no con relleno de color */
+body#cuerpo-app #sec-clientes .pap-tool.activa,
+body#cuerpo-app #sec-clientes .pap-tool[aria-pressed="true"]{
+  border-color:var(--pp-linea2)!important;
+  background:rgba(255,255,255,.07)!important;
+  color:var(--pp-txt)!important;
+  box-shadow:inset 0 -2px 0 var(--pp-rojo)!important;
+}
+
+/* ---- 5. La ficha del cliente -------------------------------------------- */
+body#cuerpo-app #sec-clientes .tarjeta-registro{
+  border:1px solid var(--pp-linea)!important;
+  border-radius:14px!important;
+  background:linear-gradient(180deg,rgba(20,24,32,.92),rgba(9,12,17,.96))!important;
+  box-shadow:none!important;
+  transition:border-color .16s ease, transform .16s ease;
+}
+body#cuerpo-app #sec-clientes .tarjeta-registro:hover{
+  border-color:var(--pp-linea2)!important; transform:translateY(-1px);
+}
+/* Vencido: filo rojo y un velo, no un ladrillo rojo entero */
+body#cuerpo-app #sec-clientes .tarjeta-registro.estado-vencido{
+  border-color:rgba(255,95,115,.30)!important;
+  background:linear-gradient(100deg,rgba(255,95,115,.11) 0%,rgba(255,95,115,.03) 38%,rgba(9,12,17,.96) 78%)!important;
+  box-shadow:inset 3px 0 0 var(--pp-rojo)!important;
+}
+body#cuerpo-app #sec-clientes .tarjeta-registro.estado-aviso,
+body#cuerpo-app #sec-clientes .tarjeta-registro.estado-urgente{
+  border-color:rgba(245,181,68,.28)!important;
+  background:linear-gradient(100deg,rgba(245,181,68,.10) 0%,rgba(245,181,68,.03) 38%,rgba(9,12,17,.96) 78%)!important;
+  box-shadow:inset 3px 0 0 var(--pp-ambar)!important;
+}
+body#cuerpo-app #sec-clientes .tarjeta-registro.estado-activo,
+body#cuerpo-app #sec-clientes .tarjeta-registro.estado-ok{
+  box-shadow:inset 3px 0 0 rgba(61,220,151,.75)!important;
+}
+
+/* Las filas de datos: rejilla de dos columnas con una raya finita */
+body#cuerpo-app #sec-clientes .dato-linea{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  align-items:baseline!important;
+  gap:10px!important;
+  padding:5px 0!important;
+  border-bottom:1px solid rgba(255,255,255,.045)!important;
+  font-size:10.5px!important;
+}
+body#cuerpo-app #sec-clientes .dato-linea:last-of-type{ border-bottom:0!important }
+body#cuerpo-app #sec-clientes .dato-linea > span:first-child{
+  color:var(--pp-txt3)!important; font-weight:800!important;
+  font-size:9px!important; letter-spacing:.05em!important; text-transform:uppercase!important;
+}
+body#cuerpo-app #sec-clientes .dato-linea > span:last-child{
+  color:var(--pp-txt)!important; font-weight:700!important; text-align:right!important;
+  font-variant-numeric:tabular-nums;
+}
+
+/* Los botones de acción, todos iguales y sin dejar uno suelto abajo */
+body#cuerpo-app #sec-clientes .tarjeta-registro .btn-icono{
+  width:30px!important; height:30px!important; border-radius:9px!important;
+  border:1px solid var(--pp-linea)!important;
+  background:rgba(255,255,255,.028)!important;
+  color:var(--pp-txt2)!important;
+}
+body#cuerpo-app #sec-clientes .tarjeta-registro .btn-icono:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.09)!important; color:#fff!important;
+}
+
+/* Las fichas eran de 214 px y todo se partía en dos renglones: "PERFIL 1 ·
+   PIN 1001" y "S/ 11.50 / 1 mes". Con 250 px cabe de una línea y en el móvil
+   se sigue viendo una sola columna. */
+body#cuerpo-app .seccion-pantalla#sec-clientes .vista-tarjetas,
+body#cuerpo-app .seccion-pantalla#sec-servicios .vista-tarjetas{ --pap-col:250px }
+
+/* Todas las filas de la rejilla medían lo mismo que la más alta (grid-auto-rows
+   en 1fr). Cuando en la última fila sólo quedaba un hueco libre, se llevaba
+   221 px de alto para enseñar tres palabras. Cada fila se ajusta a lo suyo;
+   dentro de una misma fila las fichas siguen quedando parejas. */
+body#cuerpo-app .seccion-pantalla#sec-clientes .vista-tarjetas,
+body#cuerpo-app .seccion-pantalla#sec-servicios .vista-tarjetas{ grid-auto-rows:auto!important }
+
+body#cuerpo-app #sec-clientes .tarjeta-registro .font-mono{ white-space:nowrap!important }
+
+/* Los seis botones no cabían en una fila y el sexto se quedaba solo debajo.
+   En una sola fila repartida a partes iguales siempre entran. */
+body#cuerpo-app #sec-clientes .tarjeta-registro div:has(> .btn-icono){
+  display:grid!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:minmax(0,1fr)!important;
+  gap:4px!important;
+  justify-items:center!important;
+}
+body#cuerpo-app #sec-clientes .tarjeta-registro div:has(> .btn-icono) > .btn-icono{
+  width:100%!important; max-width:34px!important;
+}
+
+/* ---- 6. El hueco libre: sin rayas, un marco de puntos ------------------- */
+body#cuerpo-app #sec-clientes .cli-libre,
+body#cuerpo-app #sec-servicios .cli-libre{
+  background-image:none!important;
+  background:rgba(61,220,151,.045)!important;
+  border:1px dashed rgba(61,220,151,.34)!important;
+  box-shadow:none!important;
+}
+body#cuerpo-app #sec-clientes .cli-libre:hover,
+body#cuerpo-app #sec-servicios .cli-libre:hover{
+  background:rgba(61,220,151,.10)!important; border-color:rgba(61,220,151,.55)!important;
+}
+/* Un hueco vacío se estiraba hasta la altura de la ficha de al lado: 221 px de
+   caja vacía. Se queda arriba y del alto justo, como lo que es: un sitio libre. */
+body#cuerpo-app #sec-clientes .cli-libre,
+body#cuerpo-app #sec-servicios .cli-libre{
+  align-self:start!important;
+  min-height:92px!important;
+  justify-content:center!important;
+}
+body#cuerpo-app #sec-clientes .cli-libre .cl-pie,
+body#cuerpo-app #sec-servicios .cli-libre .cl-pie{ margin-top:6px!important }
+
+/* Los dos carriles de color de la izquierda -uno de la plataforma, otro de la
+   cuenta- iban pegados y sumaban 9 px que en el teléfono se notan. Se afinan
+   a 3 px cada uno: se siguen distinguiendo y dejan de parecer una sola barra
+   gorda a rayas. */
+body#cuerpo-app #sec-clientes .grupo-plataforma,
+body#cuerpo-app #sec-cuentas .grupo-plataforma{ border-left-width:3px!important }
+body#cuerpo-app #sec-clientes .bloque-cuenta,
+body#cuerpo-app #sec-cuentas .bloque-cuenta{ border-left-width:3px!important }
+
+/* ---- 7. Cabecera de plataforma ------------------------------------------ */
+body#cuerpo-app #sec-clientes .grupo-cabecera,
+body#cuerpo-app #sec-cuentas .grupo-cabecera{ padding:9px 13px!important }
+body#cuerpo-app #sec-cuentas .platform-stat,
+body#cuerpo-app #sec-servicios .platform-stat{
+  padding:5px 9px!important; border-radius:999px!important;
+  background:var(--pp-hondo)!important; border:1px solid var(--pp-linea)!important;
+}
+body#cuerpo-app #sec-cuentas .platform-stat em,
+body#cuerpo-app #sec-servicios .platform-stat em{
+  color:var(--pp-txt3)!important; font-style:normal!important;
+}
+
+/* ---- 8. "Cuentas master": la cabecera ocupaba cuatro barras ------------- */
+body#cuerpo-app #sec-cuentas .pap-master-admin-head{ padding-bottom:8px!important }
+body#cuerpo-app #sec-cuentas .pap-ma-kpi{
+  padding:5px 9px!important; border-radius:999px!important;
+  border-color:var(--pp-linea)!important; background:var(--pp-hondo)!important;
+  color:var(--pp-txt3)!important;
+}
+/* Las herramientas eran una rejilla de cinco huecos fijos; al añadir el botón
+   de "Ver claves" el de "Actualizar" se caía a una fila entera para él solo. */
+body#cuerpo-app #sec-cuentas .pap-master-admin-tools,
+body#cuerpo-app #sec-servicios .pap-master-admin-tools{
+  display:flex!important; flex-wrap:wrap!important; gap:7px!important; align-items:center!important;
+}
+body#cuerpo-app #sec-cuentas .pap-master-admin-tools > input,
+body#cuerpo-app #sec-servicios .pap-master-admin-tools > input{ flex:2 1 220px!important; width:auto!important }
+body#cuerpo-app #sec-cuentas .pap-master-admin-tools > select,
+body#cuerpo-app #sec-servicios .pap-master-admin-tools > select{ flex:1 1 170px!important; width:auto!important }
+body#cuerpo-app #sec-cuentas .pap-master-tool-btn,
+body#cuerpo-app #sec-servicios .pap-master-tool-btn{
+  flex:0 0 auto!important;
+  border-color:var(--pp-linea)!important; background:var(--pp-hondo)!important; color:var(--pp-txt2)!important;
+}
+body#cuerpo-app #sec-cuentas .pap-master-tool-btn:hover,
+body#cuerpo-app #sec-servicios .pap-master-tool-btn:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.07)!important; color:var(--pp-txt)!important;
+}
+
+/* ---- 9. La tarjeta de la cuenta master ---------------------------------- */
+/* Los seis datos de la cuenta -correo, vence, clave, precio por perfil,
+   suscripción y coste- iban en una tira sin separación: en pantalla ancha se
+   leía "cuenta2@gmail.comVENCE 20 ago 2026CLAVE". Ahora van en rejilla, de
+   tres en tres en el escritorio y de uno en uno en el teléfono, cada dato con
+   su raya. */
+body#cuerpo-app #sec-cuentas .master-premium-card .mc-info,
+body#cuerpo-app #sec-servicios .master-premium-card .mc-info,
+body#cuerpo-app #sec-cuentas .mc-info,
+body#cuerpo-app #sec-servicios .mc-info{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr))!important;
+  column-gap:20px!important;
+  row-gap:0!important;
+  border-top:1px solid var(--pp-linea)!important;
+  margin:4px 0 9px!important;
+  padding-top:2px!important;
+}
+body#cuerpo-app #sec-cuentas .mc-cell,
+body#cuerpo-app #sec-servicios .mc-cell{
+  padding:6px 0!important;
+  border-bottom:1px solid rgba(255,255,255,.055)!important;
+  gap:10px!important;
+}
+body#cuerpo-app #sec-cuentas .mc-cell > b,
+body#cuerpo-app #sec-servicios .mc-cell > b{ flex:1 1 auto!important; text-align:right!important }
+/* En el teléfono la rejilla llegaba a partir una casilla en 57 px y los
+   puntitos de la clave caían en tres renglones. Ahí van de uno en uno. */
+@media (max-width:620px){
+  /* Se le pide a cada casilla que ocupe TODAS las columnas que haya, en vez de
+     pelearse por el número de columnas de la rejilla: así da igual quién gane
+     esa pelea, en el móvil siempre sale una debajo de otra. */
+  body#cuerpo-app #sec-cuentas .mc-cell,
+  body#cuerpo-app #sec-servicios .mc-cell{ grid-column:1 / -1!important }
+}
+body#cuerpo-app #sec-cuentas .mc-cell > span,
+body#cuerpo-app #sec-servicios .mc-cell > span{
+  color:var(--pp-txt3)!important; text-transform:uppercase!important;
+  letter-spacing:.06em!important; font-weight:800!important;
+}
+body#cuerpo-app #sec-cuentas .mc-cell > b,
+body#cuerpo-app #sec-servicios .mc-cell > b{ color:var(--pp-txt)!important }
+body#cuerpo-app #sec-cuentas .mc-btn,
+body#cuerpo-app #sec-servicios .mc-btn{
+  border-color:var(--pp-linea)!important; background:rgba(255,255,255,.03)!important; color:var(--pp-txt2)!important;
+}
+body#cuerpo-app #sec-cuentas .mc-btn:hover,
+body#cuerpo-app #sec-servicios .mc-btn:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.08)!important; color:#fff!important;
+}
+
+/* ---- 10. Los perfiles de la cuenta -------------------------------------- */
+body#cuerpo-app #sec-cuentas .master-profile-premium,
+body#cuerpo-app #sec-servicios .master-profile-premium{
+  border:1px solid var(--pp-linea)!important;
+  background:rgba(255,255,255,.028)!important;
+  box-shadow:none!important;
+}
+body#cuerpo-app #sec-cuentas .master-profile-premium.state-expired,
+body#cuerpo-app #sec-servicios .master-profile-premium.state-expired{
+  border-color:rgba(255,95,115,.30)!important;
+  background:rgba(255,95,115,.075)!important;
+  box-shadow:inset 3px 0 0 var(--pp-rojo)!important;
+}
+body#cuerpo-app #sec-cuentas .master-profile-premium.state-free,
+body#cuerpo-app #sec-servicios .master-profile-premium.state-free{
+  border:1px dashed rgba(61,220,151,.34)!important;
+  background:rgba(61,220,151,.045)!important;
+  box-shadow:none!important;
+}
+body#cuerpo-app #sec-cuentas .mpp-sub,
+body#cuerpo-app #sec-servicios .mpp-sub{ color:var(--pp-txt3)!important }
+
+/* ---- 11. Modo claro ------------------------------------------------------
+   En claro estas dos pantallas estaban a medio hacer: fichas oscuras sobre
+   papel blanco y nombres que no se leian. Se les da su propia versión clara.
+   --------------------------------------------------------------------------*/
+body#cuerpo-app.light-mode #sec-clientes,
+body#cuerpo-app.light-mode #sec-cuentas,
+body#cuerpo-app.light-mode #sec-servicios{
+  --pp-linea:rgba(15,23,42,.11); --pp-linea2:rgba(15,23,42,.22);
+  --pp-piso:rgba(15,23,42,.025); --pp-hondo:rgba(15,23,42,.045);
+  --pp-txt:#0f172a; --pp-txt2:#475467; --pp-txt3:#5b6676;
+}
+/* Cajas y bloques sobre papel */
+body#cuerpo-app.light-mode #sec-clientes .bloque-cuenta,
+body#cuerpo-app.light-mode #sec-cuentas .bloque-cuenta,
+body#cuerpo-app.light-mode #sec-clientes .cuerpo-bloque-cuenta,
+body#cuerpo-app.light-mode #sec-cuentas .cuerpo-bloque-cuenta{
+  background:rgba(15,23,42,.03)!important;
+}
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro,
+body#cuerpo-app.light-mode #sec-cuentas .master-premium-card{
+  background:#fff!important;
+  border-color:var(--pp-linea)!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.06)!important;
+}
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro.estado-vencido{
+  background:linear-gradient(100deg,rgba(255,95,115,.13) 0%,#fff 46%)!important;
+  box-shadow:inset 3px 0 0 #e11d48, 0 1px 2px rgba(15,23,42,.06)!important;
+}
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro.estado-aviso,
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro.estado-urgente{
+  background:linear-gradient(100deg,rgba(245,181,68,.16) 0%,#fff 46%)!important;
+  box-shadow:inset 3px 0 0 #d97706, 0 1px 2px rgba(15,23,42,.06)!important;
+}
+/* El texto de la ficha, en tinta */
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro button,
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro b,
+body#cuerpo-app.light-mode #sec-clientes .dato-linea > span:last-child{
+  color:var(--pp-txt)!important;
+}
+body#cuerpo-app.light-mode #sec-clientes .dato-linea > span:first-child,
+body#cuerpo-app.light-mode #sec-cuentas .mc-cell > span{ color:#5b6676!important }
+body#cuerpo-app.light-mode #sec-clientes .dato-linea{ border-bottom-color:rgba(15,23,42,.08)!important }
+body#cuerpo-app.light-mode #sec-cuentas .mc-cell{ border-bottom-color:rgba(15,23,42,.08)!important }
+body#cuerpo-app.light-mode #sec-cuentas .mc-cell > b{ color:var(--pp-txt)!important }
+/* Los huecos libres y los perfiles */
+body#cuerpo-app.light-mode #sec-clientes .cli-libre,
+body#cuerpo-app.light-mode #sec-servicios .cli-libre,
+body#cuerpo-app.light-mode #sec-cuentas .master-profile-premium.state-free{
+  background:rgba(16,185,129,.07)!important; border-color:rgba(5,150,105,.42)!important;
+}
+body#cuerpo-app.light-mode #sec-clientes .cli-libre .cl-tit,
+body#cuerpo-app.light-mode #sec-servicios .cli-libre .cl-tit{ color:#047857!important }
+body#cuerpo-app.light-mode #sec-clientes .cli-libre .cl-sub,
+body#cuerpo-app.light-mode #sec-clientes .cli-libre .cl-pie{ color:#4b6b62!important }
+body#cuerpo-app.light-mode #sec-cuentas .master-profile-premium{
+  background:#fff!important; border-color:var(--pp-linea)!important;
+}
+body#cuerpo-app.light-mode #sec-cuentas .master-profile-premium.state-expired{
+  background:rgba(255,95,115,.10)!important; border-color:rgba(225,29,72,.35)!important;
+}
+/* Pastillas legibles sobre papel */
+body#cuerpo-app.light-mode #sec-clientes .chip-urgente,
+body#cuerpo-app.light-mode #sec-cuentas .mc-chip.bad{ color:#be123c!important; background:rgba(225,29,72,.10)!important; border-color:rgba(225,29,72,.30)!important }
+body#cuerpo-app.light-mode #sec-clientes .chip-aviso,
+body#cuerpo-app.light-mode #sec-cuentas .mc-chip.warn{ color:#b45309!important; background:rgba(217,119,6,.11)!important; border-color:rgba(217,119,6,.30)!important }
+body#cuerpo-app.light-mode #sec-clientes .chip-ok,
+body#cuerpo-app.light-mode #sec-cuentas .mc-chip.ok{ color:#047857!important; background:rgba(5,150,105,.10)!important; border-color:rgba(5,150,105,.30)!important }
+body#cuerpo-app.light-mode #sec-clientes .chip-neutro,
+body#cuerpo-app.light-mode #sec-clientes .pap-chip-nivel{ color:#5b6676!important }
+body#cuerpo-app.light-mode #sec-clientes .tarjeta-registro .btn-icono{
+  background:rgba(15,23,42,.04)!important; border-color:var(--pp-linea)!important;
+}
+/* Las cifras grandes usaban los tonos del modo oscuro y sobre papel se
+   perdían: medido 1,10 de contraste. Tonos de la misma familia pero oscuros. */
+body#cuerpo-app.light-mode #sec-clientes .pap-mini-stat .v,
+body#cuerpo-app.light-mode #sec-cuentas .pap-mini-stat .v{ color:#0f172a!important }
+body#cuerpo-app.light-mode #sec-clientes .pap-mini-stat.red .v,
+body#cuerpo-app.light-mode #sec-cuentas .pap-mini-stat.red .v{ color:#be123c!important }
+body#cuerpo-app.light-mode #sec-clientes .pap-mini-stat.amber .v,
+body#cuerpo-app.light-mode #sec-cuentas .pap-mini-stat.amber .v{ color:#b45309!important }
+body#cuerpo-app.light-mode #sec-clientes .pap-mini-stat.green .v,
+body#cuerpo-app.light-mode #sec-cuentas .pap-mini-stat.green .v{ color:#047857!important }
+body#cuerpo-app.light-mode #sec-clientes .pap-mini-stat.blue .v,
+body#cuerpo-app.light-mode #sec-cuentas .pap-mini-stat.blue .v{ color:#1d4ed8!important }
+body#cuerpo-app.light-mode #sec-clientes .chip.grupo-conteo,
+body#cuerpo-app.light-mode #sec-cuentas .chip.grupo-conteo{ color:#475467!important }
+body#cuerpo-app.light-mode #sec-clientes .pap-platform-feature,
+body#cuerpo-app.light-mode #sec-cuentas .pap-platform-feature{
+  color:#475467!important; background:rgba(15,23,42,.05)!important; border-color:rgba(15,23,42,.12)!important;
+}
+body#cuerpo-app.light-mode #sec-clientes .insignia-cuenta,
+body#cuerpo-app.light-mode #sec-cuentas .insignia-cuenta{ background:rgba(15,23,42,.05)!important }
+body#cuerpo-app.light-mode #sec-clientes .marca-cuenta,
+body#cuerpo-app.light-mode #sec-cuentas .marca-cuenta{ color:#0f172a!important }
+body#cuerpo-app.light-mode #sec-clientes .cabecera-bloque-cuenta,
+body#cuerpo-app.light-mode #sec-cuentas .cabecera-bloque-cuenta{ color:#475467!important }
+/* El marco de la plataforma seguía siendo oscuro sobre papel */
+body#cuerpo-app.light-mode #sec-clientes .grupo-plataforma,
+body#cuerpo-app.light-mode #sec-cuentas .grupo-plataforma{
+  background:#fff!important; border-color:rgba(15,23,42,.10)!important;
+  box-shadow:0 1px 3px rgba(15,23,42,.07)!important;
+}
+/* La franja de la plataforma se queda con su color -es la que agrupa- así que
+   ahí el texto va en claro, que es lo que se lee sobre ella. */
+body#cuerpo-app.light-mode #sec-clientes .grupo-cabecera *,
+body#cuerpo-app.light-mode #sec-cuentas .grupo-cabecera *{ color:#f8fafc!important }
+body#cuerpo-app.light-mode #sec-clientes .grupo-cabecera .chip-aviso,
+body#cuerpo-app.light-mode #sec-cuentas .grupo-cabecera .chip-aviso{ color:#fde68a!important }
+body#cuerpo-app.light-mode #sec-clientes .grupo-cabecera .chip-ok,
+body#cuerpo-app.light-mode #sec-cuentas .grupo-cabecera .chip-ok{ color:#a7f3d0!important }
+body#cuerpo-app.light-mode #sec-clientes .grupo-cabecera .chip-urgente,
+body#cuerpo-app.light-mode #sec-cuentas .grupo-cabecera .chip-urgente{ color:#fecdd3!important }
+body#cuerpo-app.light-mode #sec-clientes .grupo-cuerpo,
+body#cuerpo-app.light-mode #sec-cuentas .grupo-cuerpo{ background:#fff!important }
+/* En "Cuentas master" el marco de la plataforma no es .grupo-plataforma sino
+   .platform-premium-group, y llevaba pintado un degradado con el color de la
+   plataforma. En claro seguía siendo granate oscuro con la letra oscura
+   encima: no se leía "1 Master · 3/5 perfiles ocupados". */
+body#cuerpo-app.light-mode #sec-cuentas .platform-premium-group,
+body#cuerpo-app.light-mode #sec-servicios .platform-premium-group{
+  background-image:none!important;
+  background-color:#fff!important;
+  border-color:rgba(15,23,42,.10)!important;
+  box-shadow:0 1px 3px rgba(15,23,42,.07)!important;
+}
+body#cuerpo-app.light-mode #sec-cuentas .platform-premium-head,
+body#cuerpo-app.light-mode #sec-servicios .platform-premium-head{
+  background:rgba(15,23,42,.035)!important;
+  border-bottom:1px solid rgba(15,23,42,.08)!important;
+}
+body#cuerpo-app.light-mode #sec-cuentas .platform-premium-head *,
+body#cuerpo-app.light-mode #sec-servicios .platform-premium-head *{ color:#0f172a!important }
+body#cuerpo-app.light-mode #sec-cuentas .platform-stat em,
+body#cuerpo-app.light-mode #sec-servicios .platform-stat em,
+body#cuerpo-app.light-mode #sec-cuentas .pap-platform-feature{ color:#5b6676!important }
+body#cuerpo-app.light-mode #sec-cuentas .platform-add-btn,
+body#cuerpo-app.light-mode #sec-servicios .platform-add-btn{
+  background:linear-gradient(180deg,#e11d2e,#b7121f)!important;
+  border-color:rgba(183,18,31,.65)!important;
+  color:#fff!important;
+}
+body#cuerpo-app.light-mode #sec-cuentas .platform-add-btn *,
+body#cuerpo-app.light-mode #sec-servicios .platform-add-btn *{ color:#fff!important }
+/* La chapa con el nombre de la cuenta dentro del bloque */
+body#cuerpo-app.light-mode #sec-cuentas .insignia-cuenta *,
+body#cuerpo-app.light-mode #sec-clientes .insignia-cuenta *,
+body#cuerpo-app.light-mode #sec-cuentas .cabecera-bloque-cuenta > *,
+body#cuerpo-app.light-mode #sec-clientes .cabecera-bloque-cuenta > *{ color:#0f172a!important }
+body#cuerpo-app.light-mode #sec-cuentas .cabecera-bloque-cuenta .font-mono,
+body#cuerpo-app.light-mode #sec-clientes .cabecera-bloque-cuenta .font-mono{ color:#475467!important }
+
+/* Los nombres de los perfiles se perdían */
+body#cuerpo-app.light-mode #sec-cuentas .mpp-name,
+body#cuerpo-app.light-mode #sec-servicios .mpp-name{ color:#0f172a!important }
+body#cuerpo-app.light-mode #sec-cuentas .mpp-sub,
+body#cuerpo-app.light-mode #sec-servicios .mpp-sub{ color:#5b6676!important }
+body#cuerpo-app.light-mode #sec-cuentas .master-profile-premium.state-free .mpp-name{ color:#047857!important }
+</style>
 </body>
 </html>
