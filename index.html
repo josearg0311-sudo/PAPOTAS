@@ -15790,5 +15790,178 @@ body#cuerpo-app #sec-servicios .cli-libre{
   min-height:0!important;
 }
 </style>
+
+<style id="papotas-v209-coherencia">
+/* ============================================================================
+   V209 · Que todas las pantallas hablen el mismo idioma
+
+   La renovación anterior tocó Clientes, Cuentas master, el menú y el bloque de
+   cuentas del Panel. Las otras veintidós pantallas se quedaron con el estilo
+   anterior, así que el programa parecía dos programas distintos: en unas
+   pantallas los recuadros de cifras llevaban filo de color y en otras eran
+   cajas planas; las pestañas activas llevaban un aro rojo que ya no se usa en
+   ninguna otra parte; y las pastillas cambiaban de tamaño según la pantalla.
+
+   Aquí se lleva la misma gramática a TODO el programa. No cambia ningún dato
+   ni ninguna función: sólo la forma.
+   ==========================================================================*/
+
+/* ---- Paleta, ya para toda la aplicación --------------------------------- */
+body#cuerpo-app{
+  --pp-linea:  rgba(255,255,255,.075);
+  --pp-linea2: rgba(255,255,255,.13);
+  --pp-piso:   rgba(255,255,255,.022);
+  --pp-hondo:  rgba(0,0,0,.30);
+  --pp-txt:    #e7ecf4;
+  --pp-txt2:   #97a3b5;
+  --pp-txt3:   #6c7889;
+  --pp-rojo:   #ff5f73;
+  --pp-ambar:  #f5b544;
+  --pp-verde:  #3ddc97;
+  --pp-frio:   #7dd3fc;
+}
+body#cuerpo-app.light-mode{
+  --pp-linea:rgba(15,23,42,.11); --pp-linea2:rgba(15,23,42,.22);
+  --pp-piso:rgba(15,23,42,.025); --pp-hondo:rgba(15,23,42,.045);
+  --pp-txt:#0f172a; --pp-txt2:#475467; --pp-txt3:#5b6676;
+}
+
+/* ---- 1. Los recuadros de cifras, con filo de color en todas partes ------ */
+/* Ya venían marcados por dentro (red, amber, green, blue); sólo faltaba que
+   se notara. */
+body#cuerpo-app .pap-mini-stat{
+  position:relative; overflow:hidden;
+  padding:10px 12px 10px 14px!important;
+  border:1px solid var(--pp-linea)!important;
+  border-radius:13px!important;
+  background:linear-gradient(180deg,var(--pp-piso),rgba(0,0,0,.16))!important;
+}
+body#cuerpo-app .pap-mini-stat::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--pp-txt3); opacity:.55;
+}
+body#cuerpo-app .pap-mini-stat.red::before  { background:var(--pp-rojo);  opacity:1 }
+body#cuerpo-app .pap-mini-stat.amber::before{ background:var(--pp-ambar); opacity:1 }
+body#cuerpo-app .pap-mini-stat.green::before{ background:var(--pp-verde); opacity:1 }
+body#cuerpo-app .pap-mini-stat.blue::before { background:var(--pp-frio);  opacity:1 }
+body#cuerpo-app .pap-mini-stat .k{
+  font-size:8.5px!important; letter-spacing:.12em!important; color:var(--pp-txt3)!important;
+}
+body#cuerpo-app .pap-mini-stat .v{ margin-top:3px!important; font-variant-numeric:tabular-nums }
+
+/* Los otros recuadros de cifras -los de Dinero- llevaban el color en el borde
+   entero: una caja verde, otra roja, otra ámbar, seis colores en fila. Se les
+   deja el color SÓLO en el filo de la izquierda, como a los demás, sin tener
+   que saber de qué color era cada uno: se apagan los otros tres lados y se
+   engorda el izquierdo. */
+body#cuerpo-app .metrica{
+  border-top-color:var(--pp-linea)!important;
+  border-right-color:var(--pp-linea)!important;
+  border-bottom-color:var(--pp-linea)!important;
+  border-left-width:3px!important;
+  border-radius:13px!important;
+  padding:11px 13px 11px 13px!important;
+  background:linear-gradient(180deg,var(--pp-piso),rgba(0,0,0,.16))!important;
+}
+body#cuerpo-app .metrica .etiqueta{
+  font-size:8.5px!important; letter-spacing:.12em!important; color:var(--pp-txt3)!important;
+}
+body#cuerpo-app .metrica .nota{ color:var(--pp-txt3)!important }
+body#cuerpo-app.light-mode .metrica{
+  background:#fff!important; box-shadow:0 1px 2px rgba(15,23,42,.06)!important;
+}
+
+/* ---- 2. Las pestañas ----------------------------------------------------- */
+/* La activa llevaba un aro rojo alrededor. Ahora se marca como el menú: fondo
+   suave y una raya roja debajo. */
+body#cuerpo-app .pap-pestana{
+  border:1px solid transparent!important;
+  background:transparent!important;
+  color:var(--pp-txt2)!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+body#cuerpo-app .pap-pestana:hover{
+  background:rgba(255,255,255,.05)!important; color:var(--pp-txt)!important;
+}
+body#cuerpo-app .pap-pestana{ position:relative }
+body#cuerpo-app .pap-pestana.activa{
+  background:rgba(255,255,255,.06)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+/* La raya de debajo, recta. Puesta como sombra interior seguía la curva de la
+   esquina y se veía como medio aro rojo alrededor de la pestaña. */
+body#cuerpo-app .pap-pestana.activa::after{
+  content:""; position:absolute; left:11px; right:11px; bottom:0; height:2px;
+  background:var(--papotas-primary,#e50914); border-radius:2px;
+}
+
+/* ---- 3. Las pastillas, un solo tamaño en todo el programa --------------- */
+body#cuerpo-app .chip{
+  height:19px; padding:0 8px; border-radius:999px;
+  font-size:8.5px; font-weight:900; letter-spacing:.055em; text-transform:uppercase;
+  display:inline-flex; align-items:center; gap:4px; white-space:nowrap;
+  border:1px solid var(--pp-linea2); background:var(--pp-hondo); color:var(--pp-txt2);
+}
+body#cuerpo-app .chip-neutro{
+  border-color:var(--pp-linea)!important; background:transparent!important; color:var(--pp-txt3)!important;
+}
+body#cuerpo-app .chip-urgente{
+  border-color:rgba(255,95,115,.42)!important; background:rgba(255,95,115,.13)!important; color:var(--pp-rojo)!important;
+}
+body#cuerpo-app .chip-aviso{
+  border-color:rgba(245,181,68,.40)!important; background:rgba(245,181,68,.12)!important; color:var(--pp-ambar)!important;
+}
+body#cuerpo-app .chip-ok{
+  border-color:rgba(61,220,151,.36)!important; background:rgba(61,220,151,.11)!important; color:var(--pp-verde)!important;
+}
+
+/* Los recuadros de Reportes llevan el color en el borde entero, igual que los
+   de Dinero pero hechos con otras clases. Mismo remedio: el color al filo. */
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-emerald-"],
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-red-"],
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-amber-"],
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-blue-"],
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-sky-"],
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-violet-"],
+body#cuerpo-app .seccion-pantalla .glass-card[class*="border-cyan-"]{
+  border-top-color:var(--pp-linea)!important;
+  border-right-color:var(--pp-linea)!important;
+  border-bottom-color:var(--pp-linea)!important;
+  border-left-width:3px!important;
+}
+
+/* El botón "Actualizar reportes" era el único violeta de todo el programa. */
+body#cuerpo-app .seccion-pantalla button[class*="bg-violet-"]{
+  background:var(--pp-hondo)!important;
+  border-color:var(--pp-linea)!important;
+  color:var(--pp-txt2)!important;
+}
+body#cuerpo-app .seccion-pantalla button[class*="bg-violet-"]:hover{
+  border-color:var(--pp-linea2)!important; background:rgba(255,255,255,.07)!important; color:var(--pp-txt)!important;
+}
+
+/* ---- 4. Las cajas de sección ------------------------------------------- */
+/* Los títulos de bloque iban en cinco tamaños distintos según la pantalla. */
+body#cuerpo-app .seccion-pantalla .ps-head h3,
+body#cuerpo-app .seccion-pantalla .card-head h3{ letter-spacing:-.01em }
+body#cuerpo-app .seccion-pantalla .ps-section,
+body#cuerpo-app .seccion-pantalla .glass-card{
+  border-color:var(--pp-linea)!important;
+}
+
+/* ---- 5. Modo claro para los recuadros de cifras -------------------------- */
+body#cuerpo-app.light-mode .pap-mini-stat{
+  background:#fff!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.06)!important;
+}
+body#cuerpo-app.light-mode .pap-mini-stat .v{ color:#0f172a!important }
+body#cuerpo-app.light-mode .pap-mini-stat.red .v  { color:#be123c!important }
+body#cuerpo-app.light-mode .pap-mini-stat.amber .v{ color:#b45309!important }
+body#cuerpo-app.light-mode .pap-mini-stat.green .v{ color:#047857!important }
+body#cuerpo-app.light-mode .pap-mini-stat.blue .v { color:#1d4ed8!important }
+</style>
 </body>
 </html>
