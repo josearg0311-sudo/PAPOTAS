@@ -141,3 +141,25 @@ Queda con su icono, a pantalla completa y abre sin conexión.
 
 Sube el `index.html` nuevo encima. La próxima vez que se abra con internet se
 coge la versión nueva (la copia guardada solo se usa cuando no hay red).
+
+## 7. El programa nuevo (`papotas-nuevo.html`)
+
+Es un segundo programa, con un diseño hecho de cero, que **convive** con el de
+siempre. Los dos se suben juntos y cada uno tiene su dirección:
+
+- `tusitio.netlify.app/` → el de siempre (`index.html`)
+- `tusitio.netlify.app/papotas-nuevo.html` → el nuevo
+
+Comparten los datos de verdad, no una copia:
+
+- **En el mismo dispositivo** leen y escriben las mismas claves del navegador
+  (`pap_clientes`, `pap_servicios`, `pap_ventas`…). Lo que cobras en uno, el
+  otro lo ve al abrirlo.
+- **El respaldo** es el mismo archivo `PAPOTAS_BACKUP_V10`: el que descargas de
+  uno se carga en el otro sin tocar nada.
+- **Supabase** es la misma tabla `papotas_sync_records` con las mismas
+  funciones y los mismos nombres de colección, así que se sincronizan entre
+  ellos igual que dos teléfonos.
+
+Puedes usar el que quieras, o los dos, sin decidir nada todavía. Si un día te
+quedas solo con el nuevo, basta con renombrarlo a `index.html`.
