@@ -877,6 +877,24 @@ const Nube = (function(){
   let cliente = null, firma = '';
   let estado = 'local', temporizador = 0, trabajando = false, aplicando = false;
   let canal = null;
+
+  /* Lo que este dispositivo sabe que YA está subido, ficha a ficha.
+     Sirve para tres cosas: subir solo lo que cambió (antes se resubía todo
+     entero en cada cobro), saber qué se borró aquí para avisar a la nube, y
+     distinguir "esto no lo tengo porque lo borré" de "esto no lo tengo
+     todavía". Se guarda en el dispositivo para que sobreviva a un cierre. */
+  const CLAVE_CONOCIDO = 'papnuevo_sincronizado';
+  const conocido = new Map();
+  (function(){
+    try{
+      const v = JSON.parse(localStorage.getItem(CLAVE_CONOCIDO) || '[]');
+      if(Array.isArray(v)) v.forEach(function(par){ conocido.set(par[0], par[1]); });
+    }catch(_){}
+  })();
+  function recordar(){
+    try{ localStorage.setItem(CLAVE_CONOCIDO, JSON.stringify(Array.from(conocido))); }catch(_){}
+  }
+  function firmaDe(v){ try{ return JSON.stringify(v); }catch(_){ return String(v); } }
   const idDispositivo = (function(){
     try{
       let v = localStorage.getItem('pap_device_id');
@@ -949,44 +967,132 @@ const Nube = (function(){
     else if(c==='auditoriaLog') auditoriaLog=v;
   }
 
-  async function subir(){
-    const x = await conectar(); if(!x) return;
+  async function subir(forzar){
+    const x = await conectar(); if(!x) return {subidas:0, borradas:0};
     const filas = filasLocales();
+    const presentes = new Set();
+    let subidas = 0, borradas = 0;
+
     for(const f of filas){
+      const k = f.coleccion + '::' + f.registro_id;
+      const fir = firmaDe(f.datos);
+      presentes.add(k);
+      if(!forzar && conocido.get(k) === fir) continue;   /* no cambió: no se toca */
       const r = await x.rpc('papotas_upsert_record', {
         p_coleccion:f.coleccion, p_registro_id:String(f.registro_id),
         p_datos:f.datos, p_dispositivo_id:idDispositivo
       });
       if(r.error) throw r.error;
+      conocido.set(k, fir);
+      subidas++;
     }
+
+    /* Lo que este dispositivo tenía subido y ya no existe aquí, se borró:
+       hay que decírselo a la nube o volvería a aparecer en el próximo
+       arranque, aquí y en los demás dispositivos. */
+    for(const k of Array.from(conocido.keys())){
+      if(presentes.has(k)) continue;
+      const corte = k.indexOf('::');
+      if(corte < 1) { conocido.delete(k); continue; }
+      const col = k.slice(0, corte), id = k.slice(corte + 2);
+      const r = await x.rpc('papotas_delete_record', {
+        p_coleccion:col, p_registro_id:String(id), p_dispositivo_id:idDispositivo
+      });
+      if(r.error) throw r.error;
+      conocido.delete(k);
+      borradas++;
+    }
+    recordar();
+    return {subidas, borradas};
   }
 
-  async function bajar(){
-    const x = await conectar(); if(!x) return {aplicados:0};
+  /* Traer de la nube MEZCLANDO, no arrasando.
+     Antes esto reemplazaba las listas enteras con lo de la nube, así que un
+     cliente creado sin internet desaparecía en cuanto volvía la conexión, y
+     uno borrado aquí volvía a la vida porque la nube seguía teniéndolo.
+     Ahora se compara ficha a ficha:
+       · lo que la nube marca como borrado, se quita de aquí;
+       · lo que aquí está sin subir todavía, manda sobre la nube;
+       · lo que aquí ya no está pero sí estaba subido, se respeta borrado;
+       · el resto lo dicta la nube.
+     Con `forzar` a true se hace lo de antes: la nube manda sobre todo, que
+     es lo que se quiere al pulsar "Traer lo de la nube" a propósito. */
+  async function bajar(forzar){
+    const x = await conectar(); if(!x) return {aplicados:0, quitados:0};
     const r = await x.from('papotas_sync_records').select('coleccion,registro_id,datos,eliminado');
     if(r.error) throw r.error;
-    const porColeccion = {};
-    let notas = null, conf = null;
+
+    const remoto = {}, lapidas = {};
+    let notas, notasBorradas = false, conf, confBorrada = false;
     (r.data||[]).forEach(function(fila){
-      if(fila.eliminado) return;
-      if(fila.coleccion === 'blocNotasTexto'){ notas = (fila.datos && fila.datos.value) || ''; return; }
-      if(fila.coleccion === 'ajustes'){ conf = fila.datos || null; return; }
-      if(COLECCIONES.indexOf(fila.coleccion) < 0) return;
-      (porColeccion[fila.coleccion] = porColeccion[fila.coleccion] || []).push(fila.datos);
+      const col = fila.coleccion, id = String(fila.registro_id);
+      if(col === 'blocNotasTexto'){
+        if(fila.eliminado) notasBorradas = true; else notas = (fila.datos && fila.datos.value) || '';
+        return;
+      }
+      if(col === 'ajustes'){
+        if(fila.eliminado) confBorrada = true; else conf = fila.datos || null;
+        return;
+      }
+      if(COLECCIONES.indexOf(col) < 0) return;
+      if(fila.eliminado){ (lapidas[col] = lapidas[col] || new Set()).add(id); return; }
+      (remoto[col] = remoto[col] || new Map()).set(id, fila.datos);
     });
-    let n = 0;
+
+    let aplicados = 0, quitados = 0;
     aplicando = true;
-    COLECCIONES.forEach(function(c){
-      if(porColeccion[c]){ ponColeccion(c, porColeccion[c]); n += porColeccion[c].length; }
+
+    COLECCIONES.forEach(function(col){
+      const locales = coleccion(col) || [];
+      const mapa = new Map();
+      locales.forEach(function(item, i){
+        if(item) mapa.set(String(item.id != null ? item.id : (col + '_' + i)), item);
+      });
+
+      if(lapidas[col]) lapidas[col].forEach(function(id){
+        if(mapa.delete(id)) quitados++;
+        conocido.delete(col + '::' + id);
+      });
+
+      if(remoto[col]) remoto[col].forEach(function(datos, id){
+        const k = col + '::' + id;
+        const aqui = mapa.get(id);
+        if(!forzar){
+          /* Lo borré aquí y todavía no he podido avisar a la nube. */
+          if(!aqui && conocido.has(k)) return;
+          /* Lo cambié aquí y todavía no he podido subirlo. */
+          if(aqui && conocido.get(k) !== firmaDe(aqui)) return;
+        }
+        mapa.set(id, datos);
+        conocido.set(k, firmaDe(datos));
+        aplicados++;
+      });
+
+      ponColeccion(col, Array.from(mapa.values()));
     });
-    if(notas !== null) blocNotasTexto = notas;
+
+    if(notas !== undefined){
+      const kn = 'blocNotasTexto::singleton';
+      const pendiente = conocido.get(kn) !== firmaDe({value:String(blocNotasTexto||'')});
+      if(forzar || !pendiente){ blocNotasTexto = notas; conocido.set(kn, firmaDe({value:notas})); }
+    }else if(notasBorradas){ conocido.delete('blocNotasTexto::singleton'); }
+
     if(conf){
-      const url = ajustes.supabaseUrl, key = ajustes.supabaseKey;
-      ajustes = Object.assign({}, AJUSTES_BASE, conf, {supabaseUrl:url, supabaseKey:key});
-    }
+      const ka = 'ajustes::singleton';
+      const mio = JSON.parse(JSON.stringify(ajustes||{}));
+      delete mio.supabaseUrl; delete mio.supabaseKey;
+      const pendiente = conocido.get(ka) !== firmaDe(mio);
+      if(forzar || !pendiente){
+        const url = ajustes.supabaseUrl, key = ajustes.supabaseKey;
+        ajustes = Object.assign({}, AJUSTES_BASE, conf, {supabaseUrl:url, supabaseKey:key});
+        conocido.set(ka, firmaDe(conf));
+      }
+    }else if(confBorrada){ conocido.delete('ajustes::singleton'); }
+
+    recordar();
     guardar(false);
     aplicando = false;
-    return {aplicados:n};
+    return {aplicados, quitados};
   }
 
   function pedirSubida(){
@@ -1026,6 +1132,7 @@ const Nube = (function(){
       await bajar();
       if(window.PAPOTAS && window.PAPOTAS.pintar) window.PAPOTAS.pintar();
       await subir();
+      if(window.PAPOTAS && window.PAPOTAS.pintar) window.PAPOTAS.pintar();
       ponEstado('sincronizado');
       escuchar();
     }catch(e){ console.warn('[PAPOTAS nube] arranque', e); ponEstado('error'); }
@@ -1270,7 +1377,9 @@ function num(id){ const v = parseFloat(String(val(id)).replace(',', '.')); retur
 /* ---------- 7. Navegación ------------------------------------------------ */
 
 const PANTALLAS = {
-  hoy:      {titulo:'Hoy',      accion:['Nuevo cobro', function(){ formCliente(); }]},
+  /* El botón de "Hoy" decía "Nuevo cobro" pero abría el alta de un cliente.
+     Se cobra desde la propia fila, así que aquí lo honesto es el alta. */
+  hoy:      {titulo:'Hoy',      accion:['Nuevo cliente', function(){ formCliente(); }]},
   clientes: {titulo:'Clientes', accion:['Nuevo cliente', function(){ formCliente(); }]},
   cuentas:  {titulo:'Cuentas',  accion:['Nueva cuenta', function(){ formMaster(); }]},
   dinero:   {titulo:'Dinero',   accion:['Registrar gasto', function(){ formGasto(); }]},
@@ -1866,7 +1975,7 @@ function pintaAjustes(){
       '</div>' +
       '<div class="fila" style="margin-top:var(--e3)">' +
         '<button class="btn principal" id="btn-guardar-nube">Guardar y conectar</button>' +
-        (conectado ? '<button class="btn" id="btn-subir">Subir lo de aquí</button>' : '') +
+        (conectado ? '<button class="btn" id="btn-subir">Subir todo de nuevo</button>' : '') +
         (conectado ? '<button class="btn" id="btn-bajar">Traer lo de la nube</button>' : '') +
       '</div>' +
       '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
@@ -2255,16 +2364,20 @@ document.addEventListener('click', function(ev){
     Nube.arrancar().then(function(){ pintar(); });
   }
   else if(id === 'btn-subir'){
-    avisar('Subiendo…');
-    Nube.subir().then(function(){ Nube.ponEstado('sincronizado'); avisar('Todo subido a la nube', 'bien'); })
-      .catch(function(e){ Nube.ponEstado('error'); avisar('No se pudo subir: ' + e.message, 'mal'); });
+    avisar('Subiendo todo…');
+    Nube.subir(true).then(function(r){
+      Nube.ponEstado('sincronizado');
+      avisar('Subidas ' + r.subidas + ' fichas' + (r.borradas ? ' y avisados ' + r.borradas + ' borrados' : ''), 'bien');
+    }).catch(function(e){ Nube.ponEstado('error'); avisar('No se pudo subir: ' + e.message, 'mal'); });
   }
   else if(id === 'btn-bajar'){
     confirmar('Traer lo de la nube',
-      'Lo que hay en la nube reemplazará lo que tienes en este dispositivo. ¿Continuar?',
+      'Lo que hay en la nube mandará sobre lo que tienes en este dispositivo, incluso sobre cambios que aún no hayas subido. ¿Continuar?',
       'Sí, traer', function(){
-        Nube.bajar().then(function(r){ pintar(); avisar('Traídos ' + r.aplicados + ' registros de la nube', 'bien'); })
-          .catch(function(e){ avisar('No se pudo traer: ' + e.message, 'mal'); });
+        Nube.bajar(true).then(function(r){
+          pintar();
+          avisar('Traídas ' + r.aplicados + ' fichas' + (r.quitados ? ' y quitadas ' + r.quitados : ''), 'bien');
+        }).catch(function(e){ avisar('No se pudo traer: ' + e.message, 'mal'); });
       });
   }
   else if(id === 'btn-gasto'){ formGasto(); }
