@@ -134,6 +134,10 @@ a{color:inherit}
   font-size:9px;font-weight:700;line-height:16px;text-align:center;
 }
 #carril-pie{margin-top:auto;display:flex;flex-direction:column;gap:var(--e1);align-items:center}
+#sello-carril{
+  font-size:9px;font-weight:700;color:var(--txt-4);letter-spacing:.02em;
+  padding:3px 6px;border-radius:6px;border:1px solid var(--linea);
+}
 .carril-mini{
   width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
   color:var(--txt-3);transition:color var(--rapido),background var(--rapido);
@@ -487,6 +491,7 @@ button.metrica:hover{background:var(--capa-alta)}
       <button class="carril-mini" id="btn-tema" title="Claro u oscuro" aria-label="Cambiar entre claro y oscuro">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
       </button>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.1</span>
     </div>
   </nav>
 
@@ -1266,6 +1271,8 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
+const VERSION = 'v2.1';
+
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
 
@@ -1910,6 +1917,27 @@ function pintaDinero(){
 }
 
 /* --- AJUSTES ------------------------------------------------------------ */
+/* Preguntarle a la copia guardada cómo se llama. Si el programa dice una
+   versión y la copia dice otra, se ve al momento de dónde viene el problema. */
+function contarCopiaGuardada(){
+  const celda = document.getElementById('dato-copia');
+  if(!celda) return;
+  if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller){
+    celda.textContent = 'ninguna (viene de internet)';
+    return;
+  }
+  let contestó = false;
+  const oir = function(ev){
+    if(!ev.data || ev.data.tipo !== 'papotas:version') return;
+    contestó = true;
+    navigator.serviceWorker.removeEventListener('message', oir);
+    celda.textContent = ev.data.cache;
+  };
+  navigator.serviceWorker.addEventListener('message', oir);
+  try{ navigator.serviceWorker.controller.postMessage('papotas:version'); }catch(_){}
+  setTimeout(function(){ if(!contestó) celda.textContent = 'no contestó'; }, 2500);
+}
+
 function pintaAjustes(){
   $('#subtitulo').textContent = 'Tu negocio, respaldo y nube';
   const conectado = Nube.hayCredenciales();
@@ -1991,6 +2019,22 @@ function pintaAjustes(){
       '</div></div>' +
     '</div>' +
 
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza"><div class="crece"><h2>Versión</h2>' +
+        '<p>Si aquí no pone lo mismo que te dije al entregártelo, estás abriendo una copia guardada antigua.</p></div>' +
+        '<span class="insignia">PAPOTAS ' + esc(VERSION) + '</span>' +
+      '</div>' +
+      '<div class="tarjeta-cuerpo">' +
+        '<dl class="datos" style="margin-bottom:var(--e3)">' +
+          '<div class="dato"><dt>Programa</dt><dd>PAPOTAS ' + esc(VERSION) + '</dd></div>' +
+          '<div class="dato"><dt>Copia guardada</dt><dd id="dato-copia">comprobando…</dd></div>' +
+          '<div class="dato"><dt>Dirección</dt><dd style="word-break:break-all;font-size:12px">' + esc(location.pathname) + '</dd></div>' +
+        '</dl>' +
+        '<div class="fila">' +
+          '<button class="btn" id="btn-buscar-version">Buscar una versión nueva</button>' +
+        '</div></div>' +
+    '</div>' +
+
   '</div>';
 }
 
@@ -2000,7 +2044,7 @@ function pintar(){
   else if(pantalla === 'clientes') pintaClientes();
   else if(pantalla === 'cuentas') pintaCuentas();
   else if(pantalla === 'dinero') pintaDinero();
-  else if(pantalla === 'ajustes') pintaAjustes();
+  else if(pantalla === 'ajustes'){ pintaAjustes(); contarCopiaGuardada(); }
   pintarAvisosNav();
 }
 function pintarAvisosNav(){
@@ -2381,6 +2425,10 @@ document.addEventListener('click', function(ev){
       });
   }
   else if(id === 'btn-gasto'){ formGasto(); }
+  else if(id === 'btn-buscar-version'){
+    if(window.papotasBuscarActualizacion) window.papotasBuscarActualizacion();
+    else avisar('Esto solo funciona con el programa publicado en internet');
+  }
   else if(id === 'btn-tema-2'){
     ajustes.modoClaro = !ajustes.modoClaro; aplicarTema(); guardar(); pintar();
   }
@@ -2424,7 +2472,7 @@ const destinoInicial = String(location.hash || '').replace('#','');
 ir(PANTALLAS[destinoInicial] ? destinoInicial : 'hoy');
 
 window.PAPOTAS = {
-  version:'2.0',
+  version:VERSION,
   pintar: pintar,
   datos: function(){ return {servicios, clientes, ventas, inversiones, ajustes}; },
   recargar: function(){ cargar(); aplicarTema(); pintar(); }
@@ -2432,9 +2480,45 @@ window.PAPOTAS = {
 
 Nube.arrancar();
 
-if('serviceWorker' in navigator){
+/* El programa se guarda en el navegador para abrir sin conexión, pero hasta
+   ahora nadie comprobaba nunca si había una versión nueva: se registraba y
+   ahí quedaba. Así es como subes una actualización y al abrir sale igual que
+   antes. Aquí se pregunta al abrir, al volver a la pestaña, al recuperar la
+   conexión y cada quince minutos; y cuando la versión nueva toma el mando,
+   la página se recarga sola una vez. La primera instalación no recarga. */
+if('serviceWorker' in navigator && (location.protocol === 'https:' ||
+   location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
+  var teniaControlador = !!navigator.serviceWorker.controller;
+  var recargandoPorVersion = false;
+  var estrenar = function(){
+    if(!teniaControlador || recargandoPorVersion) return;  /* nada viejo que reemplazar */
+    recargandoPorVersion = true;
+    avisar('Hay una versión nueva. Actualizando…');
+    setTimeout(function(){ location.reload(); }, 350);
+  };
+  navigator.serviceWorker.addEventListener('controllerchange', estrenar);
   window.addEventListener('load', function(){
-    navigator.serviceWorker.register('sw.js').catch(function(){});
+    navigator.serviceWorker.register('sw.js').then(function(reg){
+      if(!reg) return;
+      /* El relevo de trabajador no siempre llega: según el navegador, cuando
+         la versión nueva se activa el cliente se queda con la vieja hasta la
+         próxima navegación. Se vigila también esta otra señal, que sí es
+         fiable: aparece un trabajador nuevo y se le sigue hasta que queda
+         activado. */
+      reg.addEventListener('updatefound', function(){
+        var nuevo = reg.installing;
+        if(!nuevo) return;
+        nuevo.addEventListener('statechange', function(){
+          if(nuevo.state === 'activated') estrenar();
+        });
+      });
+      var preguntar = function(){ try{ reg.update(); }catch(_){} };
+      preguntar();
+      document.addEventListener('visibilitychange', function(){ if(!document.hidden) preguntar(); });
+      window.addEventListener('online', preguntar);
+      setInterval(preguntar, 15 * 60 * 1000);
+      window.papotasBuscarActualizacion = function(){ avisar('Buscando una versión nueva…'); preguntar(); };
+    }).catch(function(){});
   });
 }
 

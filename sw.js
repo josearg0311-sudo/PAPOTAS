@@ -15,7 +15,7 @@
    Ojo: esto NO guarda tus datos. Tus datos viven en el propio navegador y, si
    configuras la nube, en Supabase. Esto solo guarda el programa. */
 
-const CACHE = 'papotas-v4';
+const CACHE = 'papotas-v5';
 const BASICOS = ['./', './index.html', './papotas-nuevo.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 /* Cuánto se espera a la red antes de tirar de la copia guardada. */
@@ -34,6 +34,16 @@ self.addEventListener('activate', (ev) => {
       .then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
+});
+
+/* Para poder preguntarle desde la página "¿qué copia estás sirviendo?".
+   Sin esto, cuando algo sale viejo no hay forma de saber si la culpa es de
+   la copia guardada, de la dirección que se abrió o del propio archivo. */
+self.addEventListener('message', (ev) => {
+  if (ev.data !== 'papotas:version') return;
+  const responder = (c) => { try { c.postMessage({ tipo: 'papotas:version', cache: CACHE }); } catch (_e) {} };
+  if (ev.source) return responder(ev.source);
+  ev.waitUntil(self.clients.matchAll({ includeUncontrolled: true }).then((cs) => cs.forEach(responder)));
 });
 
 self.addEventListener('fetch', (ev) => {
