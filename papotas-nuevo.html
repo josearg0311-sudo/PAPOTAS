@@ -485,7 +485,14 @@ button.metrica:hover{background:var(--capa-alta)}
   border-bottom:1px solid var(--linea);
   margin-bottom:var(--e3);
 }
-.mando .btn{min-height:34px}
+.mando .btn{min-height:34px;min-width:0;max-width:100%}
+/* Con un nombre largo -"Entrar a AMAZON PRIME"- y una pantalla de 320, el
+   botón se salía de la tarjeta. Ahora el texto se recorta con puntos y el
+   icono no se encoge. */
+.mando .btn .et{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.mando .btn svg{flex:0 0 auto}
 @media (max-width:520px){
   .mando{display:grid;grid-template-columns:1fr 1fr}
   .mando .btn:first-child{grid-column:1 / -1}
@@ -540,6 +547,69 @@ button.metrica:hover{background:var(--capa-alta)}
   padding:var(--e3) var(--e4);display:flex;gap:var(--e2);justify-content:flex-end;
 }
 
+/* La fila de WhatsApp ---------------------------------------------------- */
+/* Cerrada desaparece del todo, sin animación de salida.
+   Antes se apagaba con una transición, y las transiciones SE CONGELAN cuando
+   la pestaña pasa a segundo plano: al abrir WhatsApp en otra pestaña, la
+   barra se quedaba a medio apagar y seguía robando los toques de abajo.
+   Aparecer sí se anima, que eso ocurre con la pestaña delante. */
+#cola{
+  display:none;
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:18px;z-index:150;width:min(760px, calc(100vw - 24px));
+  background:var(--capa);border:1px solid var(--linea-fuerte);
+  border-radius:var(--r-l);overflow:hidden;
+  box-shadow:0 18px 44px -20px rgba(0,0,0,.7);
+}
+#cola.puesta{ display:block;animation:subeCola var(--medio) var(--curva) }
+@keyframes subeCola{ from{ transform:translateX(-50%) translateY(115%) } to{ transform:translateX(-50%) translateY(0) } }
+@media (prefers-reduced-motion:reduce){ #cola.puesta{ animation:none } }
+.cola-barra{ height:3px;background:var(--linea) }
+.cola-barra i{ display:block;height:100%;background:var(--bien);transition:width var(--medio) var(--curva) }
+.cola-fila{
+  display:flex;align-items:center;gap:var(--e2);
+  padding:10px var(--e3);
+}
+.cola-quien{ min-width:0;flex:1 }
+.cola-quien b{ display:block;font-size:13.5px;font-weight:650;letter-spacing:-.015em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+.cola-quien small{ display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
+.cola-n{ font-family:var(--cifra);font-size:12px;font-weight:700;color:var(--txt-3);flex:0 0 auto }
+.cola-plant{ max-width:170px;min-height:34px!important;font-size:12px }
+#cola .btn .et{ white-space:nowrap }
+@media (max-width:860px){
+  /* Rejilla fija de tres renglones, para que no se estire sola:
+       quién es · con qué mensaje · qué hago. */
+  #cola{ bottom:calc(70px + env(safe-area-inset-bottom));width:calc(100vw - 14px) }
+  .cola-fila{
+    display:grid;gap:7px;padding:9px 11px;
+    grid-template-columns:auto 1fr auto auto;
+    grid-template-areas:
+      "logo  quien  num    cerrar"
+      "plant plant  plant  saltar"
+      "envia envia  cobra  cobra";
+  }
+  .cola-fila > .f-marca{ grid-area:logo;align-self:center }
+  .cola-quien{ grid-area:quien;align-self:center }
+  .cola-n{ grid-area:num;align-self:center }
+  #cola .btn[data-cola="cerrar"]{ grid-area:cerrar }
+  .cola-plant{ grid-area:plant;max-width:none;min-width:0 }
+  #cola .btn[data-cola="saltar"]{ grid-area:saltar }
+  #cola .btn[data-cola="enviar"]{ grid-area:envia }
+  #cola .btn[data-cola="cobrar"]{ grid-area:cobra }
+}
+@media (max-width:360px){
+  #cola .btn[data-cola="cobrar"] .et{ display:none }
+  .cola-plant{ font-size:11.5px }
+}
+/* Con la fila puesta, los avisos se apartan por encima de ella, midiéndola
+   de verdad en vez de suponer una altura. */
+body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
+@media (max-width:860px){
+  body.con-cola #avisos{ bottom:calc(var(--alto-cola, 160px) + 86px + env(safe-area-inset-bottom)) }
+}
+
 /* Aviso flotante --------------------------------------------------------- */
 #avisos{
   position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
@@ -564,6 +634,32 @@ button.metrica:hover{background:var(--capa-alta)}
 .nube-punto.trabajando{background:var(--aviso);animation:late 1.4s ease-in-out infinite}
 .nube-punto.mal{background:var(--mal)}
 @keyframes late{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ===== PANTALLA TÁCTIL ==================================================
+   Esto NO mira el ancho, mira si se toca con el dedo. Asi cubre igual el
+   telefono chiquito, el grande, la tablet y un portatil tactil. Un boton de
+   30 px se falla al tocarlo; la guia de Apple pide 44 y la de Android 48.
+   ======================================================================== */
+@media (pointer: coarse){
+  .btn{ min-height:44px; padding:0 16px }
+  .btn.mini{ min-height:40px; padding:0 13px }
+  .btn.icono{ width:44px; padding:0 }
+  .btn.icono.mini{ width:40px; padding:0 }
+  .mando .btn{ min-height:42px }
+  .segmentos{ padding:4px; gap:3px }
+  .segmentos button{ min-height:40px; padding:0 14px; font-size:13px }
+  .plat{ min-height:54px }
+  input:not([type="checkbox"]):not([type="radio"]), select, textarea{ min-height:46px }
+  input[type="checkbox"]{ width:22px; height:22px }
+  .f{ padding-top:13px; padding-bottom:13px }
+  .nav-btn{ min-height:56px }
+  .carril-mini{ width:44px; height:44px }
+  .mes{ min-height:44px }
+  /* Nada de efectos de "pasar el ratón" donde no hay ratón. */
+  .btn:hover, .f:hover, .plat:hover, .mes:hover, .metrica:hover{ background:inherit }
+  .btn:active{ transform:scale(.97) }
+  .f:active{ background:var(--capa-alta) }
+}
 
 /* ===== CELULAR ========================================================== */
 @media (max-width:860px){
@@ -642,7 +738,7 @@ button.metrica:hover{background:var(--capa-alta)}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.3</span>
     </div>
   </nav>
 
@@ -1664,7 +1760,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.2';
+const VERSION = 'v2.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -2059,6 +2155,8 @@ function pintaHoy(){
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<div class="crece"><h2>A quién le toca</h2><p>Se cobra y se renueva desde aquí mismo.</p></div>' +
+        (hayAlgo ? '<button class="btn mini bien" data-escribir-a="hoy-visible">' + ICONO.wa +
+          '<span class="et">Escribir a ' + tramos.reduce(function(a,t){ return a + t[2].length; }, 0) + '</span></button>' : '') +
         '<div class="segmentos">' +
           [['pendientes','Todo',porCobrar.length],['vencidos','Vencidos',vencidos.length],
            ['hoy','Hoy',deHoy.length],['semana','Próximos',semana.length]].map(function(s){
@@ -2208,6 +2306,8 @@ function pintaClientes(){
         servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
           .map(function(m){ return '<option value="' + esc(m.id) + '"' + (String(filtroCuenta)===String(m.id)?' selected':'') + '>' + esc(nombreCuenta(m)) + '</option>'; }).join('') +
       '</select>' +
+      '<button class="btn mini bien" data-escribir-a="clientes-visible">' + ICONO.wa +
+        '<span class="et">Escribir a los ' + lista.length + '</span></button>' +
       '<select id="sel-orden-cli" style="max-width:200px">' +
         '<option value="vencimiento"' + (ordenClientes==='vencimiento'?' selected':'') + '>Por vencimiento</option>' +
         '<option value="plataforma"' + (ordenClientes==='plataforma'?' selected':'') + '>Agrupados por plataforma</option>' +
@@ -2327,10 +2427,11 @@ function pintaCuentas(){
         '<div class="tarjeta-cuerpo" style="padding-bottom:0"><div class="mando">' +
           '<a class="btn mini principal" href="' + esc(casaDe(n)) + '" target="_blank" rel="noopener"' +
             ' title="' + esc(casaConocida(n) ? 'Entrar a ' + n : 'Buscar ' + n + ' en internet') + '">' +
-            ICONO.salir + 'Entrar a ' + esc(n) + '</a>' +
-          '<button class="btn mini" data-nueva-en="' + esc(n) + '">' + ICONO.mas + 'Nueva cuenta aquí</button>' +
-          '<button class="btn mini" data-clientes-de="' + esc(n) + '">' + ICONO.gente + g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</button>' +
-          (deben ? '<button class="btn mini peligro" data-cobrar-de="' + esc(n) + '">' + ICONO.cobrar + deben + ' por cobrar</button>' : '') +
+            ICONO.salir + '<span class="et">Entrar a ' + esc(n) + '</span></a>' +
+          '<button class="btn mini" data-nueva-en="' + esc(n) + '">' + ICONO.mas + '<span class="et">Nueva cuenta aquí</span></button>' +
+          '<button class="btn mini" data-clientes-de="' + esc(n) + '">' + ICONO.gente + '<span class="et">' + g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</span></button>' +
+          (deben ? '<button class="btn mini peligro" data-cobrar-de="' + esc(n) + '">' + ICONO.cobrar + '<span class="et">' + deben + ' por cobrar</span></button>' : '') +
+          (deben ? '<button class="btn mini bien" data-escribir-a="' + esc(n) + '">' + ICONO.wa + '<span class="et">Escribirles</span></button>' : '') +
         '</div></div>' +
         '<div class="tarjeta-cuerpo" style="padding-bottom:var(--e3)">' +
           '<div class="resumen-plat">' +
@@ -2689,10 +2790,15 @@ function renovarMaster(id){
   avisar(nombreCuenta(m) + ' vence ahora el ' + fechaBonita(nueva), 'bien');
 }
 
-function textoWhatsApp(c){
+function textoWhatsApp(c, cual){
   const m = masterDe(c);
   const vencido = c.vencimiento && c.vencimiento < hoyISO();
-  let t = (vencido ? ajustes.plantillaVencido : ajustes.plantillaCobro) || '';
+  let t;
+  if(cual === 'cobro')        t = ajustes.plantillaCobro;
+  else if(cual === 'vencido') t = ajustes.plantillaVencido;
+  else if(cual === 'entrega') t = ajustes.plantillaEntrega;
+  else t = vencido ? ajustes.plantillaVencido : ajustes.plantillaCobro;
+  t = t || '';
   if(ajustes.firmaWs) t += '\n\n' + ajustes.firmaWs;
   return t
     .replace(/\{cliente\}/g, c.nombre || '')
@@ -2706,14 +2812,92 @@ function textoWhatsApp(c){
     .replace(/\{dias\}/g, String(Math.abs(diasHasta(c.vencimiento) || 0)))
     .replace(/\{negocio\}/g, ajustes.nombre || 'PAPOTAS');
 }
-function abrirWhatsApp(id){
+function abrirWhatsApp(id, cual){
   const c = buscarCliente(id);
-  if(!c) return;
+  if(!c) return false;
   const tel = telefonoDe(c);
-  if(!tel){ avisar('Ese cliente no tiene teléfono', 'mal'); return; }
-  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp(c)), '_blank', 'noopener');
+  if(!tel){ avisar((c.nombre||'Ese cliente') + ' no tiene teléfono', 'mal'); return false; }
+  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp(c, cual)), '_blank', 'noopener');
   anotar('WHATSAPP', 'Mensaje abierto para ' + c.nombre);
   guardar();
+  return true;
+}
+
+/* ---------- La cola de WhatsApp -----------------------------------------
+   Escribir a cuarenta y ocho personas una por una es el trabajo que más
+   tiempo se lleva. Esto los pone en fila: se abre el chat del primero con el
+   mensaje ya escrito, y al volver al programa ya está el siguiente esperando.
+   Desde la misma barra se puede cobrar sin ir a buscar la ficha. */
+let cola = [], colaPos = 0, colaPlantilla = 'auto';
+
+function abrirCola(lista, titulo){
+  const conTel = lista.filter(function(c){ return telefonoDe(c); });
+  const sinTel = lista.length - conTel.length;
+  if(!conTel.length){
+    avisar(lista.length ? 'Ninguno de esos ' + lista.length + ' tiene teléfono guardado' : 'No hay nadie en esa lista', 'mal');
+    return;
+  }
+  cola = conTel.slice();
+  colaPos = 0;
+  pintarCola();
+  avisar(conTel.length + ' en la fila' + (sinTel ? ' · ' + sinTel + ' sin teléfono se quedan fuera' : ''), 'bien');
+}
+
+function cerrarCola(){
+  cola = []; colaPos = 0;
+  pintarCola();
+}
+
+function pintarCola(){
+  let caja = document.getElementById('cola');
+  if(!cola.length || colaPos >= cola.length){
+    if(caja) caja.classList.remove('puesta');
+    document.body.classList.remove('con-cola');
+    if(cola.length && colaPos >= cola.length){
+      cola = []; colaPos = 0;
+      avisar('Fila terminada. Los escribiste a todos.', 'bien');
+    }
+    return;
+  }
+  if(!caja){
+    caja = document.createElement('div');
+    caja.id = 'cola';
+    document.body.appendChild(caja);
+  }
+  const c = cola[colaPos];
+  const m = masterDe(c);
+  caja.innerHTML =
+    '<div class="cola-barra"><i style="width:' + Math.round(colaPos/cola.length*100) + '%"></i></div>' +
+    '<div class="cola-fila">' +
+      logoPlataforma(c.servicio || (m && m.nombre), 34) +
+      '<div class="cola-quien">' +
+        '<b>' + esc(c.nombre || 'Cliente') + '</b>' +
+        '<small>' + esc((c.servicio || '') + ' · ' + dinero(cobroDe(c)) + ' · ' + textoDias(c.vencimiento)) + '</small>' +
+      '</div>' +
+      '<div class="cola-n">' + (colaPos+1) + '/' + cola.length + '</div>' +
+      '<select class="cola-plant" id="cola-plantilla" aria-label="Qué mensaje mandar">' +
+        '<option value="auto"' + (colaPlantilla==='auto'?' selected':'') + '>Mensaje automático</option>' +
+        '<option value="cobro"' + (colaPlantilla==='cobro'?' selected':'') + '>Recordatorio de cobro</option>' +
+        '<option value="vencido"' + (colaPlantilla==='vencido'?' selected':'') + '>Ya venció</option>' +
+        '<option value="entrega"' + (colaPlantilla==='entrega'?' selected':'') + '>Entrega de datos</option>' +
+      '</select>' +
+      '<button class="btn mini bien" data-cola="enviar" title="Abrir el chat de ' + esc(c.nombre||'') + ' con el mensaje escrito">' +
+        ICONO.wa + '<span class="et">Abrir WhatsApp</span></button>' +
+      '<button class="btn mini principal" data-cola="cobrar" title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
+        ' aria-label="Cobrar ' + esc(dinero(cobroDe(c))) + '">' + ICONO.cobrar + '<span class="et">Cobrar</span></button>' +
+      '<button class="btn mini fantasma" data-cola="saltar" title="Saltar a la siguiente" aria-label="Saltar a la siguiente">' + ICONO.flecha + '</button>' +
+      '<button class="btn icono mini fantasma" data-cola="cerrar" aria-label="Terminar la fila">' + ICONO.x + '</button>' +
+    '</div>';
+  caja.classList.add('puesta');
+  document.body.classList.add('con-cola');
+  /* Los avisos flotantes tienen que ponerse por encima de la fila, y la fila
+     no mide lo mismo en el teléfono que en la pantalla grande. */
+  document.body.style.setProperty('--alto-cola', caja.offsetHeight + 'px');
+}
+
+function avanzarCola(){
+  colaPos++;
+  pintarCola();
 }
 
 /* --- Formularios --------------------------------------------------------- */
@@ -2852,7 +3036,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -2943,6 +3127,47 @@ document.addEventListener('click', function(ev){
     }, 80);
     return;
   }
+  if(d.cola){
+    const c = cola[colaPos];
+    if(d.cola === 'cerrar'){ cerrarCola(); return; }
+    if(d.cola === 'saltar'){ avanzarCola(); return; }
+    if(!c) return;
+    if(d.cola === 'enviar'){
+      if(abrirWhatsApp(c.id, colaPlantilla)) avanzarCola();
+      else avanzarCola();
+      return;
+    }
+    if(d.cola === 'cobrar'){ renovar(c.id, true); avanzarCola(); return; }
+    return;
+  }
+  if(d.escribirA){
+    /* Las listas que se pueden poner en fila, desde donde se esté. */
+    const hoy = hoyISO(), av = Number(ajustes.diasAlerta||5);
+    const deben = function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; };
+    let lista = [];
+    if(d.escribirA === 'hoy-visible'){
+      if(filtroHoy === 'vencidos') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x<0; });
+      else if(filtroHoy === 'hoy') lista = clientes.filter(function(c){ return c.vencimiento === hoy; });
+      else if(filtroHoy === 'semana') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x>0 && x<=av; });
+      else lista = clientes.filter(deben).concat(clientes.filter(function(c){ return c.vencimiento === hoy && estadoDe(c)==='activo'; }));
+    }else if(d.escribirA === 'clientes-visible'){
+      lista = Array.prototype.slice.call(document.querySelectorAll('#p-clientes [data-cid]'))
+        .map(function(el){ return buscarCliente(el.dataset.cid); }).filter(Boolean);
+    }else{
+      /* Una plataforma concreta: los que deben de ella. */
+      const plat = d.escribirA;
+      lista = clientes.filter(function(c){
+        const m = masterDe(c);
+        return String(c.servicio || (m && m.nombre) || '').trim().toUpperCase() === plat && deben(c);
+      });
+    }
+    /* Sin repetidos y por urgencia. */
+    const vistos = {};
+    lista = lista.filter(function(c){ if(vistos[c.id]) return false; vistos[c.id]=1; return true; })
+                 .sort(function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
+    abrirCola(lista);
+    return;
+  }
   if(d.nuevaEn){ formMaster(null, d.nuevaEn); return; }
   if(d.clientesDe || d.cobrarDe){
     filtroPlatCli = d.clientesDe || d.cobrarDe;
@@ -2964,6 +3189,7 @@ document.addEventListener('click', function(ev){
 /* Los desplegables y botones propios de cada pantalla. */
 document.addEventListener('change', function(ev){
   const id = ev.target.id;
+  if(id === 'cola-plantilla'){ colaPlantilla = ev.target.value; return; }
   if(id === 'sel-cuenta-cli'){ filtroCuenta = ev.target.value; pintar(); }
   else if(id === 'sel-orden-cli'){ ordenClientes = ev.target.value; pintar(); }
   else if(id === 'sel-mes'){ mesDinero = ev.target.value; pintar(); }
