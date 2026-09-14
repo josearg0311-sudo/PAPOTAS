@@ -224,6 +224,7 @@ select{appearance:none;padding-right:30px;
   background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23737b87' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 10px center}
 input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marca);cursor:pointer}
+.campo-numero{font-family:var(--cifra);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
 
 /* Buscador de la cabecera ------------------------------------------------ */
 .buscador{position:relative;flex:0 1 320px;min-width:0}
@@ -366,6 +367,75 @@ button.metrica:hover{background:var(--capa-alta)}
 .barra i{display:block;height:100%;background:var(--info);transition:width var(--medio) var(--curva)}
 .barra.llena i{background:var(--mal)}
 .barra.casi i{background:var(--aviso)}
+
+/* Los doce meses ---------------------------------------------------------- */
+.meses{
+  display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:5px;align-items:end;
+}
+.mes{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:6px 2px 5px;border-radius:9px;min-width:0;
+  transition:background var(--rapido) var(--curva);
+}
+.mes:hover{background:var(--capa-alta)}
+.mes.vivo{background:var(--capa-alta)}
+.mes.vivo .mes-barras::after{
+  content:"";position:absolute;left:12%;right:12%;bottom:-5px;height:2px;
+  border-radius:2px;background:var(--marca);
+}
+/* Cada mes tiene su carril de fondo, así los meses sin movimiento se ven
+   como un hueco y no como un fallo de dibujo. */
+.mes-barras{
+  position:relative;
+  display:flex;align-items:flex-end;justify-content:center;gap:3px;
+  width:100%;height:78px;
+  border-bottom:1px solid var(--linea);
+}
+.mes-barras::before{
+  content:"";position:absolute;left:50%;transform:translateX(-50%);
+  bottom:0;width:19px;height:100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg, transparent, var(--linea));
+  opacity:.5;
+}
+.mes-barras i{
+  position:relative;z-index:1;
+  display:block;width:8px;min-height:0;border-radius:3px 3px 0 0;
+  transition:height var(--medio) var(--curva);
+}
+.mes-barras .ent{background:var(--bien)}
+.mes-barras .sal{background:var(--mal);opacity:.75}
+.mes-txt{
+  font-size:10px;font-weight:700;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.04em;margin-top:2px;
+}
+.mes.vivo .mes-txt{color:var(--txt)}
+@media (max-width:640px){
+  .meses{gap:3px}
+  .mes-barras{height:58px}
+  .mes-barras i{width:6px}
+  .mes-txt{font-size:8.5px;letter-spacing:0}
+}
+
+/* Separador dentro de una lista ----------------------------------------- */
+.tramo{
+  display:flex;align-items:center;gap:9px;
+  padding:9px var(--e4);background:var(--capa-alta);
+  font-size:11.5px;font-weight:700;letter-spacing:.01em;color:var(--txt-2);
+  position:sticky;top:0;z-index:3;
+  border-bottom:1px solid var(--linea);
+}
+.tramo b{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+.tramo.mal{color:var(--mal)} .tramo.aviso{color:var(--aviso)} .tramo.bien{color:var(--bien)}
+.tramo .tramo-n{
+  min-width:20px;height:19px;padding:0 6px;border-radius:6px;
+  background:var(--linea);color:var(--txt-2);
+  font-size:10.5px;font-weight:700;line-height:19px;text-align:center;
+}
+.tramo .tramo-monto{margin-left:auto;font-size:12.5px;font-weight:700;color:var(--txt-2)}
+.tramo.plat-tramo{color:var(--txt)}
+.tramo.plat-tramo b{font-size:11.5px;letter-spacing:.02em}
+.lista > .tramo + .f{border-top:0}
 
 /* Barra de plataformas --------------------------------------------------- */
 .plataformas{
@@ -545,7 +615,7 @@ button.metrica:hover{background:var(--capa-alta)}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.1</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.2</span>
     </div>
   </nav>
 
@@ -691,6 +761,7 @@ function guardarClave(k, valor){
 function arr(v){ return Array.isArray(v) ? v : []; }
 
 function cargar(){
+  olvidarIndices();
   servicios       = arr(leerClave(CLAVES.servicios, []));
   clientes        = arr(leerClave(CLAVES.clientes, []));
   ventas          = arr(leerClave(CLAVES.ventas, []));
@@ -706,6 +777,7 @@ function cargar(){
 /* Guarda todo y avisa a la nube. `subir` a false para cambios que vienen
    de la propia nube, y no rebotarlos. */
 function guardar(subir){
+  olvidarIndices();
   guardarClave(CLAVES.servicios,       JSON.stringify(servicios));
   guardarClave(CLAVES.clientes,        JSON.stringify(clientes));
   guardarClave(CLAVES.ventas,          JSON.stringify(ventas));
@@ -746,6 +818,8 @@ function diasHasta(iso){
   return Math.round((a-b)/86400000);
 }
 const MESES = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const NOMBREMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto',
+                   'septiembre','octubre','noviembre','diciembre'];
 function fechaBonita(iso){
   if(!iso) return '—';
   const p = String(iso).split('-');
@@ -803,8 +877,26 @@ function cobroDe(c){
 function masterDe(c){
   return (c && servicios.find(s => String(s.id) === String(c.cuentaMasterId))) || null;
 }
+/* Dos índices que se construyen UNA sola vez por pintada.
+   Antes, "los clientes de esta cuenta" recorría la lista entera de clientes
+   una vez por cada cuenta, y "la economía" recorría todas las ventas y todos
+   los gastos otra vez por cada cuenta. Con 400 clientes y 80 cuentas eso son
+   decenas de miles de vueltas para dibujar una sola pantalla. */
+let _porMaster = null, _eco = null;
+function olvidarIndices(){ _porMaster = null; _eco = null; }
+
 function clientesDe(masterId){
-  return clientes.filter(c => c.cuentaMasterId && String(c.cuentaMasterId) === String(masterId));
+  if(!_porMaster){
+    _porMaster = new Map();
+    clientes.forEach(function(c){
+      if(!c || !c.cuentaMasterId) return;
+      const k = String(c.cuentaMasterId);
+      let lista = _porMaster.get(k);
+      if(!lista){ lista = []; _porMaster.set(k, lista); }
+      lista.push(c);
+    });
+  }
+  return _porMaster.get(String(masterId)) || [];
 }
 function libresDe(m){
   return Math.max(0, Math.max(0, Number(m.perfiles||0)) - clientesDe(m.id).length);
@@ -822,6 +914,7 @@ function telefonoDe(c){
 }
 /* Ingresos y gastos imputados a cada cuenta master. */
 function economia(){
+  if(_eco) return _eco;
   const ingresos = new Map(), gastos = new Map(), deCliente = new Map();
   clientes.forEach(c => { if(c.cuentaMasterId) deCliente.set(String(c.id), String(c.cuentaMasterId)); });
   ventas.forEach(v => {
@@ -834,7 +927,8 @@ function economia(){
     if(!id) return;
     gastos.set(id, (gastos.get(id)||0) + (Number(i.monto)||0));
   });
-  return {ingresos, gastos};
+  _eco = {ingresos, gastos};
+  return _eco;
 }
 function resumenCuenta(m, eco){
   eco = eco || economia();
@@ -1146,6 +1240,7 @@ const Nube = (function(){
          : c==='combosGuardados'?combosGuardados : c==='auditoriaLog'?auditoriaLog : null;
   }
   function ponColeccion(c, v){
+    olvidarIndices();
     if(c==='servicios') servicios=v; else if(c==='clientes') clientes=v;
     else if(c==='ventas') ventas=v; else if(c==='inversiones') inversiones=v;
     else if(c==='mensajesRapidos') mensajesRapidos=v;
@@ -1452,7 +1547,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.1';
+const VERSION = 'v2.2';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -1551,16 +1646,27 @@ function campo(id, etiqueta, opciones){
   }else if(tipo === 'textarea'){
     control = '<textarea id="' + id + '" rows="' + (o.filas||3) + '" placeholder="' + esc(o.pista||'') + '">' + esc(o.valor==null?'':o.valor) + '</textarea>';
   }else{
-    control = '<input type="' + tipo + '" id="' + id + '" value="' + esc(o.valor==null?'':o.valor) + '"' +
+    /* Los campos de dinero NO son type="number" a propósito. Con ese tipo, el
+       navegador tira lo que escribes si pones coma decimal -"12,5"- y guarda
+       vacío sin avisar. Aquí es texto con teclado numérico, y al leerlo se
+       acepta coma o punto indistintamente. */
+    const esNumero = tipo === 'number';
+    control = '<input type="' + (esNumero ? 'text' : tipo) + '" id="' + id + '"' +
+      ' value="' + esc(o.valor==null?'':o.valor) + '"' +
       (o.pista ? ' placeholder="' + esc(o.pista) + '"' : '') +
-      (tipo==='number' ? ' step="' + (o.paso||'any') + '" inputmode="decimal"' : '') +
+      (esNumero ? ' inputmode="decimal" autocomplete="off" spellcheck="false" class="campo-numero"' : '') +
       (o.atributos || '') + '>';
   }
   return '<div class="campo"><label for="' + id + '">' + esc(etiqueta) + '</label>' + control +
          (o.ayuda ? '<span class="pista">' + esc(o.ayuda) + '</span>' : '') + '</div>';
 }
 function val(id){ const e = document.getElementById(id); return e ? e.value : ''; }
-function num(id){ const v = parseFloat(String(val(id)).replace(',', '.')); return isNaN(v) ? 0 : v; }
+/* Acepta "12,5", "12.5", " 12,50 " y hasta "S/ 12,50". */
+function num(id){
+  const limpio = String(val(id)).replace(/[^0-9,.\-]/g, '').replace(',', '.');
+  const v = parseFloat(limpio);
+  return isNaN(v) ? 0 : v;
+}
 
 /* ---------- 7. Navegación ------------------------------------------------ */
 
@@ -1774,6 +1880,7 @@ function coincide(c){
 let filtroHoy = 'pendientes';
 
 function pintaHoy(){
+  const eco = economia();
   const hoy = hoyISO();
   const aviso = Number(ajustes.diasAlerta||5);
   const vencidos = clientes.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; });
@@ -1790,12 +1897,20 @@ function pintaHoy(){
   const libres = servicios.reduce(function(a,m){ return a + libresDe(m); }, 0);
   const mastersVencidos = servicios.filter(function(m){ const d=diasHasta(m.vencimiento); return d!==null && d<0; });
 
-  let lista;
-  if(filtroHoy === 'vencidos') lista = vencidos;
-  else if(filtroHoy === 'hoy') lista = deHoy;
-  else if(filtroHoy === 'semana') lista = semana;
-  else lista = porCobrar;
-  lista = lista.slice().sort(function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
+  const porFecha = function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); };
+
+  /* Cuarenta y ocho filas seguidas no se leen. Cuando se ven todas, se
+     separan por urgencia, que es el orden en que de verdad se atienden. */
+  let tramos;
+  if(filtroHoy === 'vencidos')      tramos = [['Vencidos', 'mal', vencidos]];
+  else if(filtroHoy === 'hoy')      tramos = [['Vencen hoy', 'aviso', deHoy]];
+  else if(filtroHoy === 'semana')   tramos = [['Próximos ' + aviso + ' días', 'bien', semana]];
+  else tramos = [['Vencidos', 'mal', vencidos],
+                 ['Vencen hoy', 'aviso', deHoy],
+                 ['Próximos ' + aviso + ' días', 'bien', semana]];
+  tramos = tramos.filter(function(t){ return t[2].length; });
+  const hayAlgo = tramos.length > 0;
+  const conSeparador = tramos.length > 1;
 
   const fecha = new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long'});
   $('#subtitulo').textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
@@ -1834,8 +1949,17 @@ function pintaHoy(){
         '</div>' +
       '</div>' +
       '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-        (lista.length ? lista.map(filaCliente).join('')
-                      : vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.')) +
+        (hayAlgo ? tramos.map(function(t){
+            const cuanto = t[2].reduce(function(a,c){ return a + cobroDe(c); }, 0);
+            return (conSeparador ?
+              '<div class="tramo ' + t[1] + '"><span class="punto"></span>' +
+                '<b>' + esc(t[0]) + '</b>' +
+                '<span class="tramo-n">' + t[2].length + '</span>' +
+                '<span class="tramo-monto cifra">' + esc(dinero(cuanto)) + '</span>' +
+              '</div>' : '') +
+              t[2].slice().sort(porFecha).map(filaCliente).join('');
+          }).join('')
+          : vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.')) +
       '</div></div>' +
     '</div>' +
 
@@ -1857,7 +1981,7 @@ function pintaHoy(){
           '<h2 style="color:var(--mal)">Cuentas master vencidas</h2>' +
           '<p>Si no las renuevas, tus clientes se quedan sin servicio.</p></div></div>' +
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-          mastersVencidos.map(function(m){ return filaMaster(m, economia()); }).join('') +
+          mastersVencidos.map(function(m){ return filaMaster(m, eco); }).join('') +
         '</div></div></div>' : '') +
 
   '</div>';
@@ -1894,6 +2018,34 @@ function pintaClientes(){
     return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9'));
   });
 
+  /* Agrupados por plataforma: es como se piensa el negocio, y de paso se ve
+     cuántos clientes y cuánto dinero hay detrás de cada una. */
+  let cuerpo;
+  if(ordenClientes === 'plataforma'){
+    const porPlat = new Map();
+    lista.forEach(function(c){
+      const m = masterDe(c);
+      const k = String(c.servicio || (m && m.nombre) || 'Sin plataforma').trim().toUpperCase();
+      let g = porPlat.get(k);
+      if(!g){ g = []; porPlat.set(k, g); }
+      g.push(c);
+    });
+    cuerpo = Array.from(porPlat.keys()).sort().map(function(k){
+      const g = porPlat.get(k);
+      const suma = g.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+      const deben = g.filter(function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; }).length;
+      return '<div class="tramo plat-tramo">' +
+          logoPlataforma(k, 22) +
+          '<b>' + esc(k) + '</b>' +
+          '<span class="tramo-n">' + g.length + '</span>' +
+          (deben ? '<span class="insignia mal" style="height:19px">' + deben + ' por cobrar</span>' : '') +
+          '<span class="tramo-monto cifra">' + esc(dinero(suma)) + '</span>' +
+        '</div>' + g.map(filaCliente).join('');
+    }).join('');
+  }else{
+    cuerpo = lista.map(filaCliente).join('');
+  }
+
   $('#subtitulo').textContent = clientes.length + ' ' + plural(clientes.length,'cliente','clientes') +
     ' · ' + dinero(clientes.reduce(function(a,c){ return a + cobroDe(c); }, 0)) + ' al ciclo';
 
@@ -1914,14 +2066,15 @@ function pintaClientes(){
         servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
           .map(function(m){ return '<option value="' + esc(m.id) + '"' + (String(filtroCuenta)===String(m.id)?' selected':'') + '>' + esc(nombreCuenta(m)) + '</option>'; }).join('') +
       '</select>' +
-      '<select id="sel-orden-cli" style="max-width:170px">' +
+      '<select id="sel-orden-cli" style="max-width:200px">' +
         '<option value="vencimiento"' + (ordenClientes==='vencimiento'?' selected':'') + '>Por vencimiento</option>' +
+        '<option value="plataforma"' + (ordenClientes==='plataforma'?' selected':'') + '>Agrupados por plataforma</option>' +
         '<option value="nombre"' + (ordenClientes==='nombre'?' selected':'') + '>Por nombre</option>' +
         '<option value="monto"' + (ordenClientes==='monto'?' selected':'') + '>Por monto</option>' +
       '</select>' +
     '</div>' +
     '<div class="tarjeta"><div class="tarjeta-cuerpo pegado"><div class="lista">' +
-      (lista.length ? lista.map(filaCliente).join('')
+      (lista.length ? cuerpo
                     : vacio(busqueda ? 'Nadie con ese nombre' : 'Sin clientes aquí',
                             busqueda ? 'Prueba con otra palabra o borra el buscador.'
                                      : 'Pulsa «Nuevo cliente» para empezar.')) +
@@ -2065,7 +2218,6 @@ function pintaDinero(){
   inversiones.forEach(function(i){ const m=String(i.fecha||'').slice(0,7); if(m.length===7) meses[m]=1; });
   meses[hoyISO().slice(0,7)] = 1;
   const listaMeses = Object.keys(meses).sort().reverse().slice(0,24);
-  const NOMBREMES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   function mesBonito(m){ const p=m.split('-'); return NOMBREMES[+p[1]-1] + ' ' + p[0]; }
 
   /* Rentabilidad por cuenta, de la que más deja a la que menos. */
@@ -2099,6 +2251,41 @@ function pintaDinero(){
       '<div class="metrica"><span class="k">Cobro medio</span><span class="v cifra">' + esc(dinero(ticket)) + '</span>' +
         '<span class="n">por venta</span></div>' +
     '</div>' +
+
+    /* Doce meses de un vistazo. Cada barra es un mes: lo verde entró y lo
+       rojo salió. Se pulsa una y la pantalla entera se va a ese mes. */
+    (function(){
+      const ultimos = [];
+      const base = mesDinero.split('-');
+      let a = +base[0], m = +base[1] - 1;
+      for(let i = 11; i >= 0; i--){
+        const t = m - i, aa = a + Math.floor(t/12), mm = ((t%12)+12)%12;
+        ultimos.push(aa + '-' + String(mm+1).padStart(2,'0'));
+      }
+      const filas = ultimos.map(function(k){
+        const ent = ventas.reduce(function(x,v){ return String(v.fecha||'').indexOf(k)===0 ? x + (Number(v.monto)||0) : x; }, 0);
+        const sal = inversiones.reduce(function(x,i){ return String(i.fecha||'').indexOf(k)===0 ? x + (Number(i.monto)||0) : x; }, 0);
+        return {k, ent, sal};
+      });
+      const techo = filas.reduce(function(x,f){ return Math.max(x, f.ent, f.sal); }, 0) || 1;
+      if(!filas.some(function(f){ return f.ent || f.sal; })) return '';
+      return '<div class="tarjeta">' +
+        '<div class="tarjeta-cabeza"><div class="crece"><h2>Los últimos doce meses</h2>' +
+          '<p>Verde lo que entró, rojo lo que salió. Toca un mes para verlo.</p></div></div>' +
+        '<div class="tarjeta-cuerpo"><div class="meses">' +
+          filas.map(function(f){
+            const p2 = f.k.split('-');
+            return '<button class="mes' + (f.k===mesDinero?' vivo':'') + '" data-mes="' + f.k + '"' +
+              ' title="' + esc(NOMBREMES[+p2[1]-1] + ' ' + p2[0] + ' · entró ' + dinero(f.ent) + ' · salió ' + dinero(f.sal)) + '">' +
+              '<span class="mes-barras">' +
+                '<i class="ent" style="height:' + Math.max(f.ent?3:0, Math.round(f.ent/techo*100)) + '%"></i>' +
+                '<i class="sal" style="height:' + Math.max(f.sal?3:0, Math.round(f.sal/techo*100)) + '%"></i>' +
+              '</span>' +
+              '<span class="mes-txt">' + esc(MESES[+p2[1]-1]) + '</span>' +
+            '</button>';
+          }).join('') +
+        '</div></div></div>';
+    })() +
 
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza"><div class="crece">' +
@@ -2277,6 +2464,7 @@ function pintaAjustes(){
 
 /* --- El pintor ---------------------------------------------------------- */
 function pintar(){
+  olvidarIndices();
   if(pantalla === 'hoy') pintaHoy();
   else if(pantalla === 'clientes') pintaClientes();
   else if(pantalla === 'cuentas') pintaCuentas();
@@ -2502,7 +2690,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-plat],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-mes],[data-plat],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -2593,6 +2781,7 @@ document.addEventListener('click', function(ev){
     }, 80);
     return;
   }
+  if(d.mes){ mesDinero = d.mes; pintar(); return; }
   if(d.plat){ filtroPlataforma = d.plat; pintar(); return; }
   if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
   if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
