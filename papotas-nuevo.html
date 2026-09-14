@@ -341,6 +341,13 @@ button.metrica:hover{background:var(--capa-alta)}
 .f-txt{display:flex;flex-direction:column}
 .f-nom{display:block;font-size:13.5px;font-weight:600;letter-spacing:-.012em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* El perfil, dentro del subtítulo, se separa para que se distinga de la
+   cuenta de un vistazo. */
+.f-perfil{
+  font-style:normal;color:var(--txt-4);
+}
+.f-perfil::before{ content:"·";margin:0 5px;color:var(--txt-4) }
+.f-perfil.sin{ color:var(--aviso) }
 .f-sub{display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .f-der{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:0 0 auto}
@@ -467,6 +474,36 @@ button.metrica:hover{background:var(--capa-alta)}
   border-radius:99px;background:var(--mal);color:#fff;
   font-size:10px;font-weight:700;line-height:18px;text-align:center;
   border:2px solid var(--fondo);
+}
+
+/* Barra de filtros en dos renglones -------------------------------------
+   Todo en una sola línea no cabía: los últimos filtros quedaban cortados a
+   media palabra. Arriba los filtros, abajo lo demás. */
+.barra-filtros{ display:flex;flex-direction:column;gap:var(--e2) }
+.barra-filtros > .segmentos{ width:100% }
+.fila-controles{ display:flex;gap:var(--e2);flex-wrap:wrap;align-items:center }
+.fila-controles select{ flex:0 1 240px;min-width:0 }
+.fila-controles .btn{ flex:0 0 auto }
+.fila-controles > .crece{ flex:1 1 auto;min-width:0 }
+@media (max-width:620px){
+  .fila-controles > .crece{ display:none }
+  .fila-controles select{ flex:1 1 calc(50% - 4px) }
+  .fila-controles .btn{ flex:1 1 100%;order:3 }
+}
+
+/* Aviso de que la fila sigue hacia el lado ------------------------------- */
+.segmentos, .plataformas{ position:relative }
+.segmentos.desborda, .plataformas.desborda{
+  -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 34px), transparent 100%);
+  mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 34px), transparent 100%);
+}
+.segmentos.desborda-izq, .plataformas.desborda-izq{
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 34px), transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 28px, #000 calc(100% - 34px), transparent 100%);
+}
+.segmentos.desborda-fin, .plataformas.desborda-fin{
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 28px, #000 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 28px, #000 100%);
 }
 
 /* Cartel de "estás viendo solo esta plataforma" ------------------------- */
@@ -738,7 +775,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.3</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.4</span>
     </div>
   </nav>
 
@@ -1023,6 +1060,16 @@ function clientesDe(masterId){
 }
 function libresDe(m){
   return Math.max(0, Math.max(0, Number(m.perfiles||0)) - clientesDe(m.id).length);
+}
+/* El perfil viene escrito de mil formas según cómo se cargó: "2", "PERFIL 3",
+   "perfil 4", "Perfil1"... Aquí se enseña siempre igual. */
+function perfilBonito(c){
+  const v = String((c && c.perfil) || '').trim();
+  if(!v) return '';
+  if(/^\d+$/.test(v)) return 'Perfil ' + v;
+  const m = v.match(/^perfil\s*(\d+)$/i);
+  if(m) return 'Perfil ' + m[1];
+  return v.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
 }
 function nombreCuenta(m){
   if(!m) return '';
@@ -1760,7 +1807,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.3';
+const VERSION = 'v2.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -1948,14 +1995,19 @@ function filaCliente(c){
   const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
   const m = masterDe(c);
   const abierto = abiertos.has('c'+c.id);
-  const sub = [c.servicio || 'Sin plataforma', c.perfil || 'Sin perfil'].filter(Boolean).join(' · ');
+  /* Con siete cuentas de Netflix, decir solo "NETFLIX" no sirve de nada:
+     hay que decir en CUÁL está y en qué perfil. */
+  const perfil = perfilBonito(c);
+  const sub = m
+    ? esc(nombreCuenta(m)) + (perfil ? ' <em class="f-perfil">' + esc(perfil) + '</em>' : '')
+    : esc(c.servicio || 'Sin plataforma') + ' <em class="f-perfil sin">sin cuenta</em>';
   return '' +
   '<div class="cliente-bloque" data-cid="' + esc(c.id) + '">' +
     '<button class="f ' + clase + '" data-abrir="c' + esc(c.id) + '" aria-expanded="' + (abierto?'true':'false') + '">' +
       logoPlataforma(c.servicio || (m && m.nombre)) +
       '<span class="f-txt">' +
         '<span class="f-nom">' + esc(c.nombre || 'Sin nombre') + '</span>' +
-        '<span class="f-sub">' + esc(sub) + '</span>' +
+        '<span class="f-sub">' + sub + '</span>' +
       '</span>' +
       '<span class="f-der">' +
         '<span class="f-monto cifra">' + esc(dinero(cobroDe(c))) + '</span>' +
@@ -1977,7 +2029,7 @@ function cajonCliente(c){
     ['Vence', fechaBonita(c.vencimiento)],
     ['Cobro', dinero(cobroDe(c)) + ' / ' + (ciclo.tipo==='dias' ? ciclo.cantidad+' d' : ciclo.cantidad+' '+plural(ciclo.cantidad,'mes','meses'))],
     ['Cuenta', m ? nombreCuenta(m) : 'Sin asignar'],
-    ['Perfil', (c.perfil || '—') + (c.pin ? ' · PIN ' + c.pin : '')],
+    ['Perfil', (perfilBonito(c) || '—') + (c.pin ? ' · PIN ' + c.pin : '')],
     ['Teléfono', tel || 'Sin teléfono'],
     ['Método', c.metodo || ajustes.metodoDefecto || '—']
   ];
@@ -2291,8 +2343,10 @@ function pintaClientes(){
           ICONO.salir + 'Entrar</a>' +
         '<button class="btn mini fantasma" data-quitar-plat="1" aria-label="Quitar el filtro de plataforma">' + ICONO.x + '</button>' +
       '</div>' : '') +
-    '<div class="fila">' +
-      '<div class="segmentos crece">' +
+    /* Dos renglones: arriba en qué estado están, abajo con qué los miro.
+       Todo en una línea no cabía y los últimos filtros salían cortados. */
+    '<div class="barra-filtros">' +
+      '<div class="segmentos">' +
         [['todos','Todos',cuenta.todos],['deben','Por cobrar',cuenta.deben],
          ['vencido','Vencidos',cuenta.vencido],['por_vencer','Por vencer',cuenta.por_vencer],
          ['activo','Al día',cuenta.activo],['sin_cuenta','Sin cuenta',cuenta.sin_cuenta]].map(function(s){
@@ -2300,21 +2354,25 @@ function pintaClientes(){
                  s[1] + (s[2] ? '<span class="cuenta">' + s[2] + '</span>' : '') + '</button>';
         }).join('') +
       '</div>' +
-      '<select id="sel-cuenta-cli" style="max-width:210px">' +
-        '<option value="TODAS">Todas las cuentas</option>' +
-        '<option value="SIN"' + (filtroCuenta==='SIN'?' selected':'') + '>Sin cuenta asignada</option>' +
-        servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
-          .map(function(m){ return '<option value="' + esc(m.id) + '"' + (String(filtroCuenta)===String(m.id)?' selected':'') + '>' + esc(nombreCuenta(m)) + '</option>'; }).join('') +
-      '</select>' +
-      '<button class="btn mini bien" data-escribir-a="clientes-visible">' + ICONO.wa +
-        '<span class="et">Escribir a los ' + lista.length + '</span></button>' +
-      '<select id="sel-orden-cli" style="max-width:200px">' +
-        '<option value="vencimiento"' + (ordenClientes==='vencimiento'?' selected':'') + '>Por vencimiento</option>' +
-        '<option value="plataforma"' + (ordenClientes==='plataforma'?' selected':'') + '>Agrupados por plataforma</option>' +
-        '<option value="nombre"' + (ordenClientes==='nombre'?' selected':'') + '>Por nombre</option>' +
-        '<option value="monto"' + (ordenClientes==='monto'?' selected':'') + '>Por monto</option>' +
-      '</select>' +
+      '<div class="fila-controles">' +
+        '<select id="sel-cuenta-cli" aria-label="Filtrar por cuenta">' +
+          '<option value="TODAS">Todas las cuentas</option>' +
+          '<option value="SIN"' + (filtroCuenta==='SIN'?' selected':'') + '>Sin cuenta asignada</option>' +
+          servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
+            .map(function(m){ return '<option value="' + esc(m.id) + '"' + (String(filtroCuenta)===String(m.id)?' selected':'') + '>' + esc(nombreCuenta(m)) + '</option>'; }).join('') +
+        '</select>' +
+        '<select id="sel-orden-cli" aria-label="Cómo ordenarlos">' +
+          '<option value="vencimiento"' + (ordenClientes==='vencimiento'?' selected':'') + '>Por vencimiento</option>' +
+          '<option value="plataforma"' + (ordenClientes==='plataforma'?' selected':'') + '>Agrupados por plataforma</option>' +
+          '<option value="nombre"' + (ordenClientes==='nombre'?' selected':'') + '>Por nombre</option>' +
+          '<option value="monto"' + (ordenClientes==='monto'?' selected':'') + '>Por monto</option>' +
+        '</select>' +
+        '<div class="crece"></div>' +
+        '<button class="btn mini bien" data-escribir-a="clientes-visible">' + ICONO.wa +
+          '<span class="et">Escribir a los ' + lista.length + '</span></button>' +
+      '</div>' +
     '</div>' +
+
     '<div class="tarjeta"><div class="tarjeta-cuerpo pegado"><div class="lista">' +
       (lista.length ? cuerpo
                     : vacio(busqueda ? 'Nadie con ese nombre' : 'Sin clientes aquí',
@@ -2719,6 +2777,22 @@ function pintaAjustes(){
 }
 
 /* --- El pintor ---------------------------------------------------------- */
+/* Una lista que se desplaza de lado sin avisar parece cortada. Se le pone
+   un difuminado en el borde por el que todavía hay cosas. */
+function marcarDesbordes(){
+  document.querySelectorAll('.segmentos, .plataformas').forEach(function(el){
+    const hay = el.scrollWidth > el.clientWidth + 2;
+    el.classList.toggle('desborda', hay && el.scrollLeft < 4);
+    el.classList.toggle('desborda-izq', hay && el.scrollLeft >= 4 && el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+    el.classList.toggle('desborda-fin', hay && el.scrollLeft >= el.scrollWidth - el.clientWidth - 4);
+    if(hay && !el.dataset.oyendo){
+      el.dataset.oyendo = '1';
+      el.addEventListener('scroll', function(){ marcarDesbordes(); }, {passive:true});
+    }
+  });
+}
+window.addEventListener('resize', function(){ marcarDesbordes(); });
+
 function pintar(){
   olvidarIndices();
   if(pantalla === 'hoy') pintaHoy();
@@ -2727,6 +2801,7 @@ function pintar(){
   else if(pantalla === 'dinero') pintaDinero();
   else if(pantalla === 'ajustes'){ pintaAjustes(); contarCopiaGuardada(); }
   pintarAvisosNav();
+  requestAnimationFrame(marcarDesbordes);
 }
 function pintarAvisosNav(){
   const vencidos = clientes.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; }).length;
@@ -2872,7 +2947,9 @@ function pintarCola(){
       logoPlataforma(c.servicio || (m && m.nombre), 34) +
       '<div class="cola-quien">' +
         '<b>' + esc(c.nombre || 'Cliente') + '</b>' +
-        '<small>' + esc((c.servicio || '') + ' · ' + dinero(cobroDe(c)) + ' · ' + textoDias(c.vencimiento)) + '</small>' +
+        '<small>' + esc((m ? nombreCuenta(m) : (c.servicio || '')) +
+          (perfilBonito(c) ? ' · ' + perfilBonito(c) : '') +
+          ' · ' + dinero(cobroDe(c)) + ' · ' + textoDias(c.vencimiento)) + '</small>' +
       '</div>' +
       '<div class="cola-n">' + (colaPos+1) + '/' + cola.length + '</div>' +
       '<select class="cola-plant" id="cola-plantilla" aria-label="Qué mensaje mandar">' +
