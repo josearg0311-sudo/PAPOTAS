@@ -134,6 +134,8 @@ a{color:inherit}
   font-size:9px;font-weight:700;line-height:16px;text-align:center;
 }
 #carril-pie{margin-top:auto;display:flex;flex-direction:column;gap:var(--e1);align-items:center}
+#btn-viejo-movil{ display:none; width:38px; padding:0 }
+@media (max-width:860px){ #btn-viejo-movil{ display:inline-flex; order:2 } }
 #sello-carril{
   font-size:9px;font-weight:700;color:var(--txt-4);letter-spacing:.02em;
   padding:3px 6px;border-radius:6px;border:1px solid var(--linea);
@@ -320,7 +322,14 @@ button.metrica:hover{background:var(--capa-alta)}
 .f-marca{
   width:32px;height:32px;border-radius:9px;flex:0 0 auto;
   display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;
-  letter-spacing:-.03em;
+  letter-spacing:-.03em;position:relative;overflow:hidden;
+}
+/* El logo de la plataforma tapa la inicial. Si la imagen no llega -sin
+   internet, o plataforma sin logo conocido- se borra sola y queda la
+   inicial, que es lo que había antes. */
+.f-marca img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;border-radius:inherit;background:#fff;
 }
 .f-txt{flex:1;min-width:0}
 .f-txt{display:flex;flex-direction:column}
@@ -357,6 +366,46 @@ button.metrica:hover{background:var(--capa-alta)}
 .barra i{display:block;height:100%;background:var(--info);transition:width var(--medio) var(--curva)}
 .barra.llena i{background:var(--mal)}
 .barra.casi i{background:var(--aviso)}
+
+/* Barra de plataformas --------------------------------------------------- */
+.plataformas{
+  display:flex;gap:var(--e2);overflow-x:auto;scrollbar-width:none;
+  padding:2px;margin:calc(var(--e2) * -1) 0;
+}
+.plataformas::-webkit-scrollbar{display:none}
+.plat{
+  flex:0 0 auto;display:flex;align-items:center;gap:9px;
+  min-height:48px;padding:7px 13px 7px 9px;border-radius:var(--r);
+  border:1px solid var(--linea);background:var(--capa);
+  text-align:left;position:relative;
+  transition:border-color var(--rapido) var(--curva),background var(--rapido) var(--curva);
+}
+.plat:hover{border-color:var(--linea-fuerte);background:var(--capa-alta)}
+.plat.viva{border-color:var(--marca-linea);background:var(--marca-suave)}
+.plat .plat-txt{min-width:0;line-height:1.25}
+.plat b{display:block;font-size:12.5px;font-weight:650;letter-spacing:-.015em;
+  white-space:nowrap;max-width:170px;overflow:hidden;text-overflow:ellipsis}
+.plat small{display:block;font-size:10.5px;font-weight:500;color:var(--txt-3);white-space:nowrap}
+.plat.viva b{color:var(--txt)}
+.plat-aviso{
+  position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;
+  border-radius:99px;background:var(--mal);color:#fff;
+  font-size:10px;font-weight:700;line-height:18px;text-align:center;
+  border:2px solid var(--fondo);
+}
+
+/* Resumen de una plataforma --------------------------------------------- */
+.resumen-plat{
+  display:grid;gap:var(--e3);
+  grid-template-columns:repeat(auto-fit,minmax(112px,1fr));
+}
+.resumen-plat > div{min-width:0}
+.resumen-plat dt{
+  font-size:10.5px;font-weight:600;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.03em;
+}
+.resumen-plat dd{margin:2px 0 0;font-size:16px;font-weight:700;letter-spacing:-.025em}
+.resumen-plat .barra{margin-top:6px}
 
 /* Vacío ------------------------------------------------------------------ */
 .vacio{
@@ -442,6 +491,8 @@ button.metrica:hover{background:var(--capa-alta)}
   .metrica .v{font-size:21px}
   /* Lo mismo dentro de las tarjetas: el título arriba y los filtros debajo. */
   .tarjeta-cabeza{flex-wrap:wrap;row-gap:10px}
+  .resumen-plat{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .plat b{max-width:130px}
   .tarjeta-cabeza > .crece{flex:1 1 100%;min-width:0}
   .tarjeta-cabeza .segmentos{flex:1 1 100%;order:5}
   .fila > .segmentos{flex:1 1 100%}
@@ -491,6 +542,9 @@ button.metrica:hover{background:var(--capa-alta)}
       <button class="carril-mini" id="btn-tema" title="Claro u oscuro" aria-label="Cambiar entre claro y oscuro">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
       </button>
+      <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
+      </a>
       <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.1</span>
     </div>
   </nav>
@@ -508,6 +562,9 @@ button.metrica:hover{background:var(--capa-alta)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-3.6-3.6"/></svg>
         <input type="search" id="buscar" placeholder="Buscar cliente o cuenta…" autocomplete="off">
       </label>
+      <a class="btn" id="btn-viejo-movil" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
+      </a>
       <button class="btn principal" id="btn-accion">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         <span id="btn-accion-txt">Nuevo</span>
@@ -789,21 +846,143 @@ function resumenCuenta(m, eco){
   return {clientes:cl.length, ingresos:ing, gastado:gas, neto:ing-gas,
           recurrente:rec, costo, margen:rec-costo};
 }
-/* Color estable por plataforma, sin tabla de marcas que mantener. */
-function colorPlataforma(nombre){
+/* ---------- Marcas: logo y color de cada plataforma ---------------------
+   La misma tabla que usa tu programa de siempre, para que los logos y los
+   colores sean idénticos en los dos. El logo se pide al servicio de iconos
+   de Google, igual que antes; si no hay internet o la plataforma no está en
+   la tabla, queda la inicial sobre el color de la marca, que se lee igual
+   de bien. */
+const MARCAS = {
+  "DISNEY+ESPN":["espn.com","#d50a0a"],
+  "DISNEY+ ESPN":["espn.com","#d50a0a"],
+  "DISNEY ESPN":["espn.com","#d50a0a"],
+  "ESPN":["espn.com","#d50a0a"],
+  "CRUNCHYROLL":["crunchyroll.com","#f47521"],
+  "PARAMOUNT":["paramountplus.com","#0064ff"],
+  "NETFLIX":["netflix.com","#e50914"],
+  "DISNEY":["disneyplus.com","#0063e5"],
+  "YOUTUBE":["youtube.com","#ff0000"],
+  "SPOTIFY":["spotify.com","#1db954"],
+  "AMAZON":["primevideo.com","#00a8e1"],
+  "PRIME":["primevideo.com","#00a8e1"],
+  "DIRECTV":["directvgo.com","#00a1e0"],
+  "DGO":["directvgo.com","#00a1e0"],
+  "MAGIS":["magistv.vip","#e11d48"],
+  "RAKUTEN":["rakuten.tv","#bf0000"],
+  "APPLE":["tv.apple.com","#a3a3a3"],
+  "DEEZER":["deezer.com","#a238ff"],
+  "CANVA":["canva.com","#00c4cc"],
+  "TIDAL":["tidal.com","#38bdf8"],
+  "PLEX":["plex.tv","#e5a00d"],
+  "ROKU":["roku.com","#6f1ab1"],
+  "IPTV":["iptv.org","#14b8a6"],
+  "HBO":["max.com","#991eeb"],
+  "MAX":["max.com","#991eeb"],
+  "VIX":["vix.com","#f30074"],
+  "NINTENDO SWITCH ONLINE":["nintendo.com","#e60012"],
+  "ADOBE CREATIVE CLOUD":["adobe.com","#ff0000"],
+  "PLAYSTATION PLUS":["playstation.com","#0070d1"],
+  "XBOX GAME PASS":["xbox.com","#107c10"],
+  "YOUTUBE PREMIUM":["youtube.com","#ff0000"],
+  "MICROSOFT 365":["microsoft.com","#0067b8"],
+  "DUOLINGO SUPER":["duolingo.com","#58cc02"],
+  "KINDLE UNLIMITED":["amazon.com","#ff9900"],
+  "AMAZON MUSIC":["music.amazon.com","#25d1da"],
+  "MOVISTAR PLAY":["movistarplus.es","#019df4"],
+  "CLARO VIDEO":["clarovideo.com","#da291c"],
+  "CHATGPT PLUS":["openai.com","#10a37f"],
+  "APPLE MUSIC":["music.apple.com","#fa243c"],
+  "CAPCUT":["capcut.com","#000000"],
+  "GOOGLE ONE":["one.google.com","#4285f4"],
+  "PLUTO":["pluto.tv","#ffe000"],
+  "UNIVERSAL":["universalplus.com","#0f4bd8"],
+  "LIONSGATE":["lionsgateplus.com","#d4af37"],
+  "DISCOVERY":["discoveryplus.com","#0057ff"],
+  "PERPLEXITY":["perplexity.ai","#20808d"],
+  "EXPRESSVPN":["expressvpn.com","#da3940"],
+  "PLAYSTATION":["playstation.com","#0070d1"],
+  "NINTENDO":["nintendo.com","#e60012"],
+  "DUOLINGO":["duolingo.com","#58cc02"],
+  "MICROSOFT":["microsoft.com","#0067b8"],
+  "CHATGPT":["openai.com","#10a37f"],
+  "STORYTEL":["storytel.com","#ff5a00"],
+  "COURSERA":["coursera.org","#0056d2"],
+  "ZAPPING":["zappingtv.com","#ff3b30"],
+  "NORDVPN":["nordvpn.com","#4687ff"],
+  "MOVISTAR":["movistarplus.es","#019df4"],
+  "AUDIBLE":["audible.com","#f8991c"],
+  "PICSART":["picsart.com","#c209c1"],
+  "SCRIBD":["scribd.com","#1e7b85"],
+  "GEMINI":["gemini.google.com","#8e75ff"],
+  "PLATZI":["platzi.com","#98ca3f"],
+  "CLARO":["clarovideo.com","#da291c"],
+  "CLAUDE":["claude.ai","#d97757"],
+  "ADOBE":["adobe.com","#ff0000"],
+  "STAR+":["starplus.com","#7b2ff7"],
+  "STAR":["starplus.com","#7b2ff7"],
+  "XBOX":["xbox.com","#107c10"],
+  "FUBO":["fubo.tv","#e8ae00"],
+  "FLOW":["flow.com.ar","#00b0ff"],
+  "MUBI":["mubi.com","#001489"],
+  "ROKU CHANNEL":["roku.com","#6f1ab1"],
+  "TUBI":["tubitv.com","#f58220"],
+  "PEACOCK":["peacocktv.com","#6b35e8"],
+  "AMC+":["amcplus.com","#ffffff"],
+  "STARZ":["starz.com","#d6b36a"],
+  "MGM+":["mgmplus.com","#c7a35a"],
+  "SHUDDER":["shudder.com","#e50914"],
+  "HIDIVE":["hidive.com","#4b2cff"],
+  "BRITBOX":["britbox.com","#5a43ff"],
+  "ACORN TV":["acorn.tv","#0d7f4f"],
+  "HALLMARK+":["hallmarkplus.com","#8c1d40"],
+  "BET+":["bet.plus","#f2b900"],
+  "KANOPY":["kanopy.com","#2f7f6f"],
+  "THE CW":["cwtv.com","#9b59b6"],
+  "FANDOR":["fandor.com","#ff6a00"],
+  "RAKUTEN TV":["rakuten.tv","#bf0000"],
+  "YOUTUBE MUSIC":["music.youtube.com","#ff0000"],
+  "EA PLAY":["ea.com","#e34f26"],
+  "UBISOFT+":["ubisoft.com","#ffffff"],
+  "GEFORCE NOW":["nvidia.com","#76b900"],
+  "MICROSOFT COPILOT":["copilot.microsoft.com","#7c3aed"],
+  "NOTION":["notion.so","#ffffff"],
+  "DROPBOX PLUS":["dropbox.com","#0061ff"],
+  "1PASSWORD":["1password.com","#0a68ff"],
+  "SURFSHARK":["surfshark.com","#4cc9f0"],
+  "PROTON VPN":["protonvpn.com","#6d4aff"]
+};
+const CLAVES_MARCA = Object.keys(MARCAS).sort(function(a,b){ return b.length - a.length; });
+
+function buscarMarca(nombre){
   const n = String(nombre||'').trim().toUpperCase();
-  const fijos = {
-    'NETFLIX':'#e50914','DISNEY+':'#0c3fd4','DISNEY+ESPN':'#0c3fd4','DISNEY':'#0c3fd4',
-    'MAX':'#8b5cf6','HBO MAX':'#8b5cf6','SPOTIFY':'#1db954','AMAZON PRIME':'#00a8e1',
-    'PRIME VIDEO':'#00a8e1','YOUTUBE':'#ff0000','YOUTUBE PREMIUM':'#ff0000',
-    'PARAMOUNT+':'#0064ff','CRUNCHYROLL':'#f47521','VIX':'#f9a825','APPLE TV+':'#8e8e93',
-    'STAR+':'#3b5bdb','CANVA':'#00c4cc','CHATGPT':'#10a37f','DEEZER':'#ef5466'
-  };
-  if(fijos[n]) return fijos[n];
+  if(!n) return null;
+  if(MARCAS[n]) return MARCAS[n];
+  for(let i=0;i<CLAVES_MARCA.length;i++){
+    if(n.indexOf(CLAVES_MARCA[i]) >= 0) return MARCAS[CLAVES_MARCA[i]];
+  }
+  return null;
+}
+function colorPlataforma(nombre){
+  const m = buscarMarca(nombre);
+  if(m) return m[1];
+  const n = String(nombre||'').trim().toUpperCase();
   let h = 0;
   for(let i=0;i<n.length;i++) h = (h*31 + n.charCodeAt(i)) % 360;
   return 'hsl(' + h + ', 58%, 52%)';
 }
+/* El cuadradito de la plataforma: su logo de verdad, y si falla, su inicial. */
+function logoPlataforma(nombre, tam){
+  const m = buscarMarca(nombre);
+  const color = colorPlataforma(nombre);
+  const px = tam || 32;
+  const estilo = 'background:' + color + ';color:' + textoSobre(color) +
+                 ';width:' + px + 'px;height:' + px + 'px;font-size:' + Math.round(px*0.42) + 'px';
+  return '<span class="f-marca" style="' + estilo + '">' + esc(inicial(nombre)) +
+         (m ? '<img src="https://www.google.com/s2/favicons?domain=' + esc(m[0]) +
+              '&sz=64" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : '') +
+         '</span>';
+}
+
 /* A dónde lleva cada plataforma cuando pulsas "Abrir". */
 const CASAS = {
   'NETFLIX':'netflix.com/login','DISNEY+':'disneyplus.com/login','DISNEY+ESPN':'disneyplus.com/login',
@@ -817,6 +996,8 @@ const CASAS = {
 function casaDe(nombre){
   const n = String(nombre||'').trim().toUpperCase();
   if(CASAS[n]) return 'https://' + CASAS[n];
+  const m = buscarMarca(nombre);
+  if(m) return 'https://' + m[0];
   return 'https://duckduckgo.com/?q=' + encodeURIComponent(nombre + ' iniciar sesión');
 }
 /* Blanco o negro encima del color de la plataforma, lo que se lea mejor.
@@ -1445,13 +1626,12 @@ function filaCliente(c){
   const est = estadoDe(c);
   const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
   const m = masterDe(c);
-  const color = colorPlataforma(c.servicio || (m && m.nombre));
   const abierto = abiertos.has('c'+c.id);
   const sub = [c.servicio || 'Sin plataforma', c.perfil || 'Sin perfil'].filter(Boolean).join(' · ');
   return '' +
   '<div class="cliente-bloque" data-cid="' + esc(c.id) + '">' +
     '<button class="f ' + clase + '" data-abrir="c' + esc(c.id) + '" aria-expanded="' + (abierto?'true':'false') + '">' +
-      '<span class="f-marca" style="background:' + color + ';color:' + textoSobre(color) + '">' + esc(inicial(c.servicio || (m&&m.nombre))) + '</span>' +
+      logoPlataforma(c.servicio || (m && m.nombre)) +
       '<span class="f-txt">' +
         '<span class="f-nom">' + esc(c.nombre || 'Sin nombre') + '</span>' +
         '<span class="f-sub">' + esc(sub) + '</span>' +
@@ -1505,11 +1685,10 @@ function filaMaster(m, eco){
   const dv = diasHasta(m.vencimiento);
   const claseV = dv===null ? '' : dv<0 ? 'mal' : dv<=Number(ajustes.diasAlerta||5) ? 'aviso' : 'bien';
   const abierto = abiertos.has('m'+m.id);
-  const color = colorPlataforma(m.nombre);
   return '' +
   '<div class="master-bloque" data-mid="' + esc(m.id) + '">' +
     '<button class="f ' + claseV + '" data-abrir="m' + esc(m.id) + '" aria-expanded="' + (abierto?'true':'false') + '">' +
-      '<span class="f-marca" style="background:' + color + ';color:' + textoSobre(color) + '">' + esc(inicial(m.nombre)) + '</span>' +
+      logoPlataforma(m.nombre) +
       '<span class="f-txt">' +
         '<span class="f-nom">' + esc(nombreCuenta(m)) + '</span>' +
         '<span class="f-sub">' + esc(m.correo || 'Sin correo') + '</span>' +
@@ -1751,52 +1930,110 @@ function pintaClientes(){
 }
 
 /* --- CUENTAS ------------------------------------------------------------ */
+let filtroPlataforma = 'TODAS';
+
 function pintaCuentas(){
   const eco = economia();
-  const tope   = servicios.reduce(function(a,m){ return a + Math.max(0,Number(m.perfiles||0)); }, 0);
-  const libres = servicios.reduce(function(a,m){ return a + libresDe(m); }, 0);
-  const costo  = servicios.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
-  const cobra  = servicios.reduce(function(a,m){ return a + resumenCuenta(m,eco).recurrente; }, 0);
 
-  const filtradas = servicios.filter(function(m){
-    if(!busqueda) return true;
-    return sinTildes([m.nombre, m.correo, m.etiqueta, m.numero].join(' ')).indexOf(busqueda) >= 0;
-  });
-
-  /* Agrupadas por plataforma, que es como se piensan. */
+  /* Todo se piensa por plataforma, así que primero se agrupa por plataforma
+     y se saca la cuenta de cada una: cuántas cuentas, cuántos perfiles hay y
+     cuántos quedan libres, cuánto cuesta y cuánto deja. */
   const grupos = {};
-  filtradas.forEach(function(m){
+  servicios.forEach(function(m){
     const k = String(m.nombre||'Sin nombre').trim().toUpperCase();
-    (grupos[k] = grupos[k] || []).push(m);
+    const g = grupos[k] || (grupos[k] = {nombre:k, cuentas:[], tope:0, libres:0, costo:0, cobra:0, clientes:0, vencidas:0});
+    const r = resumenCuenta(m, eco);
+    g.cuentas.push(m);
+    g.tope   += Math.max(0, Number(m.perfiles||0));
+    g.libres += libresDe(m);
+    g.costo  += r.costo;
+    g.cobra  += r.recurrente;
+    g.clientes += r.clientes;
+    const d = diasHasta(m.vencimiento);
+    if(d !== null && d < 0) g.vencidas++;
   });
   const nombres = Object.keys(grupos).sort();
 
-  $('#subtitulo').textContent = servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') +
+  const tope   = nombres.reduce(function(a,n){ return a + grupos[n].tope; }, 0);
+  const libres = nombres.reduce(function(a,n){ return a + grupos[n].libres; }, 0);
+  const costo  = nombres.reduce(function(a,n){ return a + grupos[n].costo; }, 0);
+  const cobra  = nombres.reduce(function(a,n){ return a + grupos[n].cobra; }, 0);
+
+  if(filtroPlataforma !== 'TODAS' && !grupos[filtroPlataforma]) filtroPlataforma = 'TODAS';
+
+  let mostrar = nombres;
+  if(filtroPlataforma !== 'TODAS') mostrar = [filtroPlataforma];
+  if(busqueda){
+    mostrar = mostrar.filter(function(n){
+      if(sinTildes(n).indexOf(busqueda) >= 0) return true;
+      return grupos[n].cuentas.some(function(m){
+        return sinTildes([m.correo, m.etiqueta, m.numero].join(' ')).indexOf(busqueda) >= 0;
+      });
+    });
+  }
+
+  $('#subtitulo').textContent = nombres.length + ' ' + plural(nombres.length,'plataforma','plataformas') +
+    ' · ' + servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') +
     ' · ' + (tope - libres) + '/' + tope + ' perfiles ocupados';
 
   $('#p-cuentas').innerHTML =
   '<div class="pila">' +
+
     '<div class="rejilla r4">' +
-      '<div class="metrica"><span class="k">Cuentas</span><span class="v cifra">' + servicios.length + '</span>' +
-        '<span class="n">' + nombres.length + ' ' + plural(nombres.length,'plataforma','plataformas') + '</span></div>' +
+      '<div class="metrica"><span class="k">Plataformas</span><span class="v cifra">' + nombres.length + '</span>' +
+        '<span class="n">' + servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + '</span></div>' +
       '<div class="metrica ' + (libres?'info':'mal') + '"><span class="k">Perfiles libres</span>' +
         '<span class="v cifra">' + libres + '</span><span class="n">de ' + tope + '</span></div>' +
       '<div class="metrica"><span class="k">Te cuestan</span><span class="v cifra">' + esc(dinero(costo)) + '</span>' +
-        '<span class="n">al mes en total</span></div>' +
+        '<span class="n">al ciclo en total</span></div>' +
       '<div class="metrica ' + (cobra-costo>=0?'bien':'mal') + '"><span class="k">Te dejan</span>' +
         '<span class="v cifra">' + esc(dinero(cobra-costo)) + '</span>' +
         '<span class="n">cobras ' + esc(dinero(cobra)) + '</span></div>' +
     '</div>' +
-    (nombres.length ? nombres.map(function(n){
-      const lista = grupos[n].slice().sort(function(a,b){ return (Number(a.numero)||0) - (Number(b.numero)||0); });
-      const t = lista.reduce(function(a,m){ return a + Math.max(0,Number(m.perfiles||0)); }, 0);
-      const l = lista.reduce(function(a,m){ return a + libresDe(m); }, 0);
+
+    /* La barra de plataformas: cada una con su logo y sus perfiles libres. */
+    (nombres.length > 1 ?
+      '<div class="plataformas">' +
+        '<button class="plat' + (filtroPlataforma==='TODAS'?' viva':'') + '" data-plat="TODAS">' +
+          '<span class="plat-txt"><b>Todas</b><small>' + servicios.length + ' cuentas · ' + libres + ' ' + plural(libres,'libre','libres') + '</small></span>' +
+        '</button>' +
+        nombres.map(function(n){
+          const g = grupos[n];
+          return '<button class="plat' + (filtroPlataforma===n?' viva':'') + '" data-plat="' + esc(n) + '">' +
+            logoPlataforma(n, 26) +
+            '<span class="plat-txt"><b>' + esc(n) + '</b>' +
+              '<small>' + g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') + ' · ' +
+              (g.libres ? g.libres + ' ' + plural(g.libres,'libre','libres') : 'llena') + '</small></span>' +
+            (g.vencidas ? '<span class="plat-aviso" title="' + g.vencidas + ' vencida(s)">' + g.vencidas + '</span>' : '') +
+          '</button>';
+        }).join('') +
+      '</div>' : '') +
+
+    (mostrar.length ? mostrar.map(function(n){
+      const g = grupos[n];
+      const lista = g.cuentas.slice().sort(function(a,b){ return (Number(a.numero)||0) - (Number(b.numero)||0); });
+      const ocupados = g.tope - g.libres;
+      const pct = g.tope ? Math.round(ocupados/g.tope*100) : 0;
       return '<div class="tarjeta">' +
         '<div class="tarjeta-cabeza">' +
-          '<span class="f-marca" style="background:' + colorPlataforma(n) + ';color:' + textoSobre(colorPlataforma(n)) + '">' + esc(inicial(n)) + '</span>' +
+          logoPlataforma(n, 38) +
           '<div class="crece"><h2>' + esc(n) + '</h2>' +
-            '<p>' + lista.length + ' ' + plural(lista.length,'cuenta','cuentas') + ' · ' + (t-l) + '/' + t + ' perfiles</p></div>' +
-          '<span class="insignia ' + (l===0?'mal':l<=1?'aviso':'bien') + '">' + l + ' ' + plural(l,'libre','libres') + '</span>' +
+            '<p>' + g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') + ' · ' +
+            g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</p></div>' +
+          (g.vencidas ? '<span class="insignia mal">' + g.vencidas + ' ' + plural(g.vencidas,'vencida','vencidas') + '</span>' : '') +
+          '<span class="insignia ' + (g.libres===0?'mal':g.libres<=1?'aviso':'bien') + '">' +
+            (g.libres ? g.libres + ' ' + plural(g.libres,'libre','libres') : 'sin sitio') + '</span>' +
+        '</div>' +
+        '<div class="tarjeta-cuerpo" style="padding-bottom:var(--e3)">' +
+          '<div class="resumen-plat">' +
+            '<div><dt>Perfiles</dt><dd class="cifra">' + ocupados + '/' + g.tope + '</dd>' +
+              '<span class="barra ' + (g.libres===0?'llena':g.libres<=1?'casi':'') + '"><i style="width:' + pct + '%"></i></span></div>' +
+            '<div><dt>Te cuesta</dt><dd class="cifra">' + esc(dinero(g.costo)) + '</dd></div>' +
+            '<div><dt>Cobras</dt><dd class="cifra">' + esc(dinero(g.cobra)) + '</dd></div>' +
+            '<div><dt>Te deja</dt><dd class="cifra" style="color:' + (g.cobra-g.costo>=0?'var(--bien)':'var(--mal)') + '">' +
+              (g.cobra-g.costo>=0?'+':'') + esc(dinero(g.cobra-g.costo)) + '</dd></div>' +
+            '<div><dt>Por perfil</dt><dd class="cifra">' + esc(dinero(ocupados ? g.cobra/ocupados : 0)) + '</dd></div>' +
+          '</div>' +
         '</div>' +
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
           lista.map(function(m){ return filaMaster(m, eco); }).join('') +
@@ -1871,7 +2108,7 @@ function pintaDinero(){
         (porCuenta.length ? porCuenta.map(function(x){
           const ancho = Math.round(Math.abs(x.r.margen)/maxMargen*100);
           return '<div class="f ' + (x.r.margen>=0?'bien':'mal') + '" style="cursor:default">' +
-            '<span class="f-marca" style="background:' + colorPlataforma(x.m.nombre) + ';color:' + textoSobre(colorPlataforma(x.m.nombre)) + '">' + esc(inicial(x.m.nombre)) + '</span>' +
+            logoPlataforma(x.m.nombre) +
             '<span class="f-txt">' +
               '<span class="f-nom">' + esc(nombreCuenta(x.m)) + '</span>' +
               '<span class="f-sub">' + x.r.clientes + ' ' + plural(x.r.clientes,'cliente','clientes') +
@@ -2265,7 +2502,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-plat],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -2356,6 +2593,7 @@ document.addEventListener('click', function(ev){
     }, 80);
     return;
   }
+  if(d.plat){ filtroPlataforma = d.plat; pintar(); return; }
   if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
   if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
   if(d.irCuentas){ ir('cuentas'); return; }

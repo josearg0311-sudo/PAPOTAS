@@ -16153,7 +16153,7 @@ body#cuerpo-app .pap-pestana{
   "use strict";
   if(window.__PAPOTAS_V210__) return; window.__PAPOTAS_V210__=!0;
 
-  var SELLO = "v211 · 5 pantallas";
+  var SELLO = "v212 · 5 pantallas";
 
   function seguro(fn){ try{ return fn(); }catch(e){ console.warn("[V210]",e); return null; } }
 
@@ -16408,6 +16408,122 @@ body#cuerpo-app .pap-pestana{
       preguntar(reg);
     }).catch(function(){});
   };
+})();
+</script>
+
+
+<style id="papotas-v212-puente-css">
+/* ===========================================================================
+   V212 · El puente al diseño nuevo
+   El programa nuevo vive en otro archivo, así que había que escribir la
+   dirección a mano para verlo. Nadie hace eso. Aquí va un botón.
+   =========================================================================== */
+#pap-ir-nuevo{
+  display:none;
+  width:100%;
+  margin:10px 2px 0;
+  padding:11px 12px;
+  border-radius:12px;
+  border:1px solid rgba(129,140,248,.34);
+  background:linear-gradient(135deg, rgba(99,102,241,.20), rgba(168,85,247,.14));
+  color:#e8eaf6;
+  text-align:left;
+  text-decoration:none;
+  align-items:center;
+  gap:10px;
+  transition:border-color .16s ease, background .16s ease, transform .16s ease;
+}
+#pap-ir-nuevo.puesto{ display:flex }
+#pap-ir-nuevo:hover{
+  border-color:rgba(129,140,248,.6);
+  background:linear-gradient(135deg, rgba(99,102,241,.3), rgba(168,85,247,.2));
+  transform:translateX(2px);
+}
+#pap-ir-nuevo .chispa{
+  width:30px;height:30px;flex:0 0 auto;border-radius:9px;
+  display:grid;place-items:center;font-size:15px;
+  background:rgba(129,140,248,.22);
+}
+#pap-ir-nuevo .texto{ min-width:0; line-height:1.25 }
+#pap-ir-nuevo b{
+  display:block;font-size:12px;font-weight:800;letter-spacing:-.01em;color:#fff;
+}
+#pap-ir-nuevo small{
+  display:block;font-size:9.5px;font-weight:700;color:#b9bfe8;
+  text-transform:uppercase;letter-spacing:.06em;margin-top:1px;
+}
+body#cuerpo-app.light-mode #pap-ir-nuevo{
+  border-color:rgba(99,102,241,.3);
+  background:linear-gradient(135deg, rgba(99,102,241,.12), rgba(168,85,247,.08));
+  color:#1e1b4b;
+}
+body#cuerpo-app.light-mode #pap-ir-nuevo b{ color:#312e81 }
+body#cuerpo-app.light-mode #pap-ir-nuevo small{ color:#5b5bd6 }
+</style>
+
+<script id="papotas-v212-puente">
+/* ============================================================================
+   V212 · "PERO PARECE EL MISMO DISEÑO"
+
+   Y tenía razón: lo que estaba mirando ERA el mismo programa, con el menú
+   reorganizado. El diseño nuevo es otro archivo, papotas-nuevo.html, y para
+   verlo había que escribir la dirección a mano. Eso no lo hace nadie.
+
+   Este botón lo lleva de un toque. Solo aparece si el archivo está de verdad
+   ahí: si solo se publicó el programa de siempre, no se enseña un botón que
+   llevaría a una página de error.
+   ========================================================================== */
+(function(){
+  "use strict";
+  if(window.__PAPOTAS_V212__) return; window.__PAPOTAS_V212__ = true;
+
+  var DESTINO = "papotas-nuevo.html";
+
+  function poner(){
+    if(document.getElementById("pap-ir-nuevo")) return true;
+    var nav = document.querySelector("#sidebar-menu nav");
+    if(!nav) return false;
+    var a = document.createElement("a");
+    a.id = "pap-ir-nuevo";
+    a.href = DESTINO;
+    a.innerHTML =
+      '<span class="chispa" aria-hidden="true">✨</span>' +
+      '<span class="texto"><b>Ver el diseño nuevo</b><small>Mismos datos</small></span>';
+    a.title = "Abre PAPOTAS con el diseño nuevo. Son los mismos datos: lo que hagas en uno lo ve el otro.";
+    /* Debajo del menú y encima del sello de versión. */
+    var sello = document.getElementById("pap-sello");
+    if(sello && sello.parentNode) sello.parentNode.insertBefore(a, sello);
+    else nav.parentNode.appendChild(a);
+    return true;
+  }
+
+  function encender(){
+    var a = document.getElementById("pap-ir-nuevo");
+    if(a) a.classList.add("puesto");
+  }
+
+  function comprobar(){
+    /* Abriendo el archivo suelto desde el disco no se puede preguntar por
+       otro archivo (el navegador lo prohíbe), así que ahí se enseña y ya:
+       si están juntos, que es como se entregan, el enlace funciona. */
+    if(location.protocol === "file:"){ encender(); return; }
+    if(!window.fetch){ encender(); return; }
+    fetch(DESTINO, {method:"HEAD"}).then(function(r){
+      if(r && r.ok) encender();
+    }).catch(function(){});
+  }
+
+  function arrancar(){
+    var intentos = 0;
+    (function otra(){
+      if(poner()){ comprobar(); return; }
+      if(++intentos < 20) setTimeout(otra, 300);
+    })();
+  }
+
+  if(document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", arrancar, {once:true});
+  else arrancar();
 })();
 </script>
 
