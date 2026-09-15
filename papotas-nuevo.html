@@ -458,6 +458,14 @@ button.metrica:hover{background:var(--capa-alta)}
 }
 .f-perfil::before{ content:"·";margin:0 5px;color:var(--txt-4) }
 .f-perfil.sin{ color:var(--aviso) }
+/* El cuerpo de una respuesta guardada: se ve entero, con sus saltos de
+   línea, porque lo que importa es poder releerlo antes de mandarlo. */
+.f-texto-largo{
+  display:block;margin-top:5px;padding:9px 11px;
+  background:var(--capa-alta);border:1px solid var(--linea);border-radius:10px;
+  font-size:12px;line-height:1.55;color:var(--txt-2);
+  white-space:pre-wrap;word-break:break-word;
+}
 .f-sub{display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 .f-der{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:0 0 auto}
@@ -503,6 +511,24 @@ button.metrica:hover{background:var(--capa-alta)}
 .casillas.casi i.usado{background:var(--aviso)}
 .casillas.llena i:not(.usado), .casillas.casi i:not(.usado){background:var(--linea-fuerte)}
 .casillas small{font-size:10.5px;font-weight:700;color:var(--txt-4);margin-left:4px;white-space:nowrap}
+
+/* La meta del mes --------------------------------------------------------- */
+.meta-barra{
+  height:14px;border-radius:99px;background:var(--linea);overflow:hidden;display:flex;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.35);
+}
+.meta-barra i{
+  display:block;height:100%;border-radius:99px;
+  background:linear-gradient(90deg, var(--info), var(--bien));
+  transition:width var(--medio) var(--curva);
+}
+.meta-barra.llena i{background:linear-gradient(90deg, var(--bien), var(--bien))}
+.meta-pies{
+  display:flex;justify-content:space-between;gap:var(--e3);
+  margin-top:9px;font-size:12px;color:var(--txt-3);font-weight:500;
+}
+.meta-pies b{font-size:15px;font-weight:750;letter-spacing:-.025em;color:var(--txt);margin-right:5px}
+.meta-pies span:last-child{text-align:right}
 
 /* Los doce meses ---------------------------------------------------------- */
 .meses{
@@ -1095,7 +1121,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.6</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.7</span>
     </div>
   </nav>
 
@@ -2179,7 +2205,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.6';
+const VERSION = 'v2.7';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -3103,6 +3129,40 @@ function pintaDinero(){
         '<span class="n">por venta</span></div>' +
     '</div>' +
 
+    /* La meta del mes. Solo aparece si la has puesto: una barra en blanco
+       con un cero grande no dice nada y ocupa lo mismo. */
+    (function(){
+      const meta = Number(ajustes.metaMensual) || 0;
+      if(meta <= 0) return '';
+      const pct = Math.min(100, Math.round(cobrado/meta*100));
+      const falta = Math.max(0, meta - cobrado);
+      /* Cuántos días quedan del mes que se está mirando (si es el de hoy). */
+      const pa = mesDinero.split('-');
+      const ultimoDia = new Date(+pa[0], +pa[1], 0).getDate();
+      const esEsteMes = mesDinero === hoyISO().slice(0,7);
+      const quedan = esEsteMes ? Math.max(0, ultimoDia - new Date().getDate()) : 0;
+      const porDia = quedan > 0 ? falta/quedan : 0;
+      return '<div class="tarjeta">' +
+        '<div class="tarjeta-cabeza">' +
+          '<div class="crece"><h2>Meta del mes</h2>' +
+            '<p>' + (falta > 0
+              ? 'Te faltan ' + esc(dinero(falta)) + ' para llegar a ' + esc(dinero(meta)) +
+                (quedan > 0 ? ' · ' + esc(dinero(porDia)) + ' al día en los ' + quedan +
+                              ' ' + plural(quedan,'día que queda','días que quedan') : '')
+              : '¡Meta cumplida! Has pasado de ' + esc(dinero(meta)) +
+                ' por ' + esc(dinero(cobrado - meta)) + '.') + '</p></div>' +
+          '<span class="insignia ' + (falta>0 ? (pct>=70?'aviso':'') : 'bien') + '">' + pct + '%</span>' +
+        '</div>' +
+        '<div class="tarjeta-cuerpo">' +
+          '<div class="meta-barra ' + (falta>0?'':'llena') + '"><i style="width:' + pct + '%"></i></div>' +
+          '<div class="meta-pies">' +
+            '<span><b class="cifra">' + esc(dinero(cobrado)) + '</b> cobrado</span>' +
+            '<span><b class="cifra">' + esc(dinero(meta)) + '</b> la meta</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    })() +
+
     /* Doce meses de un vistazo. Cada barra es un mes: lo verde entró y lo
        rojo salió. Se pulsa una y la pantalla entera se va a ese mes. */
     (function(){
@@ -3214,6 +3274,9 @@ function contarCopiaGuardada(){
   setTimeout(function(){ if(!contestó) celda.textContent = 'no contestó'; }, 2500);
 }
 
+/* Cuántos apuntes del historial se enseñan de golpe. */
+let verHistorial = 25;
+
 function pintaAjustes(){
   $('#subtitulo').textContent = 'Tu negocio, respaldo y nube';
   const conectado = Nube.hayCredenciales();
@@ -3235,6 +3298,8 @@ function pintaAjustes(){
           opciones:[['meses','Meses'],['dias','Días']]}) +
         campo('aj-ciclomeses','Cada cuántos meses',{tipo:'number', valor:ajustes.mesesRenovacion, paso:'1'}) +
         campo('aj-ciclodias','Cada cuántos días',{tipo:'number', valor:ajustes.diasRenovacion, paso:'1'}) +
+        campo('aj-meta','Meta del mes',{valor:ajustes.metaMensual || '', pista:'0 para no usarla',
+          ayuda:'Cuánto quieres cobrar cada mes. Sale en Dinero.'}) +
       '</div>' +
       '<div class="fila" style="margin-top:var(--e3)"><button class="btn principal" id="btn-guardar-ajustes">Guardar</button></div>' +
       '</div>' +
@@ -3250,6 +3315,75 @@ function pintaAjustes(){
         campo('aj-firma','Firma al final',{valor:ajustes.firmaWs, pista:'Opcional'}) +
         '<div class="fila"><button class="btn principal" id="btn-guardar-plantillas">Guardar mensajes</button></div>' +
       '</div></div>' +
+    '</div>' +
+
+    /* Las respuestas guardadas: las mismas que ya tienes en el programa de
+       siempre, y salen en el desplegable de la fila de WhatsApp. */
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza"><div class="crece"><h2>Respuestas guardadas</h2>' +
+        '<p>Textos que usas a menudo. Salen en la fila de WhatsApp, junto a las tres de arriba.</p></div>' +
+        '<button class="btn mini principal" data-nueva-rapida="1">' + ICONO.mas +
+          '<span class="et">Nueva respuesta</span></button>' +
+      '</div>' +
+      (mensajesRapidos.length ?
+        '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+          mensajesRapidos.map(function(g){
+            return '<div class="f" style="cursor:default;align-items:flex-start">' +
+              '<span class="f-txt">' +
+                '<span class="f-nom">' + esc(g.titulo || 'Sin título') +
+                  (g.categoria ? ' <em class="f-perfil">' + esc(g.categoria) + '</em>' : '') + '</span>' +
+                '<span class="f-texto-largo">' + esc(g.texto || '') + '</span>' +
+              '</span>' +
+              '<span class="f-der" style="flex-direction:row;gap:5px">' +
+                '<button class="btn icono mini fantasma" data-copiar="' + esc(g.texto||'') + '"' +
+                  ' title="Copiar el texto" aria-label="Copiar el texto">' + ICONO.copiar + '</button>' +
+                '<button class="btn icono mini fantasma" data-editar-rapida="' + esc(g.id) + '"' +
+                  ' title="Editar" aria-label="Editar">' + ICONO.lapiz + '</button>' +
+                '<button class="btn icono mini fantasma" data-borrar-rapida="' + esc(g.id) + '"' +
+                  ' title="Borrar" aria-label="Borrar">' + ICONO.basura + '</button>' +
+              '</span>' +
+            '</div>';
+          }).join('') +
+        '</div></div>'
+        : '<div class="tarjeta-cuerpo">' +
+            vacio('Todavía no hay respuestas guardadas',
+                  'Pulsa «Nueva respuesta» y guarda ese texto que escribes veinte veces al día.') +
+          '</div>') +
+    '</div>' +
+
+    /* El historial: lo que ha pasado, para poder mirar atrás cuando algo no
+       cuadra entre el teléfono y la laptop. */
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza"><div class="crece"><h2>Historial</h2>' +
+        '<p>Lo último que se ha hecho en el programa, de lo más nuevo a lo más viejo.</p></div>' +
+        '<span class="insignia">' + auditoriaLog.length + ' ' +
+          plural(auditoriaLog.length,'apunte','apuntes') + '</span>' +
+        (auditoriaLog.length ? '<button class="btn mini fantasma" id="btn-vaciar-historial">' +
+          '<span class="et">Vaciar</span></button>' : '') +
+      '</div>' +
+      (auditoriaLog.length ?
+        '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+          auditoriaLog.slice(0, verHistorial).map(function(a){
+            return '<div class="f" style="cursor:default">' +
+              '<span class="f-txt">' +
+                '<span class="f-nom">' + esc(a.detalle || '') + '</span>' +
+                '<span class="f-sub">' + esc(a.accion || '') + '</span>' +
+              '</span>' +
+              '<span class="f-der"><span class="f-cuando">' + esc(a.fecha || '') + '</span></span>' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        (auditoriaLog.length > verHistorial ?
+          '<div class="tarjeta-cuerpo"><div class="fila">' +
+            '<button class="btn" id="btn-mas-historial">Ver ' +
+              Math.min(50, auditoriaLog.length - verHistorial) + ' más</button>' +
+            '<span style="font-size:12px;color:var(--txt-3)">' +
+              'viendo ' + verHistorial + ' de ' + auditoriaLog.length + '</span>' +
+          '</div></div>' : '') +
+        '</div>'
+        : '<div class="tarjeta-cuerpo">' +
+            vacio('Sin historial todavía', 'Aquí se apunta cada cobro, cada alta y cada borrado.') +
+          '</div>') +
     '</div>' +
 
     '<div class="tarjeta">' +
@@ -3407,10 +3541,20 @@ function textoWhatsApp(c, cual){
   const m = masterDe(c);
   const vencido = c.vencimiento && c.vencimiento < hoyISO();
   let t;
-  if(cual === 'cobro')        t = ajustes.plantillaCobro;
-  else if(cual === 'vencido') t = ajustes.plantillaVencido;
-  else if(cual === 'entrega') t = ajustes.plantillaEntrega;
-  else t = vencido ? ajustes.plantillaVencido : ajustes.plantillaCobro;
+  /* "guardado:<id>" es una de tus respuestas guardadas; el resto son las
+     tres plantillas fijas. Una respuesta guardada que ya no existe cae en el
+     mensaje automático en vez de mandar un texto vacío. */
+  let esGuardada = false;
+  if(String(cual||'').indexOf('guardado:') === 0){
+    const g = mensajesRapidos.find(function(x){ return String(x.id) === cual.slice(9); });
+    if(g){ t = g.texto; esGuardada = true; }
+  }
+  if(!esGuardada){
+    if(cual === 'cobro')        t = ajustes.plantillaCobro;
+    else if(cual === 'vencido') t = ajustes.plantillaVencido;
+    else if(cual === 'entrega') t = ajustes.plantillaEntrega;
+    else t = vencido ? ajustes.plantillaVencido : ajustes.plantillaCobro;
+  }
   t = t || '';
   if(ajustes.firmaWs) t += '\n\n' + ajustes.firmaWs;
   return t
@@ -3495,6 +3639,14 @@ function pintarCola(){
         '<option value="cobro"' + (colaPlantilla==='cobro'?' selected':'') + '>Recordatorio de cobro</option>' +
         '<option value="vencido"' + (colaPlantilla==='vencido'?' selected':'') + '>Ya venció</option>' +
         '<option value="entrega"' + (colaPlantilla==='entrega'?' selected':'') + '>Entrega de datos</option>' +
+        (mensajesRapidos.length ?
+          '<optgroup label="Tus respuestas guardadas">' +
+            mensajesRapidos.map(function(g){
+              const v = 'guardado:' + g.id;
+              return '<option value="' + esc(v) + '"' + (colaPlantilla===v?' selected':'') + '>' +
+                     esc(g.titulo || 'Sin título') + '</option>';
+            }).join('') +
+          '</optgroup>' : '') +
       '</select>' +
       '<button class="btn mini bien" data-cola="enviar" title="Abrir el chat de ' + esc(c.nombre||'') + ' con el mensaje escrito">' +
         ICONO.wa + '<span class="et">Abrir WhatsApp</span></button>' +
@@ -3516,6 +3668,38 @@ function avanzarCola(){
 }
 
 /* --- Formularios --------------------------------------------------------- */
+
+/* El formulario de una respuesta guardada. Se conserva la forma exacta que
+   usa tu programa de siempre ({id, categoria, titulo, texto}) para que el
+   respaldo y la nube sigan sirviendo para los dos. */
+function formRapida(id){
+  const g = id ? mensajesRapidos.find(function(x){ return String(x.id) === String(id); }) : null;
+  const esNueva = !g;
+  abrirModal(esNueva ? 'Nueva respuesta guardada' : 'Editar respuesta',
+    '<div class="pila">' +
+      '<div class="rejilla r2">' +
+        campo('rp-titulo','Para qué es',{valor:g?g.titulo:'', pista:'Cómo pagar'}) +
+        campo('rp-categoria','Grupo',{valor:g?g.categoria:'', pista:'General'}) +
+      '</div>' +
+      campo('rp-texto','El mensaje',{tipo:'textarea', valor:g?g.texto:'', filas:6,
+        ayuda:'Puedes usar {cliente} {servicio} {vencimiento} {monto} {correo} {contrasena} {perfil} {pin} {negocio}.'}) +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
+     {texto:esNueva?'Guardar respuesta':'Guardar', clase:'principal', hacer:function(){
+       const titulo = val('rp-titulo').trim();
+       const texto  = val('rp-texto').trim();
+       if(!titulo){ avisar('Ponle un nombre para reconocerla', 'mal'); return; }
+       if(!texto){ avisar('Escribe el mensaje', 'mal'); return; }
+       const destino = g || {id:nuevoId('m')};
+       destino.titulo = titulo;
+       destino.categoria = val('rp-categoria').trim() || 'General';
+       destino.texto = texto;
+       if(esNueva) mensajesRapidos.push(destino);
+       anotar(esNueva ? 'NUEVA RESPUESTA' : 'EDITAR RESPUESTA', titulo);
+       guardar(); cerrarModal(); pintar();
+       avisar(esNueva ? 'Respuesta guardada' : 'Respuesta actualizada', 'bien');
+     }}]);
+}
 
 function formCliente(id){
   const c = id ? buscarCliente(id) : null;
@@ -3651,7 +3835,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -3795,6 +3979,20 @@ document.addEventListener('click', function(ev){
   }
   if(d.quitarPlat){ filtroPlatCli = 'TODAS'; pintar(); return; }
   if(d.mes){ mesDinero = d.mes; pintar(); return; }
+  if(d.nuevaRapida){ formRapida(null); return; }
+  if(d.editarRapida){ formRapida(d.editarRapida); return; }
+  if(d.borrarRapida){
+    const g = mensajesRapidos.find(function(x){ return String(x.id) === String(d.borrarRapida); });
+    if(!g) return;
+    confirmar('Borrar la respuesta', '«' + (g.titulo||'Sin título') + '» se borrará de este dispositivo y de la nube.',
+      'Borrar', function(){
+        mensajesRapidos = mensajesRapidos.filter(function(x){ return String(x.id) !== String(g.id); });
+        anotar('BORRAR RESPUESTA', g.titulo || 'Sin título');
+        guardar(); cerrarModal(); pintar();
+        avisar('Respuesta borrada', 'bien');
+      }, true);
+    return;
+  }
   if(d.vista){ vistaCuentas = d.vista; pintar(); return; }
   if(d.plat){
     filtroPlataforma = d.plat; pintar();
@@ -3830,6 +4028,7 @@ document.addEventListener('click', function(ev){
     ajustes.cicloRenovacion = val('aj-ciclotipo');
     ajustes.mesesRenovacion = Math.max(1, Math.round(num('aj-ciclomeses')) || 1);
     ajustes.diasRenovacion = Math.max(1, Math.round(num('aj-ciclodias')) || 30);
+    ajustes.metaMensual = Math.max(0, num('aj-meta'));
     guardar(); pintar(); avisar('Ajustes guardados', 'bien');
   }
   else if(id === 'btn-guardar-plantillas'){
@@ -3877,6 +4076,19 @@ document.addEventListener('click', function(ev){
   }
   else if(id === 'btn-tema-2'){
     ajustes.modoClaro = !ajustes.modoClaro; aplicarTema(); guardar(); pintar();
+  }
+  else if(id === 'btn-mas-historial'){
+    verHistorial += 50; pintar();
+  }
+  else if(id === 'btn-vaciar-historial'){
+    confirmar('Vaciar el historial',
+      'Se borrarán los ' + auditoriaLog.length + ' apuntes. Tus clientes, cuentas y cobros no se tocan.',
+      'Vaciar', function(){
+        auditoriaLog = [];
+        verHistorial = 25;
+        guardar(); cerrarModal(); pintar();
+        avisar('Historial vaciado', 'bien');
+      }, true);
   }
 });
 
