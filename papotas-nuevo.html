@@ -318,7 +318,12 @@ input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marc
 }
 .tarjeta-cabeza h2{
   font-size:17px;font-weight:700;letter-spacing:-.028em;margin:0;line-height:1.15;
+  /* Que un título largo parta línea en vez de estirar la tarjeta fuera de
+     la pantalla: "Calendario de cobros" no cabe entero en 320px. */
+  min-width:0;overflow-wrap:anywhere;
 }
+.tarjeta-cabeza > .crece{min-width:0}
+.tarjeta-cabeza p{overflow-wrap:anywhere}
 .tarjeta-cabeza p{font-size:12.5px;color:var(--txt-3);margin:3px 0 0;font-weight:500}
 .tarjeta-cuerpo{padding:0 var(--e5) var(--e5)}
 .tarjeta-cuerpo.pegado{padding:0}
@@ -336,7 +341,7 @@ input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marc
    un hueco suelto al final. Se leen mejor como un renglón cada una:
    nombre a la izquierda, cifra a la derecha. */
 @media (max-width:640px){
-  .r5{grid-template-columns:1fr;gap:var(--e2)}
+  .r5{grid-template-columns:minmax(0,1fr);gap:var(--e2)}
   .r5 > .metrica:not(.mayor){
     flex-direction:row;align-items:baseline;gap:10px;
     padding:11px var(--e4);
@@ -866,7 +871,7 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 .tramo + .mosaico.gente{padding-top:var(--e4)}
 @media (max-width:700px){
   .mosaico.gente{
-    grid-template-columns:1fr;
+    grid-template-columns:minmax(0,1fr);
     gap:var(--e2);
     padding:var(--e2) var(--e3) var(--e3);
   }
@@ -911,6 +916,127 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
      mitad se leían peor que seguidas. */
   #p-ajustes > .pila > .ancha{ grid-column:1 / -1 }
 }
+
+/* ===== AZULEJOS DE CIFRAS ==============================================
+   Del PAPOTAS de siempre: cada cifra en su azulejo, con su icono a la
+   derecha y su propio color. Ocho cifras pequeñas y distintas se leen mejor
+   que una enorme y cuatro apagadas. */
+.azulejos{
+  display:grid;gap:var(--e3);
+  grid-template-columns:repeat(4, minmax(0,1fr));
+}
+@media (max-width:1100px){ .azulejos{grid-template-columns:repeat(3, minmax(0,1fr))} }
+@media (max-width:820px){ .azulejos{grid-template-columns:repeat(2, minmax(0,1fr))} }
+.azulejo{
+  --t:var(--txt);--t-suave:rgba(255,255,255,.06);--t-linea:var(--linea-fuerte);
+  position:relative;text-align:left;min-width:0;
+  padding:13px var(--e4) 12px;border-radius:var(--r-l);
+  border:1px solid var(--linea);background:var(--capa);
+  display:flex;flex-direction:column;gap:5px;
+  box-shadow:var(--brillo);
+  transition:border-color var(--rapido) var(--curva), background var(--rapido) var(--curva);
+}
+button.azulejo{cursor:pointer}
+button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
+.azulejo .k{
+  font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--txt-3);padding-right:36px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.azulejo .v{font-size:25px;font-weight:750;letter-spacing:-.04em;line-height:1.05;color:var(--t)}
+.azulejo .n{font-size:11px;color:var(--txt-4);font-weight:550;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.azulejo .ico{
+  position:absolute;top:11px;right:11px;
+  width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  background:var(--t-suave);border:1px solid var(--t-linea);color:var(--t);
+}
+.azulejo .ico svg{width:15px;height:15px;stroke-width:2}
+.azulejo.mal  {--t:var(--mal);  --t-suave:var(--mal-fondo);  --t-linea:var(--mal-linea)}
+.azulejo.aviso{--t:var(--aviso);--t-suave:var(--aviso-fondo);--t-linea:var(--aviso-linea)}
+.azulejo.bien {--t:var(--bien); --t-suave:var(--bien-fondo); --t-linea:var(--bien-linea)}
+.azulejo.info {--t:var(--info); --t-suave:var(--info-fondo); --t-linea:var(--info-linea)}
+@media (max-width:420px){
+  .cal-dias, .cal-semana{gap:2px}
+  .dia{min-height:36px;font-size:12px;border-radius:7px}
+  .cal-pie{font-size:9.5px;gap:5px var(--e2)}
+}
+@media (max-width:640px){
+  .azulejos{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e2)}
+  .azulejo{padding:11px var(--e3) 10px}
+  .azulejo .v{font-size:20px}
+  .azulejo .k{padding-right:30px;font-size:9px}
+  .azulejo .ico{width:24px;height:24px;top:9px;right:9px;border-radius:7px}
+  .azulejo .ico svg{width:13px;height:13px}
+}
+
+/* ===== ACCIONES RÁPIDAS ================================================= */
+.acciones-rapidas{display:flex;gap:var(--e2);flex-wrap:wrap;align-items:center}
+.acciones-rapidas .crece{flex:1 1 auto;min-width:0}
+@media (max-width:860px){
+  .acciones-rapidas .crece{display:none}
+  /* Dos por renglón y la ronda entera abajo: cuatro botones sueltos se
+     comían media pantalla antes de enseñar una sola cifra. Y "ver todos los
+     clientes" ya está en la barra de abajo. */
+  .acciones-rapidas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e2)}
+  .acciones-rapidas .btn{min-width:0}
+  .acciones-rapidas .btn[data-escribir-a]{grid-column:1 / -1}
+  .acciones-rapidas .btn[data-ir-clientes]{display:none}
+}
+@media (max-width:420px){
+  .acciones-rapidas .btn{padding:0 10px;font-size:12.5px}
+}
+
+/* ===== EL CALENDARIO DEL MES ===========================================
+   El del programa de siempre: el mes entero, un punto por cobro y el día de
+   hoy marcado. */
+.calendario-mes{display:flex;flex-direction:column;gap:var(--e3)}
+.cal-cabeza{display:flex;align-items:center;gap:var(--e2)}
+.cal-titulo{flex:1;text-align:center;min-width:0}
+.cal-titulo b{display:block;font-size:13.5px;font-weight:700;letter-spacing:-.015em}
+.cal-titulo small{display:block;font-size:11px;color:var(--txt-3);font-weight:550;margin-top:1px}
+.cal-semana{
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px;
+  font-size:9.5px;font-weight:800;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.06em;text-align:center;
+}
+.cal-dias{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.dia{
+  /* Nada de aspect-ratio: en el teléfono la altura del contenido mandaba
+     sobre el ancho y cada día se hacía de 66px, así que la rejilla de siete
+     columnas se salía de la pantalla. */
+  position:relative;min-height:40px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  border-radius:9px;border:1px solid transparent;
+  font-size:12.5px;color:var(--txt-3);
+  transition:background var(--rapido) var(--curva), border-color var(--rapido) var(--curva);
+}
+.dia.vacio{pointer-events:none}
+.dia b{font-weight:600;line-height:1}
+.dia.con{color:var(--txt);background:var(--capa-alta);border-color:var(--linea)}
+.dia.con:hover{border-color:var(--linea-fuerte);background:var(--capa-alta)}
+.dia.hoy{border-color:var(--marca);color:var(--txt);font-weight:800}
+.dia.hoy b{font-weight:800}
+.puntos{display:flex;gap:2px;height:5px;align-items:center}
+.puntos i{width:5px;height:5px;border-radius:50%;display:block}
+.puntos i.mal{background:var(--mal)} .puntos i.aviso{background:var(--aviso)}
+.puntos i.bien{background:var(--bien)} .puntos i.info{background:var(--info)}
+.cal-pie{
+  display:flex;flex-wrap:wrap;gap:6px var(--e3);
+  border-top:1px solid var(--linea);padding-top:10px;
+  font-size:10.5px;color:var(--txt-4);font-weight:600;
+}
+.cal-pie span{display:flex;align-items:center;gap:5px}
+.cal-pie i{width:6px;height:6px;border-radius:50%;display:block}
+.cal-pie i.mal{background:var(--mal)} .cal-pie i.aviso{background:var(--aviso)}
+.cal-pie i.bien{background:var(--bien)} .cal-pie i.info{background:var(--info)}
+
+.rejilla.dos-tercios{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+/* minmax(0,1fr) y no 1fr: con 1fr el ancho mínimo lo pone el contenido y
+   una tarjeta se salía 50px de la pantalla en un móvil de 320. */
+@media (max-width:1100px){ .rejilla.dos-tercios{grid-template-columns:minmax(0,1fr)} }
+
+.lista-dia{max-height:52vh;overflow-y:auto;border:1px solid var(--linea);border-radius:var(--r-l)}
 
 /* ===== EL TABLERO DE HOY ================================================
    Hoy no es un listado: es el parte del día. Una cifra que manda, el anillo
@@ -1020,14 +1146,14 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
   flex:1 1 auto;min-width:40px;max-width:360px;
   height:8px;border-radius:99px;background:var(--linea);overflow:hidden;
 }
-.rank-relleno{flex:1 1 auto;min-width:0}
+.rank-relleno{flex:0 1 auto;min-width:0;max-width:24px}
 .rank-barra i{display:block;height:100%;border-radius:99px;background:var(--tono)}
 .rank-gente{
   flex:0 0 auto;min-width:26px;height:20px;padding:0 6px;border-radius:6px;
   background:var(--linea);color:var(--txt-2);
   font-size:11px;font-weight:700;line-height:20px;text-align:center;
 }
-.rank-suma{flex:0 0 96px;text-align:right;font-size:13px;font-weight:750;letter-spacing:-.02em}
+.rank-suma{flex:1 1 auto;text-align:right;font-size:13px;font-weight:750;letter-spacing:-.02em}
 @media (max-width:640px){
   .rank-n{flex:0 0 92px;font-size:12px}
   .rank-suma{flex:0 0 74px;font-size:12px}
@@ -1749,7 +1875,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v3.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v3.3</span>
     </div>
   </nav>
 
@@ -2833,7 +2959,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v3.2';
+const VERSION = 'v3.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -2850,6 +2976,11 @@ const ICONO = {
   pincel:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>',
   chat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
   etiqueta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v5.2a2 2 0 0 0 .6 1.4l7.8 7.8a2 2 0 0 0 2.8 0l6.2-6.2a2 2 0 0 0 0-2.8L12.6 4.6A2 2 0 0 0 11.2 4H6a3 3 0 0 0-3 3z"/><path d="M7.5 7.5h.01"/></svg>',
+  capas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg>',
+  alerta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  subir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg>',
+  mascliente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>',
+  calendario:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>',
   volver:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
   ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
@@ -3028,6 +3159,106 @@ $('#btn-tema').addEventListener('click', function(){
 const abiertos = new Set();
 
 /* Una fila de cliente + su cajón de acciones. */
+/* ---------- Azulejos de cifras ------------------------------------------
+   Tomado de tu PAPOTAS de siempre: cada número en su azulejo, con su icono
+   a la derecha y su propio color. Ocho cifras pequeñas y distintas se leen
+   mejor que una enorme y cuatro apagadas — y de un vistazo sabes cuál es
+   cuál sin leer la etiqueta. */
+function azulejo(etq, valor, tono, icono, extra){
+  const t = tono || '';
+  const hay = extra && extra.ir;
+  return '<' + (hay ? 'button' : 'div') + ' class="azulejo ' + t + '"' +
+    (hay ? ' data-' + extra.ir + '="1"' : '') +
+    (extra && extra.tit ? ' title="' + esc(extra.tit) + '"' : '') + '>' +
+    '<span class="k">' + esc(etq) + '</span>' +
+    '<span class="v cifra">' + valor + '</span>' +
+    (extra && extra.pie ? '<span class="n">' + extra.pie + '</span>' : '') +
+    '<span class="ico">' + (icono || ICONO.info) + '</span>' +
+  '</' + (hay ? 'button' : 'div') + '>';
+}
+
+/* ---------- El calendario de cobros -------------------------------------
+   El del programa de siempre: el mes entero, un punto por cada cobro y el
+   día de hoy marcado. Es lo que se mira para saber cómo viene la semana. */
+let mesCalendario = '';
+function calendarioCobros(lista){
+  if(!mesCalendario) mesCalendario = hoyISO().slice(0,7);
+  const [aa, mm] = mesCalendario.split('-').map(Number);
+  const primero = new Date(aa, mm-1, 1);
+  const ultimo  = new Date(aa, mm, 0).getDate();
+  /* Lunes primero, como se lee aquí. */
+  let hueco = (primero.getDay() + 6) % 7;
+
+  const porDia = {};
+  let cuantos = 0, suma = 0;
+  lista.forEach(function(c){
+    const v = String(c.vencimiento||'');
+    if(v.slice(0,7) !== mesCalendario) return;
+    const d = Number(v.slice(8,10));
+    if(!porDia[d]) porDia[d] = {n:0, suma:0, est:{}};
+    porDia[d].n++; porDia[d].suma += cobroDe(c);
+    const e = estadoDe(c);
+    porDia[d].est[e] = (porDia[d].est[e]||0) + 1;
+    cuantos++; suma += cobroDe(c);
+  });
+  /* Las cuentas master también vencen, y son las que hay que renovar. */
+  const masters = {};
+  servicios.forEach(function(m){
+    if(plataformaActiva !== 'TODAS' &&
+       String(m.nombre||'').trim().toUpperCase() !== plataformaActiva) return;
+    const v = String(m.vencimiento||'');
+    if(v.slice(0,7) !== mesCalendario) return;
+    const d = Number(v.slice(8,10));
+    masters[d] = (masters[d]||0) + 1;
+  });
+
+  const hoy = hoyISO();
+  const esEsteMes = mesCalendario === hoy.slice(0,7);
+  const diaHoy = Number(hoy.slice(8,10));
+  const antes = new Date(aa, mm-2, 1), desp = new Date(aa, mm, 1);
+  const iso = function(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'); };
+
+  let celdas = '';
+  for(let i=0;i<hueco;i++) celdas += '<span class="dia vacio"></span>';
+  for(let d=1; d<=ultimo; d++){
+    const x = porDia[d];
+    const hoyEs = esEsteMes && d === diaHoy;
+    const puntos =
+      (x && x.est.vencido    ? '<i class="mal"></i>'   : '') +
+      (x && x.est.por_vencer ? '<i class="aviso"></i>' : '') +
+      (x && x.est.activo     ? '<i class="bien"></i>'  : '') +
+      (masters[d]            ? '<i class="info"></i>'  : '');
+    const tit = (x ? x.n + ' ' + plural(x.n,'cobro','cobros') + ' · ' + dinero(x.suma) : 'Sin cobros') +
+                (masters[d] ? ' · ' + masters[d] + ' cuenta(s) master' : '');
+    celdas += '<button class="dia' + (hoyEs?' hoy':'') + (x||masters[d]?' con':'') + '"' +
+      ' data-dia="' + mesCalendario + '-' + String(d).padStart(2,'0') + '"' +
+      ' title="' + esc(String(d) + ': ' + tit) + '">' +
+      '<b>' + d + '</b><span class="puntos">' + puntos + '</span></button>';
+  }
+
+  return '<div class="calendario-mes">' +
+    '<div class="cal-cabeza">' +
+      '<button class="btn mini icono fantasma" data-calmes="' + iso(antes) + '"' +
+        ' title="Mes anterior" aria-label="Mes anterior">' + ICONO.volver + '</button>' +
+      '<div class="cal-titulo"><b>' + esc(NOMBREMES[mm-1]) + ' de ' + aa + '</b>' +
+        '<small>' + cuantos + ' ' + plural(cuantos,'cobro','cobros') +
+          (cuantos ? ' · ' + esc(dinero(suma)) : '') + '</small></div>' +
+      '<button class="btn mini icono fantasma" data-calmes="' + iso(desp) + '"' +
+        ' title="Mes siguiente" aria-label="Mes siguiente">' + ICONO.flecha + '</button>' +
+    '</div>' +
+    '<div class="cal-semana">' +
+      ['Lu','Ma','Mi','Ju','Vi','Sá','Do'].map(function(d){ return '<span>' + d + '</span>'; }).join('') +
+    '</div>' +
+    '<div class="cal-dias">' + celdas + '</div>' +
+    '<div class="cal-pie">' +
+      '<span><i class="mal"></i>Vencido</span>' +
+      '<span><i class="aviso"></i>Por vencer</span>' +
+      '<span><i class="bien"></i>Al día</span>' +
+      '<span><i class="info"></i>Cuenta master</span>' +
+    '</div>' +
+  '</div>';
+}
+
 /* ---------- Piezas del tablero de Hoy -----------------------------------
    Hoy no es otro listado de clientes: eso ya es Clientes. Hoy es el tablero
    de trabajo del día — cuánto hay pendiente, cuándo vence, qué plataforma
@@ -3287,6 +3518,37 @@ function tarjetaCliente(c){
         ' aria-label="Ver la ficha de ' + esc(c.nombre||'') + '">' + ICONO.flecha + '</button>' +
     '</span>' +
   '</div>';
+}
+
+/* Quién cobra un día concreto del calendario. */
+function verDia(iso, gente){
+  const suma = gente.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  abrirModal(fechaBonita(iso),
+    '<p style="margin:0 0 var(--e4);color:var(--txt-3);font-size:12.5px">' +
+      gente.length + ' ' + plural(gente.length,'cobro','cobros') + ' · ' + esc(dinero(suma)) +
+    '</p>' +
+    '<div class="lista lista-dia">' + gente.slice().sort(function(a,b){
+        return String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
+      }).map(function(c){
+        const m = masterDe(c);
+        const tel = telefonoDe(c);
+        return '<div class="f" style="cursor:default">' +
+          logoPlataforma(platDe(c), 30) +
+          '<span class="f-txt"><span class="f-nom">' + esc(c.nombre||'Sin nombre') + '</span>' +
+            '<span class="f-sub"><span class="chip-cuenta" style="' + tonoDe(platDe(c)) + '">' +
+              esc(m ? nombreCuenta(m) : platDe(c)) + '</span>' +
+              (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>' : '') +
+            '</span></span>' +
+          '<span class="f-der"><span class="f-monto cifra">' + esc(dinero(cobroDe(c))) + '</span></span>' +
+          '<span class="f-acciones">' +
+            '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '"' +
+              ' title="Cobrar" aria-label="Cobrar a ' + esc(c.nombre||'') + '">' + ICONO.cobrar + '</button>' +
+            (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '"' +
+              ' title="Escribir" aria-label="Escribir a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>' : '') +
+          '</span>' +
+        '</div>';
+      }).join('') + '</div>',
+    [{texto:'Cerrar', clase:'fantasma', hacer:cerrarModal}]);
 }
 
 /* La ficha entera, en una ventana. Dentro de una rejilla de tarjetas un
@@ -3632,59 +3894,79 @@ function pintaHoy(){
   '<div class="pila">' +
     barraPlataformas() +
 
-    /* ---- La cabecera del día: una sola cifra manda, y al lado el botón
-       que arranca el trabajo de verdad. ---- */
-    '<div class="tablero">' +
-      '<div class="tab-cifra">' +
-        '<span class="k">Por cobrar' + (plataformaActiva==='TODAS' ? '' : ' en ' + esc(plataformaActiva)) + '</span>' +
-        '<b class="cifra">' + esc(dinero(total)) + '</b>' +
-        '<span class="n">' + porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas') +
-          (vencidos.length ? ' · <em class="mal">' + vencidos.length + ' ya vencieron</em>' : '') + '</span>' +
-      '</div>' +
-      '<div class="tab-anillo">' +
-        anillo(pct, pct >= 100 ? 'var(--bien)' : 'var(--marca-alta)') +
-        '<span class="tab-anillo-txt"><b>' + esc(dinero(cobradoMes)) + '</b>' +
-          '<small>cobrado en ' + esc(NOMBREMES[Number(mes.slice(5,7))-1]) +
-            (meta > 0 ? ' · meta ' + esc(dinero(meta)) : '') + '</small></span>' +
-      '</div>' +
-      '<div class="tab-acciones">' +
-        /* Siempre está: si ninguno tiene teléfono, al pulsarlo lo dice, que
-           es más útil que un botón que desaparece sin explicar por qué. */
-        '<button class="btn grande principal" data-escribir-a="hoy-visible"' +
-          (conTel ? '' : ' title="Ninguno de los que tocan tiene teléfono guardado"') + '>' + ICONO.wa +
-          'Empezar la ronda <span class="btn-n">' + (conTel || cola.length) + '</span></button>' +
-        '<button class="btn" data-ir-clientes="1">' + ICONO.gente + 'Ver todos los clientes</button>' +
-      '</div>' +
-      '<dl class="tab-mini">' +
-        '<div><dt>Vencidos</dt><dd class="cifra mal">' + vencidos.length + '</dd></div>' +
-        '<div><dt>Vencen hoy</dt><dd class="cifra aviso">' + deHoy.length + '</dd></div>' +
-        '<div><dt>Próximos ' + aviso + '</dt><dd class="cifra bien">' + semana.length + '</dd></div>' +
-        '<div><dt>Libres</dt><dd class="cifra">' + libres + '</dd></div>' +
-        '<div><dt>Gastado</dt><dd class="cifra">' + esc(dinero(gastadoMes)) + '</dd></div>' +
-      '</dl>' +
+    /* ---- Lo que se hace a diario, de primeras ---- */
+    '<div class="acciones-rapidas">' +
+      '<button class="btn principal" data-nuevo-cliente="1">' + ICONO.mascliente + 'Nuevo cliente</button>' +
+      '<button class="btn" data-nueva-cuenta="1">' + ICONO.tele + 'Nueva cuenta</button>' +
+      '<button class="btn" data-nuevo-gasto="1">' + ICONO.caja + 'Registrar gasto</button>' +
+      '<button class="btn bien" data-escribir-a="hoy-visible">' + ICONO.wa +
+        'Empezar la ronda<span class="btn-n">' + (conTel || cola.length) + '</span></button>' +
+      '<div class="crece"></div>' +
+      '<button class="btn fantasma" data-ir-clientes="1">' + ICONO.gente + 'Ver todos los clientes</button>' +
     '</div>' +
 
-    /* ---- Cuándo vence qué ---- */
-    (porCobrar.length || suyos.length ?
+    /* ---- Las cifras, cada una con su color y su icono ---- */
+    '<div class="azulejos">' +
+      azulejo('Por cobrar', esc(dinero(total)), 'aviso', ICONO.cobrar,
+        {pie: porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas'), ir:'fhoy-pendientes'}) +
+      azulejo('Vencidos', vencidos.length, 'mal', ICONO.alerta,
+        {pie: esc(dinero(vencidos.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-vencidos'}) +
+      azulejo('Vencen hoy', deHoy.length, 'aviso', ICONO.reloj,
+        {pie: esc(dinero(deHoy.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-hoy'}) +
+      azulejo('Próximos ' + aviso + ' días', semana.length, 'bien', ICONO.calendario,
+        {pie: esc(dinero(semana.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-semana'}) +
+      azulejo('Cobrado en ' + esc(NOMBREMES[Number(mes.slice(5,7))-1]), esc(dinero(cobradoMes)), 'bien', ICONO.subir,
+        {pie: ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') +
+              (meta > 0 ? ' · ' + Math.round(pct) + '% de la meta' : '')}) +
+      azulejo('Gastado', esc(dinero(gastadoMes)), 'mal', ICONO.caja,
+        {pie:'este mes'}) +
+      azulejo('Perfiles libres', libres, 'info', ICONO.capas,
+        {pie: susCuentas.length + ' ' + plural(susCuentas.length,'cuenta','cuentas'), ir:'ir-cuentas'}) +
+      azulejo('Clientes', suyos.length, '', ICONO.gente,
+        {pie: esc(dinero(suyos.reduce(function(a,c){ return a + cobroDe(c); }, 0))) + ' al ciclo', ir:'ir-clientes'}) +
+    '</div>' +
+
+    /* ---- La meta, si la has puesto ---- */
+    (meta > 0 ?
       '<div class="tarjeta">' +
         '<div class="tarjeta-cabeza">' +
-          '<span class="cabeza-icono azul">' + ICONO.reloj + '</span>' +
-          '<div class="crece"><h2>Lo que viene</h2>' +
-            '<p>Cuántos vencen cada día y cuánto suman.</p></div>' +
+          '<span class="cabeza-icono verde">' + ICONO.diana + '</span>' +
+          '<div class="crece"><h2>Meta de ' + esc(NOMBREMES[Number(mes.slice(5,7))-1]) + '</h2>' +
+            '<p>' + (cobradoMes >= meta
+              ? '¡Cumplida! Has pasado de ' + esc(dinero(meta)) + '.'
+              : 'Te faltan ' + esc(dinero(meta - cobradoMes)) + ' para llegar a ' + esc(dinero(meta)) + '.') +
+            '</p></div>' +
+          '<span class="insignia ' + (cobradoMes>=meta?'bien':pct>=70?'aviso':'') + '">' + Math.round(pct) + '%</span>' +
         '</div>' +
-        '<div class="tarjeta-cuerpo">' + calendarioProximos(suyos, 10) + '</div>' +
+        '<div class="tarjeta-cuerpo">' +
+          '<div class="meta-barra ' + (cobradoMes>=meta?'llena':'') + '">' +
+            '<i style="width:' + Math.min(100, Math.round(pct)) + '%"></i></div>' +
+        '</div>' +
       '</div>' : '') +
 
-    /* ---- Qué plataforma aprieta ---- */
-    (porCobrar.length && plataformaActiva === 'TODAS' ?
+    /* ---- El calendario del mes y lo que viene, lado a lado ---- */
+    '<div class="rejilla dos-tercios">' +
+      '<div class="tarjeta">' +
+        '<div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono azul">' + ICONO.calendario + '</span>' +
+          '<div class="crece"><h2>Calendario de cobros</h2>' +
+            '<p>Toca un día para ver quién cobra ese día.</p></div>' +
+          (mesCalendario !== hoyISO().slice(0,7)
+            ? '<button class="btn mini fantasma" data-calmes="' + hoyISO().slice(0,7) + '">Hoy</button>' : '') +
+        '</div>' +
+        '<div class="tarjeta-cuerpo">' + calendarioCobros(suyos) + '</div>' +
+      '</div>' +
       '<div class="tarjeta">' +
         '<div class="tarjeta-cabeza">' +
           '<span class="cabeza-icono rosa">' + ICONO.tele + '</span>' +
           '<div class="crece"><h2>Qué plataforma aprieta</h2>' +
-            '<p>De la que más dinero tiene pendiente a la que menos.</p></div>' +
+            '<p>De la que más debe a la que menos.</p></div>' +
         '</div>' +
-        '<div class="tarjeta-cuerpo">' + rankingCobro(porCobrar) + '</div>' +
-      '</div>' : '') +
+        '<div class="tarjeta-cuerpo">' +
+          (porCobrar.length ? rankingCobro(porCobrar)
+            : vacio('Nadie debe', 'Todo al día por aquí.')) + '</div>' +
+      '</div>' +
+    '</div>' +
 
     /* ---- La cola de trabajo: tabla apretada, no tarjetas ---- */
     '<div class="tarjeta">' +
@@ -4966,7 +5248,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -5141,9 +5423,29 @@ document.addEventListener('click', function(ev){
     pintar(); return;
   }
   if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
+  /* Los azulejos llevan a su grupo de la cola de abajo. */
+  if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana){
+    filtroHoy = d.fhoyPendientes ? 'pendientes' : d.fhoyVencidos ? 'vencidos'
+              : d.fhoyHoy ? 'hoy' : 'semana';
+    pintar();
+    const t = $('#p-hoy .tabla'); if(t) t.scrollIntoView({block:'center', behavior:'smooth'});
+    return;
+  }
   if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
   if(d.irCuentas){ ir('cuentas'); return; }
   if(d.irClientes){ ir('clientes'); return; }
+  if(d.nuevoCliente){ formCliente(null); return; }
+  if(d.nuevaCuenta){ formMaster(null); return; }
+  if(d.nuevoGasto){ formGasto(); return; }
+  if(d.calmes){ mesCalendario = d.calmes; pintar(); return; }
+  if(d.dia){
+    /* Un día del calendario: se buscan los que vencen ese día. */
+    const gente = clientes.filter(enPlataformaActiva)
+      .filter(function(c){ return String(c.vencimiento||'') === d.dia; });
+    if(!gente.length){ avisar('Nadie cobra el ' + fechaBonita(d.dia)); return; }
+    verDia(d.dia, gente);
+    return;
+  }
 });
 
 /* Los desplegables y botones propios de cada pantalla. */
