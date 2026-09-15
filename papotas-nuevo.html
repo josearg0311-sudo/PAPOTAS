@@ -45,9 +45,19 @@
   --bien:#34d399;     --bien-fondo:rgba(52,211,153,.11); --bien-linea:rgba(52,211,153,.26);
   --info:#60a5fa;     --info-fondo:rgba(96,165,250,.11); --info-linea:rgba(96,165,250,.26);
 
-  --r-s:8px; --r:11px; --r-l:15px; --r-xl:20px;
-  --e1:4px; --e2:8px; --e3:12px; --e4:16px; --e5:24px; --e6:32px;
-  --rail:76px;
+  --r-s:8px; --r:11px; --r-l:16px; --r-xl:22px;
+  --e1:4px; --e2:8px; --e3:12px; --e4:16px; --e5:24px; --e6:32px; --e7:44px;
+  --rail:88px;
+
+  /* Profundidad. Hasta ahora todo era plano con una línea de 1px, y por eso
+     nada destacaba sobre nada: las tarjetas, las filas y los títulos pesaban
+     igual. Tres niveles de relieve y un brillo arriba dan volumen sin
+     ensuciar. */
+  --brillo:inset 0 1px 0 rgba(255,255,255,.045);
+  --sombra-1:0 1px 2px rgba(0,0,0,.28);
+  --sombra-2:0 4px 14px -6px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.3);
+  --sombra-3:0 18px 44px -22px rgba(0,0,0,.75), 0 2px 8px rgba(0,0,0,.28);
+  --velo:linear-gradient(180deg, rgba(255,255,255,.028), rgba(255,255,255,0) 62%);
   --curva:cubic-bezier(.32,.72,0,1);
   --rapido:140ms; --medio:220ms;
   --fuente:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
@@ -55,7 +65,12 @@
 }
 
 html[data-tema="claro"]{
-  --fondo:#f6f7f9;
+  --brillo:inset 0 1px 0 rgba(255,255,255,.9);
+  --sombra-1:0 1px 2px rgba(15,23,42,.06);
+  --sombra-2:0 4px 14px -6px rgba(15,23,42,.14), 0 1px 3px rgba(15,23,42,.06);
+  --sombra-3:0 18px 44px -22px rgba(15,23,42,.24), 0 2px 8px rgba(15,23,42,.08);
+  --velo:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0) 62%);
+  --fondo:#f2f4f7;
   --capa:#ffffff;
   --capa-alta:#f1f3f6;
   --linea:rgba(15,23,42,.09);
@@ -105,28 +120,37 @@ a{color:inherit}
   width:var(--rail); flex:0 0 var(--rail);
   background:var(--capa); border-right:1px solid var(--linea);
   display:flex; flex-direction:column; align-items:center;
-  padding:var(--e4) 0 var(--e3); gap:var(--e1); z-index:20;
+  padding:var(--e5) 0 var(--e4); gap:2px; z-index:20;
+  box-shadow:1px 0 0 rgba(0,0,0,.2);
 }
 #marca{
-  width:38px;height:38px;border-radius:11px;
-  background:var(--marca); color:#fff;
+  width:46px;height:46px;border-radius:14px;
+  background:linear-gradient(145deg, var(--marca-alta), var(--marca));
+  color:#fff;
   display:grid;place-items:center;
-  font-weight:700;font-size:17px;letter-spacing:-.04em;
-  margin-bottom:var(--e4); flex:0 0 auto;
+  font-weight:800;font-size:21px;letter-spacing:-.05em;
+  margin-bottom:var(--e5); flex:0 0 auto;
+  box-shadow:0 6px 18px -6px rgba(225,29,72,.6), var(--brillo);
 }
 .nav-btn{
-  width:56px;padding:9px 0 7px;border-radius:var(--r);
-  display:flex;flex-direction:column;align-items:center;gap:5px;
+  width:68px;padding:11px 0 9px;border-radius:14px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
   color:var(--txt-3); position:relative;
   transition:color var(--rapido) var(--curva),background var(--rapido) var(--curva);
 }
-.nav-btn svg{width:20px;height:20px;stroke-width:1.75}
-.nav-btn span{font-size:10px;font-weight:600;letter-spacing:-.01em}
+.nav-btn svg{width:23px;height:23px;stroke-width:1.7}
+.nav-btn span{font-size:10.5px;font-weight:650;letter-spacing:-.005em}
 .nav-btn:hover{color:var(--txt);background:var(--capa-alta)}
-.nav-btn[aria-current="page"]{color:var(--txt);background:var(--capa-alta)}
+.nav-btn[aria-current="page"]{
+  color:var(--txt);
+  background:linear-gradient(180deg, var(--capa-alta), rgba(255,255,255,.02));
+  box-shadow:var(--brillo), var(--sombra-1);
+}
 .nav-btn[aria-current="page"]::before{
-  content:"";position:absolute;left:-10px;top:50%;transform:translateY(-50%);
-  width:3px;height:20px;border-radius:0 3px 3px 0;background:var(--marca);
+  content:"";position:absolute;left:-16px;top:50%;transform:translateY(-50%);
+  width:4px;height:26px;border-radius:0 4px 4px 0;
+  background:var(--marca);
+  box-shadow:0 0 14px 1px rgba(225,29,72,.55);
 }
 .nav-punto{
   position:absolute;top:6px;right:10px;min-width:16px;height:16px;padding:0 4px;
@@ -151,17 +175,31 @@ a{color:inherit}
 #principal{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
 
 #cabecera{
-  flex:0 0 auto; background:var(--fondo);
+  flex:0 0 auto;
+  background:linear-gradient(180deg, var(--capa) 0%, var(--fondo) 100%);
   border-bottom:1px solid var(--linea);
-  padding:var(--e4) var(--e5) var(--e3);
-  display:flex;align-items:center;gap:var(--e3);
+  padding:var(--e5) var(--e6) var(--e4);
+  display:flex;align-items:center;gap:var(--e4);
+  position:relative;
 }
-#titulo{font-size:19px;font-weight:700;letter-spacing:-.025em;margin:0}
-#subtitulo{font-size:12px;color:var(--txt-3);font-weight:500;margin:2px 0 0}
+/* Un filo de color bajo la cabecera: firma la pantalla sin gritar. */
+#cabecera::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;
+  background:linear-gradient(90deg, var(--marca) 0, transparent 38%);
+  opacity:.5;
+}
+#titulo{
+  font-size:29px;font-weight:700;letter-spacing:-.04em;margin:0;line-height:1.05;
+}
+#subtitulo{
+  font-size:12.5px;color:var(--txt-3);font-weight:550;margin:5px 0 0;
+  letter-spacing:.005em;
+}
 #cabecera .crece{flex:1;min-width:0}
 
-#lienzo{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:var(--e5)}
-.pagina{max-width:1180px;margin:0 auto;display:none}
+#lienzo{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:var(--e6)}
+@media (min-width:1500px){ #lienzo{padding:var(--e7) var(--e6)} }
+.pagina{max-width:1320px;margin:0 auto;display:none}
 .pagina.viva{display:block;animation:entra var(--medio) var(--curva)}
 @keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){
@@ -177,6 +215,13 @@ a{color:inherit}
   z-index:30;
 }
 #barra .nav-btn{flex:1;width:auto;min-height:50px}
+/* En el carril el acento es una barrita a la izquierda; abajo, en el
+   teléfono, tiene que cruzar por arriba del botón o se ve como un borrón
+   rojo colgando entre dos iconos. */
+#barra .nav-btn[aria-current="page"]::before{
+  left:50%;top:0;bottom:auto;transform:translateX(-50%);
+  width:24px;height:3px;border-radius:0 0 3px 3px;
+}
 
 /* ===== PIEZAS =========================================================== */
 
@@ -234,36 +279,101 @@ input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marc
 /* Tarjeta ---------------------------------------------------------------- */
 .tarjeta{
   background:var(--capa);border:1px solid var(--linea);border-radius:var(--r-l);
-  overflow:hidden;
+  /* clip y no hidden: hidden convierte la tarjeta en su propio contenedor de
+     scroll y los separadores pegajosos se quedan pegados fuera de la vista. */
+  overflow:clip;position:relative;
+  box-shadow:var(--brillo), var(--sombra-2);
 }
+/* Un velo claro arriba: da volumen sin cambiar el color de la tarjeta. */
+.tarjeta::before{
+  content:"";position:absolute;inset:0 0 auto;height:96px;
+  background:var(--velo);pointer-events:none;
+}
+.tarjeta > *{position:relative}
 .tarjeta-cabeza{
   display:flex;align-items:center;gap:var(--e3);
-  padding:var(--e4) var(--e4) var(--e3);
+  padding:var(--e5) var(--e5) var(--e4);
 }
-.tarjeta-cabeza h2{font-size:14px;font-weight:650;letter-spacing:-.015em;margin:0}
-.tarjeta-cabeza p{font-size:12px;color:var(--txt-3);margin:1px 0 0;font-weight:500}
-.tarjeta-cuerpo{padding:0 var(--e4) var(--e4)}
+.tarjeta-cabeza h2{
+  font-size:17px;font-weight:700;letter-spacing:-.028em;margin:0;line-height:1.15;
+}
+.tarjeta-cabeza p{font-size:12.5px;color:var(--txt-3);margin:3px 0 0;font-weight:500}
+.tarjeta-cuerpo{padding:0 var(--e5) var(--e5)}
 .tarjeta-cuerpo.pegado{padding:0}
 
 /* Rejillas --------------------------------------------------------------- */
-.rejilla{display:grid;gap:var(--e3)}
+.rejilla{display:grid;gap:var(--e4)}
+@media (min-width:1280px){ .rejilla{gap:var(--e5)} }
 .r2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .r3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .r4{grid-template-columns:repeat(4,minmax(0,1fr))}
-.pila{display:flex;flex-direction:column;gap:var(--e4)}
+/* Cinco huecos: la cifra que manda ocupa dos y las otras tres uno cada una. */
+.r5{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:1100px){ .r5{grid-template-columns:repeat(3,minmax(0,1fr))} .r5 .metrica.mayor{grid-column:1 / -1} }
+/* En el teléfono las tres cifras pequeñas no entran como tarjetas sin dejar
+   un hueco suelto al final. Se leen mejor como un renglón cada una:
+   nombre a la izquierda, cifra a la derecha. */
+@media (max-width:640px){
+  .r5{grid-template-columns:1fr;gap:var(--e2)}
+  .r5 > .metrica:not(.mayor){
+    flex-direction:row;align-items:baseline;gap:10px;
+    padding:11px var(--e4);
+  }
+  .r5 > .metrica:not(.mayor)::before{display:none}
+  .r5 > .metrica:not(.mayor) .k{flex:1;min-width:0;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  .r5 > .metrica:not(.mayor) .v{font-size:19px;flex:0 0 auto}
+  .r5 > .metrica:not(.mayor) .n{font-size:11px;flex:0 0 auto;
+    max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .r5 > .metrica.mayor{margin-bottom:var(--e2)}
+}
+.pila{display:flex;flex-direction:column;gap:var(--e5)}
+@media (min-width:1280px){ .pila{gap:var(--e6)} }
 .fila{display:flex;align-items:center;gap:var(--e2);flex-wrap:wrap}
 .crece{flex:1;min-width:0}
 
 /* Cifras grandes --------------------------------------------------------- */
 .metrica{
   background:var(--capa);border:1px solid var(--linea);border-radius:var(--r-l);
-  padding:var(--e4);display:flex;flex-direction:column;gap:3px;min-width:0;
-  transition:border-color var(--rapido) var(--curva);
+  padding:var(--e5);display:flex;flex-direction:column;gap:4px;min-width:0;
+  position:relative;overflow:hidden;
+  box-shadow:var(--brillo), var(--sombra-1);
+  transition:border-color var(--rapido) var(--curva), transform var(--rapido) var(--curva),
+             box-shadow var(--rapido) var(--curva);
 }
-.metrica:hover{border-color:var(--linea-fuerte)}
-.metrica .k{font-size:11px;font-weight:600;color:var(--txt-3);letter-spacing:.015em;text-transform:uppercase}
-.metrica .v{font-size:25px;font-weight:700;letter-spacing:-.035em;line-height:1.15}
-.metrica .n{font-size:11.5px;color:var(--txt-4);font-weight:500}
+.metrica::before{
+  content:"";position:absolute;inset:0 0 auto;height:70px;
+  background:var(--velo);pointer-events:none;
+}
+.metrica > *{position:relative}
+.metrica:hover{border-color:var(--linea-fuerte);box-shadow:var(--brillo), var(--sombra-2)}
+.metrica .k{
+  font-size:10.5px;font-weight:700;color:var(--txt-3);
+  letter-spacing:.09em;text-transform:uppercase;
+}
+.metrica .v{font-size:30px;font-weight:700;letter-spacing:-.045em;line-height:1.08}
+.metrica .n{font-size:12px;color:var(--txt-4);font-weight:500}
+
+/* La métrica que manda: ocupa el doble y lleva el acento. Sin un punto
+   focal, cuatro cajas iguales no dicen cuál importa. */
+.metrica.mayor{
+  grid-column:span 2;
+  background:linear-gradient(135deg, var(--capa-alta), var(--capa) 62%);
+  border-color:var(--linea-fuerte);
+  box-shadow:var(--brillo), var(--sombra-2);
+}
+.metrica.mayor::after{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg, var(--marca-alta), var(--marca));
+}
+.metrica.mayor .v{font-size:44px;letter-spacing:-.05em}
+.metrica.mayor .k{color:var(--txt-2)}
+@media (max-width:860px){
+  .metrica{padding:var(--e4)}
+  .metrica .v{font-size:23px}
+  .metrica.mayor{grid-column:1 / -1}
+  .metrica.mayor .v{font-size:36px}
+}
 .metrica.mal .v{color:var(--mal)}
 .metrica.aviso .v{color:var(--aviso)}
 .metrica.bien .v{color:var(--bien)}
@@ -380,6 +490,20 @@ button.metrica:hover{background:var(--capa-alta)}
 .barra.llena i{background:var(--mal)}
 .barra.casi i{background:var(--aviso)}
 
+/* Casillas de perfil: una casilla por perfil, llenas las que están usadas.
+   Una raya continua debajo del correo parecía un subrayado roto; así se
+   cuentan los sitios de un vistazo, que es lo que de verdad se mira. */
+.casillas{display:flex;gap:3px;margin-top:7px;align-items:center}
+.casillas i{
+  display:block;width:13px;height:5px;border-radius:2px;
+  background:var(--linea-fuerte);flex:0 0 auto;
+}
+.casillas i.usado{background:var(--info)}
+.casillas.llena i.usado{background:var(--mal)}
+.casillas.casi i.usado{background:var(--aviso)}
+.casillas.llena i:not(.usado), .casillas.casi i:not(.usado){background:var(--linea-fuerte)}
+.casillas small{font-size:10.5px;font-weight:700;color:var(--txt-4);margin-left:4px;white-space:nowrap}
+
 /* Los doce meses ---------------------------------------------------------- */
 .meses{
   display:grid;grid-template-columns:repeat(12,minmax(0,1fr));
@@ -401,18 +525,18 @@ button.metrica:hover{background:var(--capa-alta)}
 .mes-barras{
   position:relative;
   display:flex;align-items:flex-end;justify-content:center;gap:3px;
-  width:100%;height:78px;
-  border-bottom:1px solid var(--linea);
+  width:100%;height:104px;
+  border-bottom:1px solid var(--linea-fuerte);
 }
 .mes-barras::before{
   content:"";position:absolute;left:50%;transform:translateX(-50%);
-  bottom:0;width:19px;height:100%;border-radius:4px 4px 0 0;
+  bottom:0;width:30px;height:100%;border-radius:6px 6px 0 0;
   background:linear-gradient(180deg, transparent, var(--linea));
   opacity:.5;
 }
 .mes-barras i{
   position:relative;z-index:1;
-  display:block;width:8px;min-height:0;border-radius:3px 3px 0 0;
+  display:block;width:12px;min-height:0;border-radius:4px 4px 0 0;
   transition:height var(--medio) var(--curva);
 }
 .mes-barras .ent{background:var(--bien)}
@@ -424,8 +548,9 @@ button.metrica:hover{background:var(--capa-alta)}
 .mes.vivo .mes-txt{color:var(--txt)}
 @media (max-width:640px){
   .meses{gap:3px}
-  .mes-barras{height:58px}
+  .mes-barras{height:64px}
   .mes-barras i{width:6px}
+  .mes-barras::before{width:16px}
   .mes-txt{font-size:8.5px;letter-spacing:0}
 }
 
@@ -436,6 +561,7 @@ button.metrica:hover{background:var(--capa-alta)}
   font-size:11.5px;font-weight:700;letter-spacing:.01em;color:var(--txt-2);
   position:sticky;top:0;z-index:3;
   border-bottom:1px solid var(--linea);
+  box-shadow:0 1px 0 var(--linea), 0 10px 16px -14px rgba(0,0,0,.75);
 }
 .tramo b{font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:11px}
 .tramo.mal{color:var(--mal)} .tramo.aviso{color:var(--aviso)} .tramo.bien{color:var(--bien)}
@@ -489,6 +615,13 @@ button.metrica:hover{background:var(--capa-alta)}
   .fila-controles > .crece{ display:none }
   .fila-controles select{ flex:1 1 calc(50% - 4px) }
   .fila-controles .btn{ flex:1 1 100%;order:3 }
+}
+
+/* En pantalla ancha las plataformas caben en dos renglones: mejor verlas
+   todas que dejar una cortada a medias en el borde. */
+@media (min-width:1100px){
+  .plataformas{ flex-wrap:wrap; overflow-x:visible }
+  .plataformas .plat{ flex:1 1 auto; min-width:190px }
 }
 
 /* Aviso de que la fila sigue hacia el lado ------------------------------- */
@@ -546,7 +679,7 @@ button.metrica:hover{background:var(--capa-alta)}
   text-transform:uppercase;letter-spacing:.03em;
 }
 .resumen-plat dd{margin:2px 0 0;font-size:16px;font-weight:700;letter-spacing:-.025em}
-.resumen-plat .barra{margin-top:6px}
+.resumen-plat .barra{margin-top:7px;max-width:118px;height:4px}
 
 /* Vacío ------------------------------------------------------------------ */
 .vacio{
@@ -712,7 +845,12 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   #cabecera > .crece{display:none}
   #titulo{font-size:17px}
   #subtitulo{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #btn-accion{order:3}
+  /* En el teléfono el botón de acción va arriba, junto al título, que es
+     donde se busca con el pulgar; el buscador se lleva su propio renglón. */
+  #btn-accion{order:1;flex:0 0 auto}
+  #btn-accion #btn-accion-txt{max-width:36vw;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap}
+  #btn-viejo-movil{order:2;flex:0 0 auto}
   .buscador{flex:1 1 100%;order:4}
   #lienzo{padding:var(--e4) var(--e3)}
   .r4{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -775,7 +913,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.4</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.5</span>
     </div>
   </nav>
 
@@ -1807,7 +1945,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.4';
+const VERSION = 'v2.5';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -2065,7 +2203,7 @@ function filaMaster(m, eco){
       '<span class="f-txt">' +
         '<span class="f-nom">' + esc(nombreCuenta(m)) + '</span>' +
         '<span class="f-sub">' + esc(m.correo || 'Sin correo') + '</span>' +
-        '<span class="barra ' + clasebarra + '" style="margin-top:6px;max-width:210px"><i style="width:' + pct + '%"></i></span>' +
+        casillasPerfiles(usados, tope, clasebarra) +
       '</span>' +
       '<span class="f-der">' +
         '<span class="insignia ' + (libres===0?'mal':libres<=1?'aviso':'info') + '">' + usados + '/' + tope + (libres ? ' · ' + libres + ' ' + plural(libres,'libre','libres') : ' · llena') + '</span>' +
@@ -2077,6 +2215,20 @@ function filaMaster(m, eco){
       '<div class="cajon-dentro">' + (abierto ? cajonMaster(m, r) : '') + '</div>' +
     '</div></div>' +
   '</div>';
+}
+
+/* Hasta doce casillas se cuentan de un vistazo; por encima de eso una raya
+   con el número dice más que veinte cuadraditos. */
+function casillasPerfiles(usados, tope, clase){
+  if(!tope) return '';
+  if(tope > 12){
+    const pct = Math.round(usados/tope*100);
+    return '<span class="barra ' + clase + '" style="margin-top:7px;max-width:200px">' +
+           '<i style="width:' + pct + '%"></i></span>';
+  }
+  let h = '<span class="casillas ' + clase + '">';
+  for(let i=1;i<=tope;i++) h += '<i' + (i<=usados ? ' class="usado"' : '') + '></i>';
+  return h + '<small>' + usados + '/' + tope + '</small></span>';
 }
 
 function cajonMaster(m, r){
@@ -2185,11 +2337,12 @@ function pintaHoy(){
   $('#p-hoy').innerHTML =
   '<div class="pila">' +
 
-    '<div class="rejilla r4">' +
-      '<button class="metrica ' + (total>0?'aviso':'bien') + '" data-fhoy="pendientes">' +
+    '<div class="rejilla r5">' +
+      '<button class="metrica mayor ' + (total>0?'aviso':'bien') + '" data-fhoy="pendientes">' +
         '<span class="k">Por cobrar</span>' +
         '<span class="v cifra">' + esc(dinero(total)) + '</span>' +
-        '<span class="n">' + porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas') + '</span></button>' +
+        '<span class="n">' + porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas') +
+          (vencidos.length ? ' · ' + vencidos.length + ' ya vencieron' : '') + '</span></button>' +
       '<button class="metrica ' + (vencidos.length?'mal':'') + '" data-fhoy="vencidos">' +
         '<span class="k">Vencidos</span>' +
         '<span class="v cifra">' + vencidos.length + '</span>' +
@@ -2321,6 +2474,30 @@ function pintaClientes(){
           '<span class="tramo-monto cifra">' + esc(dinero(suma)) + '</span>' +
         '</div>' + g.map(filaCliente).join('');
     }).join('');
+  }else if(ordenClientes === 'vencimiento'){
+    /* Por vencimiento, la lista se parte por urgencia igual que en «Hoy».
+       Ciento dos filas seguidas, todas iguales, no dicen dónde empieza lo
+       que corre prisa; con los tramos se ve de un golpe. */
+    const cajones = {vencido:[], por_vencer:[], activo:[], sin_fecha:[]};
+    lista.forEach(function(c){ cajones[estadoDe(c)].push(c); });
+    const aviso = Number(ajustes.diasAlerta||5);
+    const tramosCli = [
+      ['vencido',    'Vencidos',                  'mal'],
+      ['por_vencer', 'Vencen en ' + aviso + ' días o menos', 'aviso'],
+      ['activo',     'Al día',                    'bien'],
+      ['sin_fecha',  'Sin fecha de vencimiento',  '']
+    ].filter(function(t){ return cajones[t[0]].length; });
+    const partido = tramosCli.length > 1;
+    cuerpo = tramosCli.map(function(t){
+      const g = cajones[t[0]];
+      const suma = g.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+      return (partido ?
+        '<div class="tramo ' + t[2] + '"><span class="punto"></span>' +
+          '<b>' + esc(t[1]) + '</b>' +
+          '<span class="tramo-n">' + g.length + '</span>' +
+          '<span class="tramo-monto cifra">' + esc(dinero(suma)) + '</span>' +
+        '</div>' : '') + g.map(filaCliente).join('');
+    }).join('');
   }else{
     cuerpo = lista.map(filaCliente).join('');
   }
@@ -2432,11 +2609,13 @@ function pintaCuentas(){
   $('#p-cuentas').innerHTML =
   '<div class="pila">' +
 
-    '<div class="rejilla r4">' +
+    '<div class="rejilla r5">' +
+      '<div class="metrica mayor ' + (libres?'info':'mal') + '"><span class="k">Perfiles libres</span>' +
+        '<span class="v cifra">' + libres + '</span>' +
+        '<span class="n">de ' + tope + ' · ' + (tope-libres) + ' ocupados' +
+          (libres ? ' · sitio para ' + libres + ' ' + plural(libres,'cliente más','clientes más') : ' · todo lleno') + '</span></div>' +
       '<div class="metrica"><span class="k">Plataformas</span><span class="v cifra">' + nombres.length + '</span>' +
         '<span class="n">' + servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + '</span></div>' +
-      '<div class="metrica ' + (libres?'info':'mal') + '"><span class="k">Perfiles libres</span>' +
-        '<span class="v cifra">' + libres + '</span><span class="n">de ' + tope + '</span></div>' +
       '<div class="metrica"><span class="k">Te cuestan</span><span class="v cifra">' + esc(dinero(costo)) + '</span>' +
         '<span class="n">al ciclo en total</span></div>' +
       '<div class="metrica ' + (cobra-costo>=0?'bien':'mal') + '"><span class="k">Te dejan</span>' +
@@ -2554,9 +2733,10 @@ function pintaDinero(){
       '<div class="crece"></div>' +
     '</div>' +
 
-    '<div class="rejilla r4">' +
-      '<div class="metrica bien"><span class="k">Cobrado</span><span class="v cifra">' + esc(dinero(cobrado)) + '</span>' +
-        '<span class="n">' + ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') + '</span></div>' +
+    '<div class="rejilla r5">' +
+      '<div class="metrica mayor bien"><span class="k">Cobrado</span><span class="v cifra">' + esc(dinero(cobrado)) + '</span>' +
+        '<span class="n">' + ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') +
+          ' · queda ' + esc(dinero(cobrado-gastado)) + ' limpio</span></div>' +
       '<div class="metrica mal"><span class="k">Gastado</span><span class="v cifra">' + esc(dinero(gastado)) + '</span>' +
         '<span class="n">' + gastosMes.length + ' ' + plural(gastosMes.length,'gasto','gastos') + '</span></div>' +
       '<div class="metrica ' + (cobrado-gastado>=0?'bien':'mal') + '"><span class="k">Queda limpio</span>' +
