@@ -624,6 +624,171 @@ button.metrica:hover{background:var(--capa-alta)}
   .plataformas .plat{ flex:1 1 auto; min-width:190px }
 }
 
+/* ===== MOSAICO DE PLATAFORMAS ==========================================
+   La plataforma es la unidad con la que se piensa el negocio, así que es la
+   unidad con la que se entra: un mosaico donde cada una lleva su color, su
+   logo, sus perfiles y lo que deja. Antes eran nueve pastillas grises en
+   fila, que no decían nada de un vistazo. */
+.mosaico{
+  display:grid;gap:var(--e4);
+  grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+}
+.ficha{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;overflow:hidden;text-align:left;
+  display:flex;flex-direction:column;gap:10px;
+  padding:var(--e4);border-radius:var(--r-xl);
+  border:1px solid var(--linea);background:var(--capa);
+  box-shadow:var(--brillo), var(--sombra-2);
+  transition:transform var(--rapido) var(--curva),
+             border-color var(--rapido) var(--curva),
+             box-shadow var(--rapido) var(--curva);
+}
+/* El color de la marca entra como un velo, no como un fondo: así el texto
+   sigue leyéndose igual de bien en claro y en oscuro. */
+.ficha::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(135% 105% at 0% 0%, var(--tono) 0%, transparent 62%);
+  opacity:.17;
+}
+html[data-tema="claro"] .ficha::after{opacity:.10}
+.ficha::before{
+  content:"";position:absolute;inset:0 0 auto;height:3px;z-index:2;
+  background:linear-gradient(90deg, var(--tono), transparent 85%);
+}
+/* La tapa cubre la ficha entera; el contenido no atrapa el clic salvo los
+   botones de mando, que van por encima de ella. */
+.ficha-tapa{
+  position:absolute;inset:0;z-index:1;border-radius:inherit;
+  background:transparent;border:0;cursor:pointer;
+}
+.ficha-tapa:focus-visible{outline:2px solid var(--marca);outline-offset:-3px}
+.ficha > *:not(.ficha-tapa){position:relative;z-index:2;pointer-events:none}
+.ficha > .ficha-mando, .ficha > .ficha-marcas{z-index:3;pointer-events:auto}
+.ficha-mando{
+  display:flex;gap:6px;align-items:center;
+  border-top:1px solid var(--linea);padding-top:10px;
+}
+.ficha-mando .crece{flex:1;min-width:0}
+/* «Entrar» se pinta del color de la plataforma: es su puerta, no la del
+   programa. El color del texto se calcula sobre el de la marca para que
+   siempre se lea (Spotify verde pide texto oscuro; Netflix rojo, claro). */
+.ficha-mando .btn.principal, .plat-hero .mando .btn.principal{
+  background:var(--tono-btn);border-color:var(--tono-btn);color:var(--tono-txt);
+  box-shadow:var(--brillo);
+}
+.ficha-mando .btn.principal:hover, .plat-hero .mando .btn.principal:hover{
+  filter:brightness(1.1);
+}
+.ficha:hover{transform:translateY(-2px);border-color:var(--tono-linea);box-shadow:var(--sombra-3)}
+.ficha:focus-within{border-color:var(--tono-linea)}
+.ficha.viva{border-color:var(--tono-linea);box-shadow:var(--brillo), var(--sombra-3)}
+
+.ficha-alto{display:flex;align-items:center;gap:10px;min-width:0}
+.ficha-id{min-width:0;flex:1}
+.ficha-id b{display:block;font-size:15px;font-weight:750;letter-spacing:-.025em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ficha-id small{display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;margin-top:1px}
+
+.ficha-perfiles{display:flex;align-items:center;gap:9px;min-width:0}
+.ficha-perfiles .barra{flex:1;min-width:60px}
+.ficha-perfiles > small{font-size:10.5px;font-weight:700;color:var(--txt-4);white-space:nowrap}
+.ficha-perfiles .casillas{margin-top:0;flex-wrap:wrap;gap:3px 3px}
+.ficha-alto .insignia{flex:0 0 auto}
+
+.ficha-pie{
+  display:flex;align-items:flex-end;gap:var(--e2);
+  border-top:1px solid var(--linea);padding-top:10px;margin-top:auto;
+}
+.ficha-pie + .ficha-mando{margin-top:0}
+.ficha-deja{flex:1;min-width:0}
+.ficha-deja b{display:block;font-size:19px;font-weight:750;letter-spacing:-.035em}
+.ficha-deja small{display:block;font-size:10.5px;color:var(--txt-4);font-weight:600;
+  text-transform:uppercase;letter-spacing:.07em}
+.ficha-nums{text-align:right;font-size:11px;color:var(--txt-3);font-weight:550;line-height:1.5}
+.ficha-nums i{display:block;font-style:normal;white-space:nowrap}
+.ficha-marcas{display:flex;gap:5px;flex-wrap:wrap;pointer-events:auto;z-index:3}
+/* Una insignia que además se pulsa: lleva a esos clientes. */
+.insignia.pulsable{cursor:pointer;min-height:28px;padding:0 10px}
+.insignia.pulsable:hover{filter:brightness(1.25)}
+.mosaico{grid-template-columns:repeat(auto-fill, minmax(262px, 1fr))}
+
+/* En el teléfono las plataformas van primero: son con lo que se trabaja.
+   Debajo de las cuatro cifras quedaban a dos pantallas de distancia. */
+@media (max-width:860px){
+  #p-cuentas .caja-plataformas{order:-1}
+}
+/* Y la ficha se aprieta: con nueve plataformas, una ficha por pantalla es
+   demasiado desplazamiento. El desglose de cobras y cuesta se guarda para
+   cuando se entra a la plataforma, que es donde hace falta. */
+@media (max-width:640px){
+  /* La explicación sobra en el teléfono: las fichas se explican solas y esa
+     línea empujaba la primera plataforma media pantalla hacia abajo. */
+  .caja-plataformas > .tarjeta-cabeza p{display:none}
+  .caja-plataformas > .tarjeta-cuerpo{padding:0 var(--e3) var(--e3)}
+  .ficha{padding:var(--e3);gap:8px;border-radius:var(--r-l)}
+  .ficha-id b{font-size:14px}
+  .ficha-pie{
+    display:flex;flex-direction:row;align-items:baseline;gap:8px;padding-top:8px;
+  }
+  .ficha-deja{display:flex;align-items:baseline;gap:8px;flex:1}
+  .ficha-deja small{margin:0}
+  .ficha-deja b{font-size:17px}
+  .ficha-nums{display:none}
+  .ficha-mando{padding-top:8px}
+}
+
+/* ===== CABECERA DE UNA PLATAFORMA =======================================
+   Cuando se entra a una, manda ella: su color, su logo grande y todo lo que
+   se puede hacer con ella, junto. */
+.plat-hero{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;overflow:hidden;border-radius:var(--r-xl);
+  border:1px solid var(--tono-linea);background:var(--capa);
+  padding:var(--e5);display:flex;flex-direction:column;gap:var(--e4);
+  box-shadow:var(--brillo), var(--sombra-2);
+}
+.plat-hero::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(90% 150% at 0% 0%, var(--tono) 0%, transparent 58%);
+  opacity:.19;
+}
+html[data-tema="claro"] .plat-hero::after{opacity:.11}
+.plat-hero::before{
+  content:"";position:absolute;inset:0 0 auto;height:4px;z-index:2;
+  background:linear-gradient(90deg, var(--tono), transparent 78%);
+}
+.plat-hero > *{position:relative;z-index:1}
+.plat-hero-alto{display:flex;align-items:center;gap:var(--e3);flex-wrap:wrap}
+.plat-hero-id{min-width:0;flex:1}
+.plat-hero-id h2{font-size:25px;font-weight:750;letter-spacing:-.04em;line-height:1.1}
+.plat-hero-id p{margin:3px 0 0;font-size:12.5px;color:var(--txt-3);font-weight:500}
+@media (max-width:640px){
+  .plat-hero{padding:var(--e4)}
+  .plat-hero-id h2{font-size:20px}
+  /* En el teléfono el «volver» va arriba del todo, como en cualquier app;
+     colgado debajo del nombre parecía un botón más de la plataforma. */
+  .plat-hero-alto > [data-plat="TODAS"]{order:-1;flex:1 1 100%;justify-content:flex-start}
+  .plat-hero .mando{flex-direction:column;align-items:stretch}
+  .plat-hero .mando .btn{width:100%}
+}
+
+/* La tarjeta de una plataforma dentro de la pila, con su color arriba. */
+.tarjeta.de-plat{--tono:var(--txt-4);--tono-linea:var(--linea-fuerte)}
+.tarjeta.de-plat::after{
+  content:"";position:absolute;inset:0 0 auto;height:3px;z-index:2;
+  background:linear-gradient(90deg, var(--tono), transparent 72%);
+}
+.tarjeta.de-plat > .tarjeta-cabeza{
+  background:linear-gradient(180deg, var(--tono-suave), transparent);
+}
+
+/* El separador de tramo también se tiñe cuando agrupa por plataforma. */
+.tramo.plat-tramo{--tono:var(--txt-4)}
+.tramo.plat-tramo::after{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tono);
+}
+
 /* Aviso de que la fila sigue hacia el lado ------------------------------- */
 .segmentos, .plataformas{ position:relative }
 .segmentos.desborda, .plataformas.desborda{
@@ -645,6 +810,20 @@ button.metrica:hover{background:var(--capa-alta)}
   padding:10px var(--e4);border-radius:var(--r-l);
   border:1px solid var(--marca-linea);background:var(--marca-suave);
 }
+/* Cuando el cartel habla de una plataforma, lleva el color de esa marca y
+   no el rojo del programa: así se sabe de quién se está hablando. */
+.cartel.de-plat{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;overflow:hidden;
+  border-color:var(--tono-linea);background:var(--capa);
+  padding:12px var(--e4);
+}
+.cartel.de-plat::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg, var(--tono), transparent 52%);opacity:.16;
+}
+html[data-tema="claro"] .cartel.de-plat::after{opacity:.10}
+.cartel.de-plat > *{position:relative;z-index:1}
 .cartel b{display:block;font-size:13px;font-weight:700;letter-spacing:-.015em}
 .cartel small{display:block;font-size:11.5px;color:var(--txt-3);font-weight:500}
 
@@ -825,6 +1004,9 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .nav-btn{ min-height:56px }
   .carril-mini{ width:44px; height:44px }
   .mes{ min-height:44px }
+  /* La insignia que se pulsa es un botón de verdad: en el teléfono tiene que
+     poder tocarse con el dedo, no solo verse. */
+  .insignia.pulsable{ min-height:44px; padding:0 13px; font-size:12px; border-radius:11px }
   /* Nada de efectos de "pasar el ratón" donde no hay ratón. */
   .btn:hover, .f:hover, .plat:hover, .mes:hover, .metrica:hover{ background:inherit }
   .btn:active{ transform:scale(.97) }
@@ -913,7 +1095,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.5</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.6</span>
     </div>
   </nav>
 
@@ -1386,6 +1568,30 @@ function logoPlataforma(nombre, tam){
          '</span>';
 }
 
+/* El color de la marca, rebajado, para teñir su ficha y su cabecera. Todo
+   lo que se pinta en pantalla sale de aquí, así que se limpia el color antes
+   de meterlo en un atributo de estilo. */
+function tinte(color, a){
+  const c = String(color||'').replace(/[^#a-zA-Z0-9(),.%\s-]/g, '').trim();
+  if(c.charAt(0) === '#'){
+    const h = c.length === 4 ? c[1]+c[1]+c[2]+c[2]+c[3]+c[3] : c.slice(1,7);
+    const n = parseInt(h, 16);
+    if(isNaN(n)) return 'transparent';
+    return 'rgba(' + ((n>>16)&255) + ',' + ((n>>8)&255) + ',' + (n&255) + ',' + a + ')';
+  }
+  const m = c.match(/hsl\(\s*([\d.]+)[,\s]+([\d.]+)%[,\s]+([\d.]+)%/);
+  if(m) return 'hsla(' + m[1] + ',' + m[2] + '%,' + m[3] + '%,' + a + ')';
+  return 'transparent';
+}
+/* Las variables de color que usa cada pieza teñida por su plataforma. */
+function tonoDe(nombre){
+  const c = String(colorPlataforma(nombre)).replace(/[^#a-zA-Z0-9(),.%\s-]/g, '');
+  const txt = botonDeMarca(c);
+  return '--tono:' + c + ';--tono-linea:' + tinte(c, .42) + ';--tono-suave:' + tinte(c, .13) +
+         ';--tono-btn:' + (txt ? c : 'var(--marca)') +
+         ';--tono-txt:' + (txt || '#fff');
+}
+
 /* ---------- A dónde lleva cada plataforma -------------------------------
    La dirección de inicio de sesión de cada una, la misma lista de 79 que ya
    trae tu programa de siempre. Si la plataforma no está aquí pero sí en la
@@ -1492,18 +1698,19 @@ function casaConocida(nombre){
   return !!buscarMarca(n);
 }
 
-/* Blanco o negro encima del color de la plataforma, lo que se lea mejor.
-   El amarillo de VIX dejaba la letra blanca casi invisible. */
-function textoSobre(color){
+/* El color de la marca en rojo, verde y azul, venga como venga escrito. */
+function aRGB(color){
   let r, g, b;
-  if(color.charAt(0) === '#'){
-    const h = color.length === 4
-      ? color.slice(1).split('').map(function(x){ return x+x; }).join('')
-      : color.slice(1);
+  const c = String(color||'');
+  if(c.charAt(0) === '#'){
+    const h = c.length === 4
+      ? c.slice(1).split('').map(function(x){ return x+x; }).join('')
+      : c.slice(1);
     r = parseInt(h.slice(0,2),16); g = parseInt(h.slice(2,4),16); b = parseInt(h.slice(4,6),16);
+    if(isNaN(r) || isNaN(g) || isNaN(b)) return null;
   }else{
-    const m = color.match(/hsl\(\s*([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%/);
-    if(!m) return '#fff';
+    const m = c.match(/hsl\(\s*([\d.]+),\s*([\d.]+)%,\s*([\d.]+)%/);
+    if(!m) return null;
     const H = +m[1]/360, S = +m[2]/100, L = +m[3]/100;
     const q = L < .5 ? L*(1+S) : L+S-L*S, pp = 2*L-q;
     const hue = function(t){
@@ -1515,9 +1722,36 @@ function textoSobre(color){
     };
     r = hue(H+1/3)*255; g = hue(H)*255; b = hue(H-1/3)*255;
   }
+  return [r, g, b];
+}
+/* Lo claro que es un color, en la escala que usan las normas de contraste. */
+function claridad(color){
+  const c = aRGB(color);
+  if(!c) return 0;
   const f = function(v){ v/=255; return v<=.03928 ? v/12.92 : Math.pow((v+.055)/1.055, 2.4); };
-  const L = .2126*f(r) + .7152*f(g) + .0722*f(b);
-  return L > .42 ? '#12161d' : '#fff';
+  return .2126*f(c[0]) + .7152*f(c[1]) + .0722*f(c[2]);
+}
+function contraste(a, b){
+  const x = claridad(a), y = claridad(b);
+  return (Math.max(x,y) + .05) / (Math.min(x,y) + .05);
+}
+
+/* Blanco o negro encima del color de la plataforma, lo que se lea mejor.
+   El amarillo de VIX dejaba la letra blanca casi invisible. */
+function textoSobre(color){
+  return claridad(color) > .42 ? '#12161d' : '#fff';
+}
+
+/* Para un botón entero pintado del color de la marca hace falta más que
+   "el que se lea mejor": hace falta que se lea bien de verdad. El blanco
+   sobre el verde de Spotify se queda en 2.6 a 1, que es ilegible. Si ni el
+   blanco ni el negro llegan a 4.5, el botón no se pinta de ese color y se
+   queda con el del programa. */
+function botonDeMarca(color){
+  const blanco = contraste(color, '#ffffff');
+  const negro  = contraste(color, '#101114');
+  if(Math.max(blanco, negro) < 4.5) return null;
+  return blanco >= negro ? '#ffffff' : '#101114';
 }
 function inicial(nombre){
   const n = String(nombre||'?').trim();
@@ -1945,12 +2179,13 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.5';
+const VERSION = 'v2.6';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
 
 const ICONO = {
+  volver:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
   ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
   x:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
   info:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>',
@@ -2466,7 +2701,7 @@ function pintaClientes(){
       const g = porPlat.get(k);
       const suma = g.reduce(function(a,c){ return a + cobroDe(c); }, 0);
       const deben = g.filter(function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; }).length;
-      return '<div class="tramo plat-tramo">' +
+      return '<div class="tramo plat-tramo" style="' + tonoDe(k) + '">' +
           logoPlataforma(k, 22) +
           '<b>' + esc(k) + '</b>' +
           '<span class="tramo-n">' + g.length + '</span>' +
@@ -2512,8 +2747,8 @@ function pintaClientes(){
   $('#p-clientes').innerHTML =
   '<div class="pila">' +
     (filtroPlatCli !== 'TODAS' ?
-      '<div class="cartel">' +
-        logoPlataforma(filtroPlatCli, 26) +
+      '<div class="cartel de-plat" style="' + tonoDe(filtroPlatCli) + '">' +
+        logoPlataforma(filtroPlatCli, 30) +
         '<span class="crece"><b>' + esc(filtroPlatCli) + '</b>' +
           '<small>Solo los clientes de esta plataforma</small></span>' +
         '<a class="btn mini" href="' + esc(casaDe(filtroPlatCli)) + '" target="_blank" rel="noopener">' +
@@ -2561,6 +2796,135 @@ function pintaClientes(){
 
 /* --- CUENTAS ------------------------------------------------------------ */
 let filtroPlataforma = 'TODAS';
+/* 'mosaico' entra por plataformas; 'lista' enseña todas las cuentas de un
+   tirón, como antes, para quien quiera verlo todo sin entrar a ninguna. */
+let vistaCuentas = 'mosaico';
+
+/* Las cuentas de la pantalla Dinero, agrupadas por plataforma y ordenadas
+   de la plataforma que más deja a la que menos. Devuelve una lista mezclada
+   de cabeceras y cuentas, para pintarla de un tirón. */
+function porPlataforma(lista){
+  const g = new Map();
+  lista.forEach(function(x){
+    const k = String(x.m.nombre||'Sin plataforma').trim().toUpperCase();
+    let b = g.get(k);
+    if(!b){ b = {nombre:k, filas:[], margen:0, clientes:0}; g.set(k, b); }
+    b.filas.push(x); b.margen += x.r.margen; b.clientes += x.r.clientes;
+  });
+  const orden = Array.from(g.values()).sort(function(a,b){ return b.margen - a.margen; });
+  const fuera = [];
+  orden.forEach(function(b){
+    fuera.push({cabeza:
+      '<div class="tramo plat-tramo" style="' + tonoDe(b.nombre) + '">' +
+        logoPlataforma(b.nombre, 22) +
+        '<b>' + esc(b.nombre) + '</b>' +
+        '<span class="tramo-n">' + b.filas.length + '</span>' +
+        '<span class="tramo-monto cifra" style="color:' + (b.margen>=0?'var(--bien)':'var(--mal)') + '">' +
+          (b.margen>=0?'+':'') + esc(dinero(b.margen)) + '</span>' +
+      '</div>'});
+    b.filas.forEach(function(x){ fuera.push(x); });
+  });
+  return fuera;
+}
+
+/* La ficha de una plataforma dentro del mosaico. */
+function fichaPlataforma(n, g){
+  const ocupados = g.tope - g.libres;
+  const pct = g.tope ? Math.round(ocupados/g.tope*100) : 0;
+  const deja = g.cobra - g.costo;
+  const deben = g.cuentas.reduce(function(a,m){
+    return a + clientesDe(m.id).filter(function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; }).length;
+  }, 0);
+  /* La ficha entera se pulsa para entrar, pero los botones de mando van
+     encima: entrar a la web, abrir una cuenta nueva, ver sus clientes y
+     escribirles no pueden quedar detrás de un clic. */
+  return '<div class="ficha' + (filtroPlataforma===n?' viva':'') + '" style="' + tonoDe(n) + '">' +
+    '<button class="ficha-tapa" data-plat="' + esc(n) + '" aria-label="Entrar a ' + esc(n) + ' en PAPOTAS"></button>' +
+    '<span class="ficha-alto">' +
+      logoPlataforma(n, 40) +
+      '<span class="ficha-id"><b>' + esc(n) + '</b>' +
+        '<small>' + g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') + ' · ' +
+          g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</small></span>' +
+    '</span>' +
+    '<span class="ficha-perfiles">' +
+      (g.tope > 12
+        ? '<span class="barra ' + (g.libres===0?'llena':g.libres<=1?'casi':'') + '"><i style="width:' + pct + '%"></i></span>' +
+          '<small>' + ocupados + '/' + g.tope + '</small>'
+        : casillasPerfiles(ocupados, g.tope, g.libres===0?'llena':g.libres<=1?'casi':'')) +
+    '</span>' +
+    '<span class="ficha-marcas">' +
+      (deben ? '<button class="insignia mal pulsable" data-cobrar-de="' + esc(n) + '"' +
+        ' title="Ver los ' + deben + ' de ' + esc(n) + ' a los que hay que cobrar">' +
+        deben + ' por cobrar</button>' : '') +
+      (g.vencidas ? '<span class="insignia aviso" title="' + g.vencidas +
+        ' cuenta(s) master con la renovación vencida">' + g.vencidas + ' ' +
+        plural(g.vencidas,'vencida','vencidas') + '</span>' : '') +
+      '<span class="insignia ' + (g.libres===0?'mal':g.libres<=1?'aviso':'bien') + '">' +
+        (g.libres ? g.libres + ' ' + plural(g.libres,'libre','libres') : 'sin sitio') + '</span>' +
+    '</span>' +
+    '<span class="ficha-pie">' +
+      '<span class="ficha-deja"><small>Te deja</small>' +
+        '<b class="cifra" style="color:' + (deja>=0?'var(--bien)':'var(--mal)') + '">' +
+          (deja>=0?'+':'') + esc(dinero(deja)) + '</b></span>' +
+      '<span class="ficha-nums"><i>cobras ' + esc(dinero(g.cobra)) + '</i>' +
+        '<i>cuesta ' + esc(dinero(g.costo)) + '</i></span>' +
+    '</span>' +
+    '<span class="ficha-mando">' +
+      '<a class="btn mini principal crece" href="' + esc(casaDe(n)) + '" target="_blank" rel="noopener"' +
+        ' title="' + esc(casaConocida(n) ? 'Entrar a la web de ' + n : 'Buscar ' + n + ' en internet') + '">' +
+        ICONO.salir + '<span class="et">Entrar</span></a>' +
+      '<button class="btn mini icono" data-nueva-en="' + esc(n) + '"' +
+        ' title="Nueva cuenta de ' + esc(n) + '" aria-label="Nueva cuenta de ' + esc(n) + '">' + ICONO.mas + '</button>' +
+      '<button class="btn mini icono" data-clientes-de="' + esc(n) + '"' +
+        ' title="Ver los ' + g.clientes + ' clientes de ' + esc(n) + '"' +
+        ' aria-label="Ver los ' + g.clientes + ' clientes de ' + esc(n) + '">' + ICONO.gente + '</button>' +
+      (deben ? '<button class="btn mini icono bien" data-escribir-a="' + esc(n) + '"' +
+        ' title="Escribir por WhatsApp a los ' + deben + ' de ' + esc(n) + ' que deben"' +
+        ' aria-label="Escribir por WhatsApp a los ' + deben + ' de ' + esc(n) + ' que deben">' + ICONO.wa + '</button>' : '') +
+    '</span>' +
+  '</div>';
+}
+
+/* La cabecera de la plataforma en la que se ha entrado: su color, todo lo
+   que se puede hacer con ella y sus números, sin tener que bajar. */
+function heroPlataforma(n, g){
+  const ocupados = g.tope - g.libres;
+  const pct = g.tope ? Math.round(ocupados/g.tope*100) : 0;
+  const deben = g.cuentas.reduce(function(a,m){
+    return a + clientesDe(m.id).filter(function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; }).length;
+  }, 0);
+  return '<div class="plat-hero" style="' + tonoDe(n) + '">' +
+    '<div class="plat-hero-alto">' +
+      logoPlataforma(n, 54) +
+      '<div class="plat-hero-id"><h2>' + esc(n) + '</h2>' +
+        '<p>' + g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') + ' · ' +
+          g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + ' · ' +
+          (g.libres ? g.libres + ' ' + plural(g.libres,'perfil libre','perfiles libres') : 'sin sitio libre') +
+        '</p></div>' +
+      (g.vencidas ? '<span class="insignia mal">' + g.vencidas + ' ' + plural(g.vencidas,'vencida','vencidas') + '</span>' : '') +
+      '<button class="btn mini fantasma" data-plat="TODAS">' + ICONO.volver +
+        '<span class="et">Todas las plataformas</span></button>' +
+    '</div>' +
+    '<div class="mando">' +
+      '<a class="btn mini principal" href="' + esc(casaDe(n)) + '" target="_blank" rel="noopener"' +
+        ' title="' + esc(casaConocida(n) ? 'Entrar a ' + n : 'Buscar ' + n + ' en internet') + '">' +
+        ICONO.salir + '<span class="et">Entrar a ' + esc(n) + '</span></a>' +
+      '<button class="btn mini" data-nueva-en="' + esc(n) + '">' + ICONO.mas + '<span class="et">Nueva cuenta aquí</span></button>' +
+      '<button class="btn mini" data-clientes-de="' + esc(n) + '">' + ICONO.gente + '<span class="et">' + g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</span></button>' +
+      (deben ? '<button class="btn mini peligro" data-cobrar-de="' + esc(n) + '">' + ICONO.cobrar + '<span class="et">' + deben + ' por cobrar</span></button>' : '') +
+      (deben ? '<button class="btn mini bien" data-escribir-a="' + esc(n) + '">' + ICONO.wa + '<span class="et">Escribirles</span></button>' : '') +
+    '</div>' +
+    '<div class="resumen-plat">' +
+      '<div><dt>Perfiles</dt><dd class="cifra">' + ocupados + '/' + g.tope + '</dd>' +
+        '<span class="barra ' + (g.libres===0?'llena':g.libres<=1?'casi':'') + '"><i style="width:' + pct + '%"></i></span></div>' +
+      '<div><dt>Te cuesta</dt><dd class="cifra">' + esc(dinero(g.costo)) + '</dd></div>' +
+      '<div><dt>Cobras</dt><dd class="cifra">' + esc(dinero(g.cobra)) + '</dd></div>' +
+      '<div><dt>Te deja</dt><dd class="cifra" style="color:' + (g.cobra-g.costo>=0?'var(--bien)':'var(--mal)') + '">' +
+        (g.cobra-g.costo>=0?'+':'') + esc(dinero(g.cobra-g.costo)) + '</dd></div>' +
+      '<div><dt>Por perfil</dt><dd class="cifra">' + esc(dinero(ocupados ? g.cobra/ocupados : 0)) + '</dd></div>' +
+    '</div>' +
+  '</div>';
+}
 
 function pintaCuentas(){
   const eco = economia();
@@ -2602,13 +2966,21 @@ function pintaCuentas(){
     });
   }
 
-  $('#subtitulo').textContent = nombres.length + ' ' + plural(nombres.length,'plataforma','plataformas') +
-    ' · ' + servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') +
-    ' · ' + (tope - libres) + '/' + tope + ' perfiles ocupados';
+  if(filtroPlataforma !== 'TODAS' && grupos[filtroPlataforma]){
+    const g = grupos[filtroPlataforma];
+    $('#subtitulo').textContent = filtroPlataforma + ' · ' +
+      g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') +
+      ' · ' + (g.tope - g.libres) + '/' + g.tope + ' perfiles ocupados';
+  }else{
+    $('#subtitulo').textContent = nombres.length + ' ' + plural(nombres.length,'plataforma','plataformas') +
+      ' · ' + servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') +
+      ' · ' + (tope - libres) + '/' + tope + ' perfiles ocupados';
+  }
 
   $('#p-cuentas').innerHTML =
   '<div class="pila">' +
 
+    (filtroPlataforma !== 'TODAS' ? '' :
     '<div class="rejilla r5">' +
       '<div class="metrica mayor ' + (libres?'info':'mal') + '"><span class="k">Perfiles libres</span>' +
         '<span class="v cifra">' + libres + '</span>' +
@@ -2621,74 +2993,59 @@ function pintaCuentas(){
       '<div class="metrica ' + (cobra-costo>=0?'bien':'mal') + '"><span class="k">Te dejan</span>' +
         '<span class="v cifra">' + esc(dinero(cobra-costo)) + '</span>' +
         '<span class="n">cobras ' + esc(dinero(cobra)) + '</span></div>' +
-    '</div>' +
+    '</div>') +
 
-    /* La barra de plataformas: cada una con su logo y sus perfiles libres. */
-    (nombres.length > 1 ?
-      '<div class="plataformas">' +
-        '<button class="plat' + (filtroPlataforma==='TODAS'?' viva':'') + '" data-plat="TODAS">' +
-          '<span class="plat-txt"><b>Todas</b><small>' + servicios.length + ' cuentas · ' + libres + ' ' + plural(libres,'libre','libres') + '</small></span>' +
-        '</button>' +
-        nombres.map(function(n){
-          const g = grupos[n];
-          return '<button class="plat' + (filtroPlataforma===n?' viva':'') + '" data-plat="' + esc(n) + '">' +
-            logoPlataforma(n, 26) +
-            '<span class="plat-txt"><b>' + esc(n) + '</b>' +
-              '<small>' + g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') + ' · ' +
-              (g.libres ? g.libres + ' ' + plural(g.libres,'libre','libres') : 'llena') + '</small></span>' +
-            (g.vencidas ? '<span class="plat-aviso" title="' + g.vencidas + ' vencida(s)">' + g.vencidas + '</span>' : '') +
-          '</button>';
-        }).join('') +
+    /* El mosaico: cada plataforma con su color, su logo, sus perfiles y lo
+       que deja. Es la puerta de entrada; se pulsa una y se entra a ella. */
+    (filtroPlataforma === 'TODAS' && !busqueda && nombres.length ?
+      '<div class="tarjeta caja-plataformas"><div class="tarjeta-cabeza">' +
+          '<div class="crece"><h2>Tus plataformas</h2>' +
+            '<p>' + (vistaCuentas === 'mosaico'
+              ? 'Pulsa una para entrar a ella y ver solo sus cuentas.'
+              : 'Todas tus cuentas seguidas, agrupadas por plataforma.') + '</p></div>' +
+          '<div class="segmentos">' +
+            [['mosaico','Plataformas'],['lista','Todas las cuentas']].map(function(v){
+              return '<button data-vista="' + v[0] + '" aria-selected="' +
+                     (vistaCuentas===v[0]?'true':'false') + '">' + v[1] + '</button>';
+            }).join('') +
+          '</div>' +
+        '</div>' +
+        (vistaCuentas === 'mosaico' ?
+          '<div class="tarjeta-cuerpo"><div class="mosaico">' +
+            nombres.map(function(n){ return fichaPlataforma(n, grupos[n]); }).join('') +
+          '</div></div>' : '') +
       '</div>' : '') +
 
-    (mostrar.length ? mostrar.map(function(n){
+    /* Dentro de una plataforma manda ella: su cabecera con su color. */
+    (filtroPlataforma !== 'TODAS' && grupos[filtroPlataforma] ?
+      heroPlataforma(filtroPlataforma, grupos[filtroPlataforma]) : '') +
+
+    ((filtroPlataforma !== 'TODAS' || busqueda || vistaCuentas === 'lista') && mostrar.length ? mostrar.map(function(n){
       const g = grupos[n];
       const lista = g.cuentas.slice().sort(function(a,b){ return (Number(a.numero)||0) - (Number(b.numero)||0); });
-      const ocupados = g.tope - g.libres;
-      const pct = g.tope ? Math.round(ocupados/g.tope*100) : 0;
-      const deben = g.cuentas.reduce(function(a,m){
-        return a + clientesDe(m.id).filter(function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; }).length;
-      }, 0);
-      return '<div class="tarjeta">' +
+      return '<div class="tarjeta de-plat" style="' + tonoDe(n) + '">' +
+        (filtroPlataforma !== 'TODAS' ? '' :
         '<div class="tarjeta-cabeza">' +
-          logoPlataforma(n, 38) +
+          logoPlataforma(n, 36) +
           '<div class="crece"><h2>' + esc(n) + '</h2>' +
             '<p>' + g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') + ' · ' +
-            g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</p></div>' +
+            g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + ' · ' +
+            esc(dinero(g.cobra - g.costo)) + ' al ciclo</p></div>' +
           (g.vencidas ? '<span class="insignia mal">' + g.vencidas + ' ' + plural(g.vencidas,'vencida','vencidas') + '</span>' : '') +
           '<span class="insignia ' + (g.libres===0?'mal':g.libres<=1?'aviso':'bien') + '">' +
             (g.libres ? g.libres + ' ' + plural(g.libres,'libre','libres') : 'sin sitio') + '</span>' +
-        '</div>' +
-
-        /* Lo que se hace con una plataforma, sin salir de aquí. */
-        '<div class="tarjeta-cuerpo" style="padding-bottom:0"><div class="mando">' +
-          '<a class="btn mini principal" href="' + esc(casaDe(n)) + '" target="_blank" rel="noopener"' +
-            ' title="' + esc(casaConocida(n) ? 'Entrar a ' + n : 'Buscar ' + n + ' en internet') + '">' +
-            ICONO.salir + '<span class="et">Entrar a ' + esc(n) + '</span></a>' +
-          '<button class="btn mini" data-nueva-en="' + esc(n) + '">' + ICONO.mas + '<span class="et">Nueva cuenta aquí</span></button>' +
-          '<button class="btn mini" data-clientes-de="' + esc(n) + '">' + ICONO.gente + '<span class="et">' + g.clientes + ' ' + plural(g.clientes,'cliente','clientes') + '</span></button>' +
-          (deben ? '<button class="btn mini peligro" data-cobrar-de="' + esc(n) + '">' + ICONO.cobrar + '<span class="et">' + deben + ' por cobrar</span></button>' : '') +
-          (deben ? '<button class="btn mini bien" data-escribir-a="' + esc(n) + '">' + ICONO.wa + '<span class="et">Escribirles</span></button>' : '') +
-        '</div></div>' +
-        '<div class="tarjeta-cuerpo" style="padding-bottom:var(--e3)">' +
-          '<div class="resumen-plat">' +
-            '<div><dt>Perfiles</dt><dd class="cifra">' + ocupados + '/' + g.tope + '</dd>' +
-              '<span class="barra ' + (g.libres===0?'llena':g.libres<=1?'casi':'') + '"><i style="width:' + pct + '%"></i></span></div>' +
-            '<div><dt>Te cuesta</dt><dd class="cifra">' + esc(dinero(g.costo)) + '</dd></div>' +
-            '<div><dt>Cobras</dt><dd class="cifra">' + esc(dinero(g.cobra)) + '</dd></div>' +
-            '<div><dt>Te deja</dt><dd class="cifra" style="color:' + (g.cobra-g.costo>=0?'var(--bien)':'var(--mal)') + '">' +
-              (g.cobra-g.costo>=0?'+':'') + esc(dinero(g.cobra-g.costo)) + '</dd></div>' +
-            '<div><dt>Por perfil</dt><dd class="cifra">' + esc(dinero(ocupados ? g.cobra/ocupados : 0)) + '</dd></div>' +
-          '</div>' +
-        '</div>' +
+          '<button class="btn mini fantasma" data-plat="' + esc(n) + '">' +
+            '<span class="et">Entrar</span>' + ICONO.flecha + '</button>' +
+        '</div>') +
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
           lista.map(function(m){ return filaMaster(m, eco); }).join('') +
         '</div></div></div>';
     }).join('') :
+     (nombres.length && !busqueda && vistaCuentas !== 'lista' ? '' :
       '<div class="tarjeta"><div class="tarjeta-cuerpo">' +
         vacio(busqueda ? 'Ninguna cuenta coincide' : 'Todavía no hay cuentas',
               busqueda ? 'Prueba con otra palabra.' : 'Pulsa «Nueva cuenta» para registrar tu primera cuenta master.') +
-      '</div></div>') +
+      '</div></div>')) +
   '</div>';
 }
 
@@ -2783,10 +3140,11 @@ function pintaDinero(){
 
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza"><div class="crece">' +
-        '<h2>Qué te deja cada cuenta</h2>' +
-        '<p>Lo que cobras al ciclo menos lo que te cuesta la cuenta.</p></div></div>' +
+        '<h2>Qué te deja cada plataforma</h2>' +
+        '<p>Lo que cobras al ciclo menos lo que te cuestan sus cuentas.</p></div></div>' +
       '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-        (porCuenta.length ? porCuenta.map(function(x){
+        (porCuenta.length ? porPlataforma(porCuenta).map(function(x){
+          if(x.cabeza) return x.cabeza;
           const ancho = Math.round(Math.abs(x.r.margen)/maxMargen*100);
           return '<div class="f ' + (x.r.margen>=0?'bien':'mal') + '" style="cursor:default">' +
             logoPlataforma(x.m.nombre) +
@@ -3293,7 +3651,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -3437,7 +3795,12 @@ document.addEventListener('click', function(ev){
   }
   if(d.quitarPlat){ filtroPlatCli = 'TODAS'; pintar(); return; }
   if(d.mes){ mesDinero = d.mes; pintar(); return; }
-  if(d.plat){ filtroPlataforma = d.plat; pintar(); return; }
+  if(d.vista){ vistaCuentas = d.vista; pintar(); return; }
+  if(d.plat){
+    filtroPlataforma = d.plat; pintar();
+    const l = $('#lienzo'); if(l) l.scrollTop = 0;
+    return;
+  }
   if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
   if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
   if(d.irCuentas){ ir('cuentas'); return; }
