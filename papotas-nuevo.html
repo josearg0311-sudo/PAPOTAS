@@ -904,6 +904,186 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
   #p-ajustes > .pila > .ancha{ grid-column:1 / -1 }
 }
 
+/* ===== EL TABLERO DE HOY ================================================
+   Hoy no es un listado: es el parte del día. Una cifra que manda, el anillo
+   del mes, el botón que arranca la ronda y cinco números de apoyo. */
+.tablero{
+  display:grid;gap:var(--e4) var(--e5);
+  grid-template-columns:minmax(0,1.5fr) auto minmax(0,1fr);
+  grid-template-areas:"cifra anillo acciones" "mini mini mini";
+  align-items:center;
+  padding:var(--e5);border-radius:var(--r-xl);
+  border:1px solid var(--linea);background:var(--capa);
+  box-shadow:var(--brillo), var(--sombra-2);
+  position:relative;overflow:hidden;
+}
+.tablero::before{
+  content:"";position:absolute;inset:0 0 auto;height:2px;
+  background:linear-gradient(90deg, var(--marca), transparent 55%);
+}
+.tab-cifra{grid-area:cifra;min-width:0}
+.tab-cifra .k{
+  display:block;font-size:10.5px;font-weight:700;color:var(--txt-3);
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.tab-cifra b{
+  display:block;font-size:46px;font-weight:750;letter-spacing:-.05em;
+  line-height:1.02;margin:6px 0 4px;color:var(--aviso);
+}
+.tab-cifra .n{display:block;font-size:12.5px;color:var(--txt-3);font-weight:500}
+.tab-cifra .n em{font-style:normal;font-weight:700}
+.tab-cifra .n em.mal{color:var(--mal)}
+
+.tab-anillo{grid-area:anillo;display:flex;align-items:center;gap:var(--e3)}
+.anillo{flex:0 0 auto}
+.anillo-txt{
+  font-family:var(--cifra);font-size:17px;font-weight:700;
+  fill:var(--txt);letter-spacing:-.04em;
+}
+.tab-anillo-txt b{display:block;font-size:17px;font-weight:750;letter-spacing:-.03em}
+.tab-anillo-txt small{display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;margin-top:2px}
+
+.tab-acciones{grid-area:acciones;display:flex;flex-direction:column;gap:var(--e2);align-items:stretch}
+.btn.grande{min-height:48px;font-size:14px;font-weight:700;padding:0 var(--e4)}
+.btn-n{
+  margin-left:4px;min-width:22px;height:20px;padding:0 6px;border-radius:99px;
+  background:rgba(0,0,0,.22);font-size:11px;font-weight:800;line-height:20px;
+}
+.tab-mini{
+  grid-area:mini;margin:0;display:grid;gap:var(--e2);
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  border-top:1px solid var(--linea);padding-top:var(--e3);
+}
+.tab-mini > div{min-width:0}
+.tab-mini dt{font-size:10px;font-weight:700;color:var(--txt-4);text-transform:uppercase;
+  letter-spacing:.07em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab-mini dd{margin:3px 0 0;font-size:19px;font-weight:750;letter-spacing:-.03em}
+.tab-mini dd.mal{color:var(--mal)} .tab-mini dd.aviso{color:var(--aviso)} .tab-mini dd.bien{color:var(--bien)}
+@media (max-width:1100px){
+  .tablero{grid-template-columns:minmax(0,1fr) auto;
+           grid-template-areas:"cifra anillo" "acciones acciones" "mini mini"}
+}
+@media (max-width:640px){
+  .tablero{padding:var(--e4);gap:var(--e3);
+           grid-template-columns:minmax(0,1fr) auto;
+           grid-template-areas:"cifra anillo" "acciones acciones" "mini mini"}
+  .tab-cifra b{font-size:34px}
+  .anillo{width:64px;height:64px}
+  .tab-anillo-txt{display:none}
+  .tab-mini{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--e2) var(--e3)}
+  .tab-mini dd{font-size:16px}
+}
+
+/* ===== EL CALENDARIO DE LO QUE VIENE ==================================== */
+.calendario{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:5px;align-items:end}
+.cal-col{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:7px 2px 6px;border-radius:10px;min-width:0;
+  transition:background var(--rapido) var(--curva);
+}
+.cal-col:hover{background:var(--capa-alta)}
+.cal-n{font-size:12px;font-weight:750;letter-spacing:-.02em;height:15px;color:var(--txt-2)}
+.cal-barra{
+  width:100%;max-width:34px;height:52px;border-radius:5px;
+  background:var(--linea);display:flex;align-items:flex-end;overflow:hidden;
+}
+.cal-barra i{display:block;width:100%;border-radius:5px;background:var(--bien)}
+.cal-col.mal .cal-barra i{background:var(--mal)}
+.cal-col.aviso .cal-barra i{background:var(--aviso)}
+.cal-col.mal .cal-n{color:var(--mal)}
+.cal-col.aviso .cal-n{color:var(--aviso)}
+.cal-dia{font-size:10px;font-weight:700;color:var(--txt-3);text-transform:uppercase;letter-spacing:.05em}
+.cal-sub{font-size:10px;color:var(--txt-4);font-weight:600}
+
+/* ===== EL RANKING DE PLATAFORMAS ======================================== */
+.ranking{display:flex;flex-direction:column;gap:2px}
+.rank{
+  --tono:var(--txt-4);
+  display:flex;align-items:center;gap:10px;
+  padding:7px 8px;border-radius:10px;
+  transition:background var(--rapido) var(--curva);
+}
+.rank:hover{background:var(--capa-alta)}
+.rank-n{
+  flex:0 0 132px;min-width:0;font-size:12.5px;font-weight:700;letter-spacing:-.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.rank-barra{flex:1;min-width:40px;height:8px;border-radius:99px;background:var(--linea);overflow:hidden}
+.rank-barra i{display:block;height:100%;border-radius:99px;background:var(--tono)}
+.rank-gente{
+  flex:0 0 auto;min-width:26px;height:20px;padding:0 6px;border-radius:6px;
+  background:var(--linea);color:var(--txt-2);
+  font-size:11px;font-weight:700;line-height:20px;text-align:center;
+}
+.rank-suma{flex:0 0 96px;text-align:right;font-size:13px;font-weight:750;letter-spacing:-.02em}
+@media (max-width:640px){
+  .rank-n{flex:0 0 92px;font-size:12px}
+  .rank-suma{flex:0 0 74px;font-size:12px}
+  .rank-barra{display:none}
+}
+
+/* ===== LA TABLA DE TRABAJO =============================================
+   Para veinte líneas que se leen de un vistazo, una tabla apretada gana a
+   veinte tarjetas: menos tinta, más información por pantalla. */
+.tabla-envoltura{overflow-x:auto}
+.tabla{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.tabla col.c-quien{width:30%}
+.tabla col.c-cuenta{width:24%}
+.tabla col.c-vence{width:17%}
+.tabla col.c-monto{width:13%}
+.tabla col.c-hacer{width:16%}
+@media (max-width:860px){
+  .tabla col.c-quien{width:44%} .tabla col.c-vence{width:22%}
+  .tabla col.c-monto{width:16%} .tabla col.c-hacer{width:18%}
+}
+@media (max-width:560px){
+  .tabla col.c-quien{width:52%} .tabla col.c-monto{width:22%} .tabla col.c-hacer{width:26%}
+}
+.tabla thead th{
+  position:sticky;top:0;z-index:6;
+  padding:8px var(--e4);text-align:left;
+  background:var(--capa-alta);
+  border-bottom:1px solid var(--linea);
+  font-size:10px;font-weight:800;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.09em;white-space:nowrap;
+}
+.tabla tbody tr{border-bottom:1px solid var(--linea)}
+.tabla tbody tr:last-child{border-bottom:0}
+.tabla tbody tr:hover{background:var(--capa-alta)}
+.tabla td{padding:7px var(--e4);vertical-align:middle}
+.tabla td.t-quien{padding-left:calc(var(--e4) - 3px)}
+/* El acento de estado va en la primera celda, no en la fila: un ::before
+   sobre un <tr> se convierte en una celda fantasma y descuadraba la tabla
+   entera una columna. */
+.tabla tbody tr.mal   td:first-child{box-shadow:inset 3px 0 0 var(--mal)}
+.tabla tbody tr.aviso td:first-child{box-shadow:inset 3px 0 0 var(--aviso)}
+.tabla tbody tr.bien  td:first-child{box-shadow:inset 3px 0 0 var(--bien)}
+.t-nom{
+  display:flex;align-items:center;gap:9px;min-width:0;width:100%;text-align:left;
+  min-height:30px;padding:0 4px;margin:0 -4px;border-radius:8px;
+  font-size:13.5px;font-weight:650;letter-spacing:-.012em;color:var(--txt);
+}
+.t-nom span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
+.t-nom:hover{color:var(--marca-alta)}
+.tabla .t-monto, .tabla th.t-monto{text-align:right}
+.tabla .t-monto{font-weight:750;letter-spacing:-.02em;white-space:nowrap}
+.tabla th.t-hacer{text-align:right}
+.tabla .t-vence{white-space:nowrap}
+.tabla .t-hacer{text-align:right;white-space:nowrap}
+.tabla .t-hacer .btn{margin-left:4px}
+.tabla .f-sin-tel{display:inline-grid;vertical-align:middle;margin-left:4px}
+@media (max-width:860px){
+  .tabla .t-cuenta{display:none}
+  .tabla thead .t-cuenta{display:none}
+}
+@media (max-width:560px){
+  .tabla .t-vence{display:none}
+  .tabla thead .t-vence{display:none}
+  .t-nom span{max-width:120px}
+  .tabla td{padding:6px var(--e3)}
+  .tabla thead th{padding:7px var(--e3)}
+}
+
 /* ===== EL MANDO DE PLATAFORMAS =========================================
    La barra de arriba de todas las pantallas. No es un filtro más: es con
    quién estás trabajando. */
@@ -1450,6 +1630,10 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .f-acciones .btn.icono.mini{ width:44px; min-height:44px }
   .tc-mando .btn.mini{ min-height:44px }
   .tc-mando .btn.icono.mini{ width:44px }
+  /* En la tabla, el nombre es el botón que abre la ficha: tiene que poder
+     tocarse con el dedo, no solo verse. */
+  .t-nom{ min-height:44px }
+  .tabla .t-hacer .btn.icono.mini{ width:44px; min-height:44px }
   /* Nada de efectos de "pasar el ratón" donde no hay ratón. */
   .btn:hover, .f:hover, .plat:hover, .mes:hover, .metrica:hover{ background:inherit }
   .btn:active{ transform:scale(.97) }
@@ -1547,7 +1731,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v3.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v3.1</span>
     </div>
   </nav>
 
@@ -2631,7 +2815,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v3.0';
+const VERSION = 'v3.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -2826,6 +3010,137 @@ $('#btn-tema').addEventListener('click', function(){
 const abiertos = new Set();
 
 /* Una fila de cliente + su cajón de acciones. */
+/* ---------- Piezas del tablero de Hoy -----------------------------------
+   Hoy no es otro listado de clientes: eso ya es Clientes. Hoy es el tablero
+   de trabajo del día — cuánto hay pendiente, cuándo vence, qué plataforma
+   aprieta y a quién se atiende ahora. */
+
+/* El anillo: el porcentaje del mes cobrado, dibujado. */
+function anillo(pct, color){
+  const p = Math.max(0, Math.min(100, Math.round(pct||0)));
+  const R = 34, C = 2*Math.PI*R;
+  return '<svg class="anillo" viewBox="0 0 80 80" width="80" height="80" aria-hidden="true">' +
+    '<circle cx="40" cy="40" r="' + R + '" fill="none" stroke="var(--linea-fuerte)" stroke-width="7"/>' +
+    '<circle cx="40" cy="40" r="' + R + '" fill="none" stroke="' + color + '" stroke-width="7"' +
+      ' stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '"' +
+      ' stroke-dashoffset="' + (C*(1-p/100)).toFixed(1) + '"' +
+      ' transform="rotate(-90 40 40)"/>' +
+    '<text x="40" y="45" text-anchor="middle" class="anillo-txt">' + p + '%</text>' +
+  '</svg>';
+}
+
+/* Los próximos días, uno por columna: cuántos vencen y cuánto suman. Es la
+   pregunta que de verdad se hace por la mañana. */
+function calendarioProximos(lista, cuantos){
+  const dias = [];
+  const base = new Date();
+  for(let i=0;i<(cuantos||10);i++){
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate()+i);
+    const iso = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    dias.push({iso:iso, d:d, n:0, suma:0});
+  }
+  const mapa = {};
+  dias.forEach(function(x){ mapa[x.iso] = x; });
+  let atrasados = 0, atrasadoSuma = 0;
+  lista.forEach(function(c){
+    const v = String(c.vencimiento||'');
+    if(!v) return;
+    if(mapa[v]){ mapa[v].n++; mapa[v].suma += cobroDe(c); }
+    else if(v < dias[0].iso){ atrasados++; atrasadoSuma += cobroDe(c); }
+  });
+  const tope = Math.max(1, dias.reduce(function(a,x){ return Math.max(a, x.suma); }, 0));
+  const DIAS = ['do','lu','ma','mi','ju','vi','sá'];
+  const col = function(etq, sub, n, suma, clase){
+    const alto = Math.min(100, Math.round((suma/tope)*100));
+    return '<div class="cal-col ' + clase + '" title="' + esc(etq + ': ' + n + ' · ' + dinero(suma)) + '">' +
+      '<span class="cal-n">' + (n || '') + '</span>' +
+      '<span class="cal-barra"><i style="height:' + (suma ? Math.max(4, alto) : 0) + '%"></i></span>' +
+      '<span class="cal-dia">' + esc(etq) + '</span>' +
+      '<span class="cal-sub">' + esc(sub) + '</span>' +
+    '</div>';
+  };
+  return '<div class="calendario">' +
+    (atrasados ? col('antes', String(atrasados), atrasados, atrasadoSuma, 'mal') : '') +
+    dias.map(function(x, i){
+      return col(i===0 ? 'hoy' : DIAS[x.d.getDay()], String(x.d.getDate()), x.n, x.suma,
+                 i===0 ? 'aviso' : 'bien');
+    }).join('') +
+  '</div>';
+}
+
+/* El ranking: qué plataforma aprieta más, con su barra. */
+function rankingCobro(lista){
+  const g = new Map();
+  lista.forEach(function(c){
+    const k = platDe(c) || 'SIN PLATAFORMA';
+    if(!g.has(k)) g.set(k, {n:k, gente:0, suma:0, vencidos:0});
+    const x = g.get(k);
+    x.gente++; x.suma += cobroDe(c);
+    if(estadoDe(c) === 'vencido') x.vencidos++;
+  });
+  const filas = Array.from(g.values()).sort(function(a,b){ return b.suma - a.suma; });
+  if(!filas.length) return '';
+  const tope = filas[0].suma || 1;
+  return '<div class="ranking">' +
+    filas.map(function(x){
+      return '<div class="rank" style="' + tonoDe(x.n) + '">' +
+        logoPlataforma(x.n, 24) +
+        '<span class="rank-n">' + esc(x.n) + '</span>' +
+        '<span class="rank-barra"><i style="width:' + Math.max(3, Math.round(x.suma/tope*100)) + '%"></i></span>' +
+        '<span class="rank-gente">' + x.gente + '</span>' +
+        '<span class="rank-suma cifra">' + esc(dinero(x.suma)) + '</span>' +
+        '<button class="btn mini icono" data-plat="' + esc(x.n) + '"' +
+          ' title="Trabajar solo con ' + esc(x.n) + '" aria-label="Trabajar solo con ' + esc(x.n) + '">' +
+          ICONO.flecha + '</button>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
+/* La cola: una tabla apretada con los que tocan ahora. Aquí no hacen falta
+   tarjetas — hacen falta muchas líneas legibles y los botones a mano. */
+function tablaCobro(lista, tope){
+  const filas = lista.slice(0, tope || 20);
+  return '<div class="tabla-envoltura"><table class="tabla">' +
+    '<colgroup>' +
+      '<col class="c-quien"><col class="c-cuenta"><col class="c-vence">' +
+      '<col class="c-monto"><col class="c-hacer">' +
+    '</colgroup>' +
+    '<thead><tr>' +
+      '<th class="t-quien">Quién</th>' +
+      '<th class="t-cuenta">Dónde</th>' +
+      '<th class="t-vence">Vence</th>' +
+      '<th class="t-monto">Cobras</th>' +
+      '<th class="t-hacer"><span class="solo-lectores">Acciones</span></th>' +
+    '</tr></thead><tbody>' +
+    filas.map(function(c){
+      const est = estadoDe(c);
+      const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
+      const m = masterDe(c);
+      const plat = platDe(c);
+      const tel = telefonoDe(c);
+      return '<tr class="' + clase + '" data-cid="' + esc(c.id) + '">' +
+        '<td class="t-quien"><button class="t-nom" data-ficha="' + esc(c.id) + '">' +
+          logoPlataforma(plat, 22) + '<span>' + esc(c.nombre || 'Sin nombre') + '</span></button></td>' +
+        '<td class="t-cuenta"><span class="chip-cuenta" style="' + tonoDe(plat) + '">' +
+          esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + '</span>' +
+          (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>' : '') + '</td>' +
+        '<td class="t-vence"><span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span></td>' +
+        '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) + '</td>' +
+        '<td class="t-hacer">' +
+          '<button class="btn mini icono ' + (est==='vencido'?'peligro':'') + '" data-cobrar="' + esc(c.id) + '"' +
+            ' title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
+            ' aria-label="Cobrar a ' + esc(c.nombre||'') + '">' + ICONO.cobrar + '</button>' +
+          (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '"' +
+            ' title="Escribir a ' + esc(c.nombre||'') + '"' +
+            ' aria-label="Escribir a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>'
+            : '<span class="f-sin-tel" aria-hidden="true">' + ICONO.wa + '</span>') +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table></div>';
+}
+
 /* ---------- Agrupar gente por plataforma --------------------------------
    Es como se lleva el negocio: no "ochenta vencidos" sino "Netflix debe 17,
    Spotify 8". Cada panel lleva el color de su marca, lo que suma y lo que
@@ -3261,118 +3576,125 @@ function pintaHoy(){
 
   const mes = hoy.slice(0,7);
   const delMes = function(f){ return String(f||'').indexOf(mes)===0; };
-  const cobradoMes = ventas.filter(function(v){
-      return delMes(v.fecha) && (plataformaActiva==='TODAS' ||
-        String(v.servicio||'').trim().toUpperCase()===plataformaActiva ||
-        idsSuyos.has(String(v.cuentaMasterId)));
-    }).reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
-  const gastadoMes = inversiones.filter(function(i){
-      return delMes(i.fecha) && (plataformaActiva==='TODAS' ||
-        String(i.plataforma||'').trim().toUpperCase()===plataformaActiva ||
-        idsSuyos.has(String(i.cuentaMasterId)));
-    }).reduce(function(a,i){ return a + (Number(i.monto)||0); }, 0);
+  const suya = function(x, campo){
+    return plataformaActiva === 'TODAS' ||
+           String(x[campo]||'').trim().toUpperCase() === plataformaActiva ||
+           idsSuyos.has(String(x.cuentaMasterId));
+  };
+  const ventasMes = ventas.filter(function(v){ return delMes(v.fecha) && suya(v,'servicio'); });
+  const cobradoMes = ventasMes.reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
+  const gastadoMes = inversiones.filter(function(i){ return delMes(i.fecha) && suya(i,'plataforma'); })
+                                .reduce(function(a,i){ return a + (Number(i.monto)||0); }, 0);
   const libres = susCuentas.reduce(function(a,m){ return a + libresDe(m); }, 0);
   const mastersVencidos = susCuentas.filter(function(m){ const d=diasHasta(m.vencimiento); return d!==null && d<0; });
 
   const porFecha = function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); };
 
-  /* Cuarenta y ocho filas seguidas no se leen. Cuando se ven todas, se
-     separan por urgencia, que es el orden en que de verdad se atienden. */
-  let tramos;
-  if(filtroHoy === 'vencidos')      tramos = [['Vencidos', 'mal', vencidos]];
-  else if(filtroHoy === 'hoy')      tramos = [['Vencen hoy', 'aviso', deHoy]];
-  else if(filtroHoy === 'semana')   tramos = [['Próximos ' + aviso + ' días', 'bien', semana]];
-  else tramos = [['Vencidos', 'mal', vencidos],
-                 ['Vencen hoy', 'aviso', deHoy],
-                 ['Próximos ' + aviso + ' días', 'bien', semana]];
-  tramos = tramos.filter(function(t){ return t[2].length; });
-  const hayAlgo = tramos.length > 0;
-  const conSeparador = tramos.length > 1;
+  /* Qué entra en la cola de trabajo, según el grupo elegido arriba. */
+  let cola;
+  if(filtroHoy === 'vencidos')    cola = vencidos;
+  else if(filtroHoy === 'hoy')    cola = deHoy;
+  else if(filtroHoy === 'semana') cola = semana;
+  else cola = porCobrar;
+  cola = cola.slice().sort(porFecha);
+  const conTel = cola.filter(function(c){ return telefonoDe(c); }).length;
+
+  /* La meta del mes, si la has puesto; si no, el anillo mide lo cobrado
+     contra lo cobrado más lo que queda pendiente. */
+  const meta = Number(ajustes.metaMensual) || 0;
+  const base = meta > 0 ? meta : (cobradoMes + total);
+  const pct  = base > 0 ? (cobradoMes / base) * 100 : 0;
 
   const fecha = new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long'});
-  $('#subtitulo').textContent = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? '' : plataformaActiva + ' · ') +
+    fecha.charAt(0).toUpperCase() + fecha.slice(1);
 
   $('#p-hoy').innerHTML =
   '<div class="pila">' +
     barraPlataformas() +
 
-    '<div class="rejilla r5">' +
-      '<button class="metrica mayor ' + (total>0?'aviso':'bien') + '" data-fhoy="pendientes">' +
-        '<span class="k">Por cobrar</span>' +
-        '<span class="v cifra">' + esc(dinero(total)) + '</span>' +
+    /* ---- La cabecera del día: una sola cifra manda, y al lado el botón
+       que arranca el trabajo de verdad. ---- */
+    '<div class="tablero">' +
+      '<div class="tab-cifra">' +
+        '<span class="k">Por cobrar' + (plataformaActiva==='TODAS' ? '' : ' en ' + esc(plataformaActiva)) + '</span>' +
+        '<b class="cifra">' + esc(dinero(total)) + '</b>' +
         '<span class="n">' + porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas') +
-          (vencidos.length ? ' · ' + vencidos.length + ' ya vencieron' : '') + '</span></button>' +
-      '<button class="metrica ' + (vencidos.length?'mal':'') + '" data-fhoy="vencidos">' +
-        '<span class="k">Vencidos</span>' +
-        '<span class="v cifra">' + vencidos.length + '</span>' +
-        '<span class="n">' + esc(dinero(vencidos.reduce(function(a,c){return a+cobroDe(c);},0))) + '</span></button>' +
-      '<button class="metrica ' + (deHoy.length?'aviso':'') + '" data-fhoy="hoy">' +
-        '<span class="k">Vencen hoy</span>' +
-        '<span class="v cifra">' + deHoy.length + '</span>' +
-        '<span class="n">' + esc(dinero(deHoy.reduce(function(a,c){return a+cobroDe(c);},0))) + '</span></button>' +
-      '<button class="metrica bien" data-fhoy="semana">' +
-        '<span class="k">Próximos ' + aviso + ' días</span>' +
-        '<span class="v cifra">' + semana.length + '</span>' +
-        '<span class="n">' + esc(dinero(semana.reduce(function(a,c){return a+cobroDe(c);},0))) + '</span></button>' +
+          (vencidos.length ? ' · <em class="mal">' + vencidos.length + ' ya vencieron</em>' : '') + '</span>' +
+      '</div>' +
+      '<div class="tab-anillo">' +
+        anillo(pct, pct >= 100 ? 'var(--bien)' : 'var(--marca-alta)') +
+        '<span class="tab-anillo-txt"><b>' + esc(dinero(cobradoMes)) + '</b>' +
+          '<small>cobrado en ' + esc(NOMBREMES[Number(mes.slice(5,7))-1]) +
+            (meta > 0 ? ' · meta ' + esc(dinero(meta)) : '') + '</small></span>' +
+      '</div>' +
+      '<div class="tab-acciones">' +
+        /* Siempre está: si ninguno tiene teléfono, al pulsarlo lo dice, que
+           es más útil que un botón que desaparece sin explicar por qué. */
+        '<button class="btn grande principal" data-escribir-a="hoy-visible"' +
+          (conTel ? '' : ' title="Ninguno de los que tocan tiene teléfono guardado"') + '>' + ICONO.wa +
+          'Empezar la ronda <span class="btn-n">' + (conTel || cola.length) + '</span></button>' +
+        '<button class="btn" data-ir-clientes="1">' + ICONO.gente + 'Ver todos los clientes</button>' +
+      '</div>' +
+      '<dl class="tab-mini">' +
+        '<div><dt>Vencidos</dt><dd class="cifra mal">' + vencidos.length + '</dd></div>' +
+        '<div><dt>Vencen hoy</dt><dd class="cifra aviso">' + deHoy.length + '</dd></div>' +
+        '<div><dt>Próximos ' + aviso + '</dt><dd class="cifra bien">' + semana.length + '</dd></div>' +
+        '<div><dt>Libres</dt><dd class="cifra">' + libres + '</dd></div>' +
+        '<div><dt>Gastado</dt><dd class="cifra">' + esc(dinero(gastadoMes)) + '</dd></div>' +
+      '</dl>' +
     '</div>' +
 
+    /* ---- Cuándo vence qué ---- */
+    (porCobrar.length || suyos.length ?
+      '<div class="tarjeta">' +
+        '<div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono azul">' + ICONO.reloj + '</span>' +
+          '<div class="crece"><h2>Lo que viene</h2>' +
+            '<p>Cuántos vencen cada día y cuánto suman.</p></div>' +
+        '</div>' +
+        '<div class="tarjeta-cuerpo">' + calendarioProximos(suyos, 10) + '</div>' +
+      '</div>' : '') +
+
+    /* ---- Qué plataforma aprieta ---- */
+    (porCobrar.length && plataformaActiva === 'TODAS' ?
+      '<div class="tarjeta">' +
+        '<div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono rosa">' + ICONO.tele + '</span>' +
+          '<div class="crece"><h2>Qué plataforma aprieta</h2>' +
+            '<p>De la que más dinero tiene pendiente a la que menos.</p></div>' +
+        '</div>' +
+        '<div class="tarjeta-cuerpo">' + rankingCobro(porCobrar) + '</div>' +
+      '</div>' : '') +
+
+    /* ---- La cola de trabajo: tabla apretada, no tarjetas ---- */
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono rosa">' + ICONO.cobrar + '</span>' +
-        '<div class="crece"><h2>A quién le toca</h2><p>Se cobra y se renueva desde aquí mismo.</p></div>' +
-        (hayAlgo ? '<button class="btn mini bien" data-escribir-a="hoy-visible">' + ICONO.wa +
-          '<span class="et">Escribir a ' + tramos.reduce(function(a,t){ return a + t[2].length; }, 0) + '</span></button>' : '') +
+        '<div class="crece"><h2>A quién le toca ahora</h2>' +
+          '<p>Los más urgentes primero. Se cobra y se escribe desde aquí.</p></div>' +
         '<div class="segmentos">' +
           [['pendientes','Todo',porCobrar.length],['vencidos','Vencidos',vencidos.length],
-           ['hoy','Hoy',deHoy.length],['semana','Próximos',semana.length]].map(function(s){
-            return '<button data-fhoy="' + s[0] + '" aria-selected="' + (filtroHoy===s[0]?'true':'false') + '">' +
-                   s[1] + (s[2] ? '<span class="cuenta">' + s[2] + '</span>' : '') + '</button>';
-          }).join('') +
-        '</div>' +
-        '<div class="segmentos">' +
-          [['plataforma','Por plataforma'],['urgencia','Por urgencia']].map(function(v){
-            return '<button data-verhoy="' + v[0] + '" aria-selected="' + (verHoy===v[0]?'true':'false') + '">' +
-                   v[1] + '</button>';
+           ['hoy','Hoy',deHoy.length],['semana','Próximos',semana.length]].map(function(x){
+            return '<button data-fhoy="' + x[0] + '" aria-selected="' + (filtroHoy===x[0]?'true':'false') + '">' +
+                   x[1] + (x[2] ? '<span class="cuenta">' + x[2] + '</span>' : '') + '</button>';
           }).join('') +
         '</div>' +
       '</div>' +
-      '<div class="tarjeta-cuerpo pegado">' +
-        (!hayAlgo
-          ? '<div style="padding:0 var(--e5) var(--e5)">' +
-              vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.') +
-            '</div>'
-          : (verHoy === 'plataforma'
-              /* Por plataforma: no "ochenta vencidos", sino "Netflix debe 17
-                 y Spotify 8". Es como se lleva el negocio de verdad. */
-              ? panelesPorPlataforma(tramos.reduce(function(a,t){ return a.concat(t[2]); }, []))
-              : tramos.map(function(t){
-                  const cuanto = t[2].reduce(function(a,c){ return a + cobroDe(c); }, 0);
-                  return (conSeparador ?
-                    '<div class="tramo ' + t[1] + '"><span class="punto"></span>' +
-                      '<b>' + esc(t[0]) + '</b>' +
-                      '<span class="tramo-n">' + t[2].length + '</span>' +
-                      '<span class="tramo-monto cifra">' + esc(dinero(cuanto)) + '</span>' +
-                    '</div>' : '') +
-                    '<div class="mosaico gente">' +
-                      t[2].slice().sort(porFecha).map(tarjetaCliente).join('') +
-                    '</div>';
-                }).join('')
-            )) +
-      '</div>' +
+      (cola.length
+        ? '<div class="tarjeta-cuerpo pegado">' + tablaCobro(cola, 20) + '</div>' +
+          (cola.length > 20
+            ? '<div class="tarjeta-cuerpo"><div class="fila">' +
+                '<button class="btn" data-ir-clientes="1">Ver los ' + cola.length + ' en Clientes</button>' +
+                '<span style="font-size:12px;color:var(--txt-3)">viendo los 20 más urgentes</span>' +
+              '</div></div>'
+            : '')
+        : '<div class="tarjeta-cuerpo">' +
+            vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.') +
+          '</div>') +
     '</div>' +
 
-    '<div class="rejilla r3">' +
-      '<div class="metrica bien"><span class="k">Cobrado este mes</span>' +
-        '<span class="v cifra">' + esc(dinero(cobradoMes)) + '</span>' +
-        '<span class="n">' + ventas.filter(function(v){return String(v.fecha||'').indexOf(mes)===0;}).length + ' ventas</span></div>' +
-      '<div class="metrica"><span class="k">Gastado este mes</span>' +
-        '<span class="v cifra">' + esc(dinero(gastadoMes)) + '</span>' +
-        '<span class="n">queda ' + esc(dinero(cobradoMes-gastadoMes)) + ' limpio</span></div>' +
-      '<button class="metrica info" data-ir-cuentas="1"><span class="k">Perfiles libres</span>' +
-        '<span class="v cifra">' + libres + '</span>' +
-        '<span class="n">en ' + servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + '</span></button>' +
-    '</div>' +
-
+    /* ---- Cuentas master vencidas: si no se renuevan, se cae el negocio ---- */
     (mastersVencidos.length ?
       '<div class="tarjeta" style="border-color:var(--mal-linea)">' +
         '<div class="tarjeta-cabeza">' +
@@ -4625,7 +4947,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -4802,6 +5124,7 @@ document.addEventListener('click', function(ev){
   if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
   if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
   if(d.irCuentas){ ir('cuentas'); return; }
+  if(d.irClientes){ ir('clientes'); return; }
 });
 
 /* Los desplegables y botones propios de cada pantalla. */
