@@ -904,6 +904,150 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
   #p-ajustes > .pila > .ancha{ grid-column:1 / -1 }
 }
 
+/* ===== EL MANDO DE PLATAFORMAS =========================================
+   La barra de arriba de todas las pantallas. No es un filtro más: es con
+   quién estás trabajando. */
+.mando-plat{
+  display:flex;gap:var(--e2);overflow-x:auto;scrollbar-width:none;
+  padding:3px 3px 5px;margin:0 -3px;
+  scroll-snap-type:x proximity;
+}
+.mando-plat::-webkit-scrollbar{display:none}
+.pastel{
+  --tono:var(--txt-3);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;flex:0 0 auto;scroll-snap-align:start;
+  display:flex;align-items:center;gap:9px;
+  padding:7px 14px 7px 8px;border-radius:99px;
+  border:1px solid var(--linea);background:var(--capa);
+  text-align:left;overflow:hidden;
+  transition:border-color var(--rapido) var(--curva),
+             background var(--rapido) var(--curva),
+             transform var(--rapido) var(--curva);
+}
+.pastel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg, var(--tono), transparent 62%);
+  opacity:0;transition:opacity var(--medio) var(--curva);
+}
+.pastel > *{position:relative;z-index:1}
+.pastel:hover{border-color:var(--tono-linea);transform:translateY(-1px)}
+.pastel.viva{border-color:var(--tono-linea)}
+.pastel.viva::after{opacity:.2}
+html[data-tema="claro"] .pastel.viva::after{opacity:.13}
+.pastel-ojo{
+  width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+  display:grid;place-items:center;overflow:hidden;
+  border:1.5px solid var(--tono-linea);
+  background:var(--capa-alta);color:var(--tono);
+  transition:border-color var(--rapido) var(--curva),box-shadow var(--rapido) var(--curva);
+}
+.pastel-ojo .f-marca{width:22px;height:22px;border-radius:50%;font-size:10px}
+.pastel-ojo.todas svg{width:16px;height:16px;stroke-width:2}
+.pastel.viva .pastel-ojo{
+  border-color:var(--tono);
+  box-shadow:0 0 0 2px var(--tono-suave), 0 0 12px -2px var(--tono);
+}
+.pastel-txt{min-width:0;line-height:1.2}
+.pastel-txt b{
+  display:block;font-size:12.5px;font-weight:700;letter-spacing:-.018em;
+  max-width:132px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.pastel-txt small{display:block;font-size:10.5px;color:var(--txt-4);font-weight:600;margin-top:1px}
+.pastel.viva .pastel-txt small{color:var(--txt-3)}
+.pastel-n{
+  flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;
+  background:var(--mal);color:#fff;
+  font-size:10.5px;font-weight:800;line-height:20px;text-align:center;
+}
+@media (pointer: coarse){
+  .pastel{ padding:9px 15px 9px 9px }
+  .pastel-ojo{ width:34px;height:34px }
+  .pastel-ojo .f-marca{ width:26px;height:26px }
+}
+@media (max-width:640px){
+  .pastel-txt b{max-width:108px}
+}
+
+/* ===== ENTRADA ESCALONADA ==============================================
+   Las tarjetas no aparecen de golpe: entran una detrás de otra en poco más
+   de un parpadeo. Solo las primeras doce llevan retraso; a partir de ahí ya
+   estás desplazándote y no se nota. */
+@keyframes sube{ from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.mosaico.gente > .tc, .mosaico > .ficha{
+  animation:sube 260ms var(--curva) both;
+}
+.mosaico.gente > .tc:nth-child(1), .mosaico > .ficha:nth-child(1){animation-delay:0ms}
+.mosaico.gente > .tc:nth-child(2), .mosaico > .ficha:nth-child(2){animation-delay:14ms}
+.mosaico.gente > .tc:nth-child(3), .mosaico > .ficha:nth-child(3){animation-delay:28ms}
+.mosaico.gente > .tc:nth-child(4), .mosaico > .ficha:nth-child(4){animation-delay:42ms}
+.mosaico.gente > .tc:nth-child(5), .mosaico > .ficha:nth-child(5){animation-delay:56ms}
+.mosaico.gente > .tc:nth-child(6), .mosaico > .ficha:nth-child(6){animation-delay:70ms}
+.mosaico.gente > .tc:nth-child(7), .mosaico > .ficha:nth-child(7){animation-delay:84ms}
+.mosaico.gente > .tc:nth-child(8), .mosaico > .ficha:nth-child(8){animation-delay:98ms}
+.mosaico.gente > .tc:nth-child(n+9), .mosaico > .ficha:nth-child(n+9){animation-delay:110ms}
+@media (prefers-reduced-motion:reduce){
+  .mosaico.gente > .tc, .mosaico > .ficha{animation:none}
+}
+
+/* El foco se ve: se trabaja con teclado y hay que saber dónde se está. */
+.pastel:focus-visible, .tc-mando .btn:focus-visible, .ficha-mando .btn:focus-visible{
+  outline:2px solid var(--marca);outline-offset:2px;
+}
+
+/* La chuleta de atajos, abajo del todo en Ajustes. */
+.atajos{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.atajo{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--txt-3);font-weight:500}
+kbd{
+  display:inline-block;min-width:22px;padding:2px 7px;border-radius:6px;
+  border:1px solid var(--linea-fuerte);border-bottom-width:2px;
+  background:var(--capa-alta);color:var(--txt-2);
+  font-family:var(--mono, ui-monospace, monospace);font-size:11px;font-weight:700;text-align:center;
+}
+
+/* ===== PANEL DE UNA PLATAFORMA DENTRO DE UNA LISTA =====================
+   La unidad con la que se trabaja: su color a la izquierda, su nombre, su
+   chispa de los últimos seis meses, lo que suma y sus botones. */
+.panel-plat{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  border-top:1px solid var(--linea);
+}
+.panel-plat:first-child{border-top:0}
+.panel-cabeza{
+  position:sticky;top:0;z-index:8;
+  display:flex;align-items:center;gap:10px;
+  padding:10px var(--e5);
+  background:var(--capa-alta);
+  border-bottom:1px solid var(--linea);
+  box-shadow:0 1px 0 var(--linea), 0 10px 16px -14px rgba(0,0,0,.75);
+  overflow:hidden;
+}
+.panel-cabeza::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--tono);
+}
+.panel-cabeza::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg, var(--tono), transparent 42%);opacity:.12;
+}
+html[data-tema="claro"] .panel-cabeza::after{opacity:.08}
+.panel-cabeza > *{position:relative;z-index:1}
+.panel-id{min-width:0;flex:1}
+.panel-id b{
+  display:block;font-size:13px;font-weight:800;letter-spacing:.02em;
+  text-transform:uppercase;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.panel-id small{display:block;font-size:11px;color:var(--txt-3);font-weight:600;margin-top:1px}
+.panel-suma{font-size:14px;font-weight:750;letter-spacing:-.025em;color:var(--txt-2);flex:0 0 auto}
+.chispa{flex:0 0 auto;opacity:.85;display:block}
+@media (max-width:640px){
+  .panel-cabeza{padding:9px var(--e3);gap:8px}
+  .chispa{display:none}
+  .panel-id b{font-size:12px}
+}
+@media (max-width:420px){
+  .panel-cabeza .btn.icono[href]{display:none}
+}
+
 /* ===== TARJETA DE CLIENTE ==============================================
    El mismo esqueleto que la ficha de una plataforma. Cambia lo que cuenta
    —una persona en vez de un servicio— pero no el idioma. */
@@ -1403,7 +1547,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.9</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v3.0</span>
     </div>
   </nav>
 
@@ -2487,7 +2631,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.9';
+const VERSION = 'v3.0';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -2682,6 +2826,87 @@ $('#btn-tema').addEventListener('click', function(){
 const abiertos = new Set();
 
 /* Una fila de cliente + su cajón de acciones. */
+/* ---------- Agrupar gente por plataforma --------------------------------
+   Es como se lleva el negocio: no "ochenta vencidos" sino "Netflix debe 17,
+   Spotify 8". Cada panel lleva el color de su marca, lo que suma y lo que
+   se puede hacer con ella sin salir de aquí. */
+function panelesPorPlataforma(lista, opciones){
+  const o = opciones || {};
+  const g = new Map();
+  lista.forEach(function(c){
+    const k = platDe(c) || 'SIN PLATAFORMA';
+    if(!g.has(k)) g.set(k, []);
+    g.get(k).push(c);
+  });
+  const orden = Array.from(g.entries()).map(function(par){
+    const suma = par[1].reduce(function(a,c){ return a + cobroDe(c); }, 0);
+    const vencidos = par[1].filter(function(c){ return estadoDe(c) === 'vencido'; }).length;
+    return {n:par[0], gente:par[1], suma:suma, vencidos:vencidos};
+  }).sort(function(a,b){ return b.suma - a.suma || a.n.localeCompare(b.n,'es'); });
+
+  return orden.map(function(x){
+    const conTel = x.gente.filter(function(c){ return telefonoDe(c); }).length;
+    return '<div class="panel-plat" style="' + tonoDe(x.n) + '">' +
+      '<div class="panel-cabeza">' +
+        logoPlataforma(x.n, 30) +
+        '<span class="panel-id"><b>' + esc(x.n) + '</b>' +
+          '<small>' + x.gente.length + ' ' + plural(x.gente.length, o.uno || 'persona', o.varias || 'personas') +
+            (x.vencidos ? ' · ' + x.vencidos + ' ' + plural(x.vencidos,'vencido','vencidos') : '') +
+          '</small></span>' +
+        chispaPlataforma(x.n) +
+        '<span class="panel-suma cifra">' + esc(dinero(x.suma)) + '</span>' +
+        (conTel ? '<button class="btn mini icono bien" data-escribir-a="' + esc(x.n) + '"' +
+          ' title="Escribir por WhatsApp a los ' + conTel + ' de ' + esc(x.n) + '"' +
+          ' aria-label="Escribir por WhatsApp a los ' + conTel + ' de ' + esc(x.n) + '">' + ICONO.wa + '</button>' : '') +
+        '<a class="btn mini icono" href="' + esc(casaDe(x.n)) + '" target="_blank" rel="noopener"' +
+          ' title="Entrar a la web de ' + esc(x.n) + '" aria-label="Entrar a la web de ' + esc(x.n) + '">' +
+          ICONO.salir + '</a>' +
+        '<button class="btn mini icono" data-plat="' + esc(x.n) + '"' +
+          ' title="Trabajar solo con ' + esc(x.n) + '" aria-label="Trabajar solo con ' + esc(x.n) + '">' +
+          ICONO.flecha + '</button>' +
+      '</div>' +
+      '<div class="mosaico gente">' + x.gente.slice().sort(function(a,b){
+          return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9'));
+        }).map(tarjetaCliente).join('') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/* Una chispa con lo que entró de esa plataforma en los últimos seis meses.
+   Doce píxeles de alto que dicen si va para arriba o para abajo. */
+function chispaPlataforma(n){
+  const idsPlat = new Set(servicios.filter(function(m){
+    return String(m.nombre||'').trim().toUpperCase() === n;
+  }).map(function(m){ return String(m.id); }));
+  const hoy = new Date();
+  const meses = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(hoy.getFullYear(), hoy.getMonth()-i, 1);
+    meses.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+  }
+  const vals = meses.map(function(k){
+    return ventas.reduce(function(a,v){
+      if(String(v.fecha||'').indexOf(k) !== 0) return a;
+      const suya = String(v.servicio||'').trim().toUpperCase() === n || idsPlat.has(String(v.cuentaMasterId));
+      return suya ? a + (Number(v.monto)||0) : a;
+    }, 0);
+  });
+  const tope = Math.max.apply(null, vals);
+  if(!tope) return '';
+  const W = 58, H = 18;
+  const paso = W / (vals.length - 1);
+  const pts = vals.map(function(v,i){
+    return (i*paso).toFixed(1) + ',' + (H - (v/tope)*(H-3) - 1.5).toFixed(1);
+  });
+  return '<svg class="chispa" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '"' +
+    ' aria-hidden="true" preserveAspectRatio="none">' +
+    '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--tono)"' +
+    ' stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+    '<circle cx="' + (W).toFixed(1) + '" cy="' + (H - (vals[vals.length-1]/tope)*(H-3) - 1.5).toFixed(1) + '"' +
+    ' r="2" fill="var(--tono)"/>' +
+  '</svg>';
+}
+
 /* La tarjeta de un cliente. Mismo esqueleto que la ficha de una plataforma
    —franja de color arriba, logo, identidad, estado, cifra y mando— porque
    es el que funciona: cada cosa con su sitio y su color, no cien renglones
@@ -2936,25 +3161,118 @@ function coincide(c){
 }
 
 /* --- HOY ---------------------------------------------------------------- */
+/* ---------- La plataforma con la que estás trabajando -------------------
+   Una sola. Manda en las cuatro pantallas: Hoy, Clientes, Cuentas y Dinero.
+   Antes cada pantalla tenía su propio filtro y entrar a NETFLIX en Cuentas
+   no servía de nada en Hoy; el negocio se lleva por plataformas, así que el
+   programa también. Se recuerda entre visitas. */
+let plataformaActiva = 'TODAS';
+try{ plataformaActiva = localStorage.getItem('pap_plat_activa') || 'TODAS'; }catch(_){}
+function ponerPlataforma(n){
+  plataformaActiva = n || 'TODAS';
+  try{ localStorage.setItem('pap_plat_activa', plataformaActiva); }catch(_){}
+}
+function platDe(c){
+  const m = masterDe(c);
+  return String((c && c.servicio) || (m && m.nombre) || '').trim().toUpperCase();
+}
+function enPlataformaActiva(c){
+  return plataformaActiva === 'TODAS' || platDe(c) === plataformaActiva;
+}
+
+/* ---------- La barra de plataformas ------------------------------------
+   Va arriba de Hoy, Clientes, Cuentas y Dinero. Es el mando del negocio:
+   se pulsa una plataforma y las cuatro pantallas pasan a hablar solo de
+   ella. Cada pastilla lleva su logo, sus clientes y cuántos deben. */
+function resumenPlataformas(){
+  const g = new Map();
+  servicios.forEach(function(m){
+    const k = String(m.nombre||'').trim().toUpperCase();
+    if(!k) return;
+    if(!g.has(k)) g.set(k, {n:k, cuentas:0, clientes:0, deben:0, cobra:0, libres:0});
+    const x = g.get(k);
+    x.cuentas++; x.libres += libresDe(m);
+  });
+  clientes.forEach(function(c){
+    const k = platDe(c);
+    if(!k) return;
+    if(!g.has(k)) g.set(k, {n:k, cuentas:0, clientes:0, deben:0, cobra:0, libres:0});
+    const x = g.get(k);
+    x.clientes++;
+    x.cobra += cobroDe(c);
+    const e = estadoDe(c);
+    if(e === 'vencido' || e === 'por_vencer') x.deben++;
+  });
+  return Array.from(g.values()).sort(function(a,b){ return b.deben - a.deben || a.n.localeCompare(b.n,'es'); });
+}
+
+function barraPlataformas(){
+  const lista = resumenPlataformas();
+  if(!lista.length) return '';
+  if(plataformaActiva !== 'TODAS' && !lista.some(function(x){ return x.n === plataformaActiva; })) ponerPlataforma('TODAS');
+  const totalDeben = lista.reduce(function(a,x){ return a + x.deben; }, 0);
+  return '<nav class="mando-plat" aria-label="Con qué plataforma trabajas">' +
+    '<button class="pastel' + (plataformaActiva==='TODAS'?' viva':'') + '" data-plat="TODAS"' +
+      ' aria-pressed="' + (plataformaActiva==='TODAS'?'true':'false') + '">' +
+      '<span class="pastel-ojo todas">' + ICONO.tele + '</span>' +
+      '<span class="pastel-txt"><b>Todas</b>' +
+        '<small>' + clientes.length + ' ' + plural(clientes.length,'cliente','clientes') + '</small></span>' +
+      (totalDeben ? '<span class="pastel-n">' + totalDeben + '</span>' : '') +
+    '</button>' +
+    lista.map(function(x){
+      const viva = plataformaActiva === x.n;
+      return '<button class="pastel' + (viva?' viva':'') + '" data-plat="' + esc(x.n) + '"' +
+        ' style="' + tonoDe(x.n) + '" aria-pressed="' + (viva?'true':'false') + '"' +
+        ' title="' + esc(x.n) + ' · ' + x.clientes + ' clientes · ' + esc(dinero(x.cobra)) + ' al ciclo">' +
+        '<span class="pastel-ojo">' + logoPlataforma(x.n, 26) + '</span>' +
+        '<span class="pastel-txt"><b>' + esc(x.n) + '</b>' +
+          '<small>' + x.clientes + ' ' + plural(x.clientes,'cliente','clientes') + '</small></span>' +
+        (x.deben ? '<span class="pastel-n">' + x.deben + '</span>' : '') +
+      '</button>';
+    }).join('') +
+  '</nav>';
+}
+
 let filtroHoy = 'pendientes';
+/* Cómo se agrupa "A quién le toca": por plataforma (lo normal, porque es
+   como se lleva el negocio) o por urgencia. Se recuerda. */
+let verHoy = 'plataforma';
+try{ verHoy = localStorage.getItem('pap_ver_hoy') || 'plataforma'; }catch(_){}
 
 function pintaHoy(){
   const eco = economia();
   const hoy = hoyISO();
   const aviso = Number(ajustes.diasAlerta||5);
-  const vencidos = clientes.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; });
-  const deHoy    = clientes.filter(function(c){ return c.vencimiento === hoy; });
-  const semana   = clientes.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d>0 && d<=aviso; });
+  /* Todo lo de esta pantalla pasa por la plataforma con la que estás
+     trabajando: si entras a NETFLIX, aquí solo hay Netflix. */
+  const suyos = clientes.filter(enPlataformaActiva);
+  const vencidos = suyos.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; });
+  const deHoy    = suyos.filter(function(c){ return c.vencimiento === hoy; });
+  const semana   = suyos.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d>0 && d<=aviso; });
   const porCobrar = vencidos.concat(deHoy, semana);
   const total = porCobrar.reduce(function(a,c){ return a + cobroDe(c); }, 0);
 
+  const enPlatM = function(m){
+    return plataformaActiva === 'TODAS' ||
+           String(m.nombre||'').trim().toUpperCase() === plataformaActiva;
+  };
+  const susCuentas = servicios.filter(enPlatM);
+  const idsSuyos = new Set(susCuentas.map(function(m){ return String(m.id); }));
+
   const mes = hoy.slice(0,7);
-  const cobradoMes = ventas.filter(function(v){ return String(v.fecha||'').indexOf(mes)===0; })
-                           .reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
-  const gastadoMes = inversiones.filter(function(i){ return String(i.fecha||'').indexOf(mes)===0; })
-                                .reduce(function(a,i){ return a + (Number(i.monto)||0); }, 0);
-  const libres = servicios.reduce(function(a,m){ return a + libresDe(m); }, 0);
-  const mastersVencidos = servicios.filter(function(m){ const d=diasHasta(m.vencimiento); return d!==null && d<0; });
+  const delMes = function(f){ return String(f||'').indexOf(mes)===0; };
+  const cobradoMes = ventas.filter(function(v){
+      return delMes(v.fecha) && (plataformaActiva==='TODAS' ||
+        String(v.servicio||'').trim().toUpperCase()===plataformaActiva ||
+        idsSuyos.has(String(v.cuentaMasterId)));
+    }).reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
+  const gastadoMes = inversiones.filter(function(i){
+      return delMes(i.fecha) && (plataformaActiva==='TODAS' ||
+        String(i.plataforma||'').trim().toUpperCase()===plataformaActiva ||
+        idsSuyos.has(String(i.cuentaMasterId)));
+    }).reduce(function(a,i){ return a + (Number(i.monto)||0); }, 0);
+  const libres = susCuentas.reduce(function(a,m){ return a + libresDe(m); }, 0);
+  const mastersVencidos = susCuentas.filter(function(m){ const d=diasHasta(m.vencimiento); return d!==null && d<0; });
 
   const porFecha = function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); };
 
@@ -2976,6 +3294,7 @@ function pintaHoy(){
 
   $('#p-hoy').innerHTML =
   '<div class="pila">' +
+    barraPlataformas() +
 
     '<div class="rejilla r5">' +
       '<button class="metrica mayor ' + (total>0?'aviso':'bien') + '" data-fhoy="pendientes">' +
@@ -3010,23 +3329,35 @@ function pintaHoy(){
                    s[1] + (s[2] ? '<span class="cuenta">' + s[2] + '</span>' : '') + '</button>';
           }).join('') +
         '</div>' +
+        '<div class="segmentos">' +
+          [['plataforma','Por plataforma'],['urgencia','Por urgencia']].map(function(v){
+            return '<button data-verhoy="' + v[0] + '" aria-selected="' + (verHoy===v[0]?'true':'false') + '">' +
+                   v[1] + '</button>';
+          }).join('') +
+        '</div>' +
       '</div>' +
       '<div class="tarjeta-cuerpo pegado">' +
-        (hayAlgo ? tramos.map(function(t){
-            const cuanto = t[2].reduce(function(a,c){ return a + cobroDe(c); }, 0);
-            return (conSeparador ?
-              '<div class="tramo ' + t[1] + '"><span class="punto"></span>' +
-                '<b>' + esc(t[0]) + '</b>' +
-                '<span class="tramo-n">' + t[2].length + '</span>' +
-                '<span class="tramo-monto cifra">' + esc(dinero(cuanto)) + '</span>' +
-              '</div>' : '') +
-              '<div class="mosaico gente">' +
-                t[2].slice().sort(porFecha).map(tarjetaCliente).join('') +
-              '</div>';
-          }).join('')
-          : '<div style="padding:0 var(--e5) var(--e5)">' +
+        (!hayAlgo
+          ? '<div style="padding:0 var(--e5) var(--e5)">' +
               vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.') +
-            '</div>') +
+            '</div>'
+          : (verHoy === 'plataforma'
+              /* Por plataforma: no "ochenta vencidos", sino "Netflix debe 17
+                 y Spotify 8". Es como se lleva el negocio de verdad. */
+              ? panelesPorPlataforma(tramos.reduce(function(a,t){ return a.concat(t[2]); }, []))
+              : tramos.map(function(t){
+                  const cuanto = t[2].reduce(function(a,c){ return a + cobroDe(c); }, 0);
+                  return (conSeparador ?
+                    '<div class="tramo ' + t[1] + '"><span class="punto"></span>' +
+                      '<b>' + esc(t[0]) + '</b>' +
+                      '<span class="tramo-n">' + t[2].length + '</span>' +
+                      '<span class="tramo-monto cifra">' + esc(dinero(cuanto)) + '</span>' +
+                    '</div>' : '') +
+                    '<div class="mosaico gente">' +
+                      t[2].slice().sort(porFecha).map(tarjetaCliente).join('') +
+                    '</div>';
+                }).join('')
+            )) +
       '</div>' +
     '</div>' +
 
@@ -3057,15 +3388,16 @@ function pintaHoy(){
 }
 
 /* --- CLIENTES ----------------------------------------------------------- */
-let filtroClientes = 'todos', ordenClientes = 'vencimiento', filtroCuenta = 'TODAS', filtroPlatCli = 'TODAS';
+let filtroClientes = 'todos', ordenClientes = 'plataforma', filtroCuenta = 'TODAS';
+try{ ordenClientes = localStorage.getItem('pap_orden_cli') || 'plataforma'; }catch(_){}
 
 function pintaClientes(){
   /* Los contadores respetan el filtro de plataforma: si estás viendo Netflix,
      los números de arriba son los de Netflix, no los de todo el negocio. */
   const enPlat = function(c){
-    if(filtroPlatCli === 'TODAS') return true;
+    if(plataformaActiva === 'TODAS') return true;
     const m = masterDe(c);
-    return String(c.servicio || (m && m.nombre) || '').trim().toUpperCase() === filtroPlatCli;
+    return String(c.servicio || (m && m.nombre) || '').trim().toUpperCase() === plataformaActiva;
   };
   const cuenta = {todos:0, deben:0, vencido:0, por_vencer:0, activo:0, sin_cuenta:0};
   clientes.forEach(function(c){
@@ -3101,27 +3433,7 @@ function pintaClientes(){
      cuántos clientes y cuánto dinero hay detrás de cada una. */
   let cuerpo;
   if(ordenClientes === 'plataforma'){
-    const porPlat = new Map();
-    lista.forEach(function(c){
-      const m = masterDe(c);
-      const k = String(c.servicio || (m && m.nombre) || 'Sin plataforma').trim().toUpperCase();
-      let g = porPlat.get(k);
-      if(!g){ g = []; porPlat.set(k, g); }
-      g.push(c);
-    });
-    cuerpo = Array.from(porPlat.keys()).sort().map(function(k){
-      const g = porPlat.get(k);
-      const suma = g.reduce(function(a,c){ return a + cobroDe(c); }, 0);
-      const deben = g.filter(function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; }).length;
-      return '<div class="tramo plat-tramo" style="' + tonoDe(k) + '">' +
-          logoPlataforma(k, 22) +
-          '<b>' + esc(k) + '</b>' +
-          '<span class="tramo-n">' + g.length + '</span>' +
-          (deben ? '<span class="insignia mal" style="height:19px">' + deben + ' por cobrar</span>' : '') +
-          '<span class="tramo-monto cifra">' + esc(dinero(suma)) + '</span>' +
-        '</div>' +
-        '<div class="mosaico gente">' + g.map(tarjetaCliente).join('') + '</div>';
-    }).join('');
+    cuerpo = panelesPorPlataforma(lista, {uno:'cliente', varias:'clientes'});
   }else if(ordenClientes === 'vencimiento'){
     /* Por vencimiento, la lista se parte por urgencia igual que en «Hoy».
        Ciento dos filas seguidas, todas iguales, no dicen dónde empieza lo
@@ -3152,20 +3464,21 @@ function pintaClientes(){
   }
 
   /* Si hay una plataforma filtrada, la cabecera habla de ESA plataforma. */
-  const deLaVista = filtroPlatCli === 'TODAS' ? clientes : clientes.filter(enPlat);
+  const deLaVista = plataformaActiva === 'TODAS' ? clientes : clientes.filter(enPlat);
   $('#subtitulo').textContent =
-    (filtroPlatCli === 'TODAS' ? '' : filtroPlatCli + ' · ') +
+    (plataformaActiva === 'TODAS' ? '' : plataformaActiva + ' · ') +
     deLaVista.length + ' ' + plural(deLaVista.length,'cliente','clientes') +
     ' · ' + dinero(deLaVista.reduce(function(a,c){ return a + cobroDe(c); }, 0)) + ' al ciclo';
 
   $('#p-clientes').innerHTML =
   '<div class="pila">' +
-    (filtroPlatCli !== 'TODAS' ?
-      '<div class="cartel de-plat" style="' + tonoDe(filtroPlatCli) + '">' +
-        logoPlataforma(filtroPlatCli, 30) +
-        '<span class="crece"><b>' + esc(filtroPlatCli) + '</b>' +
+    barraPlataformas() +
+    (plataformaActiva !== 'TODAS' ?
+      '<div class="cartel de-plat" style="' + tonoDe(plataformaActiva) + '">' +
+        logoPlataforma(plataformaActiva, 30) +
+        '<span class="crece"><b>' + esc(plataformaActiva) + '</b>' +
           '<small>Solo los clientes de esta plataforma</small></span>' +
-        '<a class="btn mini" href="' + esc(casaDe(filtroPlatCli)) + '" target="_blank" rel="noopener">' +
+        '<a class="btn mini" href="' + esc(casaDe(plataformaActiva)) + '" target="_blank" rel="noopener">' +
           ICONO.salir + 'Entrar</a>' +
         '<button class="btn mini fantasma" data-quitar-plat="1" aria-label="Quitar el filtro de plataforma">' + ICONO.x + '</button>' +
       '</div>' : '') +
@@ -3175,7 +3488,7 @@ function pintaClientes(){
     '<div class="tarjeta-cabeza">' +
       '<span class="cabeza-icono rosa">' + ICONO.gente + '</span>' +
       '<div class="crece"><h2>' +
-        (filtroPlatCli === 'TODAS' ? 'Tus clientes' : esc(filtroPlatCli)) + '</h2>' +
+        (plataformaActiva === 'TODAS' ? 'Tus clientes' : esc(plataformaActiva)) + '</h2>' +
         '<p>' + (lista.length === clientes.length
             ? lista.length + ' ' + plural(lista.length,'cliente','clientes')
             : lista.length + ' de ' + clientes.length + ' ' + plural(clientes.length,'cliente','clientes')) +
@@ -3201,8 +3514,8 @@ function pintaClientes(){
             .map(function(m){ return '<option value="' + esc(m.id) + '"' + (String(filtroCuenta)===String(m.id)?' selected':'') + '>' + esc(nombreCuenta(m)) + '</option>'; }).join('') +
         '</select>' +
         '<select id="sel-orden-cli" aria-label="Cómo ordenarlos">' +
+          '<option value="plataforma"' + (ordenClientes==='plataforma'?' selected':'') + '>Por plataforma</option>' +
           '<option value="vencimiento"' + (ordenClientes==='vencimiento'?' selected':'') + '>Por vencimiento</option>' +
-          '<option value="plataforma"' + (ordenClientes==='plataforma'?' selected':'') + '>Agrupados por plataforma</option>' +
           '<option value="nombre"' + (ordenClientes==='nombre'?' selected':'') + '>Por nombre</option>' +
           '<option value="monto"' + (ordenClientes==='monto'?' selected':'') + '>Por monto</option>' +
         '</select>' +
@@ -3220,7 +3533,6 @@ function pintaClientes(){
 }
 
 /* --- CUENTAS ------------------------------------------------------------ */
-let filtroPlataforma = 'TODAS';
 /* 'mosaico' entra por plataformas; 'lista' enseña todas las cuentas de un
    tirón, como antes, para quien quiera verlo todo sin entrar a ninguna. */
 let vistaCuentas = 'mosaico';
@@ -3263,7 +3575,7 @@ function fichaPlataforma(n, g){
   /* La ficha entera se pulsa para entrar, pero los botones de mando van
      encima: entrar a la web, abrir una cuenta nueva, ver sus clientes y
      escribirles no pueden quedar detrás de un clic. */
-  return '<div class="ficha' + (filtroPlataforma===n?' viva':'') + '" style="' + tonoDe(n) + '">' +
+  return '<div class="ficha' + (plataformaActiva===n?' viva':'') + '" style="' + tonoDe(n) + '">' +
     '<button class="ficha-tapa" data-plat="' + esc(n) + '" aria-label="Entrar a ' + esc(n) + ' en PAPOTAS"></button>' +
     '<span class="ficha-alto">' +
       logoPlataforma(n, 40) +
@@ -3378,10 +3690,10 @@ function pintaCuentas(){
   const costo  = nombres.reduce(function(a,n){ return a + grupos[n].costo; }, 0);
   const cobra  = nombres.reduce(function(a,n){ return a + grupos[n].cobra; }, 0);
 
-  if(filtroPlataforma !== 'TODAS' && !grupos[filtroPlataforma]) filtroPlataforma = 'TODAS';
+  if(plataformaActiva !== 'TODAS' && !grupos[plataformaActiva]) plataformaActiva = 'TODAS';
 
   let mostrar = nombres;
-  if(filtroPlataforma !== 'TODAS') mostrar = [filtroPlataforma];
+  if(plataformaActiva !== 'TODAS') mostrar = [plataformaActiva];
   if(busqueda){
     mostrar = mostrar.filter(function(n){
       if(sinTildes(n).indexOf(busqueda) >= 0) return true;
@@ -3391,9 +3703,9 @@ function pintaCuentas(){
     });
   }
 
-  if(filtroPlataforma !== 'TODAS' && grupos[filtroPlataforma]){
-    const g = grupos[filtroPlataforma];
-    $('#subtitulo').textContent = filtroPlataforma + ' · ' +
+  if(plataformaActiva !== 'TODAS' && grupos[plataformaActiva]){
+    const g = grupos[plataformaActiva];
+    $('#subtitulo').textContent = plataformaActiva + ' · ' +
       g.cuentas.length + ' ' + plural(g.cuentas.length,'cuenta','cuentas') +
       ' · ' + (g.tope - g.libres) + '/' + g.tope + ' perfiles ocupados';
   }else{
@@ -3404,8 +3716,9 @@ function pintaCuentas(){
 
   $('#p-cuentas').innerHTML =
   '<div class="pila">' +
+    barraPlataformas() +
 
-    (filtroPlataforma !== 'TODAS' ? '' :
+    (plataformaActiva !== 'TODAS' ? '' :
     '<div class="rejilla r5">' +
       '<div class="metrica mayor ' + (libres?'info':'mal') + '"><span class="k">Perfiles libres</span>' +
         '<span class="v cifra">' + libres + '</span>' +
@@ -3422,7 +3735,7 @@ function pintaCuentas(){
 
     /* El mosaico: cada plataforma con su color, su logo, sus perfiles y lo
        que deja. Es la puerta de entrada; se pulsa una y se entra a ella. */
-    (filtroPlataforma === 'TODAS' && !busqueda && nombres.length ?
+    (plataformaActiva === 'TODAS' && !busqueda && nombres.length ?
       '<div class="tarjeta caja-plataformas"><div class="tarjeta-cabeza">' +
           '<span class="cabeza-icono rosa">' + ICONO.tele + '</span>' +
           '<div class="crece"><h2>Tus plataformas</h2>' +
@@ -3443,14 +3756,14 @@ function pintaCuentas(){
       '</div>' : '') +
 
     /* Dentro de una plataforma manda ella: su cabecera con su color. */
-    (filtroPlataforma !== 'TODAS' && grupos[filtroPlataforma] ?
-      heroPlataforma(filtroPlataforma, grupos[filtroPlataforma]) : '') +
+    (plataformaActiva !== 'TODAS' && grupos[plataformaActiva] ?
+      heroPlataforma(plataformaActiva, grupos[plataformaActiva]) : '') +
 
-    ((filtroPlataforma !== 'TODAS' || busqueda || vistaCuentas === 'lista') && mostrar.length ? mostrar.map(function(n){
+    ((plataformaActiva !== 'TODAS' || busqueda || vistaCuentas === 'lista') && mostrar.length ? mostrar.map(function(n){
       const g = grupos[n];
       const lista = g.cuentas.slice().sort(function(a,b){ return (Number(a.numero)||0) - (Number(b.numero)||0); });
       return '<div class="tarjeta de-plat" style="' + tonoDe(n) + '">' +
-        (filtroPlataforma !== 'TODAS' ? '' :
+        (plataformaActiva !== 'TODAS' ? '' :
         '<div class="tarjeta-cabeza">' +
           logoPlataforma(n, 36) +
           '<div class="crece"><h2>' + esc(n) + '</h2>' +
@@ -3482,8 +3795,24 @@ function pintaDinero(){
   if(!mesDinero) mesDinero = hoyISO().slice(0,7);
   const eco = economia();
 
-  const ventasMes = ventas.filter(function(v){ return String(v.fecha||'').indexOf(mesDinero)===0; });
-  const gastosMes = inversiones.filter(function(i){ return String(i.fecha||'').indexOf(mesDinero)===0; });
+  /* El dinero también se mira por plataforma: si estás en NETFLIX, aquí
+     solo hay lo que entra y sale de Netflix. */
+  const enPlatM = function(m){
+    return plataformaActiva === 'TODAS' ||
+           String(m.nombre||'').trim().toUpperCase() === plataformaActiva;
+  };
+  const susCuentas = servicios.filter(enPlatM);
+  const idsSuyos = new Set(susCuentas.map(function(m){ return String(m.id); }));
+  const esSuya = function(x, campo){
+    if(plataformaActiva === 'TODAS') return true;
+    return String(x[campo]||'').trim().toUpperCase() === plataformaActiva ||
+           idsSuyos.has(String(x.cuentaMasterId));
+  };
+  const ventasPlat = ventas.filter(function(v){ return esSuya(v, 'servicio'); });
+  const gastosPlat = inversiones.filter(function(i){ return esSuya(i, 'plataforma'); });
+
+  const ventasMes = ventasPlat.filter(function(v){ return String(v.fecha||'').indexOf(mesDinero)===0; });
+  const gastosMes = gastosPlat.filter(function(i){ return String(i.fecha||'').indexOf(mesDinero)===0; });
   const cobrado = ventasMes.reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
   const gastado = gastosMes.reduce(function(a,i){ return a + (Number(i.monto)||0); }, 0);
   const ticket  = ventasMes.length ? cobrado/ventasMes.length : 0;
@@ -3497,18 +3826,20 @@ function pintaDinero(){
   function mesBonito(m){ const p=m.split('-'); return NOMBREMES[+p[1]-1] + ' ' + p[0]; }
 
   /* Rentabilidad por cuenta, de la que más deja a la que menos. */
-  const porCuenta = servicios.map(function(m){
+  const porCuenta = susCuentas.map(function(m){
     const r = resumenCuenta(m, eco);
     return {m, r};
   }).sort(function(a,b){ return b.r.margen - a.r.margen; });
   const maxMargen = porCuenta.reduce(function(a,x){ return Math.max(a, Math.abs(x.r.margen)); }, 1);
 
-  const ultimas = ventas.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).slice(0,12);
+  const ultimas = ventasPlat.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).slice(0,12);
 
-  $('#subtitulo').textContent = mesBonito(mesDinero);
+  $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? '' : plataformaActiva + ' · ') +
+    mesBonito(mesDinero);
 
   $('#p-dinero').innerHTML =
   '<div class="pila">' +
+    barraPlataformas() +
     /* El mes, con sus flechas: se pasa de mes sin abrir ningún desplegable,
        que es como se mira el dinero — hacia atrás, uno a uno. */
     (function(){
@@ -3590,8 +3921,8 @@ function pintaDinero(){
         ultimos.push(aa + '-' + String(mm+1).padStart(2,'0'));
       }
       const filas = ultimos.map(function(k){
-        const ent = ventas.reduce(function(x,v){ return String(v.fecha||'').indexOf(k)===0 ? x + (Number(v.monto)||0) : x; }, 0);
-        const sal = inversiones.reduce(function(x,i){ return String(i.fecha||'').indexOf(k)===0 ? x + (Number(i.monto)||0) : x; }, 0);
+        const ent = ventasPlat.reduce(function(x,v){ return String(v.fecha||'').indexOf(k)===0 ? x + (Number(v.monto)||0) : x; }, 0);
+        const sal = gastosPlat.reduce(function(x,i){ return String(i.fecha||'').indexOf(k)===0 ? x + (Number(i.monto)||0) : x; }, 0);
         return {k, ent, sal};
       });
       const techo = filas.reduce(function(x,f){ return Math.max(x, f.ent, f.sal); }, 0) || 1;
@@ -3854,6 +4185,23 @@ function pintaAjustes(){
       '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
         'Tus claves se quedan solo en este dispositivo: nunca se suben a la nube ni salen en el respaldo compartido.' +
       '</p></div>' +
+    '</div>' +
+
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono azul">' + ICONO.rueda + '</span>' +
+        '<div class="crece"><h2>Atajos de teclado</h2>' +
+          '<p>Para la laptop. No se disparan mientras escribes.</p></div></div>' +
+      '<div class="tarjeta-cuerpo"><div class="atajos">' +
+        [['1 … 9','ir a esa plataforma'],['0','ver todas'],
+         ['←  →','plataforma anterior o siguiente'],['Esc','salir de la plataforma'],
+         ['/','buscar'],['H','Hoy'],['C','Clientes'],['U','Cuentas'],['D','Dinero'],['A','Ajustes']]
+         .map(function(a){
+           return '<div class="atajo">' +
+             a[0].split(/\s+/).map(function(k){ return '<kbd>' + esc(k) + '</kbd>'; }).join(' ') +
+             '<span>' + esc(a[1]) + '</span></div>';
+         }).join('') +
+      '</div></div>' +
     '</div>' +
 
     '<div class="tarjeta">' +
@@ -4277,7 +4625,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -4415,7 +4763,7 @@ document.addEventListener('click', function(ev){
   }
   if(d.nuevaEn){ formMaster(null, d.nuevaEn); return; }
   if(d.clientesDe || d.cobrarDe){
-    filtroPlatCli = d.clientesDe || d.cobrarDe;
+    ponerPlataforma(d.clientesDe || d.cobrarDe);
     filtroClientes = d.cobrarDe ? 'deben' : 'todos';
     filtroCuenta = 'TODAS';
     ordenClientes = 'vencimiento';
@@ -4423,7 +4771,7 @@ document.addEventListener('click', function(ev){
     ir('clientes');
     return;
   }
-  if(d.quitarPlat){ filtroPlatCli = 'TODAS'; pintar(); return; }
+  if(d.quitarPlat){ ponerPlataforma('TODAS'); pintar(); return; }
   if(d.mes){ mesDinero = d.mes; pintar(); return; }
   if(d.ficha){ verFicha(d.ficha); return; }
   if(d.nuevaRapida){ formRapida(null); return; }
@@ -4442,9 +4790,14 @@ document.addEventListener('click', function(ev){
   }
   if(d.vista){ vistaCuentas = d.vista; pintar(); return; }
   if(d.plat){
-    filtroPlataforma = d.plat; pintar();
+    ponerPlataforma(d.plat); pintar();
     const l = $('#lienzo'); if(l) l.scrollTop = 0;
     return;
+  }
+  if(d.verhoy){
+    verHoy = d.verhoy;
+    try{ localStorage.setItem('pap_ver_hoy', verHoy); }catch(_){}
+    pintar(); return;
   }
   if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
   if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
@@ -4456,7 +4809,11 @@ document.addEventListener('change', function(ev){
   const id = ev.target.id;
   if(id === 'cola-plantilla'){ colaPlantilla = ev.target.value; return; }
   if(id === 'sel-cuenta-cli'){ filtroCuenta = ev.target.value; pintar(); }
-  else if(id === 'sel-orden-cli'){ ordenClientes = ev.target.value; pintar(); }
+  else if(id === 'sel-orden-cli'){
+    ordenClientes = ev.target.value;
+    try{ localStorage.setItem('pap_orden_cli', ordenClientes); }catch(_){}
+    pintar();
+  }
   else if(id === 'sel-mes'){ mesDinero = ev.target.value; pintar(); }
 });
 
@@ -4537,6 +4894,53 @@ document.addEventListener('click', function(ev){
         avisar('Historial vaciado', 'bien');
       }, true);
   }
+});
+
+/* ---------- Atajos de teclado -------------------------------------------
+   Para cuando se trabaja en la laptop: cambiar de plataforma y de pantalla
+   sin soltar el teclado. Nunca se disparan mientras se escribe en un campo
+   ni con una ventana abierta. */
+document.addEventListener('keydown', function(ev){
+  if(ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const dentro = ev.target && ev.target.closest &&
+                 ev.target.closest('input,textarea,select,[contenteditable="true"]');
+  if(ev.key === '/' && !dentro){
+    ev.preventDefault();
+    const bu = $('#buscar'); if(bu){ bu.focus(); bu.select(); }
+    return;
+  }
+  if(dentro){
+    /* Escape dentro del buscador lo vacía y suelta el foco. */
+    if(ev.key === 'Escape' && ev.target.id === 'buscar'){
+      ev.target.value = ''; ev.target.blur();
+      ev.target.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    return;
+  }
+  if(cerrarModalActual) return;
+  const platos = resumenPlataformas();
+  if(ev.key === 'Escape' && plataformaActiva !== 'TODAS'){
+    ponerPlataforma('TODAS'); pintar(); avisar('Viendo todas las plataformas'); return;
+  }
+  if(ev.key >= '1' && ev.key <= '9'){
+    const x = platos[Number(ev.key) - 1];
+    if(x){ ponerPlataforma(x.n); pintar(); avisar('Trabajando con ' + x.n); }
+    return;
+  }
+  if(ev.key === '0'){ ponerPlataforma('TODAS'); pintar(); return; }
+  /* Flechas para pasar de una plataforma a la de al lado. */
+  if(ev.key === 'ArrowLeft' || ev.key === 'ArrowRight'){
+    if(!platos.length) return;
+    const nombres = ['TODAS'].concat(platos.map(function(x){ return x.n; }));
+    let i = nombres.indexOf(plataformaActiva);
+    if(i < 0) i = 0;
+    i = (i + (ev.key === 'ArrowRight' ? 1 : -1) + nombres.length) % nombres.length;
+    ponerPlataforma(nombres[i]); pintar();
+    return;
+  }
+  const saltos = {h:'hoy', c:'clientes', u:'cuentas', d:'dinero', a:'ajustes'};
+  const destino = saltos[String(ev.key).toLowerCase()];
+  if(destino){ ir(destino); }
 });
 
 /* Cargar un respaldo desde el disco. */
