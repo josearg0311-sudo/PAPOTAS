@@ -686,7 +686,9 @@ button.metrica:hover{background:var(--capa-alta)}
   display:flex;align-items:center;gap:9px;
   padding:9px var(--e4);background:var(--capa-alta);
   font-size:11.5px;font-weight:700;letter-spacing:.01em;color:var(--txt-2);
-  position:sticky;top:0;z-index:3;
+  /* Por encima de los botones de las tarjetas (que van a 3): si no, el
+     botón de cobrar se dibujaba encima del separador pegado arriba. */
+  position:sticky;top:0;z-index:8;
   border-bottom:1px solid var(--linea);
   box-shadow:0 1px 0 var(--linea), 0 10px 16px -14px rgba(0,0,0,.75);
 }
@@ -846,6 +848,21 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 .insignia.pulsable{cursor:pointer;min-height:28px;padding:0 10px}
 .insignia.pulsable:hover{filter:brightness(1.25)}
 .mosaico{grid-template-columns:repeat(auto-fill, minmax(262px, 1fr))}
+/* La rejilla de personas, dentro de una tarjeta: se aprieta un poco más y
+   respira por los lados como el resto del cuerpo de la tarjeta. */
+.mosaico.gente{
+  padding:var(--e3) var(--e5) var(--e5);
+  grid-template-columns:repeat(auto-fill, minmax(248px, 1fr));
+  gap:var(--e3);
+}
+.tramo + .mosaico.gente{padding-top:var(--e4)}
+@media (max-width:700px){
+  .mosaico.gente{
+    grid-template-columns:1fr;
+    gap:var(--e2);
+    padding:var(--e2) var(--e3) var(--e3);
+  }
+}
 
 /* En el teléfono las plataformas van primero: son con lo que se trabaja.
    Debajo de las cuatro cifras quedaban a dos pantallas de distancia. */
@@ -886,6 +903,134 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
      mitad se leían peor que seguidas. */
   #p-ajustes > .pila > .ancha{ grid-column:1 / -1 }
 }
+
+/* ===== TARJETA DE CLIENTE ==============================================
+   El mismo esqueleto que la ficha de una plataforma. Cambia lo que cuenta
+   —una persona en vez de un servicio— pero no el idioma. */
+.tc{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;overflow:hidden;text-align:left;
+  display:flex;flex-direction:column;gap:9px;
+  padding:var(--e4);border-radius:var(--r-xl);
+  border:1px solid var(--linea);background:var(--capa);
+  box-shadow:var(--brillo), var(--sombra-2);
+  transition:transform var(--rapido) var(--curva),
+             border-color var(--rapido) var(--curva),
+             box-shadow var(--rapido) var(--curva);
+}
+.tc::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(135% 105% at 0% 0%, var(--tono) 0%, transparent 62%);
+  opacity:.13;
+}
+html[data-tema="claro"] .tc::after{opacity:.08}
+/* La franja de arriba dice el estado, no la marca: en esta pantalla lo que
+   manda es a quién le toca, y el color de la plataforma ya lo lleva el
+   logo y el chip de su cuenta. */
+.tc::before{
+  content:"";position:absolute;inset:0 0 auto;height:3px;z-index:2;
+  background:linear-gradient(90deg, var(--tono), transparent 85%);
+}
+.tc.mal::before  {background:linear-gradient(90deg, var(--mal), transparent 88%)}
+.tc.aviso::before{background:linear-gradient(90deg, var(--aviso), transparent 88%)}
+.tc.bien::before {background:linear-gradient(90deg, var(--bien), transparent 90%)}
+.tc > *:not(.ficha-tapa){position:relative;z-index:2;pointer-events:none}
+.tc > .tc-mando{z-index:3;pointer-events:auto}
+.tc:hover{transform:translateY(-2px);border-color:var(--tono-linea);box-shadow:var(--sombra-3)}
+.tc:focus-within{border-color:var(--tono-linea)}
+
+.tc-alto{display:flex;align-items:center;gap:10px;min-width:0}
+.tc-id{min-width:0;flex:1}
+.tc-id b{
+  display:block;font-size:14.5px;font-weight:700;letter-spacing:-.022em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tc-id small{
+  display:block;margin-top:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.tc-pie{
+  display:flex;align-items:center;gap:var(--e2);
+  border-top:1px solid var(--linea);padding-top:9px;margin-top:auto;
+}
+.tc-monto{flex:1;min-width:0}
+.tc-monto small{
+  display:block;font-size:10px;color:var(--txt-4);font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.tc-monto b{display:block;font-size:19px;font-weight:750;letter-spacing:-.035em;margin-top:1px}
+.tc-mando{
+  display:flex;gap:6px;align-items:center;
+  border-top:1px solid var(--linea);padding-top:9px;
+}
+.tc-mando .crece{flex:1;min-width:0}
+.tc-mando .btn[data-ficha]{color:var(--txt-3)}
+/* El botón de cobrar habla del estado: rojo el que ya venció, ámbar el que
+   está por vencer y apagado el que está al día. Ochenta botones rosas
+   iguales gritan todos lo mismo y no dicen nada. */
+.tc.aviso .tc-mando .btn.principal{
+  background:var(--aviso);border-color:var(--aviso);color:#12161d;
+}
+.tc.bien .tc-mando .btn.principal,
+.tc:not(.mal):not(.aviso):not(.bien) .tc-mando .btn.principal{
+  background:var(--capa-alta);border-color:var(--linea-fuerte);color:var(--txt-2);
+  box-shadow:none;
+}
+.tc.bien .tc-mando .btn.principal:hover,
+.tc:not(.mal):not(.aviso):not(.bien) .tc-mando .btn.principal:hover{
+  border-color:var(--txt-4);color:var(--txt);
+}
+
+/* En pantalla estrecha la misma tarjeta se aplana: identidad arriba, cifra
+   y estado debajo, y el mando a la derecha. Sin cambiar una línea de HTML. */
+@media (max-width:700px){
+  .tc{
+    display:grid;gap:6px 10px;padding:11px var(--e3);border-radius:var(--r-l);
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:"alto mando" "pie mando";
+    align-items:center;
+  }
+  .tc-alto{grid-area:alto}
+  .tc-pie{
+    grid-area:pie;border-top:0;padding-top:0;margin-top:0;
+    padding-left:50px;gap:9px;
+  }
+  .tc-monto{flex:0 0 auto}
+  .tc-monto small{display:none}
+  .tc-monto b{font-size:14px}
+  .tc-mando{
+    grid-area:mando;border-top:0;padding-top:0;
+    flex-direction:row;align-self:center;
+  }
+  .tc-mando .btn.principal .et{display:none}
+  .tc-mando .btn.principal{width:44px;padding:0;flex:0 0 auto}
+  .tc-mando .crece{flex:0 0 auto}
+  /* La flecha sobra en el teléfono: la tarjeta entera ya abre la ficha, y
+     esos cincuenta píxeles se los estaba comiendo al nombre de la cuenta. */
+  .tc-mando .btn[data-ficha]{display:none}
+  .tc .f-marca{width:36px;height:36px}
+  .tc-pie{padding-left:46px}
+}
+@media (max-width:360px){
+  .tc-pie{padding-left:0}
+}
+
+/* La cabecera de la ficha en ventana. */
+.ficha-cabeza{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;gap:var(--e3);
+  padding:12px var(--e4);margin-bottom:var(--e4);
+  border:1px solid var(--tono-linea);border-radius:var(--r-l);background:var(--capa-alta);
+}
+.ficha-cabeza::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(90deg, var(--tono), transparent 55%);opacity:.15;
+}
+html[data-tema="claro"] .ficha-cabeza::after{opacity:.09}
+.ficha-cabeza > *{position:relative;z-index:1}
+.ficha-cabeza b{display:block;font-size:14px;font-weight:700;letter-spacing:-.02em}
+.ficha-cabeza small{display:block;font-size:12px;color:var(--txt-3);font-weight:500;margin-top:1px}
 
 /* ===== CABECERA DE UNA PLATAFORMA =======================================
    Cuando se entra a una, manda ella: su color, su logo grande y todo lo que
@@ -1159,6 +1304,8 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   /* Cobrar y escribir se pulsan cien veces al día, en una lista apretada de
      cien filas: 44 de lado, que es lo que mide un pulgar. */
   .f-acciones .btn.icono.mini{ width:44px; min-height:44px }
+  .tc-mando .btn.mini{ min-height:44px }
+  .tc-mando .btn.icono.mini{ width:44px }
   /* Nada de efectos de "pasar el ratón" donde no hay ratón. */
   .btn:hover, .f:hover, .plat:hover, .mes:hover, .metrica:hover{ background:inherit }
   .btn:active{ transform:scale(.97) }
@@ -1184,7 +1331,9 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   #btn-accion{order:1;flex:0 0 auto}
   #btn-accion #btn-accion-txt{max-width:36vw;overflow:hidden;
     text-overflow:ellipsis;white-space:nowrap}
-  #btn-viejo-movil{order:2;flex:0 0 auto}
+  /* El "volver al de siempre" se queda solo en Ajustes: aquí se llevaba un
+     renglón entero de la cabecera para un botón que se usa una vez. */
+  #btn-viejo-movil{display:none}
   .buscador{flex:1 1 100%;order:4}
   #lienzo{padding:var(--e4) var(--e3)}
   .r4{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1254,7 +1403,7 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.8</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v2.9</span>
     </div>
   </nav>
 
@@ -2338,7 +2487,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v2.8';
+const VERSION = 'v2.9';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -2533,6 +2682,73 @@ $('#btn-tema').addEventListener('click', function(){
 const abiertos = new Set();
 
 /* Una fila de cliente + su cajón de acciones. */
+/* La tarjeta de un cliente. Mismo esqueleto que la ficha de una plataforma
+   —franja de color arriba, logo, identidad, estado, cifra y mando— porque
+   es el que funciona: cada cosa con su sitio y su color, no cien renglones
+   grises seguidos. En pantalla estrecha la misma tarjeta se aplana en dos
+   renglones sin cambiar de HTML. */
+function tarjetaCliente(c){
+  const est = estadoDe(c);
+  const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
+  const m = masterDe(c);
+  const perfil = perfilBonito(c);
+  const plat = c.servicio || (m && m.nombre) || '';
+  const tel = telefonoDe(c);
+  return '' +
+  '<div class="tc ' + clase + '" data-cid="' + esc(c.id) + '" style="' + tonoDe(plat) + '">' +
+    '<button class="ficha-tapa" data-ficha="' + esc(c.id) + '"' +
+      ' aria-label="Ver la ficha de ' + esc(c.nombre || 'este cliente') + '"></button>' +
+    '<span class="tc-alto">' +
+      logoPlataforma(plat, 40) +
+      '<span class="tc-id">' +
+        '<b>' + esc(c.nombre || 'Sin nombre') + '</b>' +
+        '<small>' +
+          (m ? '<span class="chip-cuenta" style="' + tonoDe(plat) + '">' + esc(nombreCuenta(m)) + '</span>' +
+               (perfil ? '<span class="chip-perfil">' + esc(perfil) + '</span>' : '')
+             : '<span class="chip-cuenta" style="' + tonoDe(plat) + '">' + esc(plat || 'Sin plataforma') + '</span>' +
+               '<span class="chip-perfil sin">sin cuenta</span>') +
+        '</small>' +
+      '</span>' +
+    '</span>' +
+    '<span class="tc-pie">' +
+      '<span class="tc-monto"><small>Le cobras</small>' +
+        '<b class="cifra">' + esc(dinero(cobroDe(c))) + '</b></span>' +
+      '<span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span>' +
+    '</span>' +
+    '<span class="tc-mando">' +
+      '<button class="btn mini principal crece" data-cobrar="' + esc(c.id) + '"' +
+        ' title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + ' y renovarle">' +
+        ICONO.cobrar + '<span class="et">Cobrar</span></button>' +
+      (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '"' +
+        ' title="Escribir a ' + esc(c.nombre||'') + ' por WhatsApp"' +
+        ' aria-label="Escribir a ' + esc(c.nombre||'') + ' por WhatsApp">' + ICONO.wa + '</button>'
+        : '<span class="f-sin-tel" title="Sin teléfono guardado" aria-hidden="true">' + ICONO.wa + '</span>') +
+      '<button class="btn mini icono" data-ficha="' + esc(c.id) + '"' +
+        ' title="Ver la ficha de ' + esc(c.nombre||'') + '"' +
+        ' aria-label="Ver la ficha de ' + esc(c.nombre||'') + '">' + ICONO.flecha + '</button>' +
+    '</span>' +
+  '</div>';
+}
+
+/* La ficha entera, en una ventana. Dentro de una rejilla de tarjetas un
+   acordeón desencaja la fila entera; en ventana se lee mejor y en el
+   teléfono ocupa la pantalla, que es lo que hace falta. */
+function verFicha(id){
+  const c = buscarCliente(id);
+  if(!c) return;
+  const m = masterDe(c);
+  const plat = c.servicio || (m && m.nombre) || '';
+  abrirModal(c.nombre || 'Cliente',
+    '<div class="ficha-cabeza" style="' + tonoDe(plat) + '">' +
+      logoPlataforma(plat, 44) +
+      '<span class="crece"><b>' + esc(nombreCuenta(m) || plat || 'Sin cuenta') + '</b>' +
+        '<small>' + esc(perfilBonito(c) || 'Sin perfil') + '</small></span>' +
+      '<span class="pastilla ' + (estadoDe(c)==='vencido'?'mal':estadoDe(c)==='por_vencer'?'aviso':'bien') + '">' +
+        esc(textoDias(c.vencimiento)) + '</span>' +
+    '</div>' + cajonCliente(c),
+    [{texto:'Cerrar', clase:'fantasma', hacer:cerrarModal}]);
+}
+
 function filaCliente(c){
   const est = estadoDe(c);
   const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
@@ -2795,7 +3011,7 @@ function pintaHoy(){
           }).join('') +
         '</div>' +
       '</div>' +
-      '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+      '<div class="tarjeta-cuerpo pegado">' +
         (hayAlgo ? tramos.map(function(t){
             const cuanto = t[2].reduce(function(a,c){ return a + cobroDe(c); }, 0);
             return (conSeparador ?
@@ -2804,10 +3020,14 @@ function pintaHoy(){
                 '<span class="tramo-n">' + t[2].length + '</span>' +
                 '<span class="tramo-monto cifra">' + esc(dinero(cuanto)) + '</span>' +
               '</div>' : '') +
-              t[2].slice().sort(porFecha).map(filaCliente).join('');
+              '<div class="mosaico gente">' +
+                t[2].slice().sort(porFecha).map(tarjetaCliente).join('') +
+              '</div>';
           }).join('')
-          : vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.')) +
-      '</div></div>' +
+          : '<div style="padding:0 var(--e5) var(--e5)">' +
+              vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.') +
+            '</div>') +
+      '</div>' +
     '</div>' +
 
     '<div class="rejilla r3">' +
@@ -2899,7 +3119,8 @@ function pintaClientes(){
           '<span class="tramo-n">' + g.length + '</span>' +
           (deben ? '<span class="insignia mal" style="height:19px">' + deben + ' por cobrar</span>' : '') +
           '<span class="tramo-monto cifra">' + esc(dinero(suma)) + '</span>' +
-        '</div>' + g.map(filaCliente).join('');
+        '</div>' +
+        '<div class="mosaico gente">' + g.map(tarjetaCliente).join('') + '</div>';
     }).join('');
   }else if(ordenClientes === 'vencimiento'){
     /* Por vencimiento, la lista se parte por urgencia igual que en «Hoy».
@@ -2923,10 +3144,11 @@ function pintaClientes(){
           '<b>' + esc(t[1]) + '</b>' +
           '<span class="tramo-n">' + g.length + '</span>' +
           '<span class="tramo-monto cifra">' + esc(dinero(suma)) + '</span>' +
-        '</div>' : '') + g.map(filaCliente).join('');
+        '</div>' : '') +
+        '<div class="mosaico gente">' + g.map(tarjetaCliente).join('') + '</div>';
     }).join('');
   }else{
-    cuerpo = lista.map(filaCliente).join('');
+    cuerpo = '<div class="mosaico gente">' + lista.map(tarjetaCliente).join('') + '</div>';
   }
 
   /* Si hay una plataforma filtrada, la cabecera habla de ESA plataforma. */
@@ -2986,12 +3208,14 @@ function pintaClientes(){
         '</select>' +
       '</div>' +
     '</div>' +
-    '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+    '<div class="tarjeta-cuerpo pegado">' +
       (lista.length ? cuerpo
-                    : vacio(busqueda ? 'Nadie con ese nombre' : 'Sin clientes aquí',
-                            busqueda ? 'Prueba con otra palabra o borra el buscador.'
-                                     : 'Pulsa «Nuevo cliente» para empezar.')) +
-    '</div></div></div>' +
+                    : '<div style="padding:var(--e5)">' +
+                        vacio(busqueda ? 'Nadie con ese nombre' : 'Sin clientes aquí',
+                              busqueda ? 'Prueba con otra palabra o borra el buscador.'
+                                       : 'Pulsa «Nuevo cliente» para empezar.') +
+                      '</div>') +
+    '</div></div>' +
   '</div>';
 }
 
@@ -3727,6 +3951,9 @@ function renovar(id, cobrando){
     anotar('RENOVAR', c.nombre + ' renovado hasta ' + fechaBonita(nueva) + ' sin cobrar');
   }
   guardar();
+  /* Si se cobró desde la ficha abierta, la ficha se cierra: el trabajo está
+     hecho y dejarla abierta con los datos viejos solo confunde. */
+  if(cerrarModalActual) cerrarModal();
   pintar();
   avisar(cobrando
     ? 'Cobrado ' + dinero(monto*meses) + ' · ' + c.nombre + ' hasta ' + fechaBonita(nueva)
@@ -4050,7 +4277,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-vista],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-fcli],[data-ir-cuentas],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -4198,6 +4425,7 @@ document.addEventListener('click', function(ev){
   }
   if(d.quitarPlat){ filtroPlatCli = 'TODAS'; pintar(); return; }
   if(d.mes){ mesDinero = d.mes; pintar(); return; }
+  if(d.ficha){ verFicha(d.ficha); return; }
   if(d.nuevaRapida){ formRapida(null); return; }
   if(d.editarRapida){ formRapida(d.editarRapida); return; }
   if(d.borrarRapida){
