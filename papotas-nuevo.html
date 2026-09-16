@@ -29,9 +29,19 @@
 
   /* Texto. Cuatro pesos de gris, cada uno con su trabajo. */
   --txt:#f3f4f6;
+  /* Cuatro grises, y los cuatro se leen. Medidos contra la capa más clara
+     del programa (--capa-alta): 7.3, 5.6 y 4.5 a 1, que es lo que pide la
+     norma para texto normal. Los de antes se quedaban en 2.4. */
   --txt-2:#a8b0bb;
-  --txt-3:#737b87;
-  --txt-4:#565d68;
+  --txt-3:#939aa3;
+  --txt-4:#808996;
+  /* La tinta que se lee encima de cada color de estado: en oscuro los
+     colores son claros, así que encima va tinta oscura, no blanca. */
+  --velo-n:rgba(0,0,0,.42);
+  --tinta-mal:#2a0610;
+  --tinta-aviso:#241603;
+  --tinta-bien:#04170f;
+  --tinta-info:#04121f;
 
   /* Marca: solo para la acción principal y el logo. */
   --marca:#e11d48;
@@ -76,9 +86,15 @@ html[data-tema="claro"]{
   --linea:rgba(15,23,42,.09);
   --linea-fuerte:rgba(15,23,42,.16);
   --txt:#0f172a;
-  --txt-2:#4b5563;
-  --txt-3:#6b7280;
-  --txt-4:#9099a5;
+  --txt-2:#495361;
+  --txt-3:#575d68;
+  --txt-4:#5f6874;
+  /* En claro los colores de estado son oscuros: encima va blanco. */
+  --velo-n:rgba(0,0,0,.78);
+  --tinta-mal:#ffffff;
+  --tinta-aviso:#ffffff;
+  --tinta-bien:#ffffff;
+  --tinta-info:#ffffff;
   --marca-suave:rgba(225,29,72,.08);
   --marca-linea:rgba(225,29,72,.24);
   --mal:#be123c;   --mal-fondo:rgba(225,29,72,.08);  --mal-linea:rgba(225,29,72,.22);
@@ -154,7 +170,7 @@ a{color:inherit}
 }
 .nav-punto{
   position:absolute;top:6px;right:10px;min-width:16px;height:16px;padding:0 4px;
-  border-radius:99px;background:var(--mal);color:#12161d;
+  border-radius:99px;background:var(--mal);color:var(--tinta-mal);
   font-size:9px;font-weight:700;line-height:16px;text-align:center;
 }
 #carril-pie{margin-top:auto;display:flex;flex-direction:column;gap:var(--e1);align-items:center}
@@ -739,7 +755,7 @@ button.metrica:hover{background:var(--capa-alta)}
 .plat.viva b{color:var(--txt)}
 .plat-aviso{
   position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;padding:0 5px;
-  border-radius:99px;background:var(--mal);color:#fff;
+  border-radius:99px;background:var(--mal);color:var(--tinta-mal);
   font-size:10px;font-weight:700;line-height:18px;text-align:center;
   border:2px solid var(--fondo);
 }
@@ -1085,7 +1101,8 @@ button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
 .btn.grande{min-height:48px;font-size:14px;font-weight:700;padding:0 var(--e4)}
 .btn-n{
   margin-left:4px;min-width:22px;height:20px;padding:0 6px;border-radius:99px;
-  background:rgba(0,0,0,.22);font-size:11px;font-weight:800;line-height:20px;
+  background:var(--velo-n);color:#fff;
+  font-size:11px;font-weight:800;line-height:20px;
 }
 .tab-mini{
   grid-area:mini;margin:0;display:grid;gap:var(--e2);
@@ -1284,7 +1301,7 @@ html[data-tema="claro"] .pastel.viva::after{opacity:.13}
 .pastel.viva .pastel-txt small{color:var(--txt-3)}
 .pastel-n{
   flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:99px;
-  background:var(--mal);color:#fff;
+  background:var(--mal);color:var(--tinta-mal);
   font-size:10.5px;font-weight:800;line-height:20px;text-align:center;
 }
 @media (pointer: coarse){
@@ -1997,6 +2014,176 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 .historial .h .cifra{font-weight:700;color:var(--bien);white-space:nowrap}
 @media (max-width:640px){ .historial .h{padding:11px var(--e3)} }
 
+
+/* ===== DESHACER, NOTAS, PRECIOS Y REVISIÓN ============================ */
+/* El botón de deshacer dentro del propio aviso: donde estás mirando. */
+/* El aviso entero deja pasar los clics para no tapar la pantalla; el botón,
+   que es lo único que se pulsa ahí, los recoge. */
+.aviso-deshacer{
+  pointer-events:auto;
+  margin-left:auto;flex:0 0 auto;
+  border:1px solid currentColor;background:transparent;color:inherit;
+  font:inherit;font-size:11.5px;font-weight:700;cursor:pointer;
+  height:26px;padding:0 11px;border-radius:99px;opacity:.9;
+}
+.aviso-deshacer:hover{opacity:1;background:rgba(255,255,255,.08)}
+@media (pointer: coarse){ .aviso-deshacer{height:34px;padding:0 14px} }
+
+/* Una nota escrita a mano, dentro de la hoja. */
+.nota-caja{
+  display:flex;gap:10px;align-items:flex-start;
+  border-top:1px solid var(--linea);padding-top:var(--e3);margin-top:var(--e2);
+  font-size:13px;color:var(--txt-2);line-height:1.6;
+}
+.nota-caja svg{width:16px;height:16px;flex:0 0 auto;color:var(--txt-4);margin-top:2px}
+.nota-caja span{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Los tres precios, uno al lado del otro: de dónde viene, dónde está y
+   adónde va. Es la única forma de leerlos sin pensar. */
+.precios-ahora{
+  display:grid;gap:var(--e2);
+  grid-template-columns:repeat(3, minmax(0,1fr));
+}
+.precios-ahora .pr{
+  min-width:0;padding:11px var(--e3);border-radius:var(--r);
+  border:1px solid var(--linea);background:var(--capa-alta);
+}
+.precios-ahora .pr.viva{border-color:var(--marca-linea);background:var(--marca-suave)}
+.precios-ahora .pr.futuro{border-color:var(--info-linea);background:var(--info-fondo)}
+.precios-ahora dt{
+  font-size:9.5px;font-weight:700;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.07em;
+}
+.precios-ahora dd{margin:3px 0 0;font-size:19px;font-weight:750;letter-spacing:-.035em}
+.precios-ahora .pr.viva dd{color:var(--marca-alta)}
+.precios-ahora .pr.futuro dd{color:var(--info)}
+.precios-ahora small{display:block;font-size:10.5px;color:var(--txt-4);font-weight:550;margin-top:2px}
+.precios-ahora.grande dd{font-size:23px}
+@media (max-width:560px){
+  .precios-ahora{grid-template-columns:minmax(0,1fr)}
+  .precios-ahora .pr{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .precios-ahora dd{margin:0;font-size:17px}
+  .precios-ahora small{margin:0}
+}
+
+/* La línea del tiempo de precios: cada escalón con su fecha. */
+.linea-precios{display:flex;flex-direction:column;gap:5px}
+.linea-precios.ancha{margin-top:var(--e4)}
+.linea-precios .lp{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;text-align:left;
+  padding:9px var(--e3);border-radius:var(--r);
+  border:1px solid var(--linea);background:var(--capa-alta);
+  font:inherit;color:var(--txt-2);
+}
+.linea-precios .lp.pulsable{cursor:pointer}
+.linea-precios .lp.pulsable:hover{border-color:var(--linea-fuerte);color:var(--txt)}
+.linea-precios .lp.pasado{opacity:.72}
+.linea-precios .lp.ahora{border-color:var(--marca-linea);background:var(--marca-suave);opacity:1;color:var(--txt)}
+.linea-precios .lp.futuro{border-style:dashed;border-color:var(--info-linea);color:var(--info)}
+.lp-fecha{font-size:12px;font-weight:600;flex:1;min-width:90px}
+.lp-monto{font-size:14px;font-weight:750;letter-spacing:-.03em;color:var(--txt)}
+.lp-marca{
+  font-size:9.5px;font-weight:750;text-transform:uppercase;letter-spacing:.07em;
+  padding:2px 8px;border-radius:99px;background:var(--marca);color:#fff;
+}
+.lp-marca.futuro{background:var(--info);color:var(--tinta-info)}
+.lp-nota{flex:1 0 100%;font-size:11px;color:var(--txt-4);font-weight:500}
+@media (pointer: coarse){ .linea-precios .lp{min-height:44px} }
+
+/* Los perfiles como botones, al mover a alguien de sitio. */
+.huecos{display:grid;gap:6px;grid-template-columns:repeat(auto-fill,minmax(96px,1fr))}
+.hueco{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  min-height:56px;padding:8px 6px;border-radius:var(--r);
+  border:1px dashed var(--linea-fuerte);background:transparent;
+  font:inherit;color:var(--txt-2);cursor:pointer;
+}
+.hueco b{font-size:15px;font-weight:750;letter-spacing:-.02em}
+.hueco small{font-size:10px;color:var(--txt-4);font-weight:600;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hueco:hover{border-color:var(--txt-4);color:var(--txt)}
+.hueco.ocupado{border-style:solid;background:var(--capa-alta)}
+.hueco.viva{
+  border-style:solid;border-color:var(--marca);background:var(--marca-suave);color:var(--txt);
+  box-shadow:0 0 0 1px var(--marca-linea);
+}
+@media (pointer: coarse){ .hueco{min-height:64px} }
+
+/* La revisión de datos: un lío por fila, con su cuenta y su puerta. */
+.diags{display:flex;flex-direction:column}
+.diag{
+  display:flex;align-items:center;gap:var(--e3);width:100%;text-align:left;
+  padding:13px var(--e5);border:0;border-top:1px solid var(--linea);
+  background:transparent;font:inherit;color:var(--txt);cursor:pointer;
+}
+.diag:first-child{border-top:0}
+.diag:hover{background:var(--capa-alta)}
+.diag-n{
+  flex:0 0 auto;min-width:34px;height:28px;padding:0 9px;border-radius:99px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:750;font-family:var(--cifra);
+  background:var(--capa-alta);color:var(--txt-2);border:1px solid var(--linea);
+}
+.diag.mal   .diag-n{color:var(--mal);  border-color:var(--mal-linea);  background:var(--mal-fondo)}
+.diag.aviso .diag-n{color:var(--aviso);border-color:var(--aviso-linea);background:var(--aviso-fondo)}
+.diag-txt{flex:1;min-width:0}
+.diag-txt b{display:block;font-size:13.5px;font-weight:700;letter-spacing:-.015em}
+.diag-txt small{display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;line-height:1.5;margin-top:2px}
+.diag-ir{flex:0 0 auto;color:var(--txt-4)}
+.diag-ir svg{width:16px;height:16px}
+@media (max-width:640px){ .diag{padding:13px var(--e3)} }
+@media (pointer: coarse){ .diag{min-height:56px} }
+
+
+/* ===== QUE SE PUEDA USAR DE VERDAD ===================================== */
+/* El enlace que se salta el menú entero. Invisible hasta que lo pisas con
+   el tabulador, que es justo cuando hace falta. */
+.saltar{
+  position:fixed;top:-100px;left:12px;z-index:400;
+  display:inline-flex;align-items:center;height:44px;padding:0 18px;
+  border-radius:0 0 var(--r) var(--r);
+  background:var(--marca);color:#fff;
+  font-size:14px;font-weight:700;text-decoration:none;
+  box-shadow:var(--sombra-3);
+  transition:top var(--rapido) var(--curva);
+}
+.saltar:focus{top:0}
+
+/* El título recibe el foco al entrar a una subpantalla, pero no es un botón:
+   se marca con una línea discreta, no con un recuadro de formulario. */
+#titulo:focus{outline:none}
+#titulo:focus-visible{
+  outline:none;
+  box-shadow:0 3px 0 -1px var(--marca);
+  border-radius:3px;
+}
+#lienzo:focus{outline:none}
+
+/* Todo lo que se pulsa se ve cuando lo pisa el tabulador. Sin esto, con el
+   teclado no sabes dónde estás. */
+:focus-visible{
+  outline:2px solid var(--marca-alta);
+  outline-offset:2px;
+  border-radius:var(--r-s);
+}
+.segmentos button:focus-visible,
+.pastel:focus-visible,
+.hueco:focus-visible,
+.diag:focus-visible{outline-offset:-2px}
+
+/* Si el sistema pide menos movimiento, no se mueve nada. Hay gente a la que
+   las animaciones le marean de verdad. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+  .ficha:hover, .tc:hover{transform:none}
+  .nube-punto.trabajando{animation:none}
+}
+
 @media (max-width:420px){
   .r2,.r3,.r4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .datos{grid-template-columns:1fr 1fr}
@@ -2004,6 +2191,12 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 </style>
 </head>
 <body>
+
+<!-- Con el teclado, lo primero que se pisa es esto: te salta el carril de
+     secciones entero y te deja en lo que de verdad viniste a leer. -->
+<a class="saltar" href="#lienzo">Saltar al contenido</a>
+<!-- Lo que se le dice al lector de pantalla cuando cambias de sitio. -->
+<p id="anuncio" class="solo-lectores" role="status" aria-live="polite" aria-atomic="true"></p>
 
 <div id="app">
 
@@ -2034,7 +2227,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.1</span>
     </div>
   </nav>
 
@@ -2042,7 +2235,9 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 
     <header id="cabecera">
       <div>
-        <h1 id="titulo">Hoy</h1>
+        <!-- tabindex -1: no se llega con el tabulador, pero el programa
+             puede plantar el foco aquí al entrar a una subpantalla. -->
+        <h1 id="titulo" tabindex="-1">Hoy</h1>
         <p id="subtitulo">—</p>
       </div>
       <div class="crece"></div>
@@ -2060,7 +2255,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       </button>
     </header>
 
-    <main id="lienzo">
+    <main id="lienzo" tabindex="-1">
       <section class="pagina viva" id="p-hoy" aria-labelledby="titulo"></section>
       <section class="pagina" id="p-negocio"></section>
       <section class="pagina" id="p-dinero"></section>
@@ -2286,7 +2481,11 @@ function estadoDe(c){
 }
 function cobroDe(c){
   const m = parseFloat(c && c.monto);
-  return (!isNaN(m) && m > 0) ? m : (parseFloat(ajustes.precioDefecto) || 0);
+  if(!isNaN(m) && m > 0) return m;
+  /* Sin precio propio manda la tarifa de su plataforma, que es lo que hace
+     tu programa de siempre; el precio por defecto es el último recurso. */
+  const t = tarifaVigente(platDe(c));
+  return t > 0 ? t : (parseFloat(ajustes.precioDefecto) || 0);
 }
 function masterDe(c){
   return (c && servicios.find(s => String(s.id) === String(c.cuentaMasterId))) || null;
@@ -2489,9 +2688,23 @@ function colorPlataforma(nombre){
   return 'hsl(' + h + ', 58%, 52%)';
 }
 /* El cuadradito de la plataforma: su logo de verdad, y si falla, su inicial. */
+/* Hay marcas cuyo color no deja leer ni el blanco ni el negro encima: el
+   rosa de VIX+ se queda en 4.4 a 1 con blanco y en 4.4 con negro. Para esas,
+   y solo para esas, el cuadrito se oscurece lo justo hasta que la inicial se
+   lee. Cuando el logo de verdad carga, tapa el cuadro y no se nota. */
+function fondoLegible(color){
+  let c = color;
+  for(let i = 0; i < 16; i++){
+    if(contraste(c, textoSobre(c)) >= 4.5) return c;
+    const v = aRGB(c);
+    if(!v) return c;
+    c = 'rgb(' + Math.round(v[0]*0.88) + ',' + Math.round(v[1]*0.88) + ',' + Math.round(v[2]*0.88) + ')';
+  }
+  return c;
+}
 function logoPlataforma(nombre, tam){
   const m = buscarMarca(nombre);
-  const color = colorPlataforma(nombre);
+  const color = fondoLegible(colorPlataforma(nombre));
   const px = tam || 32;
   const estilo = 'background:' + color + ';color:' + textoSobre(color) +
                  ';width:' + px + 'px;height:' + px + 'px;font-size:' + Math.round(px*0.42) + 'px';
@@ -2673,7 +2886,9 @@ function contraste(a, b){
 /* Blanco o negro encima del color de la plataforma, lo que se lea mejor.
    El amarillo de VIX dejaba la letra blanca casi invisible. */
 function textoSobre(color){
-  return claridad(color) > .42 ? '#12161d' : '#fff';
+  /* El blanco sobre el verde de Spotify se queda en 2.6 a 1 y no se lee.
+     Aquí no se adivina: se miden las dos tintas y gana la que contrasta. */
+  return contraste(color, '#ffffff') >= contraste(color, '#12161d') ? '#fff' : '#12161d';
 }
 
 /* Para un botón entero pintado del color de la marca hace falta más que
@@ -3113,7 +3328,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.0';
+const VERSION = 'v4.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -3155,17 +3370,71 @@ const ICONO = {
   gente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>'
 };
 
-function avisar(texto, clase){
+function avisar(texto, clase, conDeshacer){
   const caja = $('#avisos');
   const d = document.createElement('div');
   d.className = 'aviso ' + (clase||'');
-  d.innerHTML = (clase==='mal' ? ICONO.x : clase==='bien' ? ICONO.ok : ICONO.info) + '<span>' + esc(texto) + '</span>';
+  d.innerHTML = (clase==='mal' ? ICONO.x : clase==='bien' ? ICONO.ok : ICONO.info) +
+                '<span>' + esc(texto) + '</span>';
+  /* Un toque mal dado no puede costarte un cliente: mientras el aviso está
+     en pantalla, se puede volver atrás. */
+  if(conDeshacer){
+    const btn = document.createElement('button');
+    btn.className = 'aviso-deshacer';
+    btn.type = 'button';
+    btn.textContent = 'Deshacer';
+    btn.addEventListener('click', function(){ d.remove(); deshacerPaso(); });
+    d.appendChild(btn);
+  }
   caja.appendChild(d);
   setTimeout(function(){
     d.style.transition = 'opacity .25s, transform .25s';
     d.style.opacity = '0'; d.style.transform = 'translateY(8px)';
     setTimeout(function(){ d.remove(); }, 260);
-  }, 2600);
+  }, conDeshacer ? 7000 : 2600);
+}
+
+/* ---------- Deshacer ----------------------------------------------------
+   Antes de cada cosa que cambia datos se guarda una foto de los cuatro
+   almacenes. Si te equivocaste, vuelve entera: no hay medio deshacer que
+   deje el vencimiento avanzado y el cobro borrado. */
+let ultimoPaso = null;
+function fotoDatos(){
+  /* Los ajustes entran en la foto porque ahi viven las tarifas. */
+  try{ return JSON.stringify({servicios, clientes, ventas, inversiones, ajustes}); }
+  catch(_){ return null; }
+}
+/* Mismo mecanismo; el nombre solo dice que lo que cambia son los ajustes. */
+function recordarPasoAjustes(queFue){ recordarPaso(queFue); }
+function recordarPaso(queFue){
+  const foto = fotoDatos();
+  if(!foto) { ultimoPaso = null; return; }
+  ultimoPaso = {queFue:queFue, foto:foto, cuando:Date.now()};
+}
+function hayQueDeshacer(){ return !!(ultimoPaso && ultimoPaso.foto); }
+function deshacerPaso(){
+  if(!hayQueDeshacer()){ avisar('No hay nada que deshacer'); return; }
+  const paso = ultimoPaso;
+  ultimoPaso = null;
+  try{
+    const d = JSON.parse(paso.foto);
+    servicios   = arr(d.servicios);
+    clientes    = arr(d.clientes);
+    ventas      = arr(d.ventas);
+    inversiones = arr(d.inversiones);
+    if(d.ajustes && typeof d.ajustes === 'object'){
+      /* Las claves de la nube no viajan en la foto de deshacer: se quedan
+         las que tengas puestas ahora mismo. */
+      const url = ajustes.supabaseUrl, key = ajustes.supabaseKey;
+      ajustes = d.ajustes;
+      ajustes.supabaseUrl = url; ajustes.supabaseKey = key;
+    }
+  }catch(_){ avisar('No se pudo deshacer', 'mal'); return; }
+  anotar('DESHACER', paso.queFue);
+  guardar();
+  if(cerrarModalActual) cerrarModal();
+  pintar();
+  avisar('Deshecho: ' + paso.queFue, 'bien');
 }
 
 async function copiar(texto, queEs){
@@ -3185,6 +3454,8 @@ async function copiar(texto, queEs){
 /* --- Ventana modal ------------------------------------------------------ */
 let cerrarModalActual = null;
 function abrirModal(titulo, cuerpoHTML, botones, alAbrir){
+  /* Se apunta desde dónde se abrió para devolver el foco ahí al cerrar. */
+  if(!cerrarModalActual) focoAntesDeModal = document.activeElement;
   $('#modal-titulo').textContent = titulo;
   $('#modal-cuerpo').innerHTML = cuerpoHTML;
   const pie = $('#modal-pie');
@@ -3200,16 +3471,33 @@ function abrirModal(titulo, cuerpoHTML, botones, alAbrir){
   cerrarModalActual = cerrarModal;
   if(alAbrir) alAbrir($('#modal-cuerpo'));
   const primero = $('#modal-cuerpo input, #modal-cuerpo select, #modal-cuerpo textarea');
-  if(primero && window.innerWidth > 860) setTimeout(function(){ primero.focus(); }, 60);
+  setTimeout(function(){
+    if(primero && window.innerWidth > 860){ primero.focus(); return; }
+    /* Sin campos que rellenar, el foco entra en el título de la ventana:
+       así el lector de pantalla lee de qué va antes que nada. */
+    const t = $('#modal-titulo');
+    if(t){ t.setAttribute('tabindex','-1'); t.focus(); }
+  }, 60);
 }
 function cerrarModal(){
   $('#telon').classList.remove('abierto');
   cerrarModalActual = null;
+  const volver = focoAntesDeModal;
+  focoAntesDeModal = null;
+  if(volver && volver.isConnected && typeof volver.focus === 'function'){
+    try{ volver.focus(); }catch(_){}
+  }
 }
 $('#modal-cerrar').addEventListener('click', cerrarModal);
 $('#telon').addEventListener('mousedown', function(ev){ if(ev.target === $('#telon')) cerrarModal(); });
 document.addEventListener('keydown', function(ev){
-  if(ev.key === 'Escape' && cerrarModalActual) cerrarModalActual();
+  if(ev.key === 'Escape' && cerrarModalActual){
+    /* Cerrar la ventana es TODO lo que hace esa tecla aquí. Sin esto, el
+       mismo Escape cerraba la ventana y encima te subía un escalón. */
+    ev.preventDefault();
+    ev.stopImmediatePropagation();
+    cerrarModalActual();
+  }
 });
 
 function confirmar(titulo, texto, textoBoton, hacer, peligroso){
@@ -4054,6 +4342,20 @@ window.addEventListener('popstate', function(){
 
 function arriba(){ const l = $('#lienzo'); if(l) l.scrollTop = 0; }
 
+/* Al cambiar de pestaña se repinta media pantalla y el botón que acabas de
+   pulsar deja de existir: con el ratón da igual, con el teclado te quedas
+   sin foco y la siguiente flecha hace cualquier otra cosa. Aquí se apunta
+   dónde tiene que volver el foco después de pintar. */
+let focoPendiente = null;
+function volverElFoco(sel){ focoPendiente = sel; }
+function recolocarFoco(){
+  if(!focoPendiente) return;
+  const sel = focoPendiente;
+  focoPendiente = null;
+  const e = document.querySelector(sel);
+  if(e && typeof e.focus === 'function'){ try{ e.focus({preventScroll:true}); }catch(_){ e.focus(); } }
+}
+
 /* Entrar al negocio por una de sus tres puertas, desde donde sea. */
 function puerta(cual){
   vistaRaiz = cual; guardarVistas();
@@ -4064,6 +4366,7 @@ function puerta(cual){
 }
 
 function irNegocio(empuja){
+  moverFocoAlTitulo = true;
   if(empuja) apuntarRuta(true);
   if(pantalla !== 'negocio') ir('negocio'); else pintar();
   arriba();
@@ -4232,7 +4535,22 @@ function pintaNegocio(){
   const txt = $('#btn-accion-txt');
   if(txt) txt.textContent = etiquetaAccion();
   apuntarRuta(false);
+  ponerTituloVentana();
+  /* Solo cuando de verdad has cambiado de sitio: si no, cobrar a alguien te
+     robaría el foco del botón que acabas de pulsar. */
+  const donde = hashRuta();
+  if(donde !== ultimaRutaPintada){
+    ultimaRutaPintada = donde;
+    anunciar(($('#titulo')||{}).textContent + '. ' + (($('#subtitulo')||{}).textContent || ''));
+    const h = $('#titulo');
+    if(h && moverFocoAlTitulo){ try{ h.focus({preventScroll:true}); }catch(_){ h.focus(); } }
+  }
+  moverFocoAlTitulo = false;
 }
+let ultimaRutaPintada = '';
+/* Se enciende solo cuando la navegación la pediste tú, no cuando se repinta
+   porque cambiaron los datos. */
+let moverFocoAlTitulo = false;
 
 /* ---------- NIVEL 0 · todas tus plataformas ----------------------------- */
 function hojaRaiz(){
@@ -4255,7 +4573,8 @@ function hojaRaiz(){
   const pestanas = [
     ['plataformas', 'Plataformas', nombres.length],
     ['cuentas',     'Cuentas',     servicios.length],
-    ['clientes',    'Clientes',    clientes.length]
+    ['clientes',    'Clientes',    clientes.length],
+    ['libres',      'Sitios libres', libres]
   ];
 
   let cuerpo;
@@ -4275,6 +4594,25 @@ function hojaRaiz(){
     '</div>';
   }else if(vistaRaiz === 'clientes'){
     cuerpo = filtrosClientes(clientes) + cuerpoClientes(clientes);
+  }else if(vistaRaiz === 'libres'){
+    /* La pregunta de todos los días: «me entró un cliente nuevo de Netflix,
+       ¿dónde lo meto?». Aquí está la respuesta entera, de un vistazo. */
+    const huecos = huecosGlobales();
+    const porPlat = {};
+    huecos.forEach(function(h){ (porPlat[h.plataforma] = porPlat[h.plataforma] || []).push(h); });
+    const conSitio = Object.keys(porPlat).sort();
+    cuerpo = '<div class="tarjeta-cuerpo pegado">' +
+      (huecos.length
+        ? conSitio.map(function(n){
+            const g = porPlat[n];
+            return tramoLibres(n, g.length) +
+              '<div class="lista">' + g.map(filaHueco).join('') + '</div>';
+          }).join('')
+        : '<div style="padding:var(--e5)">' +
+            vacio('No te queda sitio en ninguna parte',
+                  'Todos los perfiles de todas tus cuentas están ocupados. Para meter a alguien más, compra otra cuenta.') +
+          '</div>') +
+    '</div>';
   }else{
     cuerpo = '<div class="tarjeta-cuerpo">' +
       (nombres.length
@@ -4308,6 +4646,46 @@ function hojaRaiz(){
         }).join('') + '</div>' +
       '</div>' + cuerpo +
     '</div>' +
+  '</div>';
+}
+
+/* Todos los perfiles libres del negocio, ordenados por plataforma y por
+   número de cuenta: es la lista de lo que todavía puedes vender. */
+function huecosGlobales(){
+  const fuera = [];
+  servicios.slice().sort(function(a,b){
+    const pa = String(a.nombre||'').trim().toUpperCase(), pb = String(b.nombre||'').trim().toUpperCase();
+    return pa.localeCompare(pb,'es') || (Number(a.numero)||0) - (Number(b.numero)||0);
+  }).forEach(function(m){
+    perfilesDe(m).forEach(function(x){
+      if(x.n && !x.cliente) fuera.push({plataforma:String(m.nombre||'').trim().toUpperCase(), m:m, n:x.n});
+    });
+  });
+  return fuera;
+}
+function tramoLibres(n, cuantos){
+  return '<div class="tramo plat-tramo" style="' + tonoDe(n) + '">' +
+    logoPlataforma(n, 22) +
+    '<b>' + esc(n) + '</b>' +
+    '<span class="tramo-n">' + cuantos + '</span>' +
+    '<span class="tramo-monto cifra">' + esc(plural(cuantos,'sitio libre','sitios libres')) + '</span>' +
+    '<button class="btn mini fantasma" data-plat="' + esc(n) + '">' +
+      '<span class="et">Entrar</span>' + ICONO.flecha + '</button>' +
+  '</div>';
+}
+function filaHueco(h){
+  return '<div class="f" style="cursor:default">' +
+    logoPlataforma(h.plataforma, 34) +
+    '<span class="f-txt"><span class="f-nom">Perfil ' + h.n + ' · libre</span>' +
+      '<span class="f-sub"><span class="chip-cuenta" style="' + tonoDe(h.plataforma) + '">' +
+        esc(nombreCuenta(h.m)) + '</span></span></span>' +
+    '<span class="f-acciones">' +
+      '<button class="btn mini" data-poner-en="' + esc(h.m.id) + '" data-perfil="Perfil ' + h.n + '">' +
+        ICONO.mascliente + '<span class="et">Poner un cliente</span></button>' +
+      '<button class="btn mini icono" data-ver-cuenta="' + esc(h.m.id) + '"' +
+        ' title="Abrir ' + esc(nombreCuenta(h.m)) + '" aria-label="Abrir ' + esc(nombreCuenta(h.m)) + '">' +
+        ICONO.flecha + '</button>' +
+    '</span>' +
   '</div>';
 }
 
@@ -4611,16 +4989,20 @@ function hojaPlataforma(n){
     (huecos.length ? huecos.length + ' ' + plural(huecos.length,'perfil libre','perfiles libres') : 'sin sitio libre') +
     ' · ' + dinero(g.cobra - g.costo) + ' al ciclo';
 
+  const cambiosPrecio = lineaTarifas(n).length;
   const pestanas = [
     ['cuentas',  'Cuentas',        g.cuentas.length],
     ['clientes', 'Clientes',       gente.length],
-    ['libres',   'Perfiles libres', huecos.length]
+    ['libres',   'Perfiles libres', huecos.length],
+    ['precios',  'Precios',        cambiosPrecio]
   ];
-  const cual = ['cuentas','clientes','libres'].indexOf(vistaPlat) >= 0 ? vistaPlat : 'cuentas';
+  const cual = ['cuentas','clientes','libres','precios'].indexOf(vistaPlat) >= 0 ? vistaPlat : 'cuentas';
 
   let cuerpo;
   if(cual === 'clientes'){
     cuerpo = filtrosClientes(gente) + cuerpoClientes(gente);
+  }else if(cual === 'precios'){
+    cuerpo = panelTarifas(n);
   }else if(cual === 'libres'){
     cuerpo = '<div class="tarjeta-cuerpo pegado">' +
       (huecos.length
@@ -4663,9 +5045,11 @@ function hojaPlataforma(n){
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono rosa">' + ICONO.capas + '</span>' +
         '<div class="crece"><h2>' + (cual === 'cuentas' ? 'Sus cuentas'
-              : cual === 'clientes' ? 'Su gente' : 'Dónde te cabe uno más') + '</h2>' +
+              : cual === 'clientes' ? 'Su gente'
+              : cual === 'precios'  ? 'Su precio, con toda su historia' : 'Dónde te cabe uno más') + '</h2>' +
           '<p>' + (cual === 'cuentas' ? 'Pulsa una cuenta para ver sus perfiles y quién los ocupa.'
                  : cual === 'clientes' ? 'Todo el que te paga por ' + esc(n) + ', tenga cuenta puesta o no.'
+                 : cual === 'precios'  ? 'Lo que valía, lo que vale y lo que va a valer un perfil de ' + esc(n) + '.'
                  : 'Los perfiles que te quedan por vender, y en qué cuenta está cada uno.') + '</p></div>' +
         '<div class="segmentos">' + pestanas.map(function(p){
           return '<button data-vplat="' + p[0] + '" aria-selected="' + (cual===p[0]?'true':'false') + '">' +
@@ -4750,6 +5134,7 @@ function hojaCuenta(m){
         (deben ? '<button class="btn mini bien" data-escribir-cuenta="' + esc(m.id) + '">' + ICONO.wa +
           '<span class="et">Escribir a los ' + deben + '</span></button>' : '') +
         '<button class="btn mini" data-renovar-m="' + esc(m.id) + '">' + ICONO.renovar + '<span class="et">Renové la cuenta</span></button>' +
+        '<button class="btn mini" data-accesos-m="' + esc(m.id) + '">' + ICONO.copiar + '<span class="et">Copiar los accesos</span></button>' +
         '<button class="btn mini" data-editar-m="' + esc(m.id) + '">' + ICONO.lapiz + '<span class="et">Editar</span></button>' +
         '<button class="btn mini peligro icono" data-borrar-m="' + esc(m.id) + '" title="Borrar cuenta" aria-label="Borrar cuenta">' + ICONO.basura + '</button>' +
       '</div>' +
@@ -4769,6 +5154,7 @@ function hojaCuenta(m){
         '<div class="dato"><dt>Cobras al ciclo</dt><dd class="cifra">' + esc(dinero(r.recurrente)) + '</dd></div>' +
         '<div class="dato"><dt>Por perfil ocupado</dt><dd class="cifra">' + esc(dinero(usados ? r.recurrente/usados : 0)) + '</dd></div>' +
       '</dl>' +
+      (m.nota ? '<div class="nota-caja">' + ICONO.chat + '<span>' + esc(m.nota) + '</span></div>' : '') +
     '</div>' +
 
     '<div class="tarjeta">' +
@@ -4822,6 +5208,9 @@ function casillaPerfil(m, x){
       (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '"' +
         ' title="Escribir a ' + esc(c.nombre||'') + '" aria-label="Escribir a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>'
         : '<span class="f-sin-tel" title="Sin teléfono guardado" aria-hidden="true">' + ICONO.wa + '</span>') +
+      '<button class="btn mini icono" data-mover="' + esc(c.id) + '"' +
+        ' title="Mover a ' + esc(c.nombre||'') + ' de perfil o de cuenta"' +
+        ' aria-label="Mover a ' + esc(c.nombre||'') + ' de perfil o de cuenta">' + ICONO.capas + '</button>' +
       '<button class="btn mini icono" data-ficha="' + esc(c.id) + '"' +
         ' title="Abrir a ' + esc(c.nombre||'') + '" aria-label="Abrir a ' + esc(c.nombre||'') + '">' + ICONO.flecha + '</button>' +
     '</div>' +
@@ -4850,9 +5239,10 @@ function hojaCliente(c){
   if(m) pasos.push([nombreCuenta(m),'cuenta']);
   pasos.push([c.nombre || 'Cliente', null]);
 
+  const fut = proximoPrecio(c);
   const datos = [
     ['Vence',    fechaBonita(c.vencimiento)],
-    ['Le cobras', dinero(cobroDe(c))],
+    ['Le cobras', dinero(cobroDe(c)) + (fut ? ' → ' + dinero(fut.monto) + ' el ' + fechaBonita(fut.desde) : '')],
     ['Su ciclo', ciclo.tipo === 'dias' ? 'cada ' + ciclo.cantidad + ' días'
                                        : 'cada ' + ciclo.cantidad + ' ' + plural(ciclo.cantidad,'mes','meses')],
     ['Cuenta',   m ? nombreCuenta(m) : 'Sin asignar'],
@@ -4877,6 +5267,8 @@ function hojaCliente(c){
             (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>'
                              : '<span class="chip-perfil sin">sin perfil</span>') +
             '<span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span>' +
+            (fut ? '<span class="insignia info" title="Ya está programado">' + ICONO.etiqueta +
+              esc(dinero(fut.monto)) + ' desde el ' + esc(fechaBonita(fut.desde)) + '</span>' : '') +
           '</p></div>' +
         '<div class="hoja-monto"><small>Le cobras</small>' +
           '<b>' + esc(dinero(cobroDe(c))) + '</b></div>' +
@@ -4886,6 +5278,10 @@ function hojaCliente(c){
           '<span class="et">Cobrar ' + esc(dinero(cobroDe(c))) + '</span></button>' +
         (tel ? '<button class="btn mini bien" data-wa="' + esc(c.id) + '">' + ICONO.wa + '<span class="et">WhatsApp</span></button>' : '') +
         '<button class="btn mini" data-renovar="' + esc(c.id) + '">' + ICONO.renovar + '<span class="et">Renovar sin cobrar</span></button>' +
+        (m ? '<button class="btn mini" data-accesos="' + esc(c.id) + '">' + ICONO.copiar +
+          '<span class="et">Copiar sus accesos</span></button>' : '') +
+        '<button class="btn mini" data-precio="' + esc(c.id) + '">' + ICONO.etiqueta + '<span class="et">Cambiar el precio</span></button>' +
+        '<button class="btn mini" data-mover="' + esc(c.id) + '">' + ICONO.capas + '<span class="et">Moverlo de cuenta</span></button>' +
         '<button class="btn mini" data-editar-c="' + esc(c.id) + '">' + ICONO.lapiz + '<span class="et">Editar</span></button>' +
         (m ? '<button class="btn mini" data-ver-cuenta="' + esc(m.id) + '">' + ICONO.tele +
           '<span class="et">Ver la cuenta</span></button>' : '') +
@@ -4894,11 +5290,16 @@ function hojaCliente(c){
       '<dl class="datos">' + datos.map(function(d){
         return '<div class="dato"><dt>' + esc(d[0]) + '</dt><dd>' + esc(d[1]) + '</dd></div>';
       }).join('') + '</dl>' +
+      (c.nota ? '<div class="nota-caja">' + ICONO.chat + '<span>' + esc(c.nota) + '</span></div>' : '') +
     '</div>' +
+
+    tarjetaPrecio(c) +
 
     (m ? '<div class="tarjeta"><div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono azul">' + ICONO.tele + '</span>' +
         '<div class="crece"><h2>Su cuenta</h2><p>Lo que le tienes que pasar para entrar.</p></div>' +
+        '<button class="btn mini principal" data-accesos="' + esc(c.id) + '">' + ICONO.copiar +
+          '<span class="et">Copiar todo junto</span></button>' +
       '</div><div class="tarjeta-cuerpo"><dl class="datos">' +
         '<div class="dato"><dt>Correo</dt><dd style="display:flex;align-items:center;gap:6px">' +
           '<span style="min-width:0;word-break:break-all">' + esc(m.correo||'—') + '</span>' +
@@ -5206,6 +5607,58 @@ function pintaAjustes(){
       '</div>' +
     '</div>' +
 
+    /* El diagnóstico: los líos que con cien clientes no se ven solos. */
+    (function(){
+      const casos = diagnostico();
+      const graves = casos.filter(function(x){ return x.tono === 'mal'; }).length;
+      return '<div class="tarjeta ancha">' +
+        '<div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono ' + (graves ? 'rosa' : 'verde') + '">' + ICONO.alerta + '</span>' +
+          '<div class="crece"><h2>Revisión de tus datos</h2>' +
+            '<p>' + (casos.length
+              ? casos.length + ' ' + plural(casos.length,'cosa que mirar','cosas que mirar') +
+                (graves ? ' · ' + graves + ' ' + plural(graves,'urgente','urgentes') : '')
+              : 'Todo cuadra: ni un cliente suelto ni una cuenta sobrevendida.') + '</p></div>' +
+        '</div>' +
+        '<div class="tarjeta-cuerpo' + (casos.length ? ' pegado' : '') + '">' +
+          (casos.length
+            ? '<div class="diags">' + casos.map(function(x){
+                return '<button class="diag ' + x.tono + '" data-diag="' + esc(x.clave) + '">' +
+                  '<span class="diag-n">' + x.lista.length + '</span>' +
+                  '<span class="diag-txt"><b>' + esc(x.titulo) + '</b>' +
+                    '<small>' + esc(x.explica) + '</small></span>' +
+                  '<span class="diag-ir">' + ICONO.flecha + '</span>' +
+                '</button>';
+              }).join('') + '</div>'
+            : vacio('Nada que arreglar', 'Ni clientes sin cuenta, ni perfiles repetidos, ni cuentas vencidas.')) +
+        '</div>' +
+      '</div>';
+    })() +
+
+    /* La tarifa general: la que se usa cuando una plataforma no tiene la suya. */
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono ambar">' + ICONO.etiqueta + '</span>' +
+        '<div class="crece"><h2>Tarifa general</h2>' +
+          '<p>La que vale cuando una plataforma no tiene precio propio. Cada plataforma tiene el suyo dentro de ella.</p></div>' +
+      '</div>' +
+      panelTarifas('GENERAL') +
+    '</div>' +
+
+    /* Sacar los datos a una hoja de cálculo. */
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono azul">' + ICONO.barras + '</span>' +
+        '<div class="crece"><h2>Sacar los datos a Excel</h2>' +
+          '<p>Un archivo que abres en Excel o Google Sheets. El respaldo de abajo es para restaurar; esto es para mirar.</p></div>' +
+      '</div>' +
+      '<div class="tarjeta-cuerpo"><div class="fila">' +
+        '<button class="btn" data-csv="clientes">' + ICONO.gente + 'Clientes (' + clientes.length + ')</button>' +
+        '<button class="btn" data-csv="cobros">' + ICONO.billete + 'Cobros (' + ventas.length + ')</button>' +
+        '<button class="btn" data-csv="gastos">' + ICONO.caja + 'Gastos (' + inversiones.length + ')</button>' +
+      '</div></div>' +
+    '</div>' +
+
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono verde">' + ICONO.chat + '</span>' +
@@ -5337,10 +5790,7 @@ function pintaAjustes(){
         '<div class="crece"><h2>Atajos de teclado</h2>' +
           '<p>Para la laptop. No se disparan mientras escribes.</p></div></div>' +
       '<div class="tarjeta-cuerpo"><div class="atajos">' +
-        [['1 … 9','ir a esa plataforma'],['0','ver todas'],
-         ['←  →','plataforma anterior o siguiente'],
-         ['Esc','subir un escalón: del cliente a su cuenta, de la cuenta a su plataforma'],
-         ['/','buscar'],['H','Hoy'],['P','Plataformas'],['D','Dinero'],['A','Ajustes']]
+        ATAJOS
          .map(function(a){
            return '<div class="atajo">' +
              a[0].split(/\s+/).map(function(k){ return '<kbd>' + esc(k) + '</kbd>'; }).join(' ') +
@@ -5399,11 +5849,17 @@ window.addEventListener('resize', function(){ marcarDesbordes(); });
 
 function pintar(){
   olvidarIndices();
+  /* Los precios que tenían fecha de hoy entran solos antes de dibujar nada,
+     para que lo que veas ya sea lo que de verdad cobras. */
+  revisarPrecios();
   if(pantalla === 'hoy') pintaHoy();
   else if(pantalla === 'negocio') pintaNegocio();
   else if(pantalla === 'dinero') pintaDinero();
   else if(pantalla === 'ajustes'){ pintaAjustes(); contarCopiaGuardada(); }
   pintarAvisosNav();
+  ponerRolesPestanas();
+  ponerTituloVentana();
+  recolocarFoco();
   requestAnimationFrame(marcarDesbordes);
 }
 function pintarAvisosNav(){
@@ -5429,6 +5885,8 @@ function renovar(id, cobrando){
   const monto = cobroDe(c);
   const meses = ciclo.tipo === 'meses' ? Math.max(1, ciclo.cantidad) : 1;
 
+  recordarPaso(cobrando ? 'cobrar a ' + (c.nombre||'un cliente')
+                        : 'renovar a ' + (c.nombre||'un cliente'));
   c.inicio = c.vencimiento || hoyISO();
   c.vencimiento = nueva;
 
@@ -5438,6 +5896,13 @@ function renovar(id, cobrando){
       cuentaMasterId:c.cuentaMasterId || null, monto:monto*meses, meses:meses,
       metodo:c.metodo || ajustes.metodoDefecto || 'PLIN', fecha:hoyISO()
     });
+    /* La cuota queda apuntada en su ficha con el mismo molde que usa el
+       PAPOTAS de siempre, para que la vea en «Historial de cuotas». */
+    if(!Array.isArray(c.historialPrecios)) c.historialPrecios = [];
+    c.historialPrecios.push({fecha:hoyISO(), monto:monto, meses:meses,
+                             tipo:esPrecioEspecial(c) ? 'especial' : 'tarifa',
+                             plataforma:c.servicio || platDe(c) || ''});
+    if(c.historialPrecios.length > 80) c.historialPrecios = c.historialPrecios.slice(-80);
     anotar('COBRAR', c.nombre + ' pagó ' + dinero(monto*meses) + ', ahora vence ' + fechaBonita(nueva));
   }else{
     anotar('RENOVAR', c.nombre + ' renovado hasta ' + fechaBonita(nueva) + ' sin cobrar');
@@ -5449,12 +5914,13 @@ function renovar(id, cobrando){
   pintar();
   avisar(cobrando
     ? 'Cobrado ' + dinero(monto*meses) + ' · ' + c.nombre + ' hasta ' + fechaBonita(nueva)
-    : c.nombre + ' renovado hasta ' + fechaBonita(nueva), 'bien');
+    : c.nombre + ' renovado hasta ' + fechaBonita(nueva), 'bien', true);
 }
 
 function renovarMaster(id){
   const m = buscarMaster(id);
   if(!m) return;
+  recordarPaso('renovar ' + nombreCuenta(m));
   const ciclo = cicloDe(null);
   const nueva = avanzar(m.vencimiento || hoyISO(), ciclo);
   m.vencimiento = nueva;
@@ -5468,7 +5934,7 @@ function renovarMaster(id){
   anotar('RENOVAR MASTER', nombreCuenta(m) + ' renovada hasta ' + fechaBonita(nueva) +
          (costo>0 ? ' (gasto de ' + dinero(costo) + ')' : ''));
   guardar(); pintar();
-  avisar(nombreCuenta(m) + ' vence ahora el ' + fechaBonita(nueva), 'bien');
+  avisar(nombreCuenta(m) + ' vence ahora el ' + fechaBonita(nueva), 'bien', true);
 }
 
 function textoWhatsApp(c, cual){
@@ -5658,7 +6124,10 @@ function formCliente(id, previo){
       campo('cl-vence','Vence el',{tipo:'date', valor:c?c.vencimiento:avanzar(hoyISO(), ciclo)}) +
       campo('cl-ciclotipo','Su ciclo',{tipo:'select', valor:ciclo.tipo, opciones:[['meses','Meses'],['dias','Días']]}) +
       campo('cl-ciclocant','Cada cuántos',{tipo:'number', valor:ciclo.cantidad, paso:'1'}) +
-    '</div>',
+    '</div>' +
+    campo('cl-nota','Nota',{tipo:'textarea', valor:c?c.nota:'', filas:2,
+      pista:'Lo que quieras acordarte de esta persona',
+      ayuda:'Solo la ves tú. Sale en su pantalla.'}),
     [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
      {texto:esNuevo?'Crear cliente':'Guardar', clase:'principal', hacer:function(){
        const nombre = val('cl-nombre').trim();
@@ -5667,7 +6136,18 @@ function formCliente(id, previo){
        const master = cuentaId ? buscarMaster(cuentaId) : null;
        /* Se conserva todo lo que el programa no conoce. */
        const destino = c || {id:nuevoId('c')};
+       recordarPaso(esNuevo ? 'crear a ' + nombre : 'editar a ' + nombre);
+       /* Si le cambias el precio, queda apuntado cuándo y de cuánto a cuánto:
+          «¿este desde cuándo paga 15?» dejaba de tener respuesta. */
+       const antes = Number(destino.monto);
+       const ahora = num('cl-monto');
+       if(!esNuevo && isFinite(antes) && antes !== ahora){
+         if(!Array.isArray(destino.historialPrecios)) destino.historialPrecios = [];
+         destino.historialPrecios.unshift({fecha:hoyISO(), de:antes, a:ahora});
+         if(destino.historialPrecios.length > 30) destino.historialPrecios.length = 30;
+       }
        destino.nombre = nombre;
+       destino.nota = val('cl-nota').trim();
        destino.telefono = val('cl-tel').trim();
        destino.cuentaMasterId = cuentaId || null;
        destino.servicio = master ? master.nombre : (destino.servicio || '');
@@ -5682,7 +6162,7 @@ function formCliente(id, previo){
        if(esNuevo){ clientes.push(destino); anotar('ALTA', 'Cliente nuevo: ' + nombre); }
        else anotar('EDITAR', 'Cliente modificado: ' + nombre);
        guardar(); cerrarModal(); pintar();
-       avisar(esNuevo ? nombre + ' agregado' : 'Cambios guardados', 'bien');
+       avisar(esNuevo ? nombre + ' agregado' : 'Cambios guardados', 'bien', true);
      }}]);
 }
 
@@ -5707,6 +6187,8 @@ function formMaster(id, plataformaPuesta){
       campo('ms-vence','Vence el',{tipo:'date', valor:m?m.vencimiento:avanzar(hoyISO(), cicloDe(null))}) +
       campo('ms-etiqueta','Etiqueta',{valor:m?m.etiqueta:'', pista:'Opcional: casa, proveedor…'}) +
     '</div>' +
+    campo('ms-nota','Nota',{tipo:'textarea', valor:m?m.nota:'', filas:2,
+      pista:'De quién la compraste, con qué correo la recuperas…'}) +
     (esNuevo ? '<label class="fila" style="gap:8px;font-size:13px;font-weight:500;color:var(--txt-2)">' +
       '<input type="checkbox" id="ms-gasto" checked> Registrar la compra como gasto del día</label>' : ''),
     [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
@@ -5714,7 +6196,9 @@ function formMaster(id, plataformaPuesta){
        const nombre = val('ms-nombre').trim().toUpperCase();
        if(!nombre){ avisar('Ponle el nombre de la plataforma', 'mal'); return; }
        const destino = m || {id:nuevoId('s')};
+       recordarPaso(esNuevo ? 'crear una cuenta de ' + nombre : 'editar ' + nombreCuenta(destino));
        destino.nombre = nombre;
+       destino.nota = val('ms-nota').trim();
        destino.numero = Math.max(1, Math.round(num('ms-numero')) || 1);
        destino.correo = val('ms-correo').trim();
        destino.contrasena = val('ms-clave');
@@ -5737,8 +6221,664 @@ function formMaster(id, plataformaPuesta){
          anotar('EDITAR MASTER', 'Cuenta modificada: ' + nombreCuenta(destino));
        }
        guardar(); cerrarModal(); pintar();
-       avisar(esNuevo ? nombreCuenta(destino) + ' agregada' : 'Cambios guardados', 'bien');
+       avisar(esNuevo ? nombreCuenta(destino) + ' agregada' : 'Cambios guardados', 'bien', true);
      }}]);
+}
+
+/* ---------- Mover a alguien de sitio ------------------------------------
+   Un cliente cambia de cuenta más veces de las que parece: se te llena una,
+   compras otra y hay que repartir. Antes tocaba editar al cliente y acordarse
+   de memoria de qué perfiles estaban libres. Ahora se ven todos. */
+let moviendo = null;
+
+function formMover(id){
+  const c = buscarCliente(id);
+  if(!c){ avisar('Ese cliente ya no está', 'mal'); return; }
+  moviendo = {id:String(c.id),
+              cuenta:c.cuentaMasterId ? String(c.cuentaMasterId) : '',
+              perfil:String(c.perfil || '')};
+  abrirModal('Mover a ' + (c.nombre || 'este cliente'), cuerpoMover(),
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
+     {texto:'Mover aquí', clase:'principal', hacer:aplicarMover}]);
+}
+
+function cuerpoMover(){
+  const c = buscarCliente(moviendo.id);
+  if(!c) return '';
+  const actual = masterDe(c);
+  const opc = [['','Dejarlo sin cuenta']].concat(
+    servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
+      .map(function(m){
+        const libres = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).length;
+        return [m.id, nombreCuenta(m) + ' · ' + (libres ? libres + ' ' + plural(libres,'sitio libre','sitios libres') : 'sin sitio')];
+      }));
+  return '<div class="pila">' +
+    '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">Ahora está en <b style="color:var(--txt)">' +
+      esc(actual ? nombreCuenta(actual) : 'ninguna cuenta') + '</b>' +
+      (perfilBonito(c) ? ', en ' + esc(perfilBonito(c)) : '') + '.</p>' +
+    campo('mv-cuenta','A qué cuenta', {tipo:'select', valor:moviendo.cuenta, opciones:opc}) +
+    huecosDe(moviendo.cuenta, moviendo.perfil) +
+  '</div>';
+}
+function repintarMover(){
+  const cuerpo = $('#modal-cuerpo');
+  if(cuerpo) cuerpo.innerHTML = cuerpoMover();
+}
+
+/* Los perfiles de una cuenta como botones: se ve de un golpe cuál está
+   libre y quién ocupa los demás. */
+function huecosDe(mid, elegido){
+  const m = mid ? buscarMaster(mid) : null;
+  if(!m) return '<p class="pista" style="margin:0">Sin cuenta no hace falta perfil.</p>';
+  const casillas = perfilesDe(m).filter(function(x){ return x.n; });
+  if(!casillas.length) return '<p class="pista" style="margin:0">Esta cuenta no tiene perfiles puestos. Edítala y dile cuántos tiene.</p>';
+  return '<div class="campo"><label>En qué perfil</label>' +
+    '<div class="huecos">' + casillas.map(function(x){
+      const nombre = 'Perfil ' + x.n;
+      const suyo = x.cliente && String(x.cliente.id) === String(moviendo.id);
+      const ocupado = x.cliente && !suyo;
+      return '<button type="button" class="hueco' + (ocupado?' ocupado':'') +
+        (String(elegido) === nombre ? ' viva' : '') + '" data-hueco="' + esc(nombre) + '"' +
+        ' aria-pressed="' + (String(elegido) === nombre ? 'true' : 'false') + '">' +
+        '<b>' + x.n + '</b>' +
+        '<small>' + esc(suyo ? 'donde está' : ocupado ? (x.cliente.nombre || 'ocupado') : 'libre') + '</small>' +
+      '</button>';
+    }).join('') + '</div>' +
+    '<span class="pista">Puedes ponerlo en uno ocupado si de verdad comparten: se avisa, pero se deja.</span></div>';
+}
+
+function aplicarMover(){
+  const c = moviendo && buscarCliente(moviendo.id);
+  if(!c){ cerrarModal(); return; }
+  const m = moviendo.cuenta ? buscarMaster(moviendo.cuenta) : null;
+  const desde = masterDe(c);
+  /* Si no eliges perfil y la cuenta tiene sitio, se le da el primero libre:
+     dejarle el número del perfil de la cuenta de la que viene es cómo se
+     acaba con dos personas en el mismo sitio sin enterarte. */
+  const perfil = moviendo.perfil || (m ? primerPerfilLibre(m) : '') || c.perfil || 'Perfil 1';
+  /* Aviso, no muro: si de verdad comparten el perfil, es cosa suya. */
+  const choca = m && clientesDe(m.id).some(function(x){
+    return String(x.id) !== String(c.id) &&
+           String(x.perfil||'').trim().toLowerCase() === String(perfil).trim().toLowerCase();
+  });
+
+  recordarPaso('mover a ' + (c.nombre || 'un cliente'));
+  c.cuentaMasterId = m ? m.id : null;
+  if(m) c.servicio = m.nombre;
+  c.perfil = m ? perfil : (c.perfil || '');
+  anotar('MOVER', (c.nombre||'') + ': ' +
+    (desde ? nombreCuenta(desde) : 'sin cuenta') + ' → ' +
+    (m ? nombreCuenta(m) + ' · ' + perfil : 'sin cuenta'));
+  guardar();
+  cerrarModal();
+  if(m){
+    ponerPlataforma(String(m.nombre||'').trim().toUpperCase());
+    rutaCuenta = String(m.id);
+  }
+  pintar();
+  avisar((c.nombre || 'Cliente') + ' ahora está en ' +
+    (m ? nombreCuenta(m) + ' · ' + perfil : 'ninguna cuenta') +
+    (choca ? ' (comparte perfil)' : ''), choca ? 'aviso' : 'bien', true);
+}
+
+/* ---------- Los accesos, listos para pegar en WhatsApp -------------------
+   Es el mensaje que mandas veinte veces al día. Tenerlo a un toque, ya
+   escrito y sin faltarle el PIN, ahorra más tiempo que cualquier otra cosa
+   del programa. */
+function textoAccesos(c){
+  const m = masterDe(c);
+  const l = [platDe(c) || 'TU CUENTA'];
+  if(m && m.correo)     l.push('Correo: ' + m.correo);
+  if(m && m.contrasena) l.push('Clave: ' + m.contrasena);
+  if(perfilBonito(c))   l.push('Perfil: ' + perfilBonito(c));
+  if(c.pin)             l.push('PIN: ' + c.pin);
+  if(c.vencimiento)     l.push('Vence: ' + fechaBonita(c.vencimiento));
+  return l.join('\n');
+}
+function textoAccesosCuenta(m){
+  const l = [String(m.nombre || 'CUENTA').toUpperCase()];
+  if(m.correo)      l.push('Correo: ' + m.correo);
+  if(m.contrasena)  l.push('Clave: ' + m.contrasena);
+  if(m.vencimiento) l.push('Vence: ' + fechaBonita(m.vencimiento));
+  return l.join('\n');
+}
+
+/* ---------- Bajar un archivo, sin repetir el mismo baile tres veces ----- */
+function bajarArchivo(nombre, texto, tipo){
+  const url = URL.createObjectURL(new Blob([texto], {type:(tipo||'text/plain') + ';charset=utf-8'}));
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
+}
+
+/* ---------- Sacar los datos a una hoja de cálculo -----------------------
+   Punto y coma, no coma: es lo que abre Excel en español sin preguntar. Y
+   el BOM del principio es lo que hace que las tildes no salgan rotas. */
+function csvDe(filas){
+  return '﻿' + filas.map(function(f){
+    return f.map(function(v){
+      const t = String(v == null ? '' : v);
+      return /[";\n\r]/.test(t) ? '"' + t.replace(/"/g,'""') + '"' : t;
+    }).join(';');
+  }).join('\r\n');
+}
+function exportarCSV(que){
+  let filas, nombre;
+  if(que === 'cobros'){
+    nombre = 'papotas_cobros_' + hoyISO() + '.csv';
+    filas = [['Fecha','Cliente','Plataforma','Cuenta','Monto','Meses','Método']];
+    ventas.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); })
+      .forEach(function(v){
+        const m = v.cuentaMasterId ? buscarMaster(v.cuentaMasterId) : null;
+        filas.push([v.fecha||'', v.cliente||'', v.servicio||'', m?nombreCuenta(m):'',
+                    Number(v.monto)||0, v.meses||1, v.metodo||'']);
+      });
+  }else if(que === 'gastos'){
+    nombre = 'papotas_gastos_' + hoyISO() + '.csv';
+    filas = [['Fecha','Concepto','Cuenta','Monto']];
+    inversiones.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); })
+      .forEach(function(i){
+        const m = i.cuentaMasterId ? buscarMaster(i.cuentaMasterId) : null;
+        filas.push([i.fecha||'', i.plataforma||'', m?nombreCuenta(m):'', Number(i.monto)||0]);
+      });
+  }else{
+    nombre = 'papotas_clientes_' + hoyISO() + '.csv';
+    filas = [['Nombre','Teléfono','Plataforma','Cuenta','Perfil','PIN','Le cobras','Ciclo','Vence','Estado','Método','Nota']];
+    clientes.slice().sort(function(a,b){ return String(a.nombre||'').localeCompare(String(b.nombre||''),'es'); })
+      .forEach(function(c){
+        const m = masterDe(c);
+        const ciclo = cicloDe(c);
+        filas.push([c.nombre||'', telefonoDe(c), platDe(c), m?nombreCuenta(m):'',
+          perfilBonito(c)||'', c.pin||'', cobroDe(c),
+          ciclo.cantidad + ' ' + (ciclo.tipo === 'dias' ? 'días' : 'meses'),
+          c.vencimiento||'', textoDias(c.vencimiento), c.metodo||'', c.nota||'']);
+      });
+  }
+  bajarArchivo(nombre, csvDe(filas), 'text/csv');
+  anotar('EXPORTAR', nombre);
+  avisar('Se bajó ' + nombre, 'bien');
+}
+
+/* ---------- Diagnóstico -------------------------------------------------
+   Con cien clientes y veinte cuentas, los líos no se ven: un cliente sin
+   cuenta, dos en el mismo perfil, una master vencida que te van a cortar.
+   Esto los saca a la cara, contados y con la puerta para ir a arreglarlos. */
+function diagnostico(){
+  const casos = [];
+  function caso(clave, titulo, explica, lista, tono){
+    if(lista.length) casos.push({clave:clave, titulo:titulo, explica:explica, lista:lista, tono:tono});
+  }
+
+  caso('sin_cuenta', 'Clientes sin cuenta asignada',
+    'Les cobras, pero el programa no sabe en qué cuenta están: no salen en ningún perfil y sus accesos no se pueden copiar.',
+    clientes.filter(function(c){ return !masterDe(c); }).map(fichaDiagCliente), 'mal');
+
+  const sobre = [];
+  const repetidos = [];
+  servicios.forEach(function(m){
+    const cl = clientesDe(m.id);
+    const tope = Math.max(0, Number(m.perfiles||0));
+    if(tope && cl.length > tope) sobre.push({texto:nombreCuenta(m) + ': ' + cl.length + ' clientes en ' + tope + ' perfiles', cuenta:m.id});
+    const vistos = {};
+    cl.forEach(function(c){
+      const k = String(c.perfil||'').trim().toLowerCase();
+      if(!k) return;
+      if(vistos[k]) repetidos.push({texto:nombreCuenta(m) + ' · ' + (c.perfil||'?') + ': ' + vistos[k] + ' y ' + (c.nombre||'?'), cuenta:m.id});
+      else vistos[k] = c.nombre || '?';
+    });
+  });
+  caso('sobreventa', 'Cuentas con más gente que perfiles',
+    'Vendiste más sitios de los que tiene la cuenta. Alguien se va a quedar fuera.', sobre, 'mal');
+  caso('perfil_repetido', 'Dos personas en el mismo perfil',
+    'Comparten perfil sin saberlo: se pisan la lista de «seguir viendo» y se echan mutuamente.', repetidos, 'aviso');
+
+  caso('master_vencida', 'Cuentas master vencidas',
+    'La renovación está pasada. Si no la pagas, se cae y con ella todos sus clientes.',
+    servicios.filter(function(m){ const d = diasHasta(m.vencimiento); return d !== null && d < 0; })
+      .map(function(m){ return {texto:nombreCuenta(m) + ' · ' + textoDias(m.vencimiento) + ' · ' + clientesDe(m.id).length + ' clientes dentro', cuenta:m.id}; }), 'mal');
+
+  caso('sin_telefono', 'Clientes sin teléfono',
+    'No les puedes escribir por WhatsApp: cuando les toque pagar, tendrás que buscarlos a mano.',
+    clientes.filter(function(c){ return !telefonoDe(c); }).map(fichaDiagCliente), 'aviso');
+
+  caso('sin_fecha', 'Clientes sin fecha de vencimiento',
+    'No aparecen nunca en «Hoy» ni en el calendario: puedes estar regalándoles el servicio.',
+    clientes.filter(function(c){ return !c.vencimiento; }).map(fichaDiagCliente), 'aviso');
+
+  caso('monto_cero', 'Clientes a los que no les cobras nada',
+    'Están puestos en cero. O es un regalo a propósito, o se te olvidó ponerle el precio.',
+    clientes.filter(function(c){ return cobroDe(c) <= 0; }).map(fichaDiagCliente), 'aviso');
+
+  caso('muy_vencido', 'Vencidos hace más de 30 días',
+    'O ya no son clientes y ocupan un perfil que podrías vender, o llevas un mes sin cobrarles.',
+    clientes.filter(function(c){ const d = diasHasta(c.vencimiento); return d !== null && d < -30; })
+      .sort(function(a,b){ return String(a.vencimiento||'').localeCompare(String(b.vencimiento||'')); })
+      .map(fichaDiagCliente), 'aviso');
+
+  caso('sin_clave', 'Cuentas sin correo o sin clave guardada',
+    'Sin eso no puedes pasarle los accesos a nadie ni entrar tú.',
+    servicios.filter(function(m){ return !m.correo || !m.contrasena; })
+      .map(function(m){ return {texto:nombreCuenta(m) + ' · ' + (!m.correo && !m.contrasena ? 'sin correo ni clave' : !m.correo ? 'sin correo' : 'sin clave'), cuenta:m.id}; }), 'aviso');
+
+  const eco = economia();
+  caso('pierde', 'Cuentas que te cuestan más de lo que dejan',
+    'Con los clientes que tienen ahora, cada ciclo pones dinero de tu bolsillo.',
+    servicios.filter(function(m){ return resumenCuenta(m, eco).margen < 0; })
+      .map(function(m){ const r = resumenCuenta(m, eco);
+        return {texto:nombreCuenta(m) + ': cuesta ' + dinero(r.costo) + ', cobras ' + dinero(r.recurrente) + ' (' + dinero(r.margen) + ')', cuenta:m.id}; }), 'aviso');
+
+  return casos;
+}
+function fichaDiagCliente(c){
+  return {texto:(c.nombre || 'Sin nombre') + ' · ' + (platDe(c) || 'sin plataforma'), cliente:c.id};
+}
+
+/* La lista de uno de esos líos, con la puerta para ir a cada uno. */
+function verDiagnostico(clave){
+  const caso = diagnostico().filter(function(x){ return x.clave === clave; })[0];
+  if(!caso){ avisar('Eso ya está arreglado', 'bien'); return; }
+  abrirModal(caso.titulo,
+    '<p style="margin:0 0 var(--e4);color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+      esc(caso.explica) + '</p>' +
+    '<div class="lista lista-dia">' + caso.lista.slice(0, 80).map(function(x){
+      const ir = x.cliente ? ' data-ver-cliente="' + esc(x.cliente) + '"'
+               : x.cuenta ? ' data-ver-cuenta="' + esc(x.cuenta) + '"' : '';
+      return '<button class="f"' + ir + (ir ? '' : ' style="cursor:default"') + '>' +
+        '<span class="f-txt"><span class="f-nom">' + esc(x.texto) + '</span></span>' +
+        (ir ? '<span class="f-flecha">' + ICONO.flecha + '</span>' : '') +
+      '</button>';
+    }).join('') +
+    (caso.lista.length > 80 ? '<div class="f" style="cursor:default"><span class="f-txt"><span class="f-sub">y ' +
+      (caso.lista.length - 80) + ' más</span></span></div>' : '') +
+    '</div>',
+    [{texto:'Cerrar', clase:'fantasma', hacer:cerrarModal}]);
+}
+
+
+/* ---------- LOS PRECIOS, CON TODAS SUS VUELTAS ---------------------------
+   Un precio no es un número, es una línea del tiempo. Netflix te costaba
+   12, en marzo lo subiste a 15, en noviembre lo vas a subir a 18, y a
+   Fernanda le sigues cobrando 10 porque es tu prima. Todo eso tiene que
+   caber, y tiene que caber SIN inventar un formato nuevo: el PAPOTAS de
+   siempre ya guarda las tarifas en ajustes.historialPrecios con este
+   molde, así que los dos programas ven exactamente los mismos precios.
+
+     {id, tipo:'general'|'plataforma', plataforma, precio, desde, hasta, nota}
+
+   `hasta` en null quiere decir «y de ahí en adelante». Cuando pones un
+   precio nuevo, el anterior se cierra solo el día antes. Puedes dejar
+   tantos programados hacia delante como quieras.
+
+   Y cada cliente puede además tener el suyo, con su propia línea del
+   tiempo, que manda sobre la tarifa de su plataforma. */
+
+function tarifas(){
+  if(!Array.isArray(ajustes.historialPrecios)) ajustes.historialPrecios = [];
+  return ajustes.historialPrecios;
+}
+function clavePlat(v){ return String(v||'').trim().toUpperCase(); }
+
+/* La misma cuenta que hace tu programa de siempre, paso por paso: primero
+   la tarifa de esa plataforma que cubra ese día, luego la general, luego
+   el precio suelto de la plataforma y al final el precio por defecto. */
+function tarifaVigente(plataforma, fecha){
+  const dia  = fecha || hoyISO();
+  const plat = clavePlat(plataforma);
+  const lista = tarifas();
+  const cubre = function(t){ return t.desde && t.desde <= dia && (!t.hasta || t.hasta >= dia); };
+  const porFecha = function(a,b){ return String(b.desde).localeCompare(String(a.desde)); };
+
+  const suya = lista.filter(function(t){
+    return t.tipo === 'plataforma' && clavePlat(t.plataforma) === plat && cubre(t);
+  }).sort(porFecha);
+  if(suya[0] && Number(suya[0].precio) > 0) return Number(suya[0].precio);
+
+  const gen = lista.filter(function(t){ return t.tipo === 'general' && cubre(t); }).sort(porFecha);
+  if(gen[0] && Number(gen[0].precio) > 0) return Number(gen[0].precio);
+
+  const suelto = parseFloat((ajustes.preciosPlataforma || {})[plat]);
+  return suelto > 0 ? suelto : (parseFloat(ajustes.precioDefecto) || 0);
+}
+
+/* Toda la línea del tiempo de una plataforma (o la general), de la más
+   antigua a la más nueva, marcando cuál rige hoy y cuáles están por venir. */
+function lineaTarifas(plataforma){
+  const plat = plataforma === 'GENERAL' ? 'GENERAL' : clavePlat(plataforma);
+  const tipo = plataforma === 'GENERAL' ? 'general' : 'plataforma';
+  const hoy = hoyISO();
+  return tarifas().filter(function(t){
+    return t.tipo === tipo && (tipo === 'general' || clavePlat(t.plataforma) === plat);
+  }).slice().sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); })
+    .map(function(t){
+      const empezo  = t.desde && t.desde <= hoy;
+      const termino = t.hasta && t.hasta < hoy;
+      return {t:t, cuando: !empezo ? 'futuro' : termino ? 'pasado' : 'ahora'};
+    });
+}
+
+/* Poner un precio nuevo: cierra el que estaba y, si ya había otro puesto
+   más adelante, se cierra a sí mismo el día antes de ese. Así se pueden
+   encadenar los que hagan falta sin que se pisen. */
+function ponerTarifa(tipo, plataforma, precio, desde, nota){
+  const lista = tarifas();
+  const plat = tipo === 'general' ? 'GENERAL' : clavePlat(plataforma);
+  const mias = lista.filter(function(t){
+    return t.tipo === tipo && clavePlat(t.plataforma) === plat;
+  });
+  /* Si ya hay una que arranca justo ese día, se le cambia el precio y ya:
+     dos tarifas el mismo día no significan nada. */
+  const misma = mias.filter(function(t){ return t.desde === desde; })[0];
+  if(misma){
+    misma.precio = precio;
+    if(nota != null) misma.nota = nota;
+    return misma;
+  }
+  const nueva = {id:nuevoId('ph'), tipo:tipo, plataforma:plat,
+                 precio:precio, desde:desde, hasta:null, nota:nota || ''};
+  const antes = mias.filter(function(t){ return t.desde && t.desde < desde; })
+                    .sort(function(a,b){ return String(b.desde).localeCompare(String(a.desde)); })[0];
+  if(antes && (!antes.hasta || antes.hasta >= desde)) antes.hasta = sumarDias(desde, -1);
+  const luego = mias.filter(function(t){ return t.desde && t.desde > desde; })
+                    .sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); })[0];
+  if(luego) nueva.hasta = sumarDias(luego.desde, -1);
+  lista.push(nueva);
+  return nueva;
+}
+
+/* Quitar una: la de antes vuelve a quedar abierta hasta donde llegaba esta,
+   para que no quede un agujero de días sin precio. */
+function quitarTarifa(id){
+  const lista = tarifas();
+  const i = lista.findIndex(function(t){ return String(t.id) === String(id); });
+  if(i < 0) return false;
+  const fuera = lista[i];
+  const mias = lista.filter(function(t){
+    return t.tipo === fuera.tipo && clavePlat(t.plataforma) === clavePlat(fuera.plataforma) &&
+           String(t.id) !== String(fuera.id);
+  });
+  const antes = mias.filter(function(t){ return t.desde && t.desde < fuera.desde; })
+                    .sort(function(a,b){ return String(b.desde).localeCompare(String(a.desde)); })[0];
+  if(antes) antes.hasta = fuera.hasta || null;
+  lista.splice(i, 1);
+  return true;
+}
+
+/* ---------- El precio de UN cliente -------------------------------------
+   `monto` es lo que le cobras hoy, y es lo que lee el programa de siempre.
+   `precios` es su propia línea del tiempo, con los cambios que dejaste
+   programados. El día que toca, el de mañana pasa a ser el de hoy. */
+function preciosDe(c){
+  return (c && Array.isArray(c.precios)) ? c.precios.filter(function(p){
+    return p && p.desde && isFinite(Number(p.monto));
+  }).slice().sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); }) : [];
+}
+function preciosFuturos(c){
+  const hoy = hoyISO();
+  return preciosDe(c).filter(function(p){ return p.desde > hoy; });
+}
+function proximoPrecio(c){
+  return preciosFuturos(c)[0] || null;
+}
+/* De cuánto venía: el último cambio ya cumplido. */
+function precioAnterior(c){
+  const hoy = hoyISO();
+  const cumplidos = preciosDe(c).filter(function(p){ return p.desde <= hoy; });
+  if(cumplidos.length >= 2) return cumplidos[cumplidos.length - 2];
+  const h = (c && Array.isArray(c.historialPrecios)) ? c.historialPrecios : [];
+  const previo = h.filter(function(x){ return isFinite(Number(x.monto)) && Number(x.monto) !== cobroDe(c); })
+                  .sort(function(a,b){ return String(b.fecha).localeCompare(String(a.fecha)); })[0];
+  return previo ? {desde:previo.fecha, monto:Number(previo.monto)} : null;
+}
+/* ¿Le cobras algo distinto de lo que dice la tarifa de su plataforma? */
+function esPrecioEspecial(c){
+  const t = tarifaVigente(platDe(c));
+  return t > 0 && Math.abs(cobroDe(c) - t) > 0.005;
+}
+
+/* Poner un precio a un cliente, con su fecha. Hoy o más adelante: da igual,
+   cabe todo y en el orden que sea. */
+function ponerPrecioCliente(c, monto, desde){
+  if(!Array.isArray(c.precios)) c.precios = [];
+  const i = c.precios.findIndex(function(p){ return p && p.desde === desde; });
+  if(i >= 0) c.precios[i].monto = monto;
+  else c.precios.push({desde:desde, monto:monto});
+  c.precios.sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); });
+  if(c.precios.length > 60) c.precios = c.precios.slice(-60);
+  madurarUno(c);
+}
+/* Deja `monto` valiendo lo que toque hoy según su línea del tiempo. */
+function madurarUno(c){
+  const hoy = hoyISO();
+  const cumplidos = preciosDe(c).filter(function(p){ return p.desde <= hoy; });
+  if(!cumplidos.length) return false;
+  const debe = Number(cumplidos[cumplidos.length - 1].monto);
+  if(!isFinite(debe) || Number(c.monto) === debe) return false;
+  c.monto = debe;
+  return true;
+}
+/* Al abrir el programa y una vez al día: los precios que tenían fecha de
+   hoy entran solos, sin que tengas que acordarte. */
+let diaPreciosRevisado = '';
+function madurarPrecios(){
+  let cambios = 0;
+  clientes.forEach(function(c){ if(madurarUno(c)) cambios++; });
+  if(cambios){
+    anotar('PRECIOS', cambios + ' ' + plural(cambios,'precio que estaba programado entró hoy','precios que estaban programados entraron hoy'));
+    olvidarIndices();
+    guardar();
+  }
+  return cambios;
+}
+function revisarPrecios(){
+  const hoy = hoyISO();
+  if(diaPreciosRevisado === hoy) return;
+  diaPreciosRevisado = hoy;
+  madurarPrecios();
+}
+
+/* ---------- Poner un precio, desde donde sea ---------------------------- */
+function formTarifa(plataforma, id){
+  const esGeneral = plataforma === 'GENERAL';
+  const previa = id ? tarifas().filter(function(t){ return String(t.id) === String(id); })[0] : null;
+  const vigente = esGeneral ? tarifaVigente('__ninguna__') : tarifaVigente(plataforma);
+  abrirModal(previa ? 'Cambiar este precio'
+                    : (esGeneral ? 'Precio general nuevo' : 'Precio nuevo de ' + plataforma),
+    '<div class="pila">' +
+      '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+        (esGeneral
+          ? 'Es el que se usa cuando una plataforma no tiene precio propio.'
+          : 'Ahora mismo un perfil de <b style="color:var(--txt)">' + esc(plataforma) + '</b> vale <b style="color:var(--txt)">' +
+            esc(dinero(vigente)) + '</b>. El precio que pongas aquí manda desde el día que le digas, y el de antes se cierra solo.') +
+      '</p>' +
+      '<div class="rejilla r2">' +
+        campo('tf-precio','Cuánto vale',{tipo:'number', valor:previa?previa.precio:vigente, paso:'0.01'}) +
+        campo('tf-desde','Desde cuándo',{tipo:'date', valor:previa?previa.desde:hoyISO(),
+          ayuda:'Puedes poner una fecha de más adelante y dejarlo programado.'}) +
+      '</div>' +
+      campo('tf-nota','Por qué',{valor:previa?previa.nota:'', pista:'Opcional: subida de Netflix, promo…'}) +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal}]
+    .concat(previa ? [{texto:'Quitar', clase:'peligro', hacer:function(){
+        recordarPasoAjustes('quitar un precio');
+        quitarTarifa(previa.id);
+        anotar('TARIFA', 'Precio quitado de ' + (previa.plataforma||''));
+        guardar(); cerrarModal(); pintar();
+        avisar('Precio quitado', 'bien', true);
+      }}] : [])
+    .concat([{texto:'Guardar el precio', clase:'principal', hacer:function(){
+       const precio = num('tf-precio');
+       const desde = val('tf-desde') || hoyISO();
+       if(precio <= 0){ avisar('Pon cuánto vale', 'mal'); return; }
+       recordarPasoAjustes('cambiar un precio');
+       if(previa) quitarTarifa(previa.id);
+       ponerTarifa(esGeneral ? 'general' : 'plataforma', plataforma, precio, desde, val('tf-nota').trim());
+       anotar('TARIFA', (esGeneral?'GENERAL':plataforma) + ': ' + dinero(precio) + ' desde el ' + fechaBonita(desde));
+       olvidarIndices();
+       guardar(); cerrarModal(); pintar();
+       avisar(desde > hoyISO()
+         ? 'Programado: ' + dinero(precio) + ' desde el ' + fechaBonita(desde)
+         : 'Ahora vale ' + dinero(precio), 'bien', true);
+     }}]));
+}
+
+/* El precio de un cliente concreto, que manda sobre la tarifa. */
+function formPrecio(id){
+  const c = buscarCliente(id);
+  if(!c){ avisar('Ese cliente ya no está', 'mal'); return; }
+  const tarifa = tarifaVigente(platDe(c));
+  abrirModal('El precio de ' + (c.nombre || 'este cliente'),
+    '<div class="pila">' +
+      '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+        'La tarifa de <b style="color:var(--txt)">' + esc(platDe(c) || 'su plataforma') + '</b> hoy es <b style="color:var(--txt)">' +
+        esc(dinero(tarifa)) + '</b>. Lo que pongas aquí es lo que le cobras a él, mande lo que mande la tarifa.' +
+      '</p>' +
+      '<div class="rejilla r2">' +
+        campo('pr-monto','Cuánto le cobras',{tipo:'number', valor:cobroDe(c), paso:'0.01'}) +
+        campo('pr-desde','Desde cuándo',{tipo:'date', valor:hoyISO(),
+          ayuda:'Hoy lo cambia ya. Más adelante lo deja programado, y puedes dejar varios encadenados.'}) +
+      '</div>' +
+      lineaPreciosCliente(c) +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
+     {texto:'Guardar el precio', clase:'principal', hacer:function(){
+       const monto = num('pr-monto');
+       const desde = val('pr-desde') || hoyISO();
+       if(monto < 0){ avisar('El precio no puede ser negativo', 'mal'); return; }
+       recordarPaso('cambiar el precio de ' + (c.nombre||'un cliente'));
+       ponerPrecioCliente(c, monto, desde);
+       anotar('PRECIO', (c.nombre||'') + ': ' + dinero(monto) + ' desde el ' + fechaBonita(desde));
+       olvidarIndices();
+       guardar(); cerrarModal(); pintar();
+       avisar(desde > hoyISO()
+         ? 'Desde el ' + fechaBonita(desde) + ' le cobrarás ' + dinero(monto)
+         : 'Ahora le cobras ' + dinero(monto), 'bien', true);
+     }}]);
+}
+
+/* La línea del tiempo de un cliente, dentro de su ventana de precio. */
+function lineaPreciosCliente(c){
+  const lista = preciosDe(c);
+  if(!lista.length) return '';
+  const hoy = hoyISO();
+  return '<div class="campo"><label>Lo que ya tiene puesto</label><div class="linea-precios">' +
+    lista.map(function(p){
+      const cuando = p.desde > hoy ? 'futuro' : 'pasado';
+      return '<div class="lp ' + cuando + '">' +
+        '<span class="lp-fecha">' + esc(fechaBonita(p.desde)) + '</span>' +
+        '<span class="lp-monto cifra">' + esc(dinero(p.monto)) + '</span>' +
+        '<button class="btn icono mini fantasma" data-quitar-precio-cli="' + esc(c.id) + '" data-desde="' + esc(p.desde) + '"' +
+          ' title="Quitar este cambio" aria-label="Quitar este cambio">' + ICONO.x + '</button>' +
+      '</div>';
+    }).join('') + '</div></div>';
+}
+
+/* ---------- La tarjeta del precio dentro de la pantalla del cliente ----- */
+function tarjetaPrecio(c){
+  const ahora  = cobroDe(c);
+  const tarifa = tarifaVigente(platDe(c));
+  const ant    = precioAnterior(c);
+  const futuros = preciosFuturos(c);
+  const cuotas = (Array.isArray(c.historialPrecios) ? c.historialPrecios : [])
+    .slice().sort(function(a,b){ return String(b.fecha).localeCompare(String(a.fecha)); });
+  const especial = esPrecioEspecial(c);
+
+  return '<div class="tarjeta"><div class="tarjeta-cabeza">' +
+      '<span class="cabeza-icono ambar">' + ICONO.etiqueta + '</span>' +
+      '<div class="crece"><h2>Su precio</h2>' +
+        '<p>' + (futuros.length
+                  ? futuros.length + ' ' + plural(futuros.length,'cambio programado','cambios programados') +
+                    ' · el próximo, ' + esc(dinero(futuros[0].monto)) + ' el ' + esc(fechaBonita(futuros[0].desde))
+                  : especial ? 'Precio especial: la tarifa de ' + esc(platDe(c) || 'su plataforma') + ' es ' + esc(dinero(tarifa))
+                  : 'Le cobras la tarifa de ' + esc(platDe(c) || 'su plataforma')) + '</p></div>' +
+      '<button class="btn mini" data-precio="' + esc(c.id) + '">' + ICONO.lapiz +
+        '<span class="et">Cambiar el precio</span></button>' +
+    '</div>' +
+    '<div class="tarjeta-cuerpo">' +
+      '<div class="precios-ahora">' +
+        '<div class="pr"><dt>Le cobrabas</dt><dd class="cifra">' +
+          (ant ? esc(dinero(ant.monto)) : '—') + '</dd>' +
+          '<small>' + (ant && ant.desde ? 'hasta el ' + esc(fechaBonita(ant.desde)) : 'no le has cambiado el precio') + '</small></div>' +
+        '<div class="pr viva"><dt>Le cobras</dt><dd class="cifra">' + esc(dinero(ahora)) + '</dd>' +
+          '<small>' + (especial ? 'precio especial suyo' : 'la tarifa de su plataforma') + '</small></div>' +
+        '<div class="pr' + (futuros.length ? ' futuro' : '') + '"><dt>Le cobrarás</dt><dd class="cifra">' +
+          (futuros.length ? esc(dinero(futuros[0].monto)) : '—') + '</dd>' +
+          '<small>' + (futuros.length ? 'desde el ' + esc(fechaBonita(futuros[0].desde)) : 'nada programado') + '</small></div>' +
+      '</div>' +
+      (futuros.length > 1
+        ? '<p class="pista" style="margin:var(--e3) 0 0">Y después: ' +
+            futuros.slice(1).map(function(p){
+              return esc(dinero(p.monto)) + ' el ' + esc(fechaBonita(p.desde));
+            }).join(' · ') + '</p>'
+        : '') +
+      (preciosDe(c).length
+        ? '<div class="linea-precios ancha">' + preciosDe(c).map(function(p){
+            const hoy = hoyISO();
+            const cuando = p.desde > hoy ? 'futuro' : 'pasado';
+            return '<div class="lp ' + cuando + '">' +
+              '<span class="lp-fecha">' + esc(fechaBonita(p.desde)) + '</span>' +
+              '<span class="lp-monto cifra">' + esc(dinero(p.monto)) + '</span>' +
+            '</div>';
+          }).join('') + '</div>'
+        : '') +
+      (cuotas.length
+        ? '<div class="historial" style="margin-top:var(--e4);border-top:1px solid var(--linea)">' +
+            '<div class="h" style="border:0"><span class="crece"><small>LO QUE LE HAS COBRADO DE VERDAD</small></span></div>' +
+            cuotas.slice(0, 10).map(function(x){
+              return '<div class="h">' +
+                '<span class="crece">' + esc(fechaBonita(x.fecha)) +
+                  (Number(x.meses) > 1 ? ' <small>· ' + x.meses + ' meses</small>' : '') + '</span>' +
+                '<span class="cifra">' + esc(dinero(x.monto)) + '</span>' +
+              '</div>';
+            }).join('') +
+          '</div>'
+        : '') +
+    '</div></div>';
+}
+
+/* ---------- La pestaña de precios de una plataforma --------------------- */
+function panelTarifas(plataforma){
+  const linea = lineaTarifas(plataforma);
+  const esGeneral = plataforma === 'GENERAL';
+  const hoy = tarifaVigente(esGeneral ? '__ninguna__' : plataforma);
+  const cuantos = clientes.filter(function(c){
+    return esGeneral ? true : platDe(c) === plataforma;
+  }).length;
+  return '<div class="tarjeta-cuerpo">' +
+    '<div class="precios-ahora grande">' +
+      '<div class="pr viva"><dt>Hoy vale</dt><dd class="cifra">' + esc(dinero(hoy)) + '</dd>' +
+        '<small>por perfil y ciclo</small></div>' +
+      '<div class="pr"><dt>Cambios apuntados</dt><dd class="cifra">' + linea.length + '</dd>' +
+        '<small>' + (linea.filter(function(x){ return x.cuando==='futuro'; }).length
+          ? linea.filter(function(x){ return x.cuando==='futuro'; }).length + ' por venir' : 'ninguno por venir') + '</small></div>' +
+      (esGeneral ? '' :
+      '<div class="pr"><dt>Gente a este precio</dt><dd class="cifra">' +
+        clientes.filter(function(c){ return platDe(c) === plataforma && !esPrecioEspecial(c); }).length +
+        '</dd><small>de ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') + '</small></div>') +
+    '</div>' +
+    '<div class="fila" style="margin-top:var(--e4)">' +
+      '<button class="btn mini principal" data-nueva-tarifa="' + esc(plataforma) + '">' + ICONO.mas +
+        'Poner un precio nuevo</button>' +
+    '</div>' +
+    (linea.length
+      ? '<div class="linea-precios ancha" style="margin-top:var(--e4)">' + linea.slice().reverse().map(function(x){
+          const t = x.t;
+          return '<button class="lp ' + x.cuando + ' pulsable" data-editar-tarifa="' + esc(t.id) + '"' +
+            ' data-plat-tarifa="' + esc(plataforma) + '">' +
+            '<span class="lp-fecha">' + esc(fechaBonita(t.desde)) +
+              (t.hasta ? ' → ' + esc(fechaBonita(t.hasta))
+               : x.cuando === 'futuro' ? ' → en adelante' : ' → hoy') + '</span>' +
+            '<span class="lp-monto cifra">' + esc(dinero(t.precio)) + '</span>' +
+            (x.cuando === 'ahora' ? '<span class="lp-marca">rige ahora</span>'
+             : x.cuando === 'futuro' ? '<span class="lp-marca futuro">programado</span>' : '') +
+            (t.nota ? '<span class="lp-nota">' + esc(t.nota) + '</span>' : '') +
+          '</button>';
+        }).join('') + '</div>'
+      : '<div style="padding:var(--e4) 0">' +
+          vacio('Sin precios apuntados',
+                'Pon el primero y a partir de ahí queda la historia entera: qué cobrabas, qué cobras y qué vas a cobrar.') +
+        '</div>') +
+  '</div>';
 }
 
 function formGasto(){
@@ -5756,6 +6896,7 @@ function formGasto(){
        if(monto <= 0){ avisar('Pon cuánto gastaste', 'mal'); return; }
        const cuentaId = val('g-cuenta');
        const m = cuentaId ? buscarMaster(cuentaId) : null;
+       recordarPaso('registrar un gasto');
        inversiones.push({
          id:nuevoId('inv'),
          plataforma: val('g-concepto').trim() || (m ? m.nombre : 'Gasto'),
@@ -5765,14 +6906,14 @@ function formGasto(){
        });
        anotar('GASTO', (val('g-concepto').trim()||'Gasto') + ' por ' + dinero(monto));
        guardar(); cerrarModal(); pintar();
-       avisar('Gasto de ' + dinero(monto) + ' registrado', 'bien');
+       avisar('Gasto de ' + dinero(monto) + ' registrado', 'bien', true);
      }}]);
 }
 
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -5794,10 +6935,13 @@ document.addEventListener('click', function(ev){
     const c = buscarCliente(d.borrarC); if(!c) return;
     confirmar('Borrar cliente', '¿Seguro que quieres borrar a ' + (c.nombre||'este cliente') + '? Sus cobros ya registrados se quedan en el historial.',
       'Sí, borrar', function(){
+        recordarPaso('borrar a ' + (c.nombre||'un cliente'));
         clientes = clientes.filter(function(x){ return String(x.id) !== String(c.id); });
         abiertos.delete('c'+c.id);
         anotar('BORRAR', 'Cliente borrado: ' + (c.nombre||''));
-        guardar(); pintar(); avisar('Cliente borrado', 'bien');
+        /* Si estabas en su pantalla, se sube a la de su cuenta. */
+        if(String(rutaCliente) === String(c.id)) rutaCliente = null;
+        guardar(); pintar(); avisar('Cliente borrado', 'bien', true);
       }, true);
     return;
   }
@@ -5807,18 +6951,21 @@ document.addEventListener('click', function(ev){
     confirmar('Borrar cuenta master',
       '¿Borrar ' + nombreCuenta(m) + '?' + (cuantos ? ' Tiene ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') + ' asignados, que se quedarán sin cuenta.' : ''),
       'Sí, borrar', function(){
-        servicios = servicios.filter(function(x){ return String(x.id) !== String(m.id); });
+        recordarPaso('borrar ' + nombreCuenta(m));
         clientesDe(m.id).forEach(function(c){ c.cuentaMasterId = null; });
+        servicios = servicios.filter(function(x){ return String(x.id) !== String(m.id); });
         abiertos.delete('m'+m.id);
         anotar('BORRAR MASTER', 'Cuenta borrada: ' + nombreCuenta(m));
-        guardar(); pintar(); avisar('Cuenta borrada', 'bien');
+        if(String(rutaCuenta) === String(m.id)){ rutaCuenta = null; rutaCliente = null; }
+        guardar(); pintar(); avisar('Cuenta borrada', 'bien', true);
       }, true);
     return;
   }
   if(d.borrarG){
+    recordarPaso('borrar un gasto');
     inversiones = inversiones.filter(function(x){ return String(x.id) !== String(d.borrarG); });
     anotar('BORRAR GASTO', 'Gasto eliminado');
-    guardar(); pintar(); avisar('Gasto borrado', 'bien');
+    guardar(); pintar(); avisar('Gasto borrado', 'bien', true);
     return;
   }
   if(d.verCliente){
@@ -5891,6 +7038,39 @@ document.addEventListener('click', function(ev){
     return;
   }
   if(d.volver){ volverA(d.volver); return; }
+  if(d.deshacer){ deshacerPaso(); return; }
+  if(d.mover){ formMover(d.mover); return; }
+  if(d.hueco){
+    if(moviendo){ moviendo.perfil = d.hueco; repintarMover(); }
+    return;
+  }
+  if(d.accesos){
+    const c = buscarCliente(d.accesos);
+    if(c) copiar(textoAccesos(c), 'Los accesos de ' + (c.nombre||'ese cliente'));
+    return;
+  }
+  if(d.accesosM){
+    const m = buscarMaster(d.accesosM);
+    if(m) copiar(textoAccesosCuenta(m), 'Los accesos de ' + nombreCuenta(m));
+    return;
+  }
+  if(d.precio){ formPrecio(d.precio); return; }
+  if(d.quitarPrecioCli){
+    const c = buscarCliente(d.quitarPrecioCli);
+    if(!c) return;
+    recordarPaso('quitar un cambio de precio');
+    c.precios = preciosDe(c).filter(function(p){ return p.desde !== d.desde; });
+    madurarUno(c);
+    olvidarIndices();
+    guardar(); pintar();
+    if(cerrarModalActual){ cerrarModal(); formPrecio(c.id); }
+    avisar('Cambio de precio quitado', 'bien', true);
+    return;
+  }
+  if(d.nuevaTarifa){ formTarifa(d.nuevaTarifa, null); return; }
+  if(d.editarTarifa){ formTarifa(d.platTarifa || 'GENERAL', d.editarTarifa); return; }
+  if(d.diag){ verDiagnostico(d.diag); return; }
+  if(d.csv){ exportarCSV(d.csv); return; }
   if(d.limpiarBusqueda){
     busqueda = ''; $('#buscar').value = ''; pintar(); return;
   }
@@ -5911,8 +7091,8 @@ document.addEventListener('click', function(ev){
       }, true);
     return;
   }
-  if(d.vraiz){ vistaRaiz = d.vraiz; guardarVistas(); pintar(); arriba(); return; }
-  if(d.vplat){ vistaPlat = d.vplat; guardarVistas(); pintar(); arriba(); return; }
+  if(d.vraiz){ vistaRaiz = d.vraiz; guardarVistas(); volverElFoco('[data-vraiz="' + CSS.escape(d.vraiz) + '"]'); pintar(); arriba(); return; }
+  if(d.vplat){ vistaPlat = d.vplat; guardarVistas(); volverElFoco('[data-vplat="' + CSS.escape(d.vplat) + '"]'); pintar(); arriba(); return; }
   if(d.plat){
     busqueda = ''; $('#buscar').value = '';
     /* En Hoy y en Dinero la pastilla solo cambia de qué plataforma hablan;
@@ -5926,19 +7106,20 @@ document.addEventListener('click', function(ev){
   }
   if(d.verhoy){
     verHoy = d.verhoy;
+    volverElFoco('[data-verhoy="' + CSS.escape(d.verhoy) + '"]');
     try{ localStorage.setItem('pap_ver_hoy', verHoy); }catch(_){}
     pintar(); return;
   }
-  if(d.fhoy){ filtroHoy = d.fhoy; pintar(); return; }
+  if(d.fhoy){ filtroHoy = d.fhoy; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
   if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana){
     filtroHoy = d.fhoyPendientes ? 'pendientes' : d.fhoyVencidos ? 'vencidos'
               : d.fhoyHoy ? 'hoy' : 'semana';
     pintar();
-    const t = $('#p-hoy .tabla'); if(t) t.scrollIntoView({block:'center', behavior:'smooth'});
+    const t = $('#p-hoy .tabla'); if(t) t.scrollIntoView({block:'center', behavior:suave()});
     return;
   }
-  if(d.fcli){ filtroClientes = d.fcli; pintar(); return; }
+  if(d.fcli){ filtroClientes = d.fcli; volverElFoco('[data-fcli="' + CSS.escape(d.fcli) + '"]'); pintar(); return; }
   if(d.irCuentas){ volverA('raiz'); return; }
   if(d.irClientes){ vistaRaiz = 'clientes'; guardarVistas(); volverA('raiz'); return; }
   if(d.nuevoCliente){ formCliente(null); return; }
@@ -5959,6 +7140,10 @@ document.addEventListener('click', function(ev){
 document.addEventListener('change', function(ev){
   const id = ev.target.id;
   if(id === 'cola-plantilla'){ colaPlantilla = ev.target.value; return; }
+  if(id === 'mv-cuenta'){
+    if(moviendo){ moviendo.cuenta = ev.target.value; moviendo.perfil = ''; repintarMover(); }
+    return;
+  }
   if(id === 'sel-cuenta-cli'){ filtroCuenta = ev.target.value; pintar(); }
   else if(id === 'sel-orden-cli'){
     ordenClientes = ev.target.value;
@@ -6047,14 +7232,136 @@ document.addEventListener('click', function(ev){
   }
 });
 
+
+/* ---------- 13. Que se pueda usar de verdad -----------------------------
+   No es un adorno: con el teclado, con lector de pantalla o con el móvil en
+   «reducir movimiento», el programa tiene que seguir siendo el mismo. */
+
+/* Lo que se le dice en voz alta a quien no ve la pantalla. Se vacía antes
+   de escribir para que el lector lo lea aunque el texto se repita. */
+function anunciar(texto){
+  const caja = document.getElementById('anuncio');
+  if(!caja || !texto) return;
+  caja.textContent = '';
+  setTimeout(function(){ caja.textContent = texto; }, 40);
+}
+
+/* Si el sistema pide menos movimiento, no se desplaza con animación. */
+function suave(){
+  try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; }
+  catch(_){ return 'smooth'; }
+}
+
+/* El nombre de la pestaña del navegador dice dónde estás: con tres PAPOTAS
+   abiertos, «PAPOTAS» a secas no distingue ninguno. */
+function ponerTituloVentana(){
+  const t = ($('#titulo') || {}).textContent || '';
+  const n = (ajustes && ajustes.nombre) || 'PAPOTAS';
+  try{ document.title = t && t !== n ? t + ' · ' + n : n; }catch(_){}
+}
+
+/* Las tiras de pestañas son pestañas de verdad: el lector las anuncia como
+   tales y se cambian con las flechas, sin tabular una por una. */
+function ponerRolesPestanas(){
+  $$('.segmentos').forEach(function(tira){
+    tira.setAttribute('role','tablist');
+    const botones = Array.prototype.filter.call(tira.children, function(e){ return e.tagName === 'BUTTON'; });
+    botones.forEach(function(b){
+      b.setAttribute('role','tab');
+      if(!b.hasAttribute('aria-selected')) b.setAttribute('aria-selected','false');
+      b.setAttribute('tabindex', b.getAttribute('aria-selected') === 'true' ? '0' : '-1');
+    });
+  });
+}
+
+/* Flechas dentro de una tira de pestañas. Va antes que los atajos generales
+   para que la flecha derecha cambie de pestaña y no de plataforma. */
+document.addEventListener('keydown', function(ev){
+  const tab = ev.target && ev.target.closest && ev.target.closest('[role="tab"]');
+  if(!tab) return;
+  const tira = tab.closest('.segmentos');
+  if(!tira) return;
+  const botones = Array.prototype.filter.call(tira.children, function(e){ return e.tagName === 'BUTTON'; });
+  const i = botones.indexOf(tab);
+  let j = -1;
+  if(ev.key === 'ArrowRight' || ev.key === 'ArrowDown') j = (i + 1) % botones.length;
+  else if(ev.key === 'ArrowLeft' || ev.key === 'ArrowUp') j = (i - 1 + botones.length) % botones.length;
+  else if(ev.key === 'Home') j = 0;
+  else if(ev.key === 'End') j = botones.length - 1;
+  if(j < 0) return;
+  ev.preventDefault();
+  ev.stopPropagation();
+  botones[j].focus();
+  botones[j].click();
+}, true);
+
+/* ---------- La ventana no se te escapa ----------------------------------
+   Al abrirla, el foco entra dentro. Mientras está abierta, el tabulador da
+   vueltas ahí y no se va a pasear por la pantalla de detrás. Al cerrarla, el
+   foco vuelve al botón que la abrió, que es donde estabas mirando. */
+let focoAntesDeModal = null;
+
+function focoDentroDeModal(){
+  const modal = $('#modal');
+  if(!modal) return [];
+  return Array.prototype.filter.call(
+    modal.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'),
+    function(e){ return e.offsetParent !== null || e === document.activeElement; });
+}
+document.addEventListener('keydown', function(ev){
+  if(ev.key !== 'Tab' || !cerrarModalActual) return;
+  const f = focoDentroDeModal();
+  if(!f.length) return;
+  const primero = f[0], ultimo = f[f.length - 1];
+  if(ev.shiftKey && document.activeElement === primero){ ev.preventDefault(); ultimo.focus(); }
+  else if(!ev.shiftKey && document.activeElement === ultimo){ ev.preventDefault(); primero.focus(); }
+}, true);
+
+/* ---------- La chuleta de atajos, con «?» -------------------------------- */
+const ATAJOS = [
+  ['1 … 9', 'ir a esa plataforma'],
+  ['0', 'ver todas las plataformas'],
+  ['←  →', 'plataforma anterior o siguiente'],
+  ['Esc', 'subir un escalón: del cliente a su cuenta, de la cuenta a su plataforma'],
+  ['/', 'ir al buscador'],
+  ['H', 'Hoy'],
+  ['P', 'Plataformas'],
+  ['D', 'Dinero'],
+  ['A', 'Ajustes'],
+  ['Ctrl+Z', 'deshacer lo último que hiciste'],
+  ['?', 'esta misma lista']
+];
+function verAtajos(){
+  abrirModal('Atajos de teclado',
+    '<p style="margin:0 0 var(--e4);color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+      'Para cuando trabajas en la laptop. Ninguno se dispara mientras escribes en un campo.</p>' +
+    '<div class="atajos">' + ATAJOS.map(function(a){
+      return '<div class="atajo">' +
+        a[0].split(/\s+/).map(function(k){ return '<kbd>' + esc(k) + '</kbd>'; }).join(' ') +
+        '<span>' + esc(a[1]) + '</span></div>';
+    }).join('') + '</div>',
+    [{texto:'Entendido', clase:'principal', hacer:cerrarModal}]);
+}
+
 /* ---------- Atajos de teclado -------------------------------------------
    Para cuando se trabaja en la laptop: cambiar de plataforma y de pantalla
    sin soltar el teclado. Nunca se disparan mientras se escribe en un campo
    ni con una ventana abierta. */
 document.addEventListener('keydown', function(ev){
+  /* Ctrl+Z es lo que le sale a cualquiera cuando se equivoca. */
+  if((ev.ctrlKey || ev.metaKey) && !ev.altKey && String(ev.key).toLowerCase() === 'z'){
+    const dentroCampo = ev.target && ev.target.closest &&
+      ev.target.closest('input,textarea,[contenteditable="true"]');
+    if(!dentroCampo && hayQueDeshacer()){ ev.preventDefault(); deshacerPaso(); }
+    return;
+  }
   if(ev.ctrlKey || ev.metaKey || ev.altKey) return;
   const dentro = ev.target && ev.target.closest &&
                  ev.target.closest('input,textarea,select,[contenteditable="true"]');
+  /* Va antes que la barra suelta: según el teclado, «?» llega como Shift+/. */
+  if(!dentro && (ev.key === '?' || (ev.key === '/' && ev.shiftKey))){
+    ev.preventDefault(); verAtajos(); return;
+  }
   if(ev.key === '/' && !dentro){
     ev.preventDefault();
     const bu = $('#buscar'); if(bu){ bu.focus(); bu.select(); }
@@ -6140,7 +7447,24 @@ window.PAPOTAS = {
   ir: ir,
   datos: function(){ return {servicios, clientes, ventas, inversiones, ajustes}; },
   recargar: function(){ cargar(); aplicarTema(); pintar(); },
-  /* Las tres puertas del negocio, para volver al principio de una. */
+  /* Los precios, también desde la consola si alguna vez hace falta. */
+  precios: {
+    hoy:   function(plataforma, fecha){ return tarifaVigente(plataforma, fecha); },
+    linea: function(plataforma){ return lineaTarifas(plataforma); },
+    poner: function(plataforma, precio, desde, nota){
+      const t = ponerTarifa(plataforma === 'GENERAL' ? 'general' : 'plataforma',
+                            plataforma, Number(precio), desde || hoyISO(), nota || '');
+      olvidarIndices(); guardar(); pintar(); return t;
+    },
+    deCliente: function(id, monto, desde){
+      const c = buscarCliente(id); if(!c) return null;
+      ponerPrecioCliente(c, Number(monto), desde || hoyISO());
+      olvidarIndices(); guardar(); pintar(); return c.precios;
+    }
+  },
+  deshacer: deshacerPaso,
+  revisar: diagnostico,
+  /* Las cuatro puertas del negocio, para volver al principio de una. */
   verPlataformas: function(){ puerta('plataformas'); },
   verCuentas:     function(){ puerta('cuentas'); },
   verClientes:    function(){ puerta('clientes'); }
