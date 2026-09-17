@@ -921,17 +921,7 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 /* En pantalla ancha, Ajustes deja de ser una columna interminable: las
    tarjetas se reparten en dos y se leen de un vistazo. Se usa columnas de
    verdad para que ninguna tarjeta se parta por la mitad. */
-@media (min-width:1180px){
-  #p-ajustes > .pila{
-    display:grid;
-    grid-template-columns:repeat(2, minmax(0,1fr));
-    gap:var(--e5);
-    align-items:start;
-  }
-  /* Las dos que llevan listas largas ocupan el ancho entero: partidas por la
-     mitad se leían peor que seguidas. */
-  #p-ajustes > .pila > .ancha{ grid-column:1 / -1 }
-}
+
 
 /* ===== AZULEJOS DE CIFRAS ==============================================
    Del PAPOTAS de siempre: cada cifra en su azulejo, con su icono a la
@@ -1704,43 +1694,77 @@ html[data-tema="claro"] .cartel.de-plat::after{opacity:.10}
 @media (prefers-reduced-motion:reduce){ #cola.puesta{ animation:none } }
 .cola-barra{ height:3px;background:var(--linea) }
 .cola-barra i{ display:block;height:100%;background:var(--bien);transition:width var(--medio) var(--curva) }
-.cola-fila{
-  display:flex;align-items:center;gap:var(--e2);
-  padding:10px var(--e3);
-}
+
+/* Quién es, arriba del todo. */
+.cola-alto{ display:flex;align-items:center;gap:10px;padding:11px var(--e4) 8px }
 .cola-quien{ min-width:0;flex:1 }
-.cola-quien b{ display:block;font-size:13.5px;font-weight:650;letter-spacing:-.015em;
+.cola-quien b{ display:block;font-size:14px;font-weight:700;letter-spacing:-.02em;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
-.cola-quien small{ display:block;font-size:11.5px;color:var(--txt-3);font-weight:500;
+.cola-quien small{ display:block;font-size:11.5px;color:var(--txt-3);font-weight:550;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis }
-.cola-n{ font-family:var(--cifra);font-size:12px;font-weight:700;color:var(--txt-3);flex:0 0 auto }
-.cola-plant{ max-width:170px;min-height:34px!important;font-size:12px }
+.cola-marca{
+  display:inline-flex;align-items:center;gap:4px;flex:0 0 auto;
+  font-size:10.5px;font-weight:750;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--bien);border:1px solid var(--bien-linea);background:var(--bien-fondo);
+  border-radius:99px;padding:3px 9px;
+}
+.cola-marca svg{ width:12px;height:12px;stroke-width:3 }
+.cola-paso{ font-family:var(--cifra);font-size:11.5px;font-weight:700;color:var(--txt-4);flex:0 0 auto }
+
+/* El mensaje, a la vista y editable. Antes se mandaba a ciegas. */
+.cola-texto{ padding:0 var(--e4) 10px }
+.cola-previa{
+  margin:0;padding:10px 12px;border-radius:var(--r);
+  background:var(--capa-alta);border:1px solid var(--linea);
+  font-size:12.5px;line-height:1.55;color:var(--txt-2);
+  white-space:pre-wrap;overflow-wrap:anywhere;
+  max-height:76px;overflow:auto;
+}
+.cola-texto.editando textarea{
+  width:100%;min-height:96px;font-size:12.5px;line-height:1.55;resize:vertical;
+}
+.cola-texto-pie{ display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:7px }
+.cola-texto-pie .insignia{ margin-right:auto }
+
+/* Qué hago. */
+.cola-mando{ display:flex;align-items:center;gap:6px;padding:0 var(--e4) 10px }
+.cola-mando .crece{ flex:1 }
+.cola-mando select{ max-width:170px;min-height:36px!important;font-size:12px;flex:0 0 auto }
 #cola .btn .et{ white-space:nowrap }
+.cola-teclas{
+  margin:0;padding:7px var(--e4) 9px;
+  border-top:1px solid var(--linea);background:var(--capa-alta);
+  font-size:10.5px;color:var(--txt-4);font-weight:600;letter-spacing:.02em;
+}
+@media (pointer: coarse){ .cola-teclas{ display:none } }
+
 @media (max-width:860px){
-  /* Rejilla fija de tres renglones, para que no se estire sola:
-       quién es · con qué mensaje · qué hago. */
   #cola{ bottom:calc(70px + env(safe-area-inset-bottom));width:calc(100vw - 14px) }
-  .cola-fila{
-    display:grid;gap:7px;padding:9px 11px;
-    grid-template-columns:auto 1fr auto auto;
-    grid-template-areas:
-      "logo  quien  num    cerrar"
-      "plant plant  plant  saltar"
-      "envia envia  cobra  cobra";
+  .cola-alto{ padding:10px 12px 7px;gap:8px }
+  /* El nombre es lo que hay que leer: la palabra «mandado» se queda en su
+     tilde y el contador se encoge para dejarle sitio. */
+  .cola-marca{ padding:4px;gap:0 }
+  .cola-marca span, .cola-marca{ font-size:0 }
+  .cola-marca svg{ width:14px;height:14px }
+  .cola-paso{ font-size:10.5px }
+  .cola-texto{ padding:0 12px 9px }
+  .cola-previa{ max-height:78px;font-size:12px }
+  /* Dos pisos: el mensaje que mandas y los dos botones grandes. */
+  .cola-mando{
+    display:grid;gap:7px;padding:0 12px 11px;
+    grid-template-columns:1fr 1fr;
+    grid-template-areas: "plant plant" "envia envia" "cobra salta";
   }
-  .cola-fila > .f-marca{ grid-area:logo;align-self:center }
-  .cola-quien{ grid-area:quien;align-self:center }
-  .cola-n{ grid-area:num;align-self:center }
-  #cola .btn[data-cola="cerrar"]{ grid-area:cerrar }
-  .cola-plant{ grid-area:plant;max-width:none;min-width:0 }
-  #cola .btn[data-cola="saltar"]{ grid-area:saltar }
-  #cola .btn[data-cola="enviar"]{ grid-area:envia }
-  #cola .btn[data-cola="cobrar"]{ grid-area:cobra }
+  .cola-mando select{ grid-area:plant;max-width:none;width:100% }
+  #cola .btn[data-cola="enviar"]{ grid-area:envia;justify-content:center }
+  #cola .btn[data-cola="cobrar"]{ grid-area:cobra;justify-content:center }
+  #cola .btn[data-cola="saltar"]{ grid-area:salta;justify-content:center }
+  #cola .cola-mando .btn{ min-height:46px;font-size:13.5px }
 }
 @media (max-width:360px){
-  #cola .btn[data-cola="cobrar"] .et{ display:none }
-  .cola-plant{ font-size:11.5px }
+  .cola-mando{ grid-template-areas: "plant plant" "envia envia" "cobra cobra" "salta salta" }
 }
+
 /* Con la fila puesta, los avisos se apartan por encima de ella, midiéndola
    de verdad en vez de suponer una altura. */
 body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
@@ -2270,6 +2294,206 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   .lote-botones .btn{flex:1 1 auto;justify-content:center}
 }
 
+
+/* ===== PANELES DE MANDO ================================================
+   Una lista dice qué hay. Un panel dice qué hay, cuánto pesa y qué hacer.
+   Tres cifras arriba y un botón que actúa sobre el montón entero. */
+.panel-mando{
+  position:relative;overflow:hidden;
+  border:1px solid var(--linea);border-radius:var(--r-xl);
+  background:var(--capa);box-shadow:var(--brillo), var(--sombra-2);
+}
+.panel-mando.peligro{border-color:var(--mal-linea)}
+.panel-mando.peligro::before{
+  content:"";position:absolute;inset:0 0 auto;height:3px;
+  background:linear-gradient(90deg, var(--mal), transparent 78%);
+}
+.pm-alto{
+  display:flex;align-items:center;gap:var(--e3);
+  padding:var(--e4) var(--e5) var(--e3);
+}
+.pm-icono{
+  width:38px;height:38px;border-radius:11px;flex:0 0 auto;
+  display:grid;place-items:center;
+  background:var(--mal-fondo);color:var(--mal);border:1px solid var(--mal-linea);
+}
+.pm-icono svg{width:19px;height:19px;stroke-width:2}
+.pm-id{flex:1;min-width:0}
+.pm-id h2{margin:0;font-size:16px;font-weight:750;letter-spacing:-.025em;color:var(--mal)}
+.pm-id p{margin:3px 0 0;font-size:12.5px;color:var(--txt-3);font-weight:500;line-height:1.5}
+
+/* La fila de cifras: es lo que convierte una lista en un tablero. */
+.pm-cifras{
+  display:grid;gap:1px;
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  background:var(--linea);
+  border-top:1px solid var(--linea);border-bottom:1px solid var(--linea);
+}
+.pm-cifras.tres{grid-template-columns:repeat(3, minmax(0,1fr))}
+.pmc{
+  --t:var(--txt);
+  background:var(--capa);padding:13px var(--e4);min-width:0;
+}
+.pmc.mal{--t:var(--mal)} .pmc.aviso{--t:var(--aviso)}
+.pmc.bien{--t:var(--bien)} .pmc.info{--t:var(--info)}
+.pmc dt{
+  font-size:9.5px;font-weight:750;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.pmc dd{margin:4px 0 0;font-size:22px;font-weight:780;letter-spacing:-.04em;color:var(--t)}
+.pmc small{display:block;font-size:10.5px;color:var(--txt-4);font-weight:550;margin-top:2px}
+.pm-cuerpo{padding:0}
+.pm-cuerpo > .lista > * + *{border-top:1px solid var(--linea)}
+@media (max-width:860px){ .pm-cifras{grid-template-columns:repeat(2, minmax(0,1fr))} }
+@media (max-width:560px){
+  .pm-alto{padding:var(--e3);flex-wrap:wrap}
+  .pm-id{flex:1 1 140px}
+  .pm-alto .btn{width:100%;justify-content:center}
+  .pmc{padding:11px var(--e3)}
+  .pmc dd{font-size:19px}
+}
+/* La fila de una cuenta vencida lleva su botón de renovar a la vista. */
+.f-vencida .f-acciones{padding-right:var(--e4)}
+@media (max-width:640px){ .f-vencida .f-acciones{padding-right:var(--e3)} }
+/* En un teléfono de 320 no caben el logo, el nombre, los días, el coste y
+   el botón en la misma línea: el botón se salía por la derecha. Se parte en
+   dos pisos y el de renovar ocupa todo el ancho, que además se toca mejor. */
+@media (max-width:560px){
+  .f-vencida{
+    display:grid;align-items:center;gap:8px 10px;
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-areas:"logo txt" "der der" "acc acc";
+  }
+  .f-vencida > .f-marca{grid-area:logo}
+  .f-vencida > .f-txt{grid-area:txt;min-width:0}
+  .f-vencida > .f-der{
+    grid-area:der;flex-direction:row;align-items:center;
+    gap:9px;text-align:left;flex-wrap:wrap;
+  }
+  .f-vencida > .f-acciones{grid-area:acc;padding:0;display:flex;gap:6px;width:100%}
+  .f-vencida > .f-acciones .btn:first-child{flex:1;justify-content:center}
+}
+
+/* El pie de la tabla de cobros: qué estás viendo y qué puedes hacer. */
+.pie-tabla{
+  display:flex;align-items:center;gap:var(--e3);flex-wrap:wrap;
+  padding:12px var(--e5);
+  border-top:1px solid var(--linea-fuerte);
+  background:var(--capa-alta);
+}
+.pt-txt{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pt-txt b{font-size:14px;font-weight:780;letter-spacing:-.02em;font-family:var(--cifra)}
+.pt-txt span{font-size:12px;color:var(--txt-3);font-weight:550}
+.pt-botones{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:640px){
+  .pie-tabla{padding:12px var(--e3)}
+  .pt-botones{width:100%}
+  .pt-botones .btn{flex:1 1 auto;justify-content:center}
+}
+
+/* ===== SITIOS LIBRES ===================================================
+   Antes: dieciocho filas iguales. Ahora: una tarjeta por plataforma, sus
+   cuentas dentro y los huecos como casillas que se pulsan. */
+.libres-rejilla{
+  display:grid;gap:var(--e3);padding:var(--e4) var(--e5) var(--e5);
+  grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
+}
+.libre-plat{
+  --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
+  position:relative;overflow:hidden;min-width:0;
+  border:1px solid var(--linea);border-radius:var(--r-l);
+  background:var(--capa-alta);
+}
+.libre-plat::before{
+  content:"";position:absolute;inset:0 0 auto;height:2px;
+  background:linear-gradient(90deg, var(--tono), transparent 80%);
+}
+.lb-alto{display:flex;align-items:center;gap:10px;padding:12px var(--e4) 10px;min-width:0}
+.lb-id{flex:1;min-width:0}
+.lb-id b{display:block;font-size:14px;font-weight:750;letter-spacing:-.02em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-id small{display:block;font-size:11px;color:var(--txt-3);font-weight:550;margin-top:1px}
+.lb-cuentas{display:flex;flex-direction:column;border-top:1px solid var(--linea)}
+.lb-cuenta{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:9px var(--e4);border-top:1px solid var(--linea);
+}
+.lb-cuenta:first-child{border-top:0}
+.lb-nombre{
+  flex:1;min-width:0;text-align:left;border:0;background:transparent;padding:0;
+  font:inherit;font-size:12px;font-weight:650;color:var(--txt-2);cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.lb-nombre:hover{color:var(--txt);text-decoration:underline}
+.lb-huecos{display:flex;gap:5px;flex-wrap:wrap}
+/* Cada hueco es una casilla numerada que se pulsa para meter a alguien. */
+.hueco-chip{
+  display:inline-flex;align-items:center;gap:3px;
+  height:28px;min-width:38px;padding:0 8px;border-radius:8px;
+  border:1px dashed var(--tono-linea);background:transparent;
+  font:inherit;color:var(--txt-2);cursor:pointer;
+  transition:background var(--rapido) var(--curva), color var(--rapido) var(--curva),
+             border-color var(--rapido) var(--curva);
+}
+.hueco-chip i{font-style:normal;font-size:12.5px;font-weight:750;font-family:var(--cifra)}
+.hueco-chip svg{width:12px;height:12px;stroke-width:2.6;opacity:.6}
+.hueco-chip:hover{
+  border-style:solid;border-color:var(--bien-linea);
+  background:var(--bien-fondo);color:var(--bien);
+}
+.hueco-chip:hover svg{opacity:1}
+@media (pointer: coarse){ .hueco-chip{height:40px;min-width:46px} }
+@media (max-width:640px){
+  .libres-rejilla{grid-template-columns:minmax(0,1fr);padding:var(--e3)}
+  .lb-alto{padding:11px var(--e3) 9px}
+  .lb-cuenta{padding:9px var(--e3)}
+}
+
+/* ===== AJUSTES POR SECCIONES =========================================== */
+.secciones-aj button{gap:7px}
+.secciones-aj button svg{width:15px;height:15px;flex:0 0 auto}
+.pila-aj{display:flex;flex-direction:column;gap:var(--e5)}
+@media (min-width:1180px){
+  .pila-aj{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:var(--e5);align-items:start}
+  .pila-aj > .ancha{grid-column:1 / -1}
+}
+
+/* La cabecera de cada plataforma en la lista de clientes: antes era una
+   línea de texto gris; ahora tiene cuerpo, sus cuentas en pastillas y el
+   dinero con su etiqueta. */
+.panel-cabeza{gap:12px}
+.panel-id{min-width:0;flex:1}
+.panel-id b{display:block;font-size:14.5px;font-weight:780;letter-spacing:-.02em}
+.panel-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.panel-pills .pp{
+  font-style:normal;font-size:10.5px;font-weight:700;
+  padding:2px 8px;border-radius:99px;
+  border:1px solid var(--linea);background:var(--capa);color:var(--txt-3);
+  white-space:nowrap;
+}
+.panel-pills .pp.mal  {color:var(--mal);  border-color:var(--mal-linea);  background:var(--mal-fondo)}
+.panel-pills .pp.aviso{color:var(--aviso);border-color:var(--aviso-linea);background:var(--aviso-fondo)}
+.panel-suma{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;line-height:1.2}
+.panel-suma i{
+  font-style:normal;font-size:9.5px;font-weight:750;color:var(--txt-4);
+  text-transform:uppercase;letter-spacing:.08em;
+}
+.panel-suma b{font-size:15px;font-weight:780;letter-spacing:-.03em}
+@media (max-width:640px){
+  .panel-suma i{display:none}
+  .panel-pills .pp{font-size:10px;padding:2px 7px}
+}
+
+
+/* Un tilde de WhatsApp en la tarjeta del que ya recibió su mensaje hoy: sin
+   esto, en una ronda de cuarenta no sabes por dónde ibas. */
+.marca-escrito{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  width:20px;height:20px;border-radius:99px;
+  background:var(--bien-fondo);border:1px solid var(--bien-linea);color:var(--bien);
+}
+.marca-escrito svg{width:11px;height:11px;stroke-width:2.4}
+
 @media (max-width:420px){
   .r2,.r3,.r4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .datos{grid-template-columns:1fr 1fr}
@@ -2313,7 +2537,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.4</span>
     </div>
   </nav>
 
@@ -3414,7 +3638,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.2';
+const VERSION = 'v4.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -3946,15 +4170,18 @@ function panelesPorPlataforma(lista, opciones){
 
   return orden.map(function(x){
     const conTel = x.gente.filter(function(c){ return telefonoDe(c); }).length;
+    const enPausa2 = x.gente.filter(enPausa).length;
     return '<div class="panel-plat" style="' + tonoDe(x.n) + '">' +
       '<div class="panel-cabeza">' +
-        logoPlataforma(x.n, 30) +
+        logoPlataforma(x.n, 38) +
         '<span class="panel-id"><b>' + esc(x.n) + '</b>' +
-          '<small>' + x.gente.length + ' ' + plural(x.gente.length, o.uno || 'persona', o.varias || 'personas') +
-            (x.vencidos ? ' · ' + x.vencidos + ' ' + plural(x.vencidos,'vencido','vencidos') : '') +
-          '</small></span>' +
+          '<span class="panel-pills">' +
+            '<i class="pp">' + x.gente.length + ' ' + plural(x.gente.length, o.uno || 'persona', o.varias || 'personas') + '</i>' +
+            (x.vencidos ? '<i class="pp mal">' + x.vencidos + ' ' + plural(x.vencidos,'vencido','vencidos') + '</i>' : '') +
+            (enPausa2 ? '<i class="pp aviso">' + enPausa2 + ' en pausa</i>' : '') +
+          '</span></span>' +
         chispaPlataforma(x.n) +
-        '<span class="panel-suma cifra">' + esc(dinero(x.suma)) + '</span>' +
+        '<span class="panel-suma"><i>al ciclo</i><b class="cifra">' + esc(dinero(x.suma)) + '</b></span>' +
         (conTel ? '<button class="btn mini icono bien" data-escribir-a="' + esc(x.n) + '"' +
           ' title="Escribir por WhatsApp a los ' + conTel + ' de ' + esc(x.n) + '"' +
           ' aria-label="Escribir por WhatsApp a los ' + conTel + ' de ' + esc(x.n) + '">' + ICONO.wa + '</button>' : '') +
@@ -4048,6 +4275,8 @@ function tarjetaCliente(c){
         '<b class="cifra">' + esc(dinero(cobroDe(c))) + '</b></span>' +
       '<span class="pastilla ' + clase + '">' +
         esc(pausa ? 'en pausa' : textoDias(c.vencimiento)) + '</span>' +
+      (escritoHoy(c) && !pausa ? '<span class="marca-escrito" title="Ya le escribiste hoy">' +
+        ICONO.wa + '</span>' : '') +
     '</span>' +
     '<span class="tc-mando">' +
       '<button class="btn mini crece tc-cobrar" data-cobrar="' + esc(c.id) + '"' +
@@ -4358,29 +4587,14 @@ function pintaHoy(){
         '</div>' +
       '</div>' +
       (cola.length
-        ? '<div class="tarjeta-cuerpo pegado">' + tablaCobro(cola, 20) + '</div>' +
-          (cola.length > 20
-            ? '<div class="tarjeta-cuerpo"><div class="fila">' +
-                '<button class="btn" data-ir-clientes="1">Ver los ' + cola.length + ' en Clientes</button>' +
-                '<span style="font-size:12px;color:var(--txt-3)">viendo los 20 más urgentes</span>' +
-              '</div></div>'
-            : '')
+        ? '<div class="tarjeta-cuerpo pegado">' + tablaCobro(cola, 20) + pieTabla(cola, 20) + '</div>'
         : '<div class="tarjeta-cuerpo">' +
             vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.') +
           '</div>') +
     '</div>' +
 
     /* ---- Cuentas master vencidas: si no se renuevan, se cae el negocio ---- */
-    (mastersVencidos.length ?
-      '<div class="tarjeta" style="border-color:var(--mal-linea)">' +
-        '<div class="tarjeta-cabeza">' +
-          '<span class="cabeza-icono">' + ICONO.renovar + '</span>' +
-          '<div class="crece">' +
-          '<h2 style="color:var(--mal)">Cuentas master vencidas</h2>' +
-          '<p>Si no las renuevas, tus clientes se quedan sin servicio.</p></div></div>' +
-        '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-          mastersVencidos.map(function(m){ return filaCuenta(m, eco); }).join('') +
-        '</div></div></div>' : '') +
+    panelMastersVencidos(mastersVencidos, eco) +
 
   '</div>';
 }
@@ -4716,22 +4930,7 @@ function hojaRaiz(){
   }else if(vistaRaiz === 'libres'){
     /* La pregunta de todos los días: «me entró un cliente nuevo de Netflix,
        ¿dónde lo meto?». Aquí está la respuesta entera, de un vistazo. */
-    const huecos = huecosGlobales();
-    const porPlat = {};
-    huecos.forEach(function(h){ (porPlat[h.plataforma] = porPlat[h.plataforma] || []).push(h); });
-    const conSitio = Object.keys(porPlat).sort();
-    cuerpo = '<div class="tarjeta-cuerpo pegado">' +
-      (huecos.length
-        ? conSitio.map(function(n){
-            const g = porPlat[n];
-            return tramoLibres(n, g.length) +
-              '<div class="lista">' + g.map(filaHueco).join('') + '</div>';
-          }).join('')
-        : '<div style="padding:var(--e5)">' +
-            vacio('No te queda sitio en ninguna parte',
-                  'Todos los perfiles de todas tus cuentas están ocupados. Para meter a alguien más, compra otra cuenta.') +
-          '</div>') +
-    '</div>';
+    cuerpo = panelLibres(huecosGlobales());
   }else{
     cuerpo = '<div class="tarjeta-cuerpo">' +
       (nombres.length
@@ -4782,32 +4981,6 @@ function huecosGlobales(){
   });
   return fuera;
 }
-function tramoLibres(n, cuantos){
-  return '<div class="tramo plat-tramo" style="' + tonoDe(n) + '">' +
-    logoPlataforma(n, 22) +
-    '<b>' + esc(n) + '</b>' +
-    '<span class="tramo-n">' + cuantos + '</span>' +
-    '<span class="tramo-monto cifra">' + esc(plural(cuantos,'sitio libre','sitios libres')) + '</span>' +
-    '<button class="btn mini fantasma" data-plat="' + esc(n) + '">' +
-      '<span class="et">Entrar</span>' + ICONO.flecha + '</button>' +
-  '</div>';
-}
-function filaHueco(h){
-  return '<div class="f" style="cursor:default">' +
-    logoPlataforma(h.plataforma, 34) +
-    '<span class="f-txt"><span class="f-nom">Perfil ' + h.n + ' · libre</span>' +
-      '<span class="f-sub"><span class="chip-cuenta" style="' + tonoDe(h.plataforma) + '">' +
-        esc(nombreCuenta(h.m)) + '</span></span></span>' +
-    '<span class="f-acciones">' +
-      '<button class="btn mini" data-poner-en="' + esc(h.m.id) + '" data-perfil="Perfil ' + h.n + '">' +
-        ICONO.mascliente + '<span class="et">Poner un cliente</span></button>' +
-      '<button class="btn mini icono" data-ver-cuenta="' + esc(h.m.id) + '"' +
-        ' title="Abrir ' + esc(nombreCuenta(h.m)) + '" aria-label="Abrir ' + esc(nombreCuenta(h.m)) + '">' +
-        ICONO.flecha + '</button>' +
-    '</span>' +
-  '</div>';
-}
-
 function ordenarCuentas(lista){
   return lista.slice().sort(function(a,b){ return (Number(a.numero)||0) - (Number(b.numero)||0); });
 }
@@ -5132,27 +5305,9 @@ function hojaPlataforma(n){
   }else if(cual === 'precios'){
     cuerpo = panelTarifas(n);
   }else if(cual === 'libres'){
-    cuerpo = '<div class="tarjeta-cuerpo pegado">' +
-      (huecos.length
-        ? '<div class="lista">' + huecos.map(function(h){
-            return '<div class="f" style="cursor:default">' +
-              logoPlataforma(n, 34) +
-              '<span class="f-txt"><span class="f-nom">Perfil ' + h.n + ' · libre</span>' +
-                '<span class="f-sub"><span class="chip-cuenta" style="' + tonoDe(n) + '">' +
-                  esc(nombreCuenta(h.m)) + '</span></span></span>' +
-              '<span class="f-acciones">' +
-                '<button class="btn mini" data-poner-en="' + esc(h.m.id) + '" data-perfil="Perfil ' + h.n + '">' +
-                  ICONO.mascliente + '<span class="et">Poner un cliente</span></button>' +
-                '<button class="btn mini icono" data-ver-cuenta="' + esc(h.m.id) + '"' +
-                  ' title="Abrir ' + esc(nombreCuenta(h.m)) + '" aria-label="Abrir ' + esc(nombreCuenta(h.m)) + '">' +
-                  ICONO.flecha + '</button>' +
-              '</span>' +
-            '</div>';
-          }).join('') + '</div>'
-        : '<div style="padding:var(--e5)">' +
-            vacio('No queda sitio en ' + n, 'Todos los perfiles están ocupados. Compra otra cuenta para meter más gente.') +
-          '</div>') +
-    '</div>';
+    cuerpo = panelLibres(huecos, {
+      vacioTitulo:'No queda sitio en ' + n,
+      vacioTexto:'Todos los perfiles de ' + n + ' están ocupados. Compra otra cuenta para meter más gente.'});
   }else{
     cuerpo = '<div class="tarjeta-cuerpo pegado">' +
       (g.cuentas.length
@@ -5712,13 +5867,61 @@ function contarCopiaGuardada(){
 /* Cuántos apuntes del historial se enseñan de golpe. */
 let verHistorial = 25;
 
+/* ---------- AJUSTES -----------------------------------------------------
+   Doce tarjetas en una columna eran un rollo de papel: para cambiar el
+   mensaje de WhatsApp había que pasar por delante del respaldo, de la nube
+   y del historial. Ahora son cuatro secciones, como el resto del programa,
+   y arriba el estado del negocio de un vistazo. */
+let vistaAjustes = 'negocio';
+try{ vistaAjustes = localStorage.getItem('pap_vista_ajustes') || 'negocio'; }catch(_){}
+
 function pintaAjustes(){
-  $('#subtitulo').textContent = 'Tu negocio, respaldo y nube';
   const conectado = Nube.hayCredenciales();
+  const casos = diagnostico();
+  const graves = casos.filter(function(x){ return x.tono === 'mal'; }).length;
+  const libres = servicios.reduce(function(a,m){ return a + libresDe(m); }, 0);
+
+  $('#subtitulo').textContent = (ajustes.nombre || 'PAPOTAS') + ' · ' +
+    clientes.length + ' ' + plural(clientes.length,'cliente','clientes') + ' · ' +
+    servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') +
+    (conectado ? ' · en la nube' : ' · solo en este aparato');
+
+  const secciones = [
+    ['negocio',  'Tu negocio',  ICONO.rueda,  null],
+    ['datos',    'Tus datos',   ICONO.caja,   casos.length || null],
+    ['nube',     'La nube',     ICONO.nube,   null],
+    ['programa', 'El programa', ICONO.pincel, null]
+  ];
+  const cual = secciones.some(function(s){ return s[0] === vistaAjustes; }) ? vistaAjustes : 'negocio';
 
   $('#p-ajustes').innerHTML =
   '<div class="pila">' +
 
+    /* El estado del negocio, arriba del todo y sin tener que buscarlo. */
+    '<div class="azulejos cinco">' +
+      azulejo('Clientes', clientes.length, '', ICONO.gente,
+        {pie: servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + ' en ' +
+              new Set(servicios.map(function(m){ return String(m.nombre||'').trim().toUpperCase(); })).size + ' plataformas'}) +
+      azulejo('Perfiles libres', libres, libres ? 'bien' : 'mal', ICONO.mascliente,
+        {pie: libres ? 'sitio para ' + libres + ' ' + plural(libres,'cliente más','clientes más') : 'todo lleno'}) +
+      azulejo('Revisión', casos.length, graves ? 'mal' : casos.length ? 'aviso' : 'bien', ICONO.alerta,
+        {pie: casos.length ? (graves ? graves + ' ' + plural(graves,'urgente','urgentes') : 'nada urgente') : 'todo cuadra'}) +
+      azulejo('La nube', conectado ? 'Sí' : 'No', conectado ? 'bien' : '', ICONO.nube,
+        {pie: conectado ? 'los aparatos van sincronizados' : 'solo en este aparato'}) +
+      azulejo('Último respaldo', ajustes.ultimoRespaldo ? fechaBonita(ajustes.ultimoRespaldo) : 'Nunca',
+        ajustes.ultimoRespaldo ? '' : 'aviso', ICONO.subir,
+        {pie: ajustes.ultimoRespaldo ? 'archivo bajado a tu disco' : 'baja uno, por si acaso'}) +
+    '</div>' +
+
+    '<nav class="segmentos secciones-aj" aria-label="Secciones de los ajustes">' +
+      secciones.map(function(s){
+        return '<button data-vaj="' + s[0] + '" aria-selected="' + (cual===s[0]?'true':'false') + '">' +
+          s[2] + s[1] + (s[3] ? '<span class="cuenta">' + s[3] + '</span>' : '') + '</button>';
+      }).join('') +
+    '</nav>' +
+
+    '<div class="pila-aj">' +
+    (cual === 'negocio' ?
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono rosa">' + ICONO.rueda + '</span>' +
@@ -5741,59 +5944,6 @@ function pintaAjustes(){
       '<div class="fila" style="margin-top:var(--e3)"><button class="btn principal" id="btn-guardar-ajustes">Guardar</button></div>' +
       '</div>' +
     '</div>' +
-
-    /* El diagnóstico: los líos que con cien clientes no se ven solos. */
-    (function(){
-      const casos = diagnostico();
-      const graves = casos.filter(function(x){ return x.tono === 'mal'; }).length;
-      return '<div class="tarjeta ancha">' +
-        '<div class="tarjeta-cabeza">' +
-          '<span class="cabeza-icono ' + (graves ? 'rosa' : 'verde') + '">' + ICONO.alerta + '</span>' +
-          '<div class="crece"><h2>Revisión de tus datos</h2>' +
-            '<p>' + (casos.length
-              ? casos.length + ' ' + plural(casos.length,'cosa que mirar','cosas que mirar') +
-                (graves ? ' · ' + graves + ' ' + plural(graves,'urgente','urgentes') : '')
-              : 'Todo cuadra: ni un cliente suelto ni una cuenta sobrevendida.') + '</p></div>' +
-        '</div>' +
-        '<div class="tarjeta-cuerpo' + (casos.length ? ' pegado' : '') + '">' +
-          (casos.length
-            ? '<div class="diags">' + casos.map(function(x){
-                return '<button class="diag ' + x.tono + '" data-diag="' + esc(x.clave) + '">' +
-                  '<span class="diag-n">' + x.lista.length + '</span>' +
-                  '<span class="diag-txt"><b>' + esc(x.titulo) + '</b>' +
-                    '<small>' + esc(x.explica) + '</small></span>' +
-                  '<span class="diag-ir">' + ICONO.flecha + '</span>' +
-                '</button>';
-              }).join('') + '</div>'
-            : vacio('Nada que arreglar', 'Ni clientes sin cuenta, ni perfiles repetidos, ni cuentas vencidas.')) +
-        '</div>' +
-      '</div>';
-    })() +
-
-    /* La tarifa general: la que se usa cuando una plataforma no tiene la suya. */
-    '<div class="tarjeta">' +
-      '<div class="tarjeta-cabeza">' +
-        '<span class="cabeza-icono ambar">' + ICONO.etiqueta + '</span>' +
-        '<div class="crece"><h2>Tarifa general</h2>' +
-          '<p>La que vale cuando una plataforma no tiene precio propio. Cada plataforma tiene el suyo dentro de ella.</p></div>' +
-      '</div>' +
-      panelTarifas('GENERAL') +
-    '</div>' +
-
-    /* Sacar los datos a una hoja de cálculo. */
-    '<div class="tarjeta">' +
-      '<div class="tarjeta-cabeza">' +
-        '<span class="cabeza-icono azul">' + ICONO.barras + '</span>' +
-        '<div class="crece"><h2>Sacar los datos a Excel</h2>' +
-          '<p>Un archivo que abres en Excel o Google Sheets. El respaldo de abajo es para restaurar; esto es para mirar.</p></div>' +
-      '</div>' +
-      '<div class="tarjeta-cuerpo"><div class="fila">' +
-        '<button class="btn" data-csv="clientes">' + ICONO.gente + 'Clientes (' + clientes.length + ')</button>' +
-        '<button class="btn" data-csv="cobros">' + ICONO.billete + 'Cobros (' + ventas.length + ')</button>' +
-        '<button class="btn" data-csv="gastos">' + ICONO.caja + 'Gastos (' + inversiones.length + ')</button>' +
-      '</div></div>' +
-    '</div>' +
-
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono verde">' + ICONO.chat + '</span>' +
@@ -5846,6 +5996,71 @@ function pintaAjustes(){
 
     /* El historial: lo que ha pasado, para poder mirar atrás cuando algo no
        cuadra entre el teléfono y la laptop. */
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono gris">' + ICONO.pincel + '</span>' +
+        '<div class="crece"><h2>Aspecto</h2><p>Claro para el día, oscuro para la noche.</p></div></div>' +
+      '<div class="tarjeta-cuerpo"><div class="fila">' +
+        '<button class="btn" id="btn-tema-2">' + (ajustes.modoClaro ? 'Cambiar a oscuro' : 'Cambiar a claro') + '</button>' +
+        '<a class="btn fantasma" href="index.html">Volver al programa anterior</a>' +
+      '</div></div>' +
+    '</div>'
+     : '') +
+    (cual === 'datos' ?
+    (function(){
+      const casos = diagnostico();
+      const graves = casos.filter(function(x){ return x.tono === 'mal'; }).length;
+      return '<div class="tarjeta ancha">' +
+        '<div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono ' + (graves ? 'rosa' : 'verde') + '">' + ICONO.alerta + '</span>' +
+          '<div class="crece"><h2>Revisión de tus datos</h2>' +
+            '<p>' + (casos.length
+              ? casos.length + ' ' + plural(casos.length,'cosa que mirar','cosas que mirar') +
+                (graves ? ' · ' + graves + ' ' + plural(graves,'urgente','urgentes') : '')
+              : 'Todo cuadra: ni un cliente suelto ni una cuenta sobrevendida.') + '</p></div>' +
+        '</div>' +
+        '<div class="tarjeta-cuerpo' + (casos.length ? ' pegado' : '') + '">' +
+          (casos.length
+            ? '<div class="diags">' + casos.map(function(x){
+                return '<button class="diag ' + x.tono + '" data-diag="' + esc(x.clave) + '">' +
+                  '<span class="diag-n">' + x.lista.length + '</span>' +
+                  '<span class="diag-txt"><b>' + esc(x.titulo) + '</b>' +
+                    '<small>' + esc(x.explica) + '</small></span>' +
+                  '<span class="diag-ir">' + ICONO.flecha + '</span>' +
+                '</button>';
+              }).join('') + '</div>'
+            : vacio('Nada que arreglar', 'Ni clientes sin cuenta, ni perfiles repetidos, ni cuentas vencidas.')) +
+        '</div>' +
+      '</div>';
+    })() +
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono azul">' + ICONO.barras + '</span>' +
+        '<div class="crece"><h2>Sacar los datos a Excel</h2>' +
+          '<p>Un archivo que abres en Excel o Google Sheets. El respaldo de abajo es para restaurar; esto es para mirar.</p></div>' +
+      '</div>' +
+      '<div class="tarjeta-cuerpo"><div class="fila">' +
+        '<button class="btn" data-csv="clientes">' + ICONO.gente + 'Clientes (' + clientes.length + ')</button>' +
+        '<button class="btn" data-csv="cobros">' + ICONO.billete + 'Cobros (' + ventas.length + ')</button>' +
+        '<button class="btn" data-csv="gastos">' + ICONO.caja + 'Gastos (' + inversiones.length + ')</button>' +
+      '</div></div>' +
+    '</div>' +
+    '<div class="tarjeta">' +
+      '<div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono azul">' + ICONO.caja + '</span>' +
+        '<div class="crece"><h2>Respaldo</h2>' +
+        '<p>El mismo archivo que usa tu programa anterior, así que sirve para los dos.</p></div>' +
+        (ajustes.ultimoRespaldo ? '<span class="insignia">último: ' + esc(fechaBonita(ajustes.ultimoRespaldo)) + '</span>' : '') +
+      '</div>' +
+      '<div class="tarjeta-cuerpo"><div class="fila">' +
+        '<button class="btn principal" id="btn-exportar">Descargar respaldo</button>' +
+        '<button class="btn" id="btn-importar">Cargar un respaldo</button>' +
+      '</div>' +
+      '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
+        'Ahora mismo tienes <b>' + clientes.length + '</b> clientes, <b>' + servicios.length + '</b> cuentas master, ' +
+        '<b>' + ventas.length + '</b> cobros y <b>' + inversiones.length + '</b> gastos guardados en este dispositivo.' +
+      '</p></div>' +
+    '</div>' +
     '<div class="tarjeta ancha">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono gris">' + ICONO.reloj + '</span>' +
@@ -5879,25 +6094,9 @@ function pintaAjustes(){
         : '<div class="tarjeta-cuerpo">' +
             vacio('Sin historial todavía', 'Aquí se apunta cada cobro, cada alta y cada borrado.') +
           '</div>') +
-    '</div>' +
-
-    '<div class="tarjeta">' +
-      '<div class="tarjeta-cabeza">' +
-        '<span class="cabeza-icono azul">' + ICONO.caja + '</span>' +
-        '<div class="crece"><h2>Respaldo</h2>' +
-        '<p>El mismo archivo que usa tu programa anterior, así que sirve para los dos.</p></div>' +
-        (ajustes.ultimoRespaldo ? '<span class="insignia">último: ' + esc(fechaBonita(ajustes.ultimoRespaldo)) + '</span>' : '') +
-      '</div>' +
-      '<div class="tarjeta-cuerpo"><div class="fila">' +
-        '<button class="btn principal" id="btn-exportar">Descargar respaldo</button>' +
-        '<button class="btn" id="btn-importar">Cargar un respaldo</button>' +
-      '</div>' +
-      '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
-        'Ahora mismo tienes <b>' + clientes.length + '</b> clientes, <b>' + servicios.length + '</b> cuentas master, ' +
-        '<b>' + ventas.length + '</b> cobros y <b>' + inversiones.length + '</b> gastos guardados en este dispositivo.' +
-      '</p></div>' +
-    '</div>' +
-
+    '</div>'
+     : '') +
+    (cual === 'nube' ?
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono azul">' + ICONO.nube + '</span>' +
@@ -5917,8 +6116,9 @@ function pintaAjustes(){
       '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
         'Tus claves se quedan solo en este dispositivo: nunca se suben a la nube ni salen en el respaldo compartido.' +
       '</p></div>' +
-    '</div>' +
-
+    '</div>'
+     : '') +
+    (cual === 'programa' ?
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono azul">' + ICONO.rueda + '</span>' +
@@ -5933,17 +6133,6 @@ function pintaAjustes(){
          }).join('') +
       '</div></div>' +
     '</div>' +
-
-    '<div class="tarjeta">' +
-      '<div class="tarjeta-cabeza">' +
-        '<span class="cabeza-icono gris">' + ICONO.pincel + '</span>' +
-        '<div class="crece"><h2>Aspecto</h2><p>Claro para el día, oscuro para la noche.</p></div></div>' +
-      '<div class="tarjeta-cuerpo"><div class="fila">' +
-        '<button class="btn" id="btn-tema-2">' + (ajustes.modoClaro ? 'Cambiar a oscuro' : 'Cambiar a claro') + '</button>' +
-        '<a class="btn fantasma" href="index.html">Volver al programa anterior</a>' +
-      '</div></div>' +
-    '</div>' +
-
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono gris">' + ICONO.info + '</span>' +
@@ -5960,10 +6149,208 @@ function pintaAjustes(){
         '<div class="fila">' +
           '<button class="btn" id="btn-buscar-version">Buscar una versión nueva</button>' +
         '</div></div>' +
+    '</div>'
+     : '') +
     '</div>' +
-
   '</div>';
 }
+
+/* ---------- PANELES DE MANDO ---------------------------------------------
+   Una lista de filas dice QUÉ hay. Un panel dice qué hay, cuánto pesa y qué
+   se puede hacer con ello sin salir de ahí. La diferencia entre mirar y
+   administrar son tres cifras arriba y un botón que actúa sobre el montón. */
+
+/* --- Las cuentas master vencidas: lo más caro que te puede pasar -------- */
+function panelMastersVencidos(lista, eco){
+  if(!lista.length) return '';
+  const dentro  = lista.reduce(function(a,m){ return a + clientesDe(m.id).length; }, 0);
+  const enJuego = lista.reduce(function(a,m){ return a + resumenCuenta(m, eco).recurrente; }, 0);
+  const cuesta  = lista.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const deben   = lista.reduce(function(a,m){ return a + clientesDe(m.id).filter(debe).length; }, 0);
+  const peor    = lista.reduce(function(a,m){
+    const d = diasHasta(m.vencimiento);
+    return (d !== null && d < a) ? d : a;
+  }, 0);
+
+  return '<div class="panel-mando peligro">' +
+    '<div class="pm-alto">' +
+      '<span class="pm-icono">' + ICONO.alerta + '</span>' +
+      '<div class="pm-id"><h2>Cuentas master vencidas</h2>' +
+        '<p>Esto no es que te deban: es que se cae. Si no las renuevas, ' +
+          dentro + ' ' + plural(dentro,'cliente se queda','clientes se quedan') + ' sin servicio.</p></div>' +
+      '<button class="btn mini principal" data-renovar-todas="1">' + ICONO.renovar +
+        '<span class="et">Renové las ' + lista.length + '</span></button>' +
+    '</div>' +
+    '<div class="pm-cifras">' +
+      '<div class="pmc mal"><dt>Vencidas</dt><dd class="cifra">' + lista.length + '</dd>' +
+        '<small>la peor, hace ' + Math.abs(peor) + ' ' + plural(Math.abs(peor),'día','días') + '</small></div>' +
+      '<div class="pmc"><dt>Gente dentro</dt><dd class="cifra">' + dentro + '</dd>' +
+        '<small>' + (deben ? deben + ' te deben' : 'todos al día') + '</small></div>' +
+      '<div class="pmc aviso"><dt>En juego</dt><dd class="cifra">' + esc(dinero(enJuego)) + '</dd>' +
+        '<small>al ciclo, si se caen</small></div>' +
+      '<div class="pmc"><dt>Renovarlas</dt><dd class="cifra">' + esc(dinero(cuesta)) + '</dd>' +
+        '<small>lo que te cuesta a ti</small></div>' +
+    '</div>' +
+    '<div class="pm-cuerpo"><div class="lista">' +
+      lista.slice().sort(function(a,b){
+        return String(a.vencimiento||'').localeCompare(String(b.vencimiento||''));
+      }).map(function(m){ return filaCuentaVencida(m, eco); }).join('') +
+    '</div></div>' +
+  '</div>';
+}
+
+/* Una cuenta vencida con su botón de renovar ahí mismo: entrar a la cuenta
+   solo para pulsar «renové» eran tres toques por cada una. */
+function filaCuentaVencida(m, eco){
+  const r = resumenCuenta(m, eco);
+  const cl = clientesDe(m.id);
+  const d = diasHasta(m.vencimiento);
+  return '<div class="f mal f-vencida">' +
+    logoPlataforma(m.nombre, 34) +
+    '<span class="f-txt">' +
+      '<span class="f-nom">' + esc(nombreCuenta(m)) + '</span>' +
+      '<span class="f-sub">' + esc(m.correo || 'Sin correo') + ' · ' +
+        cl.length + ' ' + plural(cl.length,'cliente','clientes') + ' · ' +
+        esc(dinero(r.recurrente)) + ' al ciclo</span>' +
+    '</span>' +
+    '<span class="f-der">' +
+      '<span class="insignia mal">' + (d === null ? 'sin fecha' : 'hace ' + Math.abs(d) + ' ' + plural(Math.abs(d),'día','días')) + '</span>' +
+      '<span class="f-cuando mal">cuesta ' + esc(dinero(m.costo)) + '</span>' +
+    '</span>' +
+    '<span class="f-acciones">' +
+      '<button class="btn mini tc-cobrar" data-renovar-m="' + esc(m.id) + '">' + ICONO.renovar +
+        '<span class="et">Renové</span></button>' +
+      '<button class="btn mini icono" data-ver-cuenta="' + esc(m.id) + '"' +
+        ' title="Abrir ' + esc(nombreCuenta(m)) + '" aria-label="Abrir ' + esc(nombreCuenta(m)) + '">' +
+        ICONO.flecha + '</button>' +
+    '</span>' +
+  '</div>';
+}
+
+/* --- El pie de la tabla de cobros: qué estás viendo y qué puedes hacer -- */
+function pieTabla(cola, tope){
+  if(cola.length <= tope) return '';
+  const viendo = cola.slice(0, tope);
+  const suma = viendo.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  const resto = cola.length - tope;
+  const conTel = viendo.filter(function(c){ return telefonoDe(c); }).length;
+  return '<div class="pie-tabla">' +
+    '<div class="pt-txt">' +
+      '<b>' + tope + ' de ' + cola.length + '</b>' +
+      '<span>los más urgentes · ' + esc(dinero(suma)) + ' aquí · ' + resto + ' más esperando</span>' +
+    '</div>' +
+    '<div class="pt-botones">' +
+      (conTel ? '<button class="btn mini bien" data-escribir-a="hoy-visible">' + ICONO.wa +
+        '<span class="et">Empezar la ronda</span></button>' : '') +
+      '<button class="btn mini" data-ir-clientes="1">' + ICONO.gente +
+        '<span class="et">Ver los ' + cola.length + ' en Clientes</span></button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* --- Los sitios libres, agrupados y contados ----------------------------
+   Antes era una fila por perfil: dieciocho filas iguales que no decían nada.
+   Ahora cada plataforma es una tarjeta con sus cuentas y sus huecos como
+   casillas, y arriba lo único que de verdad importa: cuánto dinero es eso
+   si los llenas. */
+function panelLibres(huecos, opciones){
+  const o = opciones || {};
+  if(!huecos.length){
+    return '<div class="tarjeta-cuerpo"><div style="padding:var(--e3) 0">' +
+      vacio(o.vacioTitulo || 'No te queda sitio en ninguna parte',
+            o.vacioTexto || 'Todos los perfiles de todas tus cuentas están ocupados. Para meter a alguien más, compra otra cuenta.') +
+    '</div></div>';
+  }
+  const porPlat = new Map();
+  huecos.forEach(function(h){
+    if(!porPlat.has(h.plataforma)) porPlat.set(h.plataforma, new Map());
+    const cuentas = porPlat.get(h.plataforma);
+    const k = String(h.m.id);
+    if(!cuentas.has(k)) cuentas.set(k, {m:h.m, nums:[]});
+    cuentas.get(k).nums.push(h.n);
+  });
+  const cuantosDe = function(n){
+    return Array.from(porPlat.get(n).values()).reduce(function(a,c){ return a + c.nums.length; }, 0);
+  };
+  const plats = Array.from(porPlat.keys()).sort(function(a,b){
+    return cuantosDe(b) - cuantosDe(a) || a.localeCompare(b,'es');
+  });
+  const potencial = plats.reduce(function(a,n){ return a + cuantosDe(n) * tarifaVigente(n); }, 0);
+
+  return '<div class="panel-mando">' +
+    '<div class="pm-cifras tres">' +
+      '<div class="pmc bien"><dt>Sitios libres</dt><dd class="cifra">' + huecos.length + '</dd>' +
+        '<small>en ' + plats.length + ' ' + plural(plats.length,'plataforma','plataformas') + '</small></div>' +
+      '<div class="pmc info"><dt>Si los llenas</dt><dd class="cifra">' + esc(dinero(potencial)) + '</dd>' +
+        '<small>más al ciclo, a tarifa de hoy</small></div>' +
+      '<div class="pmc"><dt>Al año</dt><dd class="cifra">' + esc(dinero(potencial * 12)) + '</dd>' +
+        '<small>lo que pierdes si los dejas vacíos</small></div>' +
+    '</div>' +
+    '<div class="pm-cuerpo"><div class="libres-rejilla">' +
+      plats.map(function(n){
+        const cuentas = Array.from(porPlat.get(n).values())
+          .sort(function(a,b){ return (Number(a.m.numero)||0) - (Number(b.m.numero)||0); });
+        const cuantos = cuantosDe(n);
+        return '<div class="libre-plat" style="' + tonoDe(n) + '">' +
+          '<div class="lb-alto">' +
+            logoPlataforma(n, 34) +
+            '<span class="lb-id"><b>' + esc(n) + '</b>' +
+              '<small>' + cuantos + ' ' + plural(cuantos,'libre','libres') + ' · ' +
+                esc(dinero(cuantos * tarifaVigente(n))) + '</small></span>' +
+            '<button class="btn mini icono fantasma" data-plat="' + esc(n) + '"' +
+              ' title="Entrar a ' + esc(n) + '" aria-label="Entrar a ' + esc(n) + '">' + ICONO.flecha + '</button>' +
+          '</div>' +
+          '<div class="lb-cuentas">' + cuentas.map(function(c){
+            return '<div class="lb-cuenta">' +
+              '<button class="lb-nombre" data-ver-cuenta="' + esc(c.m.id) + '"' +
+                ' title="Abrir ' + esc(nombreCuenta(c.m)) + '">' + esc(nombreCuenta(c.m)) + '</button>' +
+              '<span class="lb-huecos">' + c.nums.map(function(x){
+                return '<button class="hueco-chip" data-poner-en="' + esc(c.m.id) + '" data-perfil="Perfil ' + x + '"' +
+                  ' title="Poner un cliente en el perfil ' + x + ' de ' + esc(nombreCuenta(c.m)) + '"' +
+                  ' aria-label="Poner un cliente en el perfil ' + x + ' de ' + esc(nombreCuenta(c.m)) + '">' +
+                  '<i>P' + x + '</i>' + ICONO.mas + '</button>';
+              }).join('') + '</span>' +
+            '</div>';
+          }).join('') + '</div>' +
+        '</div>';
+      }).join('') +
+    '</div></div>' +
+  '</div>';
+}
+
+/* --- Renovar de golpe todas las que están vencidas ---------------------- */
+function renovarTodasVencidas(){
+  const lista = servicios.filter(function(m){
+    const d = diasHasta(m.vencimiento);
+    return d !== null && d < 0 &&
+      (plataformaActiva === 'TODAS' || String(m.nombre||'').trim().toUpperCase() === plataformaActiva);
+  });
+  if(!lista.length){ avisar('No hay ninguna vencida', 'bien'); return; }
+  const cuesta = lista.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  confirmar('Renové ' + lista.length + ' ' + plural(lista.length,'cuenta','cuentas'),
+    'Se les corre la fecha un ciclo y se apunta el gasto: ' + dinero(cuesta) +
+    ' en total. Hazlo cuando ya las hayas pagado de verdad.',
+    'Sí, las renové', function(){
+      recordarPaso('renovar ' + lista.length + ' cuentas');
+      const ciclo = cicloDe(null);
+      let gasto = 0;
+      lista.forEach(function(m){
+        m.vencimiento = avanzar(m.vencimiento || hoyISO(), ciclo);
+        const costo = Number(m.costo) || 0;
+        if(costo > 0){
+          inversiones.push({id:nuevoId('inv'), plataforma:m.nombre, cuentaMasterId:m.id,
+                            persona:ajustes.nombre || 'PAPOTAS', monto:costo, fecha:hoyISO()});
+          gasto += costo;
+        }
+      });
+      anotar('RENOVAR MASTERS', lista.length + ' cuentas por ' + dinero(gasto));
+      olvidarIndices();
+      guardar(); pintar();
+      avisar(lista.length + ' ' + plural(lista.length,'cuenta renovada','cuentas renovadas') +
+        (gasto ? ' · ' + dinero(gasto) + ' de gasto' : ''), 'bien', true);
+    });
+}
+
 
 /* --- El pintor ---------------------------------------------------------- */
 /* Una lista que se desplaza de lado sin avisar parece cortada. Se le pone
@@ -6367,34 +6754,55 @@ function abrirWhatsApp(id, cual){
   const tel = telefonoDe(c);
   if(!tel){ avisar((c.nombre||'Ese cliente') + ' no tiene teléfono', 'mal'); return false; }
   window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp(c, cual)), '_blank', 'noopener');
+  marcarEscrito(c);
   anotar('WHATSAPP', 'Mensaje abierto para ' + c.nombre);
   guardar();
   return true;
 }
 
-/* ---------- La cola de WhatsApp -----------------------------------------
-   Escribir a cuarenta y ocho personas una por una es el trabajo que más
-   tiempo se lleva. Esto los pone en fila: se abre el chat del primero con el
-   mensaje ya escrito, y al volver al programa ya está el siguiente esperando.
-   Desde la misma barra se puede cobrar sin ir a buscar la ficha. */
-let cola = [], colaPos = 0, colaPlantilla = 'auto';
+/* ---------- LA RONDA DE WHATSAPP ----------------------------------------
+   Escribirle a cuarenta y ocho personas es el trabajo que más tiempo se
+   lleva del día. La versión de antes los ponía en fila, pero al pulsar
+   «mandar» saltaba sola al siguiente: si el cliente te pagaba en ese mismo
+   momento —que es lo que pasa la mitad de las veces— ya no lo tenías
+   delante para cobrarle. Ahora la ronda va en dos tiempos, que son los dos
+   tiempos de verdad: primero mandas, y cuando te paga, cobras.
+
+   Además se ve el mensaje ANTES de mandarlo, se puede cambiar para esa
+   persona concreta, se puede copiar, y se lleva con el teclado. */
+let cola = [], colaPos = 0;
+let colaPlantilla = 'auto';
+try{ colaPlantilla = localStorage.getItem('pap_plantilla_cola') || 'auto'; }catch(_){}
+let colaMandados = new Set();   /* a quién ya le escribiste en esta ronda */
+let colaTextos = {};            /* el mensaje retocado a mano, por cliente */
+let colaEditando = false;
 
 function abrirCola(lista, titulo){
   const conTel = lista.filter(function(c){ return telefonoDe(c); });
   const sinTel = lista.length - conTel.length;
   if(!conTel.length){
-    avisar(lista.length ? 'Ninguno de esos ' + lista.length + ' tiene teléfono guardado' : 'No hay nadie en esa lista', 'mal');
+    avisar(lista.length ? 'Ninguno de esos ' + lista.length + ' tiene teléfono guardado'
+                        : 'No hay nadie en esa lista', 'mal');
     return;
   }
   cola = conTel.slice();
   colaPos = 0;
+  colaMandados = new Set();
+  colaTextos = {};
+  colaEditando = false;
   pintarCola();
-  avisar(conTel.length + ' en la fila' + (sinTel ? ' · ' + sinTel + ' sin teléfono se quedan fuera' : ''), 'bien');
+  avisar(conTel.length + ' en la ronda' + (sinTel ? ' · ' + sinTel + ' sin teléfono se quedan fuera' : ''), 'bien');
 }
 
 function cerrarCola(){
-  cola = []; colaPos = 0;
+  cola = []; colaPos = 0; colaEditando = false;
   pintarCola();
+}
+
+/* El texto que se va a mandar: el tuyo si lo retocaste, si no la plantilla. */
+function textoDeLaRonda(c){
+  const propio = colaTextos[String(c.id)];
+  return (propio != null) ? propio : textoWhatsApp(c, colaPlantilla);
 }
 
 function pintarCola(){
@@ -6403,31 +6811,63 @@ function pintarCola(){
     if(caja) caja.classList.remove('puesta');
     document.body.classList.remove('con-cola');
     if(cola.length && colaPos >= cola.length){
+      const mandados = colaMandados.size;
       cola = []; colaPos = 0;
-      avisar('Fila terminada. Los escribiste a todos.', 'bien');
+      avisar('Ronda terminada · ' + mandados + ' ' + plural(mandados,'mensaje mandado','mensajes mandados'), 'bien');
     }
     return;
   }
   if(!caja){
     caja = document.createElement('div');
     caja.id = 'cola';
+    caja.setAttribute('role','region');
+    caja.setAttribute('aria-label','Ronda de WhatsApp');
     document.body.appendChild(caja);
   }
   const c = cola[colaPos];
   const m = masterDe(c);
+  const mandado = colaMandados.has(String(c.id));
+  const texto = textoDeLaRonda(c);
+  const retocado = colaTextos[String(c.id)] != null;
+
   caja.innerHTML =
     '<div class="cola-barra"><i style="width:' + Math.round(colaPos/cola.length*100) + '%"></i></div>' +
-    '<div class="cola-fila">' +
-      logoPlataforma(c.servicio || (m && m.nombre), 34) +
+
+    '<div class="cola-alto">' +
+      logoPlataforma(c.servicio || (m && m.nombre), 36) +
       '<div class="cola-quien">' +
         '<b>' + esc(c.nombre || 'Cliente') + '</b>' +
         '<small>' + esc((m ? nombreCuenta(m) : (c.servicio || '')) +
           (perfilBonito(c) ? ' · ' + perfilBonito(c) : '') +
           ' · ' + dinero(cobroDe(c)) + ' · ' + textoDias(c.vencimiento)) + '</small>' +
       '</div>' +
-      '<div class="cola-n">' + (colaPos+1) + '/' + cola.length + '</div>' +
-      '<select class="cola-plant" id="cola-plantilla" aria-label="Qué mensaje mandar">' +
-        '<option value="auto"' + (colaPlantilla==='auto'?' selected':'') + '>Mensaje automático</option>' +
+      (mandado ? '<span class="cola-marca">' + ICONO.ok + 'mandado</span>' : '') +
+      '<span class="cola-paso">' + (colaPos + 1) + ' de ' + cola.length + '</span>' +
+      '<button class="btn icono mini fantasma" data-cola="cerrar" aria-label="Terminar la ronda">' + ICONO.x + '</button>' +
+    '</div>' +
+
+    /* El mensaje, a la vista. Antes se mandaba a ciegas. */
+    (colaEditando
+      ? '<div class="cola-texto editando">' +
+          '<textarea id="cola-edita" rows="4" aria-label="El mensaje que se va a mandar">' + esc(texto) + '</textarea>' +
+          '<div class="cola-texto-pie">' +
+            '<button class="btn mini principal" data-cola="guardar-texto">' + ICONO.ok + 'Listo</button>' +
+            '<button class="btn mini fantasma" data-cola="dejar-texto">Cancelar</button>' +
+            (retocado ? '<button class="btn mini fantasma" data-cola="restaurar-texto">Volver a la plantilla</button>' : '') +
+          '</div>' +
+        '</div>'
+      : '<div class="cola-texto">' +
+          '<p class="cola-previa">' + esc(texto) + '</p>' +
+          '<div class="cola-texto-pie">' +
+            (retocado ? '<span class="insignia aviso">retocado</span>' : '') +
+            '<button class="btn mini fantasma" data-cola="editar">' + ICONO.lapiz + 'Cambiar el texto</button>' +
+            '<button class="btn mini fantasma" data-cola="copiar">' + ICONO.copiar + 'Copiar</button>' +
+          '</div>' +
+        '</div>') +
+
+    '<div class="cola-mando">' +
+      '<select id="cola-plantilla" aria-label="Qué mensaje mandar">' +
+        '<option value="auto"' + (colaPlantilla==='auto'?' selected':'') + '>El que toque</option>' +
         '<option value="cobro"' + (colaPlantilla==='cobro'?' selected':'') + '>Recordatorio de cobro</option>' +
         '<option value="vencido"' + (colaPlantilla==='vencido'?' selected':'') + '>Ya venció</option>' +
         '<option value="entrega"' + (colaPlantilla==='entrega'?' selected':'') + '>Entrega de datos</option>' +
@@ -6440,23 +6880,78 @@ function pintarCola(){
             }).join('') +
           '</optgroup>' : '') +
       '</select>' +
-      '<button class="btn mini bien" data-cola="enviar" title="Abrir el chat de ' + esc(c.nombre||'') + ' con el mensaje escrito">' +
-        ICONO.wa + '<span class="et">Abrir WhatsApp</span></button>' +
-      '<button class="btn mini principal" data-cola="cobrar" title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
-        ' aria-label="Cobrar ' + esc(dinero(cobroDe(c))) + '">' + ICONO.cobrar + '<span class="et">Cobrar</span></button>' +
-      '<button class="btn mini fantasma" data-cola="saltar" title="Saltar a la siguiente" aria-label="Saltar a la siguiente">' + ICONO.flecha + '</button>' +
-      '<button class="btn icono mini fantasma" data-cola="cerrar" aria-label="Terminar la fila">' + ICONO.x + '</button>' +
-    '</div>';
+      (mandado
+        ? '<button class="btn mini bien" data-cola="enviar" title="Volver a abrirle el chat">' +
+            ICONO.wa + '<span class="et">Abrir otra vez</span></button>'
+        : '<button class="btn mini bien crece" data-cola="enviar" title="Abrir el chat de ' + esc(c.nombre||'') + ' con el mensaje escrito">' +
+            ICONO.wa + '<span class="et">Mandar por WhatsApp</span></button>') +
+      '<button class="btn mini principal' + (mandado ? ' crece' : '') + '" data-cola="cobrar"' +
+        ' title="Ya me pagó: cobrar ' + esc(dinero(cobroDe(c))) + ' y pasar al siguiente">' +
+        ICONO.cobrar + '<span class="et">Me pagó · ' + esc(dinero(cobroDe(c))) + '</span></button>' +
+      '<button class="btn mini fantasma" data-cola="saltar" title="Pasar al siguiente sin cobrar">' +
+        '<span class="et">Siguiente</span>' + ICONO.flecha + '</button>' +
+    '</div>' +
+
+    '<p class="cola-teclas">Enter mandar · C cobrar · → siguiente · Esc salir</p>';
+
   caja.classList.add('puesta');
   document.body.classList.add('con-cola');
-  /* Los avisos flotantes tienen que ponerse por encima de la fila, y la fila
-     no mide lo mismo en el teléfono que en la pantalla grande. */
   document.body.style.setProperty('--alto-cola', caja.offsetHeight + 'px');
+  if(colaEditando){
+    const t = document.getElementById('cola-edita');
+    if(t){ t.focus(); t.setSelectionRange(t.value.length, t.value.length); }
+  }
 }
 
 function avanzarCola(){
+  colaEditando = false;
   colaPos++;
   pintarCola();
+}
+
+/* Todo lo que se puede hacer desde la barra de la ronda, en un solo sitio. */
+function mandoCola(que){
+  if(que === 'cerrar'){ cerrarCola(); return; }
+  const c = cola[colaPos];
+  if(!c) return;
+  const clave = String(c.id);
+
+  if(que === 'editar'){ colaEditando = true; pintarCola(); return; }
+  if(que === 'dejar-texto'){ colaEditando = false; pintarCola(); return; }
+  if(que === 'guardar-texto'){
+    const t = document.getElementById('cola-edita');
+    if(t) colaTextos[clave] = t.value;
+    colaEditando = false; pintarCola(); return;
+  }
+  if(que === 'restaurar-texto'){
+    delete colaTextos[clave];
+    colaEditando = false; pintarCola(); return;
+  }
+  if(que === 'copiar'){ copiar(textoDeLaRonda(c), 'El mensaje'); return; }
+
+  if(que === 'enviar'){
+    /* Mandar NO pasa al siguiente. Mandas, esperas, y cuando te paga le
+       das a «me pagó»: ahí sí avanza. */
+    const tel = telefonoDe(c);
+    if(!tel){ avisar((c.nombre||'Ese cliente') + ' no tiene teléfono', 'mal'); avanzarCola(); return; }
+    window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoDeLaRonda(c)), '_blank', 'noopener');
+    marcarEscrito(c);
+    colaMandados.add(clave);
+    anotar('WHATSAPP', 'Mensaje mandado a ' + (c.nombre||''));
+    guardar();
+    pintarCola();
+    return;
+  }
+  if(que === 'cobrar'){ renovar(c.id, true); avanzarCola(); return; }
+  if(que === 'saltar'){ avanzarCola(); return; }
+}
+
+/* Queda apuntado a quién le escribiste hoy, para no repetirte. */
+function marcarEscrito(c){
+  c.ultimoAviso = hoyISO();
+}
+function escritoHoy(c){
+  return !!(c && c.ultimoAviso === hoyISO());
 }
 
 /* --- Formularios --------------------------------------------------------- */
@@ -7305,7 +7800,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -7381,19 +7876,7 @@ document.addEventListener('click', function(ev){
     abrirCliente(d.verCliente);
     return;
   }
-  if(d.cola){
-    const c = cola[colaPos];
-    if(d.cola === 'cerrar'){ cerrarCola(); return; }
-    if(d.cola === 'saltar'){ avanzarCola(); return; }
-    if(!c) return;
-    if(d.cola === 'enviar'){
-      if(abrirWhatsApp(c.id, colaPlantilla)) avanzarCola();
-      else avanzarCola();
-      return;
-    }
-    if(d.cola === 'cobrar'){ renovar(c.id, true); avanzarCola(); return; }
-    return;
-  }
+  if(d.cola){ mandoCola(d.cola); return; }
   if(d.escribirA){
     /* Las listas que se pueden poner en fila, desde donde se esté. */
     const hoy = hoyISO(), av = Number(ajustes.diasAlerta||5);
@@ -7447,6 +7930,13 @@ document.addEventListener('click', function(ev){
   }
   if(d.volver){ volverA(d.volver); return; }
   if(d.deshacer){ deshacerPaso(); return; }
+  if(d.renovarTodas){ renovarTodasVencidas(); return; }
+  if(d.vaj){
+    vistaAjustes = d.vaj;
+    try{ localStorage.setItem('pap_vista_ajustes', vistaAjustes); }catch(_){}
+    volverElFoco('[data-vaj="' + CSS.escape(d.vaj) + '"]');
+    pintar(); arriba(); return;
+  }
   if(d.modoElegir){
     modoElegir = !modoElegir;
     if(!modoElegir) elegidos.clear();
@@ -7597,7 +8087,12 @@ document.addEventListener('click', function(ev){
 /* Los desplegables y botones propios de cada pantalla. */
 document.addEventListener('change', function(ev){
   const id = ev.target.id;
-  if(id === 'cola-plantilla'){ colaPlantilla = ev.target.value; return; }
+  if(id === 'cola-plantilla'){
+    colaPlantilla = ev.target.value;
+    try{ localStorage.setItem('pap_plantilla_cola', colaPlantilla); }catch(_){}
+    pintarCola();
+    return;
+  }
   if(id === 'mv-cuenta'){
     if(moviendo){ moviendo.cuenta = ev.target.value; moviendo.perfil = ''; repintarMover(); }
     return;
@@ -7787,6 +8282,9 @@ const ATAJOS = [
   ['D', 'Dinero'],
   ['A', 'Ajustes'],
   ['E', 'elegir varios clientes de una vez'],
+  ['Enter', 'en la ronda: mandar el WhatsApp'],
+  ['C', 'en la ronda: ya me pagó, cobrar'],
+  ['→', 'en la ronda: pasar al siguiente'],
   ['Ctrl+Z', 'deshacer lo último que hiciste (hasta 20 pasos)'],
   ['?', 'esta misma lista']
 ];
@@ -7835,6 +8333,14 @@ document.addEventListener('keydown', function(ev){
     return;
   }
   if(cerrarModalActual) return;
+  /* Con la ronda abierta, el teclado es de la ronda: es donde estás
+     trabajando y no tiene sentido que la flecha cambie de plataforma. */
+  if(cola.length && colaPos < cola.length){
+    if(ev.key === 'Enter'){ ev.preventDefault(); mandoCola('enviar'); return; }
+    if(String(ev.key).toLowerCase() === 'c'){ ev.preventDefault(); mandoCola('cobrar'); return; }
+    if(ev.key === 'ArrowRight' || String(ev.key).toLowerCase() === 's'){ ev.preventDefault(); mandoCola('saltar'); return; }
+    if(ev.key === 'Escape'){ ev.preventDefault(); cerrarCola(); return; }
+  }
   const platos = resumenPlataformas();
   /* Escape sube un escalon: del cliente a su cuenta, de la cuenta a su
      plataforma, y de la plataforma a todas. */
@@ -7929,6 +8435,12 @@ window.PAPOTAS = {
     }
   },
   deshacer: deshacerPaso,
+  /* Abrir una sección concreta de los ajustes. */
+  verAjustes: function(cual){
+    vistaAjustes = cual || 'negocio';
+    try{ localStorage.setItem('pap_vista_ajustes', vistaAjustes); }catch(_){}
+    if(pantalla !== 'ajustes') ir('ajustes'); else pintar();
+  },
   revisar: diagnostico,
   /* Las cuatro puertas del negocio, para volver al principio de una. */
   verPlataformas: function(){ puerta('plataformas'); },
