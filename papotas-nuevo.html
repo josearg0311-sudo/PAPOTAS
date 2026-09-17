@@ -2184,6 +2184,92 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   .nube-punto.trabajando{animation:none}
 }
 
+
+/* ===== EL CARRIL DE PLATAFORMAS SE MUEVE =============================== */
+/* Con nueve plataformas la tira se sale de la pantalla y la barra de
+   desplazamiento está escondida a propósito. Con el dedo se arrastra; con
+   ratón no había nada que tocar. Ahora hay flechas, rueda y arrastre. */
+.carril-plat{position:relative;min-width:0}
+.carril-flecha{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:4;
+  width:32px;height:32px;border-radius:99px;
+  display:none;align-items:center;justify-content:center;
+  border:1px solid var(--linea-fuerte);background:var(--capa-alta);color:var(--txt-2);
+  box-shadow:var(--sombra-2);cursor:pointer;padding:0;
+  transition:opacity var(--rapido) var(--curva), color var(--rapido) var(--curva);
+}
+.carril-plat.con-flechas .carril-flecha{display:flex}
+.carril-flecha svg{width:16px;height:16px;stroke-width:2.4}
+.carril-flecha.izq{left:-6px}
+.carril-flecha.der{right:-6px}
+.carril-flecha:hover{color:var(--txt);border-color:var(--txt-4)}
+.carril-flecha.apagada{opacity:0;pointer-events:none}
+/* Con el dedo sobran: la tira ya se arrastra. */
+@media (pointer: coarse){ .carril-plat.con-flechas .carril-flecha{display:none} }
+@media (max-width:860px){ .carril-plat.con-flechas .carril-flecha{display:none} }
+
+.mando-plat{cursor:grab}
+.mando-plat.arrastrando{cursor:grabbing;scroll-snap-type:none}
+.mando-plat.arrastrando .pastel{pointer-events:none}
+/* Los velos de los bordes dicen que hay más hacia ese lado. */
+.mando-plat.desborda, .mando-plat.desborda-izq, .mando-plat.desborda-fin{
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+}
+.mando-plat.desborda{
+  -webkit-mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+  mask-image:linear-gradient(90deg, #000 0, #000 calc(100% - 26px), transparent 100%);
+}
+.mando-plat.desborda-fin{
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 26px, #000 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 26px, #000 100%);
+}
+
+
+/* ===== TRABAJAR CON VARIOS A LA VEZ ==================================== */
+.elegir-fila{align-items:center;gap:var(--e3)}
+.elegir-fila .pista{margin:0;flex:1;min-width:0}
+@media (max-width:640px){ .elegir-fila .pista{display:none} }
+
+/* La casilla ocupa la tarjeta entera: en modo elegir, tocar en cualquier
+   sitio marca, que es lo que espera la mano. El marco dice cuál está. */
+.tc-marca{
+  position:absolute;inset:0;z-index:3;border:0;background:transparent;cursor:pointer;
+  border-radius:inherit;display:flex;align-items:flex-start;justify-content:flex-end;
+  padding:10px;color:var(--marca);
+}
+.tc-marca svg{
+  width:20px;height:20px;stroke-width:3;flex:0 0 auto;
+  background:var(--marca);color:#fff;border-radius:99px;padding:3px;
+}
+.tc.elegido{
+  border-color:var(--marca);
+  box-shadow:var(--brillo), 0 0 0 1px var(--marca-linea), var(--sombra-2);
+}
+.tc.elegido::after{opacity:.02}
+/* Un cliente en pausa se ve apagado, pero se ve. */
+.tc.pausado{opacity:.62}
+.tc.pausado .pastilla{color:var(--txt-3)}
+
+/* La barra de abajo con lo que se puede hacer con los elegidos. */
+.lote{
+  position:sticky;bottom:0;z-index:12;
+  display:flex;align-items:center;gap:var(--e3);flex-wrap:wrap;
+  margin-top:var(--e3);padding:var(--e3) var(--e4);
+  border-top:1px solid var(--linea-fuerte);
+  background:var(--capa-alta);
+  box-shadow:0 -10px 24px -18px rgba(0,0,0,.7);
+}
+.lote-cuenta{display:flex;align-items:baseline;gap:7px;flex:0 0 auto}
+.lote-cuenta b{font-size:19px;font-weight:780;letter-spacing:-.03em;font-family:var(--cifra)}
+.lote-cuenta span{font-size:12px;color:var(--txt-3);font-weight:600}
+.lote-botones{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0;justify-content:flex-end}
+@media (max-width:700px){
+  .lote{padding:var(--e3);bottom:0}
+  .lote-botones{justify-content:flex-start}
+  .lote-botones .btn{flex:1 1 auto;justify-content:center}
+}
+
 @media (max-width:420px){
   .r2,.r3,.r4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .datos{grid-template-columns:1fr 1fr}
@@ -2227,7 +2313,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.1</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.2</span>
     </div>
   </nav>
 
@@ -3328,7 +3414,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.1';
+const VERSION = 'v4.2';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -3398,7 +3484,8 @@ function avisar(texto, clase, conDeshacer){
    Antes de cada cosa que cambia datos se guarda una foto de los cuatro
    almacenes. Si te equivocaste, vuelve entera: no hay medio deshacer que
    deje el vencimiento avanzado y el cobro borrado. */
-let ultimoPaso = null;
+const PILA_MAX = 20;
+let pilaPasos = [];
 function fotoDatos(){
   /* Los ajustes entran en la foto porque ahi viven las tarifas. */
   try{ return JSON.stringify({servicios, clientes, ventas, inversiones, ajustes}); }
@@ -3408,14 +3495,16 @@ function fotoDatos(){
 function recordarPasoAjustes(queFue){ recordarPaso(queFue); }
 function recordarPaso(queFue){
   const foto = fotoDatos();
-  if(!foto) { ultimoPaso = null; return; }
-  ultimoPaso = {queFue:queFue, foto:foto, cuando:Date.now()};
+  if(!foto) return;
+  pilaPasos.push({queFue:queFue, foto:foto, cuando:Date.now()});
+  /* Veinte pasos hacia atrás: más que eso no se acuerda nadie, y cada foto
+     ocupa memoria. */
+  if(pilaPasos.length > PILA_MAX) pilaPasos.shift();
 }
-function hayQueDeshacer(){ return !!(ultimoPaso && ultimoPaso.foto); }
+function hayQueDeshacer(){ return pilaPasos.length > 0; }
 function deshacerPaso(){
   if(!hayQueDeshacer()){ avisar('No hay nada que deshacer'); return; }
-  const paso = ultimoPaso;
-  ultimoPaso = null;
+  const paso = pilaPasos.pop();
   try{
     const d = JSON.parse(paso.foto);
     servicios   = arr(d.servicios);
@@ -3431,10 +3520,12 @@ function deshacerPaso(){
     }
   }catch(_){ avisar('No se pudo deshacer', 'mal'); return; }
   anotar('DESHACER', paso.queFue);
+  olvidarIndices();
   guardar();
   if(cerrarModalActual) cerrarModal();
   pintar();
-  avisar('Deshecho: ' + paso.queFue, 'bien');
+  avisar('Deshecho: ' + paso.queFue +
+    (pilaPasos.length ? ' · quedan ' + pilaPasos.length + ' hacia atrás' : ''), 'bien');
 }
 
 async function copiar(texto, queEs){
@@ -3923,15 +4014,23 @@ function chispaPlataforma(n){
    renglones sin cambiar de HTML. */
 function tarjetaCliente(c){
   const est = estadoDe(c);
-  const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
+  const pausa = enPausa(c);
+  const clase = pausa ? 'pausado'
+              : est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
+  const elegido = modoElegir && elegidos.has(String(c.id));
   const m = masterDe(c);
   const perfil = perfilBonito(c);
   const plat = c.servicio || (m && m.nombre) || '';
   const tel = telefonoDe(c);
   return '' +
-  '<div class="tc ' + clase + '" data-cid="' + esc(c.id) + '" style="' + tonoDe(plat) + '">' +
-    '<button class="ficha-tapa" data-ficha="' + esc(c.id) + '"' +
-      ' aria-label="Ver la ficha de ' + esc(c.nombre || 'este cliente') + '"></button>' +
+  '<div class="tc ' + clase + (elegido ? ' elegido' : '') + '" data-cid="' + esc(c.id) + '" style="' + tonoDe(plat) + '">' +
+    (modoElegir
+      ? '<button class="tc-marca" data-elegir="' + esc(c.id) + '"' +
+          ' role="checkbox" aria-checked="' + (elegido ? 'true' : 'false') + '"' +
+          ' aria-label="' + (elegido ? 'Quitar de la selección a ' : 'Elegir a ') + esc(c.nombre||'este cliente') + '">' +
+          (elegido ? ICONO.ok : '') + '</button>'
+      : '<button class="ficha-tapa" data-ficha="' + esc(c.id) + '"' +
+          ' aria-label="Ver la ficha de ' + esc(c.nombre || 'este cliente') + '"></button>') +
     '<span class="tc-alto">' +
       logoPlataforma(plat, 40) +
       '<span class="tc-id">' +
@@ -3947,7 +4046,8 @@ function tarjetaCliente(c){
     '<span class="tc-pie">' +
       '<span class="tc-monto"><small>Le cobras</small>' +
         '<b class="cifra">' + esc(dinero(cobroDe(c))) + '</b></span>' +
-      '<span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span>' +
+      '<span class="pastilla ' + clase + '">' +
+        esc(pausa ? 'en pausa' : textoDias(c.vencimiento)) + '</span>' +
     '</span>' +
     '<span class="tc-mando">' +
       '<button class="btn mini crece tc-cobrar" data-cobrar="' + esc(c.id) + '"' +
@@ -4062,7 +4162,7 @@ function resumenPlataformas(){
     x.clientes++;
     x.cobra += cobroDe(c);
     const e = estadoDe(c);
-    if(e === 'vencido' || e === 'por_vencer') x.deben++;
+    if(debe(c)) x.deben++;
   });
   return Array.from(g.values()).sort(function(a,b){ return b.deben - a.deben || a.n.localeCompare(b.n,'es'); });
 }
@@ -4072,7 +4172,13 @@ function barraPlataformas(){
   if(!lista.length) return '';
   if(plataformaActiva !== 'TODAS' && !lista.some(function(x){ return x.n === plataformaActiva; })) ponerPlataforma('TODAS');
   const totalDeben = lista.reduce(function(a,x){ return a + x.deben; }, 0);
-  return '<nav class="mando-plat" aria-label="Con qué plataforma trabajas">' +
+  /* Con nueve plataformas la tira se sale de la pantalla. En el teléfono se
+     arrastra con el dedo y ya, pero con ratón no había forma de moverla:
+     la barra de desplazamiento está escondida a propósito. Ahora lleva sus
+     flechas, se mueve con la rueda y se puede arrastrar. */
+  return '<div class="carril-plat">' +
+    '<button class="carril-flecha izq" data-desliza="-1" tabindex="-1" aria-hidden="true">' + ICONO.volver + '</button>' +
+    '<nav class="mando-plat" aria-label="Con qué plataforma trabajas">' +
     '<button class="pastel' + (plataformaActiva==='TODAS'?' viva':'') + '" data-plat="TODAS"' +
       ' aria-pressed="' + (plataformaActiva==='TODAS'?'true':'false') + '">' +
       '<span class="pastel-ojo todas">' + ICONO.tele + '</span>' +
@@ -4091,7 +4197,9 @@ function barraPlataformas(){
         (x.deben ? '<span class="pastel-n">' + x.deben + '</span>' : '') +
       '</button>';
     }).join('') +
-  '</nav>';
+    '</nav>' +
+    '<button class="carril-flecha der" data-desliza="1" tabindex="-1" aria-hidden="true">' + ICONO.flecha + '</button>' +
+  '</div>';
 }
 
 let filtroHoy = 'pendientes';
@@ -4106,7 +4214,9 @@ function pintaHoy(){
   const aviso = Number(ajustes.diasAlerta||5);
   /* Todo lo de esta pantalla pasa por la plataforma con la que estás
      trabajando: si entras a NETFLIX, aquí solo hay Netflix. */
-  const suyos = clientes.filter(enPlataformaActiva);
+  /* Hoy es la pantalla de a quién hay que cobrarle: los pausados no pintan
+     nada ahí. Siguen enteros en su plataforma y en su cuenta. */
+  const suyos = clientes.filter(enPlataformaActiva).filter(function(c){ return !enPausa(c); });
   const vencidos = suyos.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; });
   const deHoy    = suyos.filter(function(c){ return c.vencimiento === hoy; });
   const semana   = suyos.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d>0 && d<=aviso; });
@@ -4405,6 +4515,7 @@ function volverA(nivel){
 }
 /* Subir un escalón, sea cual sea el que pisas. Lo usa la tecla Escape. */
 function subirUno(){
+  if(modoElegir){ limpiarEleccion(); pintar(); return true; }
   if(busqueda){ busqueda = ''; const bu = $('#buscar'); if(bu) bu.value = ''; pintar(); return true; }
   if(rutaCliente){ volverA(rutaCuenta ? 'cuenta' : 'plat'); return true; }
   if(rutaCuenta){ volverA('plat'); return true; }
@@ -4456,7 +4567,7 @@ function gruposPlataforma(eco){
     const g = caja(k);
     if(!masterDe(c)){ g.clientes++; g.cobra += cobroDe(c); g.sueltos.push(c); }
     const e = estadoDe(c);
-    if(e === 'vencido' || e === 'por_vencer') g.deben++;
+    if(debe(c)) g.deben++;
   });
   const nombres = Object.keys(grupos).sort();
   return {grupos:grupos, nombres:nombres};
@@ -4490,7 +4601,15 @@ function primerPerfilLibre(m){
   const hueco = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; })[0];
   return hueco ? 'Perfil ' + hueco.n : '';
 }
-function debe(c){ const e = estadoDe(c); return e === 'vencido' || e === 'por_vencer'; }
+/* Un cliente pausado sigue ahí, con su perfil y su historia, pero deja de
+   salir en «por cobrar»: se fue de viaje, dejó de pagar un mes, le guardas
+   el sitio. Borrarlo para eso era perder todo lo que llevaba pagado. */
+function enPausa(c){ return !!(c && c.pausado); }
+function debe(c){
+  if(enPausa(c)) return false;
+  const e = estadoDe(c);
+  return e === 'vencido' || e === 'por_vencer';
+}
 
 /* ---------- El botón grande de arriba, según dónde estés ---------------- */
 /* El boton grande de la cabecera lleva un «+»: siempre da de alta algo, y
@@ -4706,6 +4825,15 @@ function tramoPlataforma(n, cuantas, deja){
 
 /* ---------- Los clientes: filtros y cuerpo, compartidos ----------------- */
 function filtrosClientes(universo){
+  const barra = '<div class="fila-controles elegir-fila">' +
+    '<button class="btn mini' + (modoElegir ? ' principal' : '') + '" data-modo-elegir="1"' +
+      ' aria-pressed="' + (modoElegir ? 'true' : 'false') + '">' + ICONO.capas +
+      (modoElegir ? 'Salir de elegir' : 'Elegir varios') + '</button>' +
+    (modoElegir ? '' : '<span class="pista">Para cobrar, escribir o mover a varios de una vez.</span>') +
+  '</div>';
+  return barra + filtrosClientesBase(universo);
+}
+function filtrosClientesBase(universo){
   const cuenta = {todos:0, deben:0, vencido:0, por_vencer:0, activo:0, sin_cuenta:0};
   universo.forEach(function(c){
     cuenta.todos++;
@@ -4800,7 +4928,7 @@ function cuerpoClientes(universo){
   }else{
     cuerpo = '<div class="mosaico gente">' + lista.map(tarjetaCliente).join('') + '</div>';
   }
-  return '<div class="tarjeta-cuerpo pegado">' + cuerpo + '</div>';
+  return '<div class="tarjeta-cuerpo pegado">' + cuerpo + '</div>' + barraLote();
 }
 
 /* ---------- Buscar: se busca en TODO, desde donde estés ----------------- */
@@ -5267,6 +5395,8 @@ function hojaCliente(c){
             (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>'
                              : '<span class="chip-perfil sin">sin perfil</span>') +
             '<span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span>' +
+            (enPausa(c) ? '<span class="insignia aviso" title="No sale en Hoy ni en «por cobrar»">' +
+              ICONO.reloj + 'En pausa</span>' : '') +
             (fut ? '<span class="insignia info" title="Ya está programado">' + ICONO.etiqueta +
               esc(dinero(fut.monto)) + ' desde el ' + esc(fechaBonita(fut.desde)) + '</span>' : '') +
           '</p></div>' +
@@ -5277,7 +5407,12 @@ function hojaCliente(c){
         '<button class="btn mini principal" data-cobrar="' + esc(c.id) + '">' + ICONO.cobrar +
           '<span class="et">Cobrar ' + esc(dinero(cobroDe(c))) + '</span></button>' +
         (tel ? '<button class="btn mini bien" data-wa="' + esc(c.id) + '">' + ICONO.wa + '<span class="et">WhatsApp</span></button>' : '') +
+        '<button class="btn mini" data-adelanto="' + esc(c.id) + '">' + ICONO.calendario +
+          '<span class="et">Cobrar adelantado</span></button>' +
         '<button class="btn mini" data-renovar="' + esc(c.id) + '">' + ICONO.renovar + '<span class="et">Renovar sin cobrar</span></button>' +
+        '<button class="btn mini' + (enPausa(c) ? ' aviso' : '') + '" data-pausar="' + esc(c.id) + '">' +
+          (enPausa(c) ? ICONO.ok : ICONO.reloj) +
+          '<span class="et">' + (enPausa(c) ? 'Reactivarlo' : 'Pausarlo') + '</span></button>' +
         (m ? '<button class="btn mini" data-accesos="' + esc(c.id) + '">' + ICONO.copiar +
           '<span class="et">Copiar sus accesos</span></button>' : '') +
         '<button class="btn mini" data-precio="' + esc(c.id) + '">' + ICONO.etiqueta + '<span class="et">Cambiar el precio</span></button>' +
@@ -5834,14 +5969,76 @@ function pintaAjustes(){
 /* Una lista que se desplaza de lado sin avisar parece cortada. Se le pone
    un difuminado en el borde por el que todavía hay cosas. */
 function marcarDesbordes(){
-  document.querySelectorAll('.segmentos, .plataformas').forEach(function(el){
+  document.querySelectorAll('.segmentos, .plataformas, .mando-plat').forEach(function(el){
     const hay = el.scrollWidth > el.clientWidth + 2;
-    el.classList.toggle('desborda', hay && el.scrollLeft < 4);
-    el.classList.toggle('desborda-izq', hay && el.scrollLeft >= 4 && el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
-    el.classList.toggle('desborda-fin', hay && el.scrollLeft >= el.scrollWidth - el.clientWidth - 4);
-    if(hay && !el.dataset.oyendo){
+    const alPrincipio = el.scrollLeft < 4;
+    const alFinal = el.scrollLeft >= el.scrollWidth - el.clientWidth - 4;
+    el.classList.toggle('desborda', hay && alPrincipio);
+    el.classList.toggle('desborda-izq', hay && !alPrincipio && !alFinal);
+    el.classList.toggle('desborda-fin', hay && alFinal);
+    if(!el.dataset.oyendo){
       el.dataset.oyendo = '1';
       el.addEventListener('scroll', function(){ marcarDesbordes(); }, {passive:true});
+      /* La rueda del ratón mueve la tira a lo ancho: es lo que intenta
+         cualquiera antes de buscar una flecha. */
+      el.addEventListener('wheel', function(ev){
+        if(ev.deltaX) return;                       /* ya viene de lado */
+        if(el.scrollWidth <= el.clientWidth + 2) return;
+        ev.preventDefault();
+        el.scrollLeft += ev.deltaY;
+      }, {passive:false});
+      arrastrable(el);
+    }
+    /* Las flechas del carril solo existen si hay algo hacia donde ir. */
+    const carril = el.parentElement;
+    if(carril && carril.classList.contains('carril-plat')){
+      carril.classList.toggle('con-flechas', hay);
+      const izq = carril.querySelector('.carril-flecha.izq');
+      const der = carril.querySelector('.carril-flecha.der');
+      if(izq) izq.classList.toggle('apagada', !hay || alPrincipio);
+      if(der) der.classList.toggle('apagada', !hay || alFinal);
+    }
+  });
+}
+
+/* Arrastrar con el ratón, como se arrastra con el dedo. Si el arrastre pasa
+   de unos pocos píxeles, el clic que venía detrás se anula: si no, soltar
+   encima de una plataforma te metía dentro sin querer. */
+function arrastrable(el){
+  let pulsando = false, desde = 0, scroll0 = 0, movido = 0;
+  el.addEventListener('pointerdown', function(ev){
+    if(ev.pointerType === 'touch') return;          /* el dedo ya funciona */
+    if(el.scrollWidth <= el.clientWidth + 2) return;
+    pulsando = true; movido = 0;
+    desde = ev.clientX; scroll0 = el.scrollLeft;
+  });
+  el.addEventListener('pointermove', function(ev){
+    if(!pulsando) return;
+    const d = ev.clientX - desde;
+    if(Math.abs(d) > 3){ movido = Math.abs(d); el.classList.add('arrastrando'); }
+    el.scrollLeft = scroll0 - d;
+  });
+  const soltar = function(){
+    if(!pulsando) return;
+    pulsando = false;
+    el.classList.remove('arrastrando');
+    if(movido > 6){ el.dataset.arrastre = String(Date.now()); }
+  };
+  el.addEventListener('pointerup', soltar);
+  el.addEventListener('pointerleave', soltar);
+  el.addEventListener('pointercancel', soltar);
+}
+
+/* La plataforma con la que trabajas se deja siempre a la vista: si eliges
+   una con el teclado, no se queda fuera de la pantalla. */
+function acercarPlataformaViva(){
+  document.querySelectorAll('.pagina.viva .mando-plat').forEach(function(tira){
+    const viva = tira.querySelector('.pastel.viva');
+    if(!viva) return;
+    const t = tira.getBoundingClientRect(), v = viva.getBoundingClientRect();
+    if(v.left < t.left + 4 || v.right > t.right - 4){
+      tira.scrollTo({left: viva.offsetLeft - tira.clientWidth/2 + viva.offsetWidth/2,
+                     behavior: suave()});
     }
   });
 }
@@ -5860,7 +6057,7 @@ function pintar(){
   ponerRolesPestanas();
   ponerTituloVentana();
   recolocarFoco();
-  requestAnimationFrame(marcarDesbordes);
+  requestAnimationFrame(function(){ marcarDesbordes(); acercarPlataformaViva(); });
 }
 function pintarAvisosNav(){
   const vencidos = clientes.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; }).length;
@@ -5876,34 +6073,229 @@ function buscarCliente(id){ return clientes.find(function(c){ return String(c.id
 function buscarMaster(id){ return servicios.find(function(m){ return String(m.id)===String(id); }); }
 
 /* Renueva y, si se cobra, deja la venta registrada. Misma lógica que antes. */
+/* ---------- TRABAJAR CON VARIOS A LA VEZ --------------------------------
+   Con cien clientes, hacer las cosas de una en una es el trabajo. Cobrarle
+   a los doce de Netflix que vencieron el mismo día son doce ventanas, doce
+   confirmaciones y doce oportunidades de perder el hilo. Aquí se marcan los
+   que sean y se hace una sola vez. */
+let modoElegir = false;
+let elegidos = new Set();
+
+function limpiarEleccion(){ elegidos.clear(); modoElegir = false; }
+function alternarElegido(id){
+  const k = String(id);
+  if(elegidos.has(k)) elegidos.delete(k); else elegidos.add(k);
+}
+function elegidosVivos(){
+  return Array.from(elegidos).map(buscarCliente).filter(Boolean);
+}
+/* Los que están a la vista ahora mismo, en el orden en que se ven. */
+function clientesALaVista(){
+  return Array.prototype.slice.call(document.querySelectorAll('#p-negocio .tc[data-cid]'))
+    .map(function(el){ return buscarCliente(el.dataset.cid); }).filter(Boolean);
+}
+
+/* La barra que aparece abajo cuando hay alguien marcado. */
+/* Solo la barra de abajo, sin tocar la lista. */
+function refrescarLote(){
+  const caja = document.querySelector('#p-negocio .lote');
+  const html = barraLote();
+  if(caja && html){ caja.outerHTML = html; return; }
+  if(caja && !html){ caja.remove(); return; }
+  if(!caja && html) pintar();
+}
+
+function barraLote(){
+  const lista = elegidosVivos();
+  if(!modoElegir) return '';
+  const suma = lista.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  const conTel = lista.filter(function(c){ return telefonoDe(c); }).length;
+  return '<div class="lote" role="region" aria-label="Lo que vas a hacer con los elegidos">' +
+    '<div class="lote-cuenta"><b>' + lista.length + '</b>' +
+      '<span>' + plural(lista.length,'elegido','elegidos') +
+        (lista.length ? ' · ' + esc(dinero(suma)) : '') + '</span></div>' +
+    '<div class="lote-botones">' +
+      '<button class="btn mini" data-elegir-todos="1">' + ICONO.ok +
+        '<span class="et">Marcar los que se ven</span></button>' +
+      (lista.length ? '<button class="btn mini principal" data-lote="cobrar">' + ICONO.cobrar +
+        '<span class="et">Cobrar a los ' + lista.length + '</span></button>' : '') +
+      (conTel ? '<button class="btn mini bien" data-lote="escribir">' + ICONO.wa +
+        '<span class="et">Escribir a ' + conTel + '</span></button>' : '') +
+      (lista.length ? '<button class="btn mini" data-lote="mover">' + ICONO.capas +
+        '<span class="et">Moverlos</span></button>' : '') +
+      (lista.length ? '<button class="btn mini" data-lote="pausar">' + ICONO.reloj +
+        '<span class="et">Pausarlos</span></button>' : '') +
+      '<button class="btn mini fantasma" data-lote="salir">' + ICONO.x +
+        '<span class="et">Salir</span></button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* Cobrar a todos de una: una sola foto para deshacer, un solo guardado y
+   una sola pintada. De uno en uno eran cien guardados y cien subidas. */
+function cobrarLote(){
+  const lista = elegidosVivos();
+  if(!lista.length) return;
+  const suma = lista.reduce(function(a,c){ return a + cobroDe(c) * mesesDeCiclo(c); }, 0);
+  confirmar('Cobrar a ' + lista.length,
+    'Se van a apuntar ' + lista.length + ' ' + plural(lista.length,'cobro','cobros') +
+    ' por ' + dinero(suma) + ' en total, y a todos se les corre el vencimiento. ¿Seguro?',
+    'Sí, cobrar a los ' + lista.length, function(){
+      recordarPaso('cobrar a ' + lista.length + ' ' + plural(lista.length,'cliente','clientes'));
+      let hechos = 0, total = 0;
+      lista.forEach(function(c){ const r = cobrarUno(c, true, 1); if(r){ hechos++; total += r; } });
+      anotar('COBRO EN LOTE', hechos + ' cobros por ' + dinero(total));
+      guardar(); limpiarEleccion(); pintar();
+      avisar('Cobrados ' + dinero(total) + ' de ' + hechos + ' ' + plural(hechos,'cliente','clientes'), 'bien', true);
+    });
+}
+
+function pausarLote(){
+  const lista = elegidosVivos();
+  if(!lista.length) return;
+  const encendidos = lista.filter(function(c){ return !c.pausado; }).length;
+  const pausar = encendidos > 0;
+  recordarPaso((pausar ? 'pausar ' : 'reactivar ') + lista.length + ' clientes');
+  lista.forEach(function(c){ c.pausado = pausar ? true : false; if(!pausar) delete c.pausado; });
+  anotar(pausar ? 'PAUSAR' : 'REACTIVAR', lista.length + ' clientes');
+  guardar(); limpiarEleccion(); olvidarIndices(); pintar();
+  avisar((pausar ? 'Pausados ' : 'Reactivados ') + lista.length, 'bien', true);
+}
+
+/* Moverlos a todos a la misma cuenta, repartiéndolos por los perfiles que
+   queden libres y avisando si no caben. */
+function moverLote(){
+  const lista = elegidosVivos();
+  if(!lista.length) return;
+  const opc = servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
+    .map(function(m){
+      const libres = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).length;
+      return [m.id, nombreCuenta(m) + ' · ' + (libres ? libres + ' ' + plural(libres,'sitio libre','sitios libres') : 'sin sitio')];
+    });
+  abrirModal('Mover a ' + lista.length,
+    '<div class="pila">' +
+      '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">Se reparten por los perfiles que queden libres, en orden. Si no caben todos, se mueven los que quepan y te digo cuántos se quedaron fuera.</p>' +
+      campo('lt-cuenta','A qué cuenta',{tipo:'select', valor:'', opciones:[['','Elige una cuenta']].concat(opc)}) +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
+     {texto:'Moverlos', clase:'principal', hacer:function(){
+       const m = buscarMaster(val('lt-cuenta'));
+       if(!m){ avisar('Elige a qué cuenta', 'mal'); return; }
+       recordarPaso('mover ' + lista.length + ' clientes');
+       const huecos = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).map(function(x){ return 'Perfil ' + x.n; });
+       let movidos = 0;
+       lista.forEach(function(c){
+         if(String(c.cuentaMasterId) === String(m.id)){ movidos++; return; }
+         if(!huecos.length) return;
+         c.cuentaMasterId = m.id;
+         c.servicio = m.nombre;
+         c.perfil = huecos.shift();
+         movidos++;
+       });
+       const fuera = lista.length - movidos;
+       anotar('MOVER EN LOTE', movidos + ' a ' + nombreCuenta(m));
+       olvidarIndices();
+       guardar(); cerrarModal(); limpiarEleccion();
+       ponerPlataforma(String(m.nombre||'').trim().toUpperCase());
+       rutaCuenta = String(m.id); rutaCliente = null;
+       irNegocio(true);
+       avisar(movidos + ' ' + plural(movidos,'movido','movidos') + ' a ' + nombreCuenta(m) +
+         (fuera ? ' · ' + fuera + ' no ' + plural(fuera,'cupo','cupieron') : ''),
+         fuera ? 'aviso' : 'bien', true);
+     }}]);
+}
+
+/* ---------- Cobrar por adelantado --------------------------------------
+   Hay clientes que pagan tres meses de golpe. Antes había que cobrarles
+   tres veces seguidas, y en el historial quedaban tres cobros de un mes. */
+function mesesDeCiclo(c){
+  const ciclo = cicloDe(c);
+  return ciclo.tipo === 'meses' ? Math.max(1, ciclo.cantidad) : 1;
+}
+function formAdelanto(id){
+  const c = buscarCliente(id);
+  if(!c){ avisar('Ese cliente ya no está', 'mal'); return; }
+  const ciclo = cicloDe(c);
+  const unidad = ciclo.tipo === 'dias' ? plural(ciclo.cantidad,'día','días') : plural(ciclo.cantidad,'mes','meses');
+  abrirModal('Cobrar adelantado a ' + (c.nombre || 'este cliente'),
+    '<div class="pila">' +
+      '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+        'Su ciclo es de <b style="color:var(--txt)">' + ciclo.cantidad + ' ' + esc(unidad) + '</b> y le cobras <b style="color:var(--txt)">' +
+        esc(dinero(cobroDe(c))) + '</b> cada uno. Elige cuántos ciclos te paga hoy.</p>' +
+      '<div class="rejilla r2">' +
+        campo('ad-ciclos','Cuántos ciclos',{tipo:'number', valor:1, paso:'1'}) +
+        campo('ad-total','Le cobras en total',{valor:dinero(cobroDe(c)),
+          atributos:' readonly aria-readonly="true"', ayuda:'Se recalcula al escribir arriba'}) +
+      '</div>' +
+      '<p class="pista" id="ad-hasta" style="margin:0"></p>' +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
+     {texto:'Cobrar', clase:'principal', hacer:function(){
+       const n = Math.max(1, Math.round(num('ad-ciclos')) || 1);
+       recordarPaso('cobrar ' + n + ' ciclos a ' + (c.nombre||'un cliente'));
+       const total = cobrarUno(c, true, n);
+       anotar('COBRO ADELANTADO', (c.nombre||'') + ': ' + n + ' ciclos por ' + dinero(total));
+       guardar(); cerrarModal(); pintar();
+       avisar('Cobrados ' + dinero(total) + ' · ' + (c.nombre||'') + ' hasta ' + fechaBonita(c.vencimiento), 'bien', true);
+     }}],
+    function(){
+      const recalcular = function(){
+        const n = Math.max(1, Math.round(num('ad-ciclos')) || 1);
+        const campoTotal = document.getElementById('ad-total');
+        if(campoTotal) campoTotal.value = dinero(cobroDe(c) * mesesDeCiclo(c) * n);
+        let hasta = c.vencimiento || hoyISO();
+        for(let i = 0; i < n; i++) hasta = avanzar(hasta, ciclo);
+        const pie = document.getElementById('ad-hasta');
+        if(pie) pie.textContent = 'Le quedaría pagado hasta el ' + fechaBonita(hasta) + '.';
+      };
+      const campoN = document.getElementById('ad-ciclos');
+      if(campoN) campoN.addEventListener('input', recalcular);
+      recalcular();
+    });
+}
+
+/* ---------- Cobrar y renovar ------------------------------------------- */
+/* El trabajo en bruto: corre el vencimiento y, si se cobra, apunta la venta
+   y la cuota. NO guarda ni pinta, porque a veces se llama cien veces
+   seguidas y cien guardados son cien subidas a la nube. Devuelve cuánto se
+   cobró. */
+function cobrarUno(c, cobrando, ciclos){
+  const n = Math.max(1, Math.round(Number(ciclos) || 1));
+  const ciclo = cicloDe(c);
+  const meses = ciclo.tipo === 'meses' ? Math.max(1, ciclo.cantidad) : 1;
+  const monto = cobroDe(c);
+  let hasta = c.vencimiento || hoyISO();
+  for(let i = 0; i < n; i++) hasta = avanzar(hasta, ciclo);
+  c.inicio = c.vencimiento || hoyISO();
+  c.vencimiento = hasta;
+  if(!cobrando || monto <= 0) return 0;
+  const total = monto * meses * n;
+  ventas.push({
+    id:nuevoId('v'), clienteId:c.id, cliente:c.nombre, servicio:c.servicio,
+    cuentaMasterId:c.cuentaMasterId || null, monto:total, meses:meses * n,
+    metodo:c.metodo || ajustes.metodoDefecto || 'PLIN', fecha:hoyISO()
+  });
+  /* La cuota queda apuntada en su ficha con el mismo molde que usa el
+     PAPOTAS de siempre, para que la vea en «Historial de cuotas». */
+  if(!Array.isArray(c.historialPrecios)) c.historialPrecios = [];
+  c.historialPrecios.push({fecha:hoyISO(), monto:monto, meses:meses * n,
+                           tipo:esPrecioEspecial(c) ? 'especial' : 'tarifa',
+                           plataforma:c.servicio || platDe(c) || ''});
+  if(c.historialPrecios.length > 80) c.historialPrecios = c.historialPrecios.slice(-80);
+  return total;
+}
+
 function renovar(id, cobrando){
   const c = buscarCliente(id);
   if(!c){ avisar('No encontré a ese cliente', 'mal'); return; }
-  const ciclo = cicloDe(c);
-  const desde = c.vencimiento || hoyISO();
-  const nueva = avanzar(desde, ciclo);
-  const monto = cobroDe(c);
-  const meses = ciclo.tipo === 'meses' ? Math.max(1, ciclo.cantidad) : 1;
-
   recordarPaso(cobrando ? 'cobrar a ' + (c.nombre||'un cliente')
                         : 'renovar a ' + (c.nombre||'un cliente'));
-  c.inicio = c.vencimiento || hoyISO();
-  c.vencimiento = nueva;
-
-  if(cobrando && monto > 0){
-    ventas.push({
-      id:nuevoId('v'), clienteId:c.id, cliente:c.nombre, servicio:c.servicio,
-      cuentaMasterId:c.cuentaMasterId || null, monto:monto*meses, meses:meses,
-      metodo:c.metodo || ajustes.metodoDefecto || 'PLIN', fecha:hoyISO()
-    });
-    /* La cuota queda apuntada en su ficha con el mismo molde que usa el
-       PAPOTAS de siempre, para que la vea en «Historial de cuotas». */
-    if(!Array.isArray(c.historialPrecios)) c.historialPrecios = [];
-    c.historialPrecios.push({fecha:hoyISO(), monto:monto, meses:meses,
-                             tipo:esPrecioEspecial(c) ? 'especial' : 'tarifa',
-                             plataforma:c.servicio || platDe(c) || ''});
-    if(c.historialPrecios.length > 80) c.historialPrecios = c.historialPrecios.slice(-80);
-    anotar('COBRAR', c.nombre + ' pagó ' + dinero(monto*meses) + ', ahora vence ' + fechaBonita(nueva));
+  const cobrado = cobrarUno(c, cobrando, 1);
+  const nueva = c.vencimiento;
+  const monto = cobrado;
+  const meses = 1;
+  if(cobrado > 0){
+    anotar('COBRAR', c.nombre + ' pagó ' + dinero(cobrado) + ', ahora vence ' + fechaBonita(nueva));
   }else{
     anotar('RENOVAR', c.nombre + ' renovado hasta ' + fechaBonita(nueva) + ' sin cobrar');
   }
@@ -6448,11 +6840,11 @@ function diagnostico(){
 
   caso('monto_cero', 'Clientes a los que no les cobras nada',
     'Están puestos en cero. O es un regalo a propósito, o se te olvidó ponerle el precio.',
-    clientes.filter(function(c){ return cobroDe(c) <= 0; }).map(fichaDiagCliente), 'aviso');
+    clientes.filter(function(c){ return !enPausa(c) && cobroDe(c) <= 0; }).map(fichaDiagCliente), 'aviso');
 
   caso('muy_vencido', 'Vencidos hace más de 30 días',
     'O ya no son clientes y ocupan un perfil que podrías vender, o llevas un mes sin cobrarles.',
-    clientes.filter(function(c){ const d = diasHasta(c.vencimiento); return d !== null && d < -30; })
+    clientes.filter(function(c){ const d = diasHasta(c.vencimiento); return !enPausa(c) && d !== null && d < -30; })
       .sort(function(a,b){ return String(a.vencimiento||'').localeCompare(String(b.vencimiento||'')); })
       .map(fichaDiagCliente), 'aviso');
 
@@ -6913,9 +7305,25 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
+
+  /* Si vienes de arrastrar la tira, ese clic no cuenta: soltar encima de una
+     plataforma no puede meterte dentro de ella. */
+  const tira = t.closest && t.closest('.mando-plat, .segmentos');
+  if(tira && tira.dataset.arrastre && Date.now() - Number(tira.dataset.arrastre) < 250){
+    delete tira.dataset.arrastre;
+    ev.preventDefault();
+    return;
+  }
+
+  if(d.desliza){
+    const carril = t.parentElement && t.parentElement.querySelector('.mando-plat');
+    if(carril) carril.scrollBy({left: Number(d.desliza) * Math.max(160, carril.clientWidth * 0.75),
+                                behavior: suave()});
+    return;
+  }
 
   if(d.verclave){
     const llave = 'clave' + d.verclave;
@@ -6989,7 +7397,7 @@ document.addEventListener('click', function(ev){
   if(d.escribirA){
     /* Las listas que se pueden poner en fila, desde donde se esté. */
     const hoy = hoyISO(), av = Number(ajustes.diasAlerta||5);
-    const deben = function(c){ const e = estadoDe(c); return e==='vencido' || e==='por_vencer'; };
+    const deben = debe;
     let lista = [];
     if(d.escribirA === 'hoy-visible'){
       if(filtroHoy === 'vencidos') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x<0; });
@@ -7039,6 +7447,56 @@ document.addEventListener('click', function(ev){
   }
   if(d.volver){ volverA(d.volver); return; }
   if(d.deshacer){ deshacerPaso(); return; }
+  if(d.modoElegir){
+    modoElegir = !modoElegir;
+    if(!modoElegir) elegidos.clear();
+    volverElFoco('[data-modo-elegir]');
+    pintar(); return;
+  }
+  if(d.elegir){
+    alternarElegido(d.elegir);
+    const puesto = elegidos.has(String(d.elegir));
+    const tarjeta = t.closest('.tc');
+    if(tarjeta){
+      tarjeta.classList.toggle('elegido', puesto);
+      t.setAttribute('aria-checked', puesto ? 'true' : 'false');
+      t.innerHTML = puesto ? ICONO.ok : '';
+    }
+    refrescarLote();
+    return;
+  }
+  if(d.elegirTodos){
+    const vista = clientesALaVista();
+    const faltan = vista.filter(function(c){ return !elegidos.has(String(c.id)); });
+    if(faltan.length) faltan.forEach(function(c){ elegidos.add(String(c.id)); });
+    else vista.forEach(function(c){ elegidos.delete(String(c.id)); });
+    pintar(); return;
+  }
+  if(d.lote){
+    if(d.lote === 'salir'){ limpiarEleccion(); pintar(); return; }
+    if(d.lote === 'cobrar'){ cobrarLote(); return; }
+    if(d.lote === 'pausar'){ pausarLote(); return; }
+    if(d.lote === 'mover'){ moverLote(); return; }
+    if(d.lote === 'escribir'){
+      const lista = elegidosVivos().filter(function(c){ return telefonoDe(c); })
+        .sort(function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
+      if(!lista.length){ avisar('Ninguno de los elegidos tiene teléfono', 'mal'); return; }
+      abrirCola(lista);
+      return;
+    }
+    return;
+  }
+  if(d.adelanto){ formAdelanto(d.adelanto); return; }
+  if(d.pausar){
+    const c = buscarCliente(d.pausar); if(!c) return;
+    recordarPaso((enPausa(c) ? 'reactivar a ' : 'pausar a ') + (c.nombre||'un cliente'));
+    if(enPausa(c)) delete c.pausado; else c.pausado = true;
+    anotar(enPausa(c) ? 'PAUSAR' : 'REACTIVAR', c.nombre || '');
+    olvidarIndices();
+    guardar(); pintar();
+    avisar((c.nombre||'Cliente') + (enPausa(c) ? ' queda en pausa: no sale en Hoy' : ' vuelve a estar activo'), 'bien', true);
+    return;
+  }
   if(d.mover){ formMover(d.mover); return; }
   if(d.hueco){
     if(moviendo){ moviendo.perfil = d.hueco; repintarMover(); }
@@ -7328,7 +7786,8 @@ const ATAJOS = [
   ['P', 'Plataformas'],
   ['D', 'Dinero'],
   ['A', 'Ajustes'],
-  ['Ctrl+Z', 'deshacer lo último que hiciste'],
+  ['E', 'elegir varios clientes de una vez'],
+  ['Ctrl+Z', 'deshacer lo último que hiciste (hasta 20 pasos)'],
   ['?', 'esta misma lista']
 ];
 function verAtajos(){
@@ -7394,6 +7853,13 @@ document.addEventListener('keydown', function(ev){
     if(i < 0) i = 0;
     i = (i + (ev.key === 'ArrowRight' ? 1 : -1) + nombres.length) % nombres.length;
     ponerPlataforma(nombres[i]); pintar();
+    return;
+  }
+  if(String(ev.key).toLowerCase() === 'e'){
+    modoElegir = !modoElegir;
+    if(!modoElegir) elegidos.clear();
+    if(pantalla !== 'negocio'){ puerta('clientes'); } else pintar();
+    avisar(modoElegir ? 'Elige a los que quieras y actúa sobre todos' : 'Fuera del modo elegir');
     return;
   }
   const saltos = {h:'hoy', c:'negocio', u:'negocio', p:'negocio', d:'dinero', a:'ajustes'};
