@@ -2448,6 +2448,20 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   content:"";position:absolute;inset:0 0 auto;height:3px;
   background:linear-gradient(90deg, var(--mal), transparent 78%);
 }
+/* El aviso de lo que va a caer. Ámbar, no rojo: todavía estás a tiempo, y
+   si esto fuera rojo competiría con lo que ya se cayó, que es peor. */
+.panel-mando.urgente{border-color:var(--aviso-linea);background:var(--capa)}
+.panel-mando.urgente::before{
+  content:"";position:absolute;inset:0 0 auto;height:3px;
+  background:linear-gradient(90deg, var(--aviso), transparent 78%);
+}
+.panel-mando.urgente .pm-icono{
+  background:var(--aviso-fondo);border-color:var(--aviso-linea);color:var(--aviso);
+}
+.pm-pie{
+  padding:10px var(--e4);border-top:1px solid var(--linea);
+  color:var(--txt-3);font-size:11.5px;font-weight:600;
+}
 .pm-alto{
   display:flex;align-items:center;gap:var(--e3);
   padding:var(--e4) var(--e5) var(--e3);
@@ -2902,7 +2916,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.3</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.4</span>
     </div>
   </nav>
 
@@ -3021,6 +3035,7 @@ const AJUSTES_BASE = {
   nombre:'PAPOTAS', moneda:'S/', diasAlerta:5, prefijoPais:'51',
   precioDefecto:15, cicloRenovacion:'meses', mesesRenovacion:1, diasRenovacion:30,
   metodoDefecto:'PLIN', firmaWs:'', metaMensual:0, modoClaro:false, waComoAbrir:'auto',
+  cuotasPerdido:4,
   supabaseUrl:'', supabaseKey:'',
   plantillaCobro:'Hola {cliente} 👋 Te recuerdo que tu {servicio} vence el {vencimiento}. Son {monto}. ¡Gracias!',
   plantillaEntrega:'¡Listo {cliente}! 🎬\nPlataforma: {servicio}\nCorreo: {correo}\nClave: {contrasena}\nPerfil: {perfil}\nPIN: {pin}\nVence: {vencimiento}',
@@ -4304,7 +4319,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v5.3';
+const VERSION = 'v5.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5338,6 +5353,11 @@ function pintaHoy(){
                                 .reduce(function(a,i){ return a + (Number(i.monto)||0); }, 0);
   const libres = susCuentas.reduce(function(a,m){ return a + libresDe(m); }, 0);
   const mastersVencidos = susCuentas.filter(function(m){ const d=diasHasta(m.vencimiento); return d!==null && d<0; });
+  /* Las que van a caer, que es el aviso que de verdad sirve. */
+  const porCaer = mastersPorCaer(susCuentas, aviso);
+  const enRiesgo = genteEnRiesgo(porCaer);
+  /* Los que ya se fueron, aunque sigan contando como deuda. */
+  const seFueron = perdidos(suyos);
 
   const porFecha = function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); };
 
@@ -5347,6 +5367,7 @@ function pintaHoy(){
   else if(filtroHoy === 'hoy')    cola = deHoy;
   else if(filtroHoy === 'semana') cola = semana;
   else if(filtroHoy === 'colgados') cola = colgados;
+  else if(filtroHoy === 'perdidos')  cola = seFueron;
   else cola = porCobrar;
   cola = cola.slice().sort(porFecha);
   const conTel = cola.filter(function(c){ return telefonoDe(c); }).length;
@@ -5377,6 +5398,11 @@ function pintaHoy(){
     '</div>' +
 
     /* ---- Las cifras, cada una con su color y su icono ---- */
+    /* Esto va ANTES que las cifras, y a propósito. Una cuenta a punto de
+       caerse no es un dato para mirar: es algo que hay que hacer HOY, y si
+       queda debajo de «gastado este mes» no lo ves hasta que es tarde. */
+    panelPorCaer(porCaer, enRiesgo) +
+
     '<div class="azulejos">' +
       azulejo('Por cobrar', esc(dinero(total)), 'aviso', ICONO.cobrar,
         {pie: porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas'), ir:'fhoy-pendientes'}) +
@@ -5387,6 +5413,14 @@ function pintaHoy(){
       (colgados.length
         ? azulejo('Te deben varias', colgados.length, 'mal', ICONO.billete,
             {pie: esc(dinero(colgadoSuma)) + ' atrasados', ir:'fhoy-colgados'})
+        : '') +
+      /* Y de esos, los que ya no volvieron. Un número honesto vale más que
+         uno grande: esta plata está contada como deuda y no vas a verla. */
+      (seFueron.length
+        ? azulejo('Puede que ya no sean', seFueron.length, 'aviso', ICONO.info,
+            {pie: esc(dinero(seFueron.reduce(function(a,c){ return a + deudaDe(c); }, 0))) +
+                  ' que no vas a ver', ir:'fhoy-perdidos',
+             tit:'Llevan ' + umbralPerdido() + ' cuotas o más sin pagarte'})
         : '') +
       azulejo('Vencen hoy', deHoy.length, 'aviso', ICONO.reloj,
         {pie: esc(dinero(deHoy.reduce(function(a,c){return a+aCobrarDe(c);},0))), ir:'fhoy-hoy'}) +
@@ -5454,6 +5488,7 @@ function pintaHoy(){
         '<div class="segmentos">' +
           [['pendientes','Todo',porCobrar.length],['vencidos','Vencidos',vencidos.length],
            ['colgados','Te deben varias',colgados.length],
+           ['perdidos','¿Ya no son?',seFueron.length],
            ['hoy','Hoy',deHoy.length],['semana','Próximos',semana.length]]
           .filter(function(x){ return x[2] > 0 || x[0] === 'pendientes'; }).map(function(x){
             return '<button data-fhoy="' + x[0] + '" aria-selected="' + (filtroHoy===x[0]?'true':'false') + '">' +
@@ -6712,6 +6747,40 @@ function pintaDinero(){
       '</div></div>' +
     '</div>' +
 
+    /* Las cuentas que no se pagan solas. Con veinte cuentas es facilísimo
+       tener una arrastrando pérdida sin enterarte, porque el total sigue
+       dando positivo y tapa el agujero. */
+    (function(){
+      const rojas = cuentasEnRojo(susCuentas, eco);
+      if(!rojas.length) return '';
+      const pierde = rojas.reduce(function(a,x){ return a + Math.min(0, x.r.margen); }, 0);
+      return '<div class="tarjeta"><div class="tarjeta-cabeza">' +
+        '<span class="cabeza-icono rojo">' + ICONO.alerta + '</span>' +
+        '<div class="crece"><h2>Cuentas que no se pagan solas</h2>' +
+          '<p>Te cuestan más de lo que cobras por ellas. Entre todas te comen ' +
+          esc(dinero(Math.abs(pierde))) + ' al ciclo.</p></div></div>' +
+        '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+          rojas.map(function(x){
+            const vacia = x.r.clientes === 0;
+            return '<div class="f mal" style="cursor:default">' +
+              logoPlataforma(x.m.nombre) +
+              '<span class="f-txt"><span class="f-nom">' + esc(nombreCuenta(x.m)) + '</span>' +
+                '<span class="f-sub">' +
+                  (vacia ? 'sin nadie dentro · la estás pagando para nada'
+                         : x.r.clientes + ' ' + plural(x.r.clientes,'cliente','clientes') +
+                           ' · cobras ' + esc(dinero(x.r.recurrente)) +
+                           ' y te cuesta ' + esc(dinero(x.r.costo))) +
+                '</span></span>' +
+              '<span class="f-der"><span class="f-monto cifra" style="color:var(--mal)">' +
+                esc(dinero(x.r.margen)) + '</span>' +
+                '<span class="f-cuando">al ciclo</span></span>' +
+              '<button class="btn mini" data-ver-cuenta="' + esc(x.m.id) + '">' +
+                ICONO.flecha + '<span class="et">Verla</span></button>' +
+            '</div>';
+          }).join('') +
+        '</div></div></div>';
+    })() +
+
     /* Lo que ya no cae en ninguna cuenta viva. Esta plata está en la caja
        pero no se puede repartir, así que se dice en voz alta en vez de
        dejar que la suma de las cuentas no cuadre con el total. */
@@ -6862,6 +6931,8 @@ function pintaAjustes(){
         campo('aj-nombre','Nombre del negocio',{valor:ajustes.nombre}) +
         campo('aj-moneda','Moneda',{valor:ajustes.moneda, ayuda:'Lo que va delante de las cifras'}) +
         campo('aj-prefijo','Prefijo del país',{valor:ajustes.prefijoPais, ayuda:'51 para Perú'}) +
+        campo('aj-perdido','Los doy por perdidos a las',{tipo:'number', valor:umbralPerdido(), paso:'1',
+          ayuda:'Cuotas sin pagar a partir de las cuales dejo de contarlos como deuda de verdad. Siguen ahí: solo salen aparte, para que el número de «te deben» no te mienta.'}) +
         campo('aj-precio','Precio por defecto',{tipo:'number', valor:ajustes.precioDefecto, paso:'0.01'}) +
         campo('aj-alerta','Avisar con cuántos días',{tipo:'number', valor:ajustes.diasAlerta, paso:'1'}) +
         campo('aj-metodo','Método de pago habitual',{valor:ajustes.metodoDefecto}) +
@@ -7099,6 +7170,45 @@ function pintaAjustes(){
    administrar son tres cifras arriba y un botón que actúa sobre el montón. */
 
 /* --- Las cuentas master vencidas: lo más caro que te puede pasar -------- */
+/* El aviso ANTES de que se caiga. Va primero de todo: no hay nada más
+   urgente en esta pantalla, porque una master que se cae se lleva a todos
+   sus clientes de una vez y encima te los deja escribiendo. */
+function panelPorCaer(lista, dentro){
+  if(!lista.length) return '';
+  const cuanto = lista.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const manana = lista.filter(function(m){ const d=diasHasta(m.vencimiento); return d<=1; });
+  return '<div class="panel-mando urgente">' +
+    '<div class="pm-alto">' +
+      '<span class="pm-icono">' + ICONO.reloj + '</span>' +
+      '<div class="pm-id"><h2>' + lista.length + ' ' +
+        plural(lista.length,'cuenta está a punto de caerse','cuentas están a punto de caerse') + '</h2>' +
+        '<p>Todavía puedes renovarlas. Si se caen, ' + dentro + ' ' +
+          plural(dentro,'cliente se queda','clientes se quedan') + ' sin servicio de golpe' +
+          (manana.length ? ' — y ' + manana.length + ' ' +
+            plural(manana.length,'vence','vencen') + ' hoy o mañana' : '') + '.</p></div>' +
+    '</div>' +
+    '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+      lista.map(function(m){
+        const d = diasHasta(m.vencimiento);
+        const suyos = clientesDe(m.id).length;
+        return '<div class="f ' + (d<=1?'mal':'aviso') + '" style="cursor:default">' +
+          logoPlataforma(m.nombre) +
+          '<span class="f-txt"><span class="f-nom">' + esc(nombreCuenta(m)) + '</span>' +
+            '<span class="f-sub">' + suyos + ' ' + plural(suyos,'cliente dentro','clientes dentro') +
+            ' · te cuesta ' + esc(dinero(Number(m.costo)||0)) + '</span></span>' +
+          '<span class="f-der">' +
+            '<span class="f-monto" style="font-size:12.5px;color:' + (d<=1?'var(--mal)':'var(--aviso)') + '">' +
+              (d===0 ? 'vence hoy' : d===1 ? 'mañana' : 'en ' + d + ' días') + '</span>' +
+            '<span class="f-cuando">' + esc(fechaBonita(m.vencimiento)) + '</span></span>' +
+          '<button class="btn mini principal" data-renovar-m="' + esc(m.id) + '">' + ICONO.renovar +
+            '<span class="et">Renové</span></button>' +
+        '</div>';
+      }).join('') +
+    '</div></div>' +
+    '<div class="pm-pie"><small>Renovarlas todas te cuesta ' + esc(dinero(cuanto)) + '.</small></div>' +
+  '</div>';
+}
+
 function panelMastersVencidos(lista, eco){
   if(!lista.length) return '';
   const dentro  = lista.reduce(function(a,m){ return a + clientesDe(m.id).length; }, 0);
@@ -7561,6 +7671,54 @@ function moverLote(){
 /* ---------- Cobrar por adelantado --------------------------------------
    Hay clientes que pagan tres meses de golpe. Antes había que cobrarles
    tres veces seguidas, y en el historial quedaban tres cobros de un mes. */
+/* ---------- LO QUE SE TE PUEDE CAER -------------------------------------
+   El programa avisaba de las cuentas master CUANDO YA ESTABAN VENCIDAS, y
+   para entonces tus clientes ya se quedaron sin servicio y te están
+   escribiendo. Una master que se cae no es como un cliente que se atrasa:
+   se lleva por delante a TODOS los que tiene dentro de una vez.
+
+   Estas tres cuentas miran hacia delante, no hacia atrás. */
+
+/* Las que vencen pronto pero TODAVÍA NO. Es el aviso que sirve. */
+function mastersPorCaer(lista, dias){
+  const tope = Math.max(1, Number(dias) || 5);
+  return (lista || servicios).filter(function(m){
+    const d = diasHasta(m.vencimiento);
+    return d !== null && d >= 0 && d <= tope;
+  }).sort(function(a,b){ return String(a.vencimiento||'').localeCompare(String(b.vencimiento||'')); });
+}
+
+/* Cuánta gente se queda sin servicio si esa cuenta se cae. */
+function genteEnRiesgo(lista){
+  return (lista || []).reduce(function(a,m){ return a + clientesDe(m.id).length; }, 0);
+}
+
+/* Las cuentas que NO se pagan solas: te cuestan más de lo que cobras por
+   ellas. Con veinte cuentas es fácil tener una arrastrando pérdida sin
+   enterarte, porque el total sigue dando positivo. */
+function cuentasEnRojo(lista, eco){
+  eco = eco || economia();
+  return (lista || servicios).map(function(m){
+    return {m:m, r:resumenCuenta(m, eco)};
+  }).filter(function(x){
+    return x.r.margen < 0 || (x.r.clientes === 0 && x.r.costo > 0);
+  }).sort(function(a,b){ return a.r.margen - b.r.margen; });
+}
+
+/* Los que ya no son clientes, aunque el programa siga contándolos.
+   Alguien que lleva muchas cuotas sin pagar no es un moroso: se fue. Y
+   mientras siga contando como deuda, el número de «te deben» es mentira. */
+function umbralPerdido(){
+  const n = parseInt(ajustes.cuotasPerdido, 10);
+  return n > 0 ? n : 4;
+}
+function perdidos(lista){
+  const tope = umbralPerdido();
+  return (lista || clientes).filter(function(c){
+    return !enPausa(c) && cuotasPendientes(c) >= tope;
+  }).sort(function(a,b){ return cuotasPendientes(b) - cuotasPendientes(a); });
+}
+
 function mesesDeCiclo(c){
   const ciclo = cicloDe(c);
   return ciclo.tipo === 'meses' ? Math.max(1, ciclo.cantidad) : 1;
@@ -8870,7 +9028,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -8963,7 +9121,8 @@ document.addEventListener('click', function(ev){
     const deben = debe;
     let lista = [];
     if(d.escribirA === 'hoy-visible'){
-      if(filtroHoy === 'colgados') lista = clientes.filter(muyAtrasado);
+      if(filtroHoy === 'perdidos') lista = perdidos(clientes);
+      else if(filtroHoy === 'colgados') lista = clientes.filter(muyAtrasado);
       else if(filtroHoy === 'vencidos') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x<0; });
       else if(filtroHoy === 'hoy') lista = clientes.filter(function(c){ return c.vencimiento === hoy; });
       else if(filtroHoy === 'semana') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x>0 && x<=av; });
@@ -9168,9 +9327,10 @@ document.addEventListener('click', function(ev){
   }
   if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 20; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
-  if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana || d.fhoyColgados){
+  if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana || d.fhoyColgados || d.fhoyPerdidos){
     filtroHoy = d.fhoyPendientes ? 'pendientes' : d.fhoyVencidos ? 'vencidos'
-              : d.fhoyHoy ? 'hoy' : d.fhoyColgados ? 'colgados' : 'semana';
+              : d.fhoyHoy ? 'hoy' : d.fhoyColgados ? 'colgados'
+              : d.fhoyPerdidos ? 'perdidos' : 'semana';
     pintar();
     const t = $('#p-hoy .tabla'); if(t) t.scrollIntoView({block:'center', behavior:suave()});
     return;
@@ -9227,6 +9387,7 @@ document.addEventListener('click', function(ev){
     ajustes.nombre = val('aj-nombre').trim() || 'PAPOTAS';
     ajustes.moneda = val('aj-moneda').trim() || 'S/';
     ajustes.prefijoPais = val('aj-prefijo').replace(/[^0-9]/g,'');
+    ajustes.cuotasPerdido = Math.max(2, parseInt(val('aj-perdido'), 10) || 4);
     ajustes.precioDefecto = num('aj-precio');
     ajustes.diasAlerta = Math.max(0, Math.round(num('aj-alerta')));
     ajustes.metodoDefecto = val('aj-metodo').trim() || 'PLIN';
@@ -9559,6 +9720,16 @@ window.PAPOTAS = {
   },
   /* Lo que una cuenta deja y lo que cuesta, con la cuenta ya hecha. */
   cuenta: function(id){ const m = buscarMaster(id); return m ? resumenCuenta(m) : null; },
+  /* Lo que se te puede caer, lo que no se paga solo y los que ya se fueron.
+     Desde fuera para poder comprobarlo. */
+  riesgo: {
+    porCaer:  function(dias){ return mastersPorCaer(servicios, dias || ajustes.diasAlerta); },
+    enRojo:   function(){ olvidarIndices(); return cuentasEnRojo(servicios).map(function(x){
+                 return {cuenta:nombreCuenta(x.m), margen:x.r.margen, clientes:x.r.clientes}; }); },
+    perdidos: function(){ return perdidos(clientes).map(function(c){
+                 return {nombre:c.nombre, cuotas:cuotasPendientes(c), debe:deudaDe(c)}; }); },
+    umbral:   function(){ return umbralPerdido(); }
+  },
   /* Lo que no cae en ninguna cuenta viva: está en la caja pero no se puede
      repartir. Aquí para poder comprobar que la suma cuadra. */
   sueltos: function(){ olvidarIndices(); const e = economia();
