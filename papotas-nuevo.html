@@ -2537,7 +2537,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.4</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.5</span>
     </div>
   </nav>
 
@@ -2666,17 +2666,231 @@ let servicios=[], clientes=[], ventas=[], inversiones=[],
     mensajesRapidos=[], combosGuardados=[], auditoriaLog=[],
     blocNotasTexto='', ajustes=Object.assign({}, AJUSTES_BASE);
 
+/* ---------- EL ALMACÉN, A PRUEBA DE SUSTOS -------------------------------
+   Aquí había un agujero por el que se podían ir tus clientes sin que nadie
+   dijera nada, y hay que contarlo tal cual:
+
+   `leerClave` devolvía la lista vacía en DOS casos distintos que no son lo
+   mismo: cuando de verdad no hay nada guardado, y cuando lo guardado está
+   roto y no se puede leer. En el segundo caso el programa arrancaba con
+   cero clientes y, al primer cambio que hicieras, guardaba ESOS cero encima
+   de lo que había. Lo roto todavía se podía rescatar; pisado, ya no.
+
+   ¿Cuándo se rompe lo guardado? Cuando el navegador se queda sin sitio a
+   mitad de una escritura, cuando se cierra de golpe, o cuando el móvil mata
+   la pestaña por memoria. Con cien clientes y su historial no es raro.
+
+   Ahora:
+     · roto y vacío son cosas distintas, y lo roto NO se pisa nunca;
+     · pasar de «tengo ochenta y uno» a «no tengo ninguno» se para en seco y
+       se avisa, en vez de guardarse en silencio;
+     · si el navegador se queda sin sitio, se dice a gritos, no en la
+       consola donde no lo ve nadie;
+     · y todos los días se deja una copia en el propio navegador, para poder
+       volver atrás sin depender de la nube ni de acordarte de bajar nada. */
+
+let clavesDanadas = [];
+let sinEspacio = false;
+/* Solo se permite vaciar una lista cuando TÚ lo pediste: al cargar un
+   respaldo. En cualquier otro momento, vaciar es un accidente. */
+let permitirVaciar = false;
+
 function leerClave(k, porDefecto){
-  try{
-    const crudo = localStorage.getItem(k);
-    if(crudo===null || crudo==='') return porDefecto;
-    return JSON.parse(crudo);
-  }catch(_){ return porDefecto; }
+  let crudo = null;
+  try{ crudo = localStorage.getItem(k); }
+  catch(_){ return porDefecto; }
+  if(crudo === null || crudo === '') return porDefecto;
+  try{ return JSON.parse(crudo); }
+  catch(_){
+    /* Roto no es vacío. Se apunta para no pisarlo y para poder avisar. */
+    if(clavesDanadas.indexOf(k) < 0) clavesDanadas.push(k);
+    return porDefecto;
+  }
 }
+
 function guardarClave(k, valor){
   try{ localStorage.setItem(k, valor); return true; }
-  catch(e){ console.warn('[PAPOTAS] no se pudo guardar', k, e); return false; }
+  catch(e){
+    if(!sinEspacio){
+      sinEspacio = true;
+      avisar('El navegador no tiene sitio para guardar. Baja un respaldo ahora mismo.', 'mal');
+    }
+    console.warn('[PAPOTAS] no se pudo guardar', k, e);
+    return false;
+  }
 }
+
+/* Guardar una lista, con el freno de mano puesto. */
+function guardarLista(clave, lista){
+  /* Lo que no se pudo leer no se pisa: ahí dentro todavía están tus datos. */
+  if(clavesDanadas.indexOf(clave) >= 0) return false;
+  if(!lista.length && !permitirVaciar){
+    let antes = null;
+    try{ antes = JSON.parse(localStorage.getItem(clave) || 'null'); }catch(_){ antes = null; }
+    if(Array.isArray(antes) && antes.length > 0){
+      alarmaDeDatos(clave, antes.length);
+      return false;
+    }
+  }
+  return guardarClave(clave, JSON.stringify(lista));
+}
+
+/* Cuando el programa está a punto de hacer una tontería, se para y lo dice. */
+let alarmaPuesta = false;
+function alarmaDeDatos(clave, cuantos){
+  if(alarmaPuesta) return;
+  alarmaPuesta = true;
+  const que = clave === CLAVES.clientes ? 'clientes'
+            : clave === CLAVES.servicios ? 'cuentas'
+            : clave === CLAVES.ventas ? 'cobros' : 'registros';
+  anotar('ALARMA', 'Se evitó guardar 0 ' + que + ' encima de ' + cuantos);
+  abrirModal('Un momento',
+    '<div class="pila">' +
+      '<p style="margin:0;font-size:14px;line-height:1.6;color:var(--txt)">' +
+        'El programa estaba a punto de guardar <b>0 ' + esc(que) + '</b> encima de los <b>' +
+        cuantos + '</b> que tienes guardados. <b>No lo he dejado.</b></p>' +
+      '<p style="margin:0;font-size:13px;line-height:1.6;color:var(--txt-2)">' +
+        'Tus datos siguen ahí. Esto pasa cuando el navegador no pudo leer bien lo guardado ' +
+        '—porque se quedó sin sitio o se cerró de golpe—, y el programa arrancó creyendo que ' +
+        'no tenías nada.</p>' +
+      '<p style="margin:0;font-size:13px;line-height:1.6;color:var(--txt-2)">' +
+        'Vuelve a abrir el programa. Si siguen sin aparecer, entra en ' +
+        '<b>Ajustes → Tus datos → Recuperar</b>: ahí están las copias de los últimos días.</p>' +
+    '</div>',
+    [{texto:'Recargar el programa', clase:'principal', hacer:function(){ location.reload(); }},
+     {texto:'Bajar un respaldo ya', clase:'', hacer:function(){ exportarRespaldo(); }},
+     {texto:'Entendido', clase:'fantasma', hacer:function(){ cerrarModal(); alarmaPuesta = false; }}]);
+}
+
+/* ---------- Las copias de todos los días --------------------------------
+   Una al día, en el propio navegador, sin depender de la nube ni de que te
+   acuerdes de bajar nada. Se guardan las tres últimas: más no caben. */
+const COPIAS_MAX = 3;
+function clavesDeCopia(){
+  const fuera = [];
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf('pap_copia_') === 0) fuera.push(k);
+    }
+  }catch(_){}
+  return fuera.sort();
+}
+function copiaDelDia(){
+  if(clavesDanadas.length) return;                 /* con datos rotos, no se copia */
+  if(!clientes.length && !servicios.length) return; /* nada que copiar */
+  const k = 'pap_copia_' + hoyISO();
+  try{ if(localStorage.getItem(k)) return; }catch(_){ return; }
+  const carga = JSON.stringify({
+    cuando:new Date().toISOString(),
+    clientes:clientes, servicios:servicios, ventas:ventas, inversiones:inversiones
+  });
+  /* Si no cabe, se tira la más vieja y se vuelve a intentar. */
+  for(let intento = 0; intento < COPIAS_MAX + 1; intento++){
+    try{ localStorage.setItem(k, carga); break; }
+    catch(_){
+      const viejas = clavesDeCopia().filter(function(x){ return x !== k; });
+      if(!viejas.length) return;
+      try{ localStorage.removeItem(viejas[0]); }catch(_){ return; }
+    }
+  }
+  const todas = clavesDeCopia();
+  while(todas.length > COPIAS_MAX){
+    try{ localStorage.removeItem(todas.shift()); }catch(_){ break; }
+  }
+}
+
+/* Todo lo que el programa puede ofrecerte para volver atrás. */
+function fuentesDeRescate(){
+  const fuera = [];
+  clavesDeCopia().reverse().forEach(function(k){
+    try{
+      const d = JSON.parse(localStorage.getItem(k) || 'null');
+      if(!d) return;
+      fuera.push({clave:k, cuando:k.replace('pap_copia_',''),
+        titulo:'Copia del ' + fechaBonita(k.replace('pap_copia_','')),
+        clientes:arr(d.clientes).length, servicios:arr(d.servicios).length,
+        ventas:arr(d.ventas).length, datos:d});
+    }catch(_){}
+  });
+  try{
+    const prev = JSON.parse(localStorage.getItem('pap_antes_de_importar') || 'null');
+    if(prev && prev.datos){
+      fuera.push({clave:'pap_antes_de_importar', cuando:String(prev.cuando||'').slice(0,10),
+        titulo:'Justo antes de cargar un respaldo',
+        clientes:arr(prev.datos.clientes).length, servicios:arr(prev.datos.servicios).length,
+        ventas:arr(prev.datos.ventas).length, datos:prev.datos});
+    }
+  }catch(_){}
+  return fuera;
+}
+
+function restaurarCopia(clave){
+  const f = fuentesDeRescate().filter(function(x){ return x.clave === clave; })[0];
+  if(!f){ avisar('Esa copia ya no está', 'mal'); return; }
+  confirmar('Volver a la copia del ' + fechaBonita(f.cuando),
+    'Se pondrán ' + f.clientes + ' clientes, ' + f.servicios + ' cuentas y ' + f.ventas +
+    ' cobros, reemplazando lo que hay ahora. Lo de ahora se guarda aparte por si acaso.',
+    'Sí, volver a esa copia', function(){
+      try{
+        localStorage.setItem('pap_antes_de_importar', JSON.stringify({
+          cuando:new Date().toISOString(),
+          datos:{servicios, clientes, ventas, inversiones, mensajesRapidos,
+                 combosGuardados, auditoriaLog, ajustes, blocNotasTexto}
+        }));
+      }catch(_){}
+      permitirVaciar = true;
+      clavesDanadas = [];
+      servicios   = arr(f.datos.servicios);
+      clientes    = arr(f.datos.clientes);
+      ventas      = arr(f.datos.ventas);
+      inversiones = arr(f.datos.inversiones);
+      anotar('RESCATE', 'Restaurada la copia del ' + f.cuando + ': ' + f.clientes + ' clientes');
+      olvidarIndices();
+      guardar();
+      permitirVaciar = false;
+      pintar();
+      avisar('Recuperados ' + f.clientes + ' clientes de la copia del ' + fechaBonita(f.cuando), 'bien');
+    });
+}
+
+/* La tarjeta de rescate, en Ajustes → Tus datos. */
+function tarjetaRescate(){
+  const fuentes = fuentesDeRescate();
+  const roto = clavesDanadas.length > 0;
+  return '<div class="tarjeta ancha' + (roto ? ' peligro' : '') + '">' +
+    '<div class="tarjeta-cabeza">' +
+      '<span class="cabeza-icono ' + (roto ? 'rosa' : 'azul') + '">' + ICONO.subir + '</span>' +
+      '<div class="crece"><h2>Recuperar</h2>' +
+        '<p>' + (roto
+          ? 'Hay datos que este navegador no pudo leer. NO se han pisado: elige una copia de abajo.'
+          : 'El programa deja una copia al día aquí mismo, sin depender de la nube. Si algo se tuerce, vuelves a una.') +
+        '</p></div>' +
+    '</div>' +
+    (roto ? '<div class="tarjeta-cuerpo"><div class="nota-caja" style="border:0;padding:0;margin:0;color:var(--mal)">' +
+        ICONO.alerta + '<span>No se pudo leer: ' + esc(clavesDanadas.join(', ')) +
+        '. Lo que hay dentro sigue intacto y el programa no lo va a sobrescribir.</span></div></div>' : '') +
+    (fuentes.length
+      ? '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+          fuentes.map(function(f){
+            return '<div class="f" style="cursor:default">' +
+              '<span class="f-txt"><span class="f-nom">' + esc(f.titulo) + '</span>' +
+                '<span class="f-sub">' + f.clientes + ' ' + plural(f.clientes,'cliente','clientes') + ' · ' +
+                  f.servicios + ' ' + plural(f.servicios,'cuenta','cuentas') + ' · ' +
+                  f.ventas + ' ' + plural(f.ventas,'cobro','cobros') + '</span></span>' +
+              '<span class="f-acciones">' +
+                '<button class="btn mini" data-rescate="' + esc(f.clave) + '">' + ICONO.renovar +
+                  '<span class="et">Volver a esta</span></button>' +
+              '</span>' +
+            '</div>';
+          }).join('') +
+        '</div></div>'
+      : '<div class="tarjeta-cuerpo">' +
+          vacio('Todavía no hay copias', 'La primera se guarda sola hoy mismo, en cuanto toques algo.') +
+        '</div>') +
+  '</div>';
+}
+
 function arr(v){ return Array.isArray(v) ? v : []; }
 
 function cargar(){
@@ -2697,15 +2911,18 @@ function cargar(){
    de la propia nube, y no rebotarlos. */
 function guardar(subir){
   olvidarIndices();
-  guardarClave(CLAVES.servicios,       JSON.stringify(servicios));
-  guardarClave(CLAVES.clientes,        JSON.stringify(clientes));
-  guardarClave(CLAVES.ventas,          JSON.stringify(ventas));
-  guardarClave(CLAVES.inversiones,     JSON.stringify(inversiones));
+  /* Las cuatro que duelen van con freno: no se pisan si están rotas ni se
+     vacían por accidente. Las otras son recuperables o poco importantes. */
+  guardarLista(CLAVES.servicios,   servicios);
+  guardarLista(CLAVES.clientes,    clientes);
+  guardarLista(CLAVES.ventas,      ventas);
+  guardarLista(CLAVES.inversiones, inversiones);
   guardarClave(CLAVES.mensajesRapidos, JSON.stringify(mensajesRapidos));
   guardarClave(CLAVES.combosGuardados, JSON.stringify(combosGuardados));
   guardarClave(CLAVES.auditoriaLog,    JSON.stringify(auditoriaLog));
   guardarClave(CLAVES.ajustes,         JSON.stringify(ajustes));
   guardarClave(CLAVES.blocNotasTexto,  String(blocNotasTexto||''));
+  copiaDelDia();
   if(subir !== false) Nube.pedirSubida();
 }
 
@@ -3611,6 +3828,10 @@ function leerRespaldo(texto){
 }
 
 function aplicarRespaldo(rec){
+  /* Cargar un respaldo es el único momento en que vaciar una lista es lo que
+     pediste, así que aquí se suelta el freno a propósito. */
+  permitirVaciar = true;
+  clavesDanadas = [];
   /* Copia de lo que hay ahora, por si acaso. */
   try{
     localStorage.setItem('pap_antes_de_importar', JSON.stringify({
@@ -3634,11 +3855,12 @@ function aplicarRespaldo(rec){
   }
   anotar('IMPORTAR', 'Respaldo restaurado: ' + clientes.length + ' clientes, ' + servicios.length + ' cuentas');
   guardar();
+  permitirVaciar = false;   /* el freno vuelve a su sitio */
 }
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.4';
+const VERSION = 'v4.5';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5908,9 +6130,12 @@ function pintaAjustes(){
         {pie: casos.length ? (graves ? graves + ' ' + plural(graves,'urgente','urgentes') : 'nada urgente') : 'todo cuadra'}) +
       azulejo('La nube', conectado ? 'Sí' : 'No', conectado ? 'bien' : '', ICONO.nube,
         {pie: conectado ? 'los aparatos van sincronizados' : 'solo en este aparato'}) +
-      azulejo('Último respaldo', ajustes.ultimoRespaldo ? fechaBonita(ajustes.ultimoRespaldo) : 'Nunca',
-        ajustes.ultimoRespaldo ? '' : 'aviso', ICONO.subir,
-        {pie: ajustes.ultimoRespaldo ? 'archivo bajado a tu disco' : 'baja uno, por si acaso'}) +
+      (clavesDanadas.length
+        ? azulejo('Datos ilegibles', clavesDanadas.length, 'mal', ICONO.alerta,
+            {pie:'míralo en Recuperar, abajo'})
+        : azulejo('Último respaldo', ajustes.ultimoRespaldo ? fechaBonita(ajustes.ultimoRespaldo) : 'Nunca',
+            ajustes.ultimoRespaldo ? '' : 'aviso', ICONO.subir,
+            {pie: ajustes.ultimoRespaldo ? 'archivo bajado a tu disco' : 'baja uno, por si acaso'})) +
     '</div>' +
 
     '<nav class="segmentos secciones-aj" aria-label="Secciones de los ajustes">' +
@@ -6007,6 +6232,7 @@ function pintaAjustes(){
     '</div>'
      : '') +
     (cual === 'datos' ?
+    tarjetaRescate() +
     (function(){
       const casos = diagnostico();
       const graves = casos.filter(function(x){ return x.tono === 'mal'; }).length;
@@ -7800,7 +8026,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -7930,6 +8156,7 @@ document.addEventListener('click', function(ev){
   }
   if(d.volver){ volverA(d.volver); return; }
   if(d.deshacer){ deshacerPaso(); return; }
+  if(d.rescate){ restaurarCopia(d.rescate); return; }
   if(d.renovarTodas){ renovarTodasVencidas(); return; }
   if(d.vaj){
     vistaAjustes = d.vaj;
@@ -8406,6 +8633,25 @@ window.addEventListener('storage', function(ev){
 
 cargar();
 aplicarTema();
+/* Si el navegador no pudo leer algo, no se arranca como si nada: tus datos
+   siguen ahí y el programa no los va a pisar, pero hay que enterarse. */
+if(clavesDanadas.length){
+  setTimeout(function(){
+    abrirModal('No pude leer tus datos',
+      '<div class="pila">' +
+        '<p style="margin:0;font-size:14px;line-height:1.6">Este navegador no ha podido leer ' +
+          '<b>' + esc(clavesDanadas.join(', ')) + '</b>. Suele pasar cuando se queda sin sitio ' +
+          'o se cierra de golpe a mitad de guardar.</p>' +
+        '<p style="margin:0;font-size:13.5px;line-height:1.6;color:var(--txt-2)">' +
+          '<b>Lo que había sigue ahí</b> y el programa no lo va a sobrescribir. ' +
+          'Entra en Ajustes → Tus datos → Recuperar y vuelve a la última copia.</p>' +
+      '</div>',
+      [{texto:'Ir a Recuperar', clase:'principal', hacer:function(){
+         cerrarModal(); vistaAjustes = 'datos'; ir('ajustes');
+       }},
+       {texto:'Ahora no', clase:'fantasma', hacer:cerrarModal}]);
+  }, 700);
+}
 
 if(leerRuta()) ir('negocio');
 else {
