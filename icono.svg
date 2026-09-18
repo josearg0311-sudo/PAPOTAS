@@ -1,8 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-<!-- PAPOTAS · u=64 · trazo 1.28u · canto 0.38u · radios a la mitad del grosor -->
   <rect width="512" height="512" rx="112" fill="#e11d48"/>
-  <g><g fill="none" stroke-width="81.92" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#7f1128" transform="translate(24.32 24.32)"/>
-    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#ffffff"/>
-  </g></g>
+  <g transform="translate(256 256) scale(0.86) translate(-262 -250)"
+     fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#0b0b0f" stroke-width="106.24000000000001" transform="translate(24.32 24.32)"/>
+    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#7f1128" stroke-width="81.92" transform="translate(24.32 24.32)"/>
+    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#0b0b0f" stroke-width="106.24000000000001"/>
+    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#ffffff"    stroke-width="81.92"/>
+  </g>
+  <rect x="12.16" y="12.16" width="487.68" height="487.68" rx="99.84"
+        fill="none" stroke="#0b0b0f" stroke-width="24.32"/>
 </svg>
