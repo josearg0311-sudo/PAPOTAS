@@ -2578,10 +2578,23 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   font-size:inherit;font-weight:inherit;letter-spacing:inherit;
   text-transform:inherit;color:inherit;cursor:pointer;
   display:inline-flex;align-items:center;gap:4px;
+  /* La cabecera es un botón de verdad: en un teléfono hay que poder darle
+     con el dedo, no acertarle a diez píxeles de letra. */
+  min-height:34px;padding:0 2px;margin:0 -2px;border-radius:7px;
 }
-.t-orden:hover{color:var(--txt)}
-.t-orden.viva{color:var(--marca-alta)}
+.t-orden:hover{color:var(--txt);background:var(--capa)}
+.t-orden:active{background:var(--linea)}
+/* El rosa de marca sobre el gris de la cabecera no llegaba a leerse bien
+   (4.3:1 en oscuro, 3.3:1 en claro). La columna viva se marca con el tono
+   de texto más fuerte y la flechita, que es lo que de verdad la distingue. */
+/* La columna viva se distingue por el fondo teñido, no por un rosa flojo
+   en letra de diez píxeles que no llegaba a leerse. */
+.t-orden.viva{color:var(--txt);background:var(--marca-suave)}
+.t-orden.viva:hover{background:var(--marca-linea)}
 .t-orden i{font-style:normal;font-size:9px}
+@media (pointer: coarse){
+  .t-orden{min-height:44px;padding:0 6px;margin:0 -6px}
+}
 .t-escrito{
   display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
   width:17px;height:17px;border-radius:99px;margin-left:6px;
