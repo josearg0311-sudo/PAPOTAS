@@ -49,15 +49,17 @@
   --tinta-info:#04121f;
 
   /* ===== LA MARCA =======================================================
-     Violeta, y no es cuestión de gusto: el semáforo del programa ya usa
-     rojo para vencido, ámbar para por vencer, verde para al día y azul
-     para información. La marca no puede parecerse a ninguno de los cuatro
-     o se confunde un estado con un botón. El violeta es el hueco que
-     queda limpio, y aguanta texto blanco encima con holgura. */
-  --marca:#7c3aed;
-  --marca-alta:#8b5cf6;
-  --marca-suave:rgba(124,58,237,.14);
-  --marca-linea:rgba(124,58,237,.34);
+     PAPOTAS es roja y lo ha sido siempre. El semáforo también usa rojo
+     para «vencido», así que los dos se separan por tono y por forma, no
+     cambiando la marca: la marca es un rojo PROFUNDO y solo aparece
+     rellena -el logo, la acción principal, la pestaña viva-, mientras que
+     «vencido» es un rojo CLARO que siempre va con su triángulo de alerta
+     y la palabra escrita. Nunca se confunde un botón con un estado. */
+  --marca:#e11d48;
+  --marca-alta:#f43f5e;
+  --marca-canto:#7f1128;     /* el canto del logo, que baja a los botones */
+  --marca-suave:rgba(225,29,72,.13);
+  --marca-linea:rgba(225,29,72,.33);
 
   /* Semáforo. */
   --mal:#fb7185;      --mal-fondo:rgba(244,63,94,.11);   --mal-linea:rgba(244,63,94,.28);
@@ -105,8 +107,9 @@ html[data-tema="claro"]{
   --tinta-aviso:#ffffff;
   --tinta-bien:#ffffff;
   --tinta-info:#ffffff;
-  --marca-suave:rgba(124,58,237,.09);
-  --marca-linea:rgba(124,58,237,.26);
+  --marca-canto:#9f1239;
+  --marca-suave:rgba(225,29,72,.08);
+  --marca-linea:rgba(225,29,72,.24);
   --mal:#be123c;   --mal-fondo:rgba(225,29,72,.08);  --mal-linea:rgba(225,29,72,.22);
   --aviso:#b45309; --aviso-fondo:rgba(217,119,6,.09);--aviso-linea:rgba(217,119,6,.22);
   --bien:#047857;  --bien-fondo:rgba(5,150,105,.09); --bien-linea:rgba(5,150,105,.22);
@@ -155,8 +158,8 @@ a{color:inherit}
 #marca{
   width:46px;height:46px;border-radius:14px;
   margin-bottom:var(--e5); flex:0 0 auto; overflow:hidden;
-  box-shadow:0 10px 26px -10px rgba(124,58,237,.75),
-             0 2px 10px -2px rgba(124,58,237,.35), var(--brillo);
+  box-shadow:0 10px 26px -10px rgba(225,29,72,.75),
+             0 2px 10px -2px rgba(225,29,72,.35), var(--brillo);
 }
 #marca svg{display:block;width:100%;height:100%}
 .nav-btn{
@@ -173,14 +176,14 @@ a{color:inherit}
   background:linear-gradient(180deg, var(--capa-alta), rgba(255,255,255,.02));
   box-shadow:var(--brillo), var(--sombra-1);
 }
-/* La pestaña viva lleva el violeta de la marca, con su resplandor. Aquí no
+/* La pestaña viva lleva el rojo de la marca, con su resplandor. Aquí no
    hay texto encima, así que puede lucirse sin pelearse con el contraste:
    donde hay que leer algo mandan los grises, no la marca. */
 .nav-btn[aria-current="page"]::before{
   content:"";position:absolute;left:-16px;top:50%;transform:translateY(-50%);
   width:4px;height:26px;border-radius:0 4px 4px 0;
   background:var(--marca);
-  box-shadow:0 0 14px 1px rgba(124,58,237,.6), 0 0 24px 3px rgba(124,58,237,.3);
+  box-shadow:0 0 14px 1px rgba(225,29,72,.6), 0 0 24px 3px rgba(225,29,72,.3);
 }
 .nav-punto{
   position:absolute;top:6px;right:10px;min-width:16px;height:16px;padding:0 4px;
@@ -267,8 +270,31 @@ a{color:inherit}
 .btn svg{width:16px;height:16px;stroke-width:2;flex:0 0 auto}
 .btn:hover{background:var(--capa-alta);border-color:var(--txt-4)}
 .btn:active{transform:scale(.975)}
-.btn.principal{background:var(--marca);border-color:var(--marca);color:#fff}
+/* ===== EL CANTO ========================================================
+   La regla que baja del logotipo. La P de PAPOTAS tiene una cara delante y
+   un canto detrás; aquí pasa lo mismo: la acción principal lleva su canto
+   abajo, así que se ve que es una pieza con cuerpo y no un rectángulo
+   pintado. Al pulsarla, el canto se hunde y el botón baja: se nota en el
+   dedo que algo pasó.
+
+   Y es una regla, no un adorno: SOLO lo que se pulsa lleva canto. Lo que
+   no se pulsa es plano. Si un día ves canto en algo que no hace nada, está
+   mal puesto. */
+.btn.principal{
+  background:var(--marca);border-color:var(--marca);color:#fff;
+  box-shadow:inset 0 -3px 0 0 var(--marca-canto), var(--sombra-1);
+  transition:background var(--rapido) var(--curva),
+             box-shadow var(--rapido) var(--curva),
+             transform var(--rapido) var(--curva);
+}
 .btn.principal:hover{background:var(--marca-alta);border-color:var(--marca-alta)}
+.btn.principal:active{
+  transform:translateY(1px);
+  box-shadow:inset 0 -1px 0 0 var(--marca-canto);
+}
+@media (prefers-reduced-motion: reduce){
+  .btn.principal:active{transform:none}
+}
 .btn.fantasma{background:transparent;border-color:transparent;color:var(--txt-2)}
 .btn.fantasma:hover{background:var(--capa-alta);color:var(--txt)}
 .btn.mini{min-height:30px;padding:0 10px;font-size:12px;border-radius:var(--r-s)}
@@ -2772,16 +2798,21 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   <!-- Carril lateral: solo en pantalla ancha. Iconos con su nombre debajo,
        que es lo que de verdad se lee rápido. -->
   <nav id="carril" aria-label="Secciones">
-    <!-- La marca. Sistema «Casillas»: u = 64, el trazo mide 1.15u y todos
-         los extremos son redondos, con el radio a la mitad del grosor. La P
-         se apoya en la rejilla de u, no está puesta a ojo. Es exactamente el
-         mismo dibujo que queda de icono al instalar el programa. -->
+    <!-- La marca «Bloque». u = 64, el trazo mide 1.28u y el canto se
+         desplaza 0.38u en diagonal. Los extremos son redondos, con el radio
+         a la mitad del grosor; la P se apoya en la rejilla, no está puesta
+         a ojo. El canto no es un adorno: es la regla que baja al programa,
+         donde lo que se pulsa lleva canto y lo que no se pulsa es plano.
+         Es el mismo dibujo que queda de icono al instalar. -->
     <div id="marca" aria-hidden="true">
       <svg viewBox="0 0 512 512">
         <rect width="512" height="512" rx="112" fill="var(--marca)"/>
-        <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H198.4"
-              fill="none" stroke="#fff" stroke-width="73.6"
-              stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="none" stroke-width="81.92" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6"
+                stroke="var(--marca-canto)" transform="translate(24.32 24.32)"/>
+          <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6"
+                stroke="#fff"/>
+        </g>
       </svg>
     </div>
     <button class="nav-btn" data-ir="hoy" aria-current="page">
@@ -2807,7 +2838,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.1</span>
     </div>
   </nav>
 
@@ -4209,7 +4240,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v5.0';
+const VERSION = 'v5.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };

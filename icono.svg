@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-<!-- PAPOTAS · sistema «Casillas»
-     u = 64. El trazo mide 1.15u y nunca cambia. Todos los extremos son
-     redondos: el radio es la mitad del grosor. La P se apoya en la rejilla
-     de u, no está puesta a ojo. -->
-  <rect width="512" height="512" rx="112" fill="#7c3aed"/>
-  <g><path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H198.4" fill="none" stroke="#ffffff" stroke-width="73.6"
-        stroke-linecap="round" stroke-linejoin="round"/></g>
+<!-- PAPOTAS · u=64 · trazo 1.28u · canto 0.38u · radios a la mitad del grosor -->
+  <rect width="512" height="512" rx="112" fill="#e11d48"/>
+  <g><g fill="none" stroke-width="81.92" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#7f1128" transform="translate(24.32 24.32)"/>
+    <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H153.6" stroke="#ffffff"/>
+  </g></g>
 </svg>
