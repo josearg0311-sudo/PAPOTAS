@@ -2738,7 +2738,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.7</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.8</span>
     </div>
   </nav>
 
@@ -2856,7 +2856,7 @@ const CLAVES = {
 const AJUSTES_BASE = {
   nombre:'PAPOTAS', moneda:'S/', diasAlerta:5, prefijoPais:'51',
   precioDefecto:15, cicloRenovacion:'meses', mesesRenovacion:1, diasRenovacion:30,
-  metodoDefecto:'PLIN', firmaWs:'', metaMensual:0, modoClaro:false,
+  metodoDefecto:'PLIN', firmaWs:'', metaMensual:0, modoClaro:false, waComoAbrir:'auto',
   supabaseUrl:'', supabaseKey:'',
   plantillaCobro:'Hola {cliente} 👋 Te recuerdo que tu {servicio} vence el {vencimiento}. Son {monto}. ¡Gracias!',
   plantillaEntrega:'¡Listo {cliente}! 🎬\nPlataforma: {servicio}\nCorreo: {correo}\nClave: {contrasena}\nPerfil: {perfil}\nPIN: {pin}\nVence: {vencimiento}',
@@ -3257,28 +3257,107 @@ function nombreCuenta(m){
   const et = String(m.etiqueta||'').trim();
   return m.nombre + ' ' + (m.numero||1) + (et ? ' · ' + et : '');
 }
+/* ---------- EL NÚMERO CON EL QUE SE ABRE WHATSAPP ------------------------
+   Aquí había dos formas de mandar un mensaje al vacío:
+
+   1. Los ceros de delante. Un número apuntado como «0987654321» se quedaba
+      con diez dígitos, no entraba en el «<= 9» de abajo y salía sin prefijo:
+      WhatsApp lo rechazaba y no te decía de quién era.
+   2. Los que empiezan por el propio prefijo. Un celular «512345678» empieza
+      por «51», así que el programa creía que YA traía el prefijo del país y
+      no se lo ponía. Ese mensaje no llegaba nunca.
+
+   Ahora se limpia el número, se le quitan los ceros de delante y se decide
+   por la LARGITUD, que es lo que distingue de verdad un número nacional de
+   uno que ya viene con prefijo. */
 function telefonoDe(c){
-  let t = String((c&&c.telefono)||'').replace(/[^0-9]/g,'');
+  return normalizarTelefono((c && c.telefono) || '').tel;
+}
+function normalizarTelefono(crudo){
+  let t = String(crudo||'').replace(/[^0-9]/g,'');
   const p = String(ajustes.prefijoPais||'').replace(/[^0-9]/g,'');
-  if(p && t.length > 0 && t.length <= 9 && t.indexOf(p) !== 0) t = p + t;
-  return t;
+  if(!t) return {tel:'', vale:false, porque:'sin número'};
+  /* «00 51 987…» y «0987…»: los ceros de cabecera no viajan. */
+  t = t.replace(/^0+/, '');
+  if(!t) return {tel:'', vale:false, porque:'solo ceros'};
+  /* Si lo que queda es más corto que un número nacional, le falta el país.
+     Un número ya internacional es más largo que el nacional del país. */
+  const nacional = p ? Math.max(8, 11 - p.length) : 9;
+  if(p && t.length <= nacional) t = p + t;
+  if(t.length < 8)  return {tel:t, vale:false, porque:'le faltan dígitos (' + t.length + ')'};
+  if(t.length > 15) return {tel:t, vale:false, porque:'tiene demasiados dígitos (' + t.length + ')'};
+  return {tel:t, vale:true, porque:''};
+}
+
+/* Cómo se abre WhatsApp. «whatsapp://» entra directo a la aplicación; el
+   enlace wa.me pasa antes por una página de «continuar al chat» que, con
+   cuarenta mensajes al día, son cuarenta toques de más. */
+function esTactil(){
+  try{ return window.matchMedia('(pointer: coarse)').matches; }catch(_){ return false; }
+}
+function enlaceWhatsApp(tel, texto){
+  const como = ajustes.waComoAbrir || 'auto';
+  const t = encodeURIComponent(texto || '');
+  if(como === 'app' || (como === 'auto' && esTactil()))
+    return 'whatsapp://send?phone=' + tel + '&text=' + t;
+  /* En la laptop, «solo» va a WhatsApp Web derecho al chat. wa.me acaba
+     ahí igual, pero pasando antes por una página de «continuar al chat». */
+  if(como === 'web' || como === 'auto')
+    return 'https://web.whatsapp.com/send?phone=' + tel + '&text=' + t;
+  return 'https://wa.me/' + tel + '?text=' + t;
+}
+/* Abrir de verdad. Con «whatsapp://» no se usa window.open -algunos
+   navegadores dejan una pestaña en blanco colgada-: se navega y el sistema
+   se lleva el control a la aplicación. */
+function saltarAWhatsApp(tel, texto){
+  const url = enlaceWhatsApp(tel, texto);
+  if(url.indexOf('whatsapp://') === 0){
+    try{ window.location.href = url; return true; }catch(_){}
+    /* Si el sistema no tiene la aplicación, queda el camino de siempre. */
+    window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(texto||''), '_blank', 'noopener');
+    return true;
+  }
+  window.open(url, '_blank', 'noopener');
+  return true;
 }
 /* Ingresos y gastos imputados a cada cuenta master. */
+/* El reparto del dinero por cuenta. Lo que no cae en ninguna cuenta viva
+   -porque la borraste, o porque el cobro venía sin cuenta- NO se tira: se
+   aparta en `sueltos`. Antes se descartaba en silencio, y en Dinero faltaba
+   plata que sí estaba en la caja: la suma de las cuentas no daba el total y
+   no había forma de ver por qué. */
 function economia(){
   if(_eco) return _eco;
   const ingresos = new Map(), gastos = new Map(), deCliente = new Map();
+  const vivas = new Set(servicios.map(m => String(m.id)));
+  /* `cuentas` es solo lo cobrado, desglosado por la cuenta que fue. Los
+     gastos van aparte: mezclarlos daba una cifra que no era ninguna de las
+     dos y no se entendía de dónde salía. */
+  const sueltos = {ingresos:0, gastos:0, cobros:0, cuentas:new Map(), gastosDe:new Map()};
   clientes.forEach(c => { if(c.cuentaMasterId) deCliente.set(String(c.id), String(c.cuentaMasterId)); });
+  function apartar(x, cuanto, esGasto){
+    const etq = x.cuentaNombre || (x.cuentaMasterId ? 'Una cuenta borrada' : 'Sin cuenta');
+    if(esGasto){
+      sueltos.gastos += cuanto;
+      sueltos.gastosDe.set(etq, (sueltos.gastosDe.get(etq)||0) + cuanto);
+    }else{
+      sueltos.ingresos += cuanto; sueltos.cobros++;
+      sueltos.cuentas.set(etq, (sueltos.cuentas.get(etq)||0) + cuanto);
+    }
+  }
   ventas.forEach(v => {
+    const monto = Number(v.monto)||0;
     const id = v.cuentaMasterId ? String(v.cuentaMasterId) : deCliente.get(String(v.clienteId));
-    if(!id) return;
-    ingresos.set(id, (ingresos.get(id)||0) + (Number(v.monto)||0));
+    if(!id || !vivas.has(id)){ apartar(v, monto, false); return; }
+    ingresos.set(id, (ingresos.get(id)||0) + monto);
   });
   inversiones.forEach(i => {
+    const monto = Number(i.monto)||0;
     const id = i.cuentaMasterId ? String(i.cuentaMasterId) : null;
-    if(!id) return;
-    gastos.set(id, (gastos.get(id)||0) + (Number(i.monto)||0));
+    if(!id || !vivas.has(id)){ if(id) apartar(i, monto, true); return; }
+    gastos.set(id, (gastos.get(id)||0) + monto);
   });
-  _eco = {ingresos, gastos};
+  _eco = {ingresos, gastos, sueltos};
   return _eco;
 }
 function resumenCuenta(m, eco){
@@ -4061,7 +4140,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.7';
+const VERSION = 'v4.8';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6469,6 +6548,30 @@ function pintaDinero(){
       '</div></div>' +
     '</div>' +
 
+    /* Lo que ya no cae en ninguna cuenta viva. Esta plata está en la caja
+       pero no se puede repartir, así que se dice en voz alta en vez de
+       dejar que la suma de las cuentas no cuadre con el total. */
+    (eco.sueltos && eco.sueltos.ingresos > 0
+      ? '<div class="tarjeta"><div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono ambar">' + ICONO.info + '</span>' +
+          '<div class="crece"><h2>Cobros sin cuenta viva</h2>' +
+            '<p>' + eco.sueltos.cobros + ' ' + plural(eco.sueltos.cobros,'cobro','cobros') +
+            ' por ' + esc(dinero(eco.sueltos.ingresos)) + '. Están en la caja, pero su cuenta ya no ' +
+            'existe, así que no se pueden repartir arriba.</p></div></div>' +
+          '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+            Array.from(eco.sueltos.cuentas.entries())
+              .sort(function(a,b){ return b[1]-a[1]; })
+              .map(function(par){
+                return '<div class="f aviso" style="cursor:default">' +
+                  '<span class="f-txt"><span class="f-nom">' + esc(par[0]) + '</span>' +
+                  '<span class="f-sub">ya no está en tus cuentas</span></span>' +
+                  '<span class="f-der"><span class="f-monto cifra">' + esc(dinero(par[1])) + '</span>' +
+                  '<span class="f-cuando">cobrado</span></span></div>';
+              }).join('') +
+          '</div></div>' +
+        '</div>'
+      : '') +
+
     '<div class="rejilla r2">' +
       '<div class="tarjeta">' +
         '<div class="tarjeta-cabeza">' +
@@ -6618,6 +6721,12 @@ function pintaAjustes(){
         campo('aj-pl-vencido','Cuando ya venció',{tipo:'textarea', valor:ajustes.plantillaVencido, filas:3}) +
         campo('aj-pl-entrega','Entrega de datos',{tipo:'textarea', valor:ajustes.plantillaEntrega, filas:4}) +
         campo('aj-firma','Firma al final',{valor:ajustes.firmaWs, pista:'Opcional'}) +
+        campo('aj-wa-abrir','Cómo abro WhatsApp',{tipo:'select', valor:ajustes.waComoAbrir||'auto',
+          opciones:[['auto','Solo (aplicación en el celular, web en la laptop)'],
+                    ['app','Siempre la aplicación'],
+                    ['web','Siempre WhatsApp Web'],
+                    ['enlace','Enlace wa.me (el de toda la vida)']],
+          ayuda:'La aplicación entra directo al chat. El enlace wa.me pasa antes por una página de «continuar», que con cuarenta mensajes al día son cuarenta toques de más.'}) +
         '<div class="fila"><button class="btn principal" id="btn-guardar-plantillas">Guardar mensajes</button></div>' +
       '</div></div>' +
     '</div>' +
@@ -7505,12 +7614,29 @@ function textoWhatsApp(c, cual){
     .replace(/\{dias\}/g, String(Math.abs(diasHasta(c.vencimiento) || 0)))
     .replace(/\{negocio\}/g, ajustes.nombre || 'PAPOTAS');
 }
+/* Cuando el número no sirve, no basta con decir «no se pudo»: se dice cuál
+   es el número, qué le pasa, y se abre ahí mismo para arreglarlo. */
+function avisarTelefonoMalo(c, n){
+  abrirModal('El número de ' + esc(c.nombre || 'este cliente') + ' no sirve',
+    '<p style="margin:0 0 var(--e3);color:var(--txt-2);font-size:13.5px;line-height:1.6">' +
+      (c.telefono
+        ? 'Tienes apuntado <b>' + esc(c.telefono) + '</b>, y así ' + esc(n.porque) + '. ' +
+          'WhatsApp lo rechaza sin decir de quién es, por eso te lo digo aquí.'
+        : 'No tiene teléfono apuntado, así que no hay a dónde escribirle.') +
+    '</p>' +
+    '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+      'Con el prefijo <b>' + esc(ajustes.prefijoPais || '—') + '</b> puesto en Ajustes, un celular ' +
+      'se apunta con sus dígitos y el programa le pone el país solo.</p>',
+    [{texto:'Ahora no', clase:'fantasma', hacer:cerrarModal},
+     {texto:'Arreglar el número', clase:'principal', hacer:function(){ cerrarModal(); formCliente(c.id); }}]);
+}
 function abrirWhatsApp(id, cual){
   const c = buscarCliente(id);
   if(!c) return false;
-  const tel = telefonoDe(c);
-  if(!tel){ avisar((c.nombre||'Ese cliente') + ' no tiene teléfono', 'mal'); return false; }
-  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoWhatsApp(c, cual)), '_blank', 'noopener');
+  const n = normalizarTelefono(c.telefono);
+  if(!n.vale){ avisarTelefonoMalo(c, n); return false; }
+  const tel = n.tel;
+  saltarAWhatsApp(tel, textoWhatsApp(c, cual));
   marcarEscrito(c);
   anotar('WHATSAPP', 'Mensaje abierto para ' + c.nombre);
   guardar();
@@ -7689,9 +7815,9 @@ function mandoCola(que){
   if(que === 'enviar'){
     /* Mandar NO pasa al siguiente. Mandas, esperas, y cuando te paga le
        das a «me pagó»: ahí sí avanza. */
-    const tel = telefonoDe(c);
-    if(!tel){ avisar((c.nombre||'Ese cliente') + ' no tiene teléfono', 'mal'); avanzarCola(); return; }
-    window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(textoDeLaRonda(c)), '_blank', 'noopener');
+    const n = normalizarTelefono(c.telefono);
+    if(!n.vale){ avisarTelefonoMalo(c, n); return; }
+    saltarAWhatsApp(n.tel, textoDeLaRonda(c));
     marcarEscrito(c);
     colaMandados.add(clave);
     anotar('WHATSAPP', 'Mensaje mandado a ' + (c.nombre||''));
@@ -8086,6 +8212,24 @@ function diagnostico(){
     'La renovación está pasada. Si no la pagas, se cae y con ella todos sus clientes.',
     servicios.filter(function(m){ const d = diasHasta(m.vencimiento); return d !== null && d < 0; })
       .map(function(m){ return {texto:nombreCuenta(m) + ' · ' + textoDias(m.vencimiento) + ' · ' + clientesDe(m.id).length + ' clientes dentro', cuenta:m.id}; }), 'mal');
+
+  /* Cobros que apuntan a una cuenta que ya no está. La plata sigue en la
+     caja, pero no se puede repartir y en «Qué te deja cada plataforma»
+     faltaba sin que nada lo dijera. */
+  const vivas = new Set(servicios.map(function(m){ return String(m.id); }));
+  const sueltos = {};
+  ventas.forEach(function(v){
+    if(!v.cuentaMasterId || vivas.has(String(v.cuentaMasterId))) return;
+    const k = v.cuentaNombre || 'Una cuenta borrada';
+    if(!sueltos[k]) sueltos[k] = {n:0, suma:0};
+    sueltos[k].n++; sueltos[k].suma += Number(v.monto)||0;
+  });
+  caso('cobros_sueltos', 'Cobros de una cuenta que ya no existe',
+    'Esa plata está en la caja, pero su cuenta fue borrada: no se puede repartir por cuenta ni saber qué te dejó.',
+    Object.keys(sueltos).map(function(k){
+      return {texto:k + ': ' + sueltos[k].n + ' ' + plural(sueltos[k].n,'cobro','cobros') +
+                    ' · ' + dinero(sueltos[k].suma)};
+    }), 'aviso');
 
   caso('sin_telefono', 'Clientes sin teléfono',
     'No les puedes escribir por WhatsApp: cuando les toque pagar, tendrás que buscarlos a mano.',
@@ -8617,6 +8761,16 @@ document.addEventListener('click', function(ev){
       '¿Borrar ' + nombreCuenta(m) + '?' + (cuantos ? ' Tiene ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') + ' asignados, que se quedarán sin cuenta.' : ''),
       'Sí, borrar', function(){
         recordarPaso('borrar ' + nombreCuenta(m));
+        /* Antes de que la cuenta desaparezca, sus cobros y sus gastos se
+           quedan con el nombre escrito. Si no, esa plata seguía en la caja
+           pero ya no había manera de saber de dónde había salido. */
+        const comoSeLlamaba = nombreCuenta(m);
+        ventas.forEach(function(v){
+          if(String(v.cuentaMasterId) === String(m.id) && !v.cuentaNombre) v.cuentaNombre = comoSeLlamaba;
+        });
+        inversiones.forEach(function(g){
+          if(String(g.cuentaMasterId) === String(m.id) && !g.cuentaNombre) g.cuentaNombre = comoSeLlamaba;
+        });
         clientesDe(m.id).forEach(function(c){ c.cuentaMasterId = null; });
         servicios = servicios.filter(function(x){ return String(x.id) !== String(m.id); });
         abiertos.delete('m'+m.id);
@@ -8923,6 +9077,7 @@ document.addEventListener('click', function(ev){
     ajustes.plantillaVencido = val('aj-pl-vencido');
     ajustes.plantillaEntrega = val('aj-pl-entrega');
     ajustes.firmaWs = val('aj-firma');
+    ajustes.waComoAbrir = val('aj-wa-abrir') || 'auto';
     guardar(); avisar('Mensajes guardados', 'bien');
   }
   else if(id === 'btn-exportar'){
@@ -9238,6 +9393,16 @@ window.PAPOTAS = {
     monto:   function(c){ return deudaDe(c); },
     aCobrar: function(c){ return aCobrarDe(c); }
   },
+  /* Lo que una cuenta deja y lo que cuesta, con la cuenta ya hecha. */
+  cuenta: function(id){ const m = buscarMaster(id); return m ? resumenCuenta(m) : null; },
+  /* Lo que no cae en ninguna cuenta viva: está en la caja pero no se puede
+     repartir. Aquí para poder comprobar que la suma cuadra. */
+  sueltos: function(){ olvidarIndices(); const e = economia();
+    return {ingresos:e.sueltos.ingresos, gastos:e.sueltos.gastos, cobros:e.sueltos.cobros,
+            de:Array.from(e.sueltos.cuentas.entries())}; },
+  /* La revisión, para poder comprobarla desde fuera. */
+  revision: function(){ olvidarIndices(); return diagnostico(); },
+  olvidar: function(){ olvidarIndices(); },
   recargar: function(){ cargar(); aplicarTema(); pintar(); },
   /* Los precios, también desde la consola si alguna vez hace falta. */
   precios: {
@@ -9265,7 +9430,24 @@ window.PAPOTAS = {
   /* Las cuatro puertas del negocio, para volver al principio de una. */
   verPlataformas: function(){ puerta('plataformas'); },
   verCuentas:     function(){ puerta('cuentas'); },
-  verClientes:    function(){ puerta('clientes'); }
+  verClientes:    function(){ puerta('clientes'); },
+  /* Entrar a una cuenta por su id, para poder llegar a su pantalla sin
+     tener que ir pulsando plataforma por plataforma. */
+  /* WhatsApp, para poder comprobarlo desde fuera. */
+  wa: {
+    numero: function(crudo){ return normalizarTelefono(crudo); },
+    enlace: function(tel, texto){ return enlaceWhatsApp(tel, texto); },
+    tactil: function(){ return esTactil(); }
+  },
+  escribirA: function(id){ return abrirWhatsApp(id, 'auto'); },
+  verCuenta: function(id){
+    const m = buscarMaster(id);
+    if(!m) return false;
+    ponerPlataforma(String(m.nombre||'').trim().toUpperCase() || 'SIN PLATAFORMA');
+    rutaCuenta = String(m.id); rutaCliente = null;
+    irNegocio(true);
+    return true;
+  }
 };
 
 Nube.arrancar();
