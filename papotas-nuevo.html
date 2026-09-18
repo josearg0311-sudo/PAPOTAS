@@ -25,28 +25,44 @@
    =========================================================================== */
 
 :root{
-  /* Superficies. Tres niveles y no más. */
-  --fondo:#0b0d11;
-  --capa:#15181e;
-  --capa-alta:#1e222a;
+  /* ===== LA PALETA, SACADA DEL LOGOTIPO ================================
+     Antes los grises eran FRÍOS -tiraban a azul- y los colores de estado
+     venían de cualquier sitio. Un logo rojo encima de una interfaz azulada
+     no es una marca: son dos cosas que conviven.
+
+     Ahora todo sale del rojo de la marca (tono 347°):
+
+       · Las superficies llevan una gota de ese rojo. Siguen siendo casi
+         negras, pero TIBIAS. Al lado del logo no desentonan.
+       · Los grises del texto llevan la misma gota, así que el texto no se
+         ve azulado sobre un fondo cálido.
+       · El semáforo se ordena alrededor del rojo, a distancias parejas y
+         con la misma fuerza, para que los cuatro parezcan de la misma
+         familia en vez de cuatro colores sueltos.
+
+     Lo que NO se toca: el contraste. Los cuatro grises siguen midiendo
+     7.3, 5.6 y 4.5 a 1 contra la capa más clara, que es lo que pide la
+     norma, y la batería lo comprueba en cada pantalla y en los dos temas. */
+
+  /* Superficies. Tres niveles y no más. Casi negras, con su gota de rojo. */
+  --fondo:#0d0a0c;
+  --capa:#181417;
+  --capa-alta:#221d21;
   --linea:rgba(255,255,255,.085);
   --linea-fuerte:rgba(255,255,255,.16);
 
-  /* Texto. Cuatro pesos de gris, cada uno con su trabajo. */
-  --txt:#f3f4f6;
-  /* Cuatro grises, y los cuatro se leen. Medidos contra la capa más clara
-     del programa (--capa-alta): 7.3, 5.6 y 4.5 a 1, que es lo que pide la
-     norma para texto normal. Los de antes se quedaban en 2.4. */
-  --txt-2:#a8b0bb;
-  --txt-3:#939aa3;
-  --txt-4:#808996;
+  /* Texto. Cuatro pesos, todos con la misma gota tibia. */
+  --txt:#f6f3f4;
+  --txt-2:#b4aab0;
+  --txt-3:#9f959b;
+  --txt-4:#8b838a;
   /* La tinta que se lee encima de cada color de estado: en oscuro los
      colores son claros, así que encima va tinta oscura, no blanca. */
   --velo-n:rgba(0,0,0,.42);
-  --tinta-mal:#2a0610;
-  --tinta-aviso:#241603;
+  --tinta-mal:#2b070f;
+  --tinta-aviso:#271502;
   --tinta-bien:#04170f;
-  --tinta-info:#04121f;
+  --tinta-info:#050f22;
 
   /* ===== LA MARCA =======================================================
      PAPOTAS es roja y lo ha sido siempre. El semáforo también usa rojo
@@ -65,11 +81,16 @@
   --marca-suave:rgba(225,29,72,.13);
   --marca-linea:rgba(225,29,72,.33);
 
-  /* Semáforo. */
-  --mal:#fb7185;      --mal-fondo:rgba(244,63,94,.11);   --mal-linea:rgba(244,63,94,.28);
-  --aviso:#fbbf24;    --aviso-fondo:rgba(251,191,36,.11);--aviso-linea:rgba(251,191,36,.26);
-  --bien:#34d399;     --bien-fondo:rgba(52,211,153,.11); --bien-linea:rgba(52,211,153,.26);
-  --info:#60a5fa;     --info-fondo:rgba(96,165,250,.11); --info-linea:rgba(96,165,250,.26);
+  /* ===== EL SEMÁFORO, EN FAMILIA =======================================
+     Los cuatro a la misma fuerza y repartidos alrededor del rojo de la
+     marca, no cogidos de donde fuera. «Vencido» comparte tono con la marca
+     pero mucho más claro -por eso no se confunden-; «por vencer» es el
+     ámbar cálido que queda justo al lado; «al día» y «para saber» se van
+     al otro extremo, que es donde no estorban. */
+  --mal:#ff6b81;      --mal-fondo:rgba(255,107,129,.12);  --mal-linea:rgba(255,107,129,.30);
+  --aviso:#f9a53c;    --aviso-fondo:rgba(249,165,60,.12); --aviso-linea:rgba(249,165,60,.28);
+  --bien:#3fd6a4;     --bien-fondo:rgba(63,214,164,.12);  --bien-linea:rgba(63,214,164,.28);
+  --info:#7aa2f7;     --info-fondo:rgba(122,162,247,.12); --info-linea:rgba(122,162,247,.28);
 
   --r-s:8px; --r:11px; --r-l:16px; --r-xl:22px;
   --e1:4px; --e2:8px; --e3:12px; --e4:16px; --e5:24px; --e6:32px; --e7:44px;
@@ -96,15 +117,18 @@ html[data-tema="claro"]{
   --sombra-2:0 4px 14px -6px rgba(15,23,42,.14), 0 1px 3px rgba(15,23,42,.06);
   --sombra-3:0 18px 44px -22px rgba(15,23,42,.24), 0 2px 8px rgba(15,23,42,.08);
   --velo:linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0) 62%);
-  --fondo:#f2f4f7;
+  /* El claro sigue la misma regla: las superficies y los grises llevan la
+     gota de rojo de la marca, así que el programa es el mismo de día y de
+     noche, no dos programas distintos. */
+  --fondo:#f6f3f4;
   --capa:#ffffff;
-  --capa-alta:#f1f3f6;
-  --linea:rgba(15,23,42,.09);
-  --linea-fuerte:rgba(15,23,42,.16);
-  --txt:#0f172a;
-  --txt-2:#495361;
-  --txt-3:#575d68;
-  --txt-4:#5f6874;
+  --capa-alta:#f5f1f2;
+  --linea:rgba(42,15,23,.09);
+  --linea-fuerte:rgba(42,15,23,.16);
+  --txt:#1a1013;
+  --txt-2:#5c4e53;
+  --txt-3:#6a5b60;
+  --txt-4:#73646a;
   /* En claro los colores de estado son oscuros: encima va blanco. */
   --velo-n:rgba(0,0,0,.78);
   --tinta-mal:#ffffff;
@@ -116,10 +140,13 @@ html[data-tema="claro"]{
   --canto:rgba(0,0,0,.18);
   --marca-suave:rgba(225,29,72,.08);
   --marca-linea:rgba(225,29,72,.24);
-  --mal:#be123c;   --mal-fondo:rgba(225,29,72,.08);  --mal-linea:rgba(225,29,72,.22);
-  --aviso:#b45309; --aviso-fondo:rgba(217,119,6,.09);--aviso-linea:rgba(217,119,6,.22);
-  --bien:#047857;  --bien-fondo:rgba(5,150,105,.09); --bien-linea:rgba(5,150,105,.22);
-  --info:#1d4ed8;  --info-fondo:rgba(37,99,235,.08); --info-linea:rgba(37,99,235,.22);
+  /* En claro el semáforo va oscuro, pero con los mismos tonos de la
+     familia: «vencido» comparte tono con la marca, «por vencer» es el
+     ámbar de al lado, y los otros dos se van al extremo opuesto. */
+  --mal:#c01342;   --mal-fondo:rgba(192,19,66,.08);   --mal-linea:rgba(192,19,66,.22);
+  --aviso:#a9560b; --aviso-fondo:rgba(169,86,11,.09); --aviso-linea:rgba(169,86,11,.22);
+  --bien:#05755a;  --bien-fondo:rgba(5,117,90,.09);   --bien-linea:rgba(5,117,90,.22);
+  --info:#3450c7;  --info-fondo:rgba(52,80,199,.08);  --info-linea:rgba(52,80,199,.22);
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -2875,7 +2902,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.3</span>
     </div>
   </nav>
 
@@ -4277,7 +4304,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v5.2';
+const VERSION = 'v5.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
