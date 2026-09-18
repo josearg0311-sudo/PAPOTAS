@@ -327,6 +327,7 @@ input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marc
 .cabeza-icono.verde {--tinte:var(--bien); --tinte-suave:rgba(16,185,129,.16); --tinte-linea:rgba(16,185,129,.34)}
 .cabeza-icono.ambar {--tinte:var(--aviso);--tinte-suave:rgba(245,158,11,.16); --tinte-linea:rgba(245,158,11,.34)}
 .cabeza-icono.azul  {--tinte:var(--info); --tinte-suave:rgba(56,132,255,.16); --tinte-linea:rgba(56,132,255,.34)}
+.cabeza-icono.rojo  {--tinte:var(--mal);  --tinte-suave:rgba(244,63,94,.16);  --tinte-linea:rgba(244,63,94,.34)}
 .cabeza-icono.gris  {--tinte:var(--txt-3);--tinte-suave:rgba(148,163,184,.14);--tinte-linea:var(--linea-fuerte)}
 @media (max-width:640px){
   .cabeza-icono{width:32px;height:32px;border-radius:9px}
@@ -1089,6 +1090,17 @@ button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
 
 .tab-acciones{grid-area:acciones;display:flex;flex-direction:column;gap:var(--e2);align-items:stretch}
 .btn.grande{min-height:48px;font-size:14px;font-weight:700;padding:0 var(--e4)}
+/* Las dos formas de cobrarle al que debe varias cuotas, una debajo de otra
+   y con la cuenta hecha en cada una, para elegir sin pensar. */
+.cuotas-opciones{display:grid;gap:10px}
+.cuotas-opciones .btn{
+  min-height:62px;justify-content:flex-start;text-align:left;
+  padding:12px var(--e4);gap:12px;
+}
+.cuotas-opciones .btn svg{width:20px;height:20px;flex:0 0 auto}
+.cuotas-opciones .btn span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cuotas-opciones .btn b{font-size:14px;font-weight:750}
+.cuotas-opciones .btn small{font-size:11.5px;font-weight:600;opacity:.82}
 .btn-n{
   margin-left:4px;min-width:22px;height:20px;padding:0 6px;border-radius:99px;
   background:var(--velo-n);color:#fff;
@@ -2611,6 +2623,17 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   letter-spacing:.08em;color:var(--txt-4);font-weight:750;
 }
 .t-pie-suma{font-size:14px;font-weight:780;color:var(--txt)}
+/* Quien debe más de una cuota lleva su cuenta al lado del monto: es la
+   diferencia entre «me debe quince» y «me debe cuarenta y cinco». */
+/* El aviso de deuda va arriba de todo en su ficha, con el borde rojo: es
+   lo primero que tiene que ver al abrirlo. */
+.aviso-deuda{border-color:var(--mal-linea);background:var(--mal-fondo)}
+.aviso-deuda h2{color:var(--mal)}
+.t-atraso{
+  display:block;font-style:normal;font-size:10px;font-weight:750;
+  margin-top:2px;color:var(--mal);letter-spacing:.01em;
+}
+.pie-colgados{color:var(--mal)}
 .t-pie-bajar{text-align:right;padding-right:var(--e3)}
 .t-pie-bajar .btn{white-space:nowrap}
 @media (max-width:560px){ .t-pie-bajar .et{display:none} }
@@ -2715,7 +2738,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.6</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.7</span>
     </div>
   </nav>
 
@@ -4038,7 +4061,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.6';
+const VERSION = 'v4.7';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -4536,7 +4559,11 @@ function tablaCobro(lista, tope){
           esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + '</span>' +
           (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>' : '') + '</td>' +
         '<td class="t-vence">' + pastillaEstado(c, false) + '</td>' +
-        '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) + '</td>' +
+        '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) +
+          (muyAtrasado(c)
+            ? '<em class="t-atraso" title="Te debe ' + cuotasPendientes(c) + ' cuotas: ' +
+                esc(dinero(deudaDe(c))) + '">' + cuotasPendientes(c) + ' cuotas</em>'
+            : '') + '</td>' +
         '<td class="t-hacer">' +
           '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '"' +
             ' title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
@@ -4737,7 +4764,8 @@ function tablaClientes(lista){
   const filas = ordenarParaTabla(lista);
   const suma = filas.reduce(function(a,c){ return a + cobroDe(c); }, 0);
   const deben = filas.filter(debe);
-  const sumaDeben = deben.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  const sumaDeben = deben.reduce(function(a,c){ return a + aCobrarDe(c); }, 0);
+  const colgados = filas.filter(muyAtrasado);
   const todosMarcados = modoElegir && filas.length > 0 &&
     filas.every(function(c){ return elegidos.has(String(c.id)); });
   const cab = function(clave, etq, clase){
@@ -4792,7 +4820,11 @@ function tablaClientes(lista){
         '<td class="t-vence"><span class="t-fecha">' + esc(fechaBonita(c.vencimiento) || '—') + '</span>' +
           (c.vencimiento ? '<small class="' + e.clase + '">' + esc(textoDias(c.vencimiento)) + '</small>' : '') +
         '</td>' +
-        '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) + '</td>' +
+        '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) +
+          (muyAtrasado(c)
+            ? '<em class="t-atraso" title="Te debe ' + cuotasPendientes(c) + ' cuotas: ' +
+                esc(dinero(deudaDe(c))) + '">' + cuotasPendientes(c) + ' cuotas</em>'
+            : '') + '</td>' +
         '<td class="t-hacer">' +
           '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '"' +
             ' title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
@@ -4810,7 +4842,8 @@ function tablaClientes(lista){
     '</tbody>' +
     '<tfoot><tr>' +
       '<td colspan="' + (modoElegir ? 4 : 3) + '" class="t-pie-txt">' + filas.length + ' ' + plural(filas.length,'cliente','clientes') +
-        (deben.length ? ' · ' + deben.length + ' te deben ' + esc(dinero(sumaDeben)) : ' · nadie te debe') + '</td>' +
+        (deben.length ? ' · ' + deben.length + ' te deben ' + esc(dinero(sumaDeben)) : ' · nadie te debe') +
+        (colgados.length ? ' · <b class="pie-colgados">' + colgados.length + ' con más de una cuota</b>' : '') + '</td>' +
       '<td class="t-pie-etq">Al ciclo</td>' +
       '<td class="t-monto cifra t-pie-suma">' + esc(dinero(suma)) + '</td>' +
       '<td class="t-pie-bajar">' +
@@ -5036,7 +5069,11 @@ function pintaHoy(){
   const deHoy    = suyos.filter(function(c){ return c.vencimiento === hoy; });
   const semana   = suyos.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d>0 && d<=aviso; });
   const porCobrar = vencidos.concat(deHoy, semana);
-  const total = porCobrar.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  /* Todo lo que te deben, no una cuota por cabeza: quien lleva tres meses
+     sin pagar sale por sus tres cuotas, que es lo que le vas a cobrar. */
+  const total = porCobrar.reduce(function(a,c){ return a + aCobrarDe(c); }, 0);
+  const colgados = porCobrar.filter(muyAtrasado);
+  const colgadoSuma = colgados.reduce(function(a,c){ return a + deudaDe(c); }, 0);
 
   const enPlatM = function(m){
     return plataformaActiva === 'TODAS' ||
@@ -5066,6 +5103,7 @@ function pintaHoy(){
   if(filtroHoy === 'vencidos')    cola = vencidos;
   else if(filtroHoy === 'hoy')    cola = deHoy;
   else if(filtroHoy === 'semana') cola = semana;
+  else if(filtroHoy === 'colgados') cola = colgados;
   else cola = porCobrar;
   cola = cola.slice().sort(porFecha);
   const conTel = cola.filter(function(c){ return telefonoDe(c); }).length;
@@ -5100,9 +5138,15 @@ function pintaHoy(){
       azulejo('Por cobrar', esc(dinero(total)), 'aviso', ICONO.cobrar,
         {pie: porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas'), ir:'fhoy-pendientes'}) +
       azulejo('Vencidos', vencidos.length, 'mal', ICONO.alerta,
-        {pie: esc(dinero(vencidos.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-vencidos'}) +
+        {pie: esc(dinero(vencidos.reduce(function(a,c){return a+aCobrarDe(c);},0))), ir:'fhoy-vencidos'}) +
+      /* Los que llevan más de una cuota sin pagar. Van aparte porque no es
+         lo mismo que se le pasaran tres días a que lleve tres meses. */
+      (colgados.length
+        ? azulejo('Te deben varias', colgados.length, 'mal', ICONO.billete,
+            {pie: esc(dinero(colgadoSuma)) + ' atrasados', ir:'fhoy-colgados'})
+        : '') +
       azulejo('Vencen hoy', deHoy.length, 'aviso', ICONO.reloj,
-        {pie: esc(dinero(deHoy.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-hoy'}) +
+        {pie: esc(dinero(deHoy.reduce(function(a,c){return a+aCobrarDe(c);},0))), ir:'fhoy-hoy'}) +
       azulejo('Próximos ' + aviso + ' días', semana.length, 'bien', ICONO.calendario,
         {pie: esc(dinero(semana.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-semana'}) +
       azulejo('Cobrado en ' + esc(NOMBREMES[Number(mes.slice(5,7))-1]), esc(dinero(cobradoMes)), 'bien', ICONO.subir,
@@ -5166,7 +5210,9 @@ function pintaHoy(){
           '<p>Los más urgentes primero. Se cobra y se escribe desde aquí.</p></div>' +
         '<div class="segmentos">' +
           [['pendientes','Todo',porCobrar.length],['vencidos','Vencidos',vencidos.length],
-           ['hoy','Hoy',deHoy.length],['semana','Próximos',semana.length]].map(function(x){
+           ['colgados','Te deben varias',colgados.length],
+           ['hoy','Hoy',deHoy.length],['semana','Próximos',semana.length]]
+          .filter(function(x){ return x[2] > 0 || x[0] === 'pendientes'; }).map(function(x){
             return '<button data-fhoy="' + x[0] + '" aria-selected="' + (filtroHoy===x[0]?'true':'false') + '">' +
                    x[1] + (x[2] ? '<span class="cuenta">' + x[2] + '</span>' : '') + '</button>';
           }).join('') +
@@ -6138,6 +6184,8 @@ function hojaCliente(c){
     ['Cliente desde', fechaBonita(c.inicio) || '—'],
     ['Te ha pagado',  dinero(pagado) + (cobros.length ? ' en ' + cobros.length + ' ' + plural(cobros.length,'cobro','cobros') : '')]
   ];
+  const debiendo = cuotasPendientes(c);
+  if(debiendo > 1) datos.splice(2, 0, ['Te debe', debiendo + ' cuotas · ' + dinero(deudaDe(c))]);
 
   return '<div class="pila">' +
     barraPlataformas() +
@@ -6184,6 +6232,17 @@ function hojaCliente(c){
       }).join('') + '</dl>' +
       (c.nota ? '<div class="nota-caja">' + ICONO.chat + '<span>' + esc(c.nota) + '</span></div>' : '') +
     '</div>' +
+
+    (debiendo > 1
+      ? '<div class="tarjeta aviso-deuda"><div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono rojo">' + ICONO.alerta + '</span>' +
+          '<div class="crece"><h2>Te debe ' + debiendo + ' cuotas</h2>' +
+            '<p>No te paga desde el ' + esc(fechaBonita(c.vencimiento)) + '. Son ' +
+            esc(dinero(deudaDe(c))) + ' en total.</p></div>' +
+          '<button class="btn principal" data-cuotas="' + esc(c.id) + '|' + debiendo + '">' +
+            ICONO.cobrar + '<span class="et">Cobrar las ' + debiendo + '</span></button>' +
+        '</div></div>'
+      : '') +
 
     tarjetaPrecio(c) +
 
@@ -7233,6 +7292,41 @@ function mesesDeCiclo(c){
   const ciclo = cicloDe(c);
   return ciclo.tipo === 'meses' ? Math.max(1, ciclo.cantidad) : 1;
 }
+
+/* ---------- LO QUE DE VERDAD TE DEBEN -----------------------------------
+   Aquí había una cuenta que salía mal con dinero de por medio, y hay que
+   decirlo tal cual: el programa sumaba UNA cuota por cada cliente vencido,
+   estuviera atrasado tres días o tres meses. Alguien que no te paga desde
+   junio te debe tres cuotas, no una, y en la pantalla figuraba por quince
+   soles cuando en realidad te debía cuarenta y cinco.
+
+   `cuotasPendientes` cuenta cuántos cobros hacen falta para ponerlo al día:
+   uno por cada ciclo que se le pasó, más el que está corriendo. Es la misma
+   cuenta que hace `cobrarUno` al renovar, que avanza desde el vencimiento y
+   no desde hoy, así que las dos van siempre de la mano. */
+function cuotasPendientes(c){
+  if(!c || enPausa(c)) return 0;
+  const hasta = c.vencimiento;
+  if(!hasta) return 0;
+  const d = diasHasta(hasta);
+  if(d === null) return 0;
+  if(d > 0) return 0;                 /* todavía no le toca */
+  const ciclo = cicloDe(c);
+  let f = hasta, n = 0;
+  /* Se avanza ciclo a ciclo hasta pasar de hoy. El tope es por si alguien
+     tiene una fecha de hace años: ni se cuelga ni inventa cien cuotas. */
+  while(diasHasta(f) <= 0 && n < 60){ f = avanzar(f, ciclo); n++; }
+  return Math.max(1, n);
+}
+/* Lo que se le cobra de una vez: el precio por los meses de su ciclo. */
+function cuotaDe(c){ return cobroDe(c) * mesesDeCiclo(c); }
+/* Lo que te debe ya, sin contar lo que todavía no le toca. */
+function deudaDe(c){ return cuotaDe(c) * cuotasPendientes(c); }
+/* Lo que le cobrarías ahora para dejarlo al día. Al que aún no le toca se
+   le cobra su cuota; al atrasado, todas las que debe. */
+function aCobrarDe(c){ return cuotaDe(c) * Math.max(1, cuotasPendientes(c)); }
+/* Debe más de una: es el que se te está yendo de las manos. */
+function muyAtrasado(c){ return cuotasPendientes(c) > 1; }
 function formAdelanto(id){
   const c = buscarCliente(id);
   if(!c){ avisar('Ese cliente ya no está', 'mal'); return; }
@@ -7306,12 +7400,41 @@ function cobrarUno(c, cobrando, ciclos){
   return total;
 }
 
-function renovar(id, cobrando){
+/* Cuando alguien debe varias, se pregunta cuántas: casi siempre te pagan
+   todo lo atrasado, pero a veces te dan una y quedan debiendo el resto, y
+   el programa tiene que saber apuntar las dos cosas. */
+function preguntarCuotas(c, debia){
+  const una  = cuotaDe(c);
+  const todo = una * debia;
+  const desde = c.vencimiento;
+  abrirModal('¿Cuánto te pagó ' + esc(c.nombre || 'este cliente') + '?',
+    '<p style="margin:0 0 var(--e4);color:var(--txt-2);font-size:13.5px;line-height:1.6">' +
+      'Está vencido desde el ' + esc(fechaBonita(desde)) + ', así que te debe <b>' + debia +
+      ' cuotas</b>: ' + esc(dinero(todo)) + ' en total.</p>' +
+    '<div class="cuotas-opciones">' +
+      '<button class="btn grande principal" data-cuotas="' + esc(c.id) + '|' + debia + '">' +
+        ICONO.ok + '<span><b>Me pagó todo</b><small>' + debia + ' cuotas · ' +
+        esc(dinero(todo)) + ' · queda al día</small></span></button>' +
+      '<button class="btn grande" data-cuotas="' + esc(c.id) + '|1">' +
+        ICONO.cobrar + '<span><b>Solo una cuota</b><small>' + esc(dinero(una)) +
+        ' · seguirá debiendo ' + (debia-1) + '</small></span></button>' +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal}]);
+}
+
+/* Cobrar a uno. `cuantas` son las cuotas: una, o todas las que deba para
+   quedar al día. Si se le cobra una sola a quien debe tres, sigue vencido,
+   y eso está bien -debe dos más- pero hay que preguntárselo antes, no
+   dejarlo en rojo sin explicación. */
+function renovar(id, cobrando, cuantas){
   const c = buscarCliente(id);
   if(!c){ avisar('No encontré a ese cliente', 'mal'); return; }
+  const debia = cuotasPendientes(c);
+  if(cobrando && debia > 1 && !cuantas){ preguntarCuotas(c, debia); return; }
+  const n = Math.max(1, Math.round(Number(cuantas) || 1));
   recordarPaso(cobrando ? 'cobrar a ' + (c.nombre||'un cliente')
                         : 'renovar a ' + (c.nombre||'un cliente'));
-  const cobrado = cobrarUno(c, cobrando, 1);
+  const cobrado = cobrarUno(c, cobrando, n);
   const nueva = c.vencimiento;
   const monto = cobrado;
   const meses = 1;
@@ -8439,7 +8562,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -8522,7 +8645,8 @@ document.addEventListener('click', function(ev){
     const deben = debe;
     let lista = [];
     if(d.escribirA === 'hoy-visible'){
-      if(filtroHoy === 'vencidos') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x<0; });
+      if(filtroHoy === 'colgados') lista = clientes.filter(muyAtrasado);
+      else if(filtroHoy === 'vencidos') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x<0; });
       else if(filtroHoy === 'hoy') lista = clientes.filter(function(c){ return c.vencimiento === hoy; });
       else if(filtroHoy === 'semana') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return x!==null && x>0 && x<=av; });
       else lista = clientes.filter(deben).concat(clientes.filter(function(c){ return c.vencimiento === hoy && estadoDe(c)==='activo'; }));
@@ -8678,6 +8802,12 @@ document.addEventListener('click', function(ev){
   if(d.nuevaTarifa){ formTarifa(d.nuevaTarifa, null); return; }
   if(d.editarTarifa){ formTarifa(d.platTarifa || 'GENERAL', d.editarTarifa); return; }
   if(d.diag){ verDiagnostico(d.diag); return; }
+  if(d.cuotas){
+    const par = String(d.cuotas).split('|');
+    cerrarModal();
+    renovar(par[0], true, par[1]);
+    return;
+  }
   if(d.csv){ exportarCSV(d.csv); return; }
   if(d.limpiarBusqueda){
     busqueda = ''; $('#buscar').value = ''; pintar(); return;
@@ -8720,9 +8850,9 @@ document.addEventListener('click', function(ev){
   }
   if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 20; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
-  if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana){
+  if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana || d.fhoyColgados){
     filtroHoy = d.fhoyPendientes ? 'pendientes' : d.fhoyVencidos ? 'vencidos'
-              : d.fhoyHoy ? 'hoy' : 'semana';
+              : d.fhoyHoy ? 'hoy' : d.fhoyColgados ? 'colgados' : 'semana';
     pintar();
     const t = $('#p-hoy .tabla'); if(t) t.scrollIntoView({block:'center', behavior:suave()});
     return;
@@ -9101,6 +9231,13 @@ window.PAPOTAS = {
   pintar: pintar,
   ir: ir,
   datos: function(){ return {servicios, clientes, ventas, inversiones, ajustes}; },
+  /* Lo que te deben, también desde la consola: cuántas cuotas lleva sin
+     pagar alguien, cuánto suma y cuánto le cobrarías ahora. */
+  deuda: {
+    cuotas:  function(c){ return cuotasPendientes(c); },
+    monto:   function(c){ return deudaDe(c); },
+    aCobrar: function(c){ return aCobrarDe(c); }
+  },
   recargar: function(){ cargar(); aplicarTema(); pintar(); },
   /* Los precios, también desde la consola si alguna vez hace falta. */
   precios: {
