@@ -3,10 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0b0d">
+<meta name="theme-color" content="#0a0b10">
 <title>PAPOTAS</title>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PAPOTAS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
@@ -48,6 +53,14 @@
   --marca-alta:#f43f5e;
   --marca-suave:rgba(225,29,72,.12);
   --marca-linea:rgba(225,29,72,.32);
+  /* El degradado del logotipo: rosa que cae en violeta. Es la firma del
+     programa y solo se usa donde tiene que reconocerse -el logo, la acción
+     principal, la pestaña viva-, nunca detrás de un texto que haya que
+     leer. Ahí manda el contraste, no la marca. */
+  --marca-violeta:#5b21b6;
+  --aurora:linear-gradient(135deg, #ff5f8f 0%, #e11d48 42%, #5b21b6 100%);
+  --aurora-tenue:linear-gradient(135deg, rgba(255,95,143,.20) 0%,
+                 rgba(225,29,72,.16) 42%, rgba(91,33,182,.22) 100%);
 
   /* Semáforo. */
   --mal:#fb7185;      --mal-fondo:rgba(244,63,94,.11);   --mal-linea:rgba(244,63,94,.28);
@@ -139,15 +152,16 @@ a{color:inherit}
   padding:var(--e5) 0 var(--e4); gap:2px; z-index:20;
   box-shadow:1px 0 0 rgba(0,0,0,.2);
 }
+/* La marca: la P de PAPOTAS con el hueco del ojo en forma de play. Va
+   dibujada, no escrita, así que se ve igual de limpia a 46 px que a 512
+   y es exactamente el mismo dibujo que queda de icono al instalarlo. */
 #marca{
   width:46px;height:46px;border-radius:14px;
-  background:linear-gradient(145deg, var(--marca-alta), var(--marca));
-  color:#fff;
-  display:grid;place-items:center;
-  font-weight:800;font-size:21px;letter-spacing:-.05em;
-  margin-bottom:var(--e5); flex:0 0 auto;
-  box-shadow:0 6px 18px -6px rgba(225,29,72,.6), var(--brillo);
+  margin-bottom:var(--e5); flex:0 0 auto; overflow:hidden;
+  box-shadow:0 8px 22px -8px rgba(225,29,72,.65),
+             0 2px 10px -2px rgba(91,33,182,.45), var(--brillo);
 }
+#marca svg{display:block;width:100%;height:100%}
 .nav-btn{
   width:68px;padding:11px 0 9px;border-radius:14px;
   display:flex;flex-direction:column;align-items:center;gap:6px;
@@ -162,11 +176,14 @@ a{color:inherit}
   background:linear-gradient(180deg, var(--capa-alta), rgba(255,255,255,.02));
   box-shadow:var(--brillo), var(--sombra-1);
 }
+/* La pestaña viva lleva el degradado del logotipo. Aquí no hay texto
+   encima, así que la marca puede lucirse sin pelearse con el contraste:
+   donde hay que leer algo mandan los grises, no la marca. */
 .nav-btn[aria-current="page"]::before{
   content:"";position:absolute;left:-16px;top:50%;transform:translateY(-50%);
   width:4px;height:26px;border-radius:0 4px 4px 0;
-  background:var(--marca);
-  box-shadow:0 0 14px 1px rgba(225,29,72,.55);
+  background:var(--aurora);
+  box-shadow:0 0 14px 1px rgba(225,29,72,.55), 0 0 22px 2px rgba(91,33,182,.35);
 }
 .nav-punto{
   position:absolute;top:6px;right:10px;min-width:16px;height:16px;padding:0 4px;
@@ -822,6 +839,48 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
   content:"";position:absolute;inset:0 0 auto;height:3px;z-index:2;
   background:linear-gradient(90deg, var(--tono), transparent 85%);
 }
+/* ===== LA REJILLA DE PLATAFORMAS, CON SU PROPIO AIRE ====================
+   Es la primera pantalla y la que más se mira, así que no puede parecer
+   una tabla con bordes. Cada ficha es la marca: su color entra por la
+   esquina y por el canto izquierdo, el logo va sobre un azulejo de vidrio
+   y al pasar por encima cruza un brillo. Nada de esto va detrás de un
+   texto que haya que leer: ahí sigue mandando el contraste. */
+.ficha{
+  border-left:3px solid transparent;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.028), transparent 38%),
+    var(--capa);
+}
+.ficha::before{
+  background:linear-gradient(90deg, var(--tono) 0%, var(--tono) 18%, transparent 88%);
+  height:2px;
+}
+/* El canto de color: dice de qué plataforma es antes de leer el nombre.
+   Va en el borde y no dentro, porque la ficha recorta lo que se le sale. */
+.ficha{border-left-color:var(--tono)}
+/* El brillo que cruza al pasar por encima. Se mueve solo si el equipo no
+   pide que se quede quieto. */
+.ficha .ficha-tapa::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(100deg, transparent 32%,
+             rgba(255,255,255,.07) 48%, transparent 64%);
+  transform:translateX(-120%);
+  transition:transform .62s var(--curva);
+}
+.ficha:hover .ficha-tapa::before{transform:translateX(120%)}
+@media (prefers-reduced-motion: reduce){
+  .ficha .ficha-tapa::before{display:none}
+}
+/* El logo de la plataforma, sobre su azulejo. */
+.ficha .f-marca{
+  border-radius:13px;
+  box-shadow:0 5px 16px -6px var(--tono), 0 0 0 1px rgba(255,255,255,.07) inset;
+}
+
+/* Las casillas de perfil: las ocupadas llevan el color de la plataforma. */
+.ficha .casillas i.usado, .ficha .barra i{
+  box-shadow:0 0 8px -2px var(--tono);
+}
 /* La tapa cubre la ficha entera; el contenido no atrapa el clic salvo los
    botones de mando, que van por encima de ella. */
 .ficha-tapa{
@@ -849,6 +908,8 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 .ficha:hover{transform:translateY(-2px);border-color:var(--tono-linea);box-shadow:var(--sombra-3)}
 .ficha:focus-within{border-color:var(--tono-linea)}
 .ficha.viva{border-color:var(--tono-linea);box-shadow:var(--brillo), var(--sombra-3)}
+/* El canto se queda de su color pase lo que pase con el resto del borde. */
+.ficha:hover, .ficha:focus-within, .ficha.viva{border-left-color:var(--tono)}
 
 .ficha-alto{display:flex;align-items:center;gap:10px;min-width:0}
 .ficha-id{min-width:0;flex:1}
@@ -2714,7 +2775,26 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   <!-- Carril lateral: solo en pantalla ancha. Iconos con su nombre debajo,
        que es lo que de verdad se lee rápido. -->
   <nav id="carril" aria-label="Secciones">
-    <div id="marca" aria-hidden="true">P</div>
+    <div id="marca" aria-hidden="true">
+      <svg viewBox="0 0 512 512">
+        <defs>
+          <linearGradient id="mk-aurora" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ff5f8f"/>
+            <stop offset=".40" stop-color="#e11d48"/>
+            <stop offset="1" stop-color="#5b21b6"/>
+          </linearGradient>
+          <mask id="mk-pe">
+            <rect width="512" height="512" fill="#000"/>
+            <rect x="146" y="100" width="62" height="312" rx="18" fill="#fff"/>
+            <path d="M146 100 H274 a104 104 0 0 1 0 208 H146 Z" fill="#fff"/>
+            <path d="M246 182 L300 208 L246 234 Z" fill="#000" stroke="#000"
+                  stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
+          </mask>
+        </defs>
+        <rect width="512" height="512" rx="116" fill="url(#mk-aurora)"/>
+        <rect width="512" height="512" fill="#fff" mask="url(#mk-pe)"/>
+      </svg>
+    </div>
     <button class="nav-btn" data-ir="hoy" aria-current="page">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
       <span>Hoy</span><em class="nav-punto oculto" data-punto="hoy"></em>
@@ -2738,7 +2818,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.8</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.9</span>
     </div>
   </nav>
 
@@ -4140,7 +4220,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.8';
+const VERSION = 'v4.9';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
