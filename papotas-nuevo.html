@@ -552,9 +552,9 @@ button.metrica:hover{background:var(--capa-alta)}
   border:1px solid var(--linea-fuerte);color:var(--txt-3);
 }
 .pastilla.mal{color:var(--mal)} .pastilla.aviso{color:var(--aviso)} .pastilla.bien{color:var(--bien)}
-/* Sin caja: cien cajitas de color seguidas son ruido, y el color del texto
-   ya dice lo mismo. La caja se queda para la ficha, donde está sola. */
-.tc .pastilla{border:0;background:none;padding:0;border-radius:0;font-size:11.5px;font-weight:650}
+/* Antes la pastilla iba sin caja dentro de las tarjetas para no hacer ruido.
+   Pero entonces vencido y por vencer se parecían demasiado: el estado es lo
+   primero que hay que ver, así que la caja vuelve, con su icono. */
 .ficha-cabeza .pastilla{
   border:1px solid var(--linea-fuerte);padding:2px 8px;border-radius:99px;
 }
@@ -1217,13 +1217,9 @@ button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
 .tabla .t-monto{font-weight:750;letter-spacing:-.02em;white-space:nowrap}
 .tabla th.t-hacer{text-align:right}
 .tabla .t-vence{white-space:nowrap}
-/* Cincuenta pastillas rojas con fondo y borde, una debajo de otra, son un
-   muro. El estado ya lo dice el acento de la izquierda; aquí basta el texto
-   en su color. */
-.tabla .pastilla{
-  border:0;background:none;padding:0;border-radius:0;
-  font-size:11.5px;font-weight:650;letter-spacing:0;
-}
+/* En la tabla la pastilla también se ve entera: con ochenta filas, el color
+   del texto solo no distinguía el rojo del ámbar. */
+.tabla .pastilla{font-size:11px;padding:2px 8px}
 .tabla .t-hacer{text-align:right;white-space:nowrap}
 .tabla .t-hacer .btn{margin-left:4px}
 .tabla .f-sin-tel{display:inline-grid;vertical-align:middle;margin-left:4px}
@@ -2494,6 +2490,175 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 }
 .marca-escrito svg{width:11px;height:11px;stroke-width:2.4}
 
+
+/* ===== EL ESTADO SE VE DESDE LEJOS =====================================
+   Vencido, por vencer y al día no se distinguen por un matiz de rojo: se
+   distinguen por color, por forma y por icono. Y la tarjeta entera lleva
+   un filo grueso del color, que es lo que se ve sin leer nada. */
+.pastilla{
+  display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;
+  border-radius:99px;padding:3px 10px;
+  font-size:11.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;
+  border:1px solid transparent;
+}
+.pastilla svg{width:12px;height:12px;stroke-width:2.6;flex:0 0 auto}
+.pastilla b{font-weight:750}
+.pastilla i{font-style:normal;opacity:.75;font-weight:600}
+/* Lo que pide acción va relleno: se ve antes que nada en la pantalla. */
+.pastilla.llena.mal   {background:var(--mal);   color:var(--tinta-mal)}
+.pastilla.llena.aviso {background:var(--aviso); color:var(--tinta-aviso)}
+.pastilla.llena.bien  {background:var(--bien);  color:var(--tinta-bien)}
+/* Lo que no pide nada va con contorno: está, pero no grita. */
+.pastilla.suave.bien{
+  background:var(--bien-fondo);color:var(--bien);border-color:var(--bien-linea);
+}
+.pastilla.suave.pausado, .pastilla.pausado{
+  background:var(--capa-alta);color:var(--txt-3);border-color:var(--linea-fuerte);
+}
+.pastilla.suave{background:var(--capa-alta);color:var(--txt-3);border-color:var(--linea)}
+
+/* El filo de la tarjeta: cuatro píxeles a la izquierda, que es lo que se
+   ve de reojo cuando pasas la lista con el dedo. */
+.tc{border-left-width:4px;border-left-style:solid;border-left-color:var(--linea)}
+.tc.mal    {border-left-color:var(--mal)}
+.tc.aviso  {border-left-color:var(--aviso)}
+.tc.bien   {border-left-color:var(--bien)}
+.tc.pausado{border-left-color:var(--txt-4);border-left-style:dashed}
+/* La franja de arriba deja de competir con el filo. */
+.tc::before{display:none}
+
+/* Y la fila de la tabla, lo mismo. */
+.tabla tbody tr.mal    td:first-child{box-shadow:inset 4px 0 0 var(--mal)}
+.tabla tbody tr.aviso  td:first-child{box-shadow:inset 4px 0 0 var(--aviso)}
+.tabla tbody tr.bien   td:first-child{box-shadow:inset 4px 0 0 var(--bien)}
+.tabla tbody tr.pausado td:first-child{box-shadow:inset 4px 0 0 var(--txt-4)}
+.tabla tbody tr.pausado{opacity:.68}
+
+/* ===== LA LEYENDA ======================================================
+   Dice qué es cada color y cuántos hay de cada uno, y de paso filtra. */
+.leyenda{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ley{
+  display:inline-flex;align-items:center;gap:7px;
+  height:34px;padding:0 12px;border-radius:99px;
+  border:1px solid var(--linea);background:var(--capa);
+  font:inherit;font-size:12px;font-weight:650;color:var(--txt-3);cursor:pointer;
+  transition:border-color var(--rapido) var(--curva), color var(--rapido) var(--curva),
+             background var(--rapido) var(--curva);
+}
+.ley svg{width:13px;height:13px;stroke-width:2.4}
+.ley-punto{width:9px;height:9px;border-radius:99px;flex:0 0 auto;background:currentColor}
+.ley b{font-family:var(--cifra);font-size:12.5px;font-weight:750;color:var(--txt)}
+.ley.mal    {color:var(--mal)}
+.ley.aviso  {color:var(--aviso)}
+.ley.bien   {color:var(--bien)}
+.ley.pausado{color:var(--txt-3)}
+.ley:hover{background:var(--capa-alta)}
+.ley.mal.viva   {background:var(--mal-fondo);  border-color:var(--mal-linea)}
+.ley.aviso.viva {background:var(--aviso-fondo);border-color:var(--aviso-linea)}
+.ley.bien.viva  {background:var(--bien-fondo); border-color:var(--bien-linea)}
+.ley.pausado.viva{background:var(--capa-alta); border-color:var(--linea-fuerte)}
+.ley.quitar{color:var(--txt-3)}
+.ley.quitar .ley-punto{display:none}
+@media (pointer: coarse){ .ley{height:42px;padding:0 14px} }
+@media (max-width:560px){ .ley span{display:none} .ley{padding:0 11px} }
+
+/* ===== LA LISTA COMPLETA ==============================================
+   Ochenta y un clientes en nueve paneles de tarjetas eran media tarde de
+   bajar. Aquí entran treinta por pantalla, ordenables por columna. */
+.vista-gente button{gap:6px}
+.vista-gente button svg{width:14px;height:14px;flex:0 0 auto}
+.tabla-clientes .c-estado{width:132px}
+.tabla-clientes .c-quien{width:auto}
+.tabla-clientes .c-cuenta{width:210px}
+.tabla-clientes .c-vence{width:118px}
+.tabla-clientes .c-monto{width:96px}
+.tabla-clientes .c-hacer{width:132px}
+.t-orden{
+  border:0;background:transparent;padding:0;font:inherit;
+  font-size:inherit;font-weight:inherit;letter-spacing:inherit;
+  text-transform:inherit;color:inherit;cursor:pointer;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.t-orden:hover{color:var(--txt)}
+.t-orden.viva{color:var(--marca-alta)}
+.t-orden i{font-style:normal;font-size:9px}
+.t-escrito{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  width:17px;height:17px;border-radius:99px;margin-left:6px;
+  background:var(--bien-fondo);border:1px solid var(--bien-linea);color:var(--bien);
+}
+.t-escrito svg{width:9px;height:9px;stroke-width:2.6}
+.tabla tfoot td{
+  border-top:1px solid var(--linea-fuerte);
+  padding:11px var(--e3);font-size:12px;font-weight:650;color:var(--txt-3);
+  background:var(--capa-alta);
+}
+.t-pie-etq{
+  text-align:right;font-size:9.5px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--txt-4);font-weight:750;
+}
+.t-pie-suma{font-size:14px;font-weight:780;color:var(--txt)}
+.t-pie-bajar{text-align:right;padding-right:var(--e3)}
+.t-pie-bajar .btn{white-space:nowrap}
+@media (max-width:560px){ .t-pie-bajar .et{display:none} }
+@media (max-width:860px){
+  .tabla-clientes .c-cuenta, .tabla-clientes .c-vence{width:auto}
+  .t-pie-etq{display:none}
+}
+
+
+/* En la tabla el estado va corto -«Vencido»- porque la fecha tiene su propia
+   columna al lado; repetirla dejaba la pastilla más ancha que la celda. */
+.pastilla.corta{max-width:100%}
+.tabla-clientes .c-estado{width:128px}
+.tabla-clientes .c-vence{width:132px}
+.tabla-clientes .t-estado{overflow:hidden}
+.t-fecha{display:block;font-size:12.5px;font-weight:600;color:var(--txt-2)}
+.tabla-clientes .t-vence small{
+  display:block;font-size:10.5px;font-weight:650;margin-top:1px;color:var(--txt-4);
+}
+.tabla-clientes .t-vence small.mal{color:var(--mal)}
+.tabla-clientes .t-vence small.aviso{color:var(--aviso)}
+.tabla-clientes .t-vence small.bien{color:var(--bien)}
+
+
+/* Marcar a varios desde la lista completa. En las tarjetas la marca se
+   estira por toda la tarjeta; aquí tiene que ser una casilla de verdad,
+   del tamaño de un dedo, dentro de su celda. */
+.tabla-clientes .c-marca{width:44px}
+.tabla-clientes .t-marca{padding-right:0;text-align:center}
+.tabla .tc-marca{
+  position:static;inset:auto;width:22px;height:22px;padding:0;
+  border:2px solid var(--linea-fuerte);border-radius:7px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--capa);transition:background .12s, border-color .12s;
+}
+.tabla .tc-marca:hover{border-color:var(--marca)}
+.tabla .tc-marca[aria-checked="true"]{background:var(--marca);border-color:var(--marca)}
+.tabla .tc-marca svg{width:14px;height:14px;padding:0;background:none;color:#fff}
+.tabla .tc-marca.cab{border-radius:7px}
+.tabla tbody tr.elegido{background:var(--marca-suave)}
+.tabla tbody tr.elegido .t-nom span{color:var(--txt)}
+@media (pointer: coarse){
+  .tabla-clientes .c-marca{width:52px}
+  .tabla .tc-marca{width:26px;height:26px}
+}
+
+
+/* La leyenda es ahora la única fila de filtros: cabe todo y se desliza. */
+.leyenda{
+  overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;
+  padding:2px 0;margin:0 -2px;
+}
+.leyenda::-webkit-scrollbar{display:none}
+.ley{flex:0 0 auto}
+.ley.ambar{color:var(--aviso)}
+.ley.ambar.viva{background:var(--aviso-fondo);border-color:var(--aviso-linea)}
+.ley.viva:not(.mal):not(.aviso):not(.bien):not(.pausado):not(.ambar){
+  background:var(--marca-suave);border-color:var(--marca-linea);color:var(--txt);
+}
+@media (max-width:560px){ .ley span{display:inline} }
+
 @media (max-width:420px){
   .r2,.r3,.r4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .datos{grid-template-columns:1fr 1fr}
@@ -2537,7 +2702,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.5</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.6</span>
     </div>
   </nav>
 
@@ -3860,7 +4025,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.5';
+const VERSION = 'v4.6';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -3880,6 +4045,7 @@ const ICONO = {
   capas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg>',
   alerta:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>',
   subir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/></svg>',
+  bajar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>',
   mascliente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>',
   calendario:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>',
   volver:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
@@ -4356,7 +4522,7 @@ function tablaCobro(lista, tope){
         '<td class="t-cuenta"><span class="chip-cuenta" style="' + tonoDe(plat) + '">' +
           esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + '</span>' +
           (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>' : '') + '</td>' +
-        '<td class="t-vence"><span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span></td>' +
+        '<td class="t-vence">' + pastillaEstado(c, false) + '</td>' +
         '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) + '</td>' +
         '<td class="t-hacer">' +
           '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '"' +
@@ -4461,6 +4627,189 @@ function chispaPlataforma(n){
    es el que funciona: cada cosa con su sitio y su color, no cien renglones
    grises seguidos. En pantalla estrecha la misma tarjeta se aplana en dos
    renglones sin cambiar de HTML. */
+/* ---------- EL ESTADO, SIN TENER QUE ADIVINARLO -------------------------
+   Vencido, por vencer y al día tienen que distinguirse de un vistazo y
+   desde lejos: no con un matiz de rojo, sino con color, forma e icono
+   distintos. Aquí se decide una sola vez y lo usa todo el programa. */
+const ESTADOS = {
+  vencido:    {clase:'mal',   etq:'Vencido',    icono:'alerta'},
+  por_vencer: {clase:'aviso', etq:'Por vencer', icono:'reloj'},
+  activo:     {clase:'bien',  etq:'Al día',     icono:'ok'},
+  sin_fecha:  {clase:'',      etq:'Sin fecha',  icono:'info'}
+};
+function pintaDe(c){
+  if(enPausa(c)) return {clase:'pausado', etq:'En pausa', icono:'reloj'};
+  return ESTADOS[estadoDe(c)] || ESTADOS.sin_fecha;
+}
+/* La pastilla del estado: color de fondo, icono propio y el texto de
+   cuándo. Rellena la que pide acción, con contorno la que no. */
+function pastillaEstado(c, como){
+  const e = pintaDe(c);
+  const suave = e.clase === 'bien' || e.clase === 'pausado';
+  /* 'corta' es para la tabla, donde la fecha ya va en su propia columna y
+     repetirla dejaba la pastilla más ancha que la celda. */
+  const texto = como === 'corta'
+    ? (enPausa(c) ? 'En pausa' : e.etq)
+    : (enPausa(c) ? 'En pausa' : textoDias(c.vencimiento));
+  return '<span class="pastilla ' + e.clase + (suave ? ' suave' : ' llena') +
+    (como === 'corta' ? ' corta' : '') + '">' +
+    ICONO[e.icono] + '<b>' + esc(texto) + '</b>' +
+  '</span>';
+}
+
+/* La leyenda, con lo que hay de cada cosa. Se pulsa y filtra. */
+/* Una sola fila que hace las dos cosas: dice qué significa cada color y
+   filtra por él. Antes había dos filas con los mismos grupos y las cuentas
+   no cuadraban entre ellas, porque una contaba a los pausados y la otra no. */
+function leyendaEstados(universo){
+  const n = {vencido:0, por_vencer:0, activo:0, sin_fecha:0, pausa:0, sin_cuenta:0};
+  universo.forEach(function(c){
+    if(!masterDe(c)) n.sin_cuenta++;
+    if(enPausa(c)){ n.pausa++; return; }
+    n[estadoDe(c)]++;
+  });
+  const deben = n.vencido + n.por_vencer;
+  const filas = [
+    ['todos',      'Todos',      '',        universo.length, 'capas',  false],
+    ['deben',      'Por cobrar', 'ambar',   deben,            'cobrar', false],
+    ['vencido',    'Vencidos',   'mal',     n.vencido,        'alerta', true],
+    ['por_vencer', 'Por vencer', 'aviso',   n.por_vencer,     'reloj',  true],
+    ['activo',     'Al día',     'bien',    n.activo,         'ok',     true],
+    ['pausa',      'En pausa',   'pausado', n.pausa,          'reloj',  true],
+    ['sin_cuenta', 'Sin cuenta', '',        n.sin_cuenta,     'info',   false]
+  ].filter(function(f){
+    return f[3] > 0 || f[0] === 'todos' || f[0] === 'vencido' || f[0] === 'activo';
+  });
+  return '<div class="leyenda" role="group" aria-label="Filtrar por estado, y qué significa cada color">' +
+    filas.map(function(f){
+      const vivo = filtroClientes === f[0];
+      return '<button class="ley ' + f[2] + (vivo ? ' viva' : '') + '" data-fcli="' + f[0] + '"' +
+        ' aria-pressed="' + (vivo ? 'true' : 'false') + '">' +
+        (f[5] ? '<i class="ley-punto"></i>' : '') + ICONO[f[4]] +
+        '<span>' + f[1] + '</span><b>' + f[3] + '</b></button>';
+    }).join('') +
+  '</div>';
+}
+
+/* ---------- LA TABLA DE CLIENTES ----------------------------------------
+   Con ochenta y un clientes repartidos en nueve paneles de tarjetas, verlos
+   TODOS era bajar media tarde. Esta es la misma gente en una tabla de una
+   línea por cabeza: entran treinta en una pantalla, se ordena por la
+   columna que quieras y abajo dice lo que suma. */
+let ordenTabla = 'vence';
+let ordenTablaAl = 1;
+try{
+  ordenTabla = localStorage.getItem('pap_orden_tabla') || 'vence';
+  ordenTablaAl = Number(localStorage.getItem('pap_orden_tabla_al') || 1) || 1;
+}catch(_){}
+
+function ordenarParaTabla(lista){
+  const f = {
+    estado: function(c){ const o = {vencido:0, por_vencer:1, sin_fecha:2, activo:3};
+                         return (enPausa(c) ? 4 : o[estadoDe(c)]) + '|' + (c.vencimiento||'9'); },
+    quien:  function(c){ return sinTildes(c.nombre || ''); },
+    donde:  function(c){ const m = masterDe(c); return sinTildes((m ? nombreCuenta(m) : platDe(c)) + ' ' + (c.perfil||'')); },
+    vence:  function(c){ return String(c.vencimiento || '9999-99-99'); },
+    cobras: function(c){ return cobroDe(c); }
+  }[ordenTabla] || function(c){ return String(c.vencimiento||'9'); };
+  return lista.slice().sort(function(a,b){
+    const va = f(a), vb = f(b);
+    if(va < vb) return -1 * ordenTablaAl;
+    if(va > vb) return  1 * ordenTablaAl;
+    return String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
+  });
+}
+
+function tablaClientes(lista){
+  const filas = ordenarParaTabla(lista);
+  const suma = filas.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  const deben = filas.filter(debe);
+  const sumaDeben = deben.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+  const todosMarcados = modoElegir && filas.length > 0 &&
+    filas.every(function(c){ return elegidos.has(String(c.id)); });
+  const cab = function(clave, etq, clase){
+    const vivo = ordenTabla === clave;
+    return '<th class="' + clase + '"><button class="t-orden' + (vivo ? ' viva' : '') + '"' +
+      ' data-ordtab="' + clave + '"' +
+      ' aria-sort="' + (vivo ? (ordenTablaAl > 0 ? 'ascending' : 'descending') : 'none') + '">' +
+      esc(etq) + (vivo ? '<i>' + (ordenTablaAl > 0 ? '▲' : '▼') + '</i>' : '') + '</button></th>';
+  };
+  return '<div class="tabla-envoltura"><table class="tabla tabla-clientes">' +
+    '<colgroup>' +
+      (modoElegir ? '<col class="c-marca">' : '') +
+      '<col class="c-estado"><col class="c-quien"><col class="c-cuenta">' +
+      '<col class="c-vence"><col class="c-monto"><col class="c-hacer">' +
+    '</colgroup>' +
+    '<thead><tr>' +
+      (modoElegir
+        ? '<th class="t-marca"><button class="tc-marca cab" data-elegir-todos="1"' +
+            ' role="checkbox" aria-checked="' + (todosMarcados ? 'true' : 'false') + '"' +
+            ' aria-label="' + (todosMarcados ? 'Quitar la marca a todos' : 'Marcar a todos los que se ven') + '"' +
+            ' title="' + (todosMarcados ? 'Quitar la marca a todos' : 'Marcar a todos los que se ven') + '">' +
+            (todosMarcados ? ICONO.ok : '') + '</button></th>'
+        : '') +
+      cab('estado','Estado','t-estado') +
+      cab('quien','Quién','t-quien') +
+      cab('donde','Dónde','t-cuenta') +
+      cab('vence','Vence','t-vence') +
+      cab('cobras','Cobras','t-monto') +
+      '<th class="t-hacer"><span class="solo-lectores">Acciones</span></th>' +
+    '</tr></thead><tbody>' +
+    filas.map(function(c){
+      const e = pintaDe(c);
+      const m = masterDe(c);
+      const plat = platDe(c);
+      const tel = telefonoDe(c);
+      const elegido = modoElegir && elegidos.has(String(c.id));
+      return '<tr class="' + e.clase + (elegido ? ' elegido' : '') + '" data-cid="' + esc(c.id) + '">' +
+        (modoElegir
+          ? '<td class="t-marca"><button class="tc-marca" data-elegir="' + esc(c.id) + '"' +
+              ' role="checkbox" aria-checked="' + (elegido ? 'true' : 'false') + '"' +
+              ' aria-label="' + (elegido ? 'Quitar de la selección a ' : 'Elegir a ') +
+              esc(c.nombre||'este cliente') + '">' + (elegido ? ICONO.ok : '') + '</button></td>'
+          : '') +
+        '<td class="t-estado">' + pastillaEstado(c, 'corta') + '</td>' +
+        '<td class="t-quien"><button class="t-nom" data-ficha="' + esc(c.id) + '">' +
+          logoPlataforma(plat, 22) + '<span>' + esc(c.nombre || 'Sin nombre') + '</span>' +
+          (escritoHoy(c) ? '<em class="t-escrito" title="Ya le escribiste hoy">' + ICONO.wa + '</em>' : '') +
+          '</button></td>' +
+        '<td class="t-cuenta"><span class="chip-cuenta" style="' + tonoDe(plat) + '">' +
+          esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + '</span>' +
+          (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>' : '') + '</td>' +
+        '<td class="t-vence"><span class="t-fecha">' + esc(fechaBonita(c.vencimiento) || '—') + '</span>' +
+          (c.vencimiento ? '<small class="' + e.clase + '">' + esc(textoDias(c.vencimiento)) + '</small>' : '') +
+        '</td>' +
+        '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) + '</td>' +
+        '<td class="t-hacer">' +
+          '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '"' +
+            ' title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
+            ' aria-label="Cobrar a ' + esc(c.nombre||'') + '">' + ICONO.cobrar + '</button>' +
+          (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '"' +
+            ' title="Escribir a ' + esc(c.nombre||'') + '"' +
+            ' aria-label="Escribir a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>'
+            : '<span class="f-sin-tel" aria-hidden="true">' + ICONO.wa + '</span>') +
+          '<button class="btn mini icono" data-ficha="' + esc(c.id) + '"' +
+            ' title="Abrir a ' + esc(c.nombre||'') + '"' +
+            ' aria-label="Abrir a ' + esc(c.nombre||'') + '">' + ICONO.flecha + '</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody>' +
+    '<tfoot><tr>' +
+      '<td colspan="' + (modoElegir ? 4 : 3) + '" class="t-pie-txt">' + filas.length + ' ' + plural(filas.length,'cliente','clientes') +
+        (deben.length ? ' · ' + deben.length + ' te deben ' + esc(dinero(sumaDeben)) : ' · nadie te debe') + '</td>' +
+      '<td class="t-pie-etq">Al ciclo</td>' +
+      '<td class="t-monto cifra t-pie-suma">' + esc(dinero(suma)) + '</td>' +
+      '<td class="t-pie-bajar">' +
+        '<button class="btn mini fantasma" data-csv="lista"' +
+          ' title="Bajar esta lista tal como la estás viendo"' +
+          ' aria-label="Bajar esta lista a Excel">' + ICONO.bajar +
+          '<span class="et">Bajarla</span></button>' +
+      '</td>' +
+    '</tr></tfoot>' +
+  '</table></div>';
+}
+
 function tarjetaCliente(c){
   const est = estadoDe(c);
   const pausa = enPausa(c);
@@ -4495,8 +4844,7 @@ function tarjetaCliente(c){
     '<span class="tc-pie">' +
       '<span class="tc-monto"><small>Le cobras</small>' +
         '<b class="cifra">' + esc(dinero(cobroDe(c))) + '</b></span>' +
-      '<span class="pastilla ' + clase + '">' +
-        esc(pausa ? 'en pausa' : textoDias(c.vencimiento)) + '</span>' +
+      pastillaEstado(c, false) +
       (escritoHoy(c) && !pausa ? '<span class="marca-escrito" title="Ya le escribiste hoy">' +
         ICONO.wa + '</span>' : '') +
     '</span>' +
@@ -4654,6 +5002,9 @@ function barraPlataformas(){
 }
 
 let filtroHoy = 'pendientes';
+/* Cuántos de la cola se enseñan. Veinte para no ahogar la pantalla, pero
+   con un botón para verlos todos aquí en vez de mandarte a otro sitio. */
+let topeHoy = 20;
 /* Cómo se agrupa "A quién le toca": por plataforma (lo normal, porque es
    como se lleva el negocio) o por urgencia. Se recuerda. */
 let verHoy = 'plataforma';
@@ -4809,7 +5160,7 @@ function pintaHoy(){
         '</div>' +
       '</div>' +
       (cola.length
-        ? '<div class="tarjeta-cuerpo pegado">' + tablaCobro(cola, 20) + pieTabla(cola, 20) + '</div>'
+        ? '<div class="tarjeta-cuerpo pegado">' + tablaCobro(cola, topeHoy) + pieTabla(cola, topeHoy) + '</div>'
         : '<div class="tarjeta-cuerpo">' +
             vacio('Nada pendiente', 'No hay nadie a quien cobrar en este grupo. Buen día.') +
           '</div>') +
@@ -4839,15 +5190,18 @@ try{ ordenClientes = localStorage.getItem('pap_orden_cli') || 'plataforma'; }cat
 let rutaCuenta  = null;              /* id de la cuenta master abierta */
 let rutaCliente = null;              /* id del cliente abierto */
 let vistaRaiz   = 'plataformas';     /* plataformas | cuentas | clientes */
+let vistaGente  = 'tarjetas';        /* tarjetas | tabla */
 let vistaPlat   = 'cuentas';         /* cuentas | clientes | libres */
 try{
-  vistaRaiz = localStorage.getItem('pap_vista_raiz') || 'plataformas';
-  vistaPlat = localStorage.getItem('pap_vista_plat') || 'cuentas';
+  vistaRaiz  = localStorage.getItem('pap_vista_raiz') || 'plataformas';
+  vistaPlat  = localStorage.getItem('pap_vista_plat') || 'cuentas';
+  vistaGente = localStorage.getItem('pap_vista_gente') || 'tarjetas';
 }catch(_){}
 function guardarVistas(){
   try{
     localStorage.setItem('pap_vista_raiz', vistaRaiz);
     localStorage.setItem('pap_vista_plat', vistaPlat);
+    localStorage.setItem('pap_vista_gente', vistaGente);
   }catch(_){}
 }
 
@@ -5221,36 +5575,26 @@ function tramoPlataforma(n, cuantas, deja){
 /* ---------- Los clientes: filtros y cuerpo, compartidos ----------------- */
 function filtrosClientes(universo){
   const barra = '<div class="fila-controles elegir-fila">' +
+    '<div class="segmentos vista-gente" aria-label="Cómo verlos">' +
+      [['tarjetas','Tarjetas',ICONO.capas],['tabla','Lista completa',ICONO.barras]].map(function(v){
+        return '<button data-vgente="' + v[0] + '" aria-selected="' + (vistaGente===v[0]?'true':'false') + '">' +
+               v[2] + v[1] + '</button>';
+      }).join('') +
+    '</div>' +
     '<button class="btn mini' + (modoElegir ? ' principal' : '') + '" data-modo-elegir="1"' +
       ' aria-pressed="' + (modoElegir ? 'true' : 'false') + '">' + ICONO.capas +
       (modoElegir ? 'Salir de elegir' : 'Elegir varios') + '</button>' +
-    (modoElegir ? '' : '<span class="pista">Para cobrar, escribir o mover a varios de una vez.</span>') +
-  '</div>';
+    '<span class="crece"></span>' +
+  '</div>' +
+  leyendaEstados(universo);
   return barra + filtrosClientesBase(universo);
 }
 function filtrosClientesBase(universo){
-  const cuenta = {todos:0, deben:0, vencido:0, por_vencer:0, activo:0, sin_cuenta:0};
-  universo.forEach(function(c){
-    cuenta.todos++;
-    const e = estadoDe(c);
-    if(e === 'vencido'){ cuenta.vencido++; cuenta.deben++; }
-    else if(e === 'por_vencer'){ cuenta.por_vencer++; cuenta.deben++; }
-    else if(e === 'activo') cuenta.activo++;
-    if(!masterDe(c)) cuenta.sin_cuenta++;
-  });
   const cuentasPosibles = servicios.filter(function(m){
     return plataformaActiva === 'TODAS' ||
            String(m.nombre||'').trim().toUpperCase() === plataformaActiva;
   });
   return '<div class="barra-filtros dentro">' +
-    '<div class="segmentos">' +
-      [['todos','Todos',cuenta.todos],['deben','Por cobrar',cuenta.deben],
-       ['vencido','Vencidos',cuenta.vencido],['por_vencer','Por vencer',cuenta.por_vencer],
-       ['activo','Al día',cuenta.activo],['sin_cuenta','Sin cuenta',cuenta.sin_cuenta]].map(function(s){
-        return '<button data-fcli="' + s[0] + '" aria-selected="' + (filtroClientes===s[0]?'true':'false') + '">' +
-               s[1] + (s[2] ? '<span class="cuenta">' + s[2] + '</span>' : '') + '</button>';
-      }).join('') +
-    '</div>' +
     '<div class="fila-controles">' +
       '<select id="sel-cuenta-cli" aria-label="Filtrar por cuenta">' +
         '<option value="TODAS">Todas las cuentas</option>' +
@@ -5268,8 +5612,17 @@ function filtrosClientesBase(universo){
   '</div>';
 }
 
-function cuerpoClientes(universo){
-  let lista = universo.filter(function(c){
+/* El grupo del que se parte: si estás dentro de una plataforma, la suya;
+   si no, todos. Lo mismo que ve la pantalla. */
+function clientesDelAmbito(){
+  return plataformaActiva === 'TODAS' ? clientes.slice() : genteDe(plataformaActiva);
+}
+
+/* Quién pasa los filtros de arriba. Está aparte porque lo usan tanto la
+   lista de la pantalla como el botón de bajarla a Excel: si estuviera
+   escrito dos veces, un día uno de los dos se quedaría atrás. */
+function clientesFiltrados(universo){
+  return (universo || clientesDelAmbito()).filter(function(c){
     if(!coincide(c)) return false;
     if(filtroCuenta !== 'TODAS'){
       if(filtroCuenta === 'SIN'){ if(masterDe(c)) return false; }
@@ -5278,8 +5631,16 @@ function cuerpoClientes(universo){
     if(filtroClientes === 'todos') return true;
     if(filtroClientes === 'sin_cuenta') return !masterDe(c);
     if(filtroClientes === 'deben') return debe(c);
+    if(filtroClientes === 'pausa') return enPausa(c);
+    /* Quien está en pausa sale SOLO en su grupo. Si no, aparecía además
+       entre los vencidos y la lista no cuadraba con lo que dice arriba. */
+    if(enPausa(c)) return false;
     return estadoDe(c) === filtroClientes;
   });
+}
+
+function cuerpoClientes(universo){
+  let lista = clientesFiltrados(universo);
 
   lista.sort(function(a,b){
     if(ordenClientes === 'nombre') return String(a.nombre||'').localeCompare(String(b.nombre||''), 'es');
@@ -5293,6 +5654,12 @@ function cuerpoClientes(universo){
             busqueda ? 'Prueba con otra palabra o borra el buscador.'
                      : 'Pulsa «Nuevo cliente» para empezar.') +
     '</div></div>';
+  }
+
+  /* «Lista completa» es lo que contesta a «no puedo ver a todos»: una línea
+     por cabeza, todos de un tirón, sin paneles por medio. */
+  if(vistaGente === 'tabla'){
+    return '<div class="tarjeta-cuerpo pegado">' + tablaClientes(lista) + '</div>' + barraLote();
   }
 
   let cuerpo;
@@ -6468,8 +6835,10 @@ function pieTabla(cola, tope){
     '<div class="pt-botones">' +
       (conTel ? '<button class="btn mini bien" data-escribir-a="hoy-visible">' + ICONO.wa +
         '<span class="et">Empezar la ronda</span></button>' : '') +
+      '<button class="btn mini principal" data-mas-hoy="1">' + ICONO.capas +
+        '<span class="et">Ver los ' + cola.length + ' aquí</span></button>' +
       '<button class="btn mini" data-ir-clientes="1">' + ICONO.gente +
-        '<span class="et">Ver los ' + cola.length + ' en Clientes</span></button>' +
+        '<span class="et">Abrirlos en la lista</span></button>' +
     '</div>' +
   '</div>';
 }
@@ -6703,14 +7072,40 @@ function elegidosVivos(){
   return Array.from(elegidos).map(buscarCliente).filter(Boolean);
 }
 /* Los que están a la vista ahora mismo, en el orden en que se ven. */
+/* Los que están a la vista AHORA MISMO, se estén viendo en tarjetas o en
+   la lista completa. Antes solo miraba las tarjetas, así que desde la lista
+   "marcar a todos" no encontraba a nadie y no marcaba nada. */
 function clientesALaVista(){
-  return Array.prototype.slice.call(document.querySelectorAll('#p-negocio .tc[data-cid]'))
-    .map(function(el){ return buscarCliente(el.dataset.cid); }).filter(Boolean);
+  const nodos = document.querySelectorAll('#p-negocio .tc[data-cid], #p-negocio tbody tr[data-cid]');
+  const vistos = {}, fuera = [];
+  Array.prototype.forEach.call(nodos, function(el){
+    const id = String(el.dataset.cid);
+    if(vistos[id]) return;
+    vistos[id] = 1;
+    const c = buscarCliente(id);
+    if(c) fuera.push(c);
+  });
+  return fuera;
+}
+
+/* La casilla de la cabecera de la tabla se pone o se quita sola según estén
+   marcados todos los que se ven, sin repintar la tabla entera. */
+function marcaDeCabecera(){
+  const cab = document.querySelector('#p-negocio .tabla-clientes thead .tc-marca');
+  if(!cab) return;
+  const vista = clientesALaVista();
+  const todos = vista.length > 0 && vista.every(function(c){ return elegidos.has(String(c.id)); });
+  cab.setAttribute('aria-checked', todos ? 'true' : 'false');
+  cab.innerHTML = todos ? ICONO.ok : '';
+  const dilo = todos ? 'Quitar la marca a todos' : 'Marcar a todos los que se ven';
+  cab.setAttribute('aria-label', dilo);
+  cab.setAttribute('title', dilo);
 }
 
 /* La barra que aparece abajo cuando hay alguien marcado. */
 /* Solo la barra de abajo, sin tocar la lista. */
 function refrescarLote(){
+  marcaDeCabecera();
   const caja = document.querySelector('#p-negocio .lote');
   const html = barraLote();
   if(caja && html){ caja.outerHTML = html; return; }
@@ -7496,9 +7891,14 @@ function exportarCSV(que){
         filas.push([i.fecha||'', i.plataforma||'', m?nombreCuenta(m):'', Number(i.monto)||0]);
       });
   }else{
-    nombre = 'papotas_clientes_' + hoyISO() + '.csv';
+    /* 'clientes' baja a todos; 'lista' baja lo que tienes delante, filtrado
+       y en el orden que elegiste, que es lo que uno quiere mandar. */
+    const deLaVista = que === 'lista';
+    nombre = 'papotas_' + (deLaVista ? 'lista' : 'clientes') + '_' + hoyISO() + '.csv';
     filas = [['Nombre','Teléfono','Plataforma','Cuenta','Perfil','PIN','Le cobras','Ciclo','Vence','Estado','Método','Nota']];
-    clientes.slice().sort(function(a,b){ return String(a.nombre||'').localeCompare(String(b.nombre||''),'es'); })
+    (deLaVista
+      ? ordenarParaTabla(clientesFiltrados())
+      : clientes.slice().sort(function(a,b){ return String(a.nombre||'').localeCompare(String(b.nombre||''),'es'); }))
       .forEach(function(c){
         const m = masterDe(c);
         const ciclo = cicloDe(c);
@@ -8026,7 +8426,7 @@ function formGasto(){
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
 
 document.addEventListener('click', function(ev){
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-borrar-g]') : null;
   if(!t) return;
   const d = t.dataset;
 
@@ -8157,6 +8557,22 @@ document.addEventListener('click', function(ev){
   if(d.volver){ volverA(d.volver); return; }
   if(d.deshacer){ deshacerPaso(); return; }
   if(d.rescate){ restaurarCopia(d.rescate); return; }
+  if(d.vgente){
+    vistaGente = d.vgente; guardarVistas();
+    volverElFoco('[data-vgente="' + CSS.escape(d.vgente) + '"]');
+    pintar(); return;
+  }
+  if(d.ordtab){
+    if(ordenTabla === d.ordtab) ordenTablaAl = -ordenTablaAl;
+    else { ordenTabla = d.ordtab; ordenTablaAl = 1; }
+    try{
+      localStorage.setItem('pap_orden_tabla', ordenTabla);
+      localStorage.setItem('pap_orden_tabla_al', String(ordenTablaAl));
+    }catch(_){}
+    volverElFoco('[data-ordtab="' + CSS.escape(d.ordtab) + '"]');
+    pintar(); return;
+  }
+  if(d.masHoy){ topeHoy = 500; pintar(); return; }
   if(d.renovarTodas){ renovarTodasVencidas(); return; }
   if(d.vaj){
     vistaAjustes = d.vaj;
@@ -8173,11 +8589,15 @@ document.addEventListener('click', function(ev){
   if(d.elegir){
     alternarElegido(d.elegir);
     const puesto = elegidos.has(String(d.elegir));
-    const tarjeta = t.closest('.tc');
-    if(tarjeta){
-      tarjeta.classList.toggle('elegido', puesto);
+    /* La tarjeta o la línea de la tabla, la que sea: se marca en el sitio,
+       sin repintar la pantalla entera con cien clientes detrás. */
+    const donde = t.closest('.tc') || t.closest('tr');
+    if(donde){
+      donde.classList.toggle('elegido', puesto);
       t.setAttribute('aria-checked', puesto ? 'true' : 'false');
       t.innerHTML = puesto ? ICONO.ok : '';
+      const quien = (buscarCliente(d.elegir) || {}).nombre || 'este cliente';
+      t.setAttribute('aria-label', (puesto ? 'Quitar de la selección a ' : 'Elegir a ') + quien);
     }
     refrescarLote();
     return;
@@ -8285,7 +8705,7 @@ document.addEventListener('click', function(ev){
     try{ localStorage.setItem('pap_ver_hoy', verHoy); }catch(_){}
     pintar(); return;
   }
-  if(d.fhoy){ filtroHoy = d.fhoy; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
+  if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 20; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
   if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana){
     filtroHoy = d.fhoyPendientes ? 'pendientes' : d.fhoyVencidos ? 'vencidos'
@@ -8296,7 +8716,11 @@ document.addEventListener('click', function(ev){
   }
   if(d.fcli){ filtroClientes = d.fcli; volverElFoco('[data-fcli="' + CSS.escape(d.fcli) + '"]'); pintar(); return; }
   if(d.irCuentas){ volverA('raiz'); return; }
-  if(d.irClientes){ vistaRaiz = 'clientes'; guardarVistas(); volverA('raiz'); return; }
+  if(d.irClientes){
+    vistaRaiz = 'clientes'; vistaGente = 'tabla';
+    filtroClientes = 'deben'; filtroCuenta = 'TODAS';
+    guardarVistas(); volverA('raiz'); return;
+  }
   if(d.nuevoCliente){ formCliente(null); return; }
   if(d.nuevaCuenta){ formMaster(null); return; }
   if(d.nuevoGasto){ formGasto(); return; }
