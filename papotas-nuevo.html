@@ -48,19 +48,16 @@
   --tinta-bien:#04170f;
   --tinta-info:#04121f;
 
-  /* Marca: solo para la acción principal y el logo. */
-  --marca:#e11d48;
-  --marca-alta:#f43f5e;
-  --marca-suave:rgba(225,29,72,.12);
-  --marca-linea:rgba(225,29,72,.32);
-  /* El degradado del logotipo: rosa que cae en violeta. Es la firma del
-     programa y solo se usa donde tiene que reconocerse -el logo, la acción
-     principal, la pestaña viva-, nunca detrás de un texto que haya que
-     leer. Ahí manda el contraste, no la marca. */
-  --marca-violeta:#5b21b6;
-  --aurora:linear-gradient(135deg, #ff5f8f 0%, #e11d48 42%, #5b21b6 100%);
-  --aurora-tenue:linear-gradient(135deg, rgba(255,95,143,.20) 0%,
-                 rgba(225,29,72,.16) 42%, rgba(91,33,182,.22) 100%);
+  /* ===== LA MARCA =======================================================
+     Violeta, y no es cuestión de gusto: el semáforo del programa ya usa
+     rojo para vencido, ámbar para por vencer, verde para al día y azul
+     para información. La marca no puede parecerse a ninguno de los cuatro
+     o se confunde un estado con un botón. El violeta es el hueco que
+     queda limpio, y aguanta texto blanco encima con holgura. */
+  --marca:#7c3aed;
+  --marca-alta:#8b5cf6;
+  --marca-suave:rgba(124,58,237,.14);
+  --marca-linea:rgba(124,58,237,.34);
 
   /* Semáforo. */
   --mal:#fb7185;      --mal-fondo:rgba(244,63,94,.11);   --mal-linea:rgba(244,63,94,.28);
@@ -108,8 +105,8 @@ html[data-tema="claro"]{
   --tinta-aviso:#ffffff;
   --tinta-bien:#ffffff;
   --tinta-info:#ffffff;
-  --marca-suave:rgba(225,29,72,.08);
-  --marca-linea:rgba(225,29,72,.24);
+  --marca-suave:rgba(124,58,237,.09);
+  --marca-linea:rgba(124,58,237,.26);
   --mal:#be123c;   --mal-fondo:rgba(225,29,72,.08);  --mal-linea:rgba(225,29,72,.22);
   --aviso:#b45309; --aviso-fondo:rgba(217,119,6,.09);--aviso-linea:rgba(217,119,6,.22);
   --bien:#047857;  --bien-fondo:rgba(5,150,105,.09); --bien-linea:rgba(5,150,105,.22);
@@ -158,8 +155,8 @@ a{color:inherit}
 #marca{
   width:46px;height:46px;border-radius:14px;
   margin-bottom:var(--e5); flex:0 0 auto; overflow:hidden;
-  box-shadow:0 8px 22px -8px rgba(225,29,72,.65),
-             0 2px 10px -2px rgba(91,33,182,.45), var(--brillo);
+  box-shadow:0 10px 26px -10px rgba(124,58,237,.75),
+             0 2px 10px -2px rgba(124,58,237,.35), var(--brillo);
 }
 #marca svg{display:block;width:100%;height:100%}
 .nav-btn{
@@ -176,14 +173,14 @@ a{color:inherit}
   background:linear-gradient(180deg, var(--capa-alta), rgba(255,255,255,.02));
   box-shadow:var(--brillo), var(--sombra-1);
 }
-/* La pestaña viva lleva el degradado del logotipo. Aquí no hay texto
-   encima, así que la marca puede lucirse sin pelearse con el contraste:
+/* La pestaña viva lleva el violeta de la marca, con su resplandor. Aquí no
+   hay texto encima, así que puede lucirse sin pelearse con el contraste:
    donde hay que leer algo mandan los grises, no la marca. */
 .nav-btn[aria-current="page"]::before{
   content:"";position:absolute;left:-16px;top:50%;transform:translateY(-50%);
   width:4px;height:26px;border-radius:0 4px 4px 0;
-  background:var(--aurora);
-  box-shadow:0 0 14px 1px rgba(225,29,72,.55), 0 0 22px 2px rgba(91,33,182,.35);
+  background:var(--marca);
+  box-shadow:0 0 14px 1px rgba(124,58,237,.6), 0 0 24px 3px rgba(124,58,237,.3);
 }
 .nav-punto{
   position:absolute;top:6px;right:10px;min-width:16px;height:16px;padding:0 4px;
@@ -2775,24 +2772,16 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   <!-- Carril lateral: solo en pantalla ancha. Iconos con su nombre debajo,
        que es lo que de verdad se lee rápido. -->
   <nav id="carril" aria-label="Secciones">
+    <!-- La marca. Sistema «Casillas»: u = 64, el trazo mide 1.15u y todos
+         los extremos son redondos, con el radio a la mitad del grosor. La P
+         se apoya en la rejilla de u, no está puesta a ojo. Es exactamente el
+         mismo dibujo que queda de icono al instalar el programa. -->
     <div id="marca" aria-hidden="true">
       <svg viewBox="0 0 512 512">
-        <defs>
-          <linearGradient id="mk-aurora" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#ff5f8f"/>
-            <stop offset=".40" stop-color="#e11d48"/>
-            <stop offset="1" stop-color="#5b21b6"/>
-          </linearGradient>
-          <mask id="mk-pe">
-            <rect width="512" height="512" fill="#000"/>
-            <rect x="146" y="100" width="62" height="312" rx="18" fill="#fff"/>
-            <path d="M146 100 H274 a104 104 0 0 1 0 208 H146 Z" fill="#fff"/>
-            <path d="M246 182 L300 208 L246 234 Z" fill="#000" stroke="#000"
-                  stroke-width="22" stroke-linejoin="round" stroke-linecap="round"/>
-          </mask>
-        </defs>
-        <rect width="512" height="512" rx="116" fill="url(#mk-aurora)"/>
-        <rect width="512" height="512" fill="#fff" mask="url(#mk-pe)"/>
+        <rect width="512" height="512" rx="112" fill="var(--marca)"/>
+        <path d="M153.6 412.8 V99.2 H265.6 a76.8 76.8 0 0 1 0 153.6 H198.4"
+              fill="none" stroke="#fff" stroke-width="73.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </div>
     <button class="nav-btn" data-ir="hoy" aria-current="page">
@@ -2818,7 +2807,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v4.9</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.0</span>
     </div>
   </nav>
 
@@ -4220,7 +4209,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v4.9';
+const VERSION = 'v5.0';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
