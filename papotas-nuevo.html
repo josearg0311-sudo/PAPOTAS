@@ -44,22 +44,28 @@
      7.3, 5.6 y 4.5 a 1 contra la capa más clara, que es lo que pide la
      norma, y la batería lo comprueba en cada pantalla y en los dos temas. */
 
-  /* Superficies. Tres niveles y no más. Casi negras, con su gota de rojo. */
-  --fondo:#0d0a0c;
-  --capa:#181417;
-  --capa-alta:#221d21;
+  /* Superficies. Tres niveles y no más.
+     Aquí hubo una pasada de rosca: al «templarlas» con el rojo de la marca
+     les subí el rojo SIN bajar el azul, y un gris con el rojo y el azul
+     casi iguales no sale cálido, sale rosa. Ahora el azul va por debajo de
+     los otros dos -que es lo que hace que un gris sea cálido- y la
+     diferencia es de dos o tres puntos, no de diez: se nota al lado del
+     logo y no se nota como color. */
+  --fondo:#0c0b0a;
+  --capa:#171614;
+  --capa-alta:#21201d;
   --linea:rgba(255,255,255,.085);
   --linea-fuerte:rgba(255,255,255,.16);
 
-  /* Texto. Cuatro pesos, todos con la misma gota tibia. */
-  --txt:#f6f3f4;
-  --txt-2:#b4aab0;
-  --txt-3:#9f959b;
-  --txt-4:#8b838a;
+  /* Texto. Cuatro pesos, con la misma pizca de calor y ni una más. */
+  --txt:#f5f3f0;
+  --txt-2:#b2aea8;
+  --txt-3:#9d9993;
+  --txt-4:#8a8680;
   /* La tinta que se lee encima de cada color de estado: en oscuro los
      colores son claros, así que encima va tinta oscura, no blanca. */
   --velo-n:rgba(0,0,0,.42);
-  --tinta-mal:#2b070f;
+  --tinta-mal:#2a0808;
   --tinta-aviso:#271502;
   --tinta-bien:#04170f;
   --tinta-info:#050f22;
@@ -87,7 +93,10 @@
      pero mucho más claro -por eso no se confunden-; «por vencer» es el
      ámbar cálido que queda justo al lado; «al día» y «para saber» se van
      al otro extremo, que es donde no estorban. */
-  --mal:#ff6b81;      --mal-fondo:rgba(255,107,129,.12);  --mal-linea:rgba(255,107,129,.30);
+  /* «Vencido» era un rosa, no un rojo: tenía tanto azul como verde por
+     debajo del rojo, y eso lo empujaba al rosa. Ahora el verde y el azul
+     van iguales, que es lo que hace que un rojo se vea rojo. */
+  --mal:#f87171;      --mal-fondo:rgba(248,113,113,.13);  --mal-linea:rgba(248,113,113,.30);
   --aviso:#f9a53c;    --aviso-fondo:rgba(249,165,60,.12); --aviso-linea:rgba(249,165,60,.28);
   --bien:#3fd6a4;     --bien-fondo:rgba(63,214,164,.12);  --bien-linea:rgba(63,214,164,.28);
   --info:#7aa2f7;     --info-fondo:rgba(122,162,247,.12); --info-linea:rgba(122,162,247,.28);
@@ -120,15 +129,15 @@ html[data-tema="claro"]{
   /* El claro sigue la misma regla: las superficies y los grises llevan la
      gota de rojo de la marca, así que el programa es el mismo de día y de
      noche, no dos programas distintos. */
-  --fondo:#f6f3f4;
+  --fondo:#f6f4f2;
   --capa:#ffffff;
-  --capa-alta:#f5f1f2;
-  --linea:rgba(42,15,23,.09);
-  --linea-fuerte:rgba(42,15,23,.16);
-  --txt:#1a1013;
-  --txt-2:#5c4e53;
-  --txt-3:#6a5b60;
-  --txt-4:#73646a;
+  --capa-alta:#f5f3f0;
+  --linea:rgba(30,24,18,.09);
+  --linea-fuerte:rgba(30,24,18,.16);
+  --txt:#17140f;
+  --txt-2:#55514a;
+  --txt-3:#615c55;
+  --txt-4:#6a655e;
   /* En claro los colores de estado son oscuros: encima va blanco. */
   --velo-n:rgba(0,0,0,.78);
   --tinta-mal:#ffffff;
@@ -143,7 +152,7 @@ html[data-tema="claro"]{
   /* En claro el semáforo va oscuro, pero con los mismos tonos de la
      familia: «vencido» comparte tono con la marca, «por vencer» es el
      ámbar de al lado, y los otros dos se van al extremo opuesto. */
-  --mal:#c01342;   --mal-fondo:rgba(192,19,66,.08);   --mal-linea:rgba(192,19,66,.22);
+  --mal:#b91c1c;   --mal-fondo:rgba(185,28,28,.08);   --mal-linea:rgba(185,28,28,.22);
   --aviso:#a9560b; --aviso-fondo:rgba(169,86,11,.09); --aviso-linea:rgba(169,86,11,.22);
   --bien:#05755a;  --bien-fondo:rgba(5,117,90,.09);   --bien-linea:rgba(5,117,90,.22);
   --info:#3450c7;  --info-fondo:rgba(52,80,199,.08);  --info-linea:rgba(52,80,199,.22);
@@ -683,7 +692,7 @@ button.metrica:hover{background:var(--capa-alta)}
 .cajon.abierto{grid-template-rows:1fr}
 .cajon > div{min-height:0;overflow:hidden}
 .cajon-dentro{padding:var(--e4);display:flex;flex-direction:column;gap:var(--e3)}
-.datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:var(--e2) var(--e4)}
+.datos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(140px, 100%), 1fr));gap:var(--e2) var(--e4)}
 .dato{display:flex;flex-direction:column;gap:1px;min-width:0}
 .dato dt{font-size:10.5px;font-weight:600;color:var(--txt-4);text-transform:uppercase;letter-spacing:.03em}
 .dato dd{margin:0;font-size:13px;font-weight:600;word-break:break-word}
@@ -875,7 +884,7 @@ button.metrica:hover{background:var(--capa-alta)}
    fila, que no decían nada de un vistazo. */
 .mosaico{
   display:grid;gap:var(--e4);
-  grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns:repeat(auto-fill, minmax(min(250px, 100%), 1fr));
 }
 .ficha{
   --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
@@ -1009,12 +1018,12 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 /* Una insignia que además se pulsa: lleva a esos clientes. */
 .insignia.pulsable{cursor:pointer;min-height:28px;padding:0 10px}
 .insignia.pulsable:hover{filter:brightness(1.25)}
-.mosaico{grid-template-columns:repeat(auto-fill, minmax(262px, 1fr))}
+.mosaico{grid-template-columns:repeat(auto-fill, minmax(min(262px, 100%), 1fr))}
 /* La rejilla de personas, dentro de una tarjeta: se aprieta un poco más y
    respira por los lados como el resto del cuerpo de la tarjeta. */
 .mosaico.gente{
   padding:var(--e3) var(--e5) var(--e5);
-  grid-template-columns:repeat(auto-fill, minmax(248px, 1fr));
+  grid-template-columns:repeat(auto-fill, minmax(min(248px, 100%), 1fr));
   gap:var(--e3);
 }
 .tramo + .mosaico.gente{padding-top:var(--e4)}
@@ -1314,6 +1323,15 @@ button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
   .rank-suma{flex:0 0 74px;font-size:12px}
   .rank-barra{display:none}
 }
+/* El plegable cerrado mide 280px de ancho: la pantalla más estrecha que
+   existe. Ahí ya no caben el nombre, la cifra y el botón con esas medidas
+   fijas, así que se dejan encoger. */
+@media (max-width:340px){
+  .rank{gap:6px;padding:7px 4px}
+  .rank-n{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rank-suma{flex:0 0 auto;font-size:11.5px}
+  .rank .f-marca{width:24px;height:24px}
+}
 
 /* ===== LA TABLA DE TRABAJO =============================================
    Para veinte líneas que se leen de un vistazo, una tabla apretada gana a
@@ -1470,7 +1488,7 @@ html[data-tema="claro"] .pastel.viva::after{opacity:.13}
 }
 
 /* La chuleta de atajos, abajo del todo en Ajustes. */
-.atajos{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.atajos{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(min(210px, 100%), 1fr))}
 .atajo{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--txt-3);font-weight:500}
 kbd{
   display:inline-block;min-width:22px;padding:2px 7px;border-radius:6px;
@@ -1769,7 +1787,7 @@ html[data-tema="claro"] .cartel.de-plat::after{opacity:.10}
 /* Resumen de una plataforma --------------------------------------------- */
 .resumen-plat{
   display:grid;gap:var(--e3);
-  grid-template-columns:repeat(auto-fit,minmax(112px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(min(112px, 100%), 1fr));
 }
 .resumen-plat > div{min-width:0}
 .resumen-plat dt{
@@ -2121,7 +2139,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
    La casilla es la unidad de verdad del negocio: un perfil, o lo ocupa
    alguien o está libre. Verlas todas juntas dice de un golpe cuánto sitio
    te queda, que era la pregunta que había que cruzar entre dos pantallas. */
-.perfiles{display:grid;gap:var(--e3);grid-template-columns:repeat(auto-fill,minmax(232px,1fr))}
+.perfiles{display:grid;gap:var(--e3);grid-template-columns:repeat(auto-fill,minmax(min(232px, 100%), 1fr))}
 .perfil{
   --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
   position:relative;display:flex;flex-direction:column;gap:9px;min-width:0;
@@ -2550,7 +2568,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
    cuentas dentro y los huecos como casillas que se pulsan. */
 .libres-rejilla{
   display:grid;gap:var(--e3);padding:var(--e4) var(--e5) var(--e5);
-  grid-template-columns:repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns:repeat(auto-fill, minmax(min(290px, 100%), 1fr));
 }
 .libre-plat{
   --tono:var(--txt-4);--tono-linea:var(--linea-fuerte);--tono-suave:transparent;
@@ -2916,7 +2934,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.4</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v5.5</span>
     </div>
   </nav>
 
@@ -4319,7 +4337,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v5.4';
+const VERSION = 'v5.5';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
