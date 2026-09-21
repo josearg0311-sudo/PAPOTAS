@@ -53,6 +53,11 @@ jobs:
           # El manifiesto debe arrancar en la portada, que ahora es el nuevo.
           sed -i 's#"start_url": "./papotas-nuevo.html"#"start_url": "./"#' sitio/manifest.webmanifest
           sed -i 's#"id": "./papotas-nuevo.html"#"id": "./"#' sitio/manifest.webmanifest
+          # Aquí sí hay sw.js al lado, así que se marca: el programa lo
+          # registra directo, sin tantear, y no deja ni un 404 en el registro.
+          sed -i 's#<meta name="pap-sitio" content="0">#<meta name="pap-sitio" content="1">#' \
+            sitio/index.html sitio/papotas-nuevo.html
+          grep -q '"pap-sitio" content="1"' sitio/index.html
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll
           ls -la sitio

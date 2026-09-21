@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0a0b10">
+<meta name="theme-color" content="#0c0b0a">
+<meta name="pap-sitio" content="0">
 <title>PAPOTAS</title>
 <!-- El icono va METIDO EN EL ARCHIVO, no enlazado.
      Motivo: mucha gente abre este archivo directamente desde el gestor de
@@ -2073,10 +2074,16 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
      pillarla a ella, que se estiraba a 165px de ancho por 38 de alto. Ahora
      se nombra el bloque del título, que es lo que de verdad tiene que
      estirarse. */
-  #cabecera > .cabecera-txt{flex:1 1 auto;min-width:0}
+  /* Base 0, no «auto»: con «auto» el bloque pedía todo el ancho de su
+     texto más largo, no cabía al lado del logo y se iba a su propio
+     renglón, dejando al logo solo arriba como si fuera un adorno. */
+  #cabecera > .cabecera-txt{flex:1 1 0;min-width:0}
   #cabecera > .crece{display:none}
   #titulo{font-size:17px}
-  #subtitulo{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* El resumen puede ocupar dos renglones antes de cortarse. En una línea
+     sola se quedaba en «102 clientes · 102/1…», que no dice nada. */
+  #subtitulo{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+             overflow:hidden;white-space:normal;line-height:1.3}
   /* En el teléfono el botón de acción va arriba, junto al título, que es
      donde se busca con el pulgar; el buscador se lleva su propio renglón. */
   #btn-accion{order:1;flex:0 0 auto}
@@ -2086,6 +2093,13 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
      renglón entero de la cabecera para un botón que se usa una vez. */
   #btn-viejo-movil{display:none}
   .buscador{flex:1 1 100%;order:4}
+  /* El mando del mes: la flecha de «siguiente» no cabía por dos dedos y se
+     caía al renglón de abajo, dejando un hueco en blanco del alto de media
+     tarjeta. Se quita el adorno, el desplegable cede ancho y las dos
+     flechas se quedan donde se buscan: al lado del mes. */
+  .mes-mando > .cabeza-icono{display:none}
+  .mes-mando > select{flex:1 1 90px}
+  .mes-mando > .crece{display:none}
   #lienzo{padding:var(--e4) var(--e3)}
   .r4{grid-template-columns:repeat(2,minmax(0,1fr))}
   .r3{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -2999,7 +3013,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.1</span>
     </div>
   </nav>
 
@@ -4485,7 +4499,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.0';
+const VERSION = 'v6.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -4753,8 +4767,14 @@ $('#buscar').addEventListener('input', function(){
 /* Tema claro / oscuro, recordado en los ajustes de siempre. */
 function aplicarTema(){
   document.documentElement.setAttribute('data-tema', ajustes.modoClaro ? 'claro' : 'oscuro');
+  /* El color de la barra del celular se saca del fondo de verdad, no de un
+     color escrito a mano: así no se queda atrás cuando cambia la paleta. */
   const m = document.querySelector('meta[name=theme-color]');
-  if(m) m.setAttribute('content', ajustes.modoClaro ? '#f6f7f9' : '#0a0b0d');
+  if(m){
+    let f = '';
+    try{ f = getComputedStyle(document.documentElement).getPropertyValue('--fondo').trim(); }catch(_){}
+    m.setAttribute('content', f || (ajustes.modoClaro ? '#f6f4f2' : '#0c0b0a'));
+  }
 }
 $('#btn-tema').addEventListener('click', function(){
   ajustes.modoClaro = !ajustes.modoClaro;
@@ -5553,8 +5573,11 @@ function pintaHoy(){
     barraPlataformas() +
 
     /* ---- Lo que se hace a diario, de primeras ---- */
+    /* «Nuevo cliente» NO se repite aquí: es el botón rojo de la cabecera,
+       que en esta pantalla hace justo eso y no se va nunca de la vista.
+       Tenerlo dos veces a un dedo de distancia solo gastaba renglón y hacía
+       dudar de si los dos hacían lo mismo. */
     '<div class="acciones-rapidas">' +
-      '<button class="btn principal" data-nuevo-cliente="1">' + ICONO.mascliente + 'Nuevo cliente</button>' +
       '<button class="btn" data-nueva-cuenta="1">' + ICONO.tele + 'Nueva cuenta</button>' +
       '<button class="btn" data-nuevo-gasto="1">' + ICONO.caja + 'Registrar gasto</button>' +
       '<button class="btn bien" data-escribir-a="hoy-visible">' + ICONO.wa +
@@ -7667,10 +7690,27 @@ function pintar(){
   requestAnimationFrame(function(){ marcarDesbordes(); acercarPlataformaViva(); });
 }
 function pintarAvisosNav(){
-  const vencidos = clientes.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; }).length;
+  /* Cada pestaña avisa de LO SUYO. Antes las dos llevaban el mismo número
+     -los clientes vencidos- y en el teléfono se veían dos globos iguales
+     pegados: parecía un error de la pantalla, y además el aviso de
+     Plataformas no servía para nada porque no hablaba de plataformas. */
+  const vencidos = clientes.filter(function(c){
+    const d = diasHasta(c.vencimiento); return d !== null && d < 0;
+  }).length;
+  const tope = Number(ajustes.diasAlerta || 5);
+  const cuentasEnApuros = servicios.filter(function(m){
+    const d = diasHasta(m.vencimiento); return d !== null && d <= tope;
+  }).length;
+  const cuenta = { hoy: vencidos, clientes: cuentasEnApuros };
+  const dice = { hoy: 'clientes vencidos', clientes: 'cuentas por renovar' };
   $$('[data-punto]').forEach(function(el){
-    if(vencidos > 0){ el.classList.remove('oculto'); el.textContent = vencidos > 99 ? '99+' : vencidos; }
-    else el.classList.add('oculto');
+    const q = cuenta[el.dataset.punto] || 0;
+    if(q > 0){
+      el.classList.remove('oculto');
+      el.textContent = q > 99 ? '99+' : q;
+      el.setAttribute('title', q + ' ' + (dice[el.dataset.punto] || ''));
+    }
+    else { el.classList.add('oculto'); el.removeAttribute('title'); }
   });
 }
 
@@ -9990,14 +10030,25 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' ||
        consola. Preguntar primero con una petición normal no deja rastro:
        un 404 así es una respuesta corriente, no un fallo. */
     var CLAVE_SW = 'pap_sin_sw';
+    var marca = document.querySelector('meta[name="pap-sitio"]');
+    var esSitioCompleto = !!(marca && marca.content === '1');
     var yaSabemos = false;
     try{ yaSabemos = localStorage.getItem(CLAVE_SW) === location.pathname; }catch(_){}
-    (yaSabemos
+    (esSitioCompleto
+      /* El publicador marca la copia que va con sw.js al lado. Ahí se sabe
+         que está y se registra sin preguntar: ni un 404 en el registro. */
+      ? navigator.serviceWorker.register('sw.js')
+      : yaSabemos
       /* Ya se preguntó una vez y no estaba: no se vuelve a preguntar nunca.
          Así el 404 sale como mucho una vez en la vida, no en cada apertura. */
       ? Promise.resolve(null)
-      : fetch('sw.js', {method:'HEAD'}).then(function(r){
-          if(r.ok) return navigator.serviceWorker.register('sw.js');
+      /* Se pide entero y se lee entero (son cuatro kilobytes). Pedir solo la
+         cabecera dejaba la respuesta a medio consumir y el navegador la
+         anotaba como cancelada: otro rojo en el registro para nada. */
+      : fetch('sw.js').then(function(r){
+          return r.text().then(function(){ return r.ok; });
+        }).then(function(hay){
+          if(hay) return navigator.serviceWorker.register('sw.js');
           try{ localStorage.setItem(CLAVE_SW, location.pathname); }catch(_){}
           return null;
         })
@@ -10015,12 +10066,27 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' ||
           if(nuevo.state === 'activated') estrenar();
         });
       });
-      var preguntar = function(){ try{ reg.update(); }catch(_){} };
-      preguntar();
+      /* Preguntar por una versión nueva tiene su freno: al registrar, el
+         navegador ya acaba de descargar el archivo, y volver a pedirlo en
+         ese mismo momento -o dos veces seguidas al cambiar de pestaña-
+         hacía que cancelara la descarga anterior y dejara un
+         «net::ERR_ABORTED» en el registro. Se espera medio minuto entre
+         preguntas y no se solapan. */
+      var ultima = Date.now(), enCurso = false;
+      var preguntar = function(forzar){
+        if(enCurso) return;
+        if(!forzar && Date.now() - ultima < 30000) return;
+        ultima = Date.now(); enCurso = true;
+        try{
+          var q = reg.update();
+          if(q && q.then) q.then(function(){ enCurso = false; }, function(){ enCurso = false; });
+          else enCurso = false;
+        }catch(_){ enCurso = false; }
+      };
       document.addEventListener('visibilitychange', function(){ if(!document.hidden) preguntar(); });
       window.addEventListener('online', preguntar);
       setInterval(preguntar, 15 * 60 * 1000);
-      window.papotasBuscarActualizacion = function(){ avisar('Buscando una versión nueva…'); preguntar(); };
+      window.papotasBuscarActualizacion = function(){ avisar('Buscando una versión nueva…'); preguntar(true); };
     }).catch(function(){});
   });
 }
