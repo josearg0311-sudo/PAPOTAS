@@ -1,120 +1,92 @@
-# PAPOTAS · publicar, sincronizar e instalar
+# PAPOTAS · publicarlo e instalarlo
 
-## 1. Qué subir
+## Lo primero: por qué hay que publicarlo
 
-Sube estos archivos juntos, en la misma carpeta:
+Abrir el archivo desde el gestor de archivos del celular **funciona, pero es
+frágil**, y conviene saber por qué antes de meter ochenta clientes a mano:
 
-    index.html            el programa
-    sw.js                 para que se instale y abra sin conexión
-    manifest.webmanifest  nombre e iconos de la aplicación
+- **Los datos se pueden perder.** Android puede dar una dirección distinta
+  cada vez que abre el mismo archivo. El navegador guarda por dirección, así
+  que lo que metiste ayer puede no aparecer hoy. No se borró: quedó en una
+  dirección a la que ya no se llega.
+- **No se puede instalar** en la pantalla de inicio.
+- **No funciona sin internet.**
+
+Las tres cosas las concede el navegador solo a una dirección **https** de
+verdad. No es algo que el programa pueda arreglar por su cuenta.
+
+Publicarlo es gratis y se hace una vez.
+
+---
+
+## La forma más rápida: GitHub Pages (tu repositorio ya está listo)
+
+El repositorio ya trae preparado el publicador automático. Solo falta
+encenderlo, y es **un clic**:
+
+1. Entra a tu repositorio en GitHub.
+2. **Settings** (arriba) → **Pages** (menú de la izquierda).
+3. En **Source**, elige **GitHub Actions**.
+
+Ya está. Cada vez que se suba un cambio, se publica solo. A los dos minutos
+tendrás la dirección, con esta forma:
+
+    https://TU-USUARIO.github.io/PAPOTAS/
+
+Abre esa dirección **en el celular**, y verás que el navegador te ofrece
+«Añadir a pantalla de inicio» o «Instalar aplicación». Acéptalo: a partir de
+ahí se abre como una aplicación, con su icono, sin barra de navegador, y
+funciona sin cobertura.
+
+En esa dirección la portada es el programa nuevo. El de siempre queda en
+`/anterior.html` por si alguna vez hace falta volver a él.
+
+---
+
+## Si prefieres otro sitio
+
+Sirve cualquier alojamiento con **https**. Por ejemplo Netlify: entras a
+`app.netlify.com/drop` y arrastras la carpeta. En diez segundos tienes
+dirección.
+
+Sube estos archivos **juntos, en la misma carpeta**:
+
+    papotas-nuevo.html        el programa
+    index.html                el de siempre (opcional)
+    sw.js                     para instalarlo y abrirlo sin conexión
+    manifest.webmanifest      nombre e iconos
+    icono.svg
     icon-192.png
     icon-512.png
-    respaldo.json         opcional: tus datos de partida (ver punto 3)
+    icon-maskable-192.png     estos dos son los que usa Android, que recorta
+    icon-maskable-512.png     el icono en círculo
+    apple-touch-icon.png      el del iPhone
 
-Y aparte, para preparar Supabase una sola vez (no se sube al sitio):
+Si subes solo algunos, te queda el icono viejo en unos sitios y el nuevo en
+otros.
 
-    supabase.sql          lo pegas en el SQL Editor de Supabase
+---
 
-Sirve cualquier alojamiento gratuito con **https** (Netlify arrastrando la
-carpeta, GitHub Pages, Vercel). Tiene que ser https: sin él el navegador no
-deja instalar ni funcionar sin conexión.
+## Pasar tus datos al programa publicado
 
-`index.html` sigue funcionando solo, sin los demás archivos, como hasta ahora.
+Si ya metiste datos abriendo el archivo suelto, **no se copian solos**: para
+el navegador son dos sitios distintos. Se hace así:
 
-## 2. Conectar Supabase (una sola vez, para TODOS los dispositivos)
+1. En el programa donde tienes los datos: **Ajustes → Tus datos → Bajar
+   respaldo**. Se descarga un archivo.
+2. Abre la dirección publicada.
+3. **Ajustes → Tus datos → Restaurar** y elige ese archivo.
 
-La forma cómoda: escribir la conexión dentro del propio `index.html`. Así
-cualquier dispositivo que lo abra entra ya sincronizado, sin tocar Ajustes.
+Hazlo **antes** de seguir metiendo clientes, para no tener que hacerlo dos
+veces.
 
-1. En supabase.com, tu proyecto: **Settings → API**. Copia:
-   - **Project URL** (`https://xxxxxxxx.supabase.co`)
-   - **anon public** (la clave larga; la `service_role` NUNCA)
-2. Abre `index.html` con el Bloc de notas y busca, cerca del principio,
-   `TU CONEXIÓN A SUPABASE`. Rellena las dos líneas:
+---
 
-       window.PAPOTAS_NUBE = {
-         url:  "https://xxxxxxxx.supabase.co",
-         anon: "eyJ...la clave larga..."
-       };
+## Que se vea igual en el celular y en la laptop
 
-3. Guarda. Si aún no has preparado la base, ejecuta el SQL una vez en
-   Supabase: **SQL Editor → New query**, pega el contenido de `supabase.sql`
-   (viene en esta carpeta; el botón **Copiar SQL** de Ajustes → Nube da lo
-   mismo) y pulsa **Run**. Eso crea la tabla, las funciones, los permisos y
-   activa el tiempo real. Se puede ejecutar las veces que quieras sin romper
-   nada, y hace falta una sola vez para todos los dispositivos, no uno por
-   aparato.
-4. Ya está. Ese mismo archivo, abierto en el móvil o subido a tu enlace, entra
-   solo y con todos los datos.
-
-Si en un dispositivo escribes a mano otra conexión distinta en Ajustes, ese
-dispositivo se queda con la tuya y deja de hacer caso a la del archivo.
-
-Aviso, una vez: la clave anon viaja dentro del archivo. Quien tenga el archivo
-o la dirección donde lo publiques puede leer y escribir tus datos. Para uso
-personal con un enlace que no repartes, va bien. Si subes el archivo a un
-repositorio público, la clave queda a la vista de cualquiera.
-
-### La forma manual (si prefieres no escribir nada en el archivo)
-
-1. Crea un proyecto en supabase.com.
-2. En el proyecto: **Settings → API**. Copia dos cosas:
-   - **Project URL** (algo como `https://xxxx.supabase.co`)
-   - **anon public** (la clave larga; la `service_role` NO se usa nunca aquí)
-3. En PAPOTAS: **Ajustes → Nube**, pega las dos en sus casillas y pulsa
-   **Copiar SQL**.
-4. En Supabase: **SQL Editor → New query**, pega lo copiado y **Run**.
-   Eso crea la tabla, las dos funciones, los permisos y activa el tiempo real.
-5. Vuelve a PAPOTAS y pulsa **Guardar**. Verás "🟢 Sincronizado" y subirá lo
-   que ya tengas. Antes de subir nada guarda una copia local de seguridad.
-6. En el segundo dispositivo: abre la misma dirección, pega **la misma URL y
-   la misma clave**, Guardar. Se traerá todo.
-
-**Probar conexión** te dice si la tabla y las funciones están bien.
-
-### El enlace de emparejamiento (la forma rápida desde el móvil)
-
-Sirve para no volver a escribir la URL ni la clave nunca más.
-
-1. En el dispositivo que YA está conectado: **Ajustes → Nube → Enlace para
-   otro dispositivo**. Se copia un enlace al portapapeles (si el navegador no
-   deja copiar, sale en pantalla para copiarlo a mano).
-2. Mándate ese enlace por WhatsApp, correo o como quieras, y ábrelo en el otro
-   dispositivo. Con abrirlo basta: queda conectado y se trae todos los datos.
-3. El enlace lleva la clave dentro, así que el programa la borra de la barra de
-   direcciones nada más entrar. Aun así, trátalo como una contraseña: no lo
-   publiques en ningún sitio abierto.
-
-## 3. Que el sitio abra ya con tus datos
-
-Al publicar, el navegador ve una dirección nueva y el programa abre vacío: tus
-datos siguen guardados bajo el archivo viejo, no se han perdido. Para no tener
-que importarlos a mano en cada aparato:
-
-1. En el dispositivo que tiene los datos buenos: **Ajustes → Exportar
-   respaldo**. Te baja un `papotas_respaldo_completo_….json`.
-2. Renómbralo a **`respaldo.json`** y déjalo dentro de la carpeta, al lado de
-   `index.html`.
-3. Sube la carpeta. Listo.
-
-A partir de ahí, cada dispositivo que abra el sitio por primera vez entra ya
-con todo: clientes, cuentas, ventas, inversiones, ajustes y notas.
-
-Las reglas, para que no te lleves sustos:
-
-- Solo actúa si ese dispositivo está **completamente vacío**. Nunca pisa datos
-  que ya tengas.
-- Lo hace **una sola vez** por dispositivo. Si borras algo a propósito, no
-  vuelve en la siguiente recarga.
-- El primer arranque se recarga solo una vez. Es normal, dura un parpadeo.
-- Si no pones `respaldo.json`, no pasa nada: el programa abre como siempre.
-- Cuando quieras cambiar el punto de partida, exporta un respaldo nuevo y
-  súbelo con el mismo nombre encima del anterior.
-
-Y ojo con lo mismo de siempre: ese `respaldo.json` lleva tus datos dentro y
-queda accesible para quien conozca la dirección del sitio. Es la contrapartida
-de la comodidad. Si prefieres no dejarlo publicado, bórralo del sitio en cuanto
-hayas sembrado tus dispositivos: los que ya entraron conservan todo.
+Con la dirección publicada ya tienes el programa en los dos sitios, pero
+cada aparato guarda lo suyo. Para que compartan los mismos datos hay que
+conectar la nube, y eso está explicado más abajo.
 
 ## 4. Cómo sincroniza
 

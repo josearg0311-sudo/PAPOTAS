@@ -1,0 +1,65 @@
+# Publica PAPOTAS en una dirección web, gratis, con GitHub Pages.
+#
+# Por qué hace falta: instalar el programa en la pantalla de inicio -y que
+# funcione sin internet, y que los datos no se muevan de sitio- son cosas que
+# el navegador SOLO concede a una dirección https de verdad. Un archivo
+# abierto desde el gestor de archivos nunca lo es, por bien hecho que esté.
+#
+# Qué hace: coge los archivos del repositorio y los deja publicados, poniendo
+# el programa nuevo como portada y dejando el de siempre en /anterior.html,
+# sin tocar nada del repositorio.
+#
+# Para encenderlo, una sola vez:
+#   Settings → Pages → Source: GitHub Actions
+# A partir de ahí se publica solo cada vez que se sube un cambio.
+
+name: Publicar PAPOTAS
+
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Preparar el sitio
+        run: |
+          mkdir -p sitio
+          # El programa nuevo es la portada: quien entre a la dirección
+          # aterriza en él, y al instalarlo se instala él.
+          cp papotas-nuevo.html sitio/index.html
+          # El de siempre queda a mano, por si hace falta volver.
+          cp index.html sitio/anterior.html
+          cp papotas-nuevo.html sitio/papotas-nuevo.html
+          cp sw.js manifest.webmanifest sitio/
+          cp icono.svg icon-192.png icon-512.png sitio/
+          cp icon-maskable-192.png icon-maskable-512.png apple-touch-icon.png sitio/
+          # El manifiesto debe arrancar en la portada, que ahora es el nuevo.
+          sed -i 's#"start_url": "./papotas-nuevo.html"#"start_url": "./"#' sitio/manifest.webmanifest
+          sed -i 's#"id": "./papotas-nuevo.html"#"id": "./"#' sitio/manifest.webmanifest
+          # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
+          touch sitio/.nojekyll
+          ls -la sitio
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: sitio
+      - id: deploy
+        uses: actions/deploy-pages@v4
