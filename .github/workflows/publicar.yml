@@ -32,6 +32,9 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  # Encender Pages la primera vez es cambiar un ajuste del repositorio, y
+  # para eso «pages: write» no basta: hace falta este permiso.
+  administration: write
 
 concurrency:
   group: pages
