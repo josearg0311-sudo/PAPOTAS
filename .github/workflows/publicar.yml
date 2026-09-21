@@ -28,13 +28,12 @@ on:
     branches: ['**']
   workflow_dispatch:
 
+# Solo hace falta poder escribir en el repositorio: el sitio se deja en la
+# rama «gh-pages» y GitHub la reconoce solo. No se usa el despliegue por
+# Actions porque ESE camino exige que alguien entre antes a Settings a
+# encenderlo, y el token del flujo no tiene permiso para encenderlo él.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-  # Encender Pages la primera vez es cambiar un ajuste del repositorio, y
-  # para eso «pages: write» no basta: hace falta este permiso.
-  administration: write
+  contents: write
 
 concurrency:
   group: pages
@@ -43,9 +42,6 @@ concurrency:
 jobs:
   publicar:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -73,15 +69,21 @@ jobs:
           touch sitio/.nojekyll
           ls -la sitio
 
-      # «enablement: true» enciende GitHub Pages por su cuenta la primera
-      # vez. Sin esto el flujo fallaba con «Get Pages site failed» hasta
-      # que alguien entrara a Settings → Pages a activarlo a mano, y esa
-      # era justo la parte que sobraba.
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: sitio
-      - id: deploy
-        uses: actions/deploy-pages@v4
+      # El sitio se empuja a la rama «gh-pages», que GitHub reconoce sin
+      # que nadie encienda nada. El camino de antes -desplegar por
+      # Actions- fallaba siempre en el mismo sitio: pedía que alguien
+      # entrara a Settings → Pages primero, y esa era justo la parte que
+      # sobraba. La rama se rehace entera en cada publicación, a
+      # propósito: lo que hay ahí es el resultado, no historia que
+      # conservar.
+      - name: Dejarlo en la rama gh-pages
+        run: |
+          cd sitio
+          git init -b gh-pages
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "PAPOTAS publicado desde ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages
+          echo "Publicado. En un minuto estará en:"
+          echo "  https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
