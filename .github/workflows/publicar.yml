@@ -9,9 +9,17 @@
 # el programa nuevo como portada y dejando el de siempre en /anterior.html,
 # sin tocar nada del repositorio.
 #
-# Para encenderlo, una sola vez:
-#   Settings → Pages → Source: GitHub Actions
-# A partir de ahí se publica solo cada vez que se sube un cambio.
+# No hay que encender nada a mano: el propio flujo enciende Pages la
+# primera vez (el «enablement: true» de más abajo). A partir de ahí se
+# publica solo cada vez que se sube un cambio.
+#
+# La dirección queda en:  https://josearg0311-sudo.github.io/PAPOTAS/
+#
+# Ojo con una cosa, porque es la letra pequeña: esa dirección es PÚBLICA.
+# Lo que se publica es el programa, no tus datos: los clientes, las claves
+# de las cuentas y los cobros viven en el navegador de tu celular y no
+# salen de ahí ni están en este repositorio. Quien entre a la dirección ve
+# un PAPOTAS vacío.
 
 name: Publicar PAPOTAS
 
@@ -62,7 +70,13 @@ jobs:
           touch sitio/.nojekyll
           ls -la sitio
 
+      # «enablement: true» enciende GitHub Pages por su cuenta la primera
+      # vez. Sin esto el flujo fallaba con «Get Pages site failed» hasta
+      # que alguien entrara a Settings → Pages a activarlo a mano, y esa
+      # era justo la parte que sobraba.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sitio
