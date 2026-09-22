@@ -2118,6 +2118,12 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .f:active{ background:var(--capa-alta) }
 }
 
+/* ---- La misma persona, en varias fichas ---- */
+.tarjeta.persona .f-aqui{background:var(--marca-suave);cursor:default}
+.tarjeta.persona .f-aqui b{color:var(--marca-alta)}
+.tarjeta.persona .f-monto{font-weight:800;color:var(--txt-2)}
+.tarjeta.persona .rojo{color:var(--mal)}
+
 /* ---- Los grupos de la tabla de Hoy ---- */
 .tabla .t-grupo > td{
   padding:11px var(--e3) 9px;
@@ -3150,7 +3156,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.3</span>
     </div>
   </nav>
 
@@ -3720,7 +3726,7 @@ function masterDe(c){
    los gastos otra vez por cada cuenta. Con 400 clientes y 80 cuentas eso son
    decenas de miles de vueltas para dibujar una sola pantalla. */
 let _porMaster = null, _eco = null;
-function olvidarIndices(){ _porMaster = null; _eco = null; }
+function olvidarIndices(){ _porMaster = null; _eco = null; _personas = null; }
 
 function clientesDe(masterId){
   if(!_porMaster){
@@ -4636,7 +4642,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.2';
+const VERSION = 'v6.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5231,6 +5237,60 @@ function tablaCobro(lista, tope){
       '<th class="t-monto">Cobras</th>' +
       '<th class="t-hacer"><span class="solo-lectores">Acciones</span></th>' +
     '</tr></thead><tbody>' + cuerpo + '</tbody></table></div>';
+}
+
+/* ---------- LA MISMA PERSONA, EN VARIAS FICHAS --------------------------
+   Una persona que te compra Netflix, Disney y Spotify son TRES fichas:
+   tres perfiles distintos, en tres cuentas distintas, con tres
+   vencimientos. Así tiene que ser, y así se queda.
+
+   Lo que no puede ser es que el programa no sepa que son la misma persona.
+   En los datos de verdad hay dieciséis personas repartidas en cien fichas,
+   y sin esto: le escribes tres veces el mismo día, no sabes que el que te
+   debe quince te debe en realidad cuarenta y cinco, y si se va, se te van
+   tres cobros y no uno.
+
+   Se juntan por TELÉFONO, que es lo único que identifica de verdad a
+   alguien: dos «FERNANDA» pueden ser dos personas, pero dos fichas con el
+   mismo número son la misma. Si una ficha no tiene teléfono, se junta por
+   nombre solo con otra que tampoco lo tenga -nunca se le adjudica a un
+   número ajeno-. Los nombres iguales con teléfonos distintos NO se juntan:
+   salen en Revisión para que él decida. */
+function llavePersona(c){
+  const n = normalizarTelefono(c && c.telefono);
+  if(n.vale) return 'tel:' + n.tel;
+  const nombre = sinTildes(String((c && c.nombre) || '').trim().toUpperCase());
+  return nombre ? 'nom:' + nombre : null;
+}
+
+/* Las OTRAS fichas de la misma persona, sin contar la suya. */
+function mismaPersona(c){
+  const k = llavePersona(c);
+  if(!k) return [];
+  return clientes.filter(function(x){
+    return String(x.id) !== String(c.id) && llavePersona(x) === k;
+  });
+}
+
+/* Todas las fichas de cada persona, de una sola pasada. Con cien clientes,
+   preguntar ficha por ficha son diez mil comparaciones en cada pintada. */
+let _personas = null;
+function personas(){
+  if(_personas) return _personas;
+  const g = new Map();
+  clientes.forEach(function(c){
+    const k = llavePersona(c);
+    if(!k) return;
+    if(!g.has(k)) g.set(k, []);
+    g.get(k).push(c);
+  });
+  _personas = g;
+  return g;
+}
+function fichasDe(c){
+  const k = llavePersona(c);
+  const g = personas().get(k);
+  return g && g.length ? g : [c];
 }
 
 /* ---------- Agrupar gente por plataforma --------------------------------
@@ -6875,6 +6935,48 @@ function hojaCliente(c){
   const debiendo = cuotasPendientes(c);
   if(debiendo > 1) datos.splice(2, 0, ['Te debe', debiendo + ' cuotas · ' + dinero(deudaDe(c))]);
 
+  /* Lo demás que tiene esta misma persona. Con esto a la vista se decide
+     distinto: no es «uno que me debe 15», es «uno que me deja 45 al mes». */
+  const otras = mismaPersona(c);
+  const panelPersona = !otras.length ? '' :
+    (function(){
+      const todas = [c].concat(otras);
+      const alCiclo = todas.reduce(function(a,x){ return a + cobroDe(x); }, 0);
+      const deben = todas.filter(function(x){ return cuotasPendientes(x) > 0; });
+      const debe = deben.reduce(function(a,x){ return a + aCobrarDe(x); }, 0);
+      return '<div class="tarjeta persona">' +
+        '<div class="tarjeta-cabeza">' +
+          '<span class="cabeza-icono rosa">' + ICONO.gente + '</span>' +
+          '<div class="crece"><h2>' + esc(c.nombre || 'Esta persona') + ', en total</h2>' +
+          '<p>' + todas.length + ' ' + plural(todas.length,'servicio','servicios') +
+            ' · te deja <b>' + esc(dinero(alCiclo)) + '</b> al ciclo' +
+            (debe > 0 ? ' · te debe <b class="rojo">' + esc(dinero(debe)) + '</b> en ' +
+              deben.length + ' ' + plural(deben.length,'servicio','servicios') : '') +
+          '</p></div>' +
+          (telefonoDe(c) && deben.length > 1
+            ? '<button class="btn mini bien" data-wa-persona="' + esc(c.id) + '"' +
+              ' title="Un solo mensaje con todo lo que debe">' + ICONO.wa +
+              '<span class="et">Escribirle por todo</span></button>' : '') +
+        '</div>' +
+        '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+          todas.map(function(x){
+            const mm = masterDe(x);
+            const esEste = String(x.id) === String(c.id);
+            return '<div class="f' + (esEste ? ' f-aqui' : '') + '"' +
+                   (esEste ? '' : ' data-ficha="' + esc(x.id) + '"') + '>' +
+              logoPlataforma(platDe(x), 26) +
+              '<span class="f-txt"><span class="f-nom">' +
+                esc(mm ? nombreCuenta(mm) : (x.servicio || 'Sin cuenta')) + '</span>' +
+                '<span class="f-sub">' + esc(perfilBonito(x) || 'Sin perfil') +
+                (esEste ? ' · <b>estás aquí</b>' : '') + '</span></span>' +
+              pastillaEstado(x, false) +
+              '<span class="f-monto cifra">' + esc(dinero(cobroDe(x))) + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div></div>' +
+      '</div>';
+    })();
+
   return '<div class="pila">' +
     barraPlataformas() +
     migas(pasos) +
@@ -6921,6 +7023,8 @@ function hojaCliente(c){
       }).join('') + '</dl>' +
       (c.nota ? '<div class="nota-caja">' + ICONO.chat + '<span>' + esc(c.nota) + '</span></div>' : '') +
     '</div>' +
+
+    panelPersona +
 
     (debiendo > 1
       ? '<div class="tarjeta aviso-deuda"><div class="tarjeta-cabeza">' +
@@ -8481,6 +8585,32 @@ function renovarMaster(id){
   avisar(nombreCuenta(m) + ' vence ahora el ' + fechaBonita(nueva), 'bien', true);
 }
 
+/* UN SOLO MENSAJE POR PERSONA
+   Si la misma persona te debe Netflix, Disney y Spotify, mandarle tres
+   mensajes seguidos el mismo día no es ser ordenado: es ser pesado, y
+   encima te contesta a uno solo y pierdes los otros dos. Esto arma un
+   mensaje con las tres cosas y el total. La plantilla suya se respeta
+   igual: lo que cambia es que la lista va dentro. */
+function textoPersona(c, cual, cuales){
+  const lista = (cuales && cuales.length ? cuales : fichasDe(c))
+    .filter(function(x){ return cuotasPendientes(x) > 0 || String(x.id) === String(c.id); })
+    .sort(function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
+  if(lista.length < 2) return textoWhatsApp(c, cual);
+  const total = lista.reduce(function(a,x){ return a + aCobrarDe(x); }, 0);
+  const detalle = lista.map(function(x){
+    const mm = masterDe(x);
+    const q = cuotasPendientes(x);
+    return '· ' + (x.servicio || (mm && mm.nombre) || 'Servicio') +
+           ' — ' + dinero(aCobrarDe(x)) +
+           (q > 1 ? ' (' + q + ' cuotas)' : '') +
+           ' — vence ' + fechaBonita(x.vencimiento);
+  }).join('\n');
+  let t = 'Hola ' + (c.nombre || '') + ' 👋 Te paso lo que tienes conmigo:\n\n' +
+          detalle + '\n\nEn total son ' + dinero(total) + '. ¡Gracias!';
+  if(ajustes.firmaWs) t += '\n\n' + ajustes.firmaWs;
+  return t;
+}
+
 function textoWhatsApp(c, cual){
   const m = masterDe(c);
   const vencido = c.vencimiento && c.vencimiento < hoyISO();
@@ -9229,6 +9359,33 @@ function diagnostico(){
     if(lista.length) casos.push({clave:clave, titulo:titulo, explica:explica, lista:lista, tono:tono});
   }
 
+  /* Fichas que se llaman igual pero llevan teléfonos distintos. No se
+     juntan solas -dos «FERNANDA» pueden ser dos personas de verdad- pero
+     si son la misma, tener bien el número lo arregla todo de golpe: un
+     solo mensaje, y ver de un vistazo cuánto te deja en total. */
+  const porNombre = new Map();
+  clientes.forEach(function(c){
+    const n = sinTildes(String(c.nombre||'').trim().toUpperCase());
+    if(!n) return;
+    if(!porNombre.has(n)) porNombre.set(n, []);
+    porNombre.get(n).push(c);
+  });
+  const mismoNombre = [];
+  porNombre.forEach(function(grupo, n){
+    if(grupo.length < 2) return;
+    const tels = new Set(grupo.map(function(c){
+      const t = normalizarTelefono(c.telefono); return t.vale ? t.tel : '';
+    }));
+    tels.delete('');
+    if(tels.size > 1) mismoNombre.push({
+      texto: n + ': ' + grupo.length + ' fichas con ' + tels.size + ' teléfonos distintos',
+      cliente: grupo[0].id
+    });
+  });
+  caso('misma_persona', '¿La misma persona con varias fichas?',
+    'Se llaman igual pero tienen teléfonos distintos, así que el programa no las junta por su cuenta. Si es la misma persona, pon el mismo número en todas: se juntan solas, le escribes UNA vez por todo y ves cuánto te deja de verdad.',
+    mismoNombre, 'aviso');
+
   caso('sin_cuenta', 'Clientes sin cuenta asignada',
     'Les cobras, pero el programa no sabe en qué cuenta están: no salen en ningún perfil y sus accesos no se pueden copiar.',
     clientes.filter(function(c){ return !masterDe(c); }).map(fichaDiagCliente), 'mal');
@@ -9756,7 +9913,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   const d = t.dataset;
 
@@ -9792,6 +9949,19 @@ document.addEventListener('click', function(ev){
     pintar(); return;
   }
   if(d.wa){ abrirWhatsApp(d.wa); return; }
+  /* Un solo mensaje con TODO lo que esa persona tiene contigo. */
+  if(d.waPersona){
+    const c = buscarCliente(d.waPersona);
+    if(!c) return;
+    const n = normalizarTelefono(c.telefono);
+    if(!n.vale){ avisarTelefonoMalo(c, n); return; }
+    saltarAWhatsApp(n.tel, textoPersona(c, 'auto'));
+    fichasDe(c).forEach(marcarEscrito);
+    anotar('WHATSAPP', 'Un solo mensaje a ' + (c.nombre||'') + ' por sus ' +
+           fichasDe(c).length + ' servicios');
+    guardar(); pintar();
+    return;
+  }
   if(d.editarC){ formCliente(d.editarC); return; }
   if(d.editarM){ formMaster(d.editarM); return; }
   if(d.renovarM){ renovarMaster(d.renovarM); return; }
@@ -10476,6 +10646,21 @@ window.PAPOTAS = {
     cuotas:  function(c){ return cuotasPendientes(c); },
     monto:   function(c){ return deudaDe(c); },
     aCobrar: function(c){ return aCobrarDe(c); }
+  },
+  /* Todo lo que una misma persona tiene contigo, y el mensaje único que
+     se le manda por todo junto. Desde fuera para poder comprobarlo. */
+  persona: function(id){
+    const c = buscarCliente(id);
+    if(!c) return null;
+    const todas = fichasDe(c);
+    return {nombre: c.nombre, servicios: todas.length,
+            alCiclo: todas.reduce(function(a,x){ return a + cobroDe(x); }, 0),
+            debe: todas.reduce(function(a,x){ return a + (cuotasPendientes(x) ? aCobrarDe(x) : 0); }, 0),
+            fichas: todas.map(function(x){ return {id:x.id, servicio:x.servicio, vence:x.vencimiento}; })};
+  },
+  mensajePersona: function(id){
+    const c = buscarCliente(id);
+    return c ? textoPersona(c, 'auto') : null;
   },
   /* Lo que una cuenta deja y lo que cuesta, con la cuenta ya hecha. */
   cuenta: function(id){ const m = buscarMaster(id); return m ? resumenCuenta(m) : null; },
