@@ -15,7 +15,7 @@
    Ojo: esto NO guarda tus datos. Tus datos viven en el propio navegador y, si
    configuras la nube, en Supabase. Esto solo guarda el programa. */
 
-const CACHE = 'papotas-v45';
+const CACHE = 'papotas-v46';
 const BASICOS = ['./', './index.html', './papotas-nuevo.html', './manifest.webmanifest',
   './icono.svg', './icon-192.png', './icon-512.png',
   './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];

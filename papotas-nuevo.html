@@ -2727,6 +2727,22 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 .nota-caja svg{width:16px;height:16px;flex:0 0 auto;color:var(--txt-4);margin-top:2px}
 .nota-caja span{white-space:pre-wrap;overflow-wrap:anywhere}
 
+/* El aviso que va debajo del precio mientras lo escribes: a cuánta gente le
+   toca, y si con eso la cuenta te sale a cuenta. Cambia de color solo. */
+.aviso-precio{
+  border:1px solid var(--linea);border-left-width:3px;border-radius:var(--r-m);
+  padding:10px var(--e3);font-size:12.5px;line-height:1.55;color:var(--txt-2);
+  background:var(--capa);
+}
+.aviso-precio b{color:var(--txt);font-weight:700}
+.aviso-precio small{display:block;margin-top:4px;font-size:11.5px;color:var(--txt-4)}
+.aviso-precio.aviso{border-color:var(--aviso-linea);border-left-color:var(--aviso-vivo);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--aviso-fondo), transparent 70%)}
+.aviso-precio.bien{border-color:var(--bien-linea);border-left-color:var(--bien-vivo);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--bien-fondo), transparent 70%)}
+.aviso-precio.mal{border-color:var(--mal-linea);border-left-color:var(--mal-vivo);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--mal-fondo), transparent 70%)}
+
 /* Los tres precios, uno al lado del otro: de dónde viene, dónde está y
    adónde va. Es la única forma de leerlos sin pensar. */
 .precios-ahora{
@@ -2748,6 +2764,71 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 .precios-ahora .pr.futuro dd{color:var(--info)}
 .precios-ahora small{display:block;font-size:10.5px;color:var(--txt-4);font-weight:550;margin-top:2px}
 .precios-ahora.grande dd{font-size:23px}
+/* Cuatro cifras: lo que pagas, lo que cobras, lo que queda y a cuánta gente
+   le llega. Cada una con su color, que es lo que se lee de un vistazo. */
+.precios-ahora.cuatro{grid-template-columns:repeat(4, minmax(0,1fr))}
+@media (max-width:900px){ .precios-ahora.cuatro{grid-template-columns:repeat(2, minmax(0,1fr))} }
+@media (max-width:420px){ .precios-ahora.cuatro{grid-template-columns:1fr} }
+.precios-ahora .pr.vende{border-color:var(--info-linea);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--info-fondo), transparent 70%)}
+.precios-ahora .pr.vende dd{color:var(--info)}
+.precios-ahora .pr.cuesta{border-color:var(--mal-linea);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--mal-fondo), transparent 70%)}
+.precios-ahora .pr.cuesta dd{color:var(--mal)}
+.precios-ahora .pr.gana{border-color:var(--bien-linea);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--bien-fondo), transparent 70%)}
+.precios-ahora .pr.gana dd{color:var(--bien)}
+.precios-ahora .pr.pierde{border-color:var(--mal-linea);
+  background-color:var(--capa);background-image:radial-gradient(130% 110% at 0% 0%, var(--mal-fondo), transparent 70%)}
+.precios-ahora .pr.pierde dd{color:var(--mal)}
+
+/* Las dos mitades del precio. En pantalla ancha van lado a lado, porque lo
+   que cuesta y lo que se cobra solo significan algo comparados. */
+.dos-precios{
+  display:grid;gap:var(--e4);margin-top:var(--e5);
+  grid-template-columns:repeat(2, minmax(0,1fr));
+}
+@media (max-width:900px){ .dos-precios{grid-template-columns:1fr;gap:var(--e5)} }
+.mitad-precio{display:flex;flex-direction:column;gap:var(--e2);min-width:0}
+.mitad-precio h3{
+  margin:0;font-size:12.5px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--txt-3);
+}
+.pie-precio{margin:0;font-size:11.5px;line-height:1.55;color:var(--txt-4)}
+/* La tabla de todos los precios. Las aclaraciones van debajo de su cifra,
+   no pegadas al lado: pegadas se leían como parte del número. */
+.tabla-precios td, .tabla-precios th{vertical-align:middle}
+.tabla-precios .t-monto{text-align:right;white-space:nowrap}
+.tabla-precios td small{display:block;font-size:10px;color:var(--txt-4);font-weight:550;
+  letter-spacing:0;margin-top:1px}
+.tabla-precios .t-quien .lb-nombre{display:flex;align-items:center;gap:8px;min-width:0}
+.tabla-precios .t-quien small{margin-top:3px}
+.tabla-precios td.flojo{color:var(--txt-3)}
+.tabla-precios .t-hacer .fila{flex-wrap:nowrap}
+.tabla-precios tfoot td{
+  border-top:2px solid var(--linea-fuerte);font-weight:700;color:var(--txt);
+  padding-top:10px;
+}
+@media (max-width:820px){
+  /* En el celular sobran las columnas de en medio: lo que hace falta saber
+     es cuánto cuesta, a cuánto se vende y qué deja. Lo que queda tampoco
+     cabe a la fuerza: la tabla se desliza de lado, que es mejor que ver los
+     títulos montados unos encima de otros. */
+  .tabla-precios th:nth-child(4), .tabla-precios td:nth-child(4),
+  .tabla-precios th:nth-child(6), .tabla-precios td:nth-child(6){display:none}
+  .tabla-precios{table-layout:auto;min-width:500px}
+  .tabla-precios th{font-size:9px}
+  .tabla-precios .t-hacer .fila{flex-direction:column;gap:4px}
+}
+/* Un importe que hoy lo manda la tarifa de su plataforma. Se puede escribir
+   -y al escribirlo pasa a ser suyo-, pero se ve que ahora mismo viene de
+   fuera: contorno de puntos, como todo lo que en este programa no es propio. */
+.campo input.bloqueado{ border-style:dashed }
+.sin-precio{
+  border:1px dashed var(--linea-fuerte);border-radius:var(--r-m);
+  padding:var(--e4) var(--e3);text-align:center;
+  font-size:12px;color:var(--txt-4);line-height:1.5;
+}
 @media (max-width:560px){
   .precios-ahora{grid-template-columns:minmax(0,1fr)}
   .precios-ahora .pr{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
@@ -3441,7 +3522,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.1</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.2</span>
     </div>
   </nav>
 
@@ -5284,7 +5365,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.1';
+const VERSION = 'v7.2';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7480,10 +7561,10 @@ function hojaPlataforma(n){
         '<span class="cabeza-icono rosa">' + ICONO.capas + '</span>' +
         '<div class="crece"><h2>' + (cual === 'cuentas' ? 'Sus cuentas'
               : cual === 'clientes' ? 'Su gente'
-              : cual === 'precios'  ? 'Su precio, con toda su historia' : 'Dónde te cabe uno más') + '</h2>' +
+              : cual === 'precios'  ? 'Lo que te cuesta y a cuánto lo vendes' : 'Dónde te cabe uno más') + '</h2>' +
           '<p>' + (cual === 'cuentas' ? 'Pulsa una cuenta para ver sus perfiles y quién los ocupa.'
                  : cual === 'clientes' ? 'Todo el que te paga por ' + esc(n) + ', tenga cuenta puesta o no.'
-                 : cual === 'precios'  ? 'Lo que valía, lo que vale y lo que va a valer un perfil de ' + esc(n) + '.'
+                 : cual === 'precios'  ? 'Lo que pagas por una cuenta entera de ' + esc(n) + ' y lo que cobras por cada perfil. Cambiar el precio de venta le cambia el precio a su gente.'
                  : 'Los perfiles que te quedan por vender, y en qué cuenta está cada uno.') + '</p></div>' +
         '<div class="segmentos">' + pestanas.map(function(p){
           return '<button data-vplat="' + p[0] + '" aria-selected="' + (cual===p[0]?'true':'false') + '">' +
@@ -7587,7 +7668,10 @@ function hojaCuenta(m){
           (clave ? '<button class="btn icono mini fantasma" data-copiar="' + esc(clave) + '" data-que="Clave" title="Copiar clave" aria-label="Copiar clave">' + ICONO.copiar + '</button>' : '') +
         '</dd></div>' +
         '<div class="dato"><dt>Vence</dt><dd>' + esc(fechaBonita(m.vencimiento)) + '</dd></div>' +
-        '<div class="dato"><dt>Te cuesta</dt><dd class="cifra">' + esc(dinero(m.costo)) + '</dd></div>' +
+        '<div class="dato"><dt>Te cuesta</dt><dd class="cifra">' + esc(dinero(m.costo)) + '</dd>' +
+          '<span class="pista">' + (sigueElCosto(m) && costoVigente(m.nombre) > 0
+            ? 'lo que cuesta una cuenta de ' + esc(plat)
+            : 'costo propio de esta cuenta') + '</span></div>' +
         '<div class="dato"><dt>Cobras al ciclo</dt><dd class="cifra">' + esc(dinero(r.recurrente)) + '</dd></div>' +
         '<div class="dato"><dt>Por perfil ocupado</dt><dd class="cifra">' + esc(dinero(usados ? r.recurrente/usados : 0)) + '</dd></div>' +
       '</dl>' +
@@ -8258,6 +8342,7 @@ function pintaAjustes(){
 
   const secciones = [
     ['negocio',  'Tu negocio',  ICONO.rueda,  null],
+    ['precios',  'Precios',     ICONO.etiqueta, null],
     ['datos',    'Tus datos',   ICONO.caja,   casos.length || null],
     ['nube',     'La nube',     ICONO.nube,   null],
     ['programa', 'El programa', ICONO.pincel, null]
@@ -8306,7 +8391,8 @@ function pintaAjustes(){
         campo('aj-prefijo','Prefijo del país',{valor:ajustes.prefijoPais, ayuda:'51 para Perú'}) +
         campo('aj-perdido','Los doy por perdidos a las',{tipo:'number', valor:umbralPerdido(), paso:'1',
           ayuda:'Cuotas sin pagar a partir de las cuales dejo de contarlos como deuda de verdad. Siguen ahí: solo salen aparte, para que el número de «te deben» no te mienta.'}) +
-        campo('aj-precio','Precio por defecto',{tipo:'number', valor:ajustes.precioDefecto, paso:'0.01'}) +
+        campo('aj-precio','Precio por defecto',{tipo:'number', valor:ajustes.precioDefecto, paso:'0.01',
+          ayuda:'El último recurso: solo se usa donde no hayas puesto precio de plataforma. Los de verdad están en la pestaña Precios.'}) +
         campo('aj-alerta','Avisar con cuántos días',{tipo:'number', valor:ajustes.diasAlerta, paso:'1'}) +
         campo('aj-metodo','Método de pago habitual',{valor:ajustes.metodoDefecto}) +
         campo('aj-ciclotipo','Renovar por',{tipo:'select', valor:ajustes.cicloRenovacion,
@@ -8395,6 +8481,8 @@ function pintaAjustes(){
       '</div></div>' +
     '</div>'
      : '') +
+    (cual === 'precios' ? panelPreciosTodos() : '') +
+
     (cual === 'datos' ?
     tarjetaRescate() +
     (function(){
@@ -10083,6 +10171,10 @@ function formCliente(id, previo){
   const esNuevo = !c;
   previo = previo || {};
   const ciclo = cicloDe(c);
+  /* De qué plataforma es, para saber qué tarifa le toca de partida. */
+  const masterPre = (c && c.cuentaMasterId) ? buscarMaster(c.cuentaMasterId)
+                  : (previo.cuentaMasterId ? buscarMaster(previo.cuentaMasterId) : null);
+  const platPre = c ? platDe(c) : (masterPre ? masterPre.nombre : '');
   const opcCuentas = [['','Sin cuenta asignada']].concat(
     servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
       .map(function(m){ return [m.id, nombreCuenta(m) + ' (' + libresDe(m) + ' ' + plural(libresDe(m),'libre','libres') + ')']; })
@@ -10094,12 +10186,17 @@ function formCliente(id, previo){
       campo('cl-cuenta','Cuenta master',{tipo:'select', valor:c?c.cuentaMasterId:(previo.cuentaMasterId||''), opciones:opcCuentas}) +
       campo('cl-perfil','Perfil',{valor:c?c.perfil:(previo.perfil||''), pista:'Perfil 1'}) +
       campo('cl-pin','PIN',{valor:c?c.pin:'', pista:'Opcional'}) +
-      campo('cl-monto','Cuánto le cobras',{tipo:'number', valor:c?c.monto:ajustes.precioDefecto, paso:'0.01'}) +
+      campo('cl-precio-modo','Qué le cobras',{tipo:'select',
+        valor: (c ? (sigueLaTarifa(c) ? 'tarifa' : 'propio') : 'tarifa'),
+        opciones:[['tarifa','La tarifa de su plataforma'],['propio','Un precio solo suyo']]}) +
+      campo('cl-monto','Cuánto le cobras',{tipo:'number',
+        valor: c ? cobroDe(c) : (tarifaVigente(platPre) || ajustes.precioDefecto), paso:'0.01'}) +
       campo('cl-metodo','Método de pago',{valor:c?c.metodo:(ajustes.metodoDefecto||'PLIN')}) +
       campo('cl-vence','Vence el',{tipo:'date', valor:c?c.vencimiento:avanzar(hoyISO(), ciclo)}) +
       campo('cl-ciclotipo','Su ciclo',{tipo:'select', valor:ciclo.tipo, opciones:[['meses','Meses'],['dias','Días']]}) +
       campo('cl-ciclocant','Cada cuántos',{tipo:'number', valor:ciclo.cantidad, paso:'1'}) +
     '</div>' +
+    '<div class="aviso-precio" id="cl-precio-info" style="margin-bottom:var(--e3)"></div>' +
     campo('cl-nota','Nota',{tipo:'textarea', valor:c?c.nota:'', filas:2,
       pista:'Lo que quieras acordarte de esta persona',
       ayuda:'Solo la ves tú. Sale en su pantalla.'}),
@@ -10112,10 +10209,14 @@ function formCliente(id, previo){
        /* Se conserva todo lo que el programa no conoce. */
        const destino = c || {id:nuevoId('c')};
        recordarPaso(esNuevo ? 'crear a ' + nombre : 'editar a ' + nombre);
+       /* El precio sale de lo que hayas elegido: o la tarifa de su
+          plataforma -y entonces se mueve con ella- o el suyo propio. */
+       const sigue = val('cl-precio-modo') !== 'propio';
+       const tarifaSuya = tarifaVigente(master ? master.nombre : (destino.servicio || ''));
        /* Si le cambias el precio, queda apuntado cuándo y de cuánto a cuánto:
           «¿este desde cuándo paga 15?» dejaba de tener respuesta. */
        const antes = Number(destino.monto);
-       const ahora = num('cl-monto');
+       const ahora = (sigue && tarifaSuya > 0) ? tarifaSuya : num('cl-monto');
        if(!esNuevo && isFinite(antes) && antes !== ahora){
          if(!Array.isArray(destino.historialPrecios)) destino.historialPrecios = [];
          destino.historialPrecios.unshift({fecha:hoyISO(), de:antes, a:ahora});
@@ -10128,7 +10229,10 @@ function formCliente(id, previo){
        destino.servicio = master ? master.nombre : (destino.servicio || '');
        destino.perfil = val('cl-perfil').trim() || 'Perfil 1';
        destino.pin = val('cl-pin').trim();
-       destino.monto = num('cl-monto');
+       destino.monto = ahora;
+       destino.sigueTarifa = sigue;
+       /* Un precio propio con fecha ya no pinta nada si ahora va a tarifa. */
+       if(sigue && Array.isArray(destino.precios)) destino.precios = [];
        destino.metodo = val('cl-metodo').trim() || 'PLIN';
        destino.vencimiento = val('cl-vence');
        destino.cicloTipo = val('cl-ciclotipo');
@@ -10138,7 +10242,48 @@ function formCliente(id, previo){
        else anotar('EDITAR', 'Cliente modificado: ' + nombre);
        guardar(); cerrarModal(); pintar();
        avisar(esNuevo ? nombre + ' agregado' : 'Cambios guardados', 'bien', true);
-     }}]);
+     }}],
+    /* El precio se explica solo mientras lo tocas: de qué plataforma sale,
+       cuánto es y qué pasa si eliges el suyo propio. */
+    function(){
+      const pinta = function(){
+        const caja = document.getElementById('cl-precio-info');
+        const cajaMonto = document.getElementById('cl-monto');
+        if(!caja || !cajaMonto) return;
+        const mm = val('cl-cuenta') ? buscarMaster(val('cl-cuenta')) : null;
+        const plat = mm ? mm.nombre : '';
+        const t = tarifaVigente(plat);
+        const sigue = val('cl-precio-modo') !== 'propio';
+        if(sigue && t > 0) cajaMonto.value = t;
+        cajaMonto.classList.toggle('bloqueado', sigue && t > 0);
+        caja.className = 'aviso-precio ' + (sigue ? 'bien' : 'aviso');
+        caja.innerHTML = sigue
+          ? (t > 0
+              ? 'Paga la tarifa de <b>' + esc(plat || 'su plataforma') + '</b>: <b>' + esc(dinero(t)) + '</b>.' +
+                '<small>Si un día cambias esa tarifa, a esta persona le cambia sola.</small>'
+              : 'Todavía no hay tarifa para <b>' + esc(plat || 'su plataforma') + '</b>. ' +
+                'Se le cobra lo que pongas aquí.')
+          : 'Precio solo suyo: <b>' + esc(dinero(num('cl-monto'))) + '</b>.' +
+            '<small>Cambies lo que cambies la tarifa de ' + esc(plat || 'su plataforma') +
+            ', a esta persona no le toca.</small>';
+      };
+      /* Escribir un importe distinto ES decir «a este le cobro otra cosa»: el
+         interruptor se mueve solo. Bloquear el campo obligaba a acordarse de
+         cambiar primero el desplegable, que no se le ocurre a nadie. */
+      const monto = document.getElementById('cl-monto');
+      if(monto) monto.addEventListener('input', function(){
+        const mm = val('cl-cuenta') ? buscarMaster(val('cl-cuenta')) : null;
+        const t = tarifaVigente(mm ? mm.nombre : '');
+        const sel = document.getElementById('cl-precio-modo');
+        if(sel && t > 0 && Math.abs(num('cl-monto') - t) > 0.005) sel.value = 'propio';
+        pinta();
+      });
+      ['cl-cuenta','cl-precio-modo'].forEach(function(k){
+        const e = document.getElementById(k);
+        if(e) e.addEventListener('change', pinta);
+      });
+      pinta();
+    });
 }
 
 function formMaster(id, plataformaPuesta){
@@ -10158,7 +10303,12 @@ function formMaster(id, plataformaPuesta){
       campo('ms-correo','Correo',{valor:m?m.correo:''}) +
       campo('ms-clave','Clave',{valor:m?m.contrasena:''}) +
       campo('ms-perfiles','Cuántos perfiles',{tipo:'number', valor:m?m.perfiles:5, paso:'1'}) +
-      campo('ms-costo','Cuánto te cuesta',{tipo:'number', valor:m?m.costo:'', paso:'0.01'}) +
+      campo('ms-costo','Cuánto te cuesta',{tipo:'number',
+        valor: m ? m.costo : (costoVigente(nombrePre) || ''), paso:'0.01',
+        ayuda: costoVigente(nombrePre) > 0
+          ? 'Una cuenta de ' + nombrePre + ' cuesta ' + dinero(costoVigente(nombrePre)) +
+            '. Si pones otra cosa, esta se queda con la suya.'
+          : 'La cuenta entera, con todos sus perfiles'}) +
       campo('ms-vence','Vence el',{tipo:'date', valor:m?m.vencimiento:avanzar(hoyISO(), cicloDe(m))}) +
       campo('ms-etiqueta','Etiqueta',{valor:m?m.etiqueta:'', pista:'Opcional: casa, proveedor…'}) +
       /* Su ciclo, igual que el de un cliente: no todas las cuentas se
@@ -10185,6 +10335,11 @@ function formMaster(id, plataformaPuesta){
        destino.contrasena = val('ms-clave');
        destino.perfiles = Math.max(0, Math.round(num('ms-perfiles')));
        destino.costo = num('ms-costo');
+       /* Si le pones el costo que vale la plataforma, esta cuenta sigue a la
+          plataforma y cambiará con ella. Si le pones otro, es porque esta
+          te salió por otro precio: se queda con el suyo y nadie lo toca. */
+       const costoPlat = costoVigente(nombre);
+       destino.sigueCosto = costoPlat > 0 ? Math.abs(destino.costo - costoPlat) < 0.005 : true;
        destino.vencimiento = val('ms-vence');
        destino.etiqueta = val('ms-etiqueta').trim();
        destino.cicloTipo = val('ms-ciclotipo');
@@ -10681,6 +10836,22 @@ function lineaTarifas(plataforma){
     });
 }
 
+/* Encadenar una línea del tiempo: la de antes se cierra el día anterior y,
+   si ya había otra puesta más adelante, la nueva se cierra ella sola justo
+   antes de esa. Vale igual para lo que cobras y para lo que pagas, que son
+   el mismo problema mirado por los dos lados. */
+function encadenar(lista, mias, nueva){
+  const desde = nueva.desde;
+  const antes = mias.filter(function(t){ return t.desde && t.desde < desde; })
+                    .sort(function(a,b){ return String(b.desde).localeCompare(String(a.desde)); })[0];
+  if(antes && (!antes.hasta || antes.hasta >= desde)) antes.hasta = sumarDias(desde, -1);
+  const luego = mias.filter(function(t){ return t.desde && t.desde > desde; })
+                    .sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); })[0];
+  if(luego) nueva.hasta = sumarDias(luego.desde, -1);
+  lista.push(nueva);
+  return nueva;
+}
+
 /* Poner un precio nuevo: cierra el que estaba y, si ya había otro puesto
    más adelante, se cierra a sí mismo el día antes de ese. Así se pueden
    encadenar los que hagan falta sin que se pisen. */
@@ -10698,16 +10869,9 @@ function ponerTarifa(tipo, plataforma, precio, desde, nota){
     if(nota != null) misma.nota = nota;
     return misma;
   }
-  const nueva = {id:nuevoId('ph'), tipo:tipo, plataforma:plat,
-                 precio:precio, desde:desde, hasta:null, nota:nota || ''};
-  const antes = mias.filter(function(t){ return t.desde && t.desde < desde; })
-                    .sort(function(a,b){ return String(b.desde).localeCompare(String(a.desde)); })[0];
-  if(antes && (!antes.hasta || antes.hasta >= desde)) antes.hasta = sumarDias(desde, -1);
-  const luego = mias.filter(function(t){ return t.desde && t.desde > desde; })
-                    .sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); })[0];
-  if(luego) nueva.hasta = sumarDias(luego.desde, -1);
-  lista.push(nueva);
-  return nueva;
+  return encadenar(lista, mias,
+    {id:nuevoId('ph'), tipo:tipo, plataforma:plat,
+     precio:precio, desde:desde, hasta:null, nota:nota || ''});
 }
 
 /* Quitar una: la de antes vuelve a quedar abierta hasta donde llegaba esta,
@@ -10726,6 +10890,229 @@ function quitarTarifa(id){
   if(antes) antes.hasta = fuera.hasta || null;
   lista.splice(i, 1);
   return true;
+}
+
+/* ---------- Lo que te CUESTA la cuenta entera ---------------------------
+   La otra mitad del negocio. Una cuenta de NETFLIX te cuesta lo que te
+   cuesta, la partes en cinco perfiles y la diferencia es lo que ganas. Hasta
+   ahora el costo se escribía cuenta por cuenta, de memoria, y no había dónde
+   decir «una cuenta de NETFLIX me cuesta 24, y desde marzo 28».
+
+   Va en su propia lista y no dentro de `historialPrecios`, porque ese molde
+   lo comparte con el PAPOTAS de siempre y ahí dentro todo lo que hay son
+   precios de VENTA. Meterle costos sería hacerle creer que cobras 24.
+
+     ajustes.costosPlataforma = [{id, plataforma, costo, desde, hasta, nota}]  */
+
+function costos(){
+  if(!Array.isArray(ajustes.costosPlataforma)) ajustes.costosPlataforma = [];
+  return ajustes.costosPlataforma;
+}
+
+/* Lo que te cuesta hoy una cuenta entera de esa plataforma. Sin nada puesto
+   devuelve 0, que quiere decir «no lo has dicho todavía». */
+function costoVigente(plataforma, fecha){
+  const dia  = fecha || hoyISO();
+  const plat = clavePlat(plataforma);
+  const suyo = costos().filter(function(t){
+    return clavePlat(t.plataforma) === plat && t.desde && t.desde <= dia && (!t.hasta || t.hasta >= dia);
+  }).sort(function(a,b){ return String(b.desde).localeCompare(String(a.desde)); })[0];
+  return suyo && Number(suyo.costo) > 0 ? Number(suyo.costo) : 0;
+}
+
+function lineaCostos(plataforma){
+  const plat = clavePlat(plataforma);
+  const hoy = hoyISO();
+  return costos().filter(function(t){ return clavePlat(t.plataforma) === plat; })
+    .slice().sort(function(a,b){ return String(a.desde).localeCompare(String(b.desde)); })
+    .map(function(t){
+      const empezo  = t.desde && t.desde <= hoy;
+      const termino = t.hasta && t.hasta < hoy;
+      return {t:t, cuando: !empezo ? 'futuro' : termino ? 'pasado' : 'ahora'};
+    });
+}
+
+function ponerCosto(plataforma, costo, desde, nota){
+  const lista = costos();
+  const plat = clavePlat(plataforma);
+  const mias = lista.filter(function(t){ return clavePlat(t.plataforma) === plat; });
+  const misma = mias.filter(function(t){ return t.desde === desde; })[0];
+  if(misma){
+    misma.costo = costo;
+    if(nota != null) misma.nota = nota;
+    return misma;
+  }
+  return encadenar(lista, mias,
+    {id:nuevoId('pc'), plataforma:plat, costo:costo, desde:desde, hasta:null, nota:nota || ''});
+}
+
+function quitarCosto(id){
+  const lista = costos();
+  const i = lista.findIndex(function(t){ return String(t.id) === String(id); });
+  if(i < 0) return false;
+  const fuera = lista[i];
+  const antes = lista.filter(function(t){
+    return clavePlat(t.plataforma) === clavePlat(fuera.plataforma) &&
+           String(t.id) !== String(fuera.id) && t.desde && t.desde < fuera.desde;
+  }).sort(function(a,b){ return String(b.desde).localeCompare(String(a.desde)); })[0];
+  if(antes) antes.hasta = fuera.hasta || null;
+  lista.splice(i, 1);
+  return true;
+}
+
+/* ---------- Que el precio nuevo llegue de verdad a la gente -------------
+   De nada sirve apuntar que un perfil de NETFLIX ya vale 18 si los 34
+   clientes de NETFLIX se quedan pagando 15. Cuando cambia la tarifa cambia
+   lo que paga todo el que va a tarifa, y cuando cambia el costo cambia lo
+   que te cuestan las cuentas que van al costo de su plataforma.
+
+   Quien tiene precio propio no se toca NUNCA: el amigo al que le cobras
+   menos, la cuenta que te salió más cara. Para eso está la marca. */
+function sigueLaTarifa(c){ return !!c && c.sigueTarifa !== false; }
+function sigueElCosto(m){ return !!m && m.sigueCosto !== false; }
+
+/* A quiénes les cambiaría el precio poner esta tarifa. Se usa para avisar
+   ANTES de guardar, que enterarse después de subirle a 34 personas no vale. */
+function aQuienesAfecta(plataforma, precio){
+  const plat = clavePlat(plataforma);
+  return clientes.filter(function(c){
+    return sigueLaTarifa(c) && clavePlat(platDe(c)) === plat &&
+           Math.abs((Number(c.monto)||0) - precio) > 0.005;
+  });
+}
+function aQueCuentasAfecta(plataforma, costo){
+  const plat = clavePlat(plataforma);
+  return servicios.filter(function(m){
+    return sigueElCosto(m) && clavePlat(m.nombre) === plat &&
+           Math.abs((Number(m.costo)||0) - costo) > 0.005;
+  });
+}
+
+function sincronizarPrecios(){
+  const hoy = hoyISO();
+  let gente = 0, cuentas = 0;
+  clientes.forEach(function(c){
+    if(!sigueLaTarifa(c)) return;
+    const t = tarifaVigente(platDe(c));
+    if(!(t > 0)) return;
+    const antes = Number(c.monto) || 0;
+    if(Math.abs(antes - t) < 0.005) return;
+    c.monto = t;
+    if(!Array.isArray(c.historialPrecios)) c.historialPrecios = [];
+    c.historialPrecios.unshift({fecha:hoy, de:antes, a:t});
+    if(c.historialPrecios.length > 30) c.historialPrecios.length = 30;
+    apuntarHecho(c, t > antes ? 'sube' : 'baja',
+      'la tarifa de ' + (platDe(c) || 'su plataforma') + ' pasó de ' +
+      dinero(antes) + ' a ' + dinero(t) + ', y a él le toca');
+    gente++;
+  });
+  servicios.forEach(function(m){
+    if(!sigueElCosto(m)) return;
+    const k = costoVigente(m.nombre);
+    if(!(k > 0)) return;
+    if(Math.abs((Number(m.costo)||0) - k) < 0.005) return;
+    m.costo = k;
+    cuentas++;
+  });
+  if(gente || cuentas) olvidarIndices();
+  return {gente:gente, cuentas:cuentas};
+}
+
+/* Una sola vez, al abrir la versión que trae esto. El problema es que hasta
+   ahora el precio se escribía cliente por cliente: no había en ningún sitio
+   la frase «un perfil de NETFLIX vale 15». Esa frase hay que deducirla, y se
+   deduce de lo que ya cobras: el precio que se repite en esa plataforma ES
+   su tarifa, y quien se sale de él es que tiene un trato aparte.
+
+   Así, al abrir, cada plataforma llega con su precio de venta y su costo ya
+   puestos -los tuyos, los que ya usabas- y a partir de ahí cambiarlos cambia
+   a la gente. Sin esto habría que teclearlo plataforma por plataforma antes
+   de que nada de esto sirviera para algo. */
+function elQueMasSeRepite(valores){
+  const cuenta = new Map();
+  valores.forEach(function(v){
+    const k = Math.round(Number(v) * 100) / 100;
+    if(!(k > 0)) return;
+    cuenta.set(k, (cuenta.get(k) || 0) + 1);
+  });
+  let mejor = 0, veces = 0;
+  cuenta.forEach(function(n, k){ if(n > veces || (n === veces && k > mejor)){ mejor = k; veces = n; } });
+  return {valor:mejor, veces:veces, distintos:cuenta.size};
+}
+
+function marcarQuienSigueElPrecio(){
+  if(ajustes.marcadoPrecios) return false;
+  ajustes.marcadoPrecios = true;
+  const hoy = hoyISO();
+  const puestas = [];
+
+  /* Primero, sacar la tarifa de cada plataforma de lo que ya cobras. */
+  const porPlat = new Map();
+  clientes.forEach(function(c){
+    const k = clavePlat(platDe(c));
+    if(!k) return;
+    if(!porPlat.has(k)) porPlat.set(k, []);
+    porPlat.get(k).push(c);
+  });
+  porPlat.forEach(function(lista, plat){
+    if(tarifaVigente(plat) > 0 && tarifas().some(function(t){
+      return t.tipo === 'plataforma' && clavePlat(t.plataforma) === plat; })) return;
+    const moda = elQueMasSeRepite(lista.map(function(c){ return Number(c.monto); }));
+    /* Que se repita de verdad: si cada uno paga una cosa distinta, ahí no
+       hay ninguna tarifa que deducir y no se inventa ninguna. */
+    if(!(moda.valor > 0)) return;
+    if(moda.veces < 2 && lista.length > 1) return;
+    ponerTarifa('plataforma', plat, moda.valor, hoy, 'lo que ya cobrabas');
+    puestas.push(plat + ' a ' + dinero(moda.valor));
+  });
+
+  /* Y el costo de cada plataforma, de lo que ya te cuestan sus cuentas. */
+  const porPlatM = new Map();
+  servicios.forEach(function(m){
+    const k = clavePlat(m.nombre);
+    if(!k) return;
+    if(!porPlatM.has(k)) porPlatM.set(k, []);
+    porPlatM.get(k).push(m);
+  });
+  porPlatM.forEach(function(lista, plat){
+    if(costoVigente(plat) > 0) return;
+    const moda = elQueMasSeRepite(lista.map(function(m){ return Number(m.costo); }));
+    if(!(moda.valor > 0)) return;
+    if(moda.veces < 2 && lista.length > 1) return;
+    ponerCosto(plat, moda.valor, hoy, 'lo que ya te costaba');
+  });
+
+  /* Y ahora sí: quien está en el precio de su plataforma la sigue, y quien
+     está en otro se queda con el suyo. Nadie ve cambiar un número por haber
+     actualizado el programa. */
+  clientes.forEach(function(c){
+    if(typeof c.sigueTarifa === 'boolean') return;
+    const t = tarifaVigente(platDe(c));
+    c.sigueTarifa = t > 0 && Math.abs((Number(c.monto)||0) - t) < 0.005;
+  });
+  servicios.forEach(function(m){
+    if(typeof m.sigueCosto === 'boolean') return;
+    const k = costoVigente(m.nombre);
+    m.sigueCosto = k > 0 ? Math.abs((Number(m.costo)||0) - k) < 0.005 : true;
+  });
+
+  if(puestas.length){
+    anotar('TARIFA', 'Puestas las tarifas de lo que ya cobrabas: ' + puestas.join(', '));
+    ajustes.avisoTarifas = puestas.length;
+  }
+  return true;
+}
+
+/* Lo que deja una cuenta llena de esa plataforma: lo que cobras por todos
+   sus perfiles menos lo que te cuesta. Es la cuenta que de verdad importa
+   antes de comprar otra. */
+function cuentaDelNegocio(plataforma, perfiles){
+  const venta = tarifaVigente(plataforma);
+  const costo = costoVigente(plataforma);
+  const sitios = Math.max(1, Math.round(perfiles) || 0);
+  return {venta:venta, costo:costo, sitios:sitios,
+          ingreso:venta * sitios, margen:venta * sitios - costo,
+          puntoDeEquilibrio: venta > 0 ? Math.ceil(costo / venta) : 0};
 }
 
 /* ---------- El precio de UN cliente -------------------------------------
@@ -10756,6 +11143,9 @@ function precioAnterior(c){
 }
 /* ¿Le cobras algo distinto de lo que dice la tarifa de su plataforma? */
 function esPrecioEspecial(c){
+  /* Si dijiste «precio solo suyo», lo es aunque hoy coincida con la tarifa:
+     lo que importa es que mañana la tarifa suba y a él no le toque. */
+  if(c && c.sigueTarifa === false) return true;
   const t = tarifaVigente(platDe(c));
   return t > 0 && Math.abs(cobroDe(c) - t) > 0.005;
 }
@@ -10763,6 +11153,9 @@ function esPrecioEspecial(c){
 /* Poner un precio a un cliente, con su fecha. Hoy o más adelante: da igual,
    cabe todo y en el orden que sea. */
 function ponerPrecioCliente(c, monto, desde){
+  /* Ponerle precio a mano es decir «a este le cobro esto». A partir de aquí
+     la tarifa de su plataforma ya no le manda. */
+  c.sigueTarifa = false;
   if(!Array.isArray(c.precios)) c.precios = [];
   const i = c.precios.findIndex(function(p){ return p && p.desde === desde; });
   if(i >= 0) c.precios[i].monto = monto;
@@ -10799,6 +11192,30 @@ function revisarPrecios(){
   if(diaPreciosRevisado === hoy) return;
   diaPreciosRevisado = hoy;
   madurarPrecios();
+  /* Una tarifa programada para hoy tiene que llegar hoy a la gente que la
+     sigue, aunque no toques nada: por eso se sincroniza aquí también. */
+  const nuevo = marcarQuienSigueElPrecio();
+  const r = sincronizarPrecios();
+  /* La primera vez hay que decirlo, no dejarlo pasar: el programa acaba de
+     deducir a cuánto vendes cada plataforma y desde ahora eso se puede
+     cambiar de un sitio. */
+  if(ajustes.avisoTarifas){
+    const cuantas = ajustes.avisoTarifas;
+    delete ajustes.avisoTarifas;
+    setTimeout(function(){
+      avisar('Ya tienes el precio de ' + cuantas + ' ' + plural(cuantas,'plataforma','plataformas') +
+             ': míralo en su pestaña «Precios»', 'bien', true);
+    }, 1200);
+  }
+  if(nuevo || r.gente || r.cuentas){
+    if(r.gente || r.cuentas){
+      anotar('PRECIOS', 'Entró el precio nuevo: ' +
+        (r.gente ? r.gente + ' ' + plural(r.gente,'cliente','clientes') : '') +
+        (r.gente && r.cuentas ? ' y ' : '') +
+        (r.cuentas ? r.cuentas + ' ' + plural(r.cuentas,'cuenta','cuentas') : ''));
+    }
+    guardar();
+  }
 }
 
 /* ---------- Poner un precio, desde donde sea ---------------------------- */
@@ -10821,6 +11238,7 @@ function formTarifa(plataforma, id){
           ayuda:'Puedes poner una fecha de más adelante y dejarlo programado.'}) +
       '</div>' +
       campo('tf-nota','Por qué',{valor:previa?previa.nota:'', pista:'Opcional: subida de Netflix, promo…'}) +
+      (esGeneral ? '' : '<div class="aviso-precio" id="tf-afecta"></div>') +
     '</div>',
     [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal}]
     .concat(previa ? [{texto:'Quitar', clase:'peligro', hacer:function(){
@@ -10839,11 +11257,135 @@ function formTarifa(plataforma, id){
        ponerTarifa(esGeneral ? 'general' : 'plataforma', plataforma, precio, desde, val('tf-nota').trim());
        anotar('TARIFA', (esGeneral?'GENERAL':plataforma) + ': ' + dinero(precio) + ' desde el ' + fechaBonita(desde));
        olvidarIndices();
+       /* Lo que de verdad pidió: que el precio nuevo llegue a la gente. Si
+          la fecha es de más adelante no se toca a nadie todavía; el día que
+          llegue entra solo al abrir el programa. */
+       const r = sincronizarPrecios();
+       if(r.gente) anotar('PRECIOS', 'El precio nuevo le tocó a ' + r.gente + ' ' +
+                                     plural(r.gente,'cliente','clientes'));
        guardar(); cerrarModal(); pintar();
        avisar(desde > hoyISO()
          ? 'Programado: ' + dinero(precio) + ' desde el ' + fechaBonita(desde)
-         : 'Ahora vale ' + dinero(precio), 'bien', true);
-     }}]));
+         : 'Ahora vale ' + dinero(precio) +
+           (r.gente ? ' · se lo cambiaste a ' + r.gente + ' ' + plural(r.gente,'cliente','clientes') : ''),
+         'bien', true);
+     }}]),
+    /* El aviso se recalcula mientras escribes: hay que ver a cuánta gente le
+       toca ANTES de darle a guardar, no enterarse después. */
+    esGeneral ? null : function(){
+      const pinta = function(){
+        const caja = document.getElementById('tf-afecta');
+        if(!caja) return;
+        const precio = num('tf-precio');
+        const cuando = val('tf-desde') || hoyISO();
+        const tocados = aQuienesAfecta(plataforma, precio);
+        const propios = clientes.filter(function(c){
+          return clavePlat(platDe(c)) === clavePlat(plataforma) && !sigueLaTarifa(c); }).length;
+        caja.className = 'aviso-precio ' + (tocados.length ? 'aviso' : 'bien');
+        caja.innerHTML = (precio > 0
+          ? (tocados.length
+              ? '<b>' + tocados.length + ' ' + plural(tocados.length,'cliente','clientes') +
+                '</b> ' + plural(tocados.length,'pasa','pasan') + ' a pagar <b>' + esc(dinero(precio)) + '</b>' +
+                (cuando > hoyISO() ? ' el ' + esc(fechaBonita(cuando)) : '')
+              : 'Nadie cambia de precio con esto.')
+          : 'Pon cuánto vale un perfil.') +
+          (propios ? '<small>' + propios + ' con precio especial ' + plural(propios,'sigue','siguen') +
+                     ' como ' + plural(propios,'está','están') + '.</small>' : '');
+      };
+      ['tf-precio','tf-desde'].forEach(function(k){
+        const e = document.getElementById(k);
+        if(e) e.addEventListener('input', pinta);
+      });
+      pinta();
+    });
+}
+
+/* ---------- Poner lo que te cuesta la cuenta entera ---------------------- */
+function formCosto(plataforma, id){
+  const previo = id ? costos().filter(function(t){ return String(t.id) === String(id); })[0] : null;
+  const vigente = costoVigente(plataforma);
+  const venta = tarifaVigente(plataforma);
+  abrirModal(previo ? 'Cambiar lo que te cuesta' : 'Lo que te cuesta ' + plataforma,
+    '<div class="pila">' +
+      '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
+        'Lo que pagas por una cuenta <b style="color:var(--txt)">entera</b> de ' +
+        '<b style="color:var(--txt)">' + esc(plataforma) + '</b>, con todos sus perfiles. ' +
+        (vigente > 0 ? 'Ahora mismo son <b style="color:var(--txt)">' + esc(dinero(vigente)) + '</b>. '
+                     : 'Todavía no lo has puesto. ') +
+        'El costo que pongas manda desde el día que le digas.' +
+      '</p>' +
+      '<div class="rejilla r2">' +
+        campo('pc-costo','Cuánto te cuesta',{tipo:'number', valor:previo?previo.costo:(vigente||''), paso:'0.01'}) +
+        campo('pc-desde','Desde cuándo',{tipo:'date', valor:previo?previo.desde:hoyISO(),
+          ayuda:'Puedes dejarlo programado para cuando te suban.'}) +
+      '</div>' +
+      campo('pc-nota','Por qué',{valor:previo?previo.nota:'', pista:'Opcional: subió el proveedor, cambié de vendedor…'}) +
+      '<div class="aviso-precio" id="pc-afecta"></div>' +
+    '</div>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal}]
+    .concat(previo ? [{texto:'Quitar', clase:'peligro', hacer:function(){
+        recordarPasoAjustes('quitar un costo');
+        quitarCosto(previo.id);
+        anotar('COSTO', 'Costo quitado de ' + (previo.plataforma||''));
+        olvidarIndices();
+        guardar(); cerrarModal(); pintar();
+        avisar('Costo quitado', 'bien', true);
+      }}] : [])
+    .concat([{texto:'Guardar el costo', clase:'principal', hacer:function(){
+       const costo = num('pc-costo');
+       const desde = val('pc-desde') || hoyISO();
+       if(costo <= 0){ avisar('Pon cuánto te cuesta', 'mal'); return; }
+       recordarPasoAjustes('cambiar un costo');
+       if(previo) quitarCosto(previo.id);
+       ponerCosto(plataforma, costo, desde, val('pc-nota').trim());
+       anotar('COSTO', plataforma + ': te cuesta ' + dinero(costo) + ' desde el ' + fechaBonita(desde));
+       olvidarIndices();
+       const r = sincronizarPrecios();
+       guardar(); cerrarModal(); pintar();
+       avisar(desde > hoyISO()
+         ? 'Programado: te costará ' + dinero(costo) + ' desde el ' + fechaBonita(desde)
+         : 'Te cuesta ' + dinero(costo) +
+           (r.cuentas ? ' · aplicado a ' + r.cuentas + ' ' + plural(r.cuentas,'cuenta','cuentas') : ''),
+         'bien', true);
+     }}]),
+    function(){
+      const pinta = function(){
+        const caja = document.getElementById('pc-afecta');
+        if(!caja) return;
+        const costo = num('pc-costo');
+        const cuando = val('pc-desde') || hoyISO();
+        const tocadas = aQueCuentasAfecta(plataforma, costo);
+        const propias = servicios.filter(function(m){
+          return clavePlat(m.nombre) === clavePlat(plataforma) && !sigueElCosto(m); }).length;
+        /* Lo que de verdad quieres saber al poner un costo: si con lo que
+           cobras por perfil esa cuenta te sale a cuenta o no. */
+        const sitios = servicios.filter(function(m){ return clavePlat(m.nombre) === clavePlat(plataforma); })
+                                .reduce(function(a,m){ return Math.max(a, Number(m.perfiles)||0); }, 0) || 5;
+        const deja = venta * sitios - costo;
+        caja.className = 'aviso-precio ' + (costo > 0 && venta > 0 ? (deja >= 0 ? 'bien' : 'mal') : 'aviso');
+        caja.innerHTML = (costo > 0
+          ? (tocadas.length
+              ? '<b>' + tocadas.length + ' ' + plural(tocadas.length,'cuenta','cuentas') + '</b> ' +
+                plural(tocadas.length,'pasa','pasan') + ' a costarte <b>' + esc(dinero(costo)) + '</b>' +
+                (cuando > hoyISO() ? ' el ' + esc(fechaBonita(cuando)) : '')
+              : 'Ninguna cuenta cambia con esto.')
+          : 'Pon cuánto te cuesta la cuenta entera.') +
+          (costo > 0 && venta > 0
+            ? '<small>Vendes el perfil a ' + esc(dinero(venta)) + ': con ' + sitios +
+              ' ' + plural(sitios,'perfil','perfiles') + ' llenos te ' +
+              (deja >= 0 ? 'deja ' : 'falta ') + esc(dinero(Math.abs(deja))) +
+              ' · cubres el costo con ' + Math.ceil(costo / venta) + ' ' +
+              plural(Math.ceil(costo / venta),'perfil vendido','perfiles vendidos') + '.</small>'
+            : '') +
+          (propias ? '<small>' + propias + ' con costo propio ' + plural(propias,'sigue','siguen') +
+                     ' como ' + plural(propias,'está','están') + '.</small>' : '');
+      };
+      ['pc-costo','pc-desde'].forEach(function(k){
+        const e = document.getElementById(k);
+        if(e) e.addEventListener('input', pinta);
+      });
+      pinta();
+    });
 }
 
 /* El precio de un cliente concreto, que manda sobre la tarifa. */
@@ -10855,7 +11397,8 @@ function formPrecio(id){
     '<div class="pila">' +
       '<p style="margin:0;color:var(--txt-3);font-size:12.5px;line-height:1.6">' +
         'La tarifa de <b style="color:var(--txt)">' + esc(platDe(c) || 'su plataforma') + '</b> hoy es <b style="color:var(--txt)">' +
-        esc(dinero(tarifa)) + '</b>. Lo que pongas aquí es lo que le cobras a él, mande lo que mande la tarifa.' +
+        esc(dinero(tarifa)) + '</b>. Lo que pongas aquí es lo que le cobras a él, mande lo que mande la tarifa: ' +
+        'a partir de ahora, si subes la de su plataforma, a esta persona no le tocará.' +
       '</p>' +
       '<div class="rejilla r2">' +
         campo('pr-monto','Cuánto le cobras',{tipo:'number', valor:cobroDe(c), paso:'0.01'}) +
@@ -10915,6 +11458,11 @@ function tarjetaPrecio(c){
                     ' · el próximo, ' + esc(dinero(futuros[0].monto)) + ' el ' + esc(fechaBonita(futuros[0].desde))
                   : especial ? 'Precio especial: la tarifa de ' + esc(platDe(c) || 'su plataforma') + ' es ' + esc(dinero(tarifa))
                   : 'Le cobras la tarifa de ' + esc(platDe(c) || 'su plataforma')) + '</p></div>' +
+      (especial && tarifa > 0
+        ? '<button class="btn mini" data-a-tarifa="' + esc(c.id) + '"' +
+            ' title="Que vuelva a pagar la tarifa de su plataforma">' + ICONO.renovar +
+            '<span class="et">Ponerle la tarifa (' + esc(dinero(tarifa)) + ')</span></button>'
+        : '') +
       '<button class="btn mini" data-precio="' + esc(c.id) + '">' + ICONO.lapiz +
         '<span class="et">Cambiar el precio</span></button>' +
     '</div>' +
@@ -10924,7 +11472,8 @@ function tarjetaPrecio(c){
           (ant ? esc(dinero(ant.monto)) : '—') + '</dd>' +
           '<small>' + (ant && ant.desde ? 'hasta el ' + esc(fechaBonita(ant.desde)) : 'no le has cambiado el precio') + '</small></div>' +
         '<div class="pr viva"><dt>Le cobras</dt><dd class="cifra">' + esc(dinero(ahora)) + '</dd>' +
-          '<small>' + (especial ? 'precio especial suyo' : 'la tarifa de su plataforma') + '</small></div>' +
+          '<small>' + (especial ? 'precio solo suyo · no cambia con la tarifa'
+                                : 'la tarifa de su plataforma · cambia con ella') + '</small></div>' +
         '<div class="pr' + (futuros.length ? ' futuro' : '') + '"><dt>Le cobrarás</dt><dd class="cifra">' +
           (futuros.length ? esc(dinero(futuros[0].monto)) : '—') + '</dd>' +
           '<small>' + (futuros.length ? 'desde el ' + esc(fechaBonita(futuros[0].desde)) : 'nada programado') + '</small></div>' +
@@ -10960,48 +11509,220 @@ function tarjetaPrecio(c){
     '</div></div>';
 }
 
-/* ---------- La pestaña de precios de una plataforma --------------------- */
+/* ---------- La pestaña de precios de una plataforma ---------------------
+   Las dos mitades del negocio, una al lado de la otra: lo que te cuesta una
+   cuenta entera y a cuánto vendes el perfil. Separadas no dicen nada; juntas
+   te dicen si esa plataforma te da de comer. */
+function pintaLineaPrecios(linea, marca, campo, plataforma){
+  if(!linea.length) return '';
+  return '<div class="linea-precios">' + linea.slice().reverse().map(function(x){
+      const t = x.t;
+      return '<button class="lp ' + x.cuando + ' pulsable" ' + marca + '="' + esc(t.id) + '"' +
+        ' data-plat-tarifa="' + esc(plataforma) + '">' +
+        '<span class="lp-fecha">' + esc(fechaBonita(t.desde)) +
+          (t.hasta ? ' → ' + esc(fechaBonita(t.hasta))
+           : x.cuando === 'futuro' ? ' → en adelante' : ' → hoy') + '</span>' +
+        '<span class="lp-monto cifra">' + esc(dinero(t[campo])) + '</span>' +
+        (x.cuando === 'ahora' ? '<span class="lp-marca">rige ahora</span>'
+         : x.cuando === 'futuro' ? '<span class="lp-marca futuro">programado</span>' : '') +
+        (t.nota ? '<span class="lp-nota">' + esc(t.nota) + '</span>' : '') +
+      '</button>';
+    }).join('') + '</div>';
+}
+
+/* ---------- Todos los precios, en una sola pantalla ---------------------
+   La pestaña de cada plataforma está muy bien cuando ya estás dentro de
+   ella. Pero para llevar el negocio hace falta lo otro: verlas todas de
+   golpe, con lo que te cuesta cada una y a cuánto la vendes, y darte cuenta
+   de que hay una que te está dando de comer y otra que no. */
+function panelPreciosTodos(){
+  const plats = Array.from(new Set(servicios.map(function(m){ return clavePlat(m.nombre); })
+                                   .filter(Boolean))).sort();
+  if(!plats.length){
+    return '<div class="tarjeta ancha"><div class="tarjeta-cabeza">' +
+      '<span class="cabeza-icono ambar">' + ICONO.etiqueta + '</span>' +
+      '<div class="crece"><h2>Precios</h2><p>Lo que te cuesta cada plataforma y a cuánto vendes el perfil.</p></div>' +
+      '</div><div class="tarjeta-cuerpo">' +
+      vacio('Todavía no hay plataformas', 'En cuanto des de alta una cuenta, aquí podrás poner su costo y su precio de venta.') +
+      '</div></div>';
+  }
+
+  let totalCosto = 0, totalCobra = 0;
+  const filas = plats.map(function(plat){
+    const mias = servicios.filter(function(m){ return clavePlat(m.nombre) === plat; });
+    const suyos = clientes.filter(function(c){ return clavePlat(platDe(c)) === plat; });
+    const venta = tarifaVigente(plat);
+    const fijado = costoVigente(plat);
+    const gastoReal = mias.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+    const costo = fijado > 0 ? fijado : (mias.length ? gastoReal / mias.length : 0);
+    const sitios = mias.reduce(function(a,m){ return Math.max(a, Number(m.perfiles)||0); }, 0) || 5;
+    const deja = venta * sitios - costo;
+    const aTarifa = suyos.filter(sigueLaTarifa).length;
+    totalCosto += gastoReal;
+    totalCobra += suyos.reduce(function(a,c){ return a + cobroDe(c); }, 0);
+    return '<tr>' +
+      '<td class="t-quien"><button class="lb-nombre" data-plat="' + esc(plat) + '">' +
+        logoPlataforma(plat, 24) + '<span>' + esc(plat) + '</span></button>' +
+        '<small>' + mias.length + ' ' + plural(mias.length,'cuenta','cuentas') + ' · ' +
+          suyos.length + ' ' + plural(suyos.length,'cliente','clientes') + '</small></td>' +
+      '<td class="cifra t-monto ' + (fijado > 0 ? '' : 'flojo') + '">' +
+        (costo > 0 ? esc(dinero(costo)) : '—') +
+        (fijado > 0 ? '' : '<small>de media</small>') + '</td>' +
+      '<td class="cifra t-monto">' + esc(dinero(venta)) + '</td>' +
+      '<td class="cifra t-monto">' + sitios + '</td>' +
+      '<td class="cifra t-monto" style="color:' + (deja >= 0 ? 'var(--bien)' : 'var(--mal)') + '">' +
+        (costo > 0 && venta > 0 ? (deja>=0?'+':'') + esc(dinero(deja)) : '—') + '</td>' +
+      '<td class="cifra t-monto">' + aTarifa + '<small>de ' + suyos.length + '</small></td>' +
+      '<td class="t-hacer"><span class="fila" style="gap:4px;justify-content:flex-end">' +
+        '<button class="btn mini" data-nuevo-costo="' + esc(plat) + '" title="Cambiar lo que te cuesta ' + esc(plat) + '">Costo</button>' +
+        '<button class="btn mini principal" data-nueva-tarifa="' + esc(plat) + '" title="Cambiar a cuánto vendes el perfil de ' + esc(plat) + '">Venta</button>' +
+      '</span></td>' +
+    '</tr>';
+  }).join('');
+
+  return '<div class="tarjeta ancha"><div class="tarjeta-cabeza">' +
+      '<span class="cabeza-icono ambar">' + ICONO.etiqueta + '</span>' +
+      '<div class="crece"><h2>Lo que te cuesta y a cuánto lo vendes</h2>' +
+        '<p>Todas tus plataformas de golpe. Cambiar el precio de venta le cambia el precio a quien va a tarifa; ' +
+        'quien tiene un precio solo suyo no se toca.</p></div>' +
+    '</div>' +
+    '<div class="tarjeta-cuerpo pegado">' +
+      '<div class="tabla-envoltura"><table class="tabla tabla-precios">' +
+        '<thead><tr>' +
+          '<th class="t-quien">Plataforma</th>' +
+          '<th class="t-monto">Te cuesta</th>' +
+          '<th class="t-monto">Vendes a</th>' +
+          '<th class="t-monto">Perfiles</th>' +
+          '<th class="t-monto">Te deja llena</th>' +
+          '<th class="t-monto">A tarifa</th>' +
+          '<th class="t-hacer"><span class="solo-lectores">Acciones</span></th>' +
+        '</tr></thead><tbody>' + filas + '</tbody>' +
+        '<tfoot><tr>' +
+          '<td class="t-quien"><b>Todo junto</b>' +
+            '<small>' + plats.length + ' ' + plural(plats.length,'plataforma','plataformas') + ' al ciclo</small></td>' +
+          '<td class="cifra t-monto">' + esc(dinero(totalCosto)) + '</td>' +
+          '<td class="cifra t-monto">' + esc(dinero(totalCobra)) + '</td>' +
+          '<td class="t-monto"></td>' +
+          '<td class="cifra t-monto" style="color:' + (totalCobra - totalCosto >= 0 ? 'var(--bien)' : 'var(--mal)') + '">' +
+            (totalCobra - totalCosto >= 0 ? '+' : '') + esc(dinero(totalCobra - totalCosto)) + '</td>' +
+          '<td class="t-monto"></td><td class="t-hacer"></td>' +
+        '</tr></tfoot>' +
+      '</table></div>' +
+      '<p class="pista" style="padding:var(--e3) var(--e4) 0">' +
+        '«Te cuesta» y «a cuánto lo vendes» son lo que de verdad pagas y cobras al ciclo. ' +
+        '«Te deja llena» es lo que ganarías con todos los perfiles de una cuenta vendidos.</p>' +
+    '</div></div>' +
+    '<div class="tarjeta ancha"><div class="tarjeta-cabeza">' +
+      '<span class="cabeza-icono azul">' + ICONO.etiqueta + '</span>' +
+      '<div class="crece"><h2>El precio general</h2>' +
+        '<p>El que se usa cuando una plataforma no tiene el suyo puesto.</p></div>' +
+      '</div>' + panelTarifas('GENERAL') + '</div>';
+}
+
 function panelTarifas(plataforma){
-  const linea = lineaTarifas(plataforma);
   const esGeneral = plataforma === 'GENERAL';
-  const hoy = tarifaVigente(esGeneral ? '__ninguna__' : plataforma);
+  const linea = lineaTarifas(plataforma);
+  const venta = tarifaVigente(esGeneral ? '__ninguna__' : plataforma);
   const cuantos = clientes.filter(function(c){
     return esGeneral ? true : platDe(c) === plataforma;
   }).length;
+
+  if(esGeneral){
+    /* El precio general no tiene costo detrás: es el comodín para las
+       plataformas a las que todavía no les has puesto el suyo. */
+    return '<div class="tarjeta-cuerpo">' +
+      '<div class="precios-ahora grande">' +
+        '<div class="pr viva"><dt>Hoy vale</dt><dd class="cifra">' + esc(dinero(venta)) + '</dd>' +
+          '<small>por perfil y ciclo</small></div>' +
+        '<div class="pr"><dt>Cambios apuntados</dt><dd class="cifra">' + linea.length + '</dd>' +
+          '<small>' + (linea.filter(function(x){ return x.cuando==='futuro'; }).length
+            ? linea.filter(function(x){ return x.cuando==='futuro'; }).length + ' por venir' : 'ninguno por venir') + '</small></div>' +
+      '</div>' +
+      '<div class="fila" style="margin-top:var(--e4)">' +
+        '<button class="btn mini principal" data-nueva-tarifa="GENERAL">' + ICONO.mas +
+          'Poner un precio nuevo</button>' +
+      '</div>' +
+      (linea.length
+        ? '<div style="margin-top:var(--e4)">' + pintaLineaPrecios(linea, 'data-editar-tarifa', 'precio', plataforma) + '</div>'
+        : '<div style="padding:var(--e4) 0">' +
+            vacio('Sin precios apuntados',
+                  'Es el precio que se usa cuando una plataforma no tiene el suyo propio.') +
+          '</div>') +
+    '</div>';
+  }
+
+  const lineaC = lineaCostos(plataforma);
+  const costo = costoVigente(plataforma);
+  const mias = servicios.filter(function(m){ return clavePlat(m.nombre) === clavePlat(plataforma); });
+  const sitios = mias.reduce(function(a,m){ return Math.max(a, Number(m.perfiles)||0); }, 0) || 5;
+  /* Mientras no le pongas costo a la plataforma, el panel no se queda mudo:
+     enseña lo que de verdad te están costando sus cuentas hoy, que es de
+     donde vas a sacar el número que vas a poner. */
+  const gastoReal = mias.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const mediaReal = mias.length ? gastoReal / mias.length : 0;
+  const masBarata = mias.reduce(function(a,m){ const v=Number(m.costo)||0; return a===null||v<a?v:a; }, null);
+  const masCara   = mias.reduce(function(a,m){ const v=Number(m.costo)||0; return v>a?v:a; }, 0);
+  const costoUsado = costo > 0 ? costo : mediaReal;
+  const deja = venta * sitios - costoUsado;
+  const aTarifa = clientes.filter(function(c){ return platDe(c) === plataforma && sigueLaTarifa(c); }).length;
+  const equilibrio = venta > 0 ? Math.ceil(costoUsado / venta) : 0;
+
   return '<div class="tarjeta-cuerpo">' +
-    '<div class="precios-ahora grande">' +
-      '<div class="pr viva"><dt>Hoy vale</dt><dd class="cifra">' + esc(dinero(hoy)) + '</dd>' +
+    '<div class="precios-ahora cuatro">' +
+      '<div class="pr ' + (costoUsado > 0 ? 'cuesta' : '') + '"><dt>Te cuesta la cuenta</dt>' +
+        '<dd class="cifra">' + esc(costoUsado > 0 ? dinero(costoUsado) : '—') + '</dd>' +
+        '<small>' + (costo > 0 ? 'entera, con sus ' + sitios + ' perfiles'
+                   : costoUsado > 0 ? 'de media hoy · todavía sin fijar'
+                   : 'todavía no lo has puesto') + '</small></div>' +
+      '<div class="pr vende"><dt>Vendes el perfil a</dt>' +
+        '<dd class="cifra">' + esc(dinero(venta)) + '</dd>' +
         '<small>por perfil y ciclo</small></div>' +
-      '<div class="pr"><dt>Cambios apuntados</dt><dd class="cifra">' + linea.length + '</dd>' +
-        '<small>' + (linea.filter(function(x){ return x.cuando==='futuro'; }).length
-          ? linea.filter(function(x){ return x.cuando==='futuro'; }).length + ' por venir' : 'ninguno por venir') + '</small></div>' +
-      (esGeneral ? '' :
-      '<div class="pr"><dt>Gente a este precio</dt><dd class="cifra">' +
-        clientes.filter(function(c){ return platDe(c) === plataforma && !esPrecioEspecial(c); }).length +
-        '</dd><small>de ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') + '</small></div>') +
+      '<div class="pr ' + (costoUsado > 0 && venta > 0 ? (deja >= 0 ? 'gana' : 'pierde') : '') + '">' +
+        '<dt>Te deja llena</dt>' +
+        '<dd class="cifra">' + esc(costoUsado > 0 && venta > 0 ? (deja>=0?'+':'') + dinero(deja) : '—') + '</dd>' +
+        '<small>' + (costoUsado > 0 && venta > 0
+          ? 'cubres el costo con ' + equilibrio + ' ' + plural(equilibrio,'perfil','perfiles')
+          : 'pon los dos precios') + '</small></div>' +
+      '<div class="pr"><dt>Gente a este precio</dt>' +
+        '<dd class="cifra">' + aTarifa + '</dd>' +
+        '<small>de ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') +
+          (cuantos - aTarifa ? ' · ' + (cuantos - aTarifa) + ' con precio propio' : '') + '</small></div>' +
     '</div>' +
-    '<div class="fila" style="margin-top:var(--e4)">' +
-      '<button class="btn mini principal" data-nueva-tarifa="' + esc(plataforma) + '">' + ICONO.mas +
-        'Poner un precio nuevo</button>' +
+
+    '<div class="dos-precios">' +
+      '<div class="mitad-precio">' +
+        '<div class="fila">' +
+          '<h3 class="crece">Lo que te cuesta</h3>' +
+          '<button class="btn mini" data-nuevo-costo="' + esc(plataforma) + '">' + ICONO.mas +
+            '<span class="et">Costo nuevo</span></button>' +
+        '</div>' +
+        '<p class="pie-precio">Lo que pagas por una cuenta entera. Cuando lo cambies, cambian las ' +
+          mias.length + ' ' + plural(mias.length,'cuenta','cuentas') + ' que van al costo de la plataforma.</p>' +
+        (lineaC.length
+          ? pintaLineaPrecios(lineaC, 'data-editar-costo', 'costo', plataforma)
+          : '<div class="sin-precio">' +
+              (mias.length
+                ? 'Sin fijar. Tus ' + mias.length + ' ' + plural(mias.length,'cuenta','cuentas') + ' de ' + esc(plataforma) +
+                  ' te ' + plural(mias.length,'cuesta','cuestan') + ' ' + esc(dinero(gastoReal)) + ' al ciclo' +
+                  (masCara !== masBarata
+                    ? ' (de ' + esc(dinero(masBarata)) + ' a ' + esc(dinero(masCara)) + ' cada una)'
+                    : '') + '.<br>Fíjalo y todas irán a ese precio.'
+                : 'Sin costo puesto. Ponlo y sabrás de verdad cuánto ganas.') +
+            '</div>') +
+      '</div>' +
+      '<div class="mitad-precio">' +
+        '<div class="fila">' +
+          '<h3 class="crece">A cuánto lo vendes</h3>' +
+          '<button class="btn mini principal" data-nueva-tarifa="' + esc(plataforma) + '">' + ICONO.mas +
+            '<span class="et">Precio nuevo</span></button>' +
+        '</div>' +
+        '<p class="pie-precio">Lo que cobras por perfil. Al cambiarlo le cambia el precio a los ' +
+          aTarifa + ' que van a tarifa; los que tienen precio propio no se tocan.</p>' +
+        (linea.length
+          ? pintaLineaPrecios(linea, 'data-editar-tarifa', 'precio', plataforma)
+          : '<div class="sin-precio">Sin precio de venta apuntado. Pon el primero y queda la historia entera.</div>') +
+      '</div>' +
     '</div>' +
-    (linea.length
-      ? '<div class="linea-precios ancha" style="margin-top:var(--e4)">' + linea.slice().reverse().map(function(x){
-          const t = x.t;
-          return '<button class="lp ' + x.cuando + ' pulsable" data-editar-tarifa="' + esc(t.id) + '"' +
-            ' data-plat-tarifa="' + esc(plataforma) + '">' +
-            '<span class="lp-fecha">' + esc(fechaBonita(t.desde)) +
-              (t.hasta ? ' → ' + esc(fechaBonita(t.hasta))
-               : x.cuando === 'futuro' ? ' → en adelante' : ' → hoy') + '</span>' +
-            '<span class="lp-monto cifra">' + esc(dinero(t.precio)) + '</span>' +
-            (x.cuando === 'ahora' ? '<span class="lp-marca">rige ahora</span>'
-             : x.cuando === 'futuro' ? '<span class="lp-marca futuro">programado</span>' : '') +
-            (t.nota ? '<span class="lp-nota">' + esc(t.nota) + '</span>' : '') +
-          '</button>';
-        }).join('') + '</div>'
-      : '<div style="padding:var(--e4) 0">' +
-          vacio('Sin precios apuntados',
-                'Pon el primero y a partir de ahí queda la historia entera: qué cobrabas, qué cobras y qué vas a cobrar.') +
-        '</div>') +
   '</div>';
 }
 
@@ -11043,7 +11764,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
@@ -11396,6 +12117,22 @@ document.addEventListener('click', function(ev){
   }
   if(d.nuevaTarifa){ formTarifa(d.nuevaTarifa, null); return; }
   if(d.editarTarifa){ formTarifa(d.platTarifa || 'GENERAL', d.editarTarifa); return; }
+  if(d.aTarifa){
+    const cc = buscarCliente(d.aTarifa);
+    if(!cc) return;
+    const t = tarifaVigente(platDe(cc));
+    if(!(t > 0)){ avisar('Esa plataforma no tiene tarifa puesta todavía', 'mal'); return; }
+    recordarPaso('devolver a la tarifa a ' + (cc.nombre||'un cliente'));
+    cc.sigueTarifa = true;
+    cc.precios = [];
+    sincronizarPrecios();
+    anotar('PRECIO', (cc.nombre||'') + ' vuelve a la tarifa de ' + (platDe(cc)||'') + ': ' + dinero(t));
+    guardar(); pintar();
+    avisar((cc.nombre||'Este cliente') + ' vuelve a la tarifa: ' + dinero(t), 'bien', true);
+    return;
+  }
+  if(d.nuevoCosto){ formCosto(d.nuevoCosto, null); return; }
+  if(d.editarCosto){ formCosto(d.platTarifa || '', d.editarCosto); return; }
   if(d.diag){ verDiagnostico(d.diag); return; }
   if(d.cuotas){
     const par = String(d.cuotas).split('|');
@@ -11949,13 +12686,46 @@ window.PAPOTAS = {
     poner: function(plataforma, precio, desde, nota){
       const t = ponerTarifa(plataforma === 'GENERAL' ? 'general' : 'plataforma',
                             plataforma, Number(precio), desde || hoyISO(), nota || '');
-      olvidarIndices(); guardar(); pintar(); return t;
+      olvidarIndices();
+      const r = sincronizarPrecios();
+      guardar(); pintar(); return {tarifa:t, clientes:r.gente};
     },
+    quitar: function(id){ const ok = quitarTarifa(id); olvidarIndices();
+      sincronizarPrecios(); guardar(); pintar(); return ok; },
     deCliente: function(id, monto, desde){
       const c = buscarCliente(id); if(!c) return null;
       ponerPrecioCliente(c, Number(monto), desde || hoyISO());
       olvidarIndices(); guardar(); pintar(); return c.precios;
-    }
+    },
+    /* Devolver a alguien a la tarifa de su plataforma. */
+    aTarifa: function(id){
+      const c = buscarCliente(id); if(!c) return null;
+      c.sigueTarifa = true; c.precios = [];
+      sincronizarPrecios(); guardar(); pintar(); return cobroDe(c);
+    },
+    sigue: function(id){ const c = buscarCliente(id); return c ? sigueLaTarifa(c) : null; },
+    sincronizar: function(){ const r = sincronizarPrecios(); guardar(); pintar(); return r; }
+  },
+  /* Lo que te CUESTA la cuenta entera: el otro lado del negocio. */
+  costos: {
+    hoy:   function(plataforma, fecha){ return costoVigente(plataforma, fecha); },
+    linea: function(plataforma){ return lineaCostos(plataforma); },
+    poner: function(plataforma, costo, desde, nota){
+      const t = ponerCosto(plataforma, Number(costo), desde || hoyISO(), nota || '');
+      olvidarIndices();
+      const r = sincronizarPrecios();
+      guardar(); pintar(); return {costo:t, cuentas:r.cuentas};
+    },
+    quitar: function(id){ const ok = quitarCosto(id); olvidarIndices();
+      sincronizarPrecios(); guardar(); pintar(); return ok; },
+    sigue: function(id){ const m = buscarMaster(id); return m ? sigueElCosto(m) : null; },
+    /* Lo que deja una cuenta llena de esa plataforma. */
+    negocio: function(plataforma, perfiles){ return cuentaDelNegocio(plataforma, perfiles); }
+  },
+  /* Fechas, para poder hacer cuentas desde fuera sin reimplementarlas. */
+  fecha: {
+    hoy: function(){ return hoyISO(); },
+    mas: function(dia, cuantos){ return sumarDias(dia || hoyISO(), Number(cuantos)||0); }
   },
   deshacer: deshacerPaso,
   /* Abrir una sección concreta de los ajustes. */
