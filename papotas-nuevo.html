@@ -2164,6 +2164,16 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .f:active{ background:var(--capa-alta) }
 }
 
+.pasos-nube{display:flex;flex-direction:column;gap:var(--e3)}
+.paso-nube{display:flex;gap:var(--e3);align-items:flex-start}
+.paso-nube .pn-n{display:grid;place-items:center;flex:0 0 auto;
+  width:24px;height:24px;border-radius:99px;font-size:12px;font-weight:800;
+  background:var(--marca-suave);border:1px solid var(--marca-linea);color:var(--marca-alta)}
+.paso-nube b{display:block;font-size:13.5px;color:var(--txt)}
+.paso-nube small{display:block;margin-top:3px;font-size:12px;line-height:1.55;color:var(--txt-3)}
+.paso-nube code{font-family:var(--cifra);font-size:11px;background:var(--capa-alta);
+  border:1px solid var(--linea);border-radius:5px;padding:1px 5px}
+
 .f-lia{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--linea)}
 .f-lia:last-child{border-bottom:0}
 .f-lia .f{border-bottom:0;flex:1;min-width:0}
@@ -3240,7 +3250,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.6</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.7</span>
     </div>
   </nav>
 
@@ -3375,6 +3385,12 @@ const CLAVES = {
   combosGuardados:'pap_combos_guardados', auditoriaLog:'pap_auditoria',
   ajustes:'pap_ajustes', blocNotasTexto:'pap_bloc_notas'
 };
+
+/* El SQL de Supabase va DENTRO del programa, no en un archivo al lado.
+   Motivo: quien abre PAPOTAS desde un link no tiene el repositorio, y
+   mandarle a buscar «supabase.sql» es mandarle a que no lo haga. Es el
+   mismo archivo, palabra por palabra. */
+const SQL_SUPABASE = "-- PAPOTAS \u00b7 preparaci\u00f3n de Supabase. P\u00e9galo entero en SQL Editor y ejec\u00fatalo.\n\ncreate table if not exists public.papotas_sync_records (\n  coleccion       text        not null,\n  registro_id     text        not null,\n  datos           jsonb       not null default '{}'::jsonb,\n  eliminado       boolean     not null default false,\n  dispositivo_id  text,\n  version         bigint      not null default 1,\n  actualizado_en  timestamptz not null default now(),\n  primary key (coleccion, registro_id)\n);\n\ncreate index if not exists papotas_sync_records_actualizado_idx\n  on public.papotas_sync_records (actualizado_en);\n\ncreate or replace function public.papotas_upsert_record(\n  p_coleccion text, p_registro_id text, p_datos jsonb, p_dispositivo_id text\n) returns void language sql security definer as $$\n  insert into public.papotas_sync_records as t\n    (coleccion, registro_id, datos, eliminado, dispositivo_id, version, actualizado_en)\n  values (p_coleccion, p_registro_id, p_datos, false, p_dispositivo_id, 1, now())\n  on conflict (coleccion, registro_id) do update set\n    datos = excluded.datos,\n    eliminado = false,\n    dispositivo_id = excluded.dispositivo_id,\n    version = t.version + 1,\n    actualizado_en = now();\n$$;\n\ncreate or replace function public.papotas_delete_record(\n  p_coleccion text, p_registro_id text, p_dispositivo_id text\n) returns void language sql security definer as $$\n  insert into public.papotas_sync_records as t\n    (coleccion, registro_id, datos, eliminado, dispositivo_id, version, actualizado_en)\n  values (p_coleccion, p_registro_id, '{}'::jsonb, true, p_dispositivo_id, 1, now())\n  on conflict (coleccion, registro_id) do update set\n    eliminado = true,\n    dispositivo_id = excluded.dispositivo_id,\n    version = t.version + 1,\n    actualizado_en = now();\n$$;\n\n-- Acceso con la clave p\u00fablica (anon). Si esta base solo la usas t\u00fa, vale.\n-- Si vas a compartirla, cambia estas reglas por algo m\u00e1s estricto.\nalter table public.papotas_sync_records enable row level security;\ndrop policy if exists papotas_anon_todo on public.papotas_sync_records;\ncreate policy papotas_anon_todo on public.papotas_sync_records\n  for all to anon using (true) with check (true);\ngrant usage on schema public to anon;\ngrant select, insert, update, delete on public.papotas_sync_records to anon;\ngrant execute on function public.papotas_upsert_record(text,text,jsonb,text) to anon;\ngrant execute on function public.papotas_delete_record(text,text,text) to anon;\n\n-- Para que los cambios lleguen al instante a los dem\u00e1s dispositivos.\n-- (Si ya estaba publicada, no pasa nada: se puede ejecutar las veces que haga falta.)\ndo $do$\nbegin\n  alter publication supabase_realtime add table public.papotas_sync_records;\nexception when duplicate_object then null;\nend\n$do$;\n";
 
 const AJUSTES_BASE = {
   nombre:'PAPOTAS', moneda:'S/', diasAlerta:5, prefijoPais:'51',
@@ -4630,21 +4646,76 @@ const Nube = (function(){
     }catch(e){ console.warn('[PAPOTAS nube] escuchar', e); }
   }
 
+  /* Una promesa con plazo. Sin esto, una dirección mal pegada no da error:
+     se queda colgada esperando a un servidor que no existe, y el programa
+     dice «Conectando…» para siempre. Eso es peor que fallar, porque él se
+     queda mirando sin saber si tiene que esperar o arreglar algo. */
+  function conPlazo(promesa, ms, queEs){
+    return Promise.race([
+      promesa,
+      new Promise(function(_, malo){
+        setTimeout(function(){
+          const e = new Error('plazo agotado: ' + queEs);
+          e.esPlazo = true;
+          malo(e);
+        }, ms);
+      })
+    ]);
+  }
+
   async function arrancar(){
     if(!hayCredenciales()){ ponEstado('local'); return; }
     ponEstado('conectando');
     try{
-      await bajar();
+      await conPlazo(bajar(), 20000, 'traer lo de la nube');
       if(window.PAPOTAS && window.PAPOTAS.pintar) window.PAPOTAS.pintar();
       await subir();
       if(window.PAPOTAS && window.PAPOTAS.pintar) window.PAPOTAS.pintar();
       ponEstado('sincronizado');
       escuchar();
-    }catch(e){ console.warn('[PAPOTAS nube] arranque', e); ponEstado('error'); }
+    }catch(e){
+      console.warn('[PAPOTAS nube] arranque', e);
+      ultimoFallo = leerFallo(e);
+      ponEstado('error');
+      /* El fallo llega DESPUÉS de haber pintado la pantalla -conectar
+         tarda-, así que hay que volver a pintarla o el aviso no aparece
+         nunca: él se queda mirando una pantalla que no dice nada. */
+      if(window.PAPOTAS && window.PAPOTAS.pintar) window.PAPOTAS.pintar();
+    }
+  }
+
+  /* QUÉ HA FALLADO, EN CRISTIANO
+     «Sin conexión con la nube» no sirve para arreglar nada: las tres cosas
+     que fallan de verdad son la dirección mal pegada, la clave mal pegada
+     y el SQL sin ejecutar, y cada una se arregla en un sitio distinto.
+     Supabase las distingue, así que se traducen. */
+  let ultimoFallo = null;
+  function leerFallo(e){
+    const msg = String((e && (e.message || e.error_description || e.hint)) || e || '');
+    const cod = String((e && e.code) || '');
+    if(e && e.esPlazo)
+      return {que:'plazo', dice:'La nube no contesta. Suele ser la dirección mal pegada ' +
+              '-un carácter de más, o le falta el final .supabase.co-, o que el proyecto ' +
+              'esté pausado en Supabase. Míralo y vuelve a darle a Guardar y conectar.'};
+    if(/Failed to fetch|NetworkError|ERR_NAME|ENOTFOUND/i.test(msg))
+      return {que:'direccion', dice:'No existe esa dirección. Revisa la «URL del proyecto»: ' +
+              'va entera, con https:// delante y .supabase.co al final.'};
+    if(/Invalid API key|JWT|apikey/i.test(msg) || cod === '401' || cod === 'PGRST301')
+      return {que:'clave', dice:'La clave no vale. Tiene que ser la «anon public» de ' +
+              'Settings → API, la larga que empieza por eyJ. No la «service_role».'};
+    if(/does not exist|relation .* does not exist|schema cache|PGRST20[0-9]/i.test(msg) || cod === '42P01')
+      return {que:'tabla', dice:'Conecta bien, pero la base no tiene la tabla de PAPOTAS. ' +
+              'Falta ejecutar el SQL una vez, en SQL Editor.'};
+    if(/permission denied|row-level security|42501/i.test(msg))
+      return {que:'permiso', dice:'La tabla está, pero la clave pública no tiene permiso. ' +
+              'Vuelve a ejecutar el SQL entero: la última parte es la que da los permisos.'};
+    return {que:'otro', dice:msg.slice(0, 180) || 'No se pudo conectar.'};
   }
 
   return {arrancar, subir, bajar, pedirSubida, conectar, hayCredenciales, ponEstado,
-          get estado(){ return estado; }};
+          get estado(){ return estado; },
+          get fallo(){ return ultimoFallo; },
+          olvidarFallo: function(){ ultimoFallo = null; }};
 })();
 
 /* ---------- 5. Respaldo -------------------------------------------------
@@ -4776,7 +4847,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.6';
+const VERSION = 'v6.7';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7883,18 +7954,49 @@ function pintaAjustes(){
           '<p>La misma base que usa tu programa anterior. Los dos se sincronizan entre sí.</p></div>' +
         '<span class="insignia"><span class="nube-punto" data-nube-punto></span><span data-nube-texto>Solo en este dispositivo</span></span>' +
       '</div>' +
-      '<div class="tarjeta-cuerpo"><div class="rejilla r2">' +
-        campo('aj-sb-url','URL del proyecto',{valor:ajustes.supabaseUrl, pista:'https://xxxx.supabase.co'}) +
-        campo('aj-sb-key','Clave pública (anon)',{valor:ajustes.supabaseKey, pista:'eyJ…'}) +
-      '</div>' +
-      '<div class="fila" style="margin-top:var(--e3)">' +
-        '<button class="btn principal" id="btn-guardar-nube">Guardar y conectar</button>' +
-        (conectado ? '<button class="btn" id="btn-subir">Subir todo de nuevo</button>' : '') +
-        (conectado ? '<button class="btn" id="btn-bajar">Traer lo de la nube</button>' : '') +
-      '</div>' +
-      '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
-        'Tus claves se quedan solo en este dispositivo: nunca se suben a la nube ni salen en el respaldo compartido.' +
-      '</p></div>' +
+      '<div class="tarjeta-cuerpo"><div class="pila">' +
+
+        (Nube.fallo
+          ? '<p class="confirma-ojo">' + ICONO.alerta + '<span><b>No conectó.</b> ' +
+              esc(Nube.fallo.dice) + '</span></p>'
+          : '') +
+
+        /* Los dos datos no se adivinan: se dice de dónde se sacan, con el
+           nombre exacto del sitio donde están en Supabase. */
+        '<div class="pasos-nube">' +
+          '<div class="paso-nube"><span class="pn-n">1</span><div>' +
+            '<b>Pega los dos datos de tu proyecto</b>' +
+            '<small>En Supabase: <b>Settings → API</b>. «Project URL» arriba y ' +
+            '«anon public» debajo, la clave larga que empieza por <code>eyJ</code>. ' +
+            'La <b>service_role</b> NO: esa es la de administrador y no se pega en ningún sitio.</small>' +
+          '</div></div>' +
+          '<div class="paso-nube"><span class="pn-n">2</span><div>' +
+            '<b>Si es un proyecto nuevo, ejecuta el SQL una vez</b>' +
+            '<small>En <b>SQL Editor → New query</b>, pegar y darle a Run. ' +
+            'Si tu proyecto ya lo usaba el PAPOTAS de siempre, esto <b>ya está hecho</b>: ' +
+            'es la misma tabla, no hay que tocar nada.</small>' +
+            '<button class="btn mini" style="margin-top:8px" id="btn-copiar-sql">' +
+              ICONO.copiar + 'Copiar el SQL</button>' +
+          '</div></div>' +
+        '</div>' +
+
+        '<div class="rejilla r2">' +
+          campo('aj-sb-url','URL del proyecto',{valor:ajustes.supabaseUrl, pista:'https://xxxx.supabase.co'}) +
+          campo('aj-sb-key','Clave pública (anon)',{valor:ajustes.supabaseKey, pista:'eyJ…'}) +
+        '</div>' +
+        '<div class="fila">' +
+          '<button class="btn principal" id="btn-guardar-nube">Guardar y conectar</button>' +
+          (conectado ? '<button class="btn" id="btn-subir">Subir todo de nuevo</button>' : '') +
+          (conectado ? '<button class="btn" id="btn-bajar">Traer lo de la nube</button>' : '') +
+        '</div>' +
+
+        '<p class="aviso-mudanza">' + ICONO.alerta +
+          '<span>Las claves <b>no se suben nunca</b> a la nube: se quedan en este ' +
+          'aparato. Pero <b>sí van dentro del archivo de respaldo</b>, porque es lo que ' +
+          'hace que al restaurarlo en otro aparato la nube se conecte sola. Eso quiere ' +
+          'decir que <b>ese archivo no se le pasa a nadie</b>: quien lo tenga puede ' +
+          'escribir en tu base.</span></p>' +
+      '</div></div>' +
     '</div>'
      : '') +
     (cual === 'programa' ?
@@ -8264,6 +8366,13 @@ function pintar(){
   else if(pantalla === 'dinero') pintaDinero();
   else if(pantalla === 'ajustes'){ pintaAjustes(); contarCopiaGuardada(); }
   pintarAvisosNav();
+  /* El indicador de la nube vive en un trozo de HTML que se vuelve a
+     escribir en cada pintada, y el texto que trae escrito es «Solo en
+     este dispositivo». Así que sin esto, cualquier cosa que repinte la
+     pantalla -cobrar, filtrar, lo que sea- hacía que el indicador dijera
+     que no hay nube aunque estuviera sincronizando. Mentía, y sobre algo
+     en lo que hay que confiar. */
+  try{ Nube.ponEstado(Nube.estado); }catch(_){}
   ponerRolesPestanas();
   ponerTituloVentana();
   recolocarFoco();
@@ -10616,13 +10725,23 @@ document.addEventListener('click', function(ev){
     pintar();
   }
   else if(id === 'btn-importar'){ $('#archivo-respaldo').click(); }
+  else if(id === 'btn-copiar-sql'){
+    copiar(SQL_SUPABASE, 'El SQL');
+  }
   else if(id === 'btn-guardar-nube'){
     ajustes.supabaseUrl = val('aj-sb-url').trim();
     ajustes.supabaseKey = val('aj-sb-key').trim();
+    /* Se limpia el fallo anterior: si no, el aviso rojo de la vez pasada
+       se queda puesto aunque esta vez haya conectado bien. */
+    Nube.olvidarFallo();
     guardar(false);
     if(!Nube.hayCredenciales()){ Nube.ponEstado('local'); pintar(); avisar('Nube desconectada'); return; }
     avisar('Conectando con la nube…');
-    Nube.arrancar().then(function(){ pintar(); });
+    Nube.arrancar().then(function(){
+      pintar();
+      if(Nube.fallo) avisar('No conectó: ' + Nube.fallo.dice, 'mal');
+      else avisar('Nube conectada · ' + clientes.length + ' clientes sincronizados', 'bien', true);
+    });
   }
   else if(id === 'btn-subir'){
     avisar('Subiendo todo…');
@@ -10953,6 +11072,13 @@ window.PAPOTAS = {
     cuotas:  function(c){ return cuotasPendientes(c); },
     monto:   function(c){ return deudaDe(c); },
     aCobrar: function(c){ return aCobrarDe(c); }
+  },
+  /* El estado de la nube, para poder comprobarlo desde fuera y para que
+     él pueda pegarlo si algo no va. */
+  nube: function(){
+    return {estado: Nube.estado, conectada: Nube.hayCredenciales(),
+            fallo: Nube.fallo ? Nube.fallo.que : null,
+            dice: Nube.fallo ? Nube.fallo.dice : null};
   },
   /* Todo lo que una misma persona tiene contigo, y el mensaje único que
      se le manda por todo junto. Desde fuera para poder comprobarlo. */
