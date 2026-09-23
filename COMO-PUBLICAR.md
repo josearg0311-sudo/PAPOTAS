@@ -1,137 +1,95 @@
-# PAPOTAS · publicarlo e instalarlo
+# Publicar PAPOTAS
 
-## Lo primero: por qué hay que publicarlo
-
-Abrir el archivo desde el gestor de archivos del celular **funciona, pero es
-frágil**, y conviene saber por qué antes de meter ochenta clientes a mano:
-
-- **Los datos se pueden perder.** Android puede dar una dirección distinta
-  cada vez que abre el mismo archivo. El navegador guarda por dirección, así
-  que lo que metiste ayer puede no aparecer hoy. No se borró: quedó en una
-  dirección a la que ya no se llega.
-- **No se puede instalar** en la pantalla de inicio.
-- **No funciona sin internet.**
-
-Las tres cosas las concede el navegador solo a una dirección **https** de
-verdad. No es algo que el programa pueda arreglar por su cuenta.
-
-Publicarlo es gratis y se hace una vez.
+El programa es **un solo archivo**: `papotas-nuevo.html`. Lo sueltas en
+cualquier sitio que sirva direcciones `https://` y ya está. El icono, el
+logo y todo lo que hace falta para instalarlo van metidos dentro del
+archivo, así que no necesita nada al lado.
 
 ---
 
-## La forma más rápida: GitHub Pages (tu repositorio ya está listo)
+## Con Netlify (lo que ya usas)
 
-El repositorio ya trae preparado el publicador automático. Solo falta
-encenderlo, y es **un clic**:
+1. Entra a **https://app.netlify.com/drop**
+2. Arrastra el archivo `papotas-nuevo.html`, o mejor la **carpeta
+   descomprimida del ZIP** (ver más abajo por qué).
+3. Te da una dirección tipo `https://algo-random-123.netlify.app`.
+4. Ábrela en el celular. Chrome pone **«Instalar»** al costado de la barra.
 
-1. Entra a tu repositorio en GitHub.
-2. **Settings** (arriba) → **Pages** (menú de la izquierda).
-3. En **Source**, elige **GitHub Actions**.
+### La trampa: cada vez que sueltas, te da una dirección NUEVA
 
-Ya está. Cada vez que se suba un cambio, se publica solo. A los dos minutos
-tendrás la dirección, con esta forma:
+Y ahí está el problema de verdad, porque no es obvio:
 
-    https://TU-USUARIO.github.io/PAPOTAS/
+> **Los datos se guardan por dirección, no dentro del archivo.**
+> Tus clientes, tus cuentas y tus cobros viven en el navegador, atados a
+> la dirección donde los metiste. Si publicas una versión nueva y Netlify
+> te da otra dirección, el programa se muda y los datos se quedan.
+> **No se borran** —vuelves al link viejo y ahí están— pero en el nuevo
+> no aparecen.
 
-Abre esa dirección **en el celular**, y verás que el navegador te ofrece
-«Añadir a pantalla de inicio» o «Instalar aplicación». Acéptalo: a partir de
-ahí se abre como una aplicación, con su icono, sin barra de navegador, y
-funciona sin cobertura.
+Dos maneras de que no te pase:
 
-En esa dirección la portada es el programa nuevo. El de siempre queda en
-`/anterior.html` por si alguna vez hace falta volver a él.
+**a) Sitio fijo (lo recomendado).** Crea una cuenta gratis en Netlify y
+haz el primer Drop desde ella. Entonces el sitio es *tuyo*, tiene nombre
+fijo, y para actualizar arrastras el archivo nuevo **sobre ese mismo
+sitio** (Deploys → arrastra aquí). La dirección no cambia y los datos
+siguen donde estaban.
 
----
+**b) Respaldo a mano.** Antes de publicar una versión nueva:
+Ajustes → Tus datos → **Descargar respaldo**. Y en la dirección nueva:
+Ajustes → Tus datos → **Cargar un respaldo**.
 
-## Si prefieres otro sitio
+**c) La nube.** Si conectas Supabase (Ajustes → La nube), los datos dejan
+de depender de la dirección: se sincronizan solos entre cualquier
+dirección y cualquier aparato. Es el único arreglo que no hay que
+acordarse de hacer.
 
-Sirve cualquier alojamiento con **https**. Por ejemplo Netlify: entras a
-`app.netlify.com/drop` y arrastras la carpeta. En diez segundos tienes
-dirección.
-
-Sube estos archivos **juntos, en la misma carpeta**:
-
-    papotas-nuevo.html        el programa
-    index.html                el de siempre (opcional)
-    sw.js                     para instalarlo y abrirlo sin conexión
-    manifest.webmanifest      nombre e iconos
-    icono.svg
-    icon-192.png
-    icon-512.png
-    icon-maskable-192.png     estos dos son los que usa Android, que recorta
-    icon-maskable-512.png     el icono en círculo
-    apple-touch-icon.png      el del iPhone
-
-Si subes solo algunos, te queda el icono viejo en unos sitios y el nuevo en
-otros.
+Si abres PAPOTAS en una dirección y sale vacío, el propio programa te lo
+explica y te lleva a cargar el respaldo. No te asustes: no se perdió nada.
 
 ---
 
-## Pasar tus datos al programa publicado
+## El archivo solo, o el ZIP entero
 
-Si ya metiste datos abriendo el archivo suelto, **no se copian solos**: para
-el navegador son dos sitios distintos. Se hace así:
+| | Archivo solo | ZIP descomprimido |
+|---|---|---|
+| Se instala como aplicación | Sí | Sí |
+| Funciona sin internet | No | **Sí** |
+| Abre más rápido la segunda vez | No | **Sí** |
 
-1. En el programa donde tienes los datos: **Ajustes → Tus datos → Bajar
-   respaldo**. Se descarga un archivo.
-2. Abre la dirección publicada.
-3. **Ajustes → Tus datos → Restaurar** y elige ese archivo.
+El ZIP trae el `sw.js`, que es lo que guarda el programa en el celular
+para abrirlo sin datos. Si vas a usarlo a diario, sube el ZIP.
 
-Hazlo **antes** de seguir metiendo clientes, para no tener que hacerlo dos
-veces.
+Qué lleva el ZIP:
+
+```
+index.html              el programa (portada)
+papotas-nuevo.html      el mismo, por si enlazas a él por nombre
+sw.js                   para que funcione sin internet
+manifest.webmanifest    para instalarlo
+icono.svg  icon-192.png  icon-512.png
+icon-maskable-192.png  icon-maskable-512.png  apple-touch-icon.png
+```
 
 ---
 
-## Que se vea igual en el celular y en la laptop
+## Otras maneras
 
-Con la dirección publicada ya tienes el programa en los dos sitios, pero
-cada aparato guarda lo suyo. Para que compartan los mismos datos hay que
-conectar la nube, y eso está explicado más abajo.
+- **Cloudflare Pages** (`pages.cloudflare.com`): igual que Netlify,
+  también con arrastrar y soltar, también gratis.
+- **GitHub Pages**: el repositorio ya trae el publicador montado
+  (`.github/workflows/publicar.yml`). Publica solo en cada cambio, en la
+  rama `gh-pages`. Solo hay que encenderlo una vez en
+  `Settings → Pages → Source: Deploy from a branch → gh-pages → /(root)`.
+  La ventaja frente a Netlify Drop: la dirección **nunca cambia**, así que
+  el problema de arriba no existe. Está ahí por si algún día quieres
+  dejarlo fijo sin crear cuenta en ningún sitio.
 
-## 4. Cómo sincroniza
+---
 
-- Registro a registro: cada cliente, cuenta, venta e inversión viaja por
-  separado. No se pisan bloques enteros.
-- Los cambios llegan al instante (canal en vivo de Supabase) y, por si acaso,
-  se comprueba cada 30 segundos y cada vez que vuelves a la pestaña.
-- Las bajas también viajan: si borras en un móvil, desaparece en el otro.
-- Si dos dispositivos tocan **el mismo** cliente en el mismo momento, gana el
-  último que guardó. Tocando clientes distintos, no hay conflicto posible.
-- Sin internet sigues trabajando con normalidad; al volver la conexión, sube.
-- Tus claves de Supabase NO se suben a la nube: se quedan en cada dispositivo.
+## Lo que NO funciona
 
-## 5. Instalar como aplicación
-
-- **Android (Chrome)**: menú ⋮ → *Instalar aplicación*.
-- **iPhone / iPad (Safari)**: Compartir → *Añadir a pantalla de inicio*.
-- **Windows / Mac (Chrome o Edge)**: el icono de instalar en la barra de
-  direcciones.
-
-Queda con su icono, a pantalla completa y abre sin conexión.
-
-## 6. Si actualizas el programa
-
-Sube el `index.html` nuevo encima. La próxima vez que se abra con internet se
-coge la versión nueva (la copia guardada solo se usa cuando no hay red).
-
-## 7. El programa nuevo (`papotas-nuevo.html`)
-
-Es un segundo programa, con un diseño hecho de cero, que **convive** con el de
-siempre. Los dos se suben juntos y cada uno tiene su dirección:
-
-- `tusitio.netlify.app/` → el de siempre (`index.html`)
-- `tusitio.netlify.app/papotas-nuevo.html` → el nuevo
-
-Comparten los datos de verdad, no una copia:
-
-- **En el mismo dispositivo** leen y escriben las mismas claves del navegador
-  (`pap_clientes`, `pap_servicios`, `pap_ventas`…). Lo que cobras en uno, el
-  otro lo ve al abrirlo.
-- **El respaldo** es el mismo archivo `PAPOTAS_BACKUP_V10`: el que descargas de
-  uno se carga en el otro sin tocar nada.
-- **Supabase** es la misma tabla `papotas_sync_records` con las mismas
-  funciones y los mismos nombres de colección, así que se sincronizan entre
-  ellos igual que dos teléfonos.
-
-Puedes usar el que quieras, o los dos, sin decidir nada todavía. Si un día te
-quedas solo con el nuevo, basta con renombrarlo a `index.html`.
+Abrir el archivo desde el gestor de archivos del celular. La dirección
+empieza por `content://` y el navegador no considera eso un sitio: no
+ofrece instalar, no funciona sin internet, y Android puede darle una
+dirección distinta cada vez —así que lo que metas un día puede no estar
+al siguiente. El programa te avisa cuando lo abres así.

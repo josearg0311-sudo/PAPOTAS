@@ -2164,6 +2164,17 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .f:active{ background:var(--capa-alta) }
 }
 
+.mudanza-donde{margin:0;font-size:12px;color:var(--txt-3);line-height:1.6}
+.mudanza-donde code{font-family:var(--cifra);font-size:11.5px;color:var(--txt-2);
+  background:var(--capa-alta);border:1px solid var(--linea);
+  border-radius:6px;padding:2px 6px;word-break:break-all}
+.aviso-mudanza{display:flex;gap:9px;align-items:flex-start;
+  margin:var(--e3) 0 0;padding:10px var(--e3);border-radius:var(--r-m);
+  border:1px dashed var(--aviso-linea);background:var(--aviso-fondo);
+  font-size:12px;line-height:1.6;color:var(--txt-2)}
+.aviso-mudanza svg{width:16px;height:16px;flex:0 0 auto;color:var(--aviso);margin-top:1px}
+.aviso-mudanza b{color:var(--txt)}
+
 .firma-aviso{flex-wrap:wrap;gap:8px;align-items:center;
   padding:10px var(--e3);border-radius:var(--r-m);
   border:1px dashed var(--aviso-linea);background:var(--aviso-fondo)}
@@ -3208,7 +3219,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.4</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.5</span>
     </div>
   </nav>
 
@@ -3599,12 +3610,52 @@ function avisoDeDonde(){
     '</div>' +
     '<div class="tarjeta-cuerpo"><div class="pila">' +
       '<p style="margin:0;color:var(--txt-2);font-size:13px;line-height:1.6">' +
-        '<b>Qué hacer:</b> publica el programa en una dirección web -viene explicado en ' +
-        'COMO-PUBLICAR.md- y ábrelo siempre desde ahí. Es gratis y tarda cinco minutos. ' +
-        'Mientras tanto, <b>baja un respaldo cada vez que metas datos</b>, desde ' +
-        'Ajustes → Tus datos.</p>' +
+        '<b>Qué hacer:</b> suelta el archivo en <b>app.netlify.com/drop</b> y ábrelo ' +
+        'siempre desde la dirección que te dé. Es gratis, tarda un minuto y ahí sí ' +
+        'sale «Instalar». Mientras tanto, <b>baja un respaldo cada vez que metas ' +
+        'datos</b>, desde Ajustes → Tus datos.</p>' +
       '<div class="fila"><button class="btn principal" data-vaj="datos">' + ICONO.subir +
         'Ir a bajar un respaldo</button></div>' +
+    '</div></div>' +
+  '</div>';
+}
+
+/* LA MUDANZA
+   Los datos de PAPOTAS viven en el navegador, y el navegador los guarda
+   POR DIRECCIÓN. Eso quiere decir que el programa y los datos viajan por
+   separado: te llevas el programa a otra dirección y los clientes se
+   quedan en la vieja. No se borran -siguen ahí si vuelves al link de
+   antes- pero en la nueva no están.
+
+   Con Netlify esto muerde seguro: cada vez que sueltas el archivo te da
+   una dirección distinta (algo-random-123.netlify.app), así que subir una
+   versión nueva es, sin querer, mudarse de casa.
+
+   Aquí no se puede avisar ANTES -en la dirección nueva el programa nace
+   sin memoria, no sabe que existió otra-, así que se avisa cuando se
+   nota: si abre completamente vacío en una dirección web, se explica qué
+   pasó y se ofrecen las dos maneras de traerlos. */
+function panelMudanza(){
+  if(clientes.length || servicios.length || ventas.length) return '';
+  if(abiertoSuelto()) return '';        /* ese caso ya lo dice avisoDeDonde */
+  const donde = (location.host || '') + (location.pathname || '');
+  return '<div class="panel-mando info">' +
+    '<div class="pm-alto">' +
+      '<span class="pm-icono">' + ICONO.nube + '</span>' +
+      '<div class="pm-id"><h2>Este PAPOTAS está vacío</h2>' +
+        '<p>Si ya tenías clientes en otra dirección, <b>no se han borrado</b>: ' +
+        'están guardados en la dirección donde los metiste. El navegador guarda ' +
+        'los datos por dirección, así que el programa se muda y ellos se quedan. ' +
+        'Pásalos con el respaldo, o conecta la nube y ya no vuelve a pasarte.</p>' +
+      '</div>' +
+    '</div>' +
+    '<div class="tarjeta-cuerpo"><div class="pila">' +
+      '<div class="fila">' +
+        '<button class="btn principal" data-vaj="datos">' + ICONO.bajar + 'Cargar un respaldo</button>' +
+        '<button class="btn" data-vaj="nube">' + ICONO.nube + 'Conectar la nube</button>' +
+      '</div>' +
+      '<p class="mudanza-donde">Ahora mismo estás en <code>' + esc(donde) + '</code>' +
+        '. Si te suena otra, ábrela y baja el respaldo desde ahí.</p>' +
     '</div></div>' +
   '</div>';
 }
@@ -4704,7 +4755,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.4';
+const VERSION = 'v6.5';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5933,6 +5984,7 @@ function pintaHoy(){
     /* Lo primero de todo: si lo que escribe no se va a guardar, da igual
        todo lo demás de esta pantalla. */
     avisoDeDonde() +
+    panelMudanza() +
 
     /* Esto va ANTES que las cifras, y a propósito. Una cuenta a punto de
        caerse no es un dato para mirar: es algo que hay que hacer HOY, y si
@@ -7737,12 +7789,20 @@ function pintaAjustes(){
         '<span class="cabeza-icono azul">' + ICONO.caja + '</span>' +
         '<div class="crece"><h2>Respaldo</h2>' +
         '<p>El mismo archivo que usa tu programa anterior, así que sirve para los dos.</p></div>' +
+        '<span class="insignia aviso" title="Los datos se guardan por dirección">' +
+          ICONO.alerta + 'Bájalo ANTES de cambiar de dirección</span>' +
         (ajustes.ultimoRespaldo ? '<span class="insignia">último: ' + esc(fechaBonita(ajustes.ultimoRespaldo)) + '</span>' : '') +
       '</div>' +
       '<div class="tarjeta-cuerpo"><div class="fila">' +
         '<button class="btn principal" id="btn-exportar">Descargar respaldo</button>' +
         '<button class="btn" id="btn-importar">Cargar un respaldo</button>' +
       '</div>' +
+      '<p class="aviso-mudanza">' + ICONO.alerta +
+        '<span><b>Si vas a publicar el programa en otra dirección</b> -otro link de ' +
+        'Netlify, por ejemplo: cada vez que sueltas el archivo te da uno nuevo-, ' +
+        'baja el respaldo <b>antes</b> y cárgalo allá. Los datos se guardan por ' +
+        'dirección: no se borran, pero se quedan en la vieja. Con la nube conectada ' +
+        'esto deja de pasar.</span></p>' +
       '<p style="font-size:12px;color:var(--txt-3);margin:var(--e3) 0 0;line-height:1.6">' +
         'Ahora mismo tienes <b>' + clientes.length + '</b> clientes, <b>' + servicios.length + '</b> cuentas master, ' +
         '<b>' + ventas.length + '</b> cobros y <b>' + inversiones.length + '</b> gastos guardados en este dispositivo.' +
