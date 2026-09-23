@@ -3522,7 +3522,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.3</span>
     </div>
   </nav>
 
@@ -5056,6 +5056,26 @@ const Nube = (function(){
        · el resto lo dicta la nube.
      Con `forzar` a true se hace lo de antes: la nube manda sobre todo, que
      es lo que se quiere al pulsar "Traer lo de la nube" a propósito. */
+  /* ¿Este ajuste lo ha tocado él, o está como vino de fábrica? Una lista
+     vacía y una casilla sin estrenar no son «lo suyo»: son la nada, y la
+     nada no puede ganarle a lo que ya hay en la nube. */
+  function tieneAlgo(v){
+    if(v === null || v === undefined || v === '') return false;
+    if(Array.isArray(v)) return v.length > 0;
+    if(typeof v === 'string') return v.trim() !== '';
+    if(typeof v === 'object') return Object.keys(v).length > 0;
+    return true;
+  }
+  function juntarAjustes(mio, suyo){
+    const salida = Object.assign({}, AJUSTES_BASE, suyo);
+    Object.keys(mio || {}).forEach(function(k){
+      if(!tieneAlgo(mio[k])) return;
+      if(JSON.stringify(mio[k]) === JSON.stringify(AJUSTES_BASE[k])) return;
+      salida[k] = mio[k];
+    });
+    return salida;
+  }
+
   async function bajar(forzar){
     const x = await conectar(); if(!x) return {aplicados:0, quitados:0};
     const r = await x.from('papotas_sync_records').select('coleccion,registro_id,datos,eliminado');
@@ -5121,10 +5141,28 @@ const Nube = (function(){
       const mio = JSON.parse(JSON.stringify(ajustes||{}));
       delete mio.supabaseUrl; delete mio.supabaseKey;
       const pendiente = conocido.get(ka) !== firmaDe(mio);
-      if(forzar || !pendiente){
+      /* EL ESTRENO DE UN APARATO ---------------------------------------
+         Aquí se perdían los precios. Un aparato recién abierto no conoce
+         esta fila, así que la daba por «cambiada aquí y sin subir», se
+         quedaba con sus ajustes en blanco... y acto seguido se los subía
+         encima a los buenos. Resultado: abres el enlace en el celular,
+         conectas la nube, y los precios de las nueve plataformas que
+         tenías en la laptop desaparecen de la nube.
+
+         En el estreno no se elige entre los dos: se juntan. De la nube
+         viene todo, y solo se queda lo de aquí que de verdad se haya
+         tocado -que no esté vacío y no sea lo de fábrica-, porque eso sí
+         lo escribió él en este aparato. */
+      const estreno = !conocido.has(ka);
+      if(forzar || !pendiente || estreno){
         const url = ajustes.supabaseUrl, key = ajustes.supabaseKey;
-        ajustes = Object.assign({}, AJUSTES_BASE, conf, {supabaseUrl:url, supabaseKey:key});
-        conocido.set(ka, firmaDe(conf));
+        const juntado = estreno && !forzar && pendiente
+          ? juntarAjustes(mio, conf)
+          : Object.assign({}, AJUSTES_BASE, conf);
+        ajustes = Object.assign(juntado, {supabaseUrl:url, supabaseKey:key});
+        const limpio = JSON.parse(JSON.stringify(ajustes));
+        delete limpio.supabaseUrl; delete limpio.supabaseKey;
+        conocido.set(ka, firmaDe(limpio));
       }
     }else if(confBorrada){ conocido.delete('ajustes::singleton'); }
 
@@ -5365,7 +5403,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.2';
+const VERSION = 'v7.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
