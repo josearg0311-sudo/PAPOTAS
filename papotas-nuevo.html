@@ -1742,19 +1742,58 @@ html[data-tema="claro"] .tc::after{opacity:.05}
    y estado debajo, y el mando a la derecha. Sin cambiar una línea de HTML. */
 @media (max-width:700px){
   .tc{
-    display:grid;gap:6px 10px;padding:11px var(--e3);border-radius:var(--r-l);
+    display:grid;gap:5px 10px;padding:10px var(--e3);border-radius:var(--r-l);
     grid-template-columns:minmax(0,1fr) auto;
-    grid-template-areas:"alto mando" "pie mando";
+    /* Los botones ocupaban la columna de la derecha en LAS DOS filas, y
+       eso rompía las dos:
+
+       · Abajo no cabían «S/ 15.00» y «venció hace 21 días» en lo que
+         sobraba, así que la pastilla se salía de su celda y se metía por
+         debajo de los botones. En pantalla parecía que el botón estaba
+         encima del texto.
+       · Arriba se comían noventa píxeles, y el nombre se quedaba en
+         «DIEGO DE LA …» con el perfil caído a otro renglón. Justo el
+         perfil, que es lo único que distingue una ficha de DIEGO QUIROZ
+         de la otra ficha de DIEGO QUIROZ.
+
+       Así que la identidad se lleva el ancho entero y los botones bajan a
+       la derecha de la fila del dinero, que es donde hay sitio. */
+    grid-template-areas:"alto alto" "pie mando";
     align-items:center;
   }
   .tc-alto{grid-area:alto}
   .tc-pie{
     grid-area:pie;border-top:0;padding-top:0;margin-top:0;
-    padding-left:50px;gap:9px;
+    /* Sin sangrar: ahora que la identidad tiene su propio renglón, la
+       fila del dinero puede empezar en el borde y así le caben el precio
+       y la pastilla en la misma línea. Sangrada se partía en dos y cada
+       tarjeta crecía medio dedo por nada. */
+    padding-left:0;gap:6px;flex-wrap:wrap;row-gap:6px;
   }
+  /* Y aun así, que puedan encoger: un hijo de flex no se encoge por debajo
+     de su contenido a menos que se le diga, y esa es la otra mitad del
+     mismo problema. */
+  .tc-pie > *{min-width:0}
+  /* Apretada lo justo: trece píxeles eran los que faltaban para que el
+     precio y el estado entraran en la misma línea, y esa línea de más se
+     pagaba cien veces al bajar la lista. */
+  .tc-pie .pastilla{overflow:hidden;text-overflow:ellipsis;
+    font-size:10px;padding:2px 7px;gap:4px}
+  .tc-pie .pastilla svg{width:11px;height:11px}
   .tc-monto{flex:0 0 auto}
   .tc-monto small{display:none}
-  .tc-monto b{font-size:14px}
+  .tc-monto b{font-size:13.5px}
+  /* La cuenta y el perfil pueden ocupar dos renglones antes de cortarse.
+     Cortados por lo alto se quedaban en «NETFLIX 1 …», y lo que se perdía
+     era justo el perfil: lo único que distingue una ficha de DIEGO QUIROZ
+     de la otra ficha de DIEGO QUIROZ. */
+  .tc-id small{white-space:normal;display:flex;flex-wrap:wrap;gap:4px}
+  /* Y que quepan de una: la cuenta puede recortarse -«NETFLIX 1» se
+     reconoce a medias- pero el perfil no, que es lo que distingue una
+     ficha de otra de la misma persona. */
+  .tc-id .chip-cuenta{min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .tc-id .chip-perfil{flex:0 0 auto}
+  .tc-alto{gap:8px}
   .tc-mando{
     grid-area:mando;border-top:0;padding-top:0;
     flex-direction:row;align-self:center;
@@ -1765,8 +1804,8 @@ html[data-tema="claro"] .tc::after{opacity:.05}
   /* La flecha sobra en el teléfono: la tarjeta entera ya abre la ficha, y
      esos cincuenta píxeles se los estaba comiendo al nombre de la cuenta. */
   .tc-mando .btn[data-ficha]{display:none}
-  .tc .f-marca{width:36px;height:36px}
-  .tc-pie{padding-left:46px}
+  .tc .f-marca{width:36px;height:36px;flex:0 0 auto}
+  .tc-mando{gap:6px}
 }
 /* Por debajo de 400 px el boton de cobrar se queda solo con su icono: con
    la palabra dentro, el nombre del cliente se quedaba en dos letras. */
@@ -1774,9 +1813,16 @@ html[data-tema="claro"] .tc::after{opacity:.05}
   .tc-mando .tc-cobrar .et{display:none}
   .tc-mando .tc-cobrar{width:44px;padding:0;flex:0 0 auto;justify-content:center}
 }
-@media (max-width:360px){
-  .tc-pie{padding-left:0}
-}
+
+/* En la LISTA la pastilla no va rellena. La tarjeta ya dice el estado tres
+   veces -el filo de la izquierda, la franja de arriba y el tinte del
+   fondo-, así que catorce pastillas macizas seguidas no avisan de nada:
+   pintan la pantalla de rojo y dejan de leerse. Rellena se queda donde sí
+   manda, que es la ficha de uno solo. */
+.tc .pastilla.llena{ box-shadow:none }
+.tc .pastilla.llena.mal  {background:var(--mal-fondo);  color:var(--mal);  border-color:var(--mal-linea)}
+.tc .pastilla.llena.aviso{background:var(--aviso-fondo);color:var(--aviso);border-color:var(--aviso-linea)}
+.tc .pastilla.llena.bien {background:var(--bien-fondo); color:var(--bien); border-color:var(--bien-linea)}
 
 /* La cabecera de la ficha en ventana. */
 .ficha-cabeza{
@@ -2117,6 +2163,12 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .btn:active{ transform:scale(.97) }
   .f:active{ background:var(--capa-alta) }
 }
+
+.firma-aviso{flex-wrap:wrap;gap:8px;align-items:center;
+  padding:10px var(--e3);border-radius:var(--r-m);
+  border:1px dashed var(--aviso-linea);background:var(--aviso-fondo)}
+.firma-muestra{flex:1 1 200px;min-width:0;font-family:var(--fuente);
+  font-size:12px;color:var(--txt-2);white-space:pre-wrap;word-break:break-word}
 
 /* ---- La misma persona, en varias fichas ---- */
 .tarjeta.persona .f-aqui{background:var(--marca-suave);cursor:default}
@@ -3156,7 +3208,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.3</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.4</span>
     </div>
   </nav>
 
@@ -4235,6 +4287,16 @@ function textoDias(iso){
   return 'faltan ' + d + ' días';
 }
 
+/* El mismo dato en corto, para donde no hay sitio. */
+function textoDiasCorto(iso){
+  const d = diasHasta(iso);
+  if(d === null) return 'sin fecha';
+  if(d < 0)  return 'hace ' + (-d) + ' ' + plural(-d,'día','días');
+  if(d === 0) return 'hoy';
+  if(d === 1) return 'mañana';
+  return 'en ' + d + ' días';
+}
+
 /* ---------- 4. La nube (Supabase) ---------------------------------------
    Mismo contrato que el programa anterior: tabla papotas_sync_records y las
    funciones papotas_upsert_record / papotas_delete_record. Las colecciones
@@ -4642,7 +4704,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.3';
+const VERSION = 'v6.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5402,10 +5464,18 @@ function pastillaEstado(c, como){
   const e = pintaDe(c);
   const suave = e.clase === 'bien' || e.clase === 'pausado';
   /* 'corta' es para la tabla, donde la fecha ya va en su propia columna y
-     repetirla dejaba la pastilla más ancha que la celda. */
+     repetirla dejaba la pastilla más ancha que la celda.
+
+     'ficha' es para las tarjetas de la lista: ahí «venció hace 21 días» no
+     cabe al lado del precio y partía la tarjeta en un renglón más. Se
+     quita el verbo y se queda «hace 21 días»: el triángulo y el rojo ya
+     dicen que venció, y repetirlo costaba medio dedo de alto en cada una
+     de las cien tarjetas. */
   const texto = como === 'corta'
     ? (enPausa(c) ? 'En pausa' : e.etq)
-    : (enPausa(c) ? 'En pausa' : textoDias(c.vencimiento));
+    : como === 'ficha'
+      ? (enPausa(c) ? 'En pausa' : textoDiasCorto(c.vencimiento))
+      : (enPausa(c) ? 'En pausa' : textoDias(c.vencimiento));
   return '<span class="pastilla ' + e.clase + (suave ? ' suave' : ' llena') +
     (como === 'corta' ? ' corta' : '') + '">' +
     ICONO[e.icono] + '<b>' + esc(texto) + '</b>' +
@@ -5605,7 +5675,7 @@ function tarjetaCliente(c){
     '<span class="tc-pie">' +
       '<span class="tc-monto"><small>Le cobras</small>' +
         '<b class="cifra">' + esc(dinero(cobroDe(c))) + '</b></span>' +
-      pastillaEstado(c, false) +
+      pastillaEstado(c, 'ficha') +
       (escritoHoy(c) && !pausa ? '<span class="marca-escrito" title="Ya le escribiste hoy">' +
         ICONO.wa + '</span>' : '') +
     '</span>' +
@@ -6508,8 +6578,14 @@ function hojaBusqueda(){
     return sinTildes([m.nombre, m.correo, m.etiqueta, m.numero, nombreCuenta(m)].join(' ')).indexOf(busqueda) >= 0;
   });
   $('#titulo').textContent = 'Buscando';
-  $('#subtitulo').textContent = gente.length + ' ' + plural(gente.length,'cliente','clientes') +
-    ' y ' + cuentas.length + ' ' + plural(cuentas.length,'cuenta','cuentas') + ' coinciden';
+  /* Corto a propósito: en el celular el resumen tiene medio renglón, y
+     «14 clientes y 0 cuentas coinciden» se quedaba en «14 clientes y 0
+     cuentas…», que es donde deja de decir nada. Y lo que vale cero no se
+     nombra: si no hay cuentas, no se escribe «0 cuentas». */
+  $('#subtitulo').textContent = [
+    gente.length ? gente.length + ' ' + plural(gente.length,'cliente','clientes') : '',
+    cuentas.length ? cuentas.length + ' ' + plural(cuentas.length,'cuenta','cuentas') : ''
+  ].filter(Boolean).join(' · ') || 'nada coincide';
 
   return '<div class="pila">' +
     '<div class="migas"><button class="miga-volver" data-limpiar-busqueda="1">' + ICONO.x +
@@ -7549,7 +7625,15 @@ function pintaAjustes(){
         campo('aj-pl-cobro','Recordatorio de cobro',{tipo:'textarea', valor:ajustes.plantillaCobro, filas:3}) +
         campo('aj-pl-vencido','Cuando ya venció',{tipo:'textarea', valor:ajustes.plantillaVencido, filas:3}) +
         campo('aj-pl-entrega','Entrega de datos',{tipo:'textarea', valor:ajustes.plantillaEntrega, filas:4}) +
-        campo('aj-firma','Firma al final',{valor:ajustes.firmaWs, pista:'Opcional'}) +
+        campo('aj-firma','Firma al final',{valor:ajustes.firmaWs, pista:'Opcional · déjalo vacío para no firmar',
+          ayuda:'Se pega al final de TODOS los mensajes. Si arrastras una firma del programa viejo y ya no te representa, bórrala aquí.'}) +
+        (ajustes.firmaWs
+          ? '<div class="fila firma-aviso">' +
+              '<span class="insignia aviso">Ahora cada mensaje acaba así</span>' +
+              '<code class="firma-muestra">' + esc(ajustes.firmaWs) + '</code>' +
+              '<button class="btn mini fantasma" id="btn-quitar-firma">' + ICONO.x + 'Quitar la firma</button>' +
+            '</div>'
+          : '') +
         campo('aj-wa-abrir','Cómo abro WhatsApp',{tipo:'select', valor:ajustes.waComoAbrir||'auto',
           opciones:[['auto','Solo (aplicación en el celular, web en la laptop)'],
                     ['app','Siempre la aplicación'],
@@ -10325,6 +10409,16 @@ document.addEventListener('click', function(ev){
     ajustes.diasRenovacion = Math.max(1, Math.round(num('aj-ciclodias')) || 30);
     ajustes.metaMensual = Math.max(0, num('aj-meta'));
     guardar(); pintar(); avisar('Ajustes guardados', 'bien');
+  }
+  else if(id === 'btn-quitar-firma'){
+    /* Se vacía el campo y se guarda de una: si solo se vaciara el campo,
+       habría que acordarse de darle a Guardar, y el mensaje seguiría
+       saliendo firmado hasta entonces. */
+    const caja = document.getElementById('aj-firma');
+    if(caja) caja.value = '';
+    ajustes.firmaWs = '';
+    guardar(); pintar();
+    avisar('Firma quitada · los mensajes ya no la llevan', 'bien');
   }
   else if(id === 'btn-guardar-plantillas'){
     ajustes.plantillaCobro = val('aj-pl-cobro');
