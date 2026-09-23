@@ -3522,7 +3522,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.3</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.4</span>
     </div>
   </nav>
 
@@ -4328,7 +4328,7 @@ function sumarMeses(iso, n){
 function sumarDias(iso, n){
   const p = String(iso).split('-');
   const d = new Date(+p[0], +p[1]-1, +p[2]);
-  d.setDate(d.getDate() + Number(n||0));
+  d.setDate(d.getDate() + (Number(n) || 0));
   const z = d.getTimezoneOffset()*60000;
   return new Date(d.getTime()-z).toISOString().slice(0,10);
 }
@@ -4400,7 +4400,7 @@ function clientesDe(masterId){
   return _porMaster.get(String(masterId)) || [];
 }
 function libresDe(m){
-  return Math.max(0, Math.max(0, Number(m.perfiles||0)) - clientesDe(m.id).length);
+  return Math.max(0, Math.max(0, Number(m.perfiles) || 0) - clientesDe(m.id).length);
 }
 /* El perfil viene escrito de mil formas según cómo se cargó: "2", "PERFIL 3",
    "perfil 4", "Perfil1"... Aquí se enseña siempre igual. */
@@ -4415,7 +4415,20 @@ function perfilBonito(c){
 function nombreCuenta(m){
   if(!m) return '';
   const et = String(m.etiqueta||'').trim();
-  return m.nombre + ' ' + (m.numero||1) + (et ? ' · ' + et : '');
+  /* Una cuenta a la que nunca le pusiste plataforma se llamaba
+     «undefined 1». El resto del programa ya la agrupa como SIN PLATAFORMA;
+     el nombre tenía que decir lo mismo. */
+  const plat = String(m.nombre||'').trim() || 'SIN PLATAFORMA';
+  return plat + ' ' + (m.numero||1) + (et ? ' · ' + et : '');
+}
+
+/* Lo que cuesta una cuenta, siempre un número y nunca negativo. Un costo
+   en negativo -un "-20" de un dedo torcido- hacía que la plataforma
+   pareciera dar más dinero del que da, que es la mentira más cara que
+   puede contar este programa. */
+function costoDe(m){
+  const v = Number(m && m.costo);
+  return isFinite(v) && v > 0 ? v : 0;
 }
 /* ---------- EL NÚMERO CON EL QUE SE ABRE WHATSAPP ------------------------
    Aquí había dos formas de mandar un mensaje al vacío:
@@ -4526,7 +4539,7 @@ function resumenCuenta(m, eco){
   const ing = eco.ingresos.get(String(m.id)) || 0;
   const gas = eco.gastos.get(String(m.id)) || 0;
   const rec = cl.reduce((a,c) => a + cobroDe(c), 0);
-  const costo = Number(m.costo) || 0;
+  const costo = costoDe(m);
   return {clientes:cl.length, ingresos:ing, gastado:gas, neto:ing-gas,
           recurrente:rec, costo, margen:rec-costo};
 }
@@ -5403,7 +5416,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.3';
+const VERSION = 'v7.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7003,7 +7016,7 @@ function gruposPlataforma(eco){
     const g = caja(k);
     const r = resumenCuenta(m, eco);
     g.cuentas.push(m);
-    g.tope   += Math.max(0, Number(m.perfiles||0));
+    g.tope   += Math.max(0, Number(m.perfiles) || 0);
     g.libres += libresDe(m);
     g.costo  += r.costo;
     g.cobra  += r.recurrente;
@@ -7032,7 +7045,7 @@ function genteDe(n){
    El perfil se casa con su número, así «Perfil 3» es la casilla 3 y no una
    fila cualquiera de una lista. Quien no encaje sale igual, al final. */
 function perfilesDe(m){
-  const tope = Math.max(0, Number(m.perfiles||0));
+  const tope = Math.max(0, Number(m.perfiles) || 0);
   const puestos = new Map();
   const sobrantes = [];
   clientesDe(m.id).slice().sort(function(a,b){
@@ -7618,7 +7631,7 @@ function hojaPlataforma(n){
    propia pantalla, que es donde de verdad cabe lo que tiene dentro. */
 function filaCuenta(m, eco){
   const casillas = perfilesDe(m);
-  const tope   = Math.max(0, Number(m.perfiles||0));
+  const tope   = Math.max(0, Number(m.perfiles) || 0);
   const usados = casillas.filter(function(x){ return x.cliente && x.n; }).length;
   const libres = Math.max(0, tope - usados);
   const dv = diasHasta(m.vencimiento);
@@ -7648,7 +7661,7 @@ function hojaCuenta(m){
   const r    = resumenCuenta(m, eco);
   const plat = String(m.nombre||'').trim().toUpperCase();
   const casillas = perfilesDe(m);
-  const tope   = Math.max(0, Number(m.perfiles||0));
+  const tope   = Math.max(0, Number(m.perfiles) || 0);
   const usados = casillas.filter(function(x){ return x.cliente && x.n; }).length;
   const libres = Math.max(0, tope - usados);
   const dv = diasHasta(m.vencimiento);
@@ -8723,7 +8736,7 @@ function pintaAjustes(){
    sus clientes de una vez y encima te los deja escribiendo. */
 function panelPorCaer(lista, dentro){
   if(!lista.length) return '';
-  const cuanto = lista.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const cuanto = lista.reduce(function(a,m){ return a + costoDe(m); }, 0);
   const manana = lista.filter(function(m){ const d=diasHasta(m.vencimiento); return d<=1; });
   return '<div class="panel-mando urgente">' +
     '<div class="pm-alto">' +
@@ -8743,7 +8756,7 @@ function panelPorCaer(lista, dentro){
           logoPlataforma(m.nombre) +
           '<span class="f-txt"><span class="f-nom">' + esc(nombreCuenta(m)) + '</span>' +
             '<span class="f-sub">' + suyos + ' ' + plural(suyos,'cliente dentro','clientes dentro') +
-            ' · te cuesta ' + esc(dinero(Number(m.costo)||0)) + '</span></span>' +
+            ' · te cuesta ' + esc(dinero(costoDe(m))) + '</span></span>' +
           '<span class="f-der">' +
             '<span class="f-monto" style="font-size:12.5px;color:' + (d<=1?'var(--mal)':'var(--aviso)') + '">' +
               (d===0 ? 'vence hoy' : d===1 ? 'mañana' : 'en ' + d + ' días') + '</span>' +
@@ -8761,7 +8774,7 @@ function panelMastersVencidos(lista, eco){
   if(!lista.length) return '';
   const dentro  = lista.reduce(function(a,m){ return a + clientesDe(m.id).length; }, 0);
   const enJuego = lista.reduce(function(a,m){ return a + resumenCuenta(m, eco).recurrente; }, 0);
-  const cuesta  = lista.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const cuesta  = lista.reduce(function(a,m){ return a + costoDe(m); }, 0);
   const deben   = lista.reduce(function(a,m){ return a + clientesDe(m.id).filter(debe).length; }, 0);
   const peor    = lista.reduce(function(a,m){
     const d = diasHasta(m.vencimiento);
@@ -8924,7 +8937,7 @@ function renovarTodasVencidas(){
       (plataformaActiva === 'TODAS' || String(m.nombre||'').trim().toUpperCase() === plataformaActiva);
   });
   if(!lista.length){ avisar('No hay ninguna vencida', 'bien'); return; }
-  const cuesta = lista.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const cuesta = lista.reduce(function(a,m){ return a + costoDe(m); }, 0);
   confirmar('Renové ' + lista.length + ' ' + plural(lista.length,'cuenta','cuentas'),
     'Se les corre la fecha un ciclo y se apunta el gasto: ' + dinero(cuesta) +
     ' en total. Hazlo cuando ya las hayas pagado de verdad.',
@@ -8936,7 +8949,7 @@ function renovarTodasVencidas(){
            general, así que una comprada por 45 días se renovaba como si
            fuera mensual y la fecha quedaba mal desde el primer día. */
         m.vencimiento = avanzar(m.vencimiento || hoyISO(), cicloDe(m));
-        const costo = Number(m.costo) || 0;
+        const costo = costoDe(m);
         if(costo > 0){
           inversiones.push({id:nuevoId('inv'), plataforma:m.nombre, cuentaMasterId:m.id,
                             persona:ajustes.nombre || 'PAPOTAS', monto:costo, fecha:hoyISO()});
@@ -9628,7 +9641,7 @@ function renovarMaster(id){
   recordarPaso('renovar ' + nombreCuenta(m));
   const nueva = avanzar(m.vencimiento || hoyISO(), cicloDe(m));
   m.vencimiento = nueva;
-  const costo = Number(m.costo) || 0;
+  const costo = costoDe(m);
   if(costo > 0){
     inversiones.push({
       id:nuevoId('inv'), plataforma:m.nombre, cuentaMasterId:m.id,
@@ -10254,7 +10267,7 @@ function formCliente(id, previo){
        /* Si le cambias el precio, queda apuntado cuándo y de cuánto a cuánto:
           «¿este desde cuándo paga 15?» dejaba de tener respuesta. */
        const antes = Number(destino.monto);
-       const ahora = (sigue && tarifaSuya > 0) ? tarifaSuya : num('cl-monto');
+       const ahora = (sigue && tarifaSuya > 0) ? tarifaSuya : Math.max(0, num('cl-monto'));
        if(!esNuevo && isFinite(antes) && antes !== ahora){
          if(!Array.isArray(destino.historialPrecios)) destino.historialPrecios = [];
          destino.historialPrecios.unshift({fecha:hoyISO(), de:antes, a:ahora});
@@ -10371,8 +10384,8 @@ function formMaster(id, plataformaPuesta){
        destino.numero = Math.max(1, Math.round(num('ms-numero')) || 1);
        destino.correo = val('ms-correo').trim();
        destino.contrasena = val('ms-clave');
-       destino.perfiles = Math.max(0, Math.round(num('ms-perfiles')));
-       destino.costo = num('ms-costo');
+       destino.perfiles = Math.max(0, Math.round(num('ms-perfiles')) || 0);
+       destino.costo = Math.max(0, num('ms-costo'));
        /* Si le pones el costo que vale la plataforma, esta cuenta sigue a la
           plataforma y cambiará con ella. Si le pones otro, es porque esta
           te salió por otro precio: se queda con el suyo y nadie lo toca. */
@@ -10631,7 +10644,7 @@ function diagnostico(){
   const repetidos = [];
   servicios.forEach(function(m){
     const cl = clientesDe(m.id);
-    const tope = Math.max(0, Number(m.perfiles||0));
+    const tope = Math.max(0, Number(m.perfiles) || 0);
     if(tope && cl.length > tope) sobre.push({texto:nombreCuenta(m) + ': ' + cl.length + ' clientes en ' + tope + ' perfiles', cuenta:m.id});
     const vistos = {};
     cl.forEach(function(c){
@@ -11022,7 +11035,7 @@ function aQueCuentasAfecta(plataforma, costo){
   const plat = clavePlat(plataforma);
   return servicios.filter(function(m){
     return sigueElCosto(m) && clavePlat(m.nombre) === plat &&
-           Math.abs((Number(m.costo)||0) - costo) > 0.005;
+           Math.abs(costoDe(m) - costo) > 0.005;
   });
 }
 
@@ -11048,7 +11061,7 @@ function sincronizarPrecios(){
     if(!sigueElCosto(m)) return;
     const k = costoVigente(m.nombre);
     if(!(k > 0)) return;
-    if(Math.abs((Number(m.costo)||0) - k) < 0.005) return;
+    if(Math.abs(costoDe(m) - k) < 0.005) return;
     m.costo = k;
     cuentas++;
   });
@@ -11114,7 +11127,7 @@ function marcarQuienSigueElPrecio(){
   });
   porPlatM.forEach(function(lista, plat){
     if(costoVigente(plat) > 0) return;
-    const moda = elQueMasSeRepite(lista.map(function(m){ return Number(m.costo); }));
+    const moda = elQueMasSeRepite(lista.map(function(m){ return costoDe(m); }));
     if(!(moda.valor > 0)) return;
     if(moda.veces < 2 && lista.length > 1) return;
     ponerCosto(plat, moda.valor, hoy, 'lo que ya te costaba');
@@ -11131,7 +11144,7 @@ function marcarQuienSigueElPrecio(){
   servicios.forEach(function(m){
     if(typeof m.sigueCosto === 'boolean') return;
     const k = costoVigente(m.nombre);
-    m.sigueCosto = k > 0 ? Math.abs((Number(m.costo)||0) - k) < 0.005 : true;
+    m.sigueCosto = k > 0 ? Math.abs(costoDe(m) - k) < 0.005 : true;
   });
 
   if(puestas.length){
@@ -11591,7 +11604,7 @@ function panelPreciosTodos(){
     const suyos = clientes.filter(function(c){ return clavePlat(platDe(c)) === plat; });
     const venta = tarifaVigente(plat);
     const fijado = costoVigente(plat);
-    const gastoReal = mias.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+    const gastoReal = mias.reduce(function(a,m){ return a + costoDe(m); }, 0);
     const costo = fijado > 0 ? fijado : (mias.length ? gastoReal / mias.length : 0);
     const sitios = mias.reduce(function(a,m){ return Math.max(a, Number(m.perfiles)||0); }, 0) || 5;
     const deja = venta * sitios - costo;
@@ -11696,10 +11709,10 @@ function panelTarifas(plataforma){
   /* Mientras no le pongas costo a la plataforma, el panel no se queda mudo:
      enseña lo que de verdad te están costando sus cuentas hoy, que es de
      donde vas a sacar el número que vas a poner. */
-  const gastoReal = mias.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const gastoReal = mias.reduce(function(a,m){ return a + costoDe(m); }, 0);
   const mediaReal = mias.length ? gastoReal / mias.length : 0;
-  const masBarata = mias.reduce(function(a,m){ const v=Number(m.costo)||0; return a===null||v<a?v:a; }, null);
-  const masCara   = mias.reduce(function(a,m){ const v=Number(m.costo)||0; return v>a?v:a; }, 0);
+  const masBarata = mias.reduce(function(a,m){ const v=costoDe(m); return a===null||v<a?v:a; }, null);
+  const masCara   = mias.reduce(function(a,m){ const v=costoDe(m); return v>a?v:a; }, 0);
   const costoUsado = costo > 0 ? costo : mediaReal;
   const deja = venta * sitios - costoUsado;
   const aTarifa = clientes.filter(function(c){ return platDe(c) === plataforma && sigueLaTarifa(c); }).length;
@@ -11927,7 +11940,7 @@ document.addEventListener('click', function(ev){
         recordarPaso('borrar ' + nombreCuenta(m));
         aLaPapelera('cuenta', m, nombreCuenta(m),
           {donde: m.correo || '', perfil: cuantos + ' ' + plural(cuantos,'cliente','clientes'),
-           cobra: Number(m.costo) || 0});
+           cobra: costoDe(m)});
         /* Antes de que la cuenta desaparezca, sus cobros y sus gastos se
            quedan con el nombre escrito. Si no, esa plata seguía en la caja
            pero ya no había manera de saber de dónde había salido. */
