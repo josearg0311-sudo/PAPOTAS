@@ -153,10 +153,29 @@
   /* «Vencido» era un rosa, no un rojo: tenía tanto azul como verde por
      debajo del rojo, y eso lo empujaba al rosa. Ahora el verde y el azul
      van iguales, que es lo que hace que un rojo se vea rojo. */
-  --mal:#f87171;      --mal-fondo:rgba(248,113,113,.13);  --mal-linea:rgba(248,113,113,.30);
-  --aviso:#f9a53c;    --aviso-fondo:rgba(249,165,60,.12); --aviso-linea:rgba(249,165,60,.28);
-  --bien:#3fd6a4;     --bien-fondo:rgba(63,214,164,.12);  --bien-linea:rgba(63,214,164,.28);
-  --info:#7aa2f7;     --info-fondo:rgba(122,162,247,.12); --info-linea:rgba(122,162,247,.28);
+  /* El rojo se queda como está y su tinte también: subirlo dos puntos
+     bastó para que el texto rojo sobre su propio tinte bajara de lo que
+     pide la norma. Aquí la vida la pone el filo, que no lleva letras
+     encima y puede ser todo lo rojo que haga falta. */
+  --mal:#f87171;      --mal-fondo:rgba(248,113,113,.13);  --mal-linea:rgba(248,113,113,.34);
+  --aviso:#ffad33;    --aviso-fondo:rgba(255,173,51,.14);  --aviso-linea:rgba(255,173,51,.34);
+  --bien:#22e0a1;     --bien-fondo:rgba(34,224,161,.14);   --bien-linea:rgba(34,224,161,.34);
+  --info:#7aa2f7;     --info-fondo:rgba(122,162,247,.14);  --info-linea:rgba(122,162,247,.34);
+
+  /* ===== EL COLOR PARA PINTAR, APARTE DEL COLOR PARA LEER ===============
+     Sobre un fondo oscuro, un rojo vivo de verdad no se puede usar para
+     texto: para que se lea tiene que ser claro, y un rojo claro es un
+     salmón. Por eso el programa se veía apagado -el color solo salía en
+     pastillas pequeñas, y tenía que ser un color prudente-.
+
+     Así que van dos. El de arriba es el que se LEE, y sigue midiendo lo
+     que pide la norma. Estos son los de PINTAR: filos, franjas, barras y
+     tintes, donde no hay ninguna letra encima y por tanto se puede
+     apretar el color todo lo que aguante el ojo. */
+  --mal-vivo:#ff4d5e;
+  --aviso-vivo:#ffb01f;
+  --bien-vivo:#00e5a0;
+  --info-vivo:#4d8bff;
 
   --r-s:8px; --r:11px; --r-l:16px; --r-xl:22px;
   --e1:4px; --e2:8px; --e3:12px; --e4:16px; --e5:24px; --e6:32px; --e7:44px;
@@ -220,8 +239,9 @@ html[data-tema="oscuro"][data-fondo="pizarra"]{
   --fondo:#2a2724; --capa:#343029; --capa-alta:#3e3a33;
   --linea:rgba(255,255,255,.13); --linea-fuerte:rgba(255,255,255,.23);
   --txt-2:#d5d1cb; --txt-3:#c6c2bc; --txt-4:#a9a59f;
-  --mal:#ff9a9a;   --mal-fondo:rgba(255,154,154,.13);  --mal-linea:rgba(255,154,154,.30);
-  --info:#a8c2ff;  --info-fondo:rgba(168,194,255,.13); --info-linea:rgba(168,194,255,.30);
+  --mal:#ff9a9a;   --mal-fondo:rgba(255,154,154,.15);  --mal-linea:rgba(255,154,154,.36);
+  --info:#a8c2ff;  --info-fondo:rgba(168,194,255,.15); --info-linea:rgba(168,194,255,.36);
+  --mal-vivo:#ff5566; --info-vivo:#5a92ff;
 }
 html[data-tema="oscuro"][data-fondo="pizarra"][data-realce="alto"]{
   --linea:rgba(255,255,255,.22); --linea-fuerte:rgba(255,255,255,.36);
@@ -265,10 +285,18 @@ html[data-tema="claro"]{
   /* En claro el semáforo va oscuro, pero con los mismos tonos de la
      familia: «vencido» comparte tono con la marca, «por vencer» es el
      ámbar de al lado, y los otros dos se van al extremo opuesto. */
-  --mal:#b91c1c;   --mal-fondo:rgba(185,28,28,.08);   --mal-linea:rgba(185,28,28,.22);
-  --aviso:#a9560b; --aviso-fondo:rgba(169,86,11,.09); --aviso-linea:rgba(169,86,11,.22);
-  --bien:#05755a;  --bien-fondo:rgba(5,117,90,.09);   --bien-linea:rgba(5,117,90,.22);
-  --info:#3450c7;  --info-fondo:rgba(52,80,199,.08);  --info-linea:rgba(52,80,199,.22);
+  --mal:#b91c1c;   --mal-fondo:rgba(185,28,28,.10);   --mal-linea:rgba(185,28,28,.30);
+  /* Igual que el rojo en oscuro: el ámbar es el que va más justo de los
+     cuatro, y dos puntos de tinte lo dejaban por debajo. Se queda. */
+  --aviso:#a9560b; --aviso-fondo:rgba(169,86,11,.09); --aviso-linea:rgba(169,86,11,.30);
+  --bien:#05755a;  --bien-fondo:rgba(5,117,90,.11);   --bien-linea:rgba(5,117,90,.30);
+  --info:#3450c7;  --info-fondo:rgba(52,80,199,.10);  --info-linea:rgba(52,80,199,.30);
+  /* En claro pasa al revés: para leer hace falta oscuro, y para pintar se
+     puede usar el color de verdad, que sobre blanco sí luce. */
+  --mal-vivo:#e11d48;
+  --aviso-vivo:#f59e0b;
+  --bien-vivo:#00b389;
+  --info-vivo:#2563eb;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -594,6 +622,10 @@ input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marc
 }
 .metrica > *{position:relative}
 .metrica:hover{border-color:var(--linea-fuerte);box-shadow:var(--brillo), var(--sombra-2)}
+.metrica.mal:hover{border-color:var(--mal-linea);border-left-color:var(--mal-vivo)}
+.metrica.aviso:hover{border-color:var(--aviso-linea);border-left-color:var(--aviso-vivo)}
+.metrica.bien:hover{border-color:var(--bien-linea);border-left-color:var(--bien-vivo)}
+.metrica.info:hover{border-color:var(--info-linea);border-left-color:var(--info-vivo)}
 .metrica .k{
   font-size:10.5px;font-weight:700;color:var(--txt-3);
   letter-spacing:.09em;text-transform:uppercase;
@@ -625,8 +657,19 @@ input[type=checkbox]{width:17px;height:17px;min-height:0;accent-color:var(--marc
 .metrica.aviso .v{color:var(--aviso)}
 .metrica.bien .v{color:var(--bien)}
 .metrica.info .v{color:var(--info)}
+/* Ocho cajas del mismo gris no dicen nada. Cada cifra con estado se lleva su
+   canto vivo y un velo de su propio color, igual que las fichas. */
+.metrica.mal, .metrica.aviso, .metrica.bien, .metrica.info{border-left-width:3px;border-left-style:solid}
+.metrica.mal{border-color:var(--mal-linea);border-left-color:var(--mal-vivo);
+  background-color:var(--capa);background-image:radial-gradient(135% 105% at 0% 0%, var(--mal-fondo), transparent 62%)}
+.metrica.aviso{border-color:var(--aviso-linea);border-left-color:var(--aviso-vivo);
+  background-color:var(--capa);background-image:radial-gradient(135% 105% at 0% 0%, var(--aviso-fondo), transparent 62%)}
+.metrica.bien{border-color:var(--bien-linea);border-left-color:var(--bien-vivo);
+  background-color:var(--capa);background-image:radial-gradient(135% 105% at 0% 0%, var(--bien-fondo), transparent 62%)}
+.metrica.info{border-color:var(--info-linea);border-left-color:var(--info-vivo);
+  background-color:var(--capa);background-image:radial-gradient(135% 105% at 0% 0%, var(--info-fondo), transparent 62%)}
 button.metrica{text-align:left;cursor:pointer}
-button.metrica:hover{background:var(--capa-alta)}
+button.metrica:hover{background-color:var(--capa-alta)}
 
 /* Insignias -------------------------------------------------------------- */
 .insignia{
@@ -820,7 +863,7 @@ button.metrica:hover{background:var(--capa-alta)}
 /* Barra de ocupación ----------------------------------------------------- */
 .barra{height:5px;border-radius:99px;background:var(--linea);overflow:hidden;display:flex}
 .barra i{display:block;height:100%;background:var(--info);transition:width var(--medio) var(--curva)}
-.barra.llena i{background:var(--mal)}
+.barra.llena i{background:var(--mal-vivo)}
 .barra.casi i{background:var(--aviso)}
 
 /* Casillas de perfil: una casilla por perfil, llenas las que están usadas.
@@ -832,7 +875,7 @@ button.metrica:hover{background:var(--capa-alta)}
   background:var(--linea-fuerte);flex:0 0 auto;
 }
 .casillas i.usado{background:var(--info)}
-.casillas.llena i.usado{background:var(--mal)}
+.casillas.llena i.usado{background:var(--mal-vivo)}
 .casillas.casi i.usado{background:var(--aviso)}
 .casillas.llena i:not(.usado), .casillas.casi i:not(.usado){background:var(--linea-fuerte)}
 .casillas small{font-size:10.5px;font-weight:700;color:var(--txt-4);margin-left:4px;white-space:nowrap}
@@ -859,7 +902,7 @@ button.metrica:hover{background:var(--capa-alta)}
   background:linear-gradient(90deg, var(--info), var(--bien));
   transition:width var(--medio) var(--curva);
 }
-.meta-barra.llena i{background:linear-gradient(90deg, var(--bien), var(--bien))}
+.meta-barra.llena i{background:linear-gradient(90deg, var(--bien-vivo), var(--bien))}
 .meta-pies{
   display:flex;justify-content:space-between;gap:var(--e3);
   margin-top:9px;font-size:12px;color:var(--txt-3);font-weight:500;
@@ -1201,15 +1244,16 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 @media (max-width:820px){ .azulejos{grid-template-columns:repeat(2, minmax(0,1fr))} }
 .azulejo{
   --t:var(--txt);--t-suave:rgba(255,255,255,.06);--t-linea:var(--linea-fuerte);
-  position:relative;text-align:left;min-width:0;
+  --t-vivo:var(--linea-fuerte);
+  position:relative;text-align:left;min-width:0;overflow:hidden;
   padding:13px var(--e4) 12px;border-radius:var(--r-l);
-  border:1px solid var(--linea);background:var(--capa);
+  border:1px solid var(--linea);border-left:3px solid var(--t-vivo);background:var(--capa);
   display:flex;flex-direction:column;gap:5px;
   box-shadow:var(--brillo);
   transition:border-color var(--rapido) var(--curva), background var(--rapido) var(--curva);
 }
 button.azulejo{cursor:pointer}
-button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
+button.azulejo:hover{border-color:var(--t-linea);border-left-color:var(--t-vivo);background-color:var(--capa-alta)}
 .azulejo .k{
   font-size:9.5px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;
   color:var(--txt-3);padding-right:36px;
@@ -1224,10 +1268,21 @@ button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
   background:var(--t-suave);border:1px solid var(--t-linea);color:var(--t);
 }
 .azulejo .ico svg{width:15px;height:15px;stroke-width:2}
-.azulejo.mal  {--t:var(--mal);  --t-suave:var(--mal-fondo);  --t-linea:var(--mal-linea)}
-.azulejo.aviso{--t:var(--aviso);--t-suave:var(--aviso-fondo);--t-linea:var(--aviso-linea)}
-.azulejo.bien {--t:var(--bien); --t-suave:var(--bien-fondo); --t-linea:var(--bien-linea)}
-.azulejo.info {--t:var(--info); --t-suave:var(--info-fondo); --t-linea:var(--info-linea)}
+.azulejo.mal  {--t:var(--mal);  --t-suave:var(--mal-fondo);  --t-linea:var(--mal-linea);  --t-vivo:var(--mal-vivo)}
+.azulejo.aviso{--t:var(--aviso);--t-suave:var(--aviso-fondo);--t-linea:var(--aviso-linea);--t-vivo:var(--aviso-vivo)}
+.azulejo.bien {--t:var(--bien); --t-suave:var(--bien-fondo); --t-linea:var(--bien-linea); --t-vivo:var(--bien-vivo)}
+.azulejo.info {--t:var(--info); --t-suave:var(--info-fondo); --t-linea:var(--info-linea); --t-vivo:var(--info-vivo)}
+/* El velo del color propio: apenas se ve, pero separa un azulejo rojo de uno
+   verde antes de leer la cifra. Va detrás del icono y del texto. */
+.azulejo::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(130% 100% at 0% 0%, currentColor 0%, transparent 60%);
+}
+.azulejo.mal::after  {color:var(--mal-vivo);  opacity:.13}
+.azulejo.aviso::after{color:var(--aviso-vivo);opacity:.12}
+.azulejo.bien::after {color:var(--bien-vivo); opacity:.11}
+.azulejo.info::after {color:var(--info-vivo); opacity:.11}
+.azulejo > *{position:relative;z-index:2}
 @media (max-width:420px){
   .cal-dias, .cal-semana{gap:2px}
   .dia{min-height:36px;font-size:12px;border-radius:7px}
@@ -1485,9 +1540,9 @@ button.azulejo:hover{border-color:var(--t-linea);background:var(--capa-alta)}
 /* El acento de estado va en la primera celda, no en la fila: un ::before
    sobre un <tr> se convierte en una celda fantasma y descuadraba la tabla
    entera una columna. */
-.tabla tbody tr.mal   td:first-child{box-shadow:inset 3px 0 0 var(--mal)}
-.tabla tbody tr.aviso td:first-child{box-shadow:inset 3px 0 0 var(--aviso)}
-.tabla tbody tr.bien  td:first-child{box-shadow:inset 3px 0 0 var(--bien)}
+.tabla tbody tr.mal   td:first-child{box-shadow:inset 3px 0 0 var(--mal-vivo)}
+.tabla tbody tr.aviso td:first-child{box-shadow:inset 3px 0 0 var(--aviso-vivo)}
+.tabla tbody tr.bien  td:first-child{box-shadow:inset 3px 0 0 var(--bien-vivo)}
 .t-nom{
   display:flex;align-items:center;gap:9px;min-width:0;width:100%;text-align:left;
   min-height:30px;padding:0 4px;margin:0 -4px;border-radius:8px;
@@ -1681,9 +1736,12 @@ html[data-tema="claro"] .panel-cabeza::after{opacity:.08}
 .tc::after{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(120% 95% at 0% 0%, var(--tono) 0%, transparent 55%);
-  opacity:.07;
+  /* Estaba al 7%: el color de la plataforma no se veía, y cien tarjetas
+     iguales de gris es justo lo que hacía que el programa se viera
+     apagado. Al 14% se nota de quién es cada tarjeta sin teñir nada. */
+  opacity:.14;
 }
-html[data-tema="claro"] .tc::after{opacity:.05}
+html[data-tema="claro"] .tc::after{opacity:.09}
 /* La franja de arriba dice el estado, no la marca: en esta pantalla lo que
    manda es a quién le toca, y el color de la plataforma ya lo lleva el
    logo y el chip de su cuenta. */
@@ -1691,9 +1749,9 @@ html[data-tema="claro"] .tc::after{opacity:.05}
   content:"";position:absolute;inset:0 0 auto;height:2px;z-index:2;opacity:.7;
   background:linear-gradient(90deg, var(--tono), transparent 70%);
 }
-.tc.mal::before  {background:linear-gradient(90deg, var(--mal), transparent 70%)}
-.tc.aviso::before{background:linear-gradient(90deg, var(--aviso), transparent 70%)}
-.tc.bien::before {background:linear-gradient(90deg, var(--bien), transparent 70%)}
+.tc.mal::before  {background:linear-gradient(90deg, var(--mal-vivo), transparent 70%)}
+.tc.aviso::before{background:linear-gradient(90deg, var(--aviso-vivo), transparent 70%)}
+.tc.bien::before {background:linear-gradient(90deg, var(--bien-vivo), transparent 70%)}
 .tc > *:not(.ficha-tapa){position:relative;z-index:2;pointer-events:none}
 .tc > .tc-mando{z-index:3;pointer-events:auto}
 .tc:hover{transform:translateY(-2px);border-color:var(--tono-linea);box-shadow:var(--sombra-3)}
@@ -2569,9 +2627,36 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
   border:1px solid var(--linea);background:var(--capa);
   box-shadow:var(--brillo), var(--sombra-1);
 }
-.perfil.mal  {border-color:var(--mal-linea)}
-.perfil.aviso{border-color:var(--aviso-linea)}
-.perfil.libre{border-style:dashed;background:transparent;box-shadow:none;justify-content:center}
+/* EL ESTADO, A LA VISTA
+   Aquí se mira una cuenta para saber a quién hay que cobrarle, y las seis
+   casillas se veían iguales: la única diferencia era el color de tres
+   palabras pequeñas al fondo. Ahora cada casilla habla el mismo idioma
+   que las tarjetas de cliente -filo de color a la izquierda, franja
+   arriba y un roce de tinte- para que se vea sin leer. */
+.perfil{overflow:hidden;border-left-width:4px;border-left-style:solid;
+        border-left-color:var(--linea)}
+.perfil.mal   {border-color:var(--mal-linea);   border-left-color:var(--mal-vivo)}
+.perfil.aviso {border-color:var(--aviso-linea); border-left-color:var(--aviso-vivo)}
+.perfil.bien  {border-color:var(--bien-linea);  border-left-color:var(--bien-vivo)}
+.perfil::before{
+  content:"";position:absolute;inset:0 0 auto;left:0;height:2px;z-index:2;opacity:.75;
+  background:transparent;
+}
+.perfil.mal::before  {background:linear-gradient(90deg, var(--mal-vivo), transparent 75%)}
+.perfil.aviso::before{background:linear-gradient(90deg, var(--aviso-vivo), transparent 75%)}
+.perfil.bien::before {background:linear-gradient(90deg, var(--bien-vivo), transparent 75%)}
+.perfil::after{
+  content:"";position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:radial-gradient(120% 95% at 0% 0%, currentColor 0%, transparent 58%);
+}
+.perfil.mal::after  {color:var(--mal-vivo);  opacity:.13}
+.perfil.aviso::after{color:var(--aviso-vivo);opacity:.12}
+.perfil.bien::after {color:var(--bien-vivo); opacity:.10}
+.perfil > *{position:relative;z-index:2}
+.perfil.pausado{border-left-style:dashed;border-left-color:var(--txt-4)}
+.perfil.libre{border-style:dashed;border-left-style:dashed;border-left-color:var(--linea);
+  background:transparent;box-shadow:none;justify-content:center}
+.perfil.libre::before,.perfil.libre::after{display:none}
 .perfil-n{
   position:absolute;top:11px;right:13px;font-size:10px;font-weight:750;
   color:var(--txt-4);letter-spacing:.06em;text-transform:uppercase;
@@ -3123,17 +3208,17 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 /* El filo de la tarjeta: cuatro píxeles a la izquierda, que es lo que se
    ve de reojo cuando pasas la lista con el dedo. */
 .tc{border-left-width:4px;border-left-style:solid;border-left-color:var(--linea)}
-.tc.mal    {border-left-color:var(--mal)}
-.tc.aviso  {border-left-color:var(--aviso)}
-.tc.bien   {border-left-color:var(--bien)}
+.tc.mal    {border-left-color:var(--mal-vivo)}
+.tc.aviso  {border-left-color:var(--aviso-vivo)}
+.tc.bien   {border-left-color:var(--bien-vivo)}
 .tc.pausado{border-left-color:var(--txt-4);border-left-style:dashed}
 /* La franja de arriba deja de competir con el filo. */
 .tc::before{display:none}
 
 /* Y la fila de la tabla, lo mismo. */
-.tabla tbody tr.mal    td:first-child{box-shadow:inset 4px 0 0 var(--mal)}
-.tabla tbody tr.aviso  td:first-child{box-shadow:inset 4px 0 0 var(--aviso)}
-.tabla tbody tr.bien   td:first-child{box-shadow:inset 4px 0 0 var(--bien)}
+.tabla tbody tr.mal    td:first-child{box-shadow:inset 4px 0 0 var(--mal-vivo)}
+.tabla tbody tr.aviso  td:first-child{box-shadow:inset 4px 0 0 var(--aviso-vivo)}
+.tabla tbody tr.bien   td:first-child{box-shadow:inset 4px 0 0 var(--bien-vivo)}
 .tabla tbody tr.pausado td:first-child{box-shadow:inset 4px 0 0 var(--txt-4)}
 .tabla tbody tr.pausado{opacity:.68}
 
@@ -3356,7 +3441,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.1</span>
     </div>
   </nav>
 
@@ -5199,7 +5284,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.0';
+const VERSION = 'v7.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5318,14 +5403,18 @@ function deshacerPaso(){
 }
 
 async function copiar(texto, queEs){
+  /* «Clave de NETFLIX 1 copiado» chirría. El aviso concuerda con lo que se
+     ha copiado, que casi siempre es una clave o una ficha. */
+  const que = queEs || 'Texto';
+  const hecho = que + (/^(clave|contrase|ficha|cuenta|lista|tarifa)/i.test(que) ? ' copiada' : ' copiado');
   try{
     await navigator.clipboard.writeText(String(texto));
-    avisar((queEs||'Texto') + ' copiado', 'bien');
+    avisar(hecho, 'bien');
   }catch(_){
     const t = document.createElement('textarea');
     t.value = String(texto); t.style.position='fixed'; t.style.opacity='0';
     document.body.appendChild(t); t.select();
-    try{ document.execCommand('copy'); avisar((queEs||'Texto') + ' copiado', 'bien'); }
+    try{ document.execCommand('copy'); avisar(hecho, 'bien'); }
     catch(e){ avisar('No se pudo copiar', 'mal'); }
     t.remove();
   }
@@ -7472,7 +7561,10 @@ function hojaCuenta(m){
             (r.margen>=0?'+':'') + esc(dinero(r.margen)) + '</b></div>' +
       '</div>' +
       '<div class="mando">' +
-        '<a class="btn mini principal" href="' + esc(casaDe(plat)) + '" target="_blank" rel="noopener">' +
+        '<a class="btn mini principal" href="' + esc(casaDe(plat)) + '" target="_blank" rel="noopener"' +
+          ' data-entrar-m="' + esc(m.id) + '"' +
+          ' title="' + esc(m.contrasena ? 'Abre ' + plat + ' y te copia la clave: solo pégala'
+                                        : 'Abre la web de ' + plat) + '">' +
           ICONO.salir + '<span class="et">Entrar a ' + esc(plat) + '</span></a>' +
         (libres ? '<button class="btn mini" data-poner-en="' + esc(m.id) + '">' + ICONO.mascliente +
           '<span class="et">Poner un cliente</span></button>' : '') +
@@ -7534,7 +7626,10 @@ function casillaPerfil(m, x){
   }
   const c = x.cliente;
   const est = estadoDe(c);
-  const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
+  /* El pausado no es «al día»: no le estás cobrando. Con filo verde
+     parecía uno más de los que van bien, y la pastilla decía otra cosa. */
+  const clase = enPausa(c) ? 'pausado'
+              : est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
   const tel = telefonoDe(c);
   return '<div class="perfil ' + clase + '" data-cid="' + esc(c.id) + '" style="' + tonoDe(plat) + '">' +
     '<span class="perfil-n">' + esc(x.n ? 'Perfil ' + x.n : (c.perfil || 'De más')) + '</span>' +
@@ -7544,7 +7639,7 @@ function casillaPerfil(m, x){
     '</div>' +
     '<div class="perfil-pie">' +
       '<span class="cifra crece">' + esc(dinero(cobroDe(c))) + '</span>' +
-      '<span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span>' +
+      pastillaEstado(c, 'ficha') +
     '</div>' +
     '<div class="perfil-mando">' +
       '<button class="btn mini crece tc-cobrar" data-cobrar="' + esc(c.id) + '"' +
@@ -7712,6 +7807,9 @@ function hojaCliente(c){
     (m ? '<div class="tarjeta"><div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono azul">' + ICONO.tele + '</span>' +
         '<div class="crece"><h2>Su cuenta</h2><p>Lo que le tienes que pasar para entrar.</p></div>' +
+        '<a class="btn mini" href="' + esc(casaDe(platDe(c))) + '" target="_blank" rel="noopener"' +
+          ' data-entrar-m="' + esc(m.id) + '" title="Abre la web de ' + esc(platDe(c)) + ' y te copia la clave">' +
+          ICONO.salir + '<span class="et">Entrar</span></a>' +
         '<button class="btn mini principal" data-accesos="' + esc(c.id) + '">' + ICONO.copiar +
           '<span class="et">Copiar todo junto</span></button>' +
       '</div><div class="tarjeta-cuerpo"><dl class="datos">' +
@@ -10945,7 +11043,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
@@ -10977,6 +11075,15 @@ document.addEventListener('click', function(ev){
     const llave = 'clave' + d.verclave;
     if(abiertos.has(llave)) abiertos.delete(llave); else abiertos.add(llave);
     pintar();
+    return;
+  }
+  /* Entrar a la plataforma desde la propia ficha. El enlace se abre solo
+     -no se toca el evento-, pero de paso se copia la clave para que al
+     llegar a la web solo haya que pegarla. Era lo que hacía el PAPOTAS de
+     siempre y aquí faltaba. */
+  if(d.entrarM){
+    const cm = servicios.find(function(x){ return String(x.id) === String(d.entrarM); });
+    if(cm && cm.contrasena) copiar(cm.contrasena, 'Clave de ' + nombreCuenta(cm));
     return;
   }
   if(d.copiar){ copiar(d.copiar, d.que || 'Texto'); return; }
