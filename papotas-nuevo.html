@@ -2164,6 +2164,27 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .f:active{ background:var(--capa-alta) }
 }
 
+.f-lia{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--linea)}
+.f-lia:last-child{border-bottom:0}
+.f-lia .f{border-bottom:0;flex:1;min-width:0}
+.f-lia > .btn{flex:0 0 auto;margin-right:var(--e3)}
+
+.comparar{width:100%;border-collapse:collapse;margin:0 0 var(--e3);font-size:13px}
+.comparar th{padding:0 0 7px;font-size:10.5px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--txt-4);text-align:right}
+.comparar th:first-child{text-align:left}
+.comparar td{padding:7px 0;border-top:1px solid var(--linea);text-align:right;color:var(--txt-2)}
+.comparar td:first-child{text-align:left;color:var(--txt-3)}
+.comparar tr.menos td{color:var(--mal)}
+.comparar tr.menos td b{color:var(--mal);font-weight:800}
+.confirma-ojo{display:flex;gap:9px;align-items:flex-start;margin:0;
+  padding:10px var(--e3);border-radius:var(--r-m);font-size:12.5px;line-height:1.6;
+  border:1px solid var(--mal-linea);background:var(--mal-fondo);color:var(--txt-2)}
+.confirma-ojo svg{width:16px;height:16px;flex:0 0 auto;color:var(--mal);margin-top:1px}
+.confirma-ojo.suave{border-color:var(--linea);background:var(--capa-alta)}
+.confirma-ojo.suave svg{color:var(--bien)}
+.confirma-ojo b{color:var(--txt)}
+
 .mudanza-donde{margin:0;font-size:12px;color:var(--txt-3);line-height:1.6}
 .mudanza-donde code{font-family:var(--cifra);font-size:11.5px;color:var(--txt-2);
   background:var(--capa-alta);border:1px solid var(--linea);
@@ -3219,7 +3240,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.5</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.6</span>
     </div>
   </nav>
 
@@ -4755,7 +4776,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.5';
+const VERSION = 'v6.6';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -4939,6 +4960,17 @@ document.addEventListener('keydown', function(ev){
 function confirmar(titulo, texto, textoBoton, hacer, peligroso){
   abrirModal(titulo,
     '<p style="margin:0;color:var(--txt-2);font-size:13.5px;line-height:1.6">' + esc(texto) + '</p>',
+    [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
+     {texto:textoBoton, clase:peligroso?'peligro':'principal', hacer:function(){ cerrarModal(); hacer(); }}]);
+}
+
+/* El mismo, pero con el cuerpo ya armado. `confirmar` escapa el texto -y
+   así debe seguir, porque por ahí pasan nombres de clientes-, así que
+   cuando hace falta una tabla o un aviso se usa este otro, y el que lo
+   llama se hace responsable de lo que mete. Hoy solo lo usa la carga de
+   respaldo, que es donde de verdad hace falta ver dos columnas. */
+function confirmarRico(titulo, html, textoBoton, hacer, peligroso){
+  abrirModal(titulo, '<div class="pila">' + html + '</div>',
     [{texto:'Cancelar', clase:'fantasma', hacer:cerrarModal},
      {texto:textoBoton, clase:peligroso?'peligro':'principal', hacer:function(){ cerrarModal(); hacer(); }}]);
 }
@@ -9523,7 +9555,10 @@ function diagnostico(){
     tels.delete('');
     if(tels.size > 1) mismoNombre.push({
       texto: n + ': ' + grupo.length + ' fichas con ' + tels.size + ' teléfonos distintos',
-      cliente: grupo[0].id
+      cliente: grupo[0].id,
+      /* Con esto la ventana puede ofrecer el arreglo de un toque en vez de
+         mandarle a editar cien fichas a mano. */
+      juntar: grupo.map(function(c){ return c.id; })
     });
   });
   caso('misma_persona', '¿La misma persona con varias fichas?',
@@ -9612,6 +9647,82 @@ function fichaDiagCliente(c){
   return {texto:(c.nombre || 'Sin nombre') + ' · ' + (platDe(c) || 'sin plataforma'), cliente:c.id};
 }
 
+/* JUNTAR VARIAS FICHAS EN UNA SOLA PERSONA
+   No se junta nada por su cuenta: se pregunta CUÁL de los teléfonos es el
+   bueno y se enseña qué ficha tiene cada uno, porque puede que dos se
+   llamen igual y sean dos personas de verdad. Lo único que se cambia es
+   el teléfono -ni el precio, ni la cuenta, ni el vencimiento-, y se puede
+   deshacer como cualquier otra cosa. */
+function juntarPersonas(ids){
+  const lista = String(ids||'').split(',').map(buscarCliente).filter(Boolean);
+  if(lista.length < 2){ avisar('No encontré esas fichas', 'mal'); return; }
+  const nombre = lista[0].nombre || 'esta persona';
+  /* Los teléfonos que hay, con cuántas fichas usa cada uno. */
+  const porTel = new Map();
+  lista.forEach(function(c){
+    const n = normalizarTelefono(c.telefono);
+    const k = n.vale ? n.tel : '';
+    if(!porTel.has(k)) porTel.set(k, []);
+    porTel.get(k).push(c);
+  });
+  const opciones = Array.from(porTel.entries())
+    .filter(function(e){ return e[0]; })
+    .sort(function(a,b){ return b[1].length - a[1].length; });
+  if(!opciones.length){ avisar('Ninguna de esas fichas tiene teléfono', 'mal'); return; }
+
+  abrirModal('¿Es la misma persona?',
+    '<div class="pila">' +
+      '<p class="ayuda-modal">Hay <b>' + lista.length + ' fichas</b> a nombre de <b>' +
+        esc(nombre) + '</b> con teléfonos distintos. Si son la misma persona, elige ' +
+        'cuál es el número bueno y se pone en todas: a partir de ahí PAPOTAS las ' +
+        'trata como una sola -un mensaje por todo, y la cuenta de lo que te deja ' +
+        'entera-. <b>Si son dos personas distintas, cancela</b> y cámbiale el nombre ' +
+        'a una para no confundirte.</p>' +
+      '<div class="pila opciones-todos">' +
+        opciones.map(function(e){
+          const quienes = e[1].map(function(c){
+            const m = masterDe(c);
+            return (m ? nombreCuenta(m) : (c.servicio||'?')) + (perfilBonito(c) ? ' · ' + perfilBonito(c) : '');
+          }).join(' · ');
+          return '<button type="button" class="opcion-todos" data-tel-bueno="' + esc(e[0]) + '">' +
+            '<span class="ot-ico">' + ICONO.wa + '</span>' +
+            '<span class="crece"><b>+' + esc(e[0]) + '</b>' +
+            '<small>lo usan ' + e[1].length + ' de las ' + lista.length + ': ' + esc(quienes) + '</small></span>' +
+          '</button>';
+        }).join('') +
+      '</div>' +
+    '</div>',
+    [{texto:'Cancelar · son personas distintas', clase:'fantasma', hacer:cerrarModal}]);
+
+  const zona = document.getElementById('modal-cuerpo');
+  if(zona) zona.addEventListener('click', function(ev){
+    const b = ev.target.closest && ev.target.closest('[data-tel-bueno]');
+    if(!b) return;
+    const tel = b.dataset.telBueno;
+    /* Se escribe el número TAL COMO ÉL LO TIENE ESCRITO, no el que sale de
+       normalizar. Si él guarda «940000001», que todas digan «940000001»:
+       normalizando, la que ya estaba bien se quedaba como estaba y a las
+       otras les entraba «51940000001», y acababa con el mismo número
+       escrito de dos maneras. Funcionar funcionaba -para juntarlas se
+       normalizan igual- pero al abrir la ficha veía dos números distintos
+       y no había forma de saber cuál era el bueno. */
+    const grupo = porTel.get(tel);
+    const crudo = (grupo && grupo[0] && String(grupo[0].telefono || '').trim()) || tel;
+    recordarPaso('juntar las fichas de ' + nombre);
+    let tocadas = 0;
+    lista.forEach(function(c){
+      if(String(c.telefono || '').trim() === crudo) return;
+      c.telefono = crudo;
+      tocadas++;
+    });
+    anotar('JUNTAR FICHAS', nombre + ': ' + lista.length + ' fichas con el teléfono ' + crudo);
+    guardar(); cerrarModal(); pintar();
+    avisar(nombre + ': ' + lista.length + ' fichas juntas' +
+           (tocadas ? ' · ' + tocadas + ' ' + plural(tocadas,'teléfono cambiado','teléfonos cambiados') : ''),
+           'bien', true);
+  });
+}
+
 /* La lista de uno de esos líos, con la puerta para ir a cada uno. */
 function verDiagnostico(clave){
   const caso = diagnostico().filter(function(x){ return x.clave === clave; })[0];
@@ -9622,10 +9733,20 @@ function verDiagnostico(clave){
     '<div class="lista lista-dia">' + caso.lista.slice(0, 80).map(function(x){
       const ir = x.cliente ? ' data-ver-cliente="' + esc(x.cliente) + '"'
                : x.cuenta ? ' data-ver-cuenta="' + esc(x.cuenta) + '"' : '';
-      return '<button class="f"' + ir + (ir ? '' : ' style="cursor:default"') + '>' +
-        '<span class="f-txt"><span class="f-nom">' + esc(x.texto) + '</span></span>' +
-        (ir ? '<span class="f-flecha">' + ICONO.flecha + '</span>' : '') +
-      '</button>';
+      /* «Juntar» no es un botón más: cambia datos de varias fichas a la
+         vez. Por eso va aparte del renglón -que solo lleva a mirar- y
+         pregunta cuál de los teléfonos es el bueno antes de tocar nada. */
+      const juntar = x.juntar && x.juntar.length > 1
+        ? '<button class="btn mini" data-juntar="' + esc(x.juntar.join(',')) + '"' +
+          ' title="Si es la misma persona, poner el mismo teléfono en todas">' +
+          ICONO.gente + 'Es la misma</button>'
+        : '';
+      return '<div class="f-lia">' +
+        '<button class="f crece"' + ir + (ir ? '' : ' style="cursor:default"') + '>' +
+          '<span class="f-txt"><span class="f-nom">' + esc(x.texto) + '</span></span>' +
+          (ir ? '<span class="f-flecha">' + ICONO.flecha + '</span>' : '') +
+        '</button>' + juntar +
+      '</div>';
     }).join('') +
     (caso.lista.length > 80 ? '<div class="f" style="cursor:default"><span class="f-txt"><span class="f-sub">y ' +
       (caso.lista.length - 80) + ' más</span></span></div>' : '') +
@@ -10057,7 +10178,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   const d = t.dataset;
 
@@ -10087,6 +10208,7 @@ document.addEventListener('click', function(ev){
   if(d.cobrar){ renovar(d.cobrar, true); return; }
   if(d.renovar){ renovar(d.renovar, false); return; }
   if(d.correr){ correrFecha(d.correr); return; }
+  if(d.juntar){ juntarPersonas(d.juntar); return; }
   if(d.agrupa){
     agrupaHoy = !agrupaHoy;
     try{ localStorage.setItem('pap_agrupa_hoy', agrupaHoy ? '1' : '0'); }catch(_){}
@@ -10739,10 +10861,41 @@ $('#archivo-respaldo').addEventListener('change', function(ev){
     const r = leerRespaldo(String(e.target.result || ''));
     ev.target.value = '';
     if(!r.ok){ avisar(r.motivo, 'mal'); return; }
-    confirmar('Cargar respaldo',
-      'El archivo trae ' + r.resumen.clientes + ' clientes, ' + r.resumen.servicios + ' cuentas master, ' +
-      r.resumen.ventas + ' cobros y ' + r.resumen.inversiones + ' gastos. Reemplazará lo que tienes ahora ' +
-      '(se guarda una copia de lo actual por si acaso). ¿Continuar?',
+    /* Este es el momento más peligroso del programa: cargar un respaldo
+       reemplaza TODO. Antes decía solo lo que traía el archivo, y con eso
+       no se puede decidir: si lo que traes es una copia de hace tres
+       meses, el número suelto parece razonable. Ahora se enseñan las dos
+       columnas -lo que tienes y lo que va a quedar- y, si el archivo trae
+       menos, se dice en voz alta cuánto se pierde. */
+    const ahora = {clientes:clientes.length, servicios:servicios.length,
+                   ventas:ventas.length, inversiones:inversiones.length};
+    const pierde = Math.max(0, ahora.clientes - r.resumen.clientes);
+    const pierdeCobros = Math.max(0, ahora.ventas - r.resumen.ventas);
+    const filas = [
+      ['Clientes', ahora.clientes, r.resumen.clientes],
+      ['Cuentas master', ahora.servicios, r.resumen.servicios],
+      ['Cobros', ahora.ventas, r.resumen.ventas],
+      ['Gastos', ahora.inversiones, r.resumen.inversiones]
+    ];
+    confirmarRico('Cargar respaldo',
+      '<table class="comparar"><thead><tr><th></th>' +
+        '<th>Ahora tienes</th><th>Quedaría</th></tr></thead><tbody>' +
+      filas.map(function(f){
+        const menos = f[2] < f[1];
+        return '<tr' + (menos ? ' class="menos"' : '') + '><td>' + f[0] + '</td>' +
+          '<td class="cifra">' + f[1] + '</td>' +
+          '<td class="cifra">' + f[2] + (menos ? ' <b>−' + (f[1]-f[2]) + '</b>' : '') + '</td></tr>';
+      }).join('') +
+      '</tbody></table>' +
+      ((pierde || pierdeCobros)
+        ? '<p class="confirma-ojo">' + ICONO.alerta + '<span><b>Ojo:</b> este archivo trae ' +
+          'menos de lo que tienes ahora. Si es una copia vieja, ' +
+          (pierde ? 'se van <b>' + pierde + ' ' + plural(pierde,'cliente','clientes') + '</b>' : '') +
+          (pierde && pierdeCobros ? ' y ' : '') +
+          (pierdeCobros ? '<b>' + pierdeCobros + ' ' + plural(pierdeCobros,'cobro','cobros') + '</b>' : '') +
+          '. Se guarda una copia de lo actual por si acaso, en Ajustes → Recuperar.</span></p>'
+        : '<p class="confirma-ojo suave">' + ICONO.ok + '<span>Se guarda una copia de lo actual ' +
+          'por si acaso, en Ajustes → Recuperar.</span></p>'),
       'Sí, cargar', function(){
         aplicarRespaldo(r.rec);
         aplicarTema(); pintar();
