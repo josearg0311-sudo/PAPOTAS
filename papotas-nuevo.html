@@ -2198,6 +2198,78 @@ body.con-cola #avisos{ bottom:calc(var(--alto-cola, 64px) + 34px) }
   .f:active{ background:var(--capa-alta) }
 }
 
+/* ---- Deslizar la tarjeta ---- */
+.tc.deslizando{
+  transition:none;cursor:grabbing;
+  /* Mientras se desliza, la tarjeta no debe volver a animarse al pasar
+     el dedo por encima: el «hover» la subía dos píxeles a media caricia. */
+  box-shadow:var(--sombra-3);
+}
+.tc.deslizando:hover{transform:none}
+.tc.hacia-cobrar{border-color:var(--bien);box-shadow:0 0 0 2px var(--bien-linea), var(--sombra-3)}
+.tc.hacia-wa    {border-color:var(--info);box-shadow:0 0 0 2px var(--info-linea), var(--sombra-3)}
+.tc.hacia-cobrar::after{background:radial-gradient(120% 95% at 100% 50%, var(--bien) 0%, transparent 60%);opacity:.20}
+.tc.hacia-wa::after    {background:radial-gradient(120% 95% at 0% 50%, var(--info) 0%, transparent 60%);opacity:.20}
+/* El aviso de que existe el gesto, una vez y se va. */
+/* Con ratón el gesto no existe, así que el truco tampoco se cuenta. */
+.solo-dedo{display:none}
+@media (pointer: coarse){ .solo-dedo{display:flex} }
+.pista-gesto{
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;row-gap:8px;
+  padding:10px var(--e3);border-radius:var(--r-m);
+  border:1px dashed var(--linea-fuerte);background:var(--capa-alta);
+  font-size:12px;color:var(--txt-3);line-height:1.5;
+}
+/* El icono va con el texto, no en su propia columna: apretado entre la
+   frase y el botón se quedaba en una raya de dos píxeles. */
+.pista-gesto > svg{width:16px;height:16px;flex:0 0 auto;color:var(--txt-4);align-self:flex-start;margin-top:2px}
+.pista-gesto .crece{flex:1 1 200px}
+.pista-gesto > .btn{margin-left:auto;flex:0 0 auto}
+.pista-gesto b{color:var(--txt-2)}
+
+/* ---- El cierre de la ronda ---- */
+.cierre-cifras{display:grid;gap:var(--e2);
+  grid-template-columns:repeat(auto-fit,minmax(min(130px,100%),1fr))}
+.cierre-dato{padding:var(--e3);border-radius:var(--r-m);
+  border:1px solid var(--linea);background:var(--capa-alta)}
+.cierre-dato .cd-k{display:block;font-size:10px;font-weight:800;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--txt-4)}
+.cierre-dato b{display:block;font-size:22px;font-weight:750;letter-spacing:-.035em;margin-top:3px}
+.cierre-dato small{display:block;font-size:11px;color:var(--txt-3);margin-top:2px}
+.cierre-dato.bien{border-color:var(--bien-linea);background:var(--bien-fondo)}
+.cierre-dato.bien b{color:var(--bien)}
+.cierre-dato.mal{border-color:var(--mal-linea);background:var(--mal-fondo)}
+.cierre-dato.mal b{color:var(--mal)}
+.cierre-lista h3{display:flex;align-items:center;gap:7px;margin:0 0 7px;
+  font-size:12.5px;font-weight:750;color:var(--txt-2)}
+.cierre-lista h3 svg{width:15px;height:15px;color:var(--txt-4)}
+.cierre-lista .lista{border:1px solid var(--linea);border-radius:var(--r-m);overflow:hidden}
+.bien-txt{color:var(--bien)}
+
+/* ---- La historia de un cliente ---- */
+.como-boton{width:100%;text-align:left;background:none;border:0;cursor:pointer}
+.como-boton .f-flecha{transition:transform var(--medio) var(--curva)}
+.como-boton[aria-expanded="true"] .f-flecha{transform:rotate(90deg)}
+.historia{list-style:none;margin:0;padding:0}
+.hecho{display:flex;align-items:flex-start;gap:10px;
+  padding:9px var(--e4);border-bottom:1px solid var(--linea);font-size:12.5px}
+.hecho:last-child{border-bottom:0}
+.hecho-icono{display:grid;place-items:center;width:26px;height:26px;flex:0 0 auto;
+  border-radius:8px;border:1px solid var(--linea);color:var(--txt-4);
+  background:var(--capa-alta);margin-top:-1px}
+.hecho-icono svg{width:13px;height:13px}
+.hecho.bien  .hecho-icono{color:var(--bien); border-color:var(--bien-linea); background:var(--bien-fondo)}
+.hecho.aviso .hecho-icono{color:var(--aviso);border-color:var(--aviso-linea);background:var(--aviso-fondo)}
+.hecho.info  .hecho-icono{color:var(--info); border-color:var(--info-linea); background:var(--info-fondo)}
+.hecho-txt{flex:1;min-width:0;color:var(--txt-2);line-height:1.5}
+.hecho-fecha{flex:0 0 auto;font-size:11px;color:var(--txt-4);font-weight:600;
+  font-family:var(--cifra);padding-top:1px}
+.historia-mas{margin:0;padding:9px var(--e4);font-size:11.5px;color:var(--txt-4)}
+
+.papelera-tipo{display:grid;place-items:center;width:32px;height:32px;flex:0 0 auto;
+  border-radius:9px;border:1px solid var(--linea);color:var(--txt-4);background:var(--capa-alta)}
+.papelera-tipo svg{width:15px;height:15px}
+
 .pasos-nube{display:flex;flex-direction:column;gap:var(--e3)}
 .paso-nube{display:flex;gap:var(--e3);align-items:flex-start}
 .paso-nube .pn-n{display:grid;place-items:center;flex:0 0 auto;
@@ -3284,7 +3356,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.8</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.0</span>
     </div>
   </nav>
 
@@ -3417,8 +3489,14 @@ const CLAVES = {
   servicios:'pap_servicios', clientes:'pap_clientes', ventas:'pap_ventas',
   inversiones:'pap_inversiones', mensajesRapidos:'pap_mensajes',
   combosGuardados:'pap_combos_guardados', auditoriaLog:'pap_auditoria',
-  ajustes:'pap_ajustes', blocNotasTexto:'pap_bloc_notas'
+  ajustes:'pap_ajustes', blocNotasTexto:'pap_bloc_notas',
+  papelera:'pap_papelera'
 };
+
+/* Cuánto aguanta lo borrado antes de irse de verdad. Dos meses: bastante
+   para darse cuenta de un borrado del mes pasado al cuadrar las cuentas,
+   y poco para que no se convierta en un archivo muerto de años. */
+const DIAS_PAPELERA = 60;
 
 /* El SQL de Supabase va DENTRO del programa, no en un archivo al lado.
    Motivo: quien abre PAPOTAS desde un link no tiene el repositorio, y
@@ -3431,6 +3509,7 @@ const AJUSTES_BASE = {
   precioDefecto:15, cicloRenovacion:'meses', mesesRenovacion:1, diasRenovacion:30,
   metodoDefecto:'PLIN', firmaWs:'', metaMensual:0, modoClaro:false, waComoAbrir:'auto',
   cuotasPerdido:4, tonoOscuro:'carbon', contrasteAlto:false, coloresFuertes:false,
+  vistoGesto:false,
   supabaseUrl:'', supabaseKey:'',
   plantillaCobro:'Hola {cliente} 👋 Te recuerdo que tu {servicio} vence el {vencimiento}. Son {monto}. ¡Gracias!',
   plantillaEntrega:'¡Listo {cliente}! 🎬\nPlataforma: {servicio}\nCorreo: {correo}\nClave: {contrasena}\nPerfil: {perfil}\nPIN: {pin}\nVence: {vencimiento}',
@@ -3439,7 +3518,8 @@ const AJUSTES_BASE = {
 
 let servicios=[], clientes=[], ventas=[], inversiones=[],
     mensajesRapidos=[], combosGuardados=[], auditoriaLog=[],
-    blocNotasTexto='', ajustes=Object.assign({}, AJUSTES_BASE);
+    blocNotasTexto='', ajustes=Object.assign({}, AJUSTES_BASE),
+    papelera=[];
 
 /* ---------- EL ALMACÉN, A PRUEBA DE SUSTOS -------------------------------
    Aquí había un agujero por el que se podían ir tus clientes sin que nadie
@@ -3731,6 +3811,56 @@ function panelMudanza(){
   '</div>';
 }
 
+/* La papelera, en Ajustes → Tus datos. Solo sale si hay algo dentro: una
+   tarjeta vacía que dice «no hay nada» es una tarjeta que estorba todos
+   los días para el día que sí haga falta. */
+function tarjetaPapelera(){
+  limpiarPapelera();
+  if(!papelera.length) return '';
+  const gente = papelera.filter(function(x){ return x.tipo !== 'cuenta'; }).length;
+  const cuentas = papelera.length - gente;
+  return '<div class="tarjeta">' +
+    '<div class="tarjeta-cabeza">' +
+      '<span class="cabeza-icono gris">' + ICONO.basura + '</span>' +
+      '<div class="crece"><h2>Papelera</h2>' +
+      '<p>Lo que borraste se guarda ' + DIAS_PAPELERA + ' días antes de irse de verdad. ' +
+      'Es de este aparato: no viaja a la nube, porque lo que borras en el celular ' +
+      'tiene que quedarse borrado en la laptop.</p></div>' +
+      '<span class="insignia">' +
+        (gente ? gente + ' ' + plural(gente,'cliente','clientes') : '') +
+        (gente && cuentas ? ' · ' : '') +
+        (cuentas ? cuentas + ' ' + plural(cuentas,'cuenta','cuentas') : '') +
+      '</span>' +
+    '</div>' +
+    '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+      papelera.slice(0, 40).map(function(x){
+        const quedan = DIAS_PAPELERA - diasEnPapelera(x);
+        return '<div class="f-lia">' +
+          '<div class="f crece" style="cursor:default">' +
+            '<span class="f-marca papelera-tipo">' +
+              (x.tipo === 'cuenta' ? ICONO.tele : ICONO.gente) + '</span>' +
+            '<span class="f-txt"><span class="f-nom">' + esc(x.nombre) + '</span>' +
+              '<span class="f-sub">' +
+                (x.donde ? esc(x.donde) + (x.perfil ? ' · ' + esc(x.perfil) : '') + ' · ' : '') +
+                'borrado ' + (diasEnPapelera(x) === 0 ? 'hoy'
+                  : 'hace ' + diasEnPapelera(x) + ' ' + plural(diasEnPapelera(x),'día','días')) +
+              '</span></span>' +
+            '<span class="f-cuando' + (quedan <= 7 ? ' mal' : '') + '">' +
+              (quedan <= 0 ? 'se va ya' : 'quedan ' + quedan + ' ' + plural(quedan,'día','días')) +
+            '</span>' +
+          '</div>' +
+          '<button class="btn mini" data-recuperar="' + esc(x.id) + '">' +
+            ICONO.volver + 'Recuperar</button>' +
+          '<button class="btn mini peligro icono" data-tirar="' + esc(x.id) + '"' +
+            ' title="Borrar del todo, ahora" aria-label="Borrar del todo">' + ICONO.basura + '</button>' +
+        '</div>';
+      }).join('') +
+      (papelera.length > 40 ? '<div class="f" style="cursor:default"><span class="f-txt">' +
+        '<span class="f-sub">y ' + (papelera.length - 40) + ' más</span></span></div>' : '') +
+    '</div></div>' +
+  '</div>';
+}
+
 /* La tarjeta de rescate, en Ajustes → Tus datos. */
 function tarjetaRescate(){
   const fuentes = fuentesDeRescate();
@@ -3779,6 +3909,7 @@ function cargar(){
   mensajesRapidos = arr(leerClave(CLAVES.mensajesRapidos, []));
   combosGuardados = arr(leerClave(CLAVES.combosGuardados, []));
   auditoriaLog    = arr(leerClave(CLAVES.auditoriaLog, []));
+  papelera        = arr(leerClave(CLAVES.papelera, []));
   try{ blocNotasTexto = localStorage.getItem(CLAVES.blocNotasTexto) || ''; }catch(_){ blocNotasTexto=''; }
   const guardados = leerClave(CLAVES.ajustes, null);
   ajustes = Object.assign({}, AJUSTES_BASE, (guardados && typeof guardados==='object') ? guardados : {});
@@ -3797,10 +3928,190 @@ function guardar(subir){
   guardarClave(CLAVES.mensajesRapidos, JSON.stringify(mensajesRapidos));
   guardarClave(CLAVES.combosGuardados, JSON.stringify(combosGuardados));
   guardarClave(CLAVES.auditoriaLog,    JSON.stringify(auditoriaLog));
+  guardarClave(CLAVES.papelera,        JSON.stringify(papelera));
   guardarClave(CLAVES.ajustes,         JSON.stringify(ajustes));
   guardarClave(CLAVES.blocNotasTexto,  String(blocNotasTexto||''));
   copiaDelDia();
   if(subir !== false) Nube.pedirSubida();
+}
+
+/* ---------- LA HISTORIA DE UN CLIENTE -----------------------------------
+   «Te ha pagado S/ 320 en 21 cobros» está bien, pero no responde a lo que
+   de verdad se pregunta uno delante de un cliente: ¿este desde cuándo
+   paga tarde? ¿le subí el precio o me lo estoy inventando? ¿por qué vence
+   un martes raro? ¿cuándo le escribí la última vez?
+
+   Casi todo eso YA está guardado, solo que suelto: los cobros en ventas,
+   los cambios de precio en su historialPrecios, el alta en su inicio. Lo
+   que no estaba apuntado es lo que se hace sin mover dinero -renovar sin
+   cobrar, correr la fecha, pausar, mover de cuenta, escribir- y eso es
+   justo lo que explica los huecos.
+
+   Así que esas cosas se apuntan en la propia ficha, en corto y con tope:
+   cuarenta por cliente. Los cobros NO se apuntan aquí a propósito -ya
+   están en ventas, que es donde mandan- para no tener dos versiones de la
+   misma verdad. */
+function apuntarHecho(c, tipo, texto){
+  if(!c) return;
+  if(!Array.isArray(c.hechos)) c.hechos = [];
+  c.hechos.unshift({f:new Date().toISOString().slice(0,10), t:tipo, d:texto});
+  if(c.hechos.length > 40) c.hechos.length = 40;
+}
+
+/* Todo lo que le ha pasado a este cliente, de lo más nuevo a lo más
+   viejo, juntando las cuatro fuentes. */
+function historiaDe(c){
+  if(!c) return [];
+  const linea = [];
+  ventas.forEach(function(v){
+    if(String(v.clienteId) !== String(c.id)) return;
+    linea.push({f:String(v.fecha||'').slice(0,10), t:'cobro',
+                d:'Te pagó ' + dinero(Number(v.monto)||0) +
+                  (v.servicio ? ' · ' + v.servicio : ''), monto:Number(v.monto)||0});
+  });
+  (Array.isArray(c.historialPrecios) ? c.historialPrecios : []).forEach(function(h){
+    /* En ese mismo array viven DOS cosas distintas: los cambios de precio
+       -{de, a}- y las cuotas cobradas -{monto, meses}-, que es el molde
+       del PAPOTAS de siempre. Sin distinguirlas, cada cobro salía aquí
+       como «le subiste de S/ 0 a S/ 0». */
+    if(!h || h.de === undefined || h.a === undefined) return;
+    const sube = Number(h.a) > Number(h.de);
+    linea.push({f:String(h.fecha||'').slice(0,10), t: sube ? 'sube' : 'baja',
+                d:(sube ? 'Le subiste' : 'Le bajaste') + ' de ' + dinero(Number(h.de)||0) +
+                  ' a ' + dinero(Number(h.a)||0)});
+  });
+  (Array.isArray(c.hechos) ? c.hechos : []).forEach(function(h){
+    linea.push({f:String(h.f||'').slice(0,10), t:h.t||'nota', d:h.d||''});
+  });
+  if(c.inicio) linea.push({f:String(c.inicio).slice(0,10), t:'alta', d:'Lo diste de alta'});
+  return linea.filter(function(x){ return x.f; })
+              .sort(function(a,b){ return b.f.localeCompare(a.f); });
+}
+
+const PINTA_HECHO = {
+  cobro:  ['bien',  'cobrar'],
+  sube:   ['bien',  'etiqueta'],
+  baja:   ['aviso', 'etiqueta'],
+  renovar:['info',  'renovar'],
+  correr: ['aviso', 'reloj'],
+  pausa:  ['aviso', 'reloj'],
+  vuelve: ['bien',  'ok'],
+  mover:  ['info',  'capas'],
+  wa:     ['bien',  'wa'],
+  alta:   ['info',  'mascliente'],
+  nota:   ['',      'chat']
+};
+
+/* La historia, en la ficha. Se pliega: con veintiún cobros detrás, la
+   lista entera empuja hacia abajo todo lo que se usa a diario. */
+function panelHistoria(c){
+  const linea = historiaDe(c);
+  if(!linea.length) return '';
+  const cobros = linea.filter(function(x){ return x.t === 'cobro'; });
+  const pagado = cobros.reduce(function(a,x){ return a + (x.monto||0); }, 0);
+  const desde = linea[linea.length-1];
+  const abierta = abiertos.has('hist'+c.id);
+  return '<div class="tarjeta">' +
+    '<button class="tarjeta-cabeza como-boton" data-historia="' + esc(c.id) + '"' +
+      ' aria-expanded="' + abierta + '">' +
+      '<span class="cabeza-icono azul">' + ICONO.reloj + '</span>' +
+      '<div class="crece"><h2>Su historia</h2>' +
+      '<p>' + linea.length + ' ' + plural(linea.length,'cosa','cosas') +
+        (cobros.length ? ' · te ha pagado ' + esc(dinero(pagado)) + ' en ' +
+          cobros.length + ' ' + plural(cobros.length,'cobro','cobros') : '') +
+        (desde ? ' · desde ' + esc(fechaBonita(desde.f)) : '') +
+      '</p></div>' +
+      '<span class="f-flecha">' + ICONO.flecha + '</span>' +
+    '</button>' +
+    (abierta
+      ? '<div class="tarjeta-cuerpo pegado"><ol class="historia">' +
+          linea.slice(0, 60).map(function(x){
+            const pinta = PINTA_HECHO[x.t] || PINTA_HECHO.nota;
+            return '<li class="hecho ' + pinta[0] + '">' +
+              '<span class="hecho-icono">' + (ICONO[pinta[1]] || ICONO.chat) + '</span>' +
+              '<span class="hecho-txt">' + esc(x.d) + '</span>' +
+              '<time class="hecho-fecha">' + esc(fechaBonita(x.f)) + '</time>' +
+            '</li>';
+          }).join('') +
+        '</ol>' +
+        (linea.length > 60 ? '<p class="historia-mas">y ' + (linea.length-60) + ' cosas más, más atrás</p>' : '') +
+      '</div>'
+      : '') +
+  '</div>';
+}
+
+/* ---------- LA PAPELERA -------------------------------------------------
+   Borrar un cliente era para siempre. Había los veinte pasos de deshacer,
+   pero eso se gasta: haces cuatro cobros después de borrar y ya no hay
+   vuelta. Y aquí se borra gente que paga todos los meses, así que un
+   borrado por error no es perder una ficha: es perder un cobro cada mes
+   sin enterarte de por qué falta.
+
+   Ahora lo borrado se aparta dos meses antes de irse de verdad. NO se
+   sincroniza con la nube a propósito: es una red local, de este aparato.
+   Sincronizarla haría que un borrado hecho en el celular reapareciera en
+   la laptop, que es justo lo contrario de lo que pidió al borrar. */
+function aLaPapelera(tipo, ficha, comoSeLlamaba, extra){
+  papelera.unshift(Object.assign({
+    id: 'p' + Date.now() + Math.random().toString(36).slice(2,7),
+    tipo: tipo,
+    nombre: comoSeLlamaba || '(sin nombre)',
+    borradoEl: new Date().toISOString(),
+    ficha: JSON.parse(JSON.stringify(ficha))
+  }, extra || {}));
+  limpiarPapelera();
+}
+
+/* Lo que ya cumplió su tiempo se va, y se pone tope por si acaso: sin
+   tope, mil borrados dejan el almacén sin sitio y entonces lo que se
+   pierde es lo de verdad, no lo borrado. */
+function limpiarPapelera(){
+  const limite = Date.now() - DIAS_PAPELERA * 86400000;
+  papelera = papelera.filter(function(x){
+    const t = Date.parse(x && x.borradoEl);
+    return isNaN(t) ? true : t >= limite;
+  });
+  if(papelera.length > 200) papelera.length = 200;
+}
+
+function diasEnPapelera(x){
+  const t = Date.parse(x && x.borradoEl);
+  if(isNaN(t)) return 0;
+  return Math.floor((Date.now() - t) / 86400000);
+}
+
+/* Devolver una ficha a su sitio. Se comprueba que no esté ya -si borró y
+   volvió a crear a la misma persona, restaurar la duplicaría- y, en un
+   cliente, que su cuenta siga existiendo: si la cuenta también se borró,
+   vuelve sin cuenta y se dice, en vez de dejarlo apuntando a un sitio que
+   ya no está. */
+function sacarDePapelera(id){
+  const x = papelera.find(function(p){ return String(p.id) === String(id); });
+  if(!x){ avisar('Eso ya no está en la papelera', 'mal'); return; }
+  const ficha = x.ficha || {};
+  let aviso = '';
+  if(x.tipo === 'cuenta'){
+    if(servicios.some(function(m){ return String(m.id) === String(ficha.id); })){
+      avisar('Esa cuenta ya existe', 'mal'); return;
+    }
+    recordarPaso('recuperar ' + x.nombre);
+    servicios.push(ficha);
+  } else {
+    if(clientes.some(function(c){ return String(c.id) === String(ficha.id); })){
+      avisar('Ese cliente ya existe', 'mal'); return;
+    }
+    recordarPaso('recuperar a ' + x.nombre);
+    if(ficha.cuentaMasterId &&
+       !servicios.some(function(m){ return String(m.id) === String(ficha.cuentaMasterId); })){
+      ficha.cuentaMasterId = null;
+      aviso = ' · su cuenta ya no existe, quedó sin asignar';
+    }
+    clientes.push(ficha);
+  }
+  papelera = papelera.filter(function(p){ return String(p.id) !== String(id); });
+  anotar('RECUPERAR', x.nombre + ' recuperado de la papelera');
+  guardar(); pintar();
+  avisar(x.nombre + ' recuperado' + aviso, 'bien', true);
 }
 
 function anotar(accion, detalle){
@@ -3900,7 +4211,14 @@ function masterDe(c){
    los gastos otra vez por cada cuenta. Con 400 clientes y 80 cuentas eso son
    decenas de miles de vueltas para dibujar una sola pantalla. */
 let _porMaster = null, _eco = null;
-function olvidarIndices(){ _porMaster = null; _eco = null; _personas = null; }
+function olvidarIndices(){
+  _porMaster = null; _eco = null; _personas = null;
+  /* El texto donde se busca se arma una vez por cliente y se guarda en la
+     propia ficha. Si no se tira aquí, al cambiarle el teléfono a alguien
+     se seguiría buscando en el de antes. */
+  try{ clientes.forEach(function(c){ if(c && c._pajar) delete c._pajar; }); }catch(_){}
+  _frase = null; _fraseDe = null;
+}
 
 function clientesDe(masterId){
   if(!_porMaster){
@@ -4881,7 +5199,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.8';
+const VERSION = 'v7.0';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5935,10 +6253,77 @@ function vacio(titulo, texto){
 
 /* ---------- 9. Las cinco pantallas -------------------------------------- */
 
+/* ---------- BUSCAR DE VERDAD -------------------------------------------
+   Lo que buscaba antes: nombre, plataforma, perfil, teléfono y correo, y
+   todo de una pieza. Eso dejaba fuera tres cosas que se buscan a diario:
+
+   · «NETFLIX 4». Buscaba en c.servicio, que dice «NETFLIX» a secas. El
+     número de la cuenta no estaba en ningún lado, así que la cuenta
+     concreta no se podía encontrar por su nombre.
+   · Un teléfono escrito de otra manera. Él lo guarda «987654321» y lo
+     busca «987 654 321» o pegado de WhatsApp como «+51 987 654 321».
+     Sin limpiar los dos lados, no encuentra nada.
+   · Dos palabras. «diego netflix» no daba nada, porque buscaba esa
+     cadena entera y en la ficha nunca van seguidas.
+
+   Ahora se junta todo lo que identifica a un cliente -incluido el nombre
+   completo de su cuenta, su nota y lo que le cobras-, se limpia, y se
+   exige que estén TODAS las palabras, en cualquier orden. */
+function pajarDe(c){
+  if(c && c._pajar) return c._pajar;
+  const m = masterDe(c);
+  /* El teléfono entra de las tres maneras en que se escribe: como él lo
+     guarda, solo dígitos, y con el prefijo del país delante. Así lo
+     encuentra escriba «987654321» o pegue «+51 987 654 321» de un chat. */
+  const tel = String((c && c.telefono) || '').replace(/\D/g, '');
+  const n = normalizarTelefono(c && c.telefono);
+  const txt = sinTildes([
+    c.nombre, c.servicio, m && nombreCuenta(m), c.perfil, c.pin,
+    c.telefono, tel, n.vale ? n.tel : '', c.metodo, c.nota,
+    m && m.correo, m && m.etiqueta, cobroDe(c)
+  ].filter(Boolean).join(' '));
+  try{ Object.defineProperty(c, '_pajar', {value:txt, enumerable:false, configurable:true}); }catch(_){}
+  return txt;
+}
+
+/* Las palabras de lo que escribió, ya limpias. Un teléfono pegado con
+   espacios o con +51 delante cuenta como una sola palabra de dígitos. */
+function palabrasBusqueda(){
+  const q = String(busqueda || '').trim();
+  if(!q) return [];
+  if(/^[\d\s+()-]+$/.test(q)){
+    const d = q.replace(/\D/g, '');
+    if(!d) return [];
+    /* Pegado de un chat viene con el prefijo del país delante. Se prueba
+       también sin él, que es como lo tiene guardado casi siempre. */
+    const pre = String(ajustes.prefijoPais || '').replace(/\D/g, '');
+    if(pre && d.length > 9 && d.indexOf(pre) === 0) return [d.slice(pre.length)];
+    return [d];
+  }
+  return q.split(/\s+/).filter(Boolean);
+}
+
+/* ¿Existe lo que escribió TAL CUAL, en alguna ficha?
+   Esto es lo que arregla «NETFLIX 4». Buscando palabra a palabra, «4»
+   aparece en «Perfil 4» de cualquier cuenta, así que salían los treinta y
+   cuatro de Netflix. La regla ahora es fácil de explicar: si lo que
+   escribiste existe tal cual, te enseño SOLO eso; si no existe tal cual,
+   te enseño lo que tenga todas esas palabras sueltas. */
+let _frase = null, _fraseDe = null;
+function buscarPorFrase(){
+  const q = sinTildes(String(busqueda || '').trim());
+  if(!q) return false;
+  if(_fraseDe === q) return _frase;
+  _fraseDe = q;
+  _frase = q.indexOf(' ') > 0 && clientes.some(function(c){ return pajarDe(c).indexOf(q) >= 0; });
+  return _frase;
+}
+
 function coincide(c){
   if(!busqueda) return true;
-  const m = masterDe(c);
-  return sinTildes([c.nombre, c.servicio, c.perfil, c.telefono, m && m.correo].join(' ')).indexOf(busqueda) >= 0;
+  const pajar = pajarDe(c);
+  if(buscarPorFrase()) return pajar.indexOf(sinTildes(String(busqueda).trim())) >= 0;
+  return palabrasBusqueda().every(function(w){ return pajar.indexOf(w) >= 0; });
 }
 
 /* --- HOY ---------------------------------------------------------------- */
@@ -6729,8 +7114,18 @@ function cuerpoClientes(universo){
   if(vistaGente === 'tabla'){
     return '<div class="tarjeta-cuerpo pegado">' + tablaClientes(lista) + '</div>' + barraLote();
   }
+  /* Un gesto que nadie te cuenta es un gesto que no existe. Se dice una
+     vez, se cierra, y no vuelve. */
+  const pista = (!ajustes.vistoGesto && lista.length)
+    ? '<div class="tarjeta-cuerpo" style="padding-bottom:0"><div class="pista-gesto solo-dedo">' +
+        ICONO.capas +
+        '<span class="crece">Truco: <b>desliza una tarjeta a la derecha para cobrar</b> ' +
+        'y a la izquierda para escribirle por WhatsApp. Sin apuntar a ningún botón.</span>' +
+        '<button class="btn mini fantasma" data-visto-gesto="1">Entendido</button>' +
+      '</div></div>'
+    : '';
 
-  let cuerpo;
+  let cuerpo = '';
   if(ordenClientes === 'plataforma' && plataformaActiva === 'TODAS'){
     cuerpo = panelesPorPlataforma(lista, {uno:'cliente', varias:'clientes'});
   }else if(ordenClientes === 'vencimiento'){
@@ -6758,7 +7153,7 @@ function cuerpoClientes(universo){
   }else{
     cuerpo = '<div class="mosaico gente">' + lista.map(tarjetaCliente).join('') + '</div>';
   }
-  return '<div class="tarjeta-cuerpo pegado">' + cuerpo + '</div>' + barraLote();
+  return pista + '<div class="tarjeta-cuerpo pegado">' + cuerpo + '</div>' + barraLote();
 }
 
 /* ---------- Buscar: se busca en TODO, desde donde estés ----------------- */
@@ -6766,7 +7161,11 @@ function hojaBusqueda(){
   const eco = economia();
   const gente = clientes.filter(coincide);
   const cuentas = servicios.filter(function(m){
-    return sinTildes([m.nombre, m.correo, m.etiqueta, m.numero, nombreCuenta(m)].join(' ')).indexOf(busqueda) >= 0;
+    const pajar = sinTildes([m.nombre, m.correo, m.etiqueta, m.numero,
+      nombreCuenta(m), m.nota, m.costo].filter(Boolean).join(' '));
+    const q = sinTildes(String(busqueda).trim());
+    if(buscarPorFrase()) return pajar.indexOf(q) >= 0;
+    return palabrasBusqueda().every(function(w){ return pajar.indexOf(w) >= 0; });
   });
   $('#titulo').textContent = 'Buscando';
   /* Corto a propósito: en el celular el resumen tiene medio renglón, y
@@ -7294,6 +7693,7 @@ function hojaCliente(c){
       (c.nota ? '<div class="nota-caja">' + ICONO.chat + '<span>' + esc(c.nota) + '</span></div>' : '') +
     '</div>' +
 
+    panelHistoria(c) +
     panelPersona +
 
     (debiendo > 1
@@ -7937,6 +8337,7 @@ function pintaAjustes(){
         '<button class="btn" data-csv="gastos">' + ICONO.caja + 'Gastos (' + inversiones.length + ')</button>' +
       '</div></div>' +
     '</div>' +
+    tarjetaPapelera() +
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono azul">' + ICONO.caja + '</span>' +
@@ -8366,6 +8767,94 @@ function marcarDesbordes(){
 /* Arrastrar con el ratón, como se arrastra con el dedo. Si el arrastre pasa
    de unos pocos píxeles, el clic que venía detrás se anula: si no, soltar
    encima de una plataforma te metía dentro sin querer. */
+/* ---------- DESLIZAR LA TARJETA ----------------------------------------
+   En el celular la tarjeta ya tiene sus dos botones, pero son dos dianas
+   de cuarenta y cuatro píxeles en una pantalla que se baja con el pulgar:
+   para cobrar hay que parar, mirar y apuntar. Deslizando no hay que
+   apuntar a nada.
+
+   Reglas, para que no se dispare sin querer:
+   · Solo con el dedo. Con ratón están los botones, que van mejor.
+   · Tiene que ser un gesto claramente horizontal: si el dedo va más en
+     vertical que en horizontal, es que está bajando la lista y no se
+     toca nada.
+   · Hay que pasar de un tercio de la tarjeta. Menos que eso vuelve solo.
+   · Y lo que se dispara es lo mismo que hace el botón, no un atajo
+     aparte: deslizar a la derecha cobra, a la izquierda escribe. */
+const GESTO_MINIMO = 64;      /* píxeles antes de empezar a mover nada */
+
+function deslizable(tarjeta){
+  if(!tarjeta || tarjeta.dataset.desliza) return;
+  tarjeta.dataset.desliza = '1';
+  let x0 = 0, y0 = 0, dx = 0, activo = false, decidido = false, id = null;
+
+  function soltar(hacer){
+    tarjeta.style.transition = 'transform .18s var(--curva)';
+    tarjeta.style.transform = '';
+    tarjeta.classList.remove('deslizando', 'hacia-cobrar', 'hacia-wa');
+    setTimeout(function(){ tarjeta.style.transition = ''; }, 200);
+    if(hacer) hacer();
+  }
+
+  tarjeta.addEventListener('pointerdown', function(ev){
+    if(ev.pointerType !== 'touch') return;
+    if(ev.target.closest && ev.target.closest('button, a, input, select, textarea')) return;
+    activo = true; decidido = false; dx = 0; id = ev.pointerId;
+    x0 = ev.clientX; y0 = ev.clientY;
+  }, {passive:true});
+
+  tarjeta.addEventListener('pointermove', function(ev){
+    if(!activo || ev.pointerId !== id) return;
+    const ax = ev.clientX - x0, ay = ev.clientY - y0;
+    if(!decidido){
+      if(Math.abs(ax) < 10 && Math.abs(ay) < 10) return;
+      /* Si va más en vertical, está bajando la lista: fuera. */
+      if(Math.abs(ay) >= Math.abs(ax)){ activo = false; return; }
+      decidido = true;
+      tarjeta.classList.add('deslizando');
+    }
+    dx = ax;
+    const tope = tarjeta.offsetWidth * 0.45;
+    const visto = Math.max(-tope, Math.min(tope, dx));
+    tarjeta.style.transform = 'translateX(' + visto + 'px)';
+    const pasa = Math.abs(dx) >= GESTO_MINIMO;
+    tarjeta.classList.toggle('hacia-cobrar', pasa && dx > 0);
+    tarjeta.classList.toggle('hacia-wa',     pasa && dx < 0);
+  }, {passive:true});
+
+  function fin(ev){
+    if(!activo || (ev && ev.pointerId !== id)) return;
+    activo = false;
+    if(!decidido){ return; }
+    const id2 = tarjeta.dataset.cid;
+    const pasa = Math.abs(dx) >= GESTO_MINIMO;
+    /* Se marca que hubo gesto: el clic que llega después de soltar no
+       debe abrir la ficha, que es lo que hacía la tarjeta entera. */
+    tarjeta.dataset.hubodeslice = String(Date.now());
+    if(!pasa){ soltar(null); return; }
+    if(dx > 0) soltar(function(){ mandoDeslizado('cobrar', id2); });
+    else       soltar(function(){ mandoDeslizado('wa', id2); });
+  }
+  tarjeta.addEventListener('pointerup', fin, {passive:true});
+  tarjeta.addEventListener('pointercancel', function(){ activo = false; soltar(null); }, {passive:true});
+}
+
+function mandoDeslizado(que, id){
+  const c = buscarCliente(id);
+  if(!c) return;
+  if(que === 'cobrar'){ renovar(id, true); return; }
+  if(!telefonoDe(c)){ avisar((c.nombre||'Ese cliente') + ' no tiene teléfono guardado', 'mal'); return; }
+  abrirWhatsApp(id);
+}
+
+/* Se enganchan las tarjetas que haya en pantalla después de cada pintada.
+   Solo donde se usa el dedo: con ratón no aporta nada y sí puede estorbar
+   al seleccionar texto. */
+function engancharDeslices(){
+  if(!window.matchMedia || !window.matchMedia('(pointer: coarse)').matches) return;
+  document.querySelectorAll('.pagina.viva .tc[data-cid]').forEach(deslizable);
+}
+
 function arrastrable(el){
   let pulsando = false, desde = 0, scroll0 = 0, movido = 0;
   el.addEventListener('pointerdown', function(ev){
@@ -8426,7 +8915,7 @@ function pintar(){
   ponerRolesPestanas();
   ponerTituloVentana();
   recolocarFoco();
-  requestAnimationFrame(function(){ marcarDesbordes(); acercarPlataformaViva(); });
+  requestAnimationFrame(function(){ marcarDesbordes(); acercarPlataformaViva(); engancharDeslices(); });
 }
 function pintarAvisosNav(){
   /* Cada pestaña avisa de LO SUYO. Antes las dos llevaban el mismo número
@@ -8494,6 +8983,9 @@ function correrFecha(id){
        const nueva = sumarDias(desde, n);
        recordarPaso('correr la fecha de ' + (c.nombre || 'un cliente'));
        c.vencimiento = nueva;
+       apuntarHecho(c, 'correr', (n > 0 ? 'Le corriste ' + n + ' ' + plural(n,'día','días') + ' más'
+                                        : 'Le quitaste ' + (-n) + ' ' + plural(-n,'día','días')) +
+                    ', hasta el ' + fechaBonita(nueva));
        anotar('CORRER FECHA', (c.nombre || '') + ': de ' + fechaBonita(desde) +
               ' a ' + fechaBonita(nueva) + ' (' + (n > 0 ? '+' : '') + n + ' días)');
        guardar(); cerrarModal(); pintar();
@@ -8888,7 +9380,12 @@ function renovar(id, cobrando, cuantas){
   const meses = 1;
   if(cobrado > 0){
     anotar('COBRAR', c.nombre + ' pagó ' + dinero(cobrado) + ', ahora vence ' + fechaBonita(nueva));
+    if(trasCobrar && trasCobrar.id === String(c.id)){
+      const f = trasCobrar.hacer; trasCobrar = null;
+      try{ f(c, cobrado); }catch(_){}
+    }
   }else{
+    apuntarHecho(c, 'renovar', 'Le renovaste sin cobrar, hasta el ' + fechaBonita(nueva));
     anotar('RENOVAR', c.nombre + ' renovado hasta ' + fechaBonita(nueva) + ' sin cobrar');
   }
   guardar();
@@ -9002,6 +9499,7 @@ function abrirWhatsApp(id, cual){
   const tel = n.tel;
   saltarAWhatsApp(tel, textoWhatsApp(c, cual));
   marcarEscrito(c);
+  apuntarHecho(c, 'wa', 'Le escribiste por WhatsApp');
   anotar('WHATSAPP', 'Mensaje abierto para ' + c.nombre);
   guardar();
   return true;
@@ -9037,6 +9535,15 @@ let colaEditando = false;
 let colaSeguido = false;
 try{ colaSeguido = localStorage.getItem('pap_cola_seguido') === '1'; }catch(_){}
 let colaEsperandoVuelta = false;
+/* Lo que ha pasado en ESTA ronda, para poder contárselo al final. Antes
+   la ronda acababa con un «Ronda terminada · 12 mensajes mandados» que se
+   iba en tres segundos, y se quedaba sin saber lo que de verdad importa:
+   cuánto entró, a quién le queda debiendo y a quién no pudo escribirle. */
+let colaCobrado = 0, colaCobrados = [], colaSaltados = [], colaArrancoEn = null;
+/* Lo que hay que hacer en cuanto se cobre a alguien, venga el cobro de
+   una ventana o de un botón. Se apunta con el id para que no se dispare
+   con el cobro de otro si por medio se cancela la ventana. */
+let trasCobrar = null;
 
 function abrirCola(lista, titulo){
   const conTel = lista.filter(function(c){ return telefonoDe(c); });
@@ -9051,6 +9558,8 @@ function abrirCola(lista, titulo){
   colaMandados = new Set();
   colaTextos = {};
   colaEditando = false;
+  colaCobrado = 0; colaCobrados = []; colaSaltados = [];
+  colaArrancoEn = Date.now(); trasCobrar = null;
   pintarCola();
   avisar(conTel.length + ' en la ronda' + (sinTel ? ' · ' + sinTel + ' sin teléfono se quedan fuera' : ''), 'bien');
 }
@@ -9113,7 +9622,7 @@ function avisarDeMandarATodos(lista){
 }
 
 function cerrarCola(){
-  cola = []; colaPos = 0; colaEditando = false;
+  cola = []; colaPos = 0; colaEditando = false; trasCobrar = null;
   pintarCola();
 }
 
@@ -9123,15 +9632,92 @@ function textoDeLaRonda(c){
   return (propio != null) ? propio : textoWhatsApp(c, colaPlantilla);
 }
 
+/* EL CIERRE DE LA RONDA
+   Lo que se quiere saber al soltar el teléfono: cuánto entró, a cuántos
+   les cobraste, a cuántos les escribiste y quién se queda debiendo. Con
+   eso se decide si hay que volver a pasar hoy o ya está. */
+function cerrarRonda(){
+  const mandados = colaMandados.size;
+  const total = cola.length;
+  const cobrados = colaCobrados.slice();
+  const saltados = colaSaltados.slice();
+  const cobrado = colaCobrado;
+  const minutos = colaArrancoEn ? Math.max(1, Math.round((Date.now() - colaArrancoEn) / 60000)) : 0;
+  cola = []; colaPos = 0;
+  colaCobrado = 0; colaCobrados = []; colaSaltados = []; colaArrancoEn = null;
+
+  if(!mandados && !cobrados.length){
+    avisar('Ronda cerrada · no llegaste a hacer nada', 'bien');
+    return;
+  }
+  /* Los que quedan debiendo van primero: es lo único que pide otra
+     vuelta. A los que ya pagaron no hay que volver. */
+  const debiendo = saltados.filter(function(x){ return x.debe > 0; })
+                           .sort(function(a,b){ return b.debe - a.debe; });
+  const sumaDebiendo = debiendo.reduce(function(a,x){ return a + x.debe; }, 0);
+
+  anotar('RONDA', 'Ronda de ' + total + ': ' + mandados + ' mensajes, ' +
+         cobrados.length + ' cobros, ' + dinero(cobrado));
+  /* anotar() solo toca la lista en memoria. Sin guardar, la ronda se
+     perdía al cerrar el programa, que es justo cuando se quiere mirar. */
+  guardar();
+
+  abrirModal('Ronda terminada',
+    '<div class="pila">' +
+      '<div class="cierre-cifras">' +
+        '<div class="cierre-dato bien"><span class="cd-k">Cobraste</span>' +
+          '<b class="cifra">' + esc(dinero(cobrado)) + '</b>' +
+          '<small>' + cobrados.length + ' ' + plural(cobrados.length,'persona','personas') + '</small></div>' +
+        '<div class="cierre-dato"><span class="cd-k">Escribiste a</span>' +
+          '<b class="cifra">' + mandados + '</b>' +
+          '<small>de ' + total + ' en la fila</small></div>' +
+        (sumaDebiendo > 0
+          ? '<div class="cierre-dato mal"><span class="cd-k">Siguen debiendo</span>' +
+            '<b class="cifra">' + esc(dinero(sumaDebiendo)) + '</b>' +
+            '<small>' + debiendo.length + ' ' + plural(debiendo.length,'persona','personas') + '</small></div>'
+          : '') +
+        (minutos ? '<div class="cierre-dato"><span class="cd-k">Te llevó</span>' +
+          '<b class="cifra">' + minutos + '</b><small>' + plural(minutos,'minuto','minutos') + '</small></div>' : '') +
+      '</div>' +
+
+      (cobrados.length
+        ? '<div class="cierre-lista"><h3>' + ICONO.cobrar + 'Te pagaron</h3><div class="lista">' +
+            cobrados.slice(0, 25).map(function(x){
+              return '<div class="f" style="cursor:default">' +
+                '<span class="f-txt"><span class="f-nom">' + esc(x.nombre) + '</span></span>' +
+                '<span class="f-monto cifra bien-txt">' + esc(dinero(x.monto)) + '</span></div>';
+            }).join('') +
+            (cobrados.length > 25 ? '<div class="f" style="cursor:default"><span class="f-txt">' +
+              '<span class="f-sub">y ' + (cobrados.length-25) + ' más</span></span></div>' : '') +
+          '</div></div>'
+        : '') +
+
+      (debiendo.length
+        ? '<div class="cierre-lista"><h3>' + ICONO.alerta + 'Se quedan debiendo</h3>' +
+            '<p class="ayuda-modal">A estos les pasaste por encima. Los que ya tienen ' +
+            'el mensaje mandado solo están esperando a que paguen.</p>' +
+            '<div class="lista">' +
+            debiendo.slice(0, 25).map(function(x){
+              return '<div class="f" style="cursor:default">' +
+                '<span class="f-txt"><span class="f-nom">' + esc(x.nombre) + '</span>' +
+                  '<span class="f-sub">' + (x.mandado ? 'ya le escribiste' : 'sin escribirle') + '</span></span>' +
+                '<span class="f-monto cifra">' + esc(dinero(x.debe)) + '</span></div>';
+            }).join('') +
+            (debiendo.length > 25 ? '<div class="f" style="cursor:default"><span class="f-txt">' +
+              '<span class="f-sub">y ' + (debiendo.length-25) + ' más</span></span></div>' : '') +
+          '</div></div>'
+        : '') +
+    '</div>',
+    [{texto:'Listo', clase:'principal', hacer:cerrarModal}]);
+}
+
 function pintarCola(){
   let caja = document.getElementById('cola');
   if(!cola.length || colaPos >= cola.length){
     if(caja) caja.classList.remove('puesta');
     document.body.classList.remove('con-cola');
     if(cola.length && colaPos >= cola.length){
-      const mandados = colaMandados.size;
-      cola = []; colaPos = 0;
-      avisar('Ronda terminada · ' + mandados + ' ' + plural(mandados,'mensaje mandado','mensajes mandados'), 'bien');
+      cerrarRonda();
     }
     return;
   }
@@ -9320,14 +9906,34 @@ function mandoCola(que){
     saltarAWhatsApp(n.tel, textoDeLaRonda(c));
     colaEsperandoVuelta = true;
     marcarEscrito(c);
+    apuntarHecho(c, 'wa', 'Le escribiste en la ronda');
     colaMandados.add(clave);
     anotar('WHATSAPP', 'Mensaje mandado a ' + (c.nombre||''));
     guardar();
     pintarCola();
     return;
   }
-  if(que === 'cobrar'){ renovar(c.id, true); avanzarCola(); return; }
-  if(que === 'saltar'){ avanzarCola(); return; }
+  if(que === 'cobrar'){
+    /* Cobrar no siempre pasa aquí mismo: si debe varias cuotas, renovar()
+       abre una ventana y el cobro ocurre al contestarla. Así que en vez
+       de mirar si hubo venta justo después -que con la ventana abierta
+       todavía no la hay, y la fila se quedaba clavada en el mismo
+       cliente-, se deja dicho qué hacer CUANDO se cobre. */
+    trasCobrar = {id:String(c.id), hacer:function(cli, monto){
+      colaCobrado += monto;
+      colaCobrados.push({nombre:cli.nombre || 'Cliente', monto:monto});
+      avanzarCola();
+    }};
+    renovar(c.id, true);
+    return;
+  }
+  if(que === 'saltar'){
+    colaSaltados.push({nombre:c.nombre || 'Cliente',
+                       mandado:colaMandados.has(String(c.id)),
+                       debe:aCobrarDe(c)});
+    avanzarCola();
+    return;
+  }
 }
 
 /* Queda apuntado a quién le escribiste hoy, para no repetirte. */
@@ -9585,6 +10191,8 @@ function aplicarMover(){
   c.cuentaMasterId = m ? m.id : null;
   if(m) c.servicio = m.nombre;
   c.perfil = m ? perfil : (c.perfil || '');
+  apuntarHecho(c, 'mover', 'Lo moviste de ' + (desde ? nombreCuenta(desde) : 'sin cuenta') +
+    ' a ' + (m ? nombreCuenta(m) + ' · ' + perfil : 'sin cuenta'));
   anotar('MOVER', (c.nombre||'') + ': ' +
     (desde ? nombreCuenta(desde) : 'sin cuenta') + ' → ' +
     (m ? nombreCuenta(m) + ' · ' + perfil : 'sin cuenta'));
@@ -10337,8 +10945,16 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
+  /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
+     este freno, deslizar para cobrar abría encima la ficha del cliente. */
+  const deslizada = t.closest && t.closest('.tc[data-hubodeslice]');
+  if(deslizada && Date.now() - Number(deslizada.dataset.hubodeslice) < 500){
+    delete deslizada.dataset.hubodeslice;
+    ev.preventDefault();
+    return;
+  }
   const d = t.dataset;
 
   /* Si vienes de arrastrar la tira, ese clic no cuenta: soltar encima de una
@@ -10368,6 +10984,28 @@ document.addEventListener('click', function(ev){
   if(d.renovar){ renovar(d.renovar, false); return; }
   if(d.correr){ correrFecha(d.correr); return; }
   if(d.juntar){ juntarPersonas(d.juntar); return; }
+  if(d.recuperar){ sacarDePapelera(d.recuperar); return; }
+  if(d.vistoGesto){
+    ajustes.vistoGesto = true;
+    guardar(); pintar(); return;
+  }
+  if(d.historia){
+    const k = 'hist' + d.historia;
+    if(abiertos.has(k)) abiertos.delete(k); else abiertos.add(k);
+    pintar(); return;
+  }
+  if(d.tirar){
+    const x = papelera.find(function(p){ return String(p.id) === String(d.tirar); });
+    if(!x) return;
+    confirmar('Borrar del todo',
+      '¿Borrar a ' + x.nombre + ' definitivamente? Esto ya no se puede deshacer.',
+      'Sí, del todo', function(){
+        papelera = papelera.filter(function(p){ return String(p.id) !== String(x.id); });
+        anotar('VACIAR PAPELERA', x.nombre + ' borrado del todo');
+        guardar(); pintar(); avisar(x.nombre + ' borrado del todo', 'bien');
+      }, true);
+    return;
+  }
   if(d.agrupa){
     agrupaHoy = !agrupaHoy;
     try{ localStorage.setItem('pap_agrupa_hoy', agrupaHoy ? '1' : '0'); }catch(_){}
@@ -10393,15 +11031,22 @@ document.addEventListener('click', function(ev){
 
   if(d.borrarC){
     const c = buscarCliente(d.borrarC); if(!c) return;
-    confirmar('Borrar cliente', '¿Seguro que quieres borrar a ' + (c.nombre||'este cliente') + '? Sus cobros ya registrados se quedan en el historial.',
+    confirmar('Borrar cliente', '¿Seguro que quieres borrar a ' + (c.nombre||'este cliente') +
+      '? Sus cobros ya registrados se quedan en el historial, y la ficha se guarda ' +
+      DIAS_PAPELERA + ' días en la papelera por si te arrepientes.',
       'Sí, borrar', function(){
         recordarPaso('borrar a ' + (c.nombre||'un cliente'));
+        const m0 = masterDe(c);
+        aLaPapelera('cliente', c, c.nombre || 'Sin nombre',
+          {donde: m0 ? nombreCuenta(m0) : (c.servicio || ''), perfil: perfilBonito(c) || '',
+           cobra: cobroDe(c)});
         clientes = clientes.filter(function(x){ return String(x.id) !== String(c.id); });
         abiertos.delete('c'+c.id);
         anotar('BORRAR', 'Cliente borrado: ' + (c.nombre||''));
         /* Si estabas en su pantalla, se sube a la de su cuenta. */
         if(String(rutaCliente) === String(c.id)) rutaCliente = null;
-        guardar(); pintar(); avisar('Cliente borrado', 'bien', true);
+        guardar(); pintar();
+        avisar('Cliente borrado · está en la papelera ' + DIAS_PAPELERA + ' días', 'bien', true);
       }, true);
     return;
   }
@@ -10409,9 +11054,14 @@ document.addEventListener('click', function(ev){
     const m = buscarMaster(d.borrarM); if(!m) return;
     const cuantos = clientesDe(m.id).length;
     confirmar('Borrar cuenta master',
-      '¿Borrar ' + nombreCuenta(m) + '?' + (cuantos ? ' Tiene ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') + ' asignados, que se quedarán sin cuenta.' : ''),
+      '¿Borrar ' + nombreCuenta(m) + '?' +
+      (cuantos ? ' Tiene ' + cuantos + ' ' + plural(cuantos,'cliente','clientes') + ' asignados, que se quedarán sin cuenta.' : '') +
+      ' Se guarda ' + DIAS_PAPELERA + ' días en la papelera.',
       'Sí, borrar', function(){
         recordarPaso('borrar ' + nombreCuenta(m));
+        aLaPapelera('cuenta', m, nombreCuenta(m),
+          {donde: m.correo || '', perfil: cuantos + ' ' + plural(cuantos,'cliente','clientes'),
+           cobra: Number(m.costo) || 0});
         /* Antes de que la cuenta desaparezca, sus cobros y sus gastos se
            quedan con el nombre escrito. Si no, esa plata seguía en la caja
            pero ya no había manera de saber de dónde había salido. */
@@ -10427,7 +11077,8 @@ document.addEventListener('click', function(ev){
         abiertos.delete('m'+m.id);
         anotar('BORRAR MASTER', 'Cuenta borrada: ' + nombreCuenta(m));
         if(String(rutaCuenta) === String(m.id)){ rutaCuenta = null; rutaCliente = null; }
-        guardar(); pintar(); avisar('Cuenta borrada', 'bien', true);
+        guardar(); pintar();
+        avisar('Cuenta borrada · está en la papelera ' + DIAS_PAPELERA + ' días', 'bien', true);
       }, true);
     return;
   }
@@ -10600,6 +11251,8 @@ document.addEventListener('click', function(ev){
     const c = buscarCliente(d.pausar); if(!c) return;
     recordarPaso((enPausa(c) ? 'reactivar a ' : 'pausar a ') + (c.nombre||'un cliente'));
     if(enPausa(c)) delete c.pausado; else c.pausado = true;
+    apuntarHecho(c, enPausa(c) ? 'pausa' : 'vuelve',
+      enPausa(c) ? 'Lo pusiste en pausa' : 'Volvió a estar activo');
     anotar(enPausa(c) ? 'PAUSAR' : 'REACTIVAR', c.nombre || '');
     olvidarIndices();
     guardar(); pintar();
@@ -11126,6 +11779,18 @@ window.PAPOTAS = {
     cuotas:  function(c){ return cuotasPendientes(c); },
     monto:   function(c){ return deudaDe(c); },
     aCobrar: function(c){ return aCobrarDe(c); }
+  },
+  /* Poner en fila a quien se diga, para poder probar la ronda entera. */
+  ronda: function(ids){
+    const lista = (ids||[]).map(buscarCliente).filter(Boolean);
+    abrirCola(lista);
+    return lista.length;
+  },
+  /* Lo que hay en la papelera, para poder comprobarlo desde fuera. */
+  papelera: function(){
+    return papelera.map(function(x){
+      return {id:x.id, tipo:x.tipo, nombre:x.nombre, dias:diasEnPapelera(x)};
+    });
   },
   /* El estado de la nube, para poder comprobarlo desde fuera y para que
      él pueda pegarlo si algo no va. */
