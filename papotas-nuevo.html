@@ -1814,15 +1814,49 @@ html[data-tema="claro"] .tc::after{opacity:.05}
   .tc-mando .tc-cobrar{width:44px;padding:0;flex:0 0 auto;justify-content:center}
 }
 
-/* En la LISTA la pastilla no va rellena. La tarjeta ya dice el estado tres
-   veces -el filo de la izquierda, la franja de arriba y el tinte del
-   fondo-, así que catorce pastillas macizas seguidas no avisan de nada:
-   pintan la pantalla de rojo y dejan de leerse. Rellena se queda donde sí
-   manda, que es la ficha de uno solo. */
-.tc .pastilla.llena{ box-shadow:none }
-.tc .pastilla.llena.mal  {background:var(--mal-fondo);  color:var(--mal);  border-color:var(--mal-linea)}
-.tc .pastilla.llena.aviso{background:var(--aviso-fondo);color:var(--aviso);border-color:var(--aviso-linea)}
-.tc .pastilla.llena.bien {background:var(--bien-fondo); color:var(--bien); border-color:var(--bien-linea)}
+/* ===== EN LA LISTA, EL ESTADO NO GRITA ==================================
+   Una pastilla rellena es una pegatina, y una pegatina se ve antes que
+   nada: para eso está. Pero veinte renglones seguidos diciendo todos
+   «venció hace 21 días» en salmón macizo no se ven antes que nada, se
+   ven como una pared. Deja de avisar y encima tapa lo demás.
+
+   Y en la lista el estado ya se dice dos veces más: el filo de color a la
+   izquierda del renglón, que es lo que se ve de reojo al bajar con el
+   dedo, y el propio texto. Con eso basta.
+
+   Así que en tarjetas y tablas la pastilla va tintada -mismo color, misma
+   forma, mismo icono, sin el relleno- y rellena se queda donde sí manda:
+   la ficha de uno solo, donde hay UNA y tiene que saltarte a la cara.
+
+   Quien prefiera lo de antes lo tiene en Ajustes → Estilo → Colores. */
+.tc .pastilla.llena,
+.tabla .pastilla.llena,
+.estilo-prueba .pastilla.llena{ box-shadow:none }
+.tc .pastilla.llena.mal, .tabla .pastilla.llena.mal, .estilo-prueba .pastilla.llena.mal
+  {background:var(--mal-fondo);  color:var(--mal);  border-color:var(--mal-linea)}
+.tc .pastilla.llena.aviso, .tabla .pastilla.llena.aviso, .estilo-prueba .pastilla.llena.aviso
+  {background:var(--aviso-fondo);color:var(--aviso);border-color:var(--aviso-linea)}
+.tc .pastilla.llena.bien, .tabla .pastilla.llena.bien, .estilo-prueba .pastilla.llena.bien
+  {background:var(--bien-fondo); color:var(--bien); border-color:var(--bien-linea)}
+
+/* «Colores fuertes»: la pegatina vuelve a todas partes. */
+html[data-colores="fuertes"] .tc .pastilla.llena,
+html[data-colores="fuertes"] .tabla .pastilla.llena,
+html[data-colores="fuertes"] .estilo-prueba .pastilla.llena{
+  box-shadow:0 0 0 1.5px var(--contorno), inset 0 -2px 0 0 var(--canto);
+}
+html[data-colores="fuertes"] .tc .pastilla.llena.mal,
+html[data-colores="fuertes"] .tabla .pastilla.llena.mal,
+html[data-colores="fuertes"] .estilo-prueba .pastilla.llena.mal
+  {background:var(--mal);   color:var(--tinta-mal);   border-color:transparent}
+html[data-colores="fuertes"] .tc .pastilla.llena.aviso,
+html[data-colores="fuertes"] .tabla .pastilla.llena.aviso,
+html[data-colores="fuertes"] .estilo-prueba .pastilla.llena.aviso
+  {background:var(--aviso); color:var(--tinta-aviso); border-color:transparent}
+html[data-colores="fuertes"] .tc .pastilla.llena.bien,
+html[data-colores="fuertes"] .tabla .pastilla.llena.bien,
+html[data-colores="fuertes"] .estilo-prueba .pastilla.llena.bien
+  {background:var(--bien);  color:var(--tinta-bien);  border-color:transparent}
 
 /* La cabecera de la ficha en ventana. */
 .ficha-cabeza{
@@ -3250,7 +3284,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.7</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v6.8</span>
     </div>
   </nav>
 
@@ -3396,7 +3430,7 @@ const AJUSTES_BASE = {
   nombre:'PAPOTAS', moneda:'S/', diasAlerta:5, prefijoPais:'51',
   precioDefecto:15, cicloRenovacion:'meses', mesesRenovacion:1, diasRenovacion:30,
   metodoDefecto:'PLIN', firmaWs:'', metaMensual:0, modoClaro:false, waComoAbrir:'auto',
-  cuotasPerdido:4, tonoOscuro:'carbon', contrasteAlto:false,
+  cuotasPerdido:4, tonoOscuro:'carbon', contrasteAlto:false, coloresFuertes:false,
   supabaseUrl:'', supabaseKey:'',
   plantillaCobro:'Hola {cliente} 👋 Te recuerdo que tu {servicio} vence el {vencimiento}. Son {monto}. ¡Gracias!',
   plantillaEntrega:'¡Listo {cliente}! 🎬\nPlataforma: {servicio}\nCorreo: {correo}\nClave: {contrasena}\nPerfil: {perfil}\nPIN: {pin}\nVence: {vencimiento}',
@@ -4847,7 +4881,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v6.7';
+const VERSION = 'v6.8';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -5145,6 +5179,8 @@ function aplicarTema(){
   document.documentElement.setAttribute('data-fondo', tonoOscuroDe());
   if(ajustes.contrasteAlto) document.documentElement.setAttribute('data-realce','alto');
   else document.documentElement.removeAttribute('data-realce');
+  if(ajustes.coloresFuertes) document.documentElement.setAttribute('data-colores','fuertes');
+  else document.documentElement.removeAttribute('data-colores');
   /* El color de la barra del celular se saca del fondo de verdad, no de un
      color escrito a mano: así no se queda atrás cuando cambia la paleta. */
   const m = document.querySelector('meta[name=theme-color]');
@@ -5380,7 +5416,7 @@ function filaCobro(c){
     '<td class="t-cuenta"><span class="chip-cuenta" style="' + tonoDe(plat) + '">' +
       esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + '</span>' +
       (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>' : '') + '</td>' +
-    '<td class="t-vence">' + pastillaEstado(c, false) + '</td>' +
+    '<td class="t-vence">' + pastillaEstado(c, 'ficha') + '</td>' +
     '<td class="t-monto cifra">' + esc(dinero(cobroDe(c))) +
       (muyAtrasado(c)
         ? '<em class="t-atraso" title="Te debe ' + cuotasPendientes(c) + ' cuotas: ' +
@@ -7220,7 +7256,10 @@ function hojaCliente(c){
             '<span class="chip-cuenta" style="' + tonoDe(plat) + '">' + esc(m ? nombreCuenta(m) : plat) + '</span>' +
             (perfilBonito(c) ? '<span class="chip-perfil">' + esc(perfilBonito(c)) + '</span>'
                              : '<span class="chip-perfil sin">sin perfil</span>') +
-            '<span class="pastilla ' + clase + '">' + esc(textoDias(c.vencimiento)) + '</span>' +
+            /* Aquí sí, rellena y con su icono: es UN cliente, y el estado es
+               lo primero que hay que ver al abrir su ficha. En las listas va
+               tintada porque allí se repite cien veces; aquí no se repite. */
+            pastillaEstado(c, false) +
             (enPausa(c) ? '<span class="insignia aviso" title="No sale en Hoy ni en «por cobrar»">' +
               ICONO.reloj + 'En pausa</span>' : '') +
             (fut ? '<span class="insignia info" title="Ya está programado">' + ICONO.etiqueta +
@@ -7676,6 +7715,17 @@ function panelEstilo(){
       '</div>') +
 
       '<div class="estilo-grupo">' +
+        '<span class="estilo-etq">Colores del estado</span>' +
+        '<div class="segmentos">' +
+          '<button data-colores="suaves" aria-selected="' + (!ajustes.coloresFuertes) + '">Suaves</button>' +
+          '<button data-colores="fuertes" aria-selected="' + (!!ajustes.coloresFuertes) + '">Fuertes</button>' +
+        '</div>' +
+        '<p class="ayuda">Con «fuertes», «vencido» y «por vencer» van rellenos también en las listas. ' +
+        'Se ven antes, pero con cien clientes vencidos la pantalla se llena de rojo y dejan de leerse. ' +
+        'En la ficha de un cliente van rellenos siempre, de las dos maneras.</p>' +
+      '</div>' +
+
+      '<div class="estilo-grupo">' +
         '<span class="estilo-etq">Contraste</span>' +
         '<div class="segmentos">' +
           '<button data-contraste="normal" aria-selected="' + (!alto) + '">Normal</button>' +
@@ -7686,9 +7736,9 @@ function panelEstilo(){
 
       '<div class="estilo-prueba">' +
         '<div class="ep-fila"><b>Así se va a ver</b>' +
-          '<span class="insignia mal">vencido</span>' +
-          '<span class="insignia aviso">por vencer</span>' +
-          '<span class="insignia bien">al día</span></div>' +
+          '<span class="pastilla mal llena">' + ICONO.alerta + '<b>hace 21 días</b></span>' +
+          '<span class="pastilla aviso llena">' + ICONO.reloj + '<b>en 3 días</b></span>' +
+          '<span class="pastilla bien suave">' + ICONO.ok + '<b>al día</b></span></div>' +
         '<p class="ep-2">Este es el renglón de en medio, el que dice de qué cuenta es y cuánto paga.</p>' +
         '<p class="ep-3">Y este es el más bajito de todos: las notas al pie y las fechas.</p>' +
       '</div>' +
@@ -10287,7 +10337,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   const d = t.dataset;
 
@@ -10485,6 +10535,10 @@ document.addEventListener('click', function(ev){
   }
   if(d.contraste){
     ajustes.contrasteAlto = (d.contraste === 'alto');
+    aplicarTema(); guardar(); pintar(); return;
+  }
+  if(d.colores){
+    ajustes.coloresFuertes = (d.colores === 'fuertes');
     aplicarTema(); guardar(); pintar(); return;
   }
   if(d.vaj){
