@@ -3549,7 +3549,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.7</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.8</span>
     </div>
   </nav>
 
@@ -5596,7 +5596,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.7';
+const VERSION = 'v7.8';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -8437,8 +8437,10 @@ function pintaDinero(){
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
           (gastosMes.length ? gastosMes.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).map(function(i){
             return '<div class="f mal" style="cursor:default;padding-top:9px;padding-bottom:9px">' +
-              '<span class="f-txt"><span class="f-nom">' + esc(i.plataforma || i.concepto || 'Gasto') + '</span>' +
-              '<span class="f-sub">' + esc(i.persona || '') + '</span></span>' +
+              '<span class="f-txt"><span class="f-nom">' + esc(i.concepto || i.plataforma || 'Gasto') + '</span>' +
+              '<span class="f-sub">' + esc(i.concepto && i.plataforma && i.concepto.indexOf(i.plataforma) < 0
+                  ? i.plataforma + ' · ' + (i.persona || '')
+                  : (i.persona || '')) + '</span></span>' +
               '<span class="f-der"><span class="f-monto cifra" style="color:var(--mal)">−' + esc(dinero(i.monto)) + '</span>' +
               '<span class="f-cuando">' + esc(fechaBonita(i.fecha)) + '</span></span>' +
               '<button class="btn icono mini fantasma" data-borrar-g="' + esc(i.id) + '" title="Borrar gasto" aria-label="Borrar gasto">' + ICONO.basura + '</button></div>';
@@ -9148,8 +9150,7 @@ function renovarTodasVencidas(){
         m.vencimiento = avanzar(m.vencimiento || hoyISO(), cicloDe(m));
         const costo = costoDe(m);
         if(costo > 0){
-          inversiones.push({id:nuevoId('inv'), plataforma:m.nombre, cuentaMasterId:m.id,
-                            persona:ajustes.nombre || 'PAPOTAS', monto:costo, fecha:hoyISO()});
+          apuntarGastoDeCuenta(m, 'Renovación');
           gasto += costo;
         }
       });
@@ -9833,19 +9834,35 @@ function renovar(id, cobrando, cuantas){
     : c.nombre + ' renovado hasta ' + fechaBonita(nueva), 'bien', true);
 }
 
+/* ---------- EL GASTO DE UNA CUENTA MASTER -------------------------------
+   Casi todo lo que sale de tu bolsillo es esto: la suscripción que compras
+   para revenderla. Por eso NO se apunta a mano: se apunta solo cuando le
+   das a «Renové la cuenta», que es el momento en que de verdad pagaste.
+
+   Antes el apunte se guardaba solo con el nombre de la plataforma, así que
+   en la lista de gastos del mes salían siete líneas que decían «NETFLIX» y
+   no había manera de saber cuál era cuál ni si era una compra o una
+   renovación. Ahora lleva su concepto escrito, y el id de la cuenta para
+   poder volver a ella. `plataforma` se queda como estaba porque es lo que
+   lee el PAPOTAS de siempre. */
+function apuntarGastoDeCuenta(m, queFue){
+  const costo = costoDe(m);
+  if(!(costo > 0)) return 0;
+  inversiones.push({
+    id:nuevoId('inv'), plataforma:m.nombre, cuentaMasterId:m.id,
+    concepto: queFue + ' de ' + nombreCuenta(m),
+    persona:ajustes.nombre || 'PAPOTAS', monto:costo, fecha:hoyISO()
+  });
+  return costo;
+}
+
 function renovarMaster(id){
   const m = buscarMaster(id);
   if(!m) return;
   recordarPaso('renovar ' + nombreCuenta(m));
   const nueva = avanzar(m.vencimiento || hoyISO(), cicloDe(m));
   m.vencimiento = nueva;
-  const costo = costoDe(m);
-  if(costo > 0){
-    inversiones.push({
-      id:nuevoId('inv'), plataforma:m.nombre, cuentaMasterId:m.id,
-      persona:ajustes.nombre || 'PAPOTAS', monto:costo, fecha:hoyISO()
-    });
-  }
+  const costo = apuntarGastoDeCuenta(m, 'Renovación');
   anotar('RENOVAR MASTER', nombreCuenta(m) + ' renovada hasta ' + fechaBonita(nueva) +
          (costo>0 ? ' (gasto de ' + dinero(costo) + ')' : ''));
   guardar(); pintar();
@@ -10598,8 +10615,7 @@ function formMaster(id, plataformaPuesta){
          anotar('ALTA MASTER', 'Cuenta nueva: ' + nombreCuenta(destino));
          const marcar = document.getElementById('ms-gasto');
          if(marcar && marcar.checked && destino.costo > 0){
-           inversiones.push({id:nuevoId('inv'), plataforma:destino.nombre, cuentaMasterId:destino.id,
-                             persona:ajustes.nombre||'PAPOTAS', monto:destino.costo, fecha:hoyISO()});
+           apuntarGastoDeCuenta(destino, 'Compra');
            anotar('GASTO', 'Compra de ' + nombreCuenta(destino) + ' por ' + dinero(destino.costo));
          }
        }else{
@@ -11984,11 +12000,21 @@ function panelTarifas(plataforma){
   '</div>';
 }
 
+/* Este formulario es para lo que NO son suscripciones: publicidad, una
+   recarga, lo que sea. Las renovaciones de tus cuentas master se apuntan
+   solas al darle a «Renové la cuenta», y hay que decirlo aquí dentro: si
+   no, se apuntan dos veces -una sola el programa y otra a mano- y el mes
+   sale con el doble de gasto sin que se note de dónde salió. */
 function formGasto(){
   const opc = [['','Sin cuenta']].concat(servicios.map(function(m){ return [m.id, nombreCuenta(m)]; }));
   abrirModal('Registrar un gasto',
+    '<div class="aviso-precio" style="margin-bottom:var(--e3)">' +
+      'Las <b>renovaciones de tus cuentas</b> no se apuntan aquí: se apuntan solas cuando le das a ' +
+      '<b>«Renové la cuenta»</b>.<small>Esto es para lo demás: publicidad, recargas, lo que sea. ' +
+      'Si eliges una cuenta abajo, se rellena como renovación por si de verdad la pagaste hoy.</small>' +
+    '</div>' +
     '<div class="rejilla r2">' +
-      campo('g-concepto','Concepto',{valor:'', pista:'Compra de cuenta, publicidad…'}) +
+      campo('g-concepto','Concepto',{valor:'', pista:'Publicidad, recarga, comisión…'}) +
       campo('g-monto','Cuánto',{tipo:'number', valor:'', paso:'0.01'}) +
       campo('g-cuenta','¿De qué cuenta?',{tipo:'select', valor:'', opciones:opc}) +
       campo('g-fecha','Cuándo',{tipo:'date', valor:hoyISO()}) +
@@ -11999,18 +12025,37 @@ function formGasto(){
        if(monto <= 0){ avisar('Pon cuánto gastaste', 'mal'); return; }
        const cuentaId = val('g-cuenta');
        const m = cuentaId ? buscarMaster(cuentaId) : null;
+       const texto = val('g-concepto').trim();
        recordarPaso('registrar un gasto');
        inversiones.push({
          id:nuevoId('inv'),
-         plataforma: val('g-concepto').trim() || (m ? m.nombre : 'Gasto'),
+         /* `plataforma` se queda como lo escribe el PAPOTAS de siempre;
+            `concepto` es lo que se lee en la lista. */
+         plataforma: m ? m.nombre : (texto || 'Gasto'),
+         concepto: texto || (m ? 'Gasto de ' + nombreCuenta(m) : 'Gasto'),
          cuentaMasterId: cuentaId || null,
          persona: ajustes.nombre || 'PAPOTAS',
          monto: monto, fecha: val('g-fecha') || hoyISO()
        });
-       anotar('GASTO', (val('g-concepto').trim()||'Gasto') + ' por ' + dinero(monto));
+       anotar('GASTO', (texto||'Gasto') + ' por ' + dinero(monto));
        guardar(); cerrarModal(); pintar();
        avisar('Gasto de ' + dinero(monto) + ' registrado', 'bien', true);
-     }}]);
+     }}],
+    /* Al elegir una cuenta se rellena sola: el concepto y lo que cuesta.
+       Es lo que se iba a teclear igualmente, y de paso enseña cuánto te
+       cuesta esa cuenta sin tener que ir a buscarlo. */
+    function(){
+      const sel = document.getElementById('g-cuenta');
+      if(!sel) return;
+      sel.addEventListener('change', function(){
+        const m = val('g-cuenta') ? buscarMaster(val('g-cuenta')) : null;
+        const con = document.getElementById('g-concepto');
+        const mon = document.getElementById('g-monto');
+        if(!m || !con || !mon) return;
+        if(!con.value.trim()) con.value = 'Renovación de ' + nombreCuenta(m);
+        if(!num('g-monto') && costoDe(m) > 0) mon.value = costoDe(m);
+      });
+    });
 }
 
 /* ---------- 11. Un solo oyente para todo -------------------------------- */
