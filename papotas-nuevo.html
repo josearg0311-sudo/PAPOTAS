@@ -2727,6 +2727,26 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 .nota-caja svg{width:16px;height:16px;flex:0 0 auto;color:var(--txt-4);margin-top:2px}
 .nota-caja span{white-space:pre-wrap;overflow-wrap:anywhere}
 
+/* El informe de la prueba de la nube: cuatro pasos, cada uno con su marca.
+   Se lee de arriba abajo y el primero en rojo es el que hay que arreglar. */
+.prueba-nube{
+  margin-top:var(--e3);border:1px solid var(--linea);border-left-width:3px;
+  border-radius:var(--r-m);padding:var(--e3) var(--e4);background:var(--capa);
+}
+.prueba-nube.bien{border-color:var(--bien-linea);border-left-color:var(--bien-vivo)}
+.prueba-nube.mal {border-color:var(--mal-linea); border-left-color:var(--mal-vivo)}
+.pn-titulo{margin:0 0 8px;font-size:13px;font-weight:650;color:var(--txt)}
+.pn-espera{margin:0;font-size:12.5px;color:var(--txt-3)}
+.pn-lista{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.pn-lista li{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--txt-2)}
+.pn-lista li b{font-weight:600;color:var(--txt-2)}
+.pn-lista li.mal b{color:var(--mal)}
+.pn-lista li small{display:block;margin-top:2px;font-size:11.5px;color:var(--txt-4);line-height:1.5}
+.pn-ico{flex:0 0 auto;width:16px;height:16px;margin-top:1px}
+.pn-ico svg{width:16px;height:16px;stroke-width:2.4}
+.pn-lista li.bien .pn-ico{color:var(--bien)}
+.pn-lista li.mal  .pn-ico{color:var(--mal)}
+
 /* El aviso que va debajo del precio mientras lo escribes: a cuánta gente le
    toca, y si con eso la cuenta te sale a cuenta. Cambia de color solo. */
 .aviso-precio{
@@ -3522,7 +3542,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.4</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.5</span>
     </div>
   </nav>
 
@@ -3783,6 +3803,15 @@ function alarmaDeDatos(clave, cuantos){
      {texto:'Entendido', clase:'fantasma', hacer:function(){ cerrarModal(); alarmaPuesta = false; }}]);
 }
 
+/* Una copia de los ajustes sin las llaves de la nube. Se usa en las copias
+   de seguridad y en lo que se sube: la dirección y la clave de Supabase son
+   de este aparato y de nadie más. */
+function sinClaves(a){
+  const x = JSON.parse(JSON.stringify(a || {}));
+  delete x.supabaseUrl; delete x.supabaseKey;
+  return x;
+}
+
 /* ---------- Las copias de todos los días --------------------------------
    Una al día, en el propio navegador, sin depender de la nube ni de que te
    acuerdes de bajar nada. Se guardan las tres últimas: más no caben. */
@@ -3804,7 +3833,13 @@ function copiaDelDia(){
   try{ if(localStorage.getItem(k)) return; }catch(_){ return; }
   const carga = JSON.stringify({
     cuando:new Date().toISOString(),
-    clientes:clientes, servicios:servicios, ventas:ventas, inversiones:inversiones
+    clientes:clientes, servicios:servicios, ventas:ventas, inversiones:inversiones,
+    /* Los precios de venta y los costos viven en ajustes. Sin esto, volver a
+       una copia te devolvía los clientes pero NO lo que le cobras a cada uno
+       ni lo que te cuesta cada plataforma: media recuperación es peor que
+       ninguna, porque no se nota hasta que cobras mal. La clave de la nube
+       se queda fuera a propósito: no tiene por qué viajar en una copia. */
+    ajustes:sinClaves(ajustes)
   });
   /* Si no cabe, se tira la más vieja y se vuelve a intentar. */
   for(let intento = 0; intento < COPIAS_MAX + 1; intento++){
@@ -3821,9 +3856,66 @@ function copiaDelDia(){
   }
 }
 
+/* ---------- LA RED ANTES DE CADA COSA GORDA -----------------------------
+   «Deshacer» vive en memoria: cierras la pestaña y se fue. Pero las cosas
+   que de verdad dan miedo -subirle el precio a treinta y cuatro personas,
+   renovar doce cuentas de golpe, la primera vez que el programa deduce tus
+   tarifas- pasan justo antes de que cierres o se te caiga el navegador.
+
+   Así que antes de cada una se guarda una foto entera aquí mismo, con su
+   nombre y su hora, y aparece en Recuperar como una más. Se guardan las
+   tres últimas. */
+const ANTES_MAX = 3;
+function clavesDeAntes(){
+  const fuera = [];
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf('pap_antes_de_') === 0 && k !== 'pap_antes_de_importar') fuera.push(k);
+    }
+  }catch(_){}
+  return fuera.sort();
+}
+function guardarAntesDe(queFue){
+  if(clavesDanadas.length) return false;
+  if(!clientes.length && !servicios.length) return false;
+  const k = 'pap_antes_de_' + Date.now();
+  const carga = JSON.stringify({
+    cuando:new Date().toISOString(), queFue:String(queFue || 'un cambio grande'),
+    datos:{servicios, clientes, ventas, inversiones, ajustes:sinClaves(ajustes)}
+  });
+  for(let intento = 0; intento <= ANTES_MAX; intento++){
+    try{ localStorage.setItem(k, carga); break; }
+    catch(_){
+      const viejas = clavesDeAntes().filter(function(x){ return x !== k; });
+      if(!viejas.length) return false;
+      try{ localStorage.removeItem(viejas[0]); }catch(_){ return false; }
+    }
+  }
+  const todas = clavesDeAntes();
+  while(todas.length > ANTES_MAX){
+    try{ localStorage.removeItem(todas.shift()); }catch(_){ break; }
+  }
+  return true;
+}
+
 /* Todo lo que el programa puede ofrecerte para volver atrás. */
 function fuentesDeRescate(){
   const fuera = [];
+  /* Las de «justo antes de» van arriba: son las que buscas cuando acabas de
+     hacer algo y te has arrepentido. */
+  clavesDeAntes().reverse().forEach(function(k){
+    try{
+      const d = JSON.parse(localStorage.getItem(k) || 'null');
+      if(!d || !d.datos) return;
+      const h = String(d.cuando||'');
+      fuera.push({clave:k, cuando:h.slice(0,10),
+        titulo:'Justo antes de ' + (d.queFue || 'un cambio grande') +
+               (h ? ' · ' + h.slice(11,16) : ''),
+        clientes:arr(d.datos.clientes).length, servicios:arr(d.datos.servicios).length,
+        ventas:arr(d.datos.ventas).length, datos:d.datos});
+    }catch(_){}
+  });
   clavesDeCopia().reverse().forEach(function(k){
     try{
       const d = JSON.parse(localStorage.getItem(k) || 'null');
@@ -3849,9 +3941,15 @@ function fuentesDeRescate(){
 function restaurarCopia(clave){
   const f = fuentesDeRescate().filter(function(x){ return x.clave === clave; })[0];
   if(!f){ avisar('Esa copia ya no está', 'mal'); return; }
-  confirmar('Volver a la copia del ' + fechaBonita(f.cuando),
+  /* Si esa copia lleva precios dentro, se dice: volver atrás cambia lo que
+     cobras, y eso hay que saberlo ANTES de aceptar, no descubrirlo cobrando. */
+  const traePrecios = !!(f.datos && f.datos.ajustes &&
+    (arr(f.datos.ajustes.historialPrecios).length || arr(f.datos.ajustes.costosPlataforma).length));
+  confirmar('Volver a ' + (f.titulo || 'esa copia').toLowerCase(),
     'Se pondrán ' + f.clientes + ' clientes, ' + f.servicios + ' cuentas y ' + f.ventas +
-    ' cobros, reemplazando lo que hay ahora. Lo de ahora se guarda aparte por si acaso.',
+    ' cobros, reemplazando lo que hay ahora.' +
+    (traePrecios ? ' También vuelven los precios de venta y los costos que tenías ese día.' : '') +
+    ' Lo de ahora se guarda aparte por si acaso.',
     'Sí, volver a esa copia', function(){
       try{
         localStorage.setItem('pap_antes_de_importar', JSON.stringify({
@@ -3866,12 +3964,21 @@ function restaurarCopia(clave){
       clientes    = arr(f.datos.clientes);
       ventas      = arr(f.datos.ventas);
       inversiones = arr(f.datos.inversiones);
-      anotar('RESCATE', 'Restaurada la copia del ' + f.cuando + ': ' + f.clientes + ' clientes');
+      /* Y los precios, que es la mitad que faltaba. Las llaves de la nube
+         son de este aparato: se quedan las de ahora, no las de la copia. */
+      if(f.datos.ajustes && typeof f.datos.ajustes === 'object'){
+        const url = ajustes.supabaseUrl, key = ajustes.supabaseKey;
+        ajustes = Object.assign({}, AJUSTES_BASE, sinClaves(f.datos.ajustes),
+                                {supabaseUrl:url, supabaseKey:key});
+      }
+      anotar('RESCATE', 'Restaurada ' + (f.titulo||('la copia del ' + f.cuando)) + ': ' + f.clientes + ' clientes');
       olvidarIndices();
       guardar();
       permitirVaciar = false;
+      aplicarTema();
       pintar();
-      avisar('Recuperados ' + f.clientes + ' clientes de la copia del ' + fechaBonita(f.cuando), 'bien');
+      avisar('Recuperados ' + f.clientes + ' clientes' +
+             (traePrecios ? ' y sus precios' : ''), 'bien');
     });
 }
 
@@ -5281,7 +5388,73 @@ const Nube = (function(){
     return {que:'otro', dice:msg.slice(0, 180) || 'No se pudo conectar.'};
   }
 
-  return {arrancar, subir, bajar, pedirSubida, conectar, hayCredenciales, ponEstado,
+  /* ---------- PROBAR LA NUBE DE VERDAD ------------------------------
+     «Sincronizado» significa que la última vez fue bien, no que todo esté
+     en su sitio. Esto hace el viaje entero contra TU base: escribe una
+     ficha de prueba, la lee, comprueba que llegó igual y la borra. Cada
+     paso dice si pasó o no, así que si algo falla se sabe cuál de los
+     cuatro y no hay que adivinar.
+
+     La ficha de prueba va en su propia colección y se borra al terminar;
+     si algo se cortara por el medio, queda una fila llamada «prueba» que
+     no estorba a nada. */
+  async function probar(){
+    const pasos = [];
+    const apunta = function(que, bien, dice){ pasos.push({que, bien, dice:dice||''}); };
+    if(!hayCredenciales()){
+      apunta('Tienes la dirección y la clave puestas', false, 'Faltan: ponlas aquí arriba.');
+      return {pasos, bien:false};
+    }
+    apunta('Tienes la dirección y la clave puestas', true);
+    let x;
+    try{
+      x = await conPlazo(conectar(), 15000, 'conectar');
+      apunta('El programa llega a tu Supabase', true);
+    }catch(e){
+      apunta('El programa llega a tu Supabase', false, leerFallo(e).dice);
+      return {pasos, bien:false};
+    }
+    const id = 'prueba_' + Date.now();
+    const marca = 'papotas ' + new Date().toISOString();
+    try{
+      const r = await conPlazo(x.rpc('papotas_upsert_record', {
+        p_coleccion:'prueba', p_registro_id:id, p_datos:{marca:marca}, p_dispositivo_id:idDispositivo
+      }), 15000, 'escribir');
+      if(r.error) throw r.error;
+      apunta('Puede ESCRIBIR en tu base', true);
+    }catch(e){
+      apunta('Puede ESCRIBIR en tu base', false, leerFallo(e).dice);
+      return {pasos, bien:false};
+    }
+    let volvio = null;
+    try{
+      const r = await conPlazo(x.from('papotas_sync_records')
+        .select('coleccion,registro_id,datos')
+        .eq('coleccion','prueba').eq('registro_id',id), 15000, 'leer');
+      if(r.error) throw r.error;
+      volvio = (r.data||[])[0] || null;
+      apunta('Puede LEER lo que acaba de escribir', !!volvio,
+             volvio ? '' : 'Escribe pero no lee: revisa los permisos de lectura del SQL.');
+    }catch(e){
+      apunta('Puede LEER lo que acaba de escribir', false, leerFallo(e).dice);
+      return {pasos, bien:false};
+    }
+    const igual = !!(volvio && volvio.datos && volvio.datos.marca === marca);
+    apunta('Lo que vuelve es exactamente lo que se mandó', igual,
+           igual ? '' : 'Llega distinto de como salió.');
+    try{
+      const r = await conPlazo(x.rpc('papotas_delete_record', {
+        p_coleccion:'prueba', p_registro_id:id, p_dispositivo_id:idDispositivo
+      }), 15000, 'borrar');
+      if(r.error) throw r.error;
+      apunta('Puede BORRAR (y así limpia la prueba)', true);
+    }catch(e){
+      apunta('Puede BORRAR (y así limpia la prueba)', false, leerFallo(e).dice);
+    }
+    return {pasos, bien:pasos.every(function(p){ return p.bien; })};
+  }
+
+  return {arrancar, subir, bajar, pedirSubida, conectar, hayCredenciales, ponEstado, probar,
           get estado(){ return estado; },
           get fallo(){ return ultimoFallo; },
           olvidarFallo: function(){ ultimoFallo = null; }};
@@ -5416,7 +5589,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.4';
+const VERSION = 'v7.5';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -8674,9 +8847,13 @@ function pintaAjustes(){
         '</div>' +
         '<div class="fila">' +
           '<button class="btn principal" id="btn-guardar-nube">Guardar y conectar</button>' +
+          (conectado ? '<button class="btn" id="btn-probar-nube">' + ICONO.ok + 'Probar la nube</button>' : '') +
           (conectado ? '<button class="btn" id="btn-subir">Subir todo de nuevo</button>' : '') +
           (conectado ? '<button class="btn" id="btn-bajar">Traer lo de la nube</button>' : '') +
         '</div>' +
+        /* Donde se escribe el resultado de la prueba, para no abrir otra
+           ventana encima de los campos que acabas de rellenar. */
+        '<div id="prueba-nube"></div>' +
 
         '<p class="aviso-mudanza">' + ICONO.alerta +
           '<span>Las claves <b>no se suben nunca</b> a la nube: se quedan en este ' +
@@ -8942,6 +9119,7 @@ function renovarTodasVencidas(){
     'Se les corre la fecha un ciclo y se apunta el gasto: ' + dinero(cuesta) +
     ' en total. Hazlo cuando ya las hayas pagado de verdad.',
     'Sí, las renové', function(){
+      guardarAntesDe('renovar ' + lista.length + ' ' + plural(lista.length,'cuenta','cuentas'));
       recordarPaso('renovar ' + lista.length + ' cuentas');
       let gasto = 0;
       lista.forEach(function(m){
@@ -9350,6 +9528,7 @@ function cobrarLote(){
     'Se van a apuntar ' + lista.length + ' ' + plural(lista.length,'cobro','cobros') +
     ' por ' + dinero(suma) + ' en total, y a todos se les corre el vencimiento. ¿Seguro?',
     'Sí, cobrar a los ' + lista.length, function(){
+      guardarAntesDe('cobrar a ' + lista.length + ' de golpe');
       recordarPaso('cobrar a ' + lista.length + ' ' + plural(lista.length,'cliente','clientes'));
       let hechos = 0, total = 0;
       lista.forEach(function(c){ const r = cobrarUno(c, true, 1); if(r){ hechos++; total += r; } });
@@ -11093,6 +11272,9 @@ function elQueMasSeRepite(valores){
 
 function marcarQuienSigueElPrecio(){
   if(ajustes.marcadoPrecios) return false;
+  /* Esto solo pasa una vez en la vida del programa y toca los precios de
+     todo el mundo. Antes de tocar nada, una foto que sobreviva a cerrar. */
+  guardarAntesDe('poner los precios de cada plataforma');
   ajustes.marcadoPrecios = true;
   const hoy = hoyISO();
   const puestas = [];
@@ -11304,6 +11486,10 @@ function formTarifa(plataforma, id){
        const desde = val('tf-desde') || hoyISO();
        if(precio <= 0){ avisar('Pon cuánto vale', 'mal'); return; }
        recordarPasoAjustes('cambiar un precio');
+       /* Si esto le cambia el precio a gente, la foto va a disco: cerrar la
+          pestaña no puede dejarte sin vuelta atrás. */
+       if(!esGeneral && aQuienesAfecta(plataforma, precio).length)
+         guardarAntesDe('subir el precio de ' + plataforma);
        if(previa) quitarTarifa(previa.id);
        ponerTarifa(esGeneral ? 'general' : 'plataforma', plataforma, precio, desde, val('tf-nota').trim());
        anotar('TARIFA', (esGeneral?'GENERAL':plataforma) + ': ' + dinero(precio) + ' desde el ' + fechaBonita(desde));
@@ -11387,6 +11573,8 @@ function formCosto(plataforma, id){
        const desde = val('pc-desde') || hoyISO();
        if(costo <= 0){ avisar('Pon cuánto te cuesta', 'mal'); return; }
        recordarPasoAjustes('cambiar un costo');
+       if(aQueCuentasAfecta(plataforma, costo).length)
+         guardarAntesDe('cambiar lo que cuesta ' + plataforma);
        if(previo) quitarCosto(previo.id);
        ponerCosto(plataforma, costo, desde, val('pc-nota').trim());
        anotar('COSTO', plataforma + ': te cuesta ' + dinero(costo) + ' desde el ' + fechaBonita(desde));
@@ -12345,6 +12533,30 @@ document.addEventListener('click', function(ev){
       else avisar('Nube conectada · ' + clientes.length + ' clientes sincronizados', 'bien', true);
     });
   }
+  else if(id === 'btn-probar-nube'){
+    const caja = document.getElementById('prueba-nube');
+    if(caja) caja.innerHTML = '<div class="prueba-nube"><p class="pn-espera">' +
+      'Probando: escribir, leer, comprobar y borrar…</p></div>';
+    Nube.probar().then(function(r){
+      if(!caja) return;
+      caja.innerHTML = '<div class="prueba-nube ' + (r.bien ? 'bien' : 'mal') + '">' +
+        '<p class="pn-titulo">' + (r.bien
+          ? 'Tu nube funciona entera: escribe, lee, devuelve lo mismo y borra.'
+          : 'Aquí se corta:') + '</p>' +
+        '<ul class="pn-lista">' + r.pasos.map(function(x){
+          return '<li class="' + (x.bien ? 'bien' : 'mal') + '">' +
+            '<span class="pn-ico">' + (x.bien ? ICONO.ok : ICONO.x) + '</span>' +
+            '<span><b>' + esc(x.que) + '</b>' +
+            (x.dice ? '<small>' + esc(x.dice) + '</small>' : '') + '</span></li>';
+        }).join('') + '</ul></div>';
+      /* Sin «Deshacer»: probar no cambia nada, no hay nada que deshacer. */
+      avisar(r.bien ? 'La nube funciona entera' : 'La nube falla en algo: míralo abajo',
+             r.bien ? 'bien' : 'mal');
+    }).catch(function(e){
+      if(caja) caja.innerHTML = '<div class="prueba-nube mal"><p class="pn-titulo">' +
+        'No se pudo ni empezar la prueba: ' + esc(e.message||'') + '</p></div>';
+    });
+  }
   else if(id === 'btn-subir'){
     avisar('Subiendo todo…');
     Nube.subir(true).then(function(r){
@@ -12694,6 +12906,16 @@ window.PAPOTAS = {
             fallo: Nube.fallo ? Nube.fallo.que : null,
             dice: Nube.fallo ? Nube.fallo.dice : null};
   },
+  /* El viaje entero contra tu base: escribir, leer, comprobar y borrar. */
+  probarNube: function(){ return Nube.probar(); },
+  /* Las vueltas atrás que hay guardadas ahora mismo. */
+  rescates: function(){
+    return fuentesDeRescate().map(function(f){
+      return {clave:f.clave, titulo:f.titulo, clientes:f.clientes,
+              servicios:f.servicios, ventas:f.ventas,
+              conPrecios: !!(f.datos && f.datos.ajustes)};
+    });
+  },
   /* Todo lo que una misma persona tiene contigo, y el mensaje único que
      se le manda por todo junto. Desde fuera para poder comprobarlo. */
   persona: function(id){
@@ -12735,6 +12957,8 @@ window.PAPOTAS = {
     hoy:   function(plataforma, fecha){ return tarifaVigente(plataforma, fecha); },
     linea: function(plataforma){ return lineaTarifas(plataforma); },
     poner: function(plataforma, precio, desde, nota){
+      if(plataforma !== 'GENERAL' && aQuienesAfecta(plataforma, Number(precio)).length)
+        guardarAntesDe('subir el precio de ' + plataforma);
       const t = ponerTarifa(plataforma === 'GENERAL' ? 'general' : 'plataforma',
                             plataforma, Number(precio), desde || hoyISO(), nota || '');
       olvidarIndices();
@@ -12762,6 +12986,8 @@ window.PAPOTAS = {
     hoy:   function(plataforma, fecha){ return costoVigente(plataforma, fecha); },
     linea: function(plataforma){ return lineaCostos(plataforma); },
     poner: function(plataforma, costo, desde, nota){
+      if(aQueCuentasAfecta(plataforma, Number(costo)).length)
+        guardarAntesDe('cambiar lo que cuesta ' + plataforma);
       const t = ponerCosto(plataforma, Number(costo), desde || hoyISO(), nota || '');
       olvidarIndices();
       const r = sincronizarPrecios();
