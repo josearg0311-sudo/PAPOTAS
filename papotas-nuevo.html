@@ -3549,7 +3549,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.8</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.9</span>
     </div>
   </nav>
 
@@ -5596,7 +5596,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.8';
+const VERSION = 'v7.9';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -9148,6 +9148,7 @@ function renovarTodasVencidas(){
            general, así que una comprada por 45 días se renovaba como si
            fuera mensual y la fecha quedaba mal desde el primer día. */
         m.vencimiento = avanzar(m.vencimiento || hoyISO(), cicloDe(m));
+        m.renovadaEl = hoyISO();
         const costo = costoDe(m);
         if(costo > 0){
           apuntarGastoDeCuenta(m, 'Renovación');
@@ -9802,15 +9803,36 @@ function preguntarCuotas(c, debia){
    quedar al día. Si se le cobra una sola a quien debe tres, sigue vencido,
    y eso está bien -debe dos más- pero hay que preguntárselo antes, no
    dejarlo en rojo sin explicación. */
-function renovar(id, cobrando, cuantas){
+/* ---------- EL FRENO DEL DEDO ------------------------------------------
+   En el celular, un toque de más no se ve venir: la pantalla se repinta
+   igual y el botón sigue ahí. Con tres toques seguidos se apuntaban tres
+   cobros de quince -cuarenta y cinco- y el vencimiento se iba tres meses
+   hacia delante. Lo mismo al renovar una cuenta: tres gastos por el mismo
+   pago.
+
+   Cobrar dos veces el mismo día a la misma persona es, casi siempre, un
+   dedo. Y si de verdad te pagó dos ciclos, para eso está la ventana de
+   cuotas. Así que la primera vez no molesta y la segunda pregunta. */
+function yaFueHoy(cuando){ return String(cuando || '') === hoyISO(); }
+
+function renovar(id, cobrando, cuantas, yaPregunte){
   const c = buscarCliente(id);
   if(!c){ avisar('No encontré a ese cliente', 'mal'); return; }
+  if(cobrando && !yaPregunte && yaFueHoy(c.cobradoEl)){
+    confirmar('A ' + (c.nombre || 'este cliente') + ' ya le cobraste hoy',
+      'Le cobraste hoy y ahora vence el ' + fechaBonita(c.vencimiento) + '. ' +
+      'Si le cobras otra vez se apunta otro cobro de ' + dinero(aCobrarDe(c)) +
+      ' y se le corre otro ciclo. ¿Te pagó dos veces?',
+      'Sí, cobrarle otra vez', function(){ renovar(id, cobrando, cuantas, true); });
+    return;
+  }
   const debia = cuotasPendientes(c);
   if(cobrando && debia > 1 && !cuantas){ preguntarCuotas(c, debia); return; }
   const n = Math.max(1, Math.round(Number(cuantas) || 1));
   recordarPaso(cobrando ? 'cobrar a ' + (c.nombre||'un cliente')
                         : 'renovar a ' + (c.nombre||'un cliente'));
   const cobrado = cobrarUno(c, cobrando, n);
+  if(cobrando) c.cobradoEl = hoyISO();
   const nueva = c.vencimiento;
   const monto = cobrado;
   const meses = 1;
@@ -9856,13 +9878,22 @@ function apuntarGastoDeCuenta(m, queFue){
   return costo;
 }
 
-function renovarMaster(id){
+function renovarMaster(id, yaPregunte){
   const m = buscarMaster(id);
   if(!m) return;
+  if(!yaPregunte && yaFueHoy(m.renovadaEl)){
+    confirmar(nombreCuenta(m) + ' ya la renovaste hoy',
+      'Ya la renovaste hoy y ahora vence el ' + fechaBonita(m.vencimiento) + '. ' +
+      'Si le das otra vez se le suma otro ciclo' +
+      (costoDe(m) > 0 ? ' y se apunta otro gasto de ' + dinero(costoDe(m)) : '') + '. ¿La pagaste dos veces?',
+      'Sí, renovarla otra vez', function(){ renovarMaster(id, true); });
+    return;
+  }
   recordarPaso('renovar ' + nombreCuenta(m));
   const nueva = avanzar(m.vencimiento || hoyISO(), cicloDe(m));
   m.vencimiento = nueva;
   const costo = apuntarGastoDeCuenta(m, 'Renovación');
+  m.renovadaEl = hoyISO();
   anotar('RENOVAR MASTER', nombreCuenta(m) + ' renovada hasta ' + fechaBonita(nueva) +
          (costo>0 ? ' (gasto de ' + dinero(costo) + ')' : ''));
   guardar(); pintar();
