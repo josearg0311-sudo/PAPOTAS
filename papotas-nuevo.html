@@ -3549,7 +3549,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.1</span>
     </div>
   </nav>
 
@@ -5135,7 +5135,13 @@ const Nube = (function(){
     return cliente;
   }
 
-  function ponEstado(e){
+  /* La primera vez que conectas, esto sube tu negocio entero ficha por
+     ficha: con cien clientes son más de ciento cincuenta viajes al
+     servidor, y eso es un minuto largo. Antes, durante todo ese rato la
+     pantalla decía «Conectando…» y nada más, así que parecía colgado y lo
+     normal era cerrar y volver a intentarlo -que lo empieza otra vez-.
+     Ahora dice por dónde va. */
+  function ponEstado(e, detalle){
     estado = e;
     document.querySelectorAll('[data-nube-punto]').forEach(function(el){
       el.className = 'nube-punto ' + (e==='sincronizado'?'ok':e==='error'?'mal':(e==='subiendo'||e==='conectando')?'trabajando':'');
@@ -5143,7 +5149,8 @@ const Nube = (function(){
     const textos = {sincronizado:'Sincronizado', subiendo:'Subiendo cambios…',
                     conectando:'Conectando…', local:'Solo en este dispositivo',
                     error:'Sin conexión con la nube'};
-    document.querySelectorAll('[data-nube-texto]').forEach(function(el){ el.textContent = textos[e] || textos.local; });
+    const txt = (textos[e] || textos.local) + (detalle ? ' ' + detalle : '');
+    document.querySelectorAll('[data-nube-texto]').forEach(function(el){ el.textContent = txt; });
   }
 
   /* Todo lo local convertido en filas de la tabla. */
@@ -5182,6 +5189,12 @@ const Nube = (function(){
     const presentes = new Set();
     let subidas = 0, borradas = 0;
 
+    /* Cuántas hay que mandar de verdad, para poder contar hacia ese número
+       y no hacia el total -que incluye lo que ya estaba subido-. */
+    const porMandar = filas.filter(function(f){
+      return forzar || conocido.get(f.coleccion + '::' + f.registro_id) !== firmaDe(f.datos);
+    }).length;
+    let hechas = 0;
     for(const f of filas){
       const k = f.coleccion + '::' + f.registro_id;
       const fir = firmaDe(f.datos);
@@ -5194,6 +5207,10 @@ const Nube = (function(){
       if(r.error) throw r.error;
       conocido.set(k, fir);
       subidas++;
+      /* Solo cuando hay tela que subir, y de diez en diez: repintar en cada
+         ficha cuesta más que subirla. */
+      hechas++;
+      if(porMandar > 20 && hechas % 10 === 0) ponEstado('subiendo', hechas + ' de ' + porMandar);
     }
 
     /* Lo que este dispositivo tenía subido y ya no existe aquí, se borró:
@@ -5428,7 +5445,8 @@ const Nube = (function(){
               'va entera, con https:// delante y .supabase.co al final.'};
     if(/Invalid API key|JWT|apikey/i.test(msg) || cod === '401' || cod === 'PGRST301')
       return {que:'clave', dice:'La clave no vale. Tiene que ser la «anon public» de ' +
-              'Settings → API, la larga que empieza por eyJ. No la «service_role».'};
+              'Settings → API: la que pone «anon public» o «Publishable key». ' +
+              'No la «service_role».'};
     if(/does not exist|relation .* does not exist|schema cache|PGRST20[0-9]/i.test(msg) || cod === '42P01')
       return {que:'tabla', dice:'Conecta bien, pero la base no tiene la tabla de PAPOTAS. ' +
               'Falta ejecutar el SQL una vez, en SQL Editor.'};
@@ -5639,7 +5657,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.0';
+const VERSION = 'v8.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -8892,7 +8910,9 @@ function pintaAjustes(){
           '<div class="paso-nube"><span class="pn-n">1</span><div>' +
             '<b>Pega los dos datos de tu proyecto</b>' +
             '<small>En Supabase: <b>Settings → API</b>. «Project URL» arriba y ' +
-            '«anon public» debajo, la clave larga que empieza por <code>eyJ</code>. ' +
+            '«anon public» debajo. Según cuándo hicieras el proyecto será una clave ' +
+            'larguísima que empieza por <code>eyJ</code> o una que empieza por ' +
+            '<code>sb_publishable_</code>: las dos valen. ' +
             'La <b>service_role</b> NO: esa es la de administrador y no se pega en ningún sitio.</small>' +
           '</div></div>' +
           '<div class="paso-nube"><span class="pn-n">2</span><div>' +
