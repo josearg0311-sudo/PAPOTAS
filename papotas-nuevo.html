@@ -3549,7 +3549,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.1</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.2</span>
     </div>
   </nav>
 
@@ -5103,6 +5103,10 @@ const Nube = (function(){
     try{ localStorage.setItem(CLAVE_CONOCIDO, JSON.stringify(Array.from(conocido))); }catch(_){}
   }
   function firmaDe(v){ try{ return JSON.stringify(v); }catch(_){ return String(v); } }
+  /* ¿Se ha llegado a traer algo de la nube en esta sesión? Hasta que eso
+     pase, este aparato no sabe de verdad cuáles son las tarifas. */
+  let bajadoAlMenosUnaVez = false;
+
   const idDispositivo = (function(){
     try{
       let v = localStorage.getItem('pap_device_id');
@@ -5253,18 +5257,47 @@ const Nube = (function(){
     if(typeof v === 'object') return Object.keys(v).length > 0;
     return true;
   }
+  /* Las tarifas y los costos NO son un ajuste que se elija: son un diario.
+     Cada línea tiene su id y su fecha, así que las dos listas se juntan y
+     manda la fecha, como siempre.
+
+     Aquí estaba el fallo que le separaba los dos aparatos. Un aparato que
+     arrancaba con tarifas viejas guardadas se quedaba con las SUYAS -no
+     estaban vacías, así que ganaban-, le reescribía el precio a todos sus
+     clientes con los números antiguos y los subía encima de los buenos. En
+     la pantalla salían los mismos clientes con distinto dinero en cada
+     aparato, y ninguno de los dos parecía estar mintiendo. */
+  function juntarListaConId(a, b){
+    const fuera = [], vistos = new Set();
+    [].concat(Array.isArray(a)?a:[], Array.isArray(b)?b:[]).forEach(function(x){
+      if(!x) return;
+      const k = String(x.id != null ? x.id : JSON.stringify(x));
+      if(vistos.has(k)) return;
+      vistos.add(k);
+      fuera.push(x);
+    });
+    return fuera;
+  }
+  const DIARIOS = ['historialPrecios', 'costosPlataforma'];
+
   function juntarAjustes(mio, suyo){
     const salida = Object.assign({}, AJUSTES_BASE, suyo);
     Object.keys(mio || {}).forEach(function(k){
+      if(DIARIOS.indexOf(k) >= 0) return;           /* esos se juntan aparte */
       if(!tieneAlgo(mio[k])) return;
       if(JSON.stringify(mio[k]) === JSON.stringify(AJUSTES_BASE[k])) return;
       salida[k] = mio[k];
+    });
+    DIARIOS.forEach(function(k){
+      const junto = juntarListaConId((suyo||{})[k], (mio||{})[k]);
+      if(junto.length) salida[k] = junto;
     });
     return salida;
   }
 
   async function bajar(forzar){
     const x = await conectar(); if(!x) return {aplicados:0, quitados:0};
+    bajadoAlMenosUnaVez = true;
     const r = await x.from('papotas_sync_records').select('coleccion,registro_id,datos,eliminado');
     if(r.error) throw r.error;
 
@@ -5523,6 +5556,7 @@ const Nube = (function(){
   }
 
   return {arrancar, subir, bajar, pedirSubida, conectar, hayCredenciales, ponEstado, probar,
+          yaBajo: function(){ return bajadoAlMenosUnaVez; },
           get estado(){ return estado; },
           get fallo(){ return ultimoFallo; },
           olvidarFallo: function(){ ultimoFallo = null; }};
@@ -5657,7 +5691,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.1';
+const VERSION = 'v8.2';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -11550,6 +11584,18 @@ function madurarPrecios(){
   return cambios;
 }
 function revisarPrecios(){
+  /* LA CARRERA DE LOS DOS APARATOS ------------------------------------
+     Lo que cobra cada cliente se calcula desde la tarifa de su plataforma,
+     y las tarifas viven en los ajustes. Si este aparato arranca con unas
+     tarifas viejas -porque todavía no ha bajado nada de la nube- y aun así
+     recalcula, le reescribe el precio a TODO el mundo con los números
+     antiguos y encima los sube. El otro aparato, con las tarifas buenas,
+     hace lo mismo al revés. Resultado: los dos enseñan los mismos clientes
+     con distinto dinero, y ninguno de los dos miente por su cuenta.
+
+     Con la nube puesta se espera a haber bajado una vez. Sin nube no hay
+     con quién pelearse y se hace igual que siempre. */
+  if(Nube.hayCredenciales() && !Nube.yaBajo()) return;
   const hoy = hoyISO();
   if(diaPreciosRevisado === hoy) return;
   diaPreciosRevisado = hoy;
