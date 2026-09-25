@@ -3549,7 +3549,7 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v7.9</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.0</span>
     </div>
   </nav>
 
@@ -3833,21 +3833,56 @@ function clavesDeCopia(){
   }catch(_){}
   return fuera.sort();
 }
-function copiaDelDia(){
-  if(clavesDanadas.length) return;                 /* con datos rotos, no se copia */
-  if(!clientes.length && !servicios.length) return; /* nada que copiar */
-  const k = 'pap_copia_' + hoyISO();
-  try{ if(localStorage.getItem(k)) return; }catch(_){ return; }
-  const carga = JSON.stringify({
+/* ---------- UNA FOTO QUE NO ENGORDA CON LOS AÑOS ------------------------
+   Guardar la foto entera parecía lo seguro, y resulta que era lo contrario.
+   Medido con dos años de uso: cada foto pesaba un mega, casi todo el
+   historial de cobros. Seis fotos -tres del día y tres de «justo antes
+   de»- son siete megas en un almacén de cinco, así que el navegador las iba
+   tirando: cuantos más años llevara usándolo, MENOS vueltas atrás le
+   quedaban. La red se deshilachaba justo cuando más tenía que aguantar.
+
+   Los cobros y los gastos son historia: se añaden, no se editan. Para
+   deshacer basta con saber CUÁLES existían, no con copiarlos enteros. Así
+   que de ellos se guarda solo la lista de identificadores, y al volver
+   atrás se tira lo que se apuntó después. Misma vuelta atrás exacta, por la
+   cuadragésima parte de sitio: de un mega a unos cien kilos. */
+function fotoDelNegocio(){
+  return {
     cuando:new Date().toISOString(),
-    clientes:clientes, servicios:servicios, ventas:ventas, inversiones:inversiones,
+    clientes:clientes, servicios:servicios,
     /* Los precios de venta y los costos viven en ajustes. Sin esto, volver a
        una copia te devolvía los clientes pero NO lo que le cobras a cada uno
        ni lo que te cuesta cada plataforma: media recuperación es peor que
        ninguna, porque no se nota hasta que cobras mal. La clave de la nube
        se queda fuera a propósito: no tiene por qué viajar en una copia. */
-    ajustes:sinClaves(ajustes)
-  });
+    ajustes:sinClaves(ajustes),
+    ventasIds:ventas.map(function(v){ return String(v.id); }),
+    inversionesIds:inversiones.map(function(x){ return String(x.id); })
+  };
+}
+
+/* Devolver los cobros y los gastos al momento de la foto: se quedan los que
+   ya existían y se van los que se apuntaron después. Una foto vieja, de las
+   que guardaban la lista entera, se sigue entendiendo igual. */
+function historialDeLaFoto(d){
+  const dentro = function(lista, ids, enteros){
+    if(Array.isArray(enteros)) return arr(enteros);
+    if(!Array.isArray(ids)) return lista;
+    const set = new Set(ids.map(String));
+    return lista.filter(function(x){ return x && set.has(String(x.id)); });
+  };
+  return {
+    ventas: dentro(ventas, d.ventasIds, d.ventas),
+    inversiones: dentro(inversiones, d.inversionesIds, d.inversiones)
+  };
+}
+
+function copiaDelDia(){
+  if(clavesDanadas.length) return;                 /* con datos rotos, no se copia */
+  if(!clientes.length && !servicios.length) return; /* nada que copiar */
+  const k = 'pap_copia_' + hoyISO();
+  try{ if(localStorage.getItem(k)) return; }catch(_){ return; }
+  const carga = JSON.stringify(fotoDelNegocio());
   /* Si no cabe, se tira la más vieja y se vuelve a intentar. */
   for(let intento = 0; intento < COPIAS_MAX + 1; intento++){
     try{ localStorage.setItem(k, carga); break; }
@@ -3889,7 +3924,7 @@ function guardarAntesDe(queFue){
   const k = 'pap_antes_de_' + Date.now();
   const carga = JSON.stringify({
     cuando:new Date().toISOString(), queFue:String(queFue || 'un cambio grande'),
-    datos:{servicios, clientes, ventas, inversiones, ajustes:sinClaves(ajustes)}
+    datos:fotoDelNegocio()
   });
   for(let intento = 0; intento <= ANTES_MAX; intento++){
     try{ localStorage.setItem(k, carga); break; }
@@ -3911,6 +3946,11 @@ function fuentesDeRescate(){
   const fuera = [];
   /* Las de «justo antes de» van arriba: son las que buscas cuando acabas de
      hacer algo y te has arrepentido. */
+  /* Cuántos cobros tenía la foto: en las nuevas es la lista de
+     identificadores, en las viejas eran los cobros enteros. */
+  const cuantosCobros = function(d){
+    return Array.isArray(d.ventasIds) ? d.ventasIds.length : arr(d.ventas).length;
+  };
   clavesDeAntes().reverse().forEach(function(k){
     try{
       const d = JSON.parse(localStorage.getItem(k) || 'null');
@@ -3920,7 +3960,7 @@ function fuentesDeRescate(){
         titulo:'Justo antes de ' + (d.queFue || 'un cambio grande') +
                (h ? ' · ' + h.slice(11,16) : ''),
         clientes:arr(d.datos.clientes).length, servicios:arr(d.datos.servicios).length,
-        ventas:arr(d.datos.ventas).length, datos:d.datos});
+        ventas:cuantosCobros(d.datos), datos:d.datos});
     }catch(_){}
   });
   clavesDeCopia().reverse().forEach(function(k){
@@ -3930,7 +3970,7 @@ function fuentesDeRescate(){
       fuera.push({clave:k, cuando:k.replace('pap_copia_',''),
         titulo:'Copia del ' + fechaBonita(k.replace('pap_copia_','')),
         clientes:arr(d.clientes).length, servicios:arr(d.servicios).length,
-        ventas:arr(d.ventas).length, datos:d});
+        ventas:cuantosCobros(d), datos:d});
     }catch(_){}
   });
   try{
@@ -3967,10 +4007,13 @@ function restaurarCopia(clave){
       }catch(_){}
       permitirVaciar = true;
       clavesDanadas = [];
+      /* El historial se recorta ANTES de tocar nada: se calcula sobre lo que
+         hay ahora, que es de donde salen los cobros que ya existían. */
+      const hist = historialDeLaFoto(f.datos);
       servicios   = arr(f.datos.servicios);
       clientes    = arr(f.datos.clientes);
-      ventas      = arr(f.datos.ventas);
-      inversiones = arr(f.datos.inversiones);
+      ventas      = hist.ventas;
+      inversiones = hist.inversiones;
       /* Y los precios, que es la mitad que faltaba. Las llaves de la nube
          son de este aparato: se quedan las de ahora, no las de la copia. */
       if(f.datos.ajustes && typeof f.datos.ajustes === 'object'){
@@ -5596,7 +5639,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v7.9';
+const VERSION = 'v8.0';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
