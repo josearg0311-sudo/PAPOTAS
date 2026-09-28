@@ -19,6 +19,16 @@ Todo (tareas, eventos, recordatorios, notas, listas, hábitos, metas y pagos) pe
 
 En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mandan a ese espacio (también entiende `#trabajo`, `#gym`, `#futbol`, `#uni`…). El Calendario y las Tareas se pueden filtrar por espacio.
 
+### Para organizarte a fondo
+
+| Qué | Para qué |
+|---|---|
+| **Proyectos** | Juntan las tareas de algo grande (la tesis, la web de un cliente, una mudanza), en su espacio y con fecha límite. Ves el avance en un anillo, la siguiente tarea y cuántas tareas por semana necesitas para llegar. |
+| **Calendario por semana** | Los 7 días en columnas y las horas en filas, con la línea roja de "ahora". Además de Mes y Agenda. |
+| **Revisión semanal** | Cada domingo o lunes, Hoy te invita a hacerla: la agenda pone los números de la semana (tareas, entrenos, horas de estudio, hábitos, dinero, ánimo) comparados con la anterior, y tú escribes qué salió bien, qué mejorar y las prioridades de la semana que viene. |
+| **Préstamos** (en Personal) | Quién te debe y a quién le debes. Al saldarlo se anota solo en tu libro. |
+| **Tu día** | Una línea de tiempo con la marca de "ahora"; lo que ya pasó se apaga. El saludo muestra cuánto del día llevas. |
+
 ### Y además
 
 | Sección | Para qué |

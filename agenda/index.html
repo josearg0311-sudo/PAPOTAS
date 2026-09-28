@@ -1031,6 +1031,97 @@ body{
 .nota-chip.mal{ background:var(--debe-piso); color:var(--debe) }
 .fila-clase.nota-curso{ grid-template-columns:minmax(0,1.6fr) minmax(0,.8fr) minmax(0,.8fr) 34px }
 .fila-clase.nota-curso input:first-child{ text-align:left }
+
+/* ===== Diseño 3: movimiento y detalle ===================================== */
+/* Las tarjetas entran en cascada */
+.vista .rejilla > *, .vista .espacios-hoy > *, .vista .proy-rejilla > *, .vista .rev-kpis > *{ animation:entra .45s cubic-bezier(.2,.8,.2,1) both }
+.vista .rejilla > *:nth-child(2), .vista .espacios-hoy > *:nth-child(2), .vista .proy-rejilla > *:nth-child(2), .vista .rev-kpis > *:nth-child(2){ animation-delay:.05s }
+.vista .rejilla > *:nth-child(3), .vista .espacios-hoy > *:nth-child(3), .vista .proy-rejilla > *:nth-child(3), .vista .rev-kpis > *:nth-child(3){ animation-delay:.1s }
+.vista .rejilla > *:nth-child(4), .vista .espacios-hoy > *:nth-child(4), .vista .proy-rejilla > *:nth-child(4), .vista .rev-kpis > *:nth-child(4){ animation-delay:.15s }
+.vista .rejilla > *:nth-child(n+5), .vista .rev-kpis > *:nth-child(n+5){ animation-delay:.2s }
+.tarjeta{ transition:border-color .2s, box-shadow .2s }
+.tarjeta:hover{ border-color:color-mix(in srgb, var(--verde) 28%, var(--regla)) }
+.heroe{ animation:entra .5s cubic-bezier(.2,.8,.2,1) both }
+
+/* Barra del día en el saludo */
+.barra-dia{ margin-top:14px; position:relative; z-index:1 }
+.barra-dia-cab{ display:flex; justify-content:space-between; font-size:11.5px; font-weight:700; opacity:.85; margin-bottom:5px }
+.barra-dia-riel{ height:6px; border-radius:99px; background:rgba(255,255,255,.18); overflow:hidden }
+.barra-dia-riel i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, #fff, rgba(255,255,255,.7)); box-shadow:0 0 12px rgba(255,255,255,.6) }
+
+/* Línea de tiempo del día */
+.linea-tiempo{ position:relative; padding:4px 0 6px }
+.linea-tiempo::before{ content:""; position:absolute; left:62px; top:10px; bottom:10px; width:2px; background:var(--regla); border-radius:2px }
+.lt-item{ position:relative }
+.lt-item .fila{ border-bottom:none; padding-top:9px; padding-bottom:9px }
+.lt-item::before{ content:""; position:absolute; left:58px; top:16px; width:10px; height:10px; border-radius:50%; background:var(--c); box-shadow:0 0 0 3px var(--hoja); z-index:1 }
+.lt-item .fila .hora{ width:38px }
+.lt-item .fila > .barrita, .lt-item .fila > .icono-tipo, .lt-item .fila > .casilla{ margin-left:14px }
+.lt-item.pasado{ opacity:.5 }
+.lt-item.pasado::before{ background:var(--tinta-3) }
+.ahora{ position:relative; height:22px; margin:2px 14px 2px 56px }
+.ahora::before{ content:""; position:absolute; left:0; right:0; top:50%; height:2px; background:var(--debe); border-radius:2px }
+.ahora::after{ content:""; position:absolute; left:-1px; top:50%; width:12px; height:12px; margin-top:-6px; border-radius:50%; background:var(--debe); box-shadow:0 0 0 4px color-mix(in srgb, var(--debe) 25%, transparent); animation:latirAhora 2s infinite }
+.ahora span{ position:relative; z-index:1; margin-left:18px; padding:1px 8px; border-radius:99px; background:var(--debe); color:#fff; font-size:10.5px; font-weight:800; letter-spacing:.03em }
+@keyframes latirAhora{ 50%{ box-shadow:0 0 0 8px color-mix(in srgb, var(--debe) 0%, transparent) } }
+
+/* Revisión semanal: invitación y cifras */
+.aviso-rev{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:13px 14px; margin-bottom:14px; border-radius:16px;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--oro) 22%, var(--hoja)), var(--hoja)); border:1px solid color-mix(in srgb, var(--oro) 45%, var(--regla)) }
+.aviso-rev > svg:first-child{ width:34px; height:34px; padding:7px; border-radius:11px; background:color-mix(in srgb, var(--oro) 25%, transparent); color:var(--oro); flex:none }
+.aviso-rev span{ flex:1; font-size:12.5px; color:var(--tinta-2) } .aviso-rev b{ display:block; font-size:14.5px; color:var(--tinta) }
+.rev-kpis{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
+@media (min-width:760px){ .rev-kpis{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
+.rev-kpi{ padding:13px 14px; display:flex; flex-direction:column; gap:2px }
+.rev-kpi svg{ width:20px; height:20px; color:var(--verde-sube); margin-bottom:4px }
+.rev-kpi small{ font-size:11px; font-weight:750; letter-spacing:.05em; text-transform:uppercase; color:var(--tinta-3) }
+.rev-kpi b{ font-size:22px; letter-spacing:-.03em } .rev-kpi b small{ font-size:12px; text-transform:none; letter-spacing:0 }
+.rev-kpi em{ font-style:normal; font-size:11.5px; color:var(--tinta-3) }
+.rev-kpi .sube{ color:var(--haber); font-weight:800 } .rev-kpi .baja{ color:var(--debe); font-weight:800 }
+
+/* Semana de cada espacio en su ficha de Hoy */
+.esp-semana{ display:block; height:5px; border-radius:99px; background:color-mix(in srgb, var(--c) 18%, var(--regla-2)); overflow:hidden; position:relative; z-index:1 }
+.esp-semana i{ display:block; height:100%; border-radius:99px; background:var(--c) }
+.esp-semana-t{ font-size:10.5px !important }
+
+/* Proyectos */
+.proy-rejilla{ display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)) }
+.proy-card{ text-align:left; padding:14px; display:flex; flex-direction:column; gap:10px; border-top:3px solid var(--c); transition:transform .15s }
+.proy-card:hover{ transform:translateY(-2px) }
+.proy-cab{ display:flex; align-items:center; gap:12px }
+.proy-cab b{ display:block; font-size:15.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.proy-cab small{ font-size:12px; color:var(--tinta-3) }
+.proy-sig{ font-size:12.5px; color:var(--tinta-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.proy-sig b{ color:var(--tinta) }
+.proy-lim{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:var(--tinta-3) }
+.proy-lim svg{ width:13px; height:13px } .proy-lim.pronto{ color:var(--oro) } .proy-lim.tarde{ color:var(--debe) }
+.anillo-mini{ flex:none }
+.heroe .anillo-mini circle:first-child{ stroke:rgba(255,255,255,.25) }
+.heroe .anillo-mini text{ fill:#fff }
+
+/* Calendario por semana */
+.sem-envoltura{ overflow-x:auto; -webkit-overflow-scrolling:touch }
+.sem-rejilla{ display:grid; grid-template-columns:46px repeat(7, minmax(88px, 1fr)); min-width:680px }
+.sem-horas .sem-cuerpo{ position:relative }
+.sem-h{ position:absolute; right:6px; transform:translateY(-6px); font-family:var(--cifra); font-size:10.5px; color:var(--tinta-3) }
+.sem-col{ border-left:1px solid var(--regla-2); min-width:0 }
+.sem-col.hoy{ background:color-mix(in srgb, var(--verde) 6%, transparent) }
+.sem-cab{ width:100%; height:48px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-bottom:1px solid var(--regla) }
+.sem-cab small{ font-size:10.5px; font-weight:800; text-transform:uppercase; color:var(--tinta-3) }
+.sem-cab b{ font-size:17px }
+.sem-col.hoy .sem-cab b{ color:var(--papel); background:var(--verde); border-radius:8px; padding:0 7px }
+.sem-todo{ padding:3px; display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--regla); overflow:hidden }
+.sem-chip{ font-size:11px; font-weight:650; text-align:left; padding:2px 6px; border-radius:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:color-mix(in srgb, var(--c) 22%, transparent); color:var(--tinta); height:20px; flex:none }
+.sem-cuerpo{ position:relative; background:repeating-linear-gradient(180deg, transparent 0 45px, var(--regla-2) 45px 46px) }
+.sem-ev{ position:absolute; text-align:left; padding:3px 6px; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;
+  background:color-mix(in srgb, var(--c) 26%, var(--hoja)); border-left:3px solid var(--c); font-size:11px; line-height:1.25; transition:transform .12s, box-shadow .12s }
+.sem-ev:hover{ transform:scale(1.02); box-shadow:var(--sombra); z-index:2 }
+.sem-ev b{ font-weight:700; color:var(--tinta); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.sem-ev small{ color:var(--tinta-2); font-family:var(--cifra); font-size:10px }
+.sem-ev.hecho{ opacity:.5 } .sem-ev.hecho b{ text-decoration:line-through }
+.sem-ahora{ position:absolute; left:0; right:0; height:2px; background:var(--debe); z-index:3 }
+.sem-ahora::before{ content:""; position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--debe) }
+.sem-ev.corto{ justify-content:center; padding:0 6px } .sem-ev.corto b{ font-size:10.5px } .sem-ev.corto b small{ font-weight:700; margin-right:3px }
 </style>
 </head>
 <body>
@@ -1076,6 +1167,7 @@ body{
   <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8Z"/></symbol>
   <symbol id="i-pausa" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
   <symbol id="i-flecha" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-carpeta" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M8 13l2.5 2.5L16 10"/></symbol>
   <symbol id="i-casa" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></symbol>
   <symbol id="i-birrete" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
   <symbol id="i-balon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m12 7.5 3.8 2.8-1.5 4.4H9.7l-1.5-4.4Z"/><path d="M12 3v4.5M15.8 10.3l4.4-1.6M14.3 14.7l2.8 3.8M9.7 14.7l-2.8 3.8M8.2 10.3 3.8 8.7"/></symbol>
@@ -1164,7 +1256,7 @@ var CLAVE_TEMA     = 'libro_cuentas_tema';
 var CLAVE_PALETA   = 'cuentas_paleta';
 var JSONBIN        = 'https://api.jsonbin.io/v3/b';
 var MONEDA         = 'S/';
-var COLS = ['tareas','listas','eventos','recordatorios','habitos','notas','enfoque','metas','pagos','diario','cursos','entrenos','medidas','cobros'];
+var COLS = ['tareas','listas','eventos','recordatorios','habitos','notas','enfoque','metas','pagos','diario','cursos','entrenos','medidas','cobros','proyectos','revisiones','deudas'];
 
 var $ = function(id){ return document.getElementById(id); };
 
@@ -1546,6 +1638,7 @@ var SECCIONES = [
   { id:'esp-oficina',   nom:'Oficina',       ico:'i-maletin', esp:'oficina' },
   { id:'esp-deporte',   nom:'Deporte',       ico:'i-balon',   esp:'deporte' },
   { id:'tareas',        nom:'Tareas',        ico:'i-tareas',  g:'Organizar' },
+  { id:'proyectos',     nom:'Proyectos',     ico:'i-carpeta' },
   { id:'calendario',    nom:'Calendario',    ico:'i-cal' },
   { id:'recordatorios', nom:'Recordatorios', ico:'i-campana' },
   { id:'listas',        nom:'Listas',        ico:'i-listas' },
@@ -1555,6 +1648,7 @@ var SECCIONES = [
   { id:'foco',          nom:'Enfoque',       ico:'i-reloj' },
   { id:'diario',        nom:'Diario',        ico:'i-diario' },
   { id:'progreso',      nom:'Progreso',      ico:'i-diana' },
+  { id:'revision',      nom:'Revisión semanal', ico:'i-check' },
   { id:'dinero',        nom:'Dinero',        ico:'i-grafica', g:'Dinero' },
   { id:'pagos',         nom:'Pagos fijos',   ico:'i-recibo' },
   { id:'personal',      nom:'Libro personal', corto:'Gastos', ico:'i-cuentas' },
@@ -1620,6 +1714,7 @@ function ir(v, sinHash){
   if(v === 'cuentas') v = 'personal';    // la dirección de antes sigue valiendo
   if(v !== 'ajustes' && !SECCIONES.some(function(s){ return s.id === v; })) v = 'hoy';
   if(v !== 'listas') ui.lista = null;
+  if(v !== 'proyectos') ui.proy = null;
   ui.vista = v;
   if(!sinHash && location.hash !== '#' + v){
     try{ history.pushState(null, '', '#' + v); }catch(e){ location.hash = v; }
@@ -1696,6 +1791,7 @@ function filaTarea(t){
         metaFecha(t.fecha, t.hora, t.hecha) +
         (t.rep && t.rep !== 'no' ? '<span>' + ico('i-rep') + REPS_CORTO[t.rep] + '</span>' : '') +
         (sub ? '<span>' + ico('i-sub') + sub + '</span>' : '') +
+        (t.proy && ui.vista !== 'proyectos' && buscarId('proyectos', t.proy) && !buscarId('proyectos', t.proy).del ? '<span class="etiqueta">📁 ' + esc(buscarId('proyectos', t.proy).nombre) + '</span>' : '') +
         (ui.vista.indexOf('esp-') ? chipEsp(t) : '') +
         (t.area && !espDeTexto(t.area) ? '<span class="etiqueta">' + esc(t.area) + '</span>' : '') +
         (t.notas ? '<span>' + ico('i-notas') + '</span>' : '') +
@@ -1811,6 +1907,28 @@ function fraseDelDia(){
   return FRASES[Math.floor((d - ini) / 864e5) % FRASES.length];
 }
 
+/* Cuánto del día ya pasó (de 6:00 a 24:00, las horas en que se vive) */
+function barraDelDia(){
+  var d = new Date(), min = d.getHours() * 60 + d.getMinutes();
+  var p = Math.max(0, Math.min(1, (min - 360) / (1440 - 360)));
+  var txt = min < 360 ? 'El día aún no empieza' : p >= 1 ? 'Día terminado' : 'Llevas el ' + Math.round(p * 100) + '% del día';
+  return '<div class="barra-dia" title="' + txt + '"><div class="barra-dia-cab"><span>' + txt + '</span><span>' + horaAhora() + '</span></div>' +
+    '<div class="barra-dia-riel"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
+}
+/* El día en una línea de tiempo: lo pasado se apaga y una marca dice "ahora" */
+function lineaDelDia(items){
+  var ya = horaAhora(), puesto = false, h = '<div class="linea-tiempo">';
+  items.forEach(function(it){
+    var pasado = it.hora && (it.fin || it.hora) < ya;
+    if(!puesto && it.hora && it.hora >= ya){
+      h += '<div class="ahora"><span>Ahora · ' + ya + '</span></div>'; puesto = true;
+    }
+    h += '<div class="lt-item' + (pasado ? ' pasado' : '') + '" style="--c:' + it.c + '">' + filaAgenda(it) + '</div>';
+  });
+  if(!puesto && items.some(function(i){ return i.hora; })) h += '<div class="ahora"><span>Ahora · ' + ya + '</span></div>';
+  return h + '</div>';
+}
+
 /* ---------- Hoy ---------------------------------------------------------- */
 VISTAS.hoy = function(){
   var hoy = hoyISO(), h = new Date().getHours();
@@ -1841,7 +1959,7 @@ VISTAS.hoy = function(){
       '<button class="dato" data-ir="calendario">' + ico('i-cal') + '<b>' + agenda.filter(function(i){ return i.tipo === 'evento'; }).length + '</b> eventos</button>' +
       '<button class="dato" data-ir="recordatorios">' + ico('i-campana') + '<b>' + agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length + '</b> avisos</button>' +
       (pendPagos ? '<button class="dato" data-ir="pagos">' + ico('i-recibo') + '<b>' + pendPagos + '</b> por pagar</button>' : '') +
-    '</div></section>';
+    '</div>' + barraDelDia() + '</section>';
 
   if(!total && !nombre){
     html += '<div class="tarjeta" style="margin-bottom:16px"><div class="tarjeta-cuerpo" style="padding:18px 16px">' +
@@ -1854,6 +1972,16 @@ VISTAS.hoy = function(){
 
   html += captura(['tarea','rec','evento','nota'], 'Añade algo… (Enter para guardar) · usa #estudios #oficina #deporte');
 
+  var wdR = deISO(hoy).getDay();
+  if(wdR === 0 || wdR === 1){
+    var semR = wdR === 0 ? inicioSemana(hoy) : sumarDias(inicioSemana(hoy), -7);
+    var hechaR = buscarId('revisiones', semR);
+    if(!hechaR || hechaR.del || !(hechaR.logros || hechaR.prioridades)){
+      html += '<button type="button" class="aviso-rev" data-acc="ir-revision" data-v="' + semR + '">' + ico('i-check') +
+        '<span><b>Haz tu revisión semanal</b>Cinco minutos para ver cómo te fue y elegir lo importante de la semana que viene.</span>' + ico('i-der') + '</button>';
+    }
+  }
+
   /* Tus cuatro espacios, con lo que tienen para hoy */
   html += '<div class="espacios-hoy">' + ESPACIOS.map(function(E){
     var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
@@ -1865,6 +1993,12 @@ VISTAS.hoy = function(){
               : vivos('habitos').filter(function(x){ return espDe(x) === 'personal'; }).length + ' hábitos';
     return '<button type="button" class="esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
       '<span class="esp-tile-cab"><span class="esp-em">' + E.em + '</span><b>' + E.nom + '</b>' + (pend ? '<span class="esp-num">' + pend + '</span>' : '') + '</span>' +
+      (function(){
+        var ini = inicioSemana(hoy), fin = sumarDias(ini, 6);
+        var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= ini && t.fecha <= fin || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= ini); });
+        var h = ts.filter(function(t){ return t.hecha; }).length;
+        return '<span class="esp-semana"><i style="width:' + (ts.length ? h / ts.length * 100 : 0) + '%"></i></span><small class="esp-semana-t">' + (ts.length ? h + ' de ' + ts.length + ' tareas de la semana' : 'Sin tareas esta semana') + '</small>';
+      })() +
       '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
       '<small>' + extra + '</small></button>';
   }).join('') + '</div>';
@@ -1872,8 +2006,7 @@ VISTAS.hoy = function(){
 
   /* Tu día */
   html += '<section class="tarjeta">' + cabTarjeta('i-cal', 'Tu día', 'var(--verde)', 'Calendario', 'data-ir="calendario"') +
-    (agenda.length ? '<div class="lista-filas">' + agenda.map(function(i){ return filaAgenda(i); }).join('') + '</div>'
-                   : '<div class="vacio" style="padding-top:4px">Sin eventos, avisos ni pagos hoy.</div>') +
+    (agenda.length ? lineaDelDia(agenda) : '<div class="vacio" style="padding-top:4px">Sin eventos, avisos ni pagos hoy.</div>') +
     '</section>';
 
   /* Enfoque */
@@ -2287,6 +2420,15 @@ VISTAS.espacio = function(id){
       (tareas.length > 7 ? '<div class="vacio" style="padding:8px">y ' + (tareas.length - 7) + ' más…</div>' : '')
      : vacio('✅', 'Sin pendientes', 'Todo al día en ' + E.nom.toLowerCase() + '.')) + '</section>';
 
+  var pa = proyectosActivos(id);
+  if(pa.length){
+    html += '<section class="tarjeta">' + cabTarjeta('i-carpeta', 'Proyectos', E.c, 'Todos', 'data-acc="proy-lista" data-v="' + id + '"') +
+      '<div class="lista-filas">' + pa.slice(0, 4).map(function(p){
+        var a = avanceProy(p.id), n = p.limite ? diasEntre(hoy, p.limite) : null;
+        return '<div class="fila" style="align-items:center">' + anilloMini(a.p, E.c, 38) + '<div class="cuerpo" data-acc="proy-abrir" data-id="' + p.id + '"><div class="titulo">' + esc(p.nombre) + '</div><div class="meta"><span>' + a.hechas + ' de ' + a.total + ' tareas</span>' +
+          (n != null ? '<span class="' + (n < 0 ? 'tarde' : n <= 7 ? 'hoy' : '') + '">' + (n < 0 ? 'vencido' : n === 0 ? 'vence hoy' : 'faltan ' + n + ' días') + '</span>' : '') + '</div></div></div>';
+      }).join('') + '</div></section>';
+  }
   html += MODULOS[id]();
 
   /* Dinero del espacio */
@@ -2356,7 +2498,7 @@ var MODULOS = {
     var hoy = hoyISO(), d = buscarId('diario', hoy), an = d && !d.del ? d.animo : 0;
     var pp = pagosProximos(10).filter(function(x){ return espDe(x.p) === 'personal'; });
     return '<section class="tarjeta">' + cabTarjeta('i-diario', '¿Cómo te sientes hoy?', 'var(--rosa)', 'Diario', 'data-ir="diario"') +
-        '<div class="tarjeta-cuerpo">' + animosHTML(an, hoy) + '</div></section>' +
+        '<div class="tarjeta-cuerpo">' + animosHTML(an, hoy) + '</div></section>' + tarjetaPrestamos() +
       (pp.length ? '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos que vienen', 'var(--debe)', 'Pagos', 'data-ir="pagos"') +
         '<div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>' : '');
   },
@@ -2454,6 +2596,249 @@ var MODULOS = {
   }
 };
 
+/* ==========================================================================
+   PROYECTOS
+   Tareas que van juntas hacia algo más grande: la tesis, la mudanza, el
+   lanzamiento de un cliente, preparar una media maratón. Cada proyecto
+   vive en un espacio, tiene fecha límite y muestra cuánto falta.
+   ========================================================================== */
+function tareasDe(pid){ return vivos('tareas').filter(function(t){ return t.proy === pid; }); }
+function avanceProy(pid){
+  var ts = tareasDe(pid), h = ts.filter(function(t){ return t.hecha; }).length;
+  return { total:ts.length, hechas:h, p:ts.length ? h / ts.length : 0 };
+}
+function proyectosActivos(esp){
+  return vivos('proyectos').filter(function(p){ return p.estado !== 'hecho' && (!esp || espDe(p) === esp); })
+    .sort(function(a, b){ return (a.limite || '9').localeCompare(b.limite || '9'); });
+}
+function anilloMini(p, c, tam){
+  tam = tam || 44; var r = tam / 2 - 5, C = 2 * Math.PI * r;
+  return '<svg class="anillo-mini" width="' + tam + '" height="' + tam + '" viewBox="0 0 ' + tam + ' ' + tam + '" aria-hidden="true">' +
+    '<circle cx="' + tam / 2 + '" cy="' + tam / 2 + '" r="' + r + '" fill="none" stroke="var(--regla)" stroke-width="5"/>' +
+    '<circle cx="' + tam / 2 + '" cy="' + tam / 2 + '" r="' + r + '" fill="none" stroke="' + c + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - p)).toFixed(1) + '" transform="rotate(-90 ' + tam / 2 + ' ' + tam / 2 + ')"/>' +
+    '<text x="50%" y="50%" dy=".35em" text-anchor="middle" font-size="' + (tam * .26).toFixed(0) + '" font-weight="800" fill="var(--tinta)">' + Math.round(p * 100) + '</text></svg>';
+}
+function tarjetaProyecto(p){
+  var a = avanceProy(p.id), E = espInfo(espDe(p));
+  var sig = tareasDe(p.id).filter(function(t){ return !t.hecha; }).sort(ordenTareas)[0];
+  var n = p.limite ? diasEntre(hoyISO(), p.limite) : null;
+  return '<button type="button" class="tarjeta proy-card" style="--c:' + E.c + '" data-acc="proy-abrir" data-id="' + p.id + '">' +
+    '<div class="proy-cab">' + anilloMini(a.p, E.c) + '<div style="min-width:0;flex:1"><b>' + esc(p.nombre) + '</b>' +
+      '<small>' + E.em + ' ' + E.nom + ' · ' + a.hechas + ' de ' + a.total + ' tareas</small></div></div>' +
+    (sig ? '<div class="proy-sig">Siguiente: <b>' + esc(sig.t) + '</b></div>' : '<div class="proy-sig">' + (a.total ? '¡Todo hecho! Márcalo terminado.' : 'Añade la primera tarea.') + '</div>') +
+    (n != null ? '<div class="proy-lim ' + (n < 0 ? 'tarde' : n <= 7 ? 'pronto' : '') + '">' + ico('i-bandera') + (n < 0 ? 'Venció hace ' + (-n) + ' días' : n === 0 ? 'Vence hoy' : 'Faltan ' + n + ' días · ' + fechaCorta(p.limite)) + '</div>' : '') +
+  '</button>';
+}
+VISTAS.proyectos = function(){
+  var p = ui.proy && buscarId('proyectos', ui.proy);
+  if(p && !p.del) return detalleProyecto(p);
+  ui.proy = null;
+  var act = proyectosActivos(ui.proyEsp || ''), hechos = vivos('proyectos').filter(function(x){ return x.estado === 'hecho' && (!ui.proyEsp || espDe(x) === ui.proyEsp); });
+  var html = filtroEsp('proy-esp', ui.proyEsp || '');
+  html += act.length ? '<div class="proy-rejilla">' + act.map(tarjetaProyecto).join('') + '</div>'
+                     : '<div class="tarjeta">' + vacio('📁', 'Sin proyectos activos', 'Un proyecto junta las tareas de algo grande (la tesis, una mudanza, un cliente) y te muestra cuánto falta.') + '</div>';
+  html += '<div style="margin-top:14px"><button class="btn primario" data-acc="nuevo" data-tipo="proyecto">' + ico('i-plus') + 'Nuevo proyecto</button></div>';
+  if(hechos.length) html += '<div class="seccion-tit">Terminados <span class="n">' + hechos.length + '</span></div><div class="proy-rejilla">' + hechos.map(tarjetaProyecto).join('') + '</div>';
+  return html;
+};
+function detalleProyecto(p){
+  var a = avanceProy(p.id), E = espInfo(espDe(p));
+  var ts = tareasDe(p.id), pend = ts.filter(function(t){ return !t.hecha; }).sort(ordenTareas), hechas = ts.filter(function(t){ return t.hecha; });
+  var n = p.limite ? diasEntre(hoyISO(), p.limite) : null;
+  var ritmo = '';
+  if(n != null && n > 0 && pend.length) ritmo = 'Para llegar a tiempo: unas ' + Math.ceil(pend.length / Math.max(1, Math.ceil(n / 7))) + ' tareas por semana.';
+  return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button class="btn chico" data-acc="proy-volver">' + ico('i-izq') + 'Proyectos</button><div style="flex:1"></div>' +
+      '<button class="btn chico" data-acc="proy-estado" data-id="' + p.id + '">' + (p.estado === 'hecho' ? 'Reabrir' : ico('i-check') + 'Terminado') + '</button>' +
+      '<button class="btn-icono" data-acc="proy-ed" data-id="' + p.id + '" aria-label="Editar">' + ico('i-lapiz') + '</button></div>' +
+    '<section class="heroe esp-heroe" style="--ec:' + E.c + '"><div class="arriba"><div><div class="fecha">' + E.em + ' ' + E.nom + ' · proyecto</div><h2>' + esc(p.nombre) + '</h2>' +
+      (p.desc ? '<p class="frase" style="font-style:normal">' + esc(p.desc) + '</p>' : '') + '</div>' + anilloMini(a.p, '#fff', 64) + '</div>' +
+      '<div class="datos"><span class="dato">' + ico('i-tareas') + '<b>' + a.hechas + '/' + a.total + '</b> tareas</span>' +
+      (n != null ? '<span class="dato">' + ico('i-bandera') + '<b>' + (n < 0 ? 'Vencido' : n) + '</b>' + (n >= 0 ? (n === 1 ? ' día' : ' días') : '') + '</span>' : '') + '</div></section>' +
+    (ritmo ? '<p style="margin:-4px 2px 14px;color:var(--tinta-2);font-size:13px">' + ritmo + '</p>' : '') +
+    '<div class="tarjeta">' +
+      '<form class="captura" data-acc="proy-tarea" data-id="' + p.id + '" style="margin:12px;box-shadow:none" autocomplete="off"><input id="proyTarea" type="text" maxlength="200" placeholder="Nueva tarea del proyecto… (Enter)"><button class="btn primario chico" type="submit">' + ico('i-plus') + '</button></form>' +
+      (pend.length ? '<div class="lista-filas">' + pend.map(filaTarea).join('') + '</div>' : vacio('🎯', a.total ? 'Todo hecho' : 'Sin tareas', a.total ? 'Márcalo como terminado arriba.' : 'Divide el proyecto en pasos pequeños.')) +
+    '</div>' +
+    (hechas.length ? '<div class="seccion-tit">Hechas <span class="n">' + hechas.length + '</span></div><div class="tarjeta"><div class="lista-filas">' + hechas.map(filaTarea).join('') + '</div></div>' : '');
+}
+function editarProyecto(id, preset){
+  var p = id ? JSON.parse(JSON.stringify(buscarId('proyectos', id))) : Object.assign({ id:nid(), nombre:'', desc:'', limite:'', estado:'activo', creada:Date.now() }, preset || {});
+  abrirFlotante(cabFlot(id ? 'Proyecto' : 'Nuevo proyecto') +
+    '<form class="form" id="formEd" autocomplete="off">' +
+      campo('Nombre', '<input name="n" required maxlength="80" value="' + esc(p.nombre) + '" placeholder="Ej. Tesis, Mudanza, Web del cliente, Media maratón">') +
+      campo('De qué se trata (opcional)', '<textarea name="d" maxlength="400" style="min-height:64px">' + esc(p.desc) + '</textarea>') +
+      campo('Fecha límite (opcional)', '<input type="date" name="l" value="' + esc(p.limite) + '">') +
+      selectorEsp(p.esp || (id ? espDe(p) : espPorDefecto())) +
+      botonesEd(!!id) + '</form>');
+  var f = $('formEd');
+  if(!id) f.n.focus();
+  f.onsubmit = function(ev){
+    ev.preventDefault();
+    p.nombre = f.n.value.trim(); if(!p.nombre) return;
+    p.desc = f.d.value.trim(); p.limite = f.l.value; p.esp = leerSelector('esp') || 'personal';
+    poner('proyectos', p); cerrarFlotante(); ui.proy = p.id; ir('proyectos'); ui.proy = p.id; pintar();
+  };
+  edAcciones = { borrar: function(){
+    cerrarFlotante();
+    tareasDe(p.id).forEach(function(t){ delete t.proy; t.upd = Date.now(); });
+    ui.proy = null; quitar('proyectos', p.id, 'Proyecto borrado (sus tareas se quedan)'); pintar();
+  } };
+}
+
+/* ==========================================================================
+   REVISIÓN SEMANAL
+   Cinco minutos el domingo: qué hiciste, qué salió bien, qué mejorar y
+   qué es lo importante de la semana que viene. La agenda pone los números.
+   ========================================================================== */
+function statsSemana(ini){
+  var fin = sumarDias(ini, 6), enS = function(d){ return d >= ini && d <= fin; };
+  var r = { tareas:0, entrenos:0, minEnt:0, pomos:0, estudio:0, ent:0, sal:0, habT:0, habH:0, animo:0, nAnimo:0, eventos:0 };
+  vivos('tareas').forEach(function(t){
+    if(t.hecha && t.hechaEn && enS(iso(new Date(t.hechaEn)))) r.tareas++;
+    (t.log || []).forEach(function(d){ if(enS(d)) r.tareas++; });
+  });
+  vivos('entrenos').forEach(function(e){ if(enS(e.fecha)){ r.entrenos++; r.minEnt += +e.min || 0; } });
+  for(var i = 0; i < 7; i++){
+    var d = sumarDias(ini, i), e = buscarId('enfoque', d);
+    if(e && !e.del){ r.pomos += e.pomos || 0; r.estudio += (e.pomosEsp && e.pomosEsp.estudios) || 0; }
+    var w = deISO(d).getDay();
+    if(d <= hoyISO()) vivos('habitos').forEach(function(h){ if(!h.dias || h.dias.indexOf(w) >= 0){ r.habT++; if(h.marcas && h.marcas[d]) r.habH++; } });
+    var di = buscarId('diario', d); if(di && !di.del && di.animo){ r.animo += di.animo; r.nAnimo++; }
+    r.eventos += itemsDelDia(d).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
+  }
+  libroDatos('personal').concat(libroDatos('oficina')).forEach(function(t){ if(enS(t.date)){ if(t.type === 'Gasto') r.sal += t.amount; else r.ent += t.amount; } });
+  return r;
+}
+VISTAS.revision = function(){
+  var ini = ui.revSemana || inicioSemana(hoyISO()), fin = sumarDias(ini, 6);
+  var r = statsSemana(ini), ant = statsSemana(sumarDias(ini, -7));
+  var rv = buscarId('revisiones', ini); if(rv && rv.del) rv = null;
+  function cmp(a, b, inv){ if(!b || a === b) return ''; var up = a > b; return '<span class="' + ((up !== !!inv) ? 'sube' : 'baja') + '">' + (up ? '▲' : '▼') + ' ' + Math.abs(a - b) + '</span>'; }
+  var kpis = [
+    ['i-tareas', 'Tareas hechas', r.tareas, cmp(r.tareas, ant.tareas)],
+    ['i-balon', 'Entrenamientos', r.entrenos + ' <small>(' + Math.round(r.minEnt / 6) / 10 + ' h)</small>', cmp(r.entrenos, ant.entrenos)],
+    ['i-birrete', 'Horas de estudio', (r.estudio * minutosModo('trabajo') / 60).toFixed(1), cmp(r.estudio, ant.estudio)],
+    ['i-habitos', 'Hábitos cumplidos', r.habT ? Math.round(r.habH / r.habT * 100) + '%' : '—', ''],
+    ['i-subir', 'Entró', dinero(r.ent), ''],
+    ['i-bajar', 'Salió', dinero(r.sal), ''],
+    ['i-diario', 'Ánimo', r.nAnimo ? ANIMOS[Math.round(r.animo / r.nAnimo)].e : '—', ''],
+    ['i-cal', 'Eventos y clases', r.eventos, '']
+  ];
+  var sigIni = sumarDias(ini, 7), sigT = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha >= sigIni && t.fecha <= sumarDias(sigIni, 6); }).length;
+  var sigE = 0; for(var i = 0; i < 7; i++) sigE += itemsDelDia(sumarDias(sigIni, i)).filter(function(x){ return x.tipo === 'evento'; }).length;
+  function caja(k, t, ph){ return '<label class="campo"><span>' + t + '</span><textarea data-rev="' + k + '" data-sem="' + ini + '" maxlength="3000" placeholder="' + ph + '" style="min-height:92px">' + esc(rv && rv[k] || '') + '</textarea></label>'; }
+  return '<div class="cal-cab"><button class="btn-icono" data-acc="rev-mover" data-n="-7" aria-label="Semana anterior">' + ico('i-izq') + '</button>' +
+      '<h2 style="font-size:17px">Semana del ' + fechaCorta(ini) + ' al ' + fechaCorta(fin) + '</h2>' +
+      '<button class="btn-icono" data-acc="rev-mover" data-n="7" aria-label="Semana siguiente">' + ico('i-der') + '</button></div>' +
+    '<div class="rev-kpis">' + kpis.map(function(k){ return '<div class="tarjeta rev-kpi">' + ico(k[0]) + '<small>' + k[1] + '</small><b>' + k[2] + '</b>' + (k[3] ? '<em>' + k[3] + ' vs. la anterior</em>' : '') + '</div>'; }).join('') + '</div>' +
+    '<section class="tarjeta" style="margin-top:14px">' + cabTarjeta('i-lapiz', 'Tu revisión', 'var(--verde)') +
+      '<div class="tarjeta-cuerpo form">' +
+        caja('logros', '🏆 ¿Qué salió bien esta semana?', 'Lo que lograste, aunque sea pequeño') +
+        caja('mejorar', '🔧 ¿Qué mejorarías?', 'Lo que no salió como querías y por qué') +
+        caja('prioridades', '🎯 Lo importante de la próxima semana', 'Tres cosas, no más') +
+        '<small style="color:var(--tinta-3)">Se guarda solo. La semana que viene tiene ' + sigT + ' tareas y ' + sigE + ' eventos en tu agenda.</small>' +
+      '</div></section>';
+};
+
+/* ==========================================================================
+   PRÉSTAMOS: quién te debe y a quién le debes
+   ========================================================================== */
+function editarDeuda(id, preset){
+  var x = id ? JSON.parse(JSON.stringify(buscarId('deudas', id))) : Object.assign({ id:nid(), persona:'', concepto:'', monto:'', tipo:'me', fecha:'', saldada:0, esp:'personal' }, preset || {});
+  abrirFlotante(cabFlot(id ? 'Préstamo' : 'Nuevo préstamo') +
+    '<form class="form" id="formEd" autocomplete="off">' +
+      grupo('Quién le debe a quién', selector('tipoD', [{ v:'me', n:'💚 Me deben' }, { v:'yo', n:'🧡 Yo debo' }], x.tipo)) +
+      campo('Persona', '<input name="p" required maxlength="60" value="' + esc(x.persona) + '" placeholder="Ej. Carlos">') +
+      campo('Por qué', '<input name="c" maxlength="80" value="' + esc(x.concepto) + '" placeholder="Ej. Entradas del concierto">') +
+      '<div class="fila-campos">' + campo('Monto (' + MONEDA + ')', '<input name="m" inputmode="decimal" required value="' + esc(x.monto) + '">') +
+        campo('Para cuándo (opcional)', '<input type="date" name="f" value="' + esc(x.fecha) + '">') + '</div>' +
+      botonesEd(!!id) + '</form>');
+  var f = $('formEd');
+  if(!id) f.p.focus();
+  f.onsubmit = function(ev){
+    ev.preventDefault();
+    x.persona = f.p.value.trim(); if(!x.persona) return;
+    x.tipo = leerSelector('tipoD') || 'me'; x.concepto = f.c.value.trim();
+    x.monto = Math.round(num(f.m.value) * 100) / 100; x.fecha = f.f.value;
+    poner('deudas', x); cerrarFlotante(); pintar();
+  };
+  edAcciones = { borrar: function(){ cerrarFlotante(); quitar('deudas', x.id, 'Préstamo borrado'); pintar(); } };
+}
+function saldarDeuda(id, boton){
+  var x = buscarId('deudas', id);
+  if(!x) return;
+  var idMov = 'deuda-' + x.id, me = x.tipo === 'me';
+  x.saldada = Date.now(); poner('deudas', x);
+  if(+x.monto) cambiarLibro('personal', function(l){ return l.filter(function(t){ return t.id !== idMov; }).concat([{ id:idMov, date:hoyISO(), desc:(me ? 'Me pagó ' : 'Le pagué a ') + x.persona + (x.concepto ? ' – ' + x.concepto : ''), type:me ? 'Ingreso' : 'Gasto', amount:+x.monto, cat:'Préstamos' }]); });
+  if(boton){ boton.setAttribute('aria-checked', 'true'); boton.classList.add('pop'); }
+  aviso(me ? '💚 ' + x.persona + ' te pagó' : '🧡 Le pagaste a ' + x.persona, dinero(+x.monto || 0) + ' anotado en tu libro', 'Deshacer', function(){
+    x.saldada = 0; poner('deudas', x);
+    cambiarLibro('personal', function(l){ return l.filter(function(t){ return t.id !== idMov; }); });
+    pintar();
+  });
+  setTimeout(pintarSeguro, 300);
+}
+function tarjetaPrestamos(){
+  var ds = vivos('deudas').filter(function(d){ return !d.saldada; });
+  var me = ds.filter(function(d){ return d.tipo === 'me'; }), yo = ds.filter(function(d){ return d.tipo === 'yo'; });
+  var sm = me.reduce(function(a, d){ return a + (+d.monto || 0); }, 0), sy = yo.reduce(function(a, d){ return a + (+d.monto || 0); }, 0);
+  var hoy = hoyISO();
+  return '<section class="tarjeta">' + cabTarjeta('i-cuentas', 'Préstamos', 'var(--esp-personal)', 'Nuevo', 'data-acc="nuevo" data-tipo="deuda"') +
+    '<div class="cifras" style="grid-template-columns:repeat(2,minmax(0,1fr))"><div class="entra"><small>Te deben</small><b>' + dinero(sm) + '</b></div><div class="sale"><small>Debes</small><b>' + dinero(sy) + '</b></div></div>' +
+    (ds.length ? '<div class="lista-filas">' + ds.sort(function(a, b){ return (a.fecha || '9').localeCompare(b.fecha || '9'); }).slice(0, 6).map(function(d){
+      var m = d.tipo === 'me', n = d.fecha ? diasEntre(hoy, d.fecha) : null;
+      return '<div class="fila">' + casilla('deuda-ok', d.id, false, m ? 'var(--haber)' : 'var(--oro)') +
+        '<div class="cuerpo" data-acc="deuda-ed" data-id="' + d.id + '"><div class="titulo">' + (m ? esc(d.persona) + ' te debe' : 'Le debes a ' + esc(d.persona)) + '</div>' +
+        '<div class="meta">' + (d.concepto ? '<span>' + esc(d.concepto) + '</span>' : '') + (n != null ? '<span class="' + (n < 0 ? 'tarde' : n <= 2 ? 'hoy' : '') + '">' + (n < 0 ? 'desde hace ' + (-n) + ' días' : relativo(d.fecha)) + '</span>' : '') + '</div></div>' +
+        '<span class="monto" style="color:' + (m ? 'var(--haber)' : 'var(--oro)') + '">' + dinero(+d.monto || 0) + '</span></div>';
+    }).join('') + '</div>' : '<div class="vacio" style="padding-top:2px">Nadie te debe y no debes nada. 🙌</div>') + '</section>';
+}
+
+/* ==========================================================================
+   CALENDARIO POR SEMANA: los días en columnas y las horas en filas
+   ========================================================================== */
+var H_INI = 6, H_FIN = 24, H_ALTO = 46;
+function minutos(h){ var p = (h || '0:0').split(':'); return +p[0] * 60 + +p[1]; }
+function semanaHTML(){
+  var ini = inicioSemana(ui.calSel), hoy = hoyISO(), dias = [];
+  for(var i = 0; i < 7; i++) dias.push(sumarDias(ini, i));
+  var alto = (H_FIN - H_INI) * H_ALTO;
+  var maxT = Math.max.apply(null, dias.map(function(d){ return itemsCal(d).filter(function(x){ return !x.hora; }).length; }).concat([0]));
+  var altoTodo = 'style="height:' + (maxT ? maxT * 24 + 6 : 6) + 'px"';
+  var horas = '';
+  for(var h = H_INI; h < H_FIN; h++) horas += '<div class="sem-h" style="top:' + (h - H_INI) * H_ALTO + 'px">' + dos(h) + ':00</div>';
+  var cols = dias.map(function(d){
+    var its = itemsCal(d), todo = its.filter(function(x){ return !x.hora; }), conHora = its.filter(function(x){ return x.hora; });
+    /* Bloques que se pisan: se reparten el ancho */
+    var bloques = conHora.map(function(x){
+      var a = Math.max(minutos(x.hora), H_INI * 60), b = x.fin && x.fin > x.hora ? minutos(x.fin) : a + (x.tipo === 'tarea' || x.tipo === 'rec' ? 30 : 60);
+      return { x:x, a:a, b:Math.min(b, H_FIN * 60) };
+    }).sort(function(p, q){ return p.a - q.a; });
+    var carriles = [];
+    bloques.forEach(function(bl){
+      var k = 0; while(carriles[k] && carriles[k] > bl.a) k++;
+      carriles[k] = bl.b; bl.k = k;
+    });
+    var nc = Math.max(1, carriles.length);
+    var acc = { tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' };
+    var cuerpo = bloques.map(function(bl){
+      var top = (bl.a - H_INI * 60) / 60 * H_ALTO, h2 = Math.max(20, (bl.b - bl.a) / 60 * H_ALTO - 2);
+      return '<button type="button" class="sem-ev' + (bl.x.hecho ? ' hecho' : '') + (h2 < 36 ? ' corto' : '') + '" style="--c:' + bl.x.c + ';top:' + top.toFixed(0) + 'px;height:' + h2.toFixed(0) + 'px;left:calc(' + (bl.k / nc * 100) + '% + 2px);width:calc(' + (100 / nc) + '% - 4px)" data-acc="' + acc[bl.x.tipo] + '" data-id="' + bl.x.id + '">' +
+        (h2 < 36 ? '<b><small>' + bl.x.hora + '</small> ' + esc(bl.x.t) + '</b>' : '<b>' + esc(bl.x.t) + '</b><small>' + bl.x.hora + (bl.x.fin ? '–' + bl.x.fin : '') + '</small>') + '</button>';
+    }).join('');
+    var ahora = '';
+    if(d === hoy){
+      var m = new Date().getHours() * 60 + new Date().getMinutes();
+      if(m >= H_INI * 60) ahora = '<div class="sem-ahora" style="top:' + ((m - H_INI * 60) / 60 * H_ALTO).toFixed(0) + 'px"></div>';
+    }
+    return '<div class="sem-col' + (d === hoy ? ' hoy' : '') + '">' +
+      '<button type="button" class="sem-cab" data-acc="cal-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b></button>' +
+      '<div class="sem-todo" ' + altoTodo + '>' + todo.map(function(x){ return '<button type="button" class="sem-chip" style="--c:' + x.c + '" data-acc="' + acc[x.tipo] + '" data-id="' + x.id + '">' + esc(x.t) + '</button>'; }).join('') + '</div>' +
+      '<div class="sem-cuerpo" style="height:' + alto + 'px">' + cuerpo + ahora + '</div></div>';
+  }).join('');
+  return '<div class="tarjeta sem-envoltura"><div class="sem-rejilla"><div class="sem-horas"><div class="sem-cab"></div><div class="sem-todo" ' + altoTodo + '></div><div class="sem-cuerpo" style="height:' + alto + 'px">' + horas + '</div></div>' + cols + '</div></div>';
+}
+
 /* ---------- Tareas -------------------------------------------------------- */
 function ordenTareas(a, b){
   return (a.fecha || '9999').localeCompare(b.fecha || '9999') ||
@@ -2531,8 +2916,16 @@ VISTAS.calendario = function(){
     '<button class="btn-icono" data-acc="cal-mover" data-n="1" aria-label="Mes siguiente">' + ico('i-der') + '</button>' +
     '<div class="der"><button class="btn chico" data-acc="cal-hoy">Hoy</button>' +
     '<div class="selector"><button data-acc="cal-modo" data-m="mes" aria-pressed="' + (ui.calModo === 'mes') + '">Mes</button>' +
+    '<button data-acc="cal-modo" data-m="semana" aria-pressed="' + (ui.calModo === 'semana') + '">Semana</button>' +
     '<button data-acc="cal-modo" data-m="agenda" aria-pressed="' + (ui.calModo === 'agenda') + '">Agenda</button></div></div>' +
   '</div>' + filtroEsp('cal-esp', ui.calEsp);
+
+  if(ui.calModo === 'semana'){
+    var iniS = inicioSemana(ui.calSel);
+    html = html.replace('<h2>' + MESES[m] + ' ' + y + '</h2>', '<h2>' + deISO(iniS).getDate() + ' ' + MESES3[deISO(iniS).getMonth()] + ' – ' + fechaCorta(sumarDias(iniS, 6)) + '</h2>')
+               .replace(/data-acc="cal-mover" data-n="(-?1)"/g, function(_, n){ return 'data-acc="sem-mover" data-n="' + (7 * +n) + '"'; });
+    return html + semanaHTML();
+  }
 
   if(ui.calModo === 'agenda'){
     var dias = '', cuantos = 0;
@@ -3666,6 +4059,7 @@ function editarTarea(id, preset){
       '<div class="fila-campos">' + campo('Repetir', selRep(t.rep)) +
         campo('Etiqueta (opcional)', '<input name="area" list="listaAreas" maxlength="30" value="' + esc(t.area) + '" placeholder="Ej. Casa, Tesis, Cliente X"><datalist id="listaAreas">' +
           areas.map(function(a){ return '<option value="' + esc(a) + '">'; }).join('') + '</datalist>') + '</div>' +
+      (proyectosActivos().length || t.proy ? campo('Proyecto', '<select name="proy"><option value="">— Ninguno —</option>' + vivos('proyectos').filter(function(p){ return p.estado !== 'hecho' || p.id === t.proy; }).map(function(p){ return '<option value="' + p.id + '"' + (t.proy === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>') : '') +
       grupo('Prioridad', selector('prio', PRIOS.map(function(p, i){ return { v:String(i), n:(i ? '<span style="color:' + p.c + '">●</span> ' : '') + p.n }; }), String(t.prio || 0))) +
       grupo('Subtareas', '<div class="subtareas" id="subs">' + (t.sub || []).map(filaSub).join('') + '</div>' +
         '<button type="button" class="btn chico" data-ed="sub-add" style="align-self:flex-start;margin-top:4px">' + ico('i-plus') + 'Subtarea</button>') +
@@ -3681,6 +4075,7 @@ function editarTarea(id, preset){
     if(t.rep !== 'no' && !t.fecha) t.fecha = hoyISO();
     t.area = f.area.value.trim(); t.notas = f.notas.value.trim();
     t.prio = +leerSelector('prio') || 0;
+    if(f.proy){ t.proy = f.proy.value || undefined; if(t.proy){ var pp = buscarId('proyectos', t.proy); if(pp && !t.esp) t.esp = espDe(pp); } }
     t.sub = leerSubs();
     poner('tareas', t);
     cerrarFlotante(); pintar();
@@ -4015,7 +4410,7 @@ function cambiarLista(fn){
 
 /* ---------- Menús ---------------------------------------------------------- */
 function menuNuevo(){
-  var ops = [['tarea','i-tareas','Tarea'],['rec','i-campana','Recordatorio'],['evento','i-cal','Evento'],['nota','i-notas','Nota'],['lista','i-listas','Lista'],['habito','i-habitos','Hábito'],['meta','i-meta','Meta'],['curso','i-birrete','Curso'],['cobro','i-subir','Cobro pendiente'],['entreno','i-balon','Entrenamiento'],['pago','i-recibo','Pago fijo'],['diario','i-diario','Diario'],['personal','i-cuentas','Gasto personal'],['oficina','i-maletin','Movimiento de oficina']];
+  var ops = [['tarea','i-tareas','Tarea'],['rec','i-campana','Recordatorio'],['evento','i-cal','Evento'],['nota','i-notas','Nota'],['lista','i-listas','Lista'],['habito','i-habitos','Hábito'],['meta','i-meta','Meta'],['proyecto','i-carpeta','Proyecto'],['curso','i-birrete','Curso'],['deuda','i-cuentas','Préstamo'],['cobro','i-subir','Cobro pendiente'],['entreno','i-balon','Entrenamiento'],['pago','i-recibo','Pago fijo'],['diario','i-diario','Diario'],['personal','i-cuentas','Gasto personal'],['oficina','i-maletin','Movimiento de oficina']];
   abrirFlotante(cabFlot('Añadir') + '<div class="rejilla-mas">' + ops.map(function(o){
     return '<button type="button" data-acc="nuevo" data-tipo="' + o[0] + '">' + ico(o[1]) + o[2] + '</button>';
   }).join('') + '</div>');
@@ -4040,6 +4435,8 @@ function nuevo(tipo, preset){
   else if(tipo === 'meta') editarMeta(null, preset);
   else if(tipo === 'curso') editarCurso(null);
   else if(tipo === 'cobro') editarCobro(null);
+  else if(tipo === 'proyecto') editarProyecto(null);
+  else if(tipo === 'deuda') editarDeuda(null);
   else if(tipo === 'entreno') editarEntreno(null, preset);
   else if(tipo === 'pago') editarPago(null, preset);
   else if(tipo === 'diario'){ ui.diarioDia = hoyISO(); ir('diario'); setTimeout(function(){ var t = $('textoDiario'); if(t) t.focus(); }, 60); }
@@ -4057,6 +4454,7 @@ function nuevoSegunVista(){
   else if(v === 'habitos') nuevo('habito');
   else if(v === 'metas') nuevo('meta');
   else if(v === 'pagos') nuevo('pago');
+  else if(v === 'proyectos'){ if(ui.proy && $('proyTarea')) $('proyTarea').focus(); else nuevo('proyecto'); }
   else if(v.indexOf('esp-') === 0) menuNuevo();
   else if(v === 'dinero'){ var qm = $('qaMonto'); if(qm){ qm.focus(); qm.scrollIntoView({ block:'center', behavior:'smooth' }); } }
   else if(v === 'diario'){ var td = $('textoDiario'); if(td) td.focus(); }
@@ -4461,6 +4859,14 @@ function cargarEjemplos(){
   poner('cursos', { id:nid(), nombre:'Matemática II', prof:'Prof. Ramírez', aula:'Aula 204', clases:[{ d:1, ini:'08:00', fin:'10:00' },{ d:3, ini:'08:00', fin:'10:00' }], notas:[{ n:'Práctica 1', v:16, p:20 },{ n:'Práctica 2', v:14, p:20 },{ n:'Parcial', v:'', p:30 },{ n:'Final', v:'', p:30 }], inicio:'', fin:'', creada:c++ });
   poner('cursos', { id:nid(), nombre:'Economía', prof:'Dra. Salas', aula:'Aula 110', clases:[{ d:2, ini:'18:00', fin:'20:00' },{ d:4, ini:'18:00', fin:'20:00' }], notas:[{ n:'Control de lectura', v:9, p:'' },{ n:'Exposición', v:12, p:'' }], inicio:'', fin:'', creada:c++ });
   poner('cursos', { id:nid(), nombre:'Inglés intermedio', prof:'', aula:'Zoom', clases:[{ d:6, ini:'09:00', fin:'11:00' }], inicio:'', fin:'', creada:c++ });
+  var pT = nid(), pW = nid();
+  poner('proyectos', { id:pT, nombre:'Monografía de Economía', desc:'Trabajo final del curso, en grupo de 3', limite:sumarDias(hoy, 20), esp:'estudios', estado:'activo', creada:c++ });
+  poner('proyectos', { id:pW, nombre:'Web de Empresa ABC', desc:'Diseño y lanzamiento de la página del cliente', limite:sumarDias(hoy, 12), esp:'oficina', estado:'activo', creada:c++ });
+  [['Elegir el tema', -3, true, pT],['Buscar 5 fuentes', 2, false, pT],['Escribir la introducción', 6, false, pT],['Revisión con el grupo', 12, false, pT],
+   ['Reunión de requisitos', -5, true, pW],['Maqueta de la portada', -1, true, pW],['Textos e imágenes', 3, false, pW],['Publicar la web', 11, false, pW]]
+    .forEach(function(x){ poner('tareas', T({ t:x[0], fecha:sumarDias(hoy, x[1]), hecha:x[2], hechaEn:x[2] ? Date.now() - 864e5 : 0, proy:x[3], esp:x[3] === pT ? 'estudios' : 'oficina' })); });
+  poner('deudas', { id:nid(), persona:'Carlos', concepto:'Entradas del concierto', monto:120, tipo:'me', fecha:sumarDias(hoy, 5), saldada:0, esp:'personal' });
+  poner('deudas', { id:nid(), persona:'Ana', concepto:'Almuerzo del viernes', monto:35, tipo:'yo', fecha:'', saldada:0, esp:'personal' });
   poner('cobros', { id:nid(), cliente:'Empresa ABC', concepto:'Factura F001-245', monto:2400, vence:sumarDias(hoy, 3), cobrado:0, esp:'oficina' });
   poner('cobros', { id:nid(), cliente:'Juan Pérez', concepto:'Asesoría de agosto', monto:650, vence:sumarDias(hoy, -2), cobrado:0, esp:'oficina' });
   [[-1,'gym',70,'',2,'Pecho y tríceps'],[-2,'correr',35,5.2,2,''],[-4,'futbol',90,'',3,'Ganamos 5-3'],[-6,'gym',65,'',2,'Espalda y bíceps'],[-9,'gym',60,'',2,'Pierna'],[-11,'futbol',90,'',3,'Empate 2-2']]
@@ -4669,6 +5075,20 @@ document.addEventListener('click', function(ev){
       ir('dinero'); setTimeout(function(){ var m = $('qaMonto'); if(m) m.focus(); }, 60); break;
     case 'curso-ed': cerrarFlotante(); editarCurso(id); break;
     case 'cobro-ed': cerrarFlotante(); editarCobro(id); break;
+    case 'deuda-ed': cerrarFlotante(); editarDeuda(id); break;
+    case 'deuda-ok': saldarDeuda(id, b); break;
+    case 'proy-abrir': cerrarFlotante(); ir('proyectos'); ui.proy = id; pintar(); break;
+    case 'proy-volver': ui.proy = null; pintar(); break;
+    case 'proy-ed': editarProyecto(id); break;
+    case 'proy-esp': ui.proyEsp = b.dataset.v; pintar(); break;
+    case 'proy-lista': ui.proyEsp = b.dataset.v; ui.proy = null; ir('proyectos'); break;
+    case 'proy-estado':
+      var pe = buscarId('proyectos', id);
+      if(pe){ pe.estado = pe.estado === 'hecho' ? 'activo' : 'hecho'; poner('proyectos', pe); if(pe.estado === 'hecho'){ confeti(); aviso('🎉 ¡Proyecto terminado!', pe.nombre); } pintar(); }
+      break;
+    case 'ir-revision': ui.revSemana = b.dataset.v; ir('revision'); break;
+    case 'rev-mover': ui.revSemana = sumarDias(ui.revSemana || inicioSemana(hoyISO()), +b.dataset.n); pintar(); break;
+    case 'sem-mover': ui.calSel = sumarDias(ui.calSel, +b.dataset.n); ui.calMes = ui.calSel.slice(0, 7); pintar(); break;
     case 'cobro-ok': cobrar(id, b); break;
     case 'nuevo-examen': editarEvento(null, { tipo:'examen', esp:'estudios', todo:false, aviso:1440, color:'rojo' }); break;
     case 'nuevo-reunion': editarEvento(null, { tipo:'reunion', esp:'oficina', aviso:15 }); break;
@@ -4802,6 +5222,12 @@ document.addEventListener('submit', function(ev){
     inp.value = '';
     pintar();
     var ni = $('entradaCaptura'); if(ni) ni.focus();
+  } else if(a === 'proy-tarea'){
+    var pi = $('proyTarea'), pv = pi.value.trim();
+    if(!pv) return;
+    var pr = buscarId('proyectos', f.dataset.id), pp2 = interpretar(pv);
+    poner('tareas', { id:nid(), t:pp2.texto || pv, fecha:pp2.fecha, hora:pp2.hora, prio:pp2.prio, area:pp2.area, esp:pr ? espDe(pr) : 'personal', proy:f.dataset.id, rep:'no', sub:[], notas:'', creada:Date.now() });
+    pintar(); var np = $('proyTarea'); if(np) np.focus();
   } else if(a === 'peso'){
     var kg = num($('pesoHoy').value);
     if(!kg || kg < 20 || kg > 400){ aviso('Escribe tu peso en kg', 'Ej. 72.5'); return; }
@@ -4886,6 +5312,10 @@ document.addEventListener('change', function(ev){
     pref[t.dataset.min] = mv; escribirJSON(CLAVE_PREF, pref);
     if(!foco.fin){ foco.resta = 0; guardarFoco(); }
     pintarSeguro(); tictac();
+  } else if(t.dataset && t.dataset.rev){
+    var rid = t.dataset.sem, rr = buscarId('revisiones', rid);
+    rr = rr ? JSON.parse(JSON.stringify(rr)) : { id:rid };
+    delete rr.del; rr[t.dataset.rev] = t.value.trim(); poner('revisiones', rr);
   } else if(t.id === 'textoDiario'){
     clearTimeout(relojDiario); guardarDiario(t.dataset.dia, { texto:t.value.replace(/\s+$/, '') });
   } else if(t.id === 'ajSonido'){

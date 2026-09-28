@@ -972,3 +972,94 @@ body{
 .nota-chip.mal{ background:var(--debe-piso); color:var(--debe) }
 .fila-clase.nota-curso{ grid-template-columns:minmax(0,1.6fr) minmax(0,.8fr) minmax(0,.8fr) 34px }
 .fila-clase.nota-curso input:first-child{ text-align:left }
+
+/* ===== Diseño 3: movimiento y detalle ===================================== */
+/* Las tarjetas entran en cascada */
+.vista .rejilla > *, .vista .espacios-hoy > *, .vista .proy-rejilla > *, .vista .rev-kpis > *{ animation:entra .45s cubic-bezier(.2,.8,.2,1) both }
+.vista .rejilla > *:nth-child(2), .vista .espacios-hoy > *:nth-child(2), .vista .proy-rejilla > *:nth-child(2), .vista .rev-kpis > *:nth-child(2){ animation-delay:.05s }
+.vista .rejilla > *:nth-child(3), .vista .espacios-hoy > *:nth-child(3), .vista .proy-rejilla > *:nth-child(3), .vista .rev-kpis > *:nth-child(3){ animation-delay:.1s }
+.vista .rejilla > *:nth-child(4), .vista .espacios-hoy > *:nth-child(4), .vista .proy-rejilla > *:nth-child(4), .vista .rev-kpis > *:nth-child(4){ animation-delay:.15s }
+.vista .rejilla > *:nth-child(n+5), .vista .rev-kpis > *:nth-child(n+5){ animation-delay:.2s }
+.tarjeta{ transition:border-color .2s, box-shadow .2s }
+.tarjeta:hover{ border-color:color-mix(in srgb, var(--verde) 28%, var(--regla)) }
+.heroe{ animation:entra .5s cubic-bezier(.2,.8,.2,1) both }
+
+/* Barra del día en el saludo */
+.barra-dia{ margin-top:14px; position:relative; z-index:1 }
+.barra-dia-cab{ display:flex; justify-content:space-between; font-size:11.5px; font-weight:700; opacity:.85; margin-bottom:5px }
+.barra-dia-riel{ height:6px; border-radius:99px; background:rgba(255,255,255,.18); overflow:hidden }
+.barra-dia-riel i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, #fff, rgba(255,255,255,.7)); box-shadow:0 0 12px rgba(255,255,255,.6) }
+
+/* Línea de tiempo del día */
+.linea-tiempo{ position:relative; padding:4px 0 6px }
+.linea-tiempo::before{ content:""; position:absolute; left:62px; top:10px; bottom:10px; width:2px; background:var(--regla); border-radius:2px }
+.lt-item{ position:relative }
+.lt-item .fila{ border-bottom:none; padding-top:9px; padding-bottom:9px }
+.lt-item::before{ content:""; position:absolute; left:58px; top:16px; width:10px; height:10px; border-radius:50%; background:var(--c); box-shadow:0 0 0 3px var(--hoja); z-index:1 }
+.lt-item .fila .hora{ width:38px }
+.lt-item .fila > .barrita, .lt-item .fila > .icono-tipo, .lt-item .fila > .casilla{ margin-left:14px }
+.lt-item.pasado{ opacity:.5 }
+.lt-item.pasado::before{ background:var(--tinta-3) }
+.ahora{ position:relative; height:22px; margin:2px 14px 2px 56px }
+.ahora::before{ content:""; position:absolute; left:0; right:0; top:50%; height:2px; background:var(--debe); border-radius:2px }
+.ahora::after{ content:""; position:absolute; left:-1px; top:50%; width:12px; height:12px; margin-top:-6px; border-radius:50%; background:var(--debe); box-shadow:0 0 0 4px color-mix(in srgb, var(--debe) 25%, transparent); animation:latirAhora 2s infinite }
+.ahora span{ position:relative; z-index:1; margin-left:18px; padding:1px 8px; border-radius:99px; background:var(--debe); color:#fff; font-size:10.5px; font-weight:800; letter-spacing:.03em }
+@keyframes latirAhora{ 50%{ box-shadow:0 0 0 8px color-mix(in srgb, var(--debe) 0%, transparent) } }
+
+/* Revisión semanal: invitación y cifras */
+.aviso-rev{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:13px 14px; margin-bottom:14px; border-radius:16px;
+  background:linear-gradient(135deg, color-mix(in srgb, var(--oro) 22%, var(--hoja)), var(--hoja)); border:1px solid color-mix(in srgb, var(--oro) 45%, var(--regla)) }
+.aviso-rev > svg:first-child{ width:34px; height:34px; padding:7px; border-radius:11px; background:color-mix(in srgb, var(--oro) 25%, transparent); color:var(--oro); flex:none }
+.aviso-rev span{ flex:1; font-size:12.5px; color:var(--tinta-2) } .aviso-rev b{ display:block; font-size:14.5px; color:var(--tinta) }
+.rev-kpis{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
+@media (min-width:760px){ .rev-kpis{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
+.rev-kpi{ padding:13px 14px; display:flex; flex-direction:column; gap:2px }
+.rev-kpi svg{ width:20px; height:20px; color:var(--verde-sube); margin-bottom:4px }
+.rev-kpi small{ font-size:11px; font-weight:750; letter-spacing:.05em; text-transform:uppercase; color:var(--tinta-3) }
+.rev-kpi b{ font-size:22px; letter-spacing:-.03em } .rev-kpi b small{ font-size:12px; text-transform:none; letter-spacing:0 }
+.rev-kpi em{ font-style:normal; font-size:11.5px; color:var(--tinta-3) }
+.rev-kpi .sube{ color:var(--haber); font-weight:800 } .rev-kpi .baja{ color:var(--debe); font-weight:800 }
+
+/* Semana de cada espacio en su ficha de Hoy */
+.esp-semana{ display:block; height:5px; border-radius:99px; background:color-mix(in srgb, var(--c) 18%, var(--regla-2)); overflow:hidden; position:relative; z-index:1 }
+.esp-semana i{ display:block; height:100%; border-radius:99px; background:var(--c) }
+.esp-semana-t{ font-size:10.5px !important }
+
+/* Proyectos */
+.proy-rejilla{ display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)) }
+.proy-card{ text-align:left; padding:14px; display:flex; flex-direction:column; gap:10px; border-top:3px solid var(--c); transition:transform .15s }
+.proy-card:hover{ transform:translateY(-2px) }
+.proy-cab{ display:flex; align-items:center; gap:12px }
+.proy-cab b{ display:block; font-size:15.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.proy-cab small{ font-size:12px; color:var(--tinta-3) }
+.proy-sig{ font-size:12.5px; color:var(--tinta-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.proy-sig b{ color:var(--tinta) }
+.proy-lim{ display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:700; color:var(--tinta-3) }
+.proy-lim svg{ width:13px; height:13px } .proy-lim.pronto{ color:var(--oro) } .proy-lim.tarde{ color:var(--debe) }
+.anillo-mini{ flex:none }
+.heroe .anillo-mini circle:first-child{ stroke:rgba(255,255,255,.25) }
+.heroe .anillo-mini text{ fill:#fff }
+
+/* Calendario por semana */
+.sem-envoltura{ overflow-x:auto; -webkit-overflow-scrolling:touch }
+.sem-rejilla{ display:grid; grid-template-columns:46px repeat(7, minmax(88px, 1fr)); min-width:680px }
+.sem-horas .sem-cuerpo{ position:relative }
+.sem-h{ position:absolute; right:6px; transform:translateY(-6px); font-family:var(--cifra); font-size:10.5px; color:var(--tinta-3) }
+.sem-col{ border-left:1px solid var(--regla-2); min-width:0 }
+.sem-col.hoy{ background:color-mix(in srgb, var(--verde) 6%, transparent) }
+.sem-cab{ width:100%; height:48px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-bottom:1px solid var(--regla) }
+.sem-cab small{ font-size:10.5px; font-weight:800; text-transform:uppercase; color:var(--tinta-3) }
+.sem-cab b{ font-size:17px }
+.sem-col.hoy .sem-cab b{ color:var(--papel); background:var(--verde); border-radius:8px; padding:0 7px }
+.sem-todo{ padding:3px; display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--regla); overflow:hidden }
+.sem-chip{ font-size:11px; font-weight:650; text-align:left; padding:2px 6px; border-radius:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:color-mix(in srgb, var(--c) 22%, transparent); color:var(--tinta); height:20px; flex:none }
+.sem-cuerpo{ position:relative; background:repeating-linear-gradient(180deg, transparent 0 45px, var(--regla-2) 45px 46px) }
+.sem-ev{ position:absolute; text-align:left; padding:3px 6px; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;
+  background:color-mix(in srgb, var(--c) 26%, var(--hoja)); border-left:3px solid var(--c); font-size:11px; line-height:1.25; transition:transform .12s, box-shadow .12s }
+.sem-ev:hover{ transform:scale(1.02); box-shadow:var(--sombra); z-index:2 }
+.sem-ev b{ font-weight:700; color:var(--tinta); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.sem-ev small{ color:var(--tinta-2); font-family:var(--cifra); font-size:10px }
+.sem-ev.hecho{ opacity:.5 } .sem-ev.hecho b{ text-decoration:line-through }
+.sem-ahora{ position:absolute; left:0; right:0; height:2px; background:var(--debe); z-index:3 }
+.sem-ahora::before{ content:""; position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--debe) }
+.sem-ev.corto{ justify-content:center; padding:0 6px } .sem-ev.corto b{ font-size:10.5px } .sem-ev.corto b small{ font-weight:700; margin-right:3px }
