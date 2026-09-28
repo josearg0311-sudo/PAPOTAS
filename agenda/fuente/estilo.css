@@ -889,3 +889,86 @@ body{
 .mov-ico.g{ background:var(--debe-piso); color:var(--debe) }
 .mov-ico.i{ background:var(--haber-piso); color:var(--haber) }
 .cat-fila .barra-prog i{ transition:width .5s ease }
+
+/* ===== Espacios ============================================================ */
+:root{ --esp-personal:#B794F6; --esp-estudios:#5AB0F0; --esp-oficina:#F2B34B; --esp-deporte:#34D399 }
+:root[data-tema="claro"]{ --esp-personal:#7C4DDB; --esp-estudios:#2A78B8; --esp-oficina:#B7791F; --esp-deporte:#138A5C }
+
+.nav-lat .nav-esp svg{ color:var(--c) }
+.nav-lat .nav-esp[aria-current="page"]{ background:linear-gradient(90deg, color-mix(in srgb, var(--c) 22%, transparent), transparent); box-shadow:inset 3px 0 0 var(--c); color:var(--tinta) }
+
+.chip-esp{ display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; color:var(--c) }
+.chip-esp::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--c) }
+.ficha-esp[aria-pressed="true"]{ background:color-mix(in srgb, var(--c) 18%, var(--hoja)); border-color:var(--c); color:var(--tinta) }
+.selector.espacios button{ display:inline-flex; align-items:center; gap:4px }
+.selector.espacios button[aria-pressed="true"]{ background:color-mix(in srgb, var(--c) 18%, var(--hoja-2)); border-color:var(--c); color:var(--tinta) }
+
+/* Las cuatro fichas de Hoy */
+.espacios-hoy{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:16px }
+@media (min-width:1000px){ .espacios-hoy{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
+.esp-tile{
+  position:relative; overflow:hidden; text-align:left; display:flex; flex-direction:column; gap:6px; min-width:0;
+  padding:13px 13px 12px; border-radius:18px; border:1px solid color-mix(in srgb, var(--c) 35%, var(--regla));
+  background:linear-gradient(160deg, color-mix(in srgb, var(--c) 20%, var(--hoja)), var(--hoja) 70%);
+  box-shadow:var(--sombra); transition:transform .15s, border-color .15s;
+}
+.esp-tile:hover{ transform:translateY(-2px); border-color:var(--c) }
+.esp-tile::after{ content:""; position:absolute; right:-26px; top:-26px; width:80px; height:80px; border-radius:50%; background:color-mix(in srgb, var(--c) 16%, transparent) }
+.esp-tile-cab{ display:flex; align-items:center; gap:8px; position:relative; z-index:1 }
+.esp-em{ width:32px; height:32px; border-radius:10px; display:grid; place-items:center; font-size:17px; background:color-mix(in srgb, var(--c) 25%, transparent) }
+.esp-tile b{ font-size:15px; letter-spacing:-.01em }
+.esp-num{ margin-left:auto; min-width:22px; height:22px; padding:0 7px; border-radius:99px; background:var(--c); color:#0B0F19; font-size:11.5px; font-weight:800; display:grid; place-items:center }
+.esp-prox{ font-size:12.5px; font-weight:600; color:var(--tinta); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; position:relative; z-index:1 }
+.esp-prox em{ font-style:normal; color:var(--c) }
+.esp-tile small{ font-size:11.5px; color:var(--tinta-3); position:relative; z-index:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+
+/* Cambiar de espacio dentro de un panel */
+.cambia-esp{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-bottom:14px; padding:4px; border-radius:16px; background:var(--hoja); border:1px solid var(--regla) }
+.cambia-esp button{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:7px 2px; border-radius:12px; font-size:12px; font-weight:700; color:var(--tinta-2); transition:background .15s, color .15s }
+.cambia-esp button span{ font-size:18px }
+.cambia-esp button[aria-pressed="true"]{ background:color-mix(in srgb, var(--c) 22%, var(--hoja-2)); color:var(--tinta); box-shadow:inset 0 -3px 0 var(--c) }
+@media (min-width:640px){ .cambia-esp button{ flex-direction:row; justify-content:center; gap:7px; font-size:13.5px } }
+
+/* El saludo de cada espacio con su color */
+.heroe.esp-heroe{
+  background:radial-gradient(420px 220px at 100% 0%, rgba(255,255,255,.2), transparent 60%),
+             linear-gradient(135deg, color-mix(in srgb, var(--ec) 85%, #fff 10%) 0%, color-mix(in srgb, var(--ec) 70%, #0B1020) 60%, color-mix(in srgb, var(--ec) 35%, #0B1020) 100%);
+  box-shadow:0 18px 40px color-mix(in srgb, var(--ec) 28%, transparent);
+}
+.heroe.esp-heroe .frase b{ font-weight:800 }
+.dia-mini{ display:flex; align-items:baseline; gap:8px; padding:10px 16px 2px; font-size:12px; color:var(--tinta-3) }
+.dia-mini b{ font-size:12.5px; color:var(--tinta); text-transform:capitalize }
+
+/* Estudios */
+.curso-ico{ width:34px; height:34px; flex:none; border-radius:11px; display:grid; place-items:center; font-weight:800; color:#0B1020; background:linear-gradient(135deg, color-mix(in srgb, var(--esp-estudios) 70%, #fff), var(--esp-estudios)) }
+.cuenta-atras{ width:48px; flex:none; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:5px 0; border-radius:12px; background:var(--hoja-2); border:1px solid var(--regla); font-size:10px; color:var(--tinta-3); font-weight:700; line-height:1.1 }
+.cuenta-atras b{ font-size:17px; color:var(--tinta); font-family:var(--cifra) }
+.cuenta-atras.urge{ background:var(--debe-piso); border-color:color-mix(in srgb, var(--debe) 45%, transparent) }
+.cuenta-atras.urge b{ color:var(--debe) }
+.clases{ display:flex; flex-direction:column; gap:6px }
+.fila-clase{ display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1fr) 34px; gap:6px; align-items:center }
+.fila-clase select, .fila-clase input{ height:38px; padding:0 8px; border-radius:10px; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); min-width:0 }
+
+/* Deporte */
+.entreno-rapido{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:6px; margin-bottom:12px }
+@media (max-width:480px){ .entreno-rapido{ grid-template-columns:repeat(3,minmax(0,1fr)) } }
+.entreno-rapido button{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px; border-radius:12px; background:var(--hoja-2); border:1px solid var(--regla); font-size:11.5px; font-weight:700; color:var(--tinta-2); transition:border-color .15s, transform .12s }
+.entreno-rapido button span{ font-size:20px }
+.entreno-rapido button:hover{ border-color:var(--esp-deporte); transform:translateY(-1px) }
+.resumen-dep{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:10px }
+.resumen-dep div{ text-align:center; padding:8px 4px; border-radius:12px; background:color-mix(in srgb, var(--esp-deporte) 10%, var(--hoja-2)) }
+.resumen-dep b{ display:block; font-size:17px; letter-spacing:-.02em }
+.resumen-dep small{ font-size:11px; color:var(--tinta-3) }
+.peso-fila{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+.peso-actual{ flex:1 1 150px }
+.peso-actual b{ display:block; font-size:26px; letter-spacing:-.03em; font-family:var(--cifra) }
+.peso-actual small{ font-size:12px; color:var(--tinta-3) }
+.peso-actual small.baja{ color:var(--haber) } .peso-actual small.sube{ color:var(--oro) }
+.peso-form{ display:flex; gap:6px }
+.peso-form .entrada{ width:110px; height:34px }
+.spark{ width:100%; height:64px; display:block; margin-top:8px }
+.nota-chip{ display:inline-grid; place-items:center; min-width:34px; height:20px; padding:0 6px; border-radius:99px; font-family:var(--cifra); font-size:11.5px; font-weight:800; vertical-align:1px }
+.nota-chip.ok{ background:var(--haber-piso); color:var(--haber) }
+.nota-chip.mal{ background:var(--debe-piso); color:var(--debe) }
+.fila-clase.nota-curso{ grid-template-columns:minmax(0,1.6fr) minmax(0,.8fr) minmax(0,.8fr) 34px }
+.fila-clase.nota-curso input:first-child{ text-align:left }
