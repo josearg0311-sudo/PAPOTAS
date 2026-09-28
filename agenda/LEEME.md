@@ -29,6 +29,16 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 | **Préstamos** (en Personal) | Quién te debe y a quién le debes. Al saldarlo se anota solo en tu libro. |
 | **Tu día** | Una línea de tiempo con la marca de "ahora"; lo que ya pasó se apaga. El saludo muestra cuánto del día llevas. |
 
+### Más para cada día
+
+| Qué | Para qué |
+|---|---|
+| **Rutinas de gym** (en Deporte) | Tus rutinas con ejercicios, series, repeticiones y kilos, y los días que tocan. "Hoy toca…" y un botón para anotarla: te propone los pesos de la última vez. |
+| **Récords personales** | La agenda guarda tu máximo de cada ejercicio y cuánto has subido desde el inicio. Si lo superas, salta el aviso y el confeti. 🏆 |
+| **Horario de clases** (en Estudios) | Tu semana de clases en columnas, con el día de hoy marcado. |
+| **Cuenta regresiva** | Marca un evento (un viaje, un examen, un partido) y Hoy te muestra los días que faltan. |
+| **Tema automático** | Claro u oscuro según tu celular, además de fijo en claro u oscuro. |
+
 ### Y además
 
 | Sección | Para qué |

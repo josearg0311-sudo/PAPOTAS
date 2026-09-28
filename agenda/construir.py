@@ -36,6 +36,7 @@ iconos = json.dumps([
     {"src": mask512, "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
 ])
 
+fuente_datos = 'data:font/woff2;base64,' + b64('fuente/jakarta.woff2')
 cabeza = f'''<!DOCTYPE html>
 <html lang="es" data-tema="oscuro" data-paleta="medianoche">
 <head>
@@ -91,11 +92,17 @@ cabeza = f'''<!DOCTYPE html>
     document.head.appendChild(l);
   }}catch(e){{}}
   window.ICONO_AGENDA = '{png192}';
+  window.FUENTE_AGENDA = '{fuente_datos}';
 }})();
 </script>
 '''
 
 logo_css = ':root{ --logo:url("' + 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode()).decode() + '") }\n'
+# Tipografía Plus Jakarta Sans (licencia OFL), metida en el archivo para que
+# se vea igual sin internet. Una sola fuente variable cubre todos los grosores.
+fuente_b64 = b64('fuente/jakarta.woff2')
+logo_css += ("@font-face{ font-family:'Jakarta'; src:url(data:font/woff2;base64," + fuente_b64 +
+             ") format('woff2'); font-weight:200 800; font-display:swap }\n")
 html = (cabeza + '<style>\n' + logo_css + css + '</style>\n</head>\n<body>\n' + cuerpo +
         '\n<!-- El Libro de Cuentas entero, en base64 (se abre en la sección Cuentas) -->\n'
         '<script type="application/octet-stream" id="fuenteCuentas">' + cuentas + '</script>\n'

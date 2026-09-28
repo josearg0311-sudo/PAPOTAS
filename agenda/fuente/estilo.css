@@ -1063,3 +1063,101 @@ body{
 .sem-ahora{ position:absolute; left:0; right:0; height:2px; background:var(--debe); z-index:3 }
 .sem-ahora::before{ content:""; position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:var(--debe) }
 .sem-ev.corto{ justify-content:center; padding:0 6px } .sem-ev.corto b{ font-size:10.5px } .sem-ev.corto b small{ font-weight:700; margin-right:3px }
+
+/* ==========================================================================
+   DISEÑO 4 · acabado general
+   Una tipografía con carácter (Plus Jakarta Sans, dentro del archivo), una
+   barra inferior que flota, el perfil en el lateral y más aire en todo.
+   ========================================================================== */
+:root{ --letra:'Jakarta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; --barra:66px }
+body{ font-family:var(--letra); font-feature-settings:"ss01" 1, "cv11" 1; letter-spacing:-.005em }
+::selection{ background:color-mix(in srgb, var(--verde) 35%, transparent) }
+*{ scrollbar-width:thin; scrollbar-color:var(--regla) transparent }
+h1, h2, h3, .heroe h2, .tarjeta-cab h2{ font-family:var(--letra); text-wrap:balance }
+.heroe h2{ font-weight:800; letter-spacing:-.035em }
+.cifra, .monto, .hora, .kpi b, .rev-kpi b{ font-variant-numeric:tabular-nums }
+
+/* Cabecera: título más presente */
+.cabecera{ height:62px }
+.cabecera h1{ font-size:20px; font-weight:800; letter-spacing:-.03em }
+.cabecera .btn-icono{ border-radius:12px }
+
+/* Lateral: grupos con aire y el perfil abajo */
+.lateral{ padding:18px 12px 14px; background:linear-gradient(180deg, var(--hoja), color-mix(in srgb, var(--hoja) 85%, var(--papel))) }
+.marca{ padding:4px 8px 16px }
+.marca b{ font-size:18px; font-weight:800; letter-spacing:-.03em }
+.nav-lat button{ font-weight:650; border-radius:12px; padding:8px 10px }
+.nav-lat .grupo{ padding:16px 12px 6px; font-size:10px; letter-spacing:.14em }
+.lateral .pie{ margin-top:auto; padding-top:14px; border-top:1px solid var(--regla-2) }
+.perfil{ width:100%; display:flex; align-items:center; gap:10px; padding:8px; border-radius:14px; text-align:left; transition:background .15s }
+.perfil:hover, .perfil[aria-current="page"]{ background:var(--hoja-2) }
+.avatar{ width:36px; height:36px; border-radius:12px; flex:none; display:grid; place-items:center; font-weight:800; font-size:15px; color:#fff;
+  background:linear-gradient(135deg, var(--verde-sube), var(--verde)); box-shadow:0 4px 12px color-mix(in srgb, var(--verde) 35%, transparent) }
+.perfil-txt{ flex:1; min-width:0 }
+.perfil-txt b{ display:block; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.perfil-txt small{ font-size:11.5px; color:var(--tinta-3) }
+.perfil svg{ color:var(--tinta-3) }
+
+/* Barra inferior flotante (móvil) */
+@media (max-width:899px){
+  .barra-inf{
+    left:10px; right:10px; bottom:calc(10px + env(safe-area-inset-bottom)); height:var(--barra); padding-bottom:0;
+    border-radius:24px; border:1px solid color-mix(in srgb, var(--tinta) 10%, transparent);
+    background:color-mix(in srgb, var(--hoja) 82%, transparent); backdrop-filter:blur(18px) saturate(1.4); -webkit-backdrop-filter:blur(18px) saturate(1.4);
+    box-shadow:0 12px 34px rgba(0,0,0,.35);
+  }
+  .fab{ bottom:calc(var(--barra) + 24px + env(safe-area-inset-bottom)) }
+  .avisos{ bottom:calc(var(--barra) + 26px + env(safe-area-inset-bottom)) }
+  .contenido{ padding-bottom:130px }
+  body.en-cuentas .marco-cuentas{ height:calc(100vh - var(--barra) - 20px - env(safe-area-inset-bottom)); height:calc(100dvh - var(--barra) - 20px - env(safe-area-inset-bottom)) }
+}
+.barra-inf button{ font-size:10.5px; font-weight:700 }
+
+/* Tarjetas: más redondas y con el título más claro */
+.tarjeta{ border-radius:22px }
+.tarjeta-cab{ padding:16px 16px 10px }
+.tarjeta-cab h2, .tarjeta-cab h3{ font-size:15.5px; font-weight:800; letter-spacing:-.02em }
+.azulejo{ width:32px; height:32px; border-radius:11px }
+.fila{ padding:12px 16px }
+.fila .titulo{ font-weight:650 }
+.btn{ font-weight:700; border-radius:12px }
+.ficha{ font-weight:700 }
+.captura{ border-radius:18px; padding:6px 6px 6px 16px }
+.captura input{ font-size:15.5px }
+.hoja-flot{ border-radius:26px 26px 0 0 }
+@media (min-width:640px){ .hoja-flot{ border-radius:26px } }
+.hoja-flot .cab h3{ font-size:19px; font-weight:800; letter-spacing:-.03em }
+
+/* Cuenta regresiva */
+.regresivas{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; padding:4px 16px 16px }
+.regresiva{ position:relative; overflow:hidden; text-align:left; padding:14px; border-radius:18px; display:flex; flex-direction:column; gap:2px;
+  background:linear-gradient(150deg, color-mix(in srgb, var(--c) 28%, var(--hoja-2)), var(--hoja-2)); border:1px solid color-mix(in srgb, var(--c) 40%, var(--regla)) }
+.regresiva b{ font-size:34px; font-weight:800; letter-spacing:-.05em; line-height:1; color:var(--tinta) }
+.regresiva small{ font-size:12px; font-weight:700; color:var(--c); margin-bottom:6px }
+.regresiva span{ font-size:13.5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.regresiva em{ font-style:normal; font-size:11.5px; color:var(--tinta-3) }
+
+/* Horario de clases */
+.horario{ display:grid; gap:6px; padding:4px 12px 14px; overflow-x:auto }
+.hor-col{ display:flex; flex-direction:column; gap:6px; min-width:84px }
+.hor-col > b{ font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--tinta-3); text-align:center; padding:4px 0; border-radius:8px }
+.hor-col.hoy > b{ background:var(--esp-estudios); color:#0B1020 }
+.hor-clase{ text-align:left; padding:8px; border-radius:12px; display:flex; flex-direction:column; gap:1px; border-left:3px solid var(--t); background:color-mix(in srgb, var(--t) 16%, var(--hoja-2)) }
+.hor-clase small{ font-size:10.5px; font-weight:700; color:var(--tinta-2); font-variant-numeric:tabular-nums }
+.hor-clase span{ font-size:12.5px; font-weight:750; line-height:1.25 }
+.hor-clase em{ font-style:normal; font-size:10.5px; color:var(--tinta-3) }
+.tono0{ --t:var(--esp-estudios) } .tono1{ --t:var(--esp-personal) } .tono2{ --t:var(--esp-oficina) } .tono3{ --t:var(--esp-deporte) } .tono4{ --t:var(--rosa) }
+
+/* Rutinas y récords */
+.hoy-toca{ padding:0 16px 8px; display:flex; flex-direction:column; gap:6px }
+.hoy-toca-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:14px; background:color-mix(in srgb, var(--esp-deporte) 14%, var(--hoja-2)); border:1px solid color-mix(in srgb, var(--esp-deporte) 40%, var(--regla)); font-size:13px }
+.hoy-toca-item span{ flex:1; min-width:0 }
+.records{ padding:6px 16px 16px; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:8px }
+.records-tit{ grid-column:1 / -1; font-size:12.5px; color:var(--tinta-2) }
+.record{ padding:10px 12px; border-radius:14px; background:var(--hoja-2); border:1px solid var(--regla); display:flex; flex-direction:column; min-width:0 }
+.record span{ font-size:12px; color:var(--tinta-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.record b{ font-size:19px; font-weight:800; letter-spacing:-.03em; font-variant-numeric:tabular-nums }
+.record small{ font-size:11px; color:var(--haber); font-weight:700 }
+.ej-cab, .fila-ej{ display:grid; grid-template-columns:minmax(0,2.2fr) minmax(0,.8fr) minmax(0,.8fr) minmax(0,.9fr) 34px; gap:6px; align-items:center }
+.ej-cab span{ font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--tinta-3) }
+.fila-ej input{ height:38px; padding:0 8px; border-radius:10px; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); min-width:0; font-variant-numeric:tabular-nums }
