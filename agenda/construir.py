@@ -26,7 +26,6 @@ cuentas = base64.b64encode(leer('../libro-de-cuentas/index.html', 'rb')).decode(
 
 png192  = 'data:image/png;base64,' + b64('icon-192.png')
 png512  = 'data:image/png;base64,' + b64('icon-512.png')
-mask192 = 'data:image/png;base64,' + b64('icon-maskable-192.png')
 mask512 = 'data:image/png;base64,' + b64('icon-maskable-512.png')
 apple   = 'data:image/png;base64,' + b64('apple-touch-icon.png')
 svguri  = 'data:image/svg+xml,' + urllib.parse.quote(' '.join(svg.split()), safe=' =:/";,')
@@ -34,7 +33,6 @@ svguri  = 'data:image/svg+xml,' + urllib.parse.quote(' '.join(svg.split()), safe
 iconos = json.dumps([
     {"src": png192,  "sizes": "192x192", "type": "image/png", "purpose": "any"},
     {"src": png512,  "sizes": "512x512", "type": "image/png", "purpose": "any"},
-    {"src": mask192, "sizes": "192x192", "type": "image/png", "purpose": "maskable"},
     {"src": mask512, "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
 ])
 
@@ -97,7 +95,8 @@ cabeza = f'''<!DOCTYPE html>
 </script>
 '''
 
-html = (cabeza + '<style>\n' + css + '</style>\n</head>\n<body>\n' + cuerpo +
+logo_css = ':root{ --logo:url("' + 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode()).decode() + '") }\n'
+html = (cabeza + '<style>\n' + logo_css + css + '</style>\n</head>\n<body>\n' + cuerpo +
         '\n<!-- El Libro de Cuentas entero, en base64 (se abre en la sección Cuentas) -->\n'
         '<script type="application/octet-stream" id="fuenteCuentas">' + cuentas + '</script>\n'
         '<script>\n' + app + '</script>\n</body>\n</html>\n')

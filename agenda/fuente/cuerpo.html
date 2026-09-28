@@ -31,18 +31,6 @@
   <symbol id="i-diana" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/></symbol>
   <symbol id="i-dormir" viewBox="0 0 24 24"><path d="M5 4h6l-6 7h6M13 12h6l-6 8h6"/></symbol>
   <symbol id="i-instalar" viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 8v6M9.5 11.5 12 14l2.5-2.5M10.5 18.5h3"/></symbol>
-  <symbol id="marca" viewBox="0 0 512 512">
-    <defs>
-      <linearGradient id="mg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B7BFF"/><stop offset=".55" stop-color="#5B4CF0"/><stop offset="1" stop-color="#3A2FC4"/></linearGradient>
-      <linearGradient id="mok" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3DDC97"/><stop offset="1" stop-color="#1FB57A"/></linearGradient>
-    </defs>
-    <rect width="512" height="512" rx="116" fill="url(#mg)"/>
-    <rect x="112" y="136" width="288" height="262" rx="52" fill="#FFFFFF"/>
-    <path d="M112 188 a52 52 0 0 1 52 -52 h184 a52 52 0 0 1 52 52 v28 h-288 z" fill="#FF6B81"/>
-    <rect x="178" y="100" width="34" height="76" rx="17" fill="#FFFFFF" stroke="#5B4CF0" stroke-width="10"/>
-    <rect x="300" y="100" width="34" height="76" rx="17" fill="#FFFFFF" stroke="#5B4CF0" stroke-width="10"/>
-    <path d="M188 306 L236 352 L326 258" fill="none" stroke="url(#mok)" stroke-width="38" stroke-linecap="round" stroke-linejoin="round"/>
-  </symbol>
   <symbol id="i-meta" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
   <symbol id="i-recibo" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 17.5v-11"/></symbol>
   <symbol id="i-diario" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M9 7h7M9 11h5"/></symbol>
@@ -59,7 +47,7 @@
 <div class="app">
   <aside class="lateral" aria-label="Secciones">
     <div class="marca">
-      <svg viewBox="0 0 512 512"><use href="#marca"/></svg>
+      <i class="logo-img" aria-hidden="true"></i>
       <div><b>Agenda</b><small id="marcaNombre">Mi organización</small></div>
     </div>
     <nav class="nav-lat" id="navLat"></nav>
@@ -71,7 +59,7 @@
   <div class="principal">
     <header class="cabecera">
       <button type="button" class="btn-icono solo-movil" id="btnMarcaMovil" data-ir="hoy" aria-label="Ir a Hoy" style="width:34px">
-        <svg viewBox="0 0 512 512" style="width:30px;height:30px"><use href="#marca"/></svg>
+        <i class="logo-img" style="width:32px;height:32px" aria-hidden="true"></i>
       </button>
       <h1 id="tituloVista">Hoy</h1>
       <div class="acciones">
@@ -98,13 +86,13 @@
 
 <!-- Pantalla de entrada: el logo un instante al abrir la aplicación -->
 <div class="portada" id="portada" aria-hidden="true">
-  <svg viewBox="0 0 512 512"><use href="#marca"/></svg>
+  <i class="logo-img"></i>
   <b>Agenda</b>
 </div>
 
 <!-- Candado: si pusiste PIN, nada se ve hasta escribirlo -->
 <div class="candado oculto" id="candado" role="dialog" aria-modal="true" aria-label="Agenda bloqueada">
-  <svg class="logo" viewBox="0 0 512 512"><use href="#marca"/></svg>
+  <i class="logo-img logo" aria-hidden="true"></i>
   <b id="candadoTitulo">Escribe tu PIN</b>
   <div class="puntos-pin" id="puntosPin"></div>
   <div class="teclado" id="teclado"></div>
