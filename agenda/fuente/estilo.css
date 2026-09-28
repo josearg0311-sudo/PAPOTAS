@@ -1161,3 +1161,171 @@ h1, h2, h3, .heroe h2, .tarjeta-cab h2{ font-family:var(--letra); text-wrap:bala
 .ej-cab, .fila-ej{ display:grid; grid-template-columns:minmax(0,2.2fr) minmax(0,.8fr) minmax(0,.8fr) minmax(0,.9fr) 34px; gap:6px; align-items:center }
 .ej-cab span{ font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--tinta-3) }
 .fila-ej input{ height:38px; padding:0 8px; border-radius:10px; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); min-width:0; font-variant-numeric:tabular-nums }
+
+/* ==========================================================================
+   CADA ESPACIO CON SU PERSONALIDAD
+   Deporte es una cancha con marcador, Estudios una pizarra y un cuaderno,
+   Oficina un despacho sobrio y Personal una casa cálida. El body lleva
+   data-esp con el espacio abierto.
+   ========================================================================== */
+.heroe .deco{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:0 }
+.heroe.esp-heroe .arriba, .heroe.esp-heroe .datos{ position:relative; z-index:1 }
+.heroe.esp-heroe[class*="tema-"]::after{ display:none }
+
+/* ----- Deporte: la cancha --------------------------------------------------- */
+body[data-esp="deporte"]{ --verde-piso:color-mix(in srgb, var(--esp-deporte) 16%, transparent) }
+.heroe.tema-deporte{
+  background:
+    linear-gradient(180deg, rgba(0,0,0,.05), rgba(0,0,0,.38)),
+    repeating-linear-gradient(90deg, #15803D 0 44px, #178a43 44px 88px);
+  box-shadow:0 18px 40px rgba(21,128,61,.35), inset 0 0 0 1px rgba(255,255,255,.12);
+}
+.heroe.tema-deporte .deco{ opacity:.3 }
+.heroe.tema-deporte h2{ font-style:italic; text-transform:uppercase; letter-spacing:.01em; font-weight:900 }
+.heroe.tema-deporte .dato{ background:rgba(0,0,0,.28); border-color:rgba(255,255,255,.18) }
+.heroe.tema-deporte .dato b{ font-family:var(--cifra); color:#FDE047 }
+body[data-esp="deporte"] .tarjeta{ border-top:3px solid var(--esp-deporte) }
+body[data-esp="deporte"] .tarjeta-cab h2{ text-transform:uppercase; font-style:italic; font-weight:850; letter-spacing:.02em; font-size:14px }
+body[data-esp="deporte"] .azulejo{ border-radius:50%; background:var(--esp-deporte); color:#06281A }
+body[data-esp="deporte"] .resumen-dep b{ font-family:var(--cifra); color:var(--esp-deporte) }
+
+.marcador{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin:4px 16px 0; padding:10px;
+  border-radius:14px; background:linear-gradient(180deg, #0B0F0C, #151B17); border:1px solid #2A332D;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.6);
+}
+.marcador div{ text-align:center; padding:6px 0; border-radius:9px; background:#050706; border:1px solid #1D241F; min-width:0 }
+.marcador b{ display:block; font-family:var(--cifra); font-size:26px; line-height:1.1; font-weight:800; color:#FDE047; text-shadow:0 0 12px rgba(253,224,71,.55) }
+.marcador small{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#8FA398 }
+.ved{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:10px 16px 6px; font-size:12px; font-weight:700 }
+.ved > span:not(.forma){ padding:4px 9px; border-radius:99px; background:var(--hoja-2); border:1px solid var(--regla) }
+.ved .v{ color:var(--haber) } .ved .d{ color:var(--debe) } .ved .e{ color:var(--tinta-2) }
+.forma{ margin-left:auto; display:flex; gap:4px }
+.forma i, .res-chip{
+  width:24px; height:24px; border-radius:50%; display:grid; place-items:center; flex:none;
+  font-style:normal; font-size:11px; font-weight:900; color:#fff; background:var(--tinta-3)
+}
+.res-chip{ width:32px; height:32px; font-size:13px }
+.forma i.v, .res-chip.v{ background:#16A34A } .forma i.e, .res-chip.e{ background:#64748B } .forma i.d, .res-chip.d{ background:#DC2626 }
+.partido-campos{ display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:14px; background:color-mix(in srgb, var(--esp-deporte) 8%, var(--hoja-2)); border:1px dashed color-mix(in srgb, var(--esp-deporte) 45%, transparent) }
+
+/* ----- Estudios: la pizarra y el cuaderno ------------------------------------ */
+.heroe.tema-estudios{
+  background:
+    radial-gradient(260px 120px at 20% 30%, rgba(255,255,255,.07), transparent 70%),
+    radial-gradient(300px 140px at 80% 80%, rgba(255,255,255,.05), transparent 70%),
+    linear-gradient(160deg, #24453A, #1A332B 60%, #142821);
+  border:7px solid #8A5A34; border-bottom-width:12px;
+  box-shadow:0 18px 40px rgba(20,40,33,.4), inset 0 0 40px rgba(0,0,0,.35);
+}
+.heroe.tema-estudios h2, .heroe.tema-estudios .frase{ font-family:Georgia, "Times New Roman", serif }
+.heroe.tema-estudios h2{ font-weight:700; letter-spacing:0; text-shadow:0 0 1px rgba(255,255,255,.6) }
+.heroe.tema-estudios .dato{ background:rgba(255,255,255,.08); border:1px dashed rgba(255,255,255,.35); backdrop-filter:none; -webkit-backdrop-filter:none }
+.tiza span{
+  position:absolute; white-space:nowrap; font-family:Georgia, "Times New Roman", serif; font-style:italic;
+  font-size:clamp(13px, 2.6vw, 19px); color:rgba(255,255,255,.2); transform:rotate(-6deg)
+}
+.tiza span:nth-child(2n){ transform:rotate(4deg) }
+@media (max-width:600px){ .tiza span:nth-child(2), .tiza span:nth-child(3){ display:none } }
+body[data-esp="estudios"] .tarjeta{
+  background-image:linear-gradient(90deg, transparent 26px, color-mix(in srgb, #EF4444 30%, transparent) 26px 27.5px, transparent 27.5px);
+  background-color:var(--hoja);
+}
+body[data-esp="estudios"] .tarjeta-cab{ padding-left:36px }
+body[data-esp="estudios"] .tarjeta-cab h2{ font-family:Georgia, "Times New Roman", serif; font-weight:700; font-size:16.5px; letter-spacing:0 }
+body[data-esp="estudios"] .lista-filas .fila{ padding-left:36px }
+body[data-esp="estudios"] .azulejo{ border-radius:6px; transform:rotate(-4deg) }
+body[data-esp="estudios"] .curso-ico{ font-family:Georgia, serif; font-size:17px }
+.curso-extra{ margin-top:4px }
+.necesita, .faltas{ display:inline-flex; align-items:center; padding:2px 8px; border-radius:99px; font-size:11.5px; font-weight:750; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-2) }
+.necesita.ok{ color:var(--haber); border-color:color-mix(in srgb, var(--haber) 40%, transparent); background:color-mix(in srgb, var(--haber) 10%, transparent) }
+.necesita.ojo, .faltas.ojo{ color:var(--oro); border-color:color-mix(in srgb, var(--oro) 45%, transparent); background:color-mix(in srgb, var(--oro) 10%, transparent) }
+.necesita.mal, .faltas.mal{ color:var(--debe); border-color:color-mix(in srgb, var(--debe) 45%, transparent); background:color-mix(in srgb, var(--debe) 10%, transparent) }
+.falta-btn{ font-family:var(--cifra); font-size:12px !important; font-weight:800; color:var(--tinta-3) }
+.falta-btn:hover{ color:var(--debe) }
+
+/* ----- Oficina: el despacho ------------------------------------------------- */
+.heroe.tema-oficina{
+  background:
+    linear-gradient(rgba(255,255,255,.045) 1px, transparent 1px) 0 0/22px 22px,
+    linear-gradient(90deg, rgba(255,255,255,.045) 1px, transparent 1px) 0 0/22px 22px,
+    linear-gradient(135deg, #1E3A5F, #0F1F38 60%, #0A1528);
+  border-bottom:4px solid #F2B34B; border-radius:16px;
+  box-shadow:0 18px 40px rgba(10,21,40,.4);
+}
+.heroe.tema-oficina .deco{ opacity:.13 }
+.heroe .deco.deco-der{ left:auto; right:14px; top:auto; bottom:0; width:auto; height:88%; aspect-ratio:170/184 }
+.heroe.tema-oficina .fecha{ color:#F2B34B; opacity:1 }
+.heroe.tema-oficina h2{ font-weight:750; letter-spacing:-.02em }
+.heroe.tema-oficina .dato{ border-radius:8px; background:rgba(255,255,255,.07); border-color:rgba(242,179,75,.3) }
+.heroe.tema-oficina .dato b{ font-family:var(--cifra); color:#F2B34B }
+body[data-esp="oficina"] .tarjeta{ border-radius:12px; box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 8px 22px rgba(0,0,0,.14) }
+body[data-esp="oficina"] .tarjeta-cab{ border-bottom:1px solid var(--regla); padding-bottom:11px; margin-bottom:4px }
+body[data-esp="oficina"] .tarjeta-cab h2{ font-size:12.5px; font-weight:800; text-transform:uppercase; letter-spacing:.09em; color:var(--tinta-2) }
+body[data-esp="oficina"] .azulejo{ border-radius:7px; width:28px; height:28px }
+body[data-esp="oficina"] .tarjeta-cab .mas{ border-radius:7px }
+body[data-esp="oficina"] .cambia-esp, body[data-esp="oficina"] .captura{ border-radius:12px }
+.cronometro{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:14px;
+  border-radius:12px; background:linear-gradient(135deg, #0F1F38, #1A2E4F); color:#fff; border:1px solid rgba(242,179,75,.25)
+}
+.cronometro small{ display:block; font-size:11px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; color:#AFC0D8 }
+.cronometro b{ display:block; font-family:var(--cifra); font-size:32px; font-weight:800; letter-spacing:-.02em; line-height:1.15; font-variant-numeric:tabular-nums }
+.cronometro.andando b{ color:#F2B34B }
+.cronometro.andando small::before{ content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:#EF4444; margin-right:6px; animation:parpadeo 1.2s infinite }
+@keyframes parpadeo{ 50%{ opacity:.2 } }
+.reloj-form{ display:flex; gap:8px; flex:1 1 240px; min-width:0 }
+.reloj-form .entrada{ flex:1; min-width:0; background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:#fff }
+.reloj-form .entrada::placeholder{ color:#8FA3C0 }
+
+/* ----- Personal: la casa ---------------------------------------------------- */
+.heroe.tema-personal{
+  background:linear-gradient(125deg, #F59E7A 0%, #E57AA6 45%, #9F7AEA 100%);
+  border-radius:28px; box-shadow:0 18px 44px rgba(229,122,166,.32);
+}
+.heroe.tema-personal .dato{ border-radius:99px; background:rgba(255,255,255,.2) }
+.burbujas i{ position:absolute; border-radius:50%; background:radial-gradient(circle at 35% 35%, rgba(255,255,255,.55), rgba(255,255,255,.08) 70%); animation:flotar 9s ease-in-out infinite }
+.burbujas i:nth-child(1){ width:120px; height:120px; right:-20px; top:-30px }
+.burbujas i:nth-child(2){ width:60px; height:60px; right:26%; bottom:-14px; animation-delay:-3s }
+.burbujas i:nth-child(3){ width:34px; height:34px; right:14%; top:40%; animation-delay:-5s }
+.burbujas i:nth-child(4){ width:22px; height:22px; left:48%; top:12%; animation-delay:-2s }
+.burbujas i:nth-child(5){ width:80px; height:80px; right:40%; top:-40px; opacity:.6; animation-delay:-7s }
+@keyframes flotar{ 50%{ transform:translateY(-10px) scale(1.05) } }
+@media (prefers-reduced-motion:reduce){ .burbujas i{ animation:none } }
+body[data-esp="personal"] .tarjeta{ border-radius:26px; box-shadow:0 10px 30px color-mix(in srgb, #E57AA6 10%, transparent) }
+body[data-esp="personal"] .azulejo{ border-radius:50% }
+body[data-esp="personal"] .tarjeta-cab h2{ font-weight:800 }
+body[data-esp="personal"] .captura, body[data-esp="personal"] .cambia-esp{ border-radius:22px }
+
+.bien-fila{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13.5px; font-weight:650 }
+.bien-fila b{ font-family:var(--cifra); font-size:13px }
+.vasos{ display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px; margin-top:8px }
+.vaso{
+  height:44px; border-radius:10px 10px 14px 14px; display:grid; place-items:center;
+  border:1.5px solid color-mix(in srgb, #38BDF8 40%, var(--regla)); background:var(--hoja-2); color:color-mix(in srgb, #38BDF8 55%, var(--tinta-3));
+  transition:background .2s, transform .15s
+}
+.vaso svg{ width:18px; height:18px }
+.vaso.lleno{ background:linear-gradient(180deg, #7DD3FC, #0EA5E9); border-color:#0EA5E9; color:#fff }
+.vaso.lleno svg{ fill:rgba(255,255,255,.5) }
+.vaso:active{ transform:scale(.92) }
+.sueno-sel{ display:flex; gap:4px }
+.sueno-sel button{ padding:5px 9px; border-radius:99px; font-size:12px; font-weight:750; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-2) }
+.sueno-sel button[aria-pressed="true"]{ background:#6366F1; border-color:#6366F1; color:#fff }
+.sueno-semana{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; height:74px; margin-top:12px; align-items:end }
+.sueno-dia{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px }
+.sueno-dia i{ width:100%; max-width:26px; border-radius:7px 7px 3px 3px; background:color-mix(in srgb, #6366F1 45%, var(--hoja-2)) }
+.sueno-dia i.bien{ background:linear-gradient(180deg, #A5B4FC, #6366F1) }
+.sueno-dia i.poco{ background:linear-gradient(180deg, #FCA5A5, #EF4444) }
+.sueno-dia small{ font-size:10.5px; font-weight:750; color:var(--tinta-3) }
+.sueno-dia.hoy small{ color:var(--tinta) }
+.bien-pie{ display:block; margin-top:8px; font-size:12.5px; color:var(--tinta-3) }
+.compras{ display:flex; flex-wrap:wrap; gap:6px; padding:4px 16px 12px }
+.compra{
+  padding:7px 12px; border-radius:99px; font-size:13px; font-weight:650; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta);
+  transition:opacity .25s, transform .25s
+}
+.compra::before{ content:"○ "; color:var(--tinta-3) }
+.compra:hover{ border-color:var(--esp-personal) }
+.compra.comprado{ opacity:.35; text-decoration:line-through; transform:scale(.94) }
+.compra.comprado::before{ content:"✓ "; color:var(--haber) }

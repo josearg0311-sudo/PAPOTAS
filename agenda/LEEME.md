@@ -17,6 +17,15 @@ Todo (tareas, eventos, recordatorios, notas, listas, hábitos, metas y pagos) pe
 | 💼 **Oficina** | **Reuniones** de la semana, **cobros pendientes** de clientes (al cobrar, el ingreso se anota solo en el libro de la oficina), pagos y cuentas de la oficina. |
 | ⚽ **Deporte** | **Entrenamientos** con un toque (fútbol, gym, correr, bici, nadar), horas y sesiones de los últimos 7 días, **semanas seguidas activo**, **partidos** con resultado, **peso** con su gráfica y lo que gastas en deporte. |
 
+Cada espacio tiene además **su propio estilo** y lo suyo:
+
+| Espacio | Cómo se ve | Qué trae de propio |
+|---|---|---|
+| 🏠 **Personal** | Cálido: degradado melocotón y lila, burbujas, tarjetas redondas. | **Agua** (8 vasos al día, con un toque) y **sueño** (horas y tu semana), **lista de compras** para tachar con un toque o añadir sin salir, **fechas importantes** (cumpleaños y aniversarios con cuenta atrás). |
+| 🎓 **Estudios** | Pizarra con marco de madera y fórmulas en tiza; tarjetas de cuaderno con margen rojo y títulos con serifa. | **Nota que necesitas** en lo que falta para aprobar (con pesos que sumen 100 %), **faltas** por curso con su límite y botón −1 para anotar una falta. |
+| 💼 **Oficina** | Despacho: azul marino con cuadrícula, línea dorada y gráfica de fondo, tarjetas sobrias. | **Cronómetro de horas por cliente**: empiezas, paras y queda anotado. Horas de hoy y de la semana, **facturable del mes** según la tarifa por hora y reparto por cliente. |
+| ⚽ **Deporte** | Una cancha con sus líneas; títulos en cursiva deportiva. | **Tus números en la cancha**: marcador con partidos jugados, goles, asistencias y goles por partido, ganados/empatados/perdidos y tu racha de los últimos 5. Al editar un partido marca "Ya lo jugué". |
+
 En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mandan a ese espacio (también entiende `#trabajo`, `#gym`, `#futbol`, `#uni`…). El Calendario y las Tareas se pueden filtrar por espacio.
 
 ### Para organizarte a fondo

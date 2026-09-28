@@ -19,7 +19,7 @@ var CLAVE_TEMA     = 'libro_cuentas_tema';
 var CLAVE_PALETA   = 'cuentas_paleta';
 var JSONBIN        = 'https://api.jsonbin.io/v3/b';
 var MONEDA         = 'S/';
-var COLS = ['tareas','listas','eventos','recordatorios','habitos','notas','enfoque','metas','pagos','diario','cursos','entrenos','medidas','cobros','proyectos','revisiones','deudas','rutinas'];
+var COLS = ['tareas','listas','eventos','recordatorios','habitos','notas','enfoque','metas','pagos','diario','cursos','entrenos','medidas','cobros','proyectos','revisiones','deudas','rutinas','bienestar','horas'];
 
 var $ = function(id){ return document.getElementById(id); };
 
@@ -507,6 +507,7 @@ function pintar(){
   $('tituloVista').textContent = v === 'ajustes' ? 'Ajustes' : (v === 'listas' && ui.lista ? (listaActual() || {}).nombre || 'Listas' : (sec.esp ? espInfo(sec.esp).em + ' ' : '') + sec.nom);
   if(!foco.fin) document.title = (v === 'hoy' ? 'Agenda' : $('tituloVista').textContent + ' · Agenda');
   document.body.classList.toggle('en-cuentas', esLibro(v));
+  document.body.dataset.esp = sec && sec.esp ? sec.esp : '';
 
   if(esLibro(v)){
     $('contenido').classList.add('oculto');
@@ -991,7 +992,9 @@ function editarCurso(id){
         '<button type="button" class="btn chico" data-ed="clase-add" style="align-self:flex-start;margin-top:4px">' + ico('i-plus') + 'Otra clase</button>') +
       grupo('Notas del curso (sobre 20)', '<div id="notasCurso" class="clases">' + (c.notas || []).map(filaNota).join('') + '</div>' +
         '<button type="button" class="btn chico" data-ed="nota-add" style="align-self:flex-start;margin-top:4px">' + ico('i-plus') + 'Añadir nota</button>' +
-        '<small style="color:var(--tinta-3)">Nombre de la evaluación, nota y peso en %. Si no pones pesos, cuentan igual.</small>') +
+        '<small style="color:var(--tinta-3)">Nombre de la evaluación, nota y peso en %. Si no pones pesos, cuentan igual. Con pesos que sumen 100, te digo cuánto necesitas en lo que falta para aprobar.</small>') +
+      '<div class="fila-campos">' + campo('Faltas que llevas', '<input name="fa" inputmode="numeric" value="' + esc(c.faltas || '') + '" placeholder="0">') +
+        campo('Máximo de faltas permitidas', '<input name="mf" inputmode="numeric" value="' + esc(c.maxFaltas || '') + '" placeholder="Ej. 6 (30%)">') + '</div>' +
       '<div class="fila-campos">' + campo('Empieza el', '<input type="date" name="i" value="' + esc(c.inicio) + '">') +
         campo('Termina el', '<input type="date" name="f" value="' + esc(c.fin) + '">') + '</div>' +
       '<small style="color:var(--tinta-3)">Las clases aparecen solas en el calendario y en Estudios, cada semana, entre esas fechas.</small>' +
@@ -1003,6 +1006,7 @@ function editarCurso(id){
     ev.preventDefault();
     c.nombre = f.n.value.trim(); if(!c.nombre) return;
     c.prof = f.p.value.trim(); c.aula = f.a.value.trim(); c.inicio = f.i.value; c.fin = f.f.value;
+    c.faltas = parseInt(f.fa.value, 10) || 0; c.maxFaltas = parseInt(f.mf.value, 10) || 0;
     c.clases = [].slice.call(document.querySelectorAll('#clases .fila-clase')).map(function(r){
       var s = r.querySelectorAll('select,input');
       return { d:+s[0].value, ini:s[1].value, fin:s[2].value };
@@ -1152,6 +1156,14 @@ function dineroEsp(id){
   return { libro:'personal', cat:'', lista:todo };
 }
 
+/* Adorno de fondo del saludo de cada espacio: la cancha, la pizarra,
+   la oficina y la casa */
+var DECO_ESP = {
+  deporte:'<svg class="deco" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="2.5"><rect x="8" y="8" width="384" height="184" rx="4"/><path d="M200 8v184"/><circle cx="200" cy="100" r="36"/><rect x="8" y="52" width="58" height="96"/><rect x="8" y="78" width="22" height="44"/><rect x="334" y="52" width="58" height="96"/><rect x="370" y="78" width="22" height="44"/><path d="M66 78a26 26 0 0 1 0 44M334 78a26 26 0 0 0 0 44"/></g><circle cx="200" cy="100" r="3.5" fill="#fff"/></svg>',
+  estudios:'<div class="deco tiza" aria-hidden="true"><span style="left:52%;top:14%">∫ x² dx = x³⁄3</span><span style="left:70%;top:52%">a² + b² = c²</span><span style="left:46%;top:70%">E = mc²</span><span style="left:84%;top:22%">π ≈ 3,14</span></div>',
+  oficina:'<svg class="deco deco-der" viewBox="226 16 170 184" preserveAspectRatio="xMaxYMax meet" aria-hidden="true"><g fill="#fff"><rect x="250" y="120" width="18" height="80" rx="2"/><rect x="276" y="95" width="18" height="105" rx="2"/><rect x="302" y="105" width="18" height="95" rx="2"/><rect x="328" y="70" width="18" height="130" rx="2"/><rect x="354" y="45" width="18" height="155" rx="2"/></g><path d="M236 128 285 92 311 102 337 66 386 30" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="m372 26 14 4-4 14" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  personal:'<div class="deco burbujas" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>'
+};
 VISTAS.espacio = function(id){
   var E = espInfo(id), hoy = hoyISO(), ym = hoy.slice(0, 7);
   ui.espUlt = id;
@@ -1166,7 +1178,7 @@ VISTAS.espacio = function(id){
   }).join('') + '</div>';
 
   var prox = ag7.filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
-  html += '<section class="heroe esp-heroe" style="--ec:' + E.c + '"><div class="arriba"><div>' +
+  html += '<section class="heroe esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' + DECO_ESP[id] + '<div class="arriba"><div>' +
       '<div class="fecha">' + E.em + ' ' + cap(fechaLarga(hoy)) + '</div>' +
       '<h2>' + E.nom + '</h2><p class="frase" style="font-style:normal">' +
       (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p></div></div>' +
@@ -1283,7 +1295,7 @@ var MODULOS = {
     var hoy = hoyISO(), d = buscarId('diario', hoy), an = d && !d.del ? d.animo : 0;
     var pp = pagosProximos(10).filter(function(x){ return espDe(x.p) === 'personal'; });
     return '<section class="tarjeta">' + cabTarjeta('i-diario', '¿Cómo te sientes hoy?', 'var(--rosa)', 'Diario', 'data-ir="diario"') +
-        '<div class="tarjeta-cuerpo">' + animosHTML(an, hoy) + '</div></section>' + tarjetaPrestamos() +
+        '<div class="tarjeta-cuerpo">' + animosHTML(an, hoy) + '</div></section>' + tarjetaBienestar() + tarjetaCompras() + tarjetaFechas() + tarjetaPrestamos() +
       (pp.length ? '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos que vienen', 'var(--debe)', 'Pagos', 'data-ir="pagos"') +
         '<div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>' : '');
   },
@@ -1305,7 +1317,9 @@ var MODULOS = {
           var p = proximaClase(c);
           return '<div class="fila"><span class="curso-ico">' + esc((c.nombre || '?').charAt(0).toUpperCase()) + '</span><div class="cuerpo" data-acc="curso-ed" data-id="' + c.id + '"><div class="titulo">' + esc(c.nombre) + ' ' + chipNota(promedioCurso(c)) + '</div>' +
             '<div class="meta">' + (p ? '<span class="' + (p.dia === hoyISO() ? 'hoy' : '') + '">' + ico('i-reloj') + cap(relativo(p.dia)) + ' ' + p.k.ini + (p.k.fin ? '–' + p.k.fin : '') + '</span>' : '<span>Sin clases próximas</span>') +
-            (c.aula ? '<span>' + ico('i-lugar') + esc(c.aula) + '</span>' : '') + (c.prof ? '<span>' + esc(c.prof) + '</span>' : '') + '</div></div></div>';
+            (c.aula ? '<span>' + ico('i-lugar') + esc(c.aula) + '</span>' : '') + (c.prof ? '<span>' + esc(c.prof) + '</span>' : '') + '</div>' +
+            (textoNecesaria(c) || textoFaltas(c) ? '<div class="meta curso-extra">' + textoNecesaria(c) + textoFaltas(c) + '</div>' : '') + '</div>' +
+            '<div class="lado"><button class="btn-icono falta-btn" data-acc="curso-falta" data-id="' + c.id + '" title="Anotar una falta" aria-label="Anotar una falta">−1</button></div></div>';
         }).join('') + '</div>' : vacio('📚', 'Añade tus cursos', 'Pon su horario y las clases saldrán solas en el calendario.')) + '</section>' +
       '<section class="tarjeta">' + cabTarjeta('i-diana', 'Próximos exámenes', 'var(--debe)', 'Nuevo examen', 'data-acc="nuevo-examen"') +
         (ex.length ? '<div class="lista-filas">' + ex.slice(0, 5).map(function(x){
@@ -1330,7 +1344,7 @@ var MODULOS = {
       }).join('') + '</div><p style="margin:0;padding:0 16px 12px;font-size:12px;color:var(--tinta-3)">Al marcarlo como cobrado se anota solo como ingreso en el libro de la oficina.</p>'
        : '<div class="vacio" style="padding-top:4px">Nadie te debe nada. 👌 Apunta aquí lo que te deben tus clientes.</div>') + '</section>';
     var pp = pagosProximos(15).filter(function(x){ return espDe(x.p) === 'oficina'; });
-    return cobros + '<section class="tarjeta">' + cabTarjeta('i-maletin', 'Reuniones de la semana', 'var(--esp-oficina)', 'Nueva reunión', 'data-acc="nuevo-reunion"') +
+    return tarjetaHoras() + cobros + '<section class="tarjeta">' + cabTarjeta('i-maletin', 'Reuniones de la semana', 'var(--esp-oficina)', 'Nueva reunión', 'data-acc="nuevo-reunion"') +
         (re.length ? '<div class="lista-filas">' + re.slice(0, 6).map(function(x){
           return '<div class="fila"><span class="hora" style="width:70px">' + (x.e.todo ? cuenta(x.en) : (x.en ? relativo(x.dia).slice(0, 3) + ' ' : '') + x.e.ini) + '</span><span class="barrita" style="--c:var(--esp-oficina)"></span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">' + esc(x.e.t) + '</div><div class="meta"><span>' + cuenta(x.en) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + '</div></div></div>';
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin reuniones esta semana.</div>') + '</section>' +
@@ -1374,6 +1388,7 @@ var MODULOS = {
         (pa.length ? '<div class="lista-filas">' + pa.slice(0, 4).map(function(x){
           return '<div class="fila"><span class="cuenta-atras"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">⚽ ' + esc(x.e.t) + '</div><div class="meta"><span>' + cap(relativo(x.dia)) + (x.e.todo ? '' : ' · ' + x.e.ini) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + '</div></div></div>';
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin partidos programados. ¿Armamos una pichanga?</div>') + '</section>' +
+      tarjetaFutbol() +
       '<section class="tarjeta">' + cabTarjeta('i-grafica', 'Peso', 'var(--esp-deporte)') +
         '<div class="tarjeta-cuerpo"><div class="peso-fila"><div class="peso-actual"><b>' + (ultP ? formNum(+ultP.peso) + ' kg' : '—') + '</b>' +
           (ultP && antP ? '<small class="' + (+ultP.peso <= +antP.peso ? 'baja' : 'sube') + '">' + (+ultP.peso - +antP.peso > 0 ? '+' : '') + formNum(+ultP.peso - +antP.peso) + ' kg desde el ' + fechaCorta(antP.id) + '</small>' : '<small>Anota tu peso de vez en cuando</small>') + '</div>' +
@@ -1770,6 +1785,175 @@ function tarjetaCuentas(){
 var mqOscuro = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 function temaSegunSistema(){ return mqOscuro && !mqOscuro.matches ? 'claro' : 'oscuro'; }
 if(mqOscuro && mqOscuro.addEventListener) mqOscuro.addEventListener('change', function(){ if(pref.temaAuto) aplicarTema(temaSegunSistema(), true); });
+
+/* ==========================================================================
+   LO PROPIO DE CADA ESPACIO, SEGUNDA TANDA
+   ========================================================================== */
+
+/* ---------- Personal: agua, sueño, fechas importantes y la compra --------- */
+var META_AGUA = 8;
+function bienestar(dia){ var b = buscarId('bienestar', dia); return b && !b.del ? b : { id:dia, agua:0, sueno:'' }; }
+function tarjetaBienestar(){
+  var hoy = hoyISO(), b = bienestar(hoy), dias = [];
+  for(var i = 6; i >= 0; i--){ var d = sumarDias(hoy, -i); dias.push({ d:d, b:bienestar(d) }); }
+  var suenos = dias.filter(function(x){ return +x.b.sueno; });
+  var media = suenos.length ? suenos.reduce(function(a, x){ return a + +x.b.sueno; }, 0) / suenos.length : 0;
+  var vasos = '';
+  for(var v = 1; v <= META_AGUA; v++) vasos += '<button type="button" class="vaso' + (v <= b.agua ? ' lleno' : '') + '" data-acc="agua" data-v="' + v + '" aria-label="' + v + ' vasos">' + ico('i-gota') + '</button>';
+  return '<section class="tarjeta">' + cabTarjeta('i-gota', 'Agua y sueño', 'var(--azul)') +
+    '<div class="tarjeta-cuerpo">' +
+      '<div class="bien-fila"><span>💧 Agua hoy</span><b>' + b.agua + ' / ' + META_AGUA + ' vasos</b></div>' +
+      '<div class="vasos">' + vasos + '</div>' +
+      '<div class="bien-fila" style="margin-top:14px"><span>😴 Anoche dormí</span>' +
+        '<div class="sueno-sel">' + [5, 6, 7, 8, 9].map(function(h){ return '<button type="button" data-acc="sueno" data-v="' + h + '" aria-pressed="' + (+b.sueno === h) + '">' + h + ' h</button>'; }).join('') + '</div></div>' +
+      '<div class="sueno-semana">' + dias.map(function(x){
+        var h = +x.b.sueno || 0;
+        return '<div class="sueno-dia' + (x.d === hoy ? ' hoy' : '') + '" title="' + fechaCorta(x.d) + ': ' + (h ? h + ' h' : 'sin dato') + '"><i style="height:' + (h ? Math.min(100, h / 10 * 100) : 4) + '%" class="' + (h && h < 6 ? 'poco' : h >= 7 ? 'bien' : '') + '"></i><small>' + DIAS3[deISO(x.d).getDay()].charAt(0) + '</small></div>';
+      }).join('') + '</div>' +
+      '<small class="bien-pie">' + (media ? 'Duermes ' + media.toFixed(1) + ' h de media esta semana' + (media < 7 ? '. Lo ideal son 7 a 9.' : '. ¡Bien!') : 'Marca cuántas horas dormiste para ver tu semana.') + '</small>' +
+    '</div></section>';
+}
+function tarjetaFechas(){
+  var cs = proximosCumples(60);
+  var otros = vivos('eventos').filter(function(e){ return !e.cumple && e.rep === 'ano' && espDe(e) === 'personal'; });
+  var hoy = hoyISO(), anivs = [];
+  otros.forEach(function(e){ var d = proximaDesde(e.fecha, 'ano', hoy); if(d && diasEntre(hoy, d) <= 60) anivs.push({ e:e, dia:d, en:diasEntre(hoy, d) }); });
+  var todo = cs.map(function(c){ return { t:'🎂 ' + c.e.t, extra:edadCumple(c.e, c.dia) > 0 ? 'cumple ' + edadCumple(c.e, c.dia) : '', en:c.en, dia:c.dia, id:c.e.id }; })
+    .concat(anivs.map(function(a){ return { t:'💝 ' + a.e.t, extra:'', en:a.en, dia:a.dia, id:a.e.id }; })).sort(function(a, b){ return a.en - b.en; });
+  return '<section class="tarjeta">' + cabTarjeta('i-regalo', 'Fechas importantes', 'var(--rosa)', 'Añadir', 'data-acc="nuevo-cumple"') +
+    (todo.length ? '<div class="lista-filas">' + todo.slice(0, 5).map(function(x){
+      return '<div class="fila"><span class="cuenta-atras' + (x.en <= 3 ? ' urge' : '') + '"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span>' +
+        '<div class="cuerpo" data-acc="evento-ed" data-id="' + x.id + '"><div class="titulo">' + esc(x.t) + '</div><div class="meta"><span>' + cap(fechaLarga(x.dia)) + '</span>' + (x.extra ? '<span class="cumple">' + x.extra + '</span>' : '') + '</div></div></div>';
+    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Añade cumpleaños y aniversarios para que nunca se te pasen.</div>') + '</section>';
+}
+function tarjetaCompras(){
+  var l = vivos('listas').find(function(x){ return /compra|super|mercado/i.test(sinTildes(x.nombre)); });
+  if(!l) return '';
+  var faltan = (l.items || []).filter(function(i){ return !i.ok; });
+  return '<section class="tarjeta">' + cabTarjeta('i-listas', 'Para comprar', 'var(--esp-personal)', 'Abrir lista', 'data-acc="lista-abrir" data-id="' + l.id + '"') +
+    '<div class="compras">' + (faltan.length ? faltan.slice(0, 12).map(function(i){
+      return '<button type="button" class="compra" data-acc="compra-ok" data-lista="' + l.id + '" data-id="' + i.id + '">' + esc(i.t) + '</button>';
+    }).join('') : '<span class="vacio" style="padding:4px 0">Nada que comprar. 🛒</span>') + '</div>' +
+    '<form class="captura" data-acc="compra-nueva" data-lista="' + l.id + '" style="margin:0 12px 12px;box-shadow:none" autocomplete="off"><input id="compraNueva" maxlength="80" placeholder="Añadir a la compra… (Enter)"><button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form></section>';
+}
+
+/* ---------- Estudios: nota que necesitas y faltas --------------------------- */
+var NOTA_APROBAR = 10.5;
+/* Si las evaluaciones tienen peso y faltan algunas por rendir, cuánto hay
+   que sacar de media en lo que falta para cerrar el curso aprobado. */
+function notaNecesaria(c){
+  var ns = c.notas || [];
+  if(!ns.length || !ns.every(function(x){ return +x.p > 0; })) return null;
+  var total = ns.reduce(function(a, x){ return a + +x.p; }, 0);
+  if(Math.abs(total - 100) > 0.5) return null;
+  var hecho = 0, pesoHecho = 0, pesoFalta = 0;
+  ns.forEach(function(x){ if(x.v !== '' && x.v != null){ hecho += +x.v * +x.p; pesoHecho += +x.p; } else pesoFalta += +x.p; });
+  if(!pesoFalta) return null;
+  return (NOTA_APROBAR * 100 - hecho) / pesoFalta;
+}
+function textoNecesaria(c){
+  var n = notaNecesaria(c);
+  if(n == null) return '';
+  if(n <= 0) return '<span class="necesita ok">Ya aprobaste 🎉</span>';
+  if(n > 20) return '<span class="necesita mal">Necesitarías ' + n.toFixed(1) + ': habla con el profe</span>';
+  return '<span class="necesita ' + (n > 15 ? 'mal' : n > 12 ? 'ojo' : 'ok') + '">Necesitas ' + n.toFixed(1) + ' en lo que falta</span>';
+}
+function textoFaltas(c){
+  if(!c.maxFaltas && !c.faltas) return '';
+  var f = +c.faltas || 0, m = +c.maxFaltas || 0;
+  return '<span class="faltas ' + (m && f >= m ? 'mal' : m && f >= m * .7 ? 'ojo' : '') + '">Faltas ' + f + (m ? '/' + m : '') + '</span>';
+}
+
+/* ---------- Oficina: cronómetro de horas por cliente ------------------------ */
+var CLAVE_RELOJ = 'agenda_reloj';
+var reloj = leerJSON(CLAVE_RELOJ, null);
+function minutosHoras(desde, cliente){
+  return vivos('horas').filter(function(h){ return h.fecha >= desde && (!cliente || h.cliente === cliente); }).reduce(function(a, h){ return a + (+h.min || 0); }, 0);
+}
+function hhmm(min){ min = Math.round(min); return Math.floor(min / 60) + 'h ' + dos(min % 60) + 'm'; }
+function tarjetaHoras(){
+  var hoy = hoyISO(), ini = inicioSemana(hoy), mes = hoy.slice(0, 7) + '-01';
+  var semana = minutosHoras(ini), hoyMin = minutosHoras(hoy) - minutosHoras(sumarDias(hoy, 1));
+  var porCli = {}, tarifas = {};
+  vivos('horas').forEach(function(h){ if(h.fecha >= mes){ var k = h.cliente || 'Sin cliente'; porCli[k] = (porCli[k] || 0) + (+h.min || 0); if(+h.tarifa) tarifas[k] = +h.tarifa; } });
+  var facturable = Object.keys(porCli).reduce(function(a, k){ return a + (tarifas[k] ? porCli[k] / 60 * tarifas[k] : 0); }, 0);
+  var clientes = [];
+  vivos('horas').concat(vivos('cobros')).forEach(function(x){ var n = x.cliente; if(n && clientes.indexOf(n) < 0) clientes.push(n); });
+  var enMarcha = reloj && reloj.inicio;
+  var ult = vivos('horas').sort(function(a, b){ return (b.fecha + b.ini).localeCompare(a.fecha + a.ini); }).slice(0, 4);
+  return '<section class="tarjeta tarjeta-horas">' + cabTarjeta('i-reloj', 'Horas trabajadas', 'var(--esp-oficina)', 'Anotar a mano', 'data-acc="hora-nueva"') +
+    '<div class="tarjeta-cuerpo">' +
+      '<div class="cronometro' + (enMarcha ? ' andando' : '') + '">' +
+        '<div><small>' + (enMarcha ? 'Trabajando en ' + esc(reloj.cliente || 'algo') : 'Cronómetro parado') + '</small><b id="relojOficina">' + (enMarcha ? mmssLargo(Date.now() - reloj.inicio) : '0:00:00') + '</b></div>' +
+        (enMarcha ? '<button class="btn peligro" data-acc="reloj-parar">' + ico('i-pausa') + 'Parar</button>'
+                  : '<form class="reloj-form" data-acc="reloj-empezar" autocomplete="off"><input class="entrada" id="relojCliente" list="listaClientes" placeholder="Cliente o proyecto" maxlength="60"><datalist id="listaClientes">' + clientes.map(function(c){ return '<option value="' + esc(c) + '">'; }).join('') + '</datalist><button class="btn primario" type="submit">' + ico('i-play') + 'Empezar</button></form>') +
+      '</div>' +
+      '<div class="cifras" style="padding:12px 0 0"><div><small>Hoy</small><b>' + hhmm(hoyMin) + '</b></div><div><small>Esta semana</small><b>' + hhmm(semana) + '</b></div><div class="entra"><small>Facturable del mes</small><b>' + dinero(facturable) + '</b></div></div>' +
+      (Object.keys(porCli).length ? '<div style="margin-top:10px">' + Object.keys(porCli).sort(function(a, b){ return porCli[b] - porCli[a]; }).slice(0, 5).map(function(k){
+        var total = Object.keys(porCli).reduce(function(a, x){ return a + porCli[x]; }, 0);
+        return '<div class="barra-h" style="padding:5px 0;grid-template-columns:minmax(0,120px) minmax(0,1fr) 70px"><span>' + esc(k) + '</span><div class="barra-prog"><i style="width:' + (porCli[k] / total * 100).toFixed(1) + '%;background:var(--esp-oficina)"></i></div><b>' + (porCli[k] / 60).toFixed(1) + ' h</b></div>';
+      }).join('') + '</div>' : '') +
+    '</div>' +
+    (ult.length ? '<div class="lista-filas">' + ult.map(function(h){
+      return '<div class="fila"><span class="hora" style="width:52px">' + (h.ini || '') + '</span><div class="cuerpo" data-acc="hora-ed" data-id="' + h.id + '"><div class="titulo">' + esc(h.cliente || 'Sin cliente') + (h.nota ? ' · ' + esc(h.nota) : '') + '</div><div class="meta"><span>' + relativo(h.fecha) + '</span><span>' + hhmm(+h.min || 0) + '</span>' + (+h.tarifa ? '<span>' + dinero(+h.min / 60 * +h.tarifa) + '</span>' : '') + '</div></div></div>';
+    }).join('') + '</div>' : '') + '</section>';
+}
+function mmssLargo(ms){ var s = Math.floor(ms / 1000); return Math.floor(s / 3600) + ':' + dos(Math.floor(s / 60) % 60) + ':' + dos(s % 60); }
+function tarifaDe(cliente){
+  var t = 0; vivos('horas').forEach(function(h){ if(h.cliente === cliente && +h.tarifa) t = +h.tarifa; }); return t;
+}
+function pararReloj(){
+  if(!reloj) return;
+  var min = Math.max(1, Math.round((Date.now() - reloj.inicio) / 60000)), d = new Date(reloj.inicio);
+  var h = { id:nid(), fecha:iso(d), ini:dos(d.getHours()) + ':' + dos(d.getMinutes()), min:min, cliente:reloj.cliente || '', nota:'', tarifa:tarifaDe(reloj.cliente || '') };
+  poner('horas', h);
+  reloj = null; try{ localStorage.removeItem(CLAVE_RELOJ); }catch(e){}
+  aviso('⏱️ ' + hhmm(min) + ' anotadas', h.cliente || 'Sin cliente', 'Editar', function(){ editarHora(h.id); });
+  pintar();
+}
+function editarHora(id){
+  var h = id ? JSON.parse(JSON.stringify(buscarId('horas', id))) : { id:nid(), fecha:hoyISO(), ini:'09:00', min:60, cliente:'', nota:'', tarifa:'' };
+  abrirFlotante(cabFlot(id ? 'Horas trabajadas' : 'Anotar horas') +
+    '<form class="form" id="formEd" autocomplete="off">' +
+      campo('Cliente o proyecto', '<input name="c" maxlength="60" value="' + esc(h.cliente) + '" placeholder="Ej. Empresa ABC">') +
+      '<div class="fila-campos tres">' + campo('Día', '<input type="date" name="f" value="' + esc(h.fecha) + '">') + campo('Empecé', '<input type="time" name="i" value="' + esc(h.ini) + '">') + campo('Minutos', '<input name="m" inputmode="numeric" value="' + esc(h.min) + '">') + '</div>' +
+      '<div class="fila-campos">' + campo('Qué hice', '<input name="n" maxlength="120" value="' + esc(h.nota) + '" placeholder="Opcional">') + campo('Tarifa por hora (' + MONEDA + ')', '<input name="t" inputmode="decimal" value="' + esc(h.tarifa) + '" placeholder="Opcional">') + '</div>' +
+      botonesEd(!!id) + '</form>');
+  var f = $('formEd');
+  f.onsubmit = function(ev){
+    ev.preventDefault();
+    h.cliente = f.c.value.trim(); h.fecha = f.f.value || hoyISO(); h.ini = f.i.value; h.min = Math.max(1, parseInt(f.m.value, 10) || 1);
+    h.nota = f.n.value.trim(); h.tarifa = num(f.t.value) || '';
+    poner('horas', h); cerrarFlotante(); pintar();
+  };
+  edAcciones = { borrar: function(){ cerrarFlotante(); quitar('horas', h.id, 'Registro borrado'); pintar(); } };
+}
+
+/* ---------- Deporte: tus números en la cancha -------------------------------- */
+function statsFutbol(){
+  var hoy = hoyISO(), r = { pj:0, g:0, a:0, v:0, e:0, d:0, racha:[] };
+  vivos('eventos').filter(function(e){ return e.tipo === 'partido' && e.fecha <= hoy && e.jugado; })
+    .sort(function(a, b){ return a.fecha.localeCompare(b.fecha); }).forEach(function(e){
+      r.pj++; r.g += +e.goles || 0; r.a += +e.asist || 0;
+      if(e.res === 'v') r.v++; else if(e.res === 'e') r.e++; else if(e.res === 'd') r.d++;
+      if(e.res) r.racha.push(e.res);
+    });
+  return r;
+}
+function tarjetaFutbol(){
+  var s = statsFutbol();
+  var ult = vivos('eventos').filter(function(e){ return e.tipo === 'partido' && e.jugado; }).sort(function(a, b){ return b.fecha.localeCompare(a.fecha); }).slice(0, 4);
+  return '<section class="tarjeta marcador-card">' + cabTarjeta('i-balon', 'Tus números en la cancha', 'var(--esp-deporte)', 'Anotar partido', 'data-acc="partido-jugado"') +
+    '<div class="marcador">' +
+      [['PJ', s.pj], ['Goles', s.g], ['Asist.', s.a], ['G/P', s.pj ? (s.g / s.pj).toFixed(1) : '0']].map(function(x){ return '<div><b>' + x[1] + '</b><small>' + x[0] + '</small></div>'; }).join('') +
+    '</div>' +
+    '<div class="ved"><span class="v">' + s.v + ' ganados</span><span class="e">' + s.e + ' empates</span><span class="d">' + s.d + ' perdidos</span>' +
+      '<span class="forma">' + s.racha.slice(-5).map(function(x){ return '<i class="' + x + '">' + { v:'G', e:'E', d:'P' }[x] + '</i>'; }).join('') + '</span></div>' +
+    (ult.length ? '<div class="lista-filas">' + ult.map(function(e){
+      return '<div class="fila"><span class="res-chip ' + (e.res || '') + '">' + ({ v:'G', e:'E', d:'P' }[e.res] || '·') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + e.id + '"><div class="titulo">' + esc(e.t) + (e.resultado ? ' · ' + esc(e.resultado) : '') + '</div><div class="meta"><span>' + relativo(e.fecha) + '</span>' +
+        (+e.goles ? '<span>⚽ ' + e.goles + '</span>' : '') + (+e.asist ? '<span>🅰️ ' + e.asist + '</span>' : '') + '</div></div></div>';
+    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Anota tus partidos jugados con tus goles y asistencias.</div>') + '</section>';
+}
 
 /* ---------- Tareas -------------------------------------------------------- */
 function ordenTareas(a, b){
@@ -2676,6 +2860,7 @@ function tictac(){
   $('pastillaFocoTexto').textContent = mmss(r);
   if(foco.fin) document.title = mmss(r) + ' · ' + MODOS[foco.modo].n;
   if(foco.fin && r <= 0) terminarFoco();
+  var ro = $('relojOficina'); if(ro && reloj && reloj.inicio) ro.textContent = mmssLargo(Date.now() - reloj.inicio);
 }
 function terminarFoco(){
   var era = foco.modo;
@@ -3079,7 +3264,13 @@ function editarEvento(id, preset){
     '<form class="form" id="formEd" autocomplete="off">' +
       campo('Título', '<input name="t" required maxlength="200" value="' + esc(e.t) + '" placeholder="Ej. Cumpleaños de Ana, reunión, dentista">') +
       grupo('Tipo', selector('tipoEv', Object.keys(TIPOS_EV).map(function(k){ return { v:k, n:TIPOS_EV[k].em + ' ' + TIPOS_EV[k].n }; }), e.tipo || 'evento')) +
-      '<div id="filaResultado"' + (e.tipo === 'partido' ? '' : ' style="display:none"') + '>' + campo('Resultado (cuando se juegue)', '<input name="res" maxlength="40" value="' + esc(e.resultado || '') + '" placeholder="Ej. Ganamos 4-2">') + '</div>' +
+      '<div id="filaResultado" class="partido-campos"' + (e.tipo === 'partido' ? '' : ' style="display:none"') + '>' +
+        '<label class="interruptor"><input type="checkbox" name="jugado"' + (e.jugado ? ' checked' : '') + '>⚽ Ya lo jugué: anotar mis números</label>' +
+        '<div id="filaJugado"' + (e.jugado ? '' : ' style="display:none"') + '>' +
+          grupo('¿Cómo quedó?', selector('resPartido', [{ v:'v', n:'✅ Ganamos' }, { v:'e', n:'🤝 Empate' }, { v:'d', n:'❌ Perdimos' }], e.res || '')) +
+          '<div class="fila-campos tres">' + campo('Marcador', '<input name="res" maxlength="40" value="' + esc(e.resultado || '') + '" placeholder="Ej. 4-2">') +
+            campo('Mis goles', '<input name="goles" inputmode="numeric" value="' + esc(e.goles || '') + '" placeholder="0">') +
+            campo('Asistencias', '<input name="asist" inputmode="numeric" value="' + esc(e.asist || '') + '" placeholder="0">') + '</div></div></div>' +
       '<div class="fila-campos">' + campo('Día', '<input type="date" name="fecha" required value="' + esc(e.fecha) + '">') +
                                     campo('Hasta (varios días)', '<input type="date" name="hasta" value="' + esc(e.hasta || '') + '">') + '</div>' +
       '<label class="interruptor"><input type="checkbox" name="cumple"' + (e.cumple ? ' checked' : '') + '>🎂 Es un cumpleaños o aniversario (se repite cada año)</label>' +
@@ -3100,6 +3291,7 @@ function editarEvento(id, preset){
   var f = $('formEd');
   if(!id) f.t.focus();
   f.todo.onchange = function(){ $('filaHoras').style.display = f.todo.checked ? 'none' : ''; };
+  f.jugado.onchange = function(){ $('filaJugado').style.display = f.jugado.checked ? '' : 'none'; };
   f.cumple.onchange = function(){
     $('filaCumple').style.display = f.cumple.checked ? '' : 'none';
     $('filaNoCumple').style.display = f.cumple.checked ? 'none' : '';
@@ -3114,6 +3306,8 @@ function editarEvento(id, preset){
     e.color = leerSelector('color') || 'esp'; e.notas = f.notas.value.trim();
     e.cuenta = f.cuenta.checked;
     e.tipo = leerSelector('tipoEv') || 'evento'; e.resultado = e.tipo === 'partido' ? f.res.value.trim() : '';
+    if(e.tipo === 'partido' && f.jugado.checked){ e.jugado = true; e.res = leerSelector('resPartido'); e.goles = parseInt(f.goles.value, 10) || 0; e.asist = parseInt(f.asist.value, 10) || 0; }
+    else { delete e.jugado; delete e.res; delete e.goles; delete e.asist; }
     e.cumple = f.cumple.checked;
     if(e.cumple){ e.todo = true; e.rep = 'ano'; e.hasta = ''; e.nacio = parseInt(f.nacio.value, 10) || ''; if(e.aviso > 0 && e.aviso < 1440) e.aviso = 1440; e.ini = e.ini || '09:00'; }
     else delete e.nacio;
@@ -3869,6 +4063,12 @@ function cargarEjemplos(){
   [[-1,4,'Buen día en el trabajo, terminé el informe.'],[-2,3,''],[-3,5,'Cena con amigos 🥳'],[-5,2,'Cansado, dormí poco.']].forEach(function(x){
     poner('diario', { id:sumarDias(hoy, x[0]), animo:x[1], texto:x[2] });
   });
+  [[0,5,''],[-1,8,7],[-2,6,6],[-3,7,8],[-4,8,7],[-5,4,5],[-6,7,7]].forEach(function(x){ poner('bienestar', { id:sumarDias(hoy, x[0]), agua:x[1], sueno:x[2] }); });
+  [[0,'09:10',95,'Empresa ABC','Diseño de la portada',60],[-1,'15:00',120,'Empresa ABC','Reunión y ajustes',60],[-1,'09:30',80,'Juan Pérez','Asesoría contable',45],[-2,'10:00',150,'Empresa ABC','Maquetación',60],[-3,'16:00',60,'Juan Pérez','Revisión de facturas',45]]
+    .forEach(function(x){ poner('horas', { id:nid(), fecha:sumarDias(hoy, x[0]), ini:x[1], min:x[2], cliente:x[3], nota:x[4], tarifa:x[5] }); });
+  [[-4,'Pichanga del jueves','5-3','v',2,1],[-11,'Fulbito con la oficina','2-2','e',1,0],[-18,'Liga del barrio','1-3','d',0,1],[-25,'Liga del barrio','4-1','v',1,2]]
+    .forEach(function(x){ poner('eventos', { id:nid(), t:x[1], fecha:sumarDias(hoy, x[0]), todo:true, ini:'', fin:'', lugar:'', color:'esp', esp:'deporte', tipo:'partido', rep:'no', aviso:-1, notas:'', resultado:x[2], jugado:true, res:x[3], goles:x[4], asist:x[5] }); });
+  vivos('cursos').forEach(function(k, j){ if(j < 2){ k.faltas = j ? 4 : 1; k.maxFaltas = 5; poner('cursos', k); } });
   pintar();
   aviso('Ejemplos cargados', 'Bórralos cuando quieras; son solo para ver cómo queda.');
 }
@@ -4045,6 +4245,29 @@ document.addEventListener('click', function(ev){
     case 'nuevo-examen': editarEvento(null, { tipo:'examen', esp:'estudios', todo:false, aviso:1440, color:'rojo' }); break;
     case 'nuevo-reunion': editarEvento(null, { tipo:'reunion', esp:'oficina', aviso:15 }); break;
     case 'nuevo-partido': editarEvento(null, { tipo:'partido', esp:'deporte', aviso:60, t:'Partido' }); break;
+    case 'partido-jugado': editarEvento(null, { tipo:'partido', esp:'deporte', aviso:-1, t:'Partido', fecha:hoyISO(), ini:'', fin:'', todo:true, jugado:true }); break;
+    case 'nuevo-cumple': editarEvento(null, { esp:'personal', cumple:true, todo:true, rep:'ano', aviso:1440, color:'rosa' }); break;
+    case 'agua':
+      var bA = JSON.parse(JSON.stringify(bienestar(hoyISO()))), vA = +b.dataset.v;
+      delete bA.del; bA.agua = bA.agua === vA ? vA - 1 : vA; poner('bienestar', bA);
+      if(bA.agua === META_AGUA){ aviso('💧 ¡Meta de agua cumplida!', META_AGUA + ' vasos hoy'); if(typeof confeti === 'function') confeti(); }
+      pintarSeguro(); break;
+    case 'sueno':
+      var bS = JSON.parse(JSON.stringify(bienestar(hoyISO()))), vS = +b.dataset.v;
+      delete bS.del; bS.sueno = +bS.sueno === vS ? '' : vS; poner('bienestar', bS); pintarSeguro(); break;
+    case 'compra-ok':
+      var lC = buscarId('listas', b.dataset.lista);
+      if(lC){ lC = JSON.parse(JSON.stringify(lC)); var itC = (lC.items || []).find(function(x){ return x.id === id; }); if(itC){ itC.ok = true; poner('listas', lC); b.classList.add('comprado'); setTimeout(pintarSeguro, 280); } }
+      break;
+    case 'curso-falta':
+      var cF = buscarId('cursos', id);
+      if(cF){ cF = JSON.parse(JSON.stringify(cF)); cF.faltas = (+cF.faltas || 0) + 1; poner('cursos', cF);
+        aviso('Falta anotada en ' + cF.nombre, 'Llevas ' + cF.faltas + (cF.maxFaltas ? ' de ' + cF.maxFaltas + ' permitidas' : ''), 'Deshacer', function(){ var c2 = JSON.parse(JSON.stringify(buscarId('cursos', id))); c2.faltas = Math.max(0, (+c2.faltas || 0) - 1); poner('cursos', c2); pintar(); });
+        pintar(); }
+      break;
+    case 'hora-nueva': editarHora(null); break;
+    case 'hora-ed': cerrarFlotante(); editarHora(id); break;
+    case 'reloj-parar': pararReloj(); break;
     case 'estudiar': foco.esp = 'estudios'; guardarFoco(); ir('foco'); break;
     case 'foco-esp': foco.esp = b.dataset.v; guardarFoco(); pintar(); break;
     case 'entreno-rapido': ui.entTipo = b.dataset.v; editarEntreno(null, { tipo:b.dataset.v, min:b.dataset.v === 'futbol' ? 90 : b.dataset.v === 'correr' ? 30 : 60 }); break;
@@ -4185,6 +4408,16 @@ document.addEventListener('submit', function(ev){
     if(!kg || kg < 20 || kg > 400){ aviso('Escribe tu peso en kg', 'Ej. 72.5'); return; }
     poner('medidas', { id:hoyISO(), peso:Math.round(kg * 10) / 10 });
     aviso('Peso anotado', formNum(kg) + ' kg'); pintar();
+  } else if(a === 'compra-nueva'){
+    var ci = $('compraNueva'), cv = ci.value.trim();
+    var lN = buscarId('listas', f.dataset.lista);
+    if(!cv || !lN) return;
+    lN = JSON.parse(JSON.stringify(lN)); lN.items = lN.items || [];
+    cv.split(/\s*[;,\n]\s*/).filter(Boolean).forEach(function(t){ lN.items.push({ id:nid(), t:t.slice(0, 160), ok:false }); });
+    poner('listas', lN); pintar(); var cn = $('compraNueva'); if(cn) cn.focus();
+  } else if(a === 'reloj-empezar'){
+    reloj = { inicio:Date.now(), cliente:$('relojCliente').value.trim() };
+    escribirJSON(CLAVE_RELOJ, reloj); pintar();
   } else if(a === 'qa'){
     anotarMovimiento(f);
   } else if(a === 'meta-cantidad'){
