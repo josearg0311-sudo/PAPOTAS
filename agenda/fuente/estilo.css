@@ -1620,7 +1620,7 @@ body{
 .espacios-hoy{ margin-bottom:0 }
 .esp-tile{ gap:8px; padding:14px; border-radius:18px; border:1px solid var(--borde-card); background:var(--hoja); text-align:left }
 .esp-tile::before{ content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--c) }
-.esp-prox{ font-size:12.5px; line-height:1.35; color:var(--tinta-2); position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px }
+.esp-prox{ font-size:12.5px; line-height:1.35; color:var(--tinta-2); position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px; white-space:normal; text-overflow:clip }
 .esp-prox em{ font-style:normal; color:var(--c); font-weight:700 }
 
 /* ----- Ahora ----- */
@@ -1723,3 +1723,45 @@ body{
 .avatar{ width:32px; height:32px; border-radius:10px }
 .nav-lat .nav-ico{ width:31px }
 .nav-iconos{ gap:1px; flex-wrap:nowrap }
+
+/* ----- Descargar informes ----- */
+.inf-fila{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px }
+.inf-fila > span{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--tinta-3) }
+.inf-fila .selector{ display:flex; flex-wrap:wrap; gap:6px }
+.inf-fila .selector button{ padding:7px 12px; border-radius:99px; font-size:13px; font-weight:700; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-2) }
+.inf-fila .selector button[aria-pressed="true"]{ background:var(--verde-piso); border-color:var(--verde); color:var(--tinta) }
+.inf-rango{ margin-bottom:12px }
+.inf-botones{ display:grid; grid-template-columns:minmax(0,1fr); gap:8px }
+@media (min-width:560px){ .inf-botones{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+.inf-btn{ height:auto !important; display:flex !important; align-items:center; gap:12px; padding:12px 14px !important; text-align:left; justify-content:flex-start !important; background:var(--hoja-2); border:1px solid var(--regla) }
+.inf-btn b{ display:block; font-size:15px } .inf-btn small{ display:block; font-size:12px; font-weight:600; color:var(--tinta-3); line-height:1.3 }
+.inf-ico{ width:44px; height:44px; flex:none; border-radius:10px; display:grid; place-items:center; font-size:12px; font-weight:900; letter-spacing:.04em; color:#fff }
+.inf-btn.excel .inf-ico{ background:linear-gradient(135deg, #22A565, #107C41) }
+.inf-btn.pdf .inf-ico{ background:linear-gradient(135deg, #F0564A, #C4271B) }
+.inf-btn.excel:hover{ border-color:#22A565 } .inf-btn.pdf:hover{ border-color:#F0564A }
+
+/* ----- Deshacer, rehacer y papelera ----- */
+.btn-icono:disabled{ opacity:.3; cursor:default; background:none !important }
+.globo.gris{ background:var(--tinta-3) !important }
+.pap-fila .lado{ gap:4px }
+.pap-fila .lado .btn{ height:34px }
+@media (max-width:480px){ .pap-fila{ flex-wrap:wrap } .pap-fila .lado{ width:100%; justify-content:flex-end; padding-left:40px } }
+.nubes-est{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px }
+.nube-est{ padding:3px 9px; border-radius:99px; font-size:12px; font-weight:700; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-3) }
+.nube-est.ok{ color:var(--haber); border-color:color-mix(in srgb, var(--haber) 40%, transparent) }
+
+/* ----- Revisión móvil: los números del saludo en columnas, cifras que caben ----- */
+@media (max-width:600px){
+  .heroe .datos{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px }
+  .heroe .dato{ flex-direction:column; align-items:flex-start; gap:1px; padding:8px 10px; font-size:11px; line-height:1.25; min-width:0; text-align:left }
+  .heroe .dato svg{ display:none }
+  .heroe .dato b{ font-size:16px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .dinero-heroe .dato b, .heroe.tema-oficina .dato b{ font-size:13px; letter-spacing:-.03em }
+  .heroe.esp-heroe{ padding:16px 16px 14px }
+  .heroe.esp-heroe h2{ font-size:24px }
+  .cifras{ gap:6px; padding-left:12px; padding-right:12px }
+  .cifras > div{ padding:8px 8px }
+  .cifras b{ font-size:12px; letter-spacing:-.04em }
+  .cifras small{ font-size:9.5px }
+}
+@media (max-width:600px){ .dinero-heroe .dato b{ font-size:12px; letter-spacing:-.05em } .dinero-heroe .datos{ gap:5px } .dinero-heroe .dato{ padding:8px 7px } }

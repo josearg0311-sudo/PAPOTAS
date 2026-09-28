@@ -1681,7 +1681,7 @@ body{
 .espacios-hoy{ margin-bottom:0 }
 .esp-tile{ gap:8px; padding:14px; border-radius:18px; border:1px solid var(--borde-card); background:var(--hoja); text-align:left }
 .esp-tile::before{ content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--c) }
-.esp-prox{ font-size:12.5px; line-height:1.35; color:var(--tinta-2); position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px }
+.esp-prox{ font-size:12.5px; line-height:1.35; color:var(--tinta-2); position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px; white-space:normal; text-overflow:clip }
 .esp-prox em{ font-style:normal; color:var(--c); font-weight:700 }
 
 /* ----- Ahora ----- */
@@ -1784,6 +1784,48 @@ body{
 .avatar{ width:32px; height:32px; border-radius:10px }
 .nav-lat .nav-ico{ width:31px }
 .nav-iconos{ gap:1px; flex-wrap:nowrap }
+
+/* ----- Descargar informes ----- */
+.inf-fila{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px }
+.inf-fila > span{ font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--tinta-3) }
+.inf-fila .selector{ display:flex; flex-wrap:wrap; gap:6px }
+.inf-fila .selector button{ padding:7px 12px; border-radius:99px; font-size:13px; font-weight:700; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-2) }
+.inf-fila .selector button[aria-pressed="true"]{ background:var(--verde-piso); border-color:var(--verde); color:var(--tinta) }
+.inf-rango{ margin-bottom:12px }
+.inf-botones{ display:grid; grid-template-columns:minmax(0,1fr); gap:8px }
+@media (min-width:560px){ .inf-botones{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+.inf-btn{ height:auto !important; display:flex !important; align-items:center; gap:12px; padding:12px 14px !important; text-align:left; justify-content:flex-start !important; background:var(--hoja-2); border:1px solid var(--regla) }
+.inf-btn b{ display:block; font-size:15px } .inf-btn small{ display:block; font-size:12px; font-weight:600; color:var(--tinta-3); line-height:1.3 }
+.inf-ico{ width:44px; height:44px; flex:none; border-radius:10px; display:grid; place-items:center; font-size:12px; font-weight:900; letter-spacing:.04em; color:#fff }
+.inf-btn.excel .inf-ico{ background:linear-gradient(135deg, #22A565, #107C41) }
+.inf-btn.pdf .inf-ico{ background:linear-gradient(135deg, #F0564A, #C4271B) }
+.inf-btn.excel:hover{ border-color:#22A565 } .inf-btn.pdf:hover{ border-color:#F0564A }
+
+/* ----- Deshacer, rehacer y papelera ----- */
+.btn-icono:disabled{ opacity:.3; cursor:default; background:none !important }
+.globo.gris{ background:var(--tinta-3) !important }
+.pap-fila .lado{ gap:4px }
+.pap-fila .lado .btn{ height:34px }
+@media (max-width:480px){ .pap-fila{ flex-wrap:wrap } .pap-fila .lado{ width:100%; justify-content:flex-end; padding-left:40px } }
+.nubes-est{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px }
+.nube-est{ padding:3px 9px; border-radius:99px; font-size:12px; font-weight:700; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-3) }
+.nube-est.ok{ color:var(--haber); border-color:color-mix(in srgb, var(--haber) 40%, transparent) }
+
+/* ----- Revisión móvil: los números del saludo en columnas, cifras que caben ----- */
+@media (max-width:600px){
+  .heroe .datos{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px }
+  .heroe .dato{ flex-direction:column; align-items:flex-start; gap:1px; padding:8px 10px; font-size:11px; line-height:1.25; min-width:0; text-align:left }
+  .heroe .dato svg{ display:none }
+  .heroe .dato b{ font-size:16px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .dinero-heroe .dato b, .heroe.tema-oficina .dato b{ font-size:13px; letter-spacing:-.03em }
+  .heroe.esp-heroe{ padding:16px 16px 14px }
+  .heroe.esp-heroe h2{ font-size:24px }
+  .cifras{ gap:6px; padding-left:12px; padding-right:12px }
+  .cifras > div{ padding:8px 8px }
+  .cifras b{ font-size:12px; letter-spacing:-.04em }
+  .cifras small{ font-size:9.5px }
+}
+@media (max-width:600px){ .dinero-heroe .dato b{ font-size:12px; letter-spacing:-.05em } .dinero-heroe .datos{ gap:5px } .dinero-heroe .dato{ padding:8px 7px } }
 </style>
 </head>
 <body>
@@ -1836,6 +1878,8 @@ body{
   <symbol id="i-espacios" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2.5"/><rect x="13" y="3" width="8" height="8" rx="2.5"/><rect x="3" y="13" width="8" height="8" rx="2.5"/><circle cx="17" cy="17" r="4"/></symbol>
   <symbol id="i-maletin" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="3"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20M10 13v2h4v-2"/></symbol>
   <symbol id="i-gota" viewBox="0 0 24 24"><path d="M12 2.7s6.5 7 6.5 11.8a6.5 6.5 0 0 1-13 0C5.5 9.7 12 2.7 12 2.7Z"/></symbol>
+  <symbol id="i-deshacer" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-rehacer" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
   <symbol id="i-estrella" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></symbol>
 </svg>
 
@@ -1868,8 +1912,11 @@ body{
         <button type="button" class="pastilla foco oculto" id="pastillaFoco" data-ir="foco" title="Temporizador de enfoque">
           <svg class="i"><use href="#i-reloj"/></svg><span id="pastillaFocoTexto">25:00</span>
         </button>
+        <button type="button" class="btn-icono" id="btnDeshacer" data-acc="deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer" disabled><svg class="i"><use href="#i-deshacer"/></svg></button>
+        <button type="button" class="btn-icono" id="btnRehacer" data-acc="rehacer" title="Rehacer (Ctrl+Y)" aria-label="Rehacer" disabled><svg class="i"><use href="#i-rehacer"/></svg></button>
+        <button type="button" class="btn-icono solo-escritorio" data-ir="papelera" title="Papelera" aria-label="Papelera"><svg class="i"><use href="#i-basura"/></svg></button>
         <button type="button" class="btn-icono" id="btnBuscar" title="Buscar (/)" aria-label="Buscar"><svg class="i"><use href="#i-buscar"/></svg></button>
-        <button type="button" class="btn-icono" id="btnTema" title="Claro u oscuro" aria-label="Cambiar tema"><svg class="i"><use href="#i-luna"/></svg></button>
+        <button type="button" class="btn-icono solo-escritorio" id="btnTema" title="Claro u oscuro" aria-label="Cambiar tema"><svg class="i"><use href="#i-luna"/></svg></button>
         <button type="button" class="btn-icono solo-movil" data-ir="ajustes" aria-label="Ajustes"><svg class="i"><use href="#i-ajustes"/></svg></button>
       </div>
     </header>
@@ -1958,8 +2005,10 @@ function buscarId(col, id){ return db[col].find(function(x){ return x.id === id;
 
 function guardarLocal(){
   if(!escribirJSON(CLAVE, db)) aviso('No se pudo guardar', 'El almacenamiento del navegador está lleno o bloqueado.');
+  if(typeof HIST !== 'undefined'){ HIST.estable = JSON.stringify(db); pintarHist(); }
 }
 function guardar(){
+  if(typeof HIST !== 'undefined') anotarHistorial();
   guardarLocal();
   programarSubida();
 }
@@ -1975,12 +2024,12 @@ var ultimoBorrado = null;
 function quitar(col, id, nombre){
   var o = buscarId(col, id);
   if(!o) return;
-  o.del = true; o.upd = Date.now();
+  o.del = true; o.upd = o.delEn = Date.now();
   ultimoBorrado = { col:col, id:id };
   guardar();
-  aviso((nombre || 'Borrado'), null, 'Deshacer', function(){
+  aviso((nombre || 'Borrado') + ' · está en la papelera', null, 'Deshacer', function(){
     var x = buscarId(col, id);
-    if(x){ delete x.del; x.upd = Date.now(); guardar(); pintar(); }
+    if(x){ delete x.del; delete x.delEn; x.upd = Date.now(); guardar(); pintar(); }
   });
 }
 
@@ -2315,12 +2364,14 @@ var SECCIONES = [
   { id:'foco',          nom:'Enfoque',       ico:'i-reloj' },
   { id:'diario',        nom:'Diario',        ico:'i-diario' },
   { id:'progreso',      nom:'Progreso',      ico:'i-diana' },
-  { id:'revision',      nom:'Revisión semanal', ico:'i-check' },
+  { id:'revision',      nom:'Revisión semanal', movil:'Revisión', ico:'i-check' },
   { id:'dinero',        nom:'Dinero',        ico:'i-grafica', g:'Dinero' },
   { id:'pagos',         nom:'Pagos fijos',   ico:'i-recibo' },
-  { id:'personal',      nom:'Libro personal', corto:'Gastos', ico:'i-cuentas' },
-  { id:'oficina',       nom:'Libro de oficina', ico:'i-maletin' }
+  { id:'personal',      nom:'Libro personal', movil:'Gastos personales', corto:'Gastos', ico:'i-cuentas' },
+  { id:'oficina',       nom:'Libro de oficina', movil:'Oficina', ico:'i-maletin' },
+  { id:'papelera',      nom:'Papelera',      ico:'i-basura', oculta:true }
 ];
+var SNAV = SECCIONES.filter(function(s){ return !s.oculta; });
 /* En el móvil: Hoy, los espacios, el calendario, el dinero y "Más" */
 var ABAJO = ['hoy','espacios','calendario','dinero'];
 function esLibro(v){ return v === 'personal' || v === 'oficina'; }
@@ -2348,7 +2399,7 @@ function pintarNav(){
   var k = contadores();
   function num(id){ return id === 'tareas' ? k.tareas : id === 'recordatorios' ? k.recordatorios : id === 'pagos' ? k.pagos : 0; }
   var grupoNav = '';
-  $('navLat').innerHTML = SECCIONES.map(function(s){
+  $('navLat').innerHTML = SNAV.map(function(s){
     var n = num(s.id);
     var alerta = (s.id === 'tareas' && k.tareasTarde) || ((s.id === 'recordatorios' || s.id === 'pagos') && n);
     var enEsp = s.esp ? ' class="nav-esp" style="--c:' + espInfo(s.esp).c + '"' : '';
@@ -2356,7 +2407,7 @@ function pintarNav(){
     if(s.g) grupoNav = s.g;
     var plegado = navPlegados().indexOf(grupoNav) >= 0;
     var abre = s.g ? '<button type="button" class="grupo" data-acc="nav-plegar" data-v="' + s.g + '" aria-expanded="' + !plegado + '">' + s.g + ico('i-der') + '</button>' + (plegado ? '<div class="nav-iconos">' : '') : '';
-    var sig = SECCIONES[SECCIONES.indexOf(s) + 1], cierra = plegado && (!sig || sig.g) ? '</div>' : '';
+    var sig = SNAV[SNAV.indexOf(s) + 1], cierra = plegado && (!sig || sig.g) ? '</div>' : '';
     if(plegado) return abre + '<button type="button" class="nav-ico" data-ir="' + s.id + '" title="' + s.nom + '" aria-label="' + s.nom + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' + ico(s.ico) + (n ? '<span class="punto-nav' + (alerta ? ' alerta' : '') + '"></span>' : '') + '</button>' + cierra;
     return abre +
       ('<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' +
@@ -2376,7 +2427,7 @@ function pintarNav(){
     return '<button type="button" data-ir="' + destino + '"' + (activo ? ' aria-current="page"' : '') + '>' +
              ico(s.ico) + (s.corto || s.nom) + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
   }).join('') +
-  '<button type="button" data-acc="menu-mas"' + (enMas ? ' aria-current="page"' : '') + '>' + ico('i-mas') + 'Más' +
+  '<button type="button" data-acc="menu-mas"' + (enMas ? ' aria-current="page"' : '') + '>' + ico('i-mas') + 'Todo' +
     (otros ? '<span class="globo">' + otros + '</span>' : '') + '</button>';
   var nom = db.perfil.nombre || '';
   $('avatar').textContent = nom ? nom.trim().charAt(0).toUpperCase() : '✦';
@@ -2415,7 +2466,7 @@ function pintar(){
   pintarNav();
   var v = ui.vista;
   var sec = SECCIONES.find(function(s){ return s.id === v; });
-  $('tituloVista').textContent = v === 'ajustes' ? 'Ajustes' : (v === 'listas' && ui.lista ? (listaActual() || {}).nombre || 'Listas' : (sec.esp ? espInfo(sec.esp).em + ' ' : '') + sec.nom);
+  $('tituloVista').textContent = v === 'ajustes' ? 'Ajustes' : (v === 'listas' && ui.lista ? (listaActual() || {}).nombre || 'Listas' : (sec.esp ? espInfo(sec.esp).em + ' ' : '') + (innerWidth < 600 && sec.movil ? sec.movil : sec.nom));
   if(!foco.fin) document.title = (v === 'hoy' ? 'Agenda' : $('tituloVista').textContent + ' · Agenda');
   document.body.classList.toggle('en-cuentas', esLibro(v));
   document.body.dataset.esp = sec && sec.esp ? sec.esp : '';
@@ -2829,7 +2880,7 @@ VISTAS.hoy = function(){
     html += tituloSecc('Dinero', '<small>' + cap(MESES[new Date().getMonth()]) + '</small>') +
       '<section class="tarjeta ancho-2 dinero-hoy"><div class="libros-hoy">' + libros + '</div>' +
       (pp.length ? '<div class="pagos-hoy"><h4>' + ico('i-recibo') + 'Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
-      '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="personal">' + ico('i-plus') + 'Anotar gasto</button><button class="btn chico" data-ir="dinero">' + ico('i-grafica') + 'Ver el resumen</button><button class="btn chico" data-ir="pagos">' + ico('i-recibo') + 'Pagos fijos</button></div>' +
+      '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="personal">' + ico('i-plus') + 'Anotar gasto</button><button class="btn chico" data-ir="dinero">' + ico('i-grafica') + 'Ver el resumen</button><button class="btn chico" data-acc="ir-informes">' + ico('i-bajar') + 'PDF y Excel</button></div>' +
       '</section>';
   }
 
@@ -3414,7 +3465,8 @@ function statsSemana(ini){
   return r;
 }
 VISTAS.revision = function(){
-  var ini = ui.revSemana || inicioSemana(hoyISO()), fin = sumarDias(ini, 6);
+  if(!ui.revSemana){ var wdv = new Date().getDay(); ui.revSemana = wdv === 1 ? sumarDias(inicioSemana(hoyISO()), -7) : inicioSemana(hoyISO()); }
+  var ini = ui.revSemana, fin = sumarDias(ini, 6);
   var r = statsSemana(ini), ant = statsSemana(sumarDias(ini, -7));
   var rv = buscarId('revisiones', ini); if(rv && rv.del) rv = null;
   function cmp(a, b, inv){ if(!b || a === b) return ''; var up = a > b; return '<span class="' + ((up !== !!inv) ? 'sube' : 'baja') + '">' + (up ? '▲' : '▼') + ' ' + Math.abs(a - b) + '</span>'; }
@@ -3432,7 +3484,7 @@ VISTAS.revision = function(){
   var sigE = 0; for(var i = 0; i < 7; i++) sigE += itemsDelDia(sumarDias(sigIni, i)).filter(function(x){ return x.tipo === 'evento'; }).length;
   function caja(k, t, ph){ return '<label class="campo"><span>' + t + '</span><textarea data-rev="' + k + '" data-sem="' + ini + '" maxlength="3000" placeholder="' + ph + '" style="min-height:92px">' + esc(rv && rv[k] || '') + '</textarea></label>'; }
   return '<div class="cal-cab"><button class="btn-icono" data-acc="rev-mover" data-n="-7" aria-label="Semana anterior">' + ico('i-izq') + '</button>' +
-      '<h2 style="font-size:17px">Semana del ' + fechaCorta(ini) + ' al ' + fechaCorta(fin) + '</h2>' +
+      '<h2 style="font-size:17px;text-transform:none">Semana del ' + fechaCorta(ini) + ' al ' + fechaCorta(fin) + '</h2>' +
       '<button class="btn-icono" data-acc="rev-mover" data-n="7" aria-label="Semana siguiente">' + ico('i-der') + '</button></div>' +
     '<div class="rev-kpis">' + kpis.map(function(k){ return '<div class="tarjeta rev-kpi">' + ico(k[0]) + '<small>' + k[1] + '</small><b>' + k[2] + '</b>' + (k[3] ? '<em>' + k[3] + ' vs. la anterior</em>' : '') + '</div>'; }).join('') + '</div>' +
     '<section class="tarjeta" style="margin-top:14px">' + cabTarjeta('i-lapiz', 'Tu revisión', 'var(--verde)') +
@@ -4517,6 +4569,156 @@ function tarjetaPichanga(){
     '</div></section>';
 }
 
+/* ==========================================================================
+   DESHACER Y REHACER
+   Se guarda una foto de la agenda antes de cada cambio (los cambios que
+   llegan juntos, en menos de un segundo, cuentan como uno). Al deshacer,
+   lo que vuelve se marca con la hora de ahora, para que la sincronización
+   lo lleve también al otro aparato en vez de pisarlo.
+   ========================================================================== */
+var HIST = { atras:[], adelante:[], estable:null, t:0 };
+var MAX_HIST = 40;
+function fotoDB(){ return JSON.stringify(db); }
+function anotarHistorial(){
+  var ahora = Date.now();
+  if(HIST.estable && ahora - HIST.t > 900){
+    HIST.atras.push(HIST.estable);
+    if(HIST.atras.length > MAX_HIST) HIST.atras.shift();
+    HIST.adelante = [];
+  }
+  HIST.t = ahora;
+}
+function pintarHist(){
+  var a = $('btnDeshacer'), r = $('btnRehacer');
+  if(a) a.disabled = !HIST.atras.length;
+  if(r) r.disabled = !HIST.adelante.length;
+}
+function volverA(txt){
+  var viejo = JSON.parse(txt), ahora = Date.now(), cambios = 0;
+  COLS.forEach(function(c){
+    var antes = {};
+    (viejo[c] || []).forEach(function(x){ antes[x.id] = x; });
+    db[c] = db[c].map(function(x){
+      var v = antes[x.id];
+      delete antes[x.id];
+      if(!v){
+        if(x.del) return x;
+        cambios++;
+        return { id:x.id, del:true, purga:true, upd:ahora };
+      }
+      if(JSON.stringify(v) === JSON.stringify(x)) return x;
+      cambios++;
+      v = JSON.parse(JSON.stringify(v)); v.upd = ahora; return v;
+    });
+    Object.keys(antes).forEach(function(k){ var v = JSON.parse(JSON.stringify(antes[k])); v.upd = ahora; db[c].push(v); cambios++; });
+  });
+  if(JSON.stringify(viejo.perfil || {}) !== JSON.stringify(db.perfil || {})){ db.perfil = Object.assign({}, viejo.perfil, { upd:ahora }); cambios++; }
+  guardarLocal(); programarSubida(); pintar();
+  return cambios;
+}
+function deshacer(){
+  if(!HIST.atras.length){ aviso('Nada que deshacer'); return; }
+  var actual = fotoDB();
+  HIST.adelante.push(actual);
+  volverA(HIST.atras.pop());
+  HIST.t = 0;
+  aviso('↶ Deshecho', null, 'Rehacer', rehacer);
+  pintarHist();
+}
+function rehacer(){
+  if(!HIST.adelante.length){ aviso('Nada que rehacer'); return; }
+  HIST.atras.push(fotoDB());
+  volverA(HIST.adelante.pop());
+  HIST.t = 0;
+  aviso('↷ Rehecho', null, 'Deshacer', deshacer);
+  pintarHist();
+}
+
+/* ==========================================================================
+   PAPELERA
+   Lo que borras no desaparece: queda aquí 30 días. Puedes devolverlo o
+   borrarlo para siempre. Lo borrado para siempre deja solo una marca
+   mínima, para que el otro aparato también lo borre al sincronizar.
+   ========================================================================== */
+var DIAS_PAPELERA = 30;
+var PAPELERA_TIPOS = {
+  tareas:['Tarea','✅', function(x){ return x.t; }],
+  eventos:['Evento','📅', function(x){ return (x.cumple ? '🎂 ' : '') + x.t; }],
+  recordatorios:['Recordatorio','🔔', function(x){ return x.t; }],
+  notas:['Nota','🗒️', function(x){ return x.t || (x.cuerpo || '').split('\n')[0]; }],
+  listas:['Lista','📋', function(x){ return x.nombre; }],
+  habitos:['Hábito','🔥', function(x){ return x.nombre; }],
+  metas:['Meta','🎯', function(x){ return x.t; }],
+  pagos:['Pago fijo','🧾', function(x){ return x.t; }],
+  proyectos:['Proyecto','📁', function(x){ return x.nombre; }],
+  cursos:['Curso','🎓', function(x){ return x.nombre; }],
+  entrenos:['Entrenamiento','🏋️', function(x){ return deporteInfo(x.tipo).n + ' · ' + fechaCorta(x.fecha); }],
+  rutinas:['Rutina','🏋️', function(x){ return x.nombre; }],
+  cobros:['Cobro','💰', function(x){ return x.cliente + (x.concepto ? ' · ' + x.concepto : ''); }],
+  deudas:['Préstamo','🤝', function(x){ return x.persona + (x.concepto ? ' · ' + x.concepto : ''); }],
+  diario:['Diario','📖', function(x){ return 'Diario del ' + fechaCorta(x.id); }],
+  horas:['Horas','⏱️', function(x){ return (x.cliente || 'Sin cliente') + ' · ' + hhmm(+x.min || 0); }],
+  casa:['Casa','🧹', function(x){ return x.t; }],
+  docs:['Documento','📄', function(x){ return x.t; }],
+  fichas:['Ficha','🧠', function(x){ return x.q; }],
+  clientes:['Cliente','🤝', function(x){ return x.nombre; }]
+};
+function enPapelera(){
+  var out = [], limite = Date.now() - DIAS_PAPELERA * 864e5;
+  Object.keys(PAPELERA_TIPOS).forEach(function(c){
+    (db[c] || []).forEach(function(x){
+      if(!x.del || x.purga) return;
+      var cuando = x.delEn || x.upd || 0;
+      if(cuando < limite) return;
+      var t = ''; try{ t = PAPELERA_TIPOS[c][2](x) || ''; }catch(e){}
+      if(!t) return;
+      out.push({ c:c, x:x, t:t, cuando:cuando });
+    });
+  });
+  return out.sort(function(a, b){ return b.cuando - a.cuando; });
+}
+/* Pasados 30 días, lo de la papelera se borra solo */
+function limpiarPapelera(){
+  var limite = Date.now() - DIAS_PAPELERA * 864e5, n = 0;
+  COLS.forEach(function(c){
+    db[c] = db[c].map(function(x){
+      if(x.del && !x.purga && (x.delEn || x.upd || 0) < limite){ n++; return { id:x.id, del:true, purga:true, upd:Date.now() }; }
+      return x;
+    });
+  });
+  if(n) guardar();
+}
+function purgar(c, id){
+  var i = db[c].findIndex(function(x){ return x.id === id; });
+  if(i >= 0) db[c][i] = { id:id, del:true, purga:true, upd:Date.now() };
+}
+function restaurarDePapelera(c, id){
+  var x = buscarId(c, id);
+  if(!x) return;
+  delete x.del; delete x.delEn; x.upd = Date.now();
+  guardar();
+}
+VISTAS.papelera = function(){
+  var cs = enPapelera();
+  var html = '<section class="tarjeta papelera">' + cabTarjeta('i-basura', 'Papelera' + (cs.length ? ' <span class="cab-num">' + cs.length + '</span>' : ''), 'var(--debe)', cs.length ? 'Vaciar' : '', cs.length ? 'data-acc="pap-vaciar"' : '') +
+    '<p class="explica" style="margin:0 16px 10px">Lo que borras queda aquí ' + DIAS_PAPELERA + ' días y después se borra solo. Toca <b>Restaurar</b> para devolverlo a su sitio.</p>';
+  if(!cs.length) return html + vacio('🗑️', 'La papelera está vacía', 'Cuando borres algo, lo encontrarás aquí.') + '</section>';
+  var grupo = '';
+  html += '<div class="lista-filas">' + cs.map(function(p){
+    var dia = iso(new Date(p.cuando)), cab = '';
+    if(dia !== grupo){ grupo = dia; cab = '<div class="dia-mini"><b>' + cap(relativo(dia)) + '</b><span>' + fechaCorta(dia) + '</span></div>'; }
+    var T = PAPELERA_TIPOS[p.c], resta = DIAS_PAPELERA - Math.floor((Date.now() - p.cuando) / 864e5);
+    return cab + '<div class="fila pap-fila"><span class="em-fila">' + T[1] + '</span><div class="cuerpo"><div class="titulo">' + esc(p.t) + '</div>' +
+      '<div class="meta"><span>' + T[0] + '</span>' + (p.x.esp ? chipEsp(p.x) : '') + '<span>Se borra en ' + resta + (resta === 1 ? ' día' : ' días') + '</span></div></div>' +
+      '<div class="lado"><button class="btn chico primario" data-acc="pap-restaurar" data-c="' + p.c + '" data-id="' + p.x.id + '">' + ico('i-deshacer') + 'Restaurar</button>' +
+      '<button class="btn-icono" data-acc="pap-borrar" data-c="' + p.c + '" data-id="' + p.x.id + '" title="Borrar para siempre" aria-label="Borrar para siempre">' + ico('i-basura') + '</button></div></div>';
+  }).join('') + '</div></section>';
+  return html;
+};
+
+HIST.estable = fotoDB();
+limpiarPapelera();
+
 /* ---------- Tareas -------------------------------------------------------- */
 function ordenTareas(a, b){
   return (a.fecha || '9999').localeCompare(b.fecha || '9999') ||
@@ -4839,18 +5041,54 @@ var LIBROS = {
   oficina:  { clave:CLAVE_OFICINA, nube:'oficina_cuentas_db_cfg', nom:'Oficina',  sub:'Cuentas de la oficina', archivo:'oficina_' }
 };
 var marcos = {};
+function crearMarco(cual){
+  if(marcos[cual]) return marcos[cual];
+  var m = document.createElement('iframe');
+  m.className = 'marco-cuentas';
+  m.title = LIBROS[cual].sub;
+  m.style.display = 'none';
+  m.srcdoc = fuenteLibro(cual);
+  $('zonaCuentas').appendChild(m);
+  return (marcos[cual] = m);
+}
 function mostrarLibro(cual){
   var z = $('zonaCuentas');
   z.classList.remove('oculto');
+  crearMarco(cual);
   Object.keys(marcos).forEach(function(k){ marcos[k].style.display = k === cual ? '' : 'none'; });
-  if(!marcos[cual]){
-    var m = document.createElement('iframe');
-    m.className = 'marco-cuentas';
-    m.title = LIBROS[cual].sub;
-    m.srcdoc = fuenteLibro(cual);
-    z.appendChild(m);
-    marcos[cual] = m;
-  }
+}
+/* Informe de un libro sin tener que abrirlo: se usa el mismo motor de
+   Excel y PDF del libro, con el periodo que elijas aquí */
+function exportarLibro(cual, formato, periodo, desde, hasta){
+  var m = crearMarco(cual), intentos = 0;
+  (function prueba(){
+    var w = null; try{ w = m.contentWindow; }catch(e){}
+    if(w && typeof w.exportarPara === 'function'){
+      var n = w.exportarPara(periodo, desde, hasta, formato);
+      if(!n) aviso('Sin movimientos', NOM_LIBRO[cual] + ': no hay nada en ese periodo.');
+      return;
+    }
+    if(++intentos > 60){ aviso('No se pudo preparar el informe', 'Abre el libro una vez y vuelve a intentarlo.'); return; }
+    setTimeout(prueba, 100);
+  })();
+}
+function tarjetaInformes(){
+  var I = ui.inf || (ui.inf = { libro:ui.dinLibro === 'oficina' ? 'oficina' : ui.dinLibro === 'personal' ? 'personal' : 'ambos', periodo:'mes', desde:'', hasta:'' });
+  var PER = [['mes','Este mes'],['mes-1','Mes pasado'],['90','Últimos 90 días'],['anio','Este año'],['todo','Todo'],['rango','Elegir fechas']];
+  return '<section class="tarjeta informes" style="margin-bottom:14px">' + cabTarjeta('i-bajar', 'Descargar informes', 'var(--azul)') +
+    '<div class="tarjeta-cuerpo">' +
+      '<div class="inf-fila"><span>Libro</span><div class="selector">' + [['personal','🏠 Personal'],['oficina','💼 Oficina'],['ambos','Los dos']].map(function(o){
+        return '<button type="button" data-acc="inf-libro" data-v="' + o[0] + '" aria-pressed="' + (I.libro === o[0]) + '">' + o[1] + '</button>';
+      }).join('') + '</div></div>' +
+      '<div class="inf-fila"><span>Periodo</span><div class="selector inf-per">' + PER.map(function(o){
+        return '<button type="button" data-acc="inf-per" data-v="' + o[0] + '" aria-pressed="' + (I.periodo === o[0]) + '">' + o[1] + '</button>';
+      }).join('') + '</div></div>' +
+      (I.periodo === 'rango' ? '<div class="fila-campos inf-rango"><label class="campo"><span>Desde</span><input type="date" id="infDesde" value="' + esc(I.desde) + '"></label><label class="campo"><span>Hasta</span><input type="date" id="infHasta" value="' + esc(I.hasta) + '"></label></div>' : '') +
+      '<div class="inf-botones">' +
+        '<button type="button" class="btn inf-btn excel" data-acc="inf-bajar" data-v="xlsx"><span class="inf-ico">XLS</span><span><b>Excel</b><small>Movimientos con fórmulas, resumen por mes y por categoría</small></span></button>' +
+        '<button type="button" class="btn inf-btn pdf" data-acc="inf-bajar" data-v="pdf"><span class="inf-ico">PDF</span><span><b>PDF</b><small>Informe listo para imprimir o enviar</small></span></button>' +
+      '</div>' +
+    '</div></section>';
 }
 var cacheCuentas = '';
 function fuenteCuentas(){
@@ -4874,6 +5112,17 @@ function fuenteLibro(cual){
   cambia("pdf.texto('Cuentas',", "pdf.texto('" + L.sub + "',");
   cambia("'cuentas_' + hoyISO()", "'" + L.archivo + "' + hoyISO()");
   cambia("'respaldo_cuentas_' + hoyISO()", "'respaldo_" + L.archivo + "' + hoyISO()");
+  cambia("pdf.texto('CUENTAS', M", "pdf.texto('" + L.sub.toUpperCase() + "', M");
+  cambia('function subirANube(){', 'window.recargarLibro = function(){ if(estado.editando) return false; cargarLocal(); pintarTodo(); return true; };' +
+    'window.estadoNubeDesdeAgenda = function(e){ estadoNube(hayNube() ? e : "off"); };' +
+    'function subirANube(){ try{ if(window.parent !== window && window.parent.sincronizarLibro){ if(hayNube()){ estadoNube("busy"); if(window.cuentasHuboCambio) window.cuentasHuboCambio(); } window.parent.sincronizarLibro("' + cual + '"); return; } }catch(e){}');
+  cambia('function bajarDeNube(silencioso){', 'function bajarDeNube(silencioso){ try{ if(window.parent !== window && window.parent.sincronizarLibro){ if(!estado.editando) window.parent.sincronizarLibro("' + cual + '", true); return; } }catch(e){}');
+  cambia('function bajarArchivo(blob, nombre){', 'window.exportarPara = function(periodo, desde, hasta, formato){' +
+    'var f = estado.filtros, antes = { periodo:f.periodo, desde:f.desde, hasta:f.hasta, ym:f.ym };' +
+    'f.periodo = periodo; f.desde = desde || ""; f.hasta = hasta || ""; f.ym = periodo === "ym" ? desde : "";' +
+    'try{ if(formato === "pdf") exportarPDF(); else if(formato === "csv") exportarCSV(); else exportarExcel(); } finally { f.periodo = antes.periodo; f.desde = antes.desde; f.hasta = antes.hasta; f.ym = antes.ym; }' +
+    'return delPeriodo().length; };' +
+    'function bajarArchivo(blob, nombre){ try{ if(window.parent !== window && window.parent.guardarArchivo){ window.parent.guardarArchivo(blob, nombre); return; } }catch(e){}');
   /* El libro se viste igual que la agenda: mismo logo, mismas tarjetas */
   var logo = getComputedStyle(document.documentElement).getPropertyValue('--logo').trim();
   var fuenteCss = window.FUENTE_AGENDA ? "@font-face{font-family:'Jakarta';src:url(" + window.FUENTE_AGENDA + ") format('woff2');font-weight:200 800}:root{--letra:'Jakarta',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important}body{font-family:var(--letra)!important}" : '';
@@ -4969,6 +5218,7 @@ VISTAS.dinero = function(){
       '<span class="dato">' + ico('i-cuentas') + '<b>' + dinero(saldo) + '</b> saldo total</span>' +
     '</div></section>';
 
+  html += tarjetaInformes();
   /* Anotar rápido */
   var cats = {};
   lista.forEach(function(t){ if(t.cat) cats[t.cat] = (cats[t.cat] || 0) + 1; });
@@ -5076,19 +5326,8 @@ function cambiarLibro(cual, fn){
   var lista = raw && Array.isArray(raw.transactions) ? raw.transactions : (Array.isArray(raw) ? raw : []);
   lista = fn(lista);
   escribirJSON(L.clave, { transactions:lista });
-  var cfg = leerJSON(L.nube, null);
-  if(cfg && cfg.key && cfg.bin){
-    fetch(JSONBIN + '/' + cfg.bin + '/latest', { headers:{ 'X-Master-Key':cfg.key, 'X-Bin-Meta':'false' }, cache:'no-store' })
-      .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-      .then(function(rem){
-        var l2 = Array.isArray(rem) ? rem : (rem && Array.isArray(rem.transactions) ? rem.transactions : []);
-        l2 = fn(l2);
-        return fetch(JSONBIN + '/' + cfg.bin, { method:'PUT', headers:{ 'Content-Type':'application/json', 'X-Master-Key':cfg.key },
-          body:JSON.stringify(l2.length ? l2 : { transactions:[] }) });
-      })
-      .catch(function(){ aviso('Anotado en este aparato', 'No se pudo subir a la nube del libro; se subirá al abrirlo.'); });
-  }
-  if(marcos[cual]) marcos[cual].srcdoc = fuenteLibro(cual) + '<!-- ' + Date.now() + ' -->';
+  recargarMarco(cual);
+  sincronizarLibro(cual);
 }
 function anotarMovimiento(f){
   var monto = Math.round(Math.abs(num(f.monto.value)) * 100) / 100;
@@ -5255,7 +5494,7 @@ VISTAS.pagos = function(){
       inactivos.map(function(p){ return '<div class="fila"><span class="em-fila">' + esc(p.em || '🧾') + '</span><div class="cuerpo" data-acc="pago-ed" data-id="' + p.id + '"><div class="titulo">' + esc(p.t) + '</div><div class="meta"><span>Pausado</span></div></div><span class="monto">' + dinero(+p.monto || 0) + '</span></div>'; }).join('') +
       '</div></div>';
   }
-  return html + '<p style="color:var(--tinta-3);font-size:12.5px;margin-top:14px">Marcar un pago no lo anota en tus libros: si quieres que cuente, anótalo también como gasto en Gastos personales u Oficina.</p>';
+  return html + '<p style="color:var(--tinta-3);font-size:12.5px;margin-top:14px">Al marcar un pago como pagado se anota solo como gasto en su libro (Gastos personales u Oficina). Si no quieres que se anote, desactívalo al editar el pago.</p>';
 };
 function editarPago(id, preset){
   var p = id ? JSON.parse(JSON.stringify(buscarId('pagos', id))) :
@@ -5646,19 +5885,22 @@ VISTAS.ajustes = function(){
 
   html += '<div class="seccion-tit">Sincronizar entre aparatos</div><div class="tarjeta">';
   if(nube){
-    html += '<div class="ajuste"><div class="txt"><b>Conectada a jsonbin.io</b><small>La agenda se guarda también en tu base <span class="cifra">' + esc(nube.bin) + '</span> y se junta con la de tus otros aparatos. Cuentas sincroniza aparte, desde su propio menú.</small></div>' +
+    html += '<div class="ajuste"><div class="txt"><b>Conectada a jsonbin.io</b><small>La agenda se guarda también en tu base <span class="cifra">' + esc(nube.bin) + '</span> y se junta con la de tus otros aparatos.</small>' + estadoNubes() + '</div>' +
       '<button class="btn chico primario" data-acc="nube-ya">' + ico('i-nube') + 'Sincronizar ahora</button></div>' +
-      '<div class="ajuste"><div class="txt"><b>Añadir otro aparato</b><small>Copia este código y pégalo en Ajustes del otro aparato.</small></div>' +
+      ((leerJSON(LIBROS.personal.nube, null) || {}).bin && (leerJSON(LIBROS.oficina.nube, null) || {}).bin ? '' :
+        '<div class="ajuste"><div class="txt"><b>Poner también los libros en la nube</b><small>Crea las bases que faltan con tu misma llave, para que tus cuentas también pasen de un aparato a otro.</small></div>' +
+        '<button class="btn chico primario" data-acc="nube-libros">' + ico('i-nube') + 'Conectar libros</button></div>') +
+      '<div class="ajuste"><div class="txt"><b>Añadir otro aparato</b><small>Copia este código y pégalo en Ajustes del otro aparato (celular o laptop). Con él se conectan la agenda y los dos libros a la vez.</small></div>' +
       '<button class="btn chico" data-acc="nube-codigo">Ver código</button></div>' +
       '<div class="ajuste"><div class="txt"><b>Desconectar este aparato</b><small>Los datos se quedan aquí y en la nube; solo deja de sincronizar.</small></div>' +
       '<button class="btn chico peligro" data-acc="nube-quitar">Desconectar</button></div>';
   } else {
-    html += '<div class="ajuste"><div class="txt"><b>Primer aparato</b><small>Usa tu cuenta gratuita de jsonbin.io, la misma de Cuentas. Pega tu X-Master-Key' +
-      (llaveCuentas ? ' (ya la puse: es la que usa Cuentas)' : '') + ' y crea la base de la agenda.</small></div>' +
+    html += '<div class="ajuste"><div class="txt"><b>Primer aparato</b><small>Usa tu cuenta gratuita de jsonbin.io. Pega tu X-Master-Key' +
+      (llaveCuentas ? ' (ya la puse: es la que usaba Cuentas)' : '') + ' y se crean las bases de la agenda y de los dos libros. Luego conecta tus otros aparatos con el código.</small></div>' +
       '<input class="entrada" id="ajLlave" style="max-width:320px" placeholder="X-Master-Key" value="' + esc(llaveCuentas) + '">' +
       '<button class="btn chico primario" data-acc="nube-crear">Crear base</button></div>' +
       '<div class="ajuste"><div class="txt"><b>Otro aparato</b><small>Pega el código que te da el primero.</small></div>' +
-      '<input class="entrada" id="ajCodigo" style="max-width:320px" placeholder="AGENDA1:…">' +
+      '<input class="entrada" id="ajCodigo" style="max-width:320px" placeholder="AGENDA2:…">' +
       '<button class="btn chico" data-acc="nube-unir">Conectar</button></div>';
   }
   html += '</div>';
@@ -5668,9 +5910,11 @@ VISTAS.ajustes = function(){
       '<button class="btn chico" data-acc="respaldo">' + ico('i-bajar') + 'Descargar</button>' +
       '<button class="btn chico" data-acc="cargar">' + ico('i-subir') + 'Cargar</button>' +
       '<input type="file" id="archivoRespaldo" accept=".json,application/json" class="oculto"></div>' +
+    '<div class="ajuste"><div class="txt"><b>Papelera</b><small>Lo que borras se guarda ' + DIAS_PAPELERA + ' días por si te arrepientes.</small></div>' +
+      '<button class="btn chico" data-ir="papelera">' + ico('i-basura') + 'Abrir (' + enPapelera().length + ')</button></div>' +
     '<div class="ajuste"><div class="txt"><b>Instalar como aplicación</b><small>Con su icono, a pantalla completa y abriendo sin internet.</small></div>' +
       '<button class="btn chico" data-acc="instalar">' + ico('i-instalar') + 'Instalar</button></div>' +
-    '<div class="ajuste"><div class="txt"><b>Borrar toda la agenda</b><small>Tareas, listas, eventos, recordatorios, hábitos y notas de este aparato. Las cuentas no se tocan.</small></div>' +
+    '<div class="ajuste"><div class="txt"><b>Borrar toda la agenda</b><small>Todo lo de la agenda pasa a la papelera (30 días para arrepentirte). Las cuentas no se tocan.</small></div>' +
       '<button class="btn chico peligro" data-acc="borrar-todo">' + ico('i-basura') + 'Borrar</button></div>' +
   '</div>';
 
@@ -6109,7 +6353,7 @@ function menuNuevo(){
 }
 function menuMas(){
   var k = contadores(), grupos = [], g = null;
-  SECCIONES.forEach(function(sc){
+  SNAV.forEach(function(sc){
     if(sc.id === 'hoy') return;
     if(sc.g){ g = { n:sc.g, items:[] }; grupos.push(g); }
     g.items.push(sc);
@@ -6123,7 +6367,8 @@ function menuMas(){
     }).join('') + '</div></div>';
   }).join('') +
     '<div class="mas-grupo"><h4>Herramientas</h4><div class="rejilla-mas"><button type="button" data-acc="buscar">' + ico('i-buscar') + '<span>Buscar</span></button>' +
-    '<button type="button" data-ir="ajustes">' + ico('i-ajustes') + '<span>Ajustes</span></button><button type="button" data-acc="personalizar-hoy">' + ico('i-hoy') + '<span>Personalizar Hoy</span></button></div></div>');
+    '<button type="button" data-ir="ajustes">' + ico('i-ajustes') + '<span>Ajustes</span></button><button type="button" data-acc="personalizar-hoy">' + ico('i-hoy') + '<span>Personalizar Hoy</span></button>' +
+    '<button type="button" data-ir="papelera">' + ico('i-basura') + '<span>Papelera</span>' + (enPapelera().length ? '<span class="globo gris">' + enPapelera().length + '</span>' : '') + '</button></div></div>');
 }
 function nuevo(tipo, preset){
   cerrarFlotante();
@@ -6252,7 +6497,31 @@ function bajarICS(eventos, nombre){
   var txt = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Agenda personal//ES', 'CALSCALE:GREGORIAN'].concat(eventos).concat(['END:VCALENDAR']).join('\r\n');
   bajar(new Blob([txt], { type:'text/calendar;charset=utf-8' }), nombre.replace(/[\\/:*?"<>|]+/g, '_'));
 }
+/* Todas las descargas pasan por aquí: en la vista previa de Claude se
+   usa su permiso de descargas; en el navegador o la app instalada, la
+   descarga de siempre. Los libros de cuentas también la usan. */
+var descargasClaude;
 function bajar(blob, nombre){
+  var c = window.claude;
+  if(descargasClaude === undefined && c && typeof c.use === 'function'){
+    descargasClaude = null;
+    c.use('downloads').then(function(d){ descargasClaude = d || null; if(d) bajar(blob, nombre); else bajarDirecto(blob, nombre); }, function(){ bajarDirecto(blob, nombre); });
+    return;
+  }
+  if(descargasClaude){
+    descargasClaude.save({ filename:nombre, data:blob }).then(function(){ aviso('📥 Archivo guardado', nombre); }, function(e){
+      var k = e && e.code;
+      if(k === 'declined') return;
+      if(k === 'rate_limited') aviso('Espera un momento', 'Ya hay una descarga pendiente de confirmar.');
+      else if(k === 'rejected_extension' || k === 'extension_not_enabled') aviso('Este tipo de archivo no se puede guardar aquí', 'Ábrelo desde la app instalada o el navegador.');
+      else bajarDirecto(blob, nombre);
+    });
+    return;
+  }
+  bajarDirecto(blob, nombre);
+}
+window.guardarArchivo = bajar;
+function bajarDirecto(blob, nombre){
   var a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = nombre;
   document.body.appendChild(a); a.click();
@@ -6273,6 +6542,9 @@ function aviso(titulo, texto, boton, alPulsar, alarma){
   if(boton) el.querySelector('button').onclick = function(){ el.remove(); alPulsar(); };
   var ok = el.querySelector('[data-cerrar]');
   if(ok) ok.onclick = function(){ el.remove(); };
+  /* Un aviso a la vez (las alarmas se quedan): no tapan la pantalla */
+  if(!alarma) [].slice.call(caja.querySelectorAll('.aviso:not(.alarma)')).forEach(function(x){ x.remove(); });
+  el.querySelector('.txt').onclick = function(){ if(!alarma) el.remove(); };
   caja.appendChild(el);
   while(caja.children.length > 3) caja.firstChild.remove();
   if(!alarma) setTimeout(function(){ el.remove(); }, boton ? 6000 : 3200);
@@ -6454,28 +6726,132 @@ function crearBase(llave){
     .then(function(j){
       nube = { key:llave, bin:j.metadata.id };
       escribirJSON(CLAVE_NUBE, nube);
-      aviso('Nube conectada', 'Ahora puedes añadir tus otros aparatos.');
-      estadoNube('ok'); pintar();
+      return crearBaseLibro('personal', llave).then(function(){ return crearBaseLibro('oficina', llave); }).then(function(){
+        aviso('Nube conectada', 'La agenda y los dos libros ya se guardan en la nube. Ahora añade tus otros aparatos.');
+        estadoNube('ok'); pintar(); sincronizarTodo();
+      });
     })
     .catch(function(e){ aviso('No se pudo crear', String(e.message || e)); });
 }
-function codigoNube(){ return 'AGENDA1:' + btoa(JSON.stringify({ k:nube.key, b:nube.bin })); }
+function estadoNubes(){
+  var fila = function(n, ok){ return '<span class="nube-est ' + (ok ? 'ok' : '') + '">' + (ok ? '✓ ' : '○ ') + n + '</span>'; };
+  return '<div class="nubes-est">' + fila('Agenda', !!nube) + fila('Gastos personales', !!(leerJSON(LIBROS.personal.nube, null) || {}).bin) + fila('Oficina', !!(leerJSON(LIBROS.oficina.nube, null) || {}).bin) + '</div>';
+}
+function codigoNube(){
+  var p = leerJSON(LIBROS.personal.nube, null), o = leerJSON(LIBROS.oficina.nube, null), j = { k:nube.key, b:nube.bin };
+  if(p && p.bin) j.p = { k:p.key, b:p.bin };
+  if(o && o.bin) j.o = { k:o.key, b:o.bin };
+  return 'AGENDA2:' + btoa(JSON.stringify(j));
+}
 function unirNube(codigo){
   try{
-    var j = JSON.parse(atob(String(codigo).trim().replace(/^AGENDA1:/, '')));
+    var j = JSON.parse(atob(String(codigo).replace(/\s+/g, '').replace(/^AGENDA[12]:/, '')));
     if(!j.k || !j.b) throw 0;
     nube = { key:j.k, bin:j.b };
     escribirJSON(CLAVE_NUBE, nube);
+    if(j.p && j.p.b) escribirJSON(LIBROS.personal.nube, { key:j.p.k, bin:j.p.b });
+    if(j.o && j.o.b) escribirJSON(LIBROS.oficina.nube, { key:j.o.k, bin:j.o.b });
     aviso('Conectando…');
-    sincronizar().then(function(){ pintar(); aviso('Listo', 'Este aparato ya está sincronizado.'); });
+    sincronizarTodo().then(function(){
+      Object.keys(marcos).forEach(recargarMarco);
+      pintar(); aviso('Listo', 'Este aparato ya tiene tu agenda y tus dos libros.' + (j.p && j.o ? '' : ' Los libros sin nube se conectan desde el aparato principal.'));
+    });
   }catch(e){ aviso('Código no válido', 'Cópialo entero desde Ajustes del otro aparato.'); }
 }
 
 /* Escucha: rápido mientras la usas, nada si la dejas quieta */
+function hayAlgunaNube(){ return !!(nube || (leerJSON(LIBROS.personal.nube, null) || {}).bin || (leerJSON(LIBROS.oficina.nube, null) || {}).bin); }
 function latido(){
-  if(!nube || document.hidden) return;
+  if(!hayAlgunaNube() || document.hidden) return;
   if(Date.now() - ultimoToque > 5 * 60e3) return;
-  sincronizar();
+  sincronizarTodo();
+}
+window.addEventListener('online', function(){ if(hayAlgunaNube()) sincronizarTodo(); });
+
+/* ==========================================================================
+   NUBE DE LOS LIBROS
+   Los dos libros de cuentas se sincronizan desde aquí, igual que la agenda:
+   se baja lo de la nube y se junta movimiento por movimiento con lo de este
+   aparato. Para saber qué se borró en el otro aparato se recuerda la última
+   versión que ambos compartieron (la "base"): lo que estaba en la base y ya
+   no está en un lado, se borró ahí. Así nadie pisa a nadie.
+   En la nube el libro sigue guardándose como una lista de movimientos, el
+   mismo formato de siempre de Cuentas.
+   ========================================================================== */
+var syncLibro = { personal:{ en:false, otra:false, ult:0 }, oficina:{ en:false, otra:false, ult:0 } };
+function movsLocal(clave){
+  var raw = leerJSON(clave, null);
+  return raw && Array.isArray(raw.transactions) ? raw.transactions : (Array.isArray(raw) ? raw : []);
+}
+function movsDeNube(d){
+  var r = d && d.record !== undefined ? d.record : d;
+  return Array.isArray(r) ? r : (r && Array.isArray(r.transactions) ? r.transactions : []);
+}
+function juntarMovs(loc, rem, base){
+  var B = {}, L = {}, R = {}, ids = [], out = [];
+  var hayBase = Array.isArray(base);
+  (base || []).forEach(function(x){ B[x.id] = JSON.stringify(x); });
+  loc.forEach(function(x){ if(x && x.id && !L[x.id]){ L[x.id] = x; ids.push(x.id); } });
+  rem.forEach(function(x){ if(x && x.id && !R[x.id]){ R[x.id] = x; if(!L[x.id]) ids.push(x.id); } });
+  ids.forEach(function(id){
+    var l = L[id], r = R[id], b = B[id];
+    if(l && r){
+      var ls = JSON.stringify(l), rs = JSON.stringify(r);
+      out.push(ls === rs ? l : (b !== undefined && ls === b) ? r : l);
+    } else {
+      var x = l || r;
+      /* Estaba en la base y el otro lado ya no lo tiene: se borró allí,
+         salvo que aquí se haya cambiado después (gana el cambio) */
+      if(hayBase && b !== undefined && JSON.stringify(x) === b) return;
+      out.push(x);
+    }
+  });
+  return out;
+}
+function cuerpoLibro(l){ return JSON.stringify(l.length ? l : { transactions:[] }); }
+function recargarMarco(cual){
+  var m = marcos[cual];
+  if(!m) return;
+  try{ if(m.contentWindow && m.contentWindow.recargarLibro && m.contentWindow.recargarLibro() !== false) return; }catch(e){}
+  m.srcdoc = fuenteLibro(cual) + '<!-- ' + Date.now() + ' -->';
+}
+/* soloSiToca: cuando lo pide el latido del libro, no más de una vez cada 8 s */
+function sincronizarLibro(cual, soloSiToca){
+  var L = LIBROS[cual], cfg = leerJSON(L.nube, null), S = syncLibro[cual];
+  if(!cfg || !cfg.key || !cfg.bin) return Promise.resolve();
+  if(soloSiToca && Date.now() - S.ult < 8000) return Promise.resolve();
+  if(S.en){ S.otra = true; return Promise.resolve(); }
+  S.en = true; S.ult = Date.now();
+  return fetch(JSONBIN + '/' + cfg.bin + '/latest', { headers:{ 'X-Master-Key':cfg.key, 'X-Bin-Meta':'false' }, cache:'no-store' })
+    .then(function(r){ if(!r.ok) throw new Error('http ' + r.status); return r.json(); })
+    .then(function(d){
+      var rem = movsDeNube(d), loc = movsLocal(L.clave), base = leerJSON(L.clave + '_base', null);
+      var junto = juntarMovs(loc, rem, base);
+      var jl = JSON.stringify(junto);
+      if(jl !== JSON.stringify(loc)){ escribirJSON(L.clave, { transactions:junto }); recargarMarco(cual); if(ui.vista === 'dinero' || ui.vista === 'hoy' || ui.vista.indexOf('esp-') === 0) pintarSeguro(); }
+      escribirJSON(L.clave + '_base', junto);
+      if(jl !== JSON.stringify(rem)){
+        return fetch(JSONBIN + '/' + cfg.bin, { method:'PUT', headers:{ 'Content-Type':'application/json', 'X-Master-Key':cfg.key }, body:cuerpoLibro(junto) })
+          .then(function(r){ if(!r.ok) throw new Error('http ' + r.status); });
+      }
+    })
+    .then(function(){ estadoLibroMarco(cual, 'ok'); }, function(){ estadoLibroMarco(cual, 'err'); })
+    .then(function(){ S.en = false; if(S.otra){ S.otra = false; sincronizarLibro(cual); } });
+}
+function estadoLibroMarco(cual, e){
+  try{ var w = marcos[cual] && marcos[cual].contentWindow; if(w && w.estadoNubeDesdeAgenda) w.estadoNubeDesdeAgenda(e); }catch(x){}
+}
+window.sincronizarLibro = sincronizarLibro;
+function sincronizarTodo(){
+  return Promise.all([sincronizar(), sincronizarLibro('personal'), sincronizarLibro('oficina')]);
+}
+/* Crea en jsonbin la base de un libro que aún no tiene */
+function crearBaseLibro(cual, llave){
+  var L = LIBROS[cual], c = leerJSON(L.nube, null);
+  if(c && c.key && c.bin) return Promise.resolve(c);
+  return fetch(JSONBIN, { method:'POST', headers:{ 'Content-Type':'application/json', 'X-Master-Key':llave, 'X-Bin-Name':L.archivo.replace(/_$/, ''), 'X-Bin-Private':'true' }, body:cuerpoLibro(movsLocal(L.clave)) })
+    .then(function(r){ return r.json().then(function(j){ if(!r.ok) throw new Error(j && j.message || 'http ' + r.status); return j; }); })
+    .then(function(j){ var cfg = { key:llave, bin:j.metadata.id }; escribirJSON(L.nube, cfg); escribirJSON(L.clave + '_base', movsLocal(L.clave)); return cfg; });
 }
 
 /* ==========================================================================
@@ -6710,6 +7086,27 @@ document.addEventListener('click', function(ev){
 
   switch(a){
     case 'menu-mas': menuMas(); break;
+    case 'deshacer': deshacer(); break;
+    case 'rehacer': rehacer(); break;
+    case 'pap-restaurar': restaurarDePapelera(b.dataset.c, id); aviso('Restaurado', PAPELERA_TIPOS[b.dataset.c][0] + ' devuelto a su sitio'); pintar(); break;
+    case 'pap-borrar':
+      if(!confirm('¿Borrar para siempre? Ya no se podrá recuperar.')) return;
+      purgar(b.dataset.c, id); guardar(); pintar(); break;
+    case 'pap-vaciar':
+      var nP = enPapelera().length;
+      if(!confirm('¿Vaciar la papelera? Se borrarán para siempre ' + nP + (nP === 1 ? ' cosa.' : ' cosas.'))) return;
+      enPapelera().forEach(function(p){ purgar(p.c, p.x.id); }); guardar(); pintar(); aviso('🗑️ Papelera vacía'); break;
+    case 'ir-informes': ir('dinero'); setTimeout(function(){ var t = document.querySelector('.informes'); if(t) t.scrollIntoView({ block:'start', behavior:'smooth' }); }, 60); break;
+    case 'inf-libro': ui.inf.libro = b.dataset.v; pintar(); break;
+    case 'inf-per': ui.inf.periodo = b.dataset.v; pintar(); break;
+    case 'inf-bajar':
+      var I = ui.inf;
+      if(I.periodo === 'rango'){ I.desde = ($('infDesde') || {}).value || ''; I.hasta = ($('infHasta') || {}).value || ''; if(!I.desde && !I.hasta){ aviso('Elige las fechas', 'Pon al menos el día de inicio o el de fin.'); break; } }
+      (I.libro === 'ambos' ? ['personal','oficina'] : [I.libro]).forEach(function(l, k){
+        setTimeout(function(){ exportarLibro(l, b.dataset.v, I.periodo, I.desde, I.hasta); }, k * 1500);
+      });
+      aviso('Preparando ' + (b.dataset.v === 'pdf' ? 'el PDF' : 'el Excel') + '…', I.libro === 'ambos' ? 'Se descargan dos archivos: personal y oficina.' : null);
+      break;
     case 'personalizar-hoy': personalizarHoy(); break;
     case 'nav-plegar':
       var pl = navPlegados().slice(), gi = pl.indexOf(b.dataset.v);
@@ -6733,7 +7130,7 @@ document.addEventListener('click', function(ev){
     case 'rec-ver-hechos': ui.verHechos = !ui.verHechos; pintar(); break;
     case 'rec-borrar-hechos':
       if(!confirm('¿Borrar todos los recordatorios hechos?')) return;
-      vivos('recordatorios').forEach(function(r){ if(r.hecho && (!r.rep || r.rep === 'no')){ r.del = true; r.upd = Date.now(); } });
+      vivos('recordatorios').forEach(function(r){ if(r.hecho && (!r.rep || r.rep === 'no')){ r.del = true; r.upd = r.delEn = Date.now(); } });
       guardar(); pintar(); break;
     case 'evento-ed': cerrarFlotante(); editarEvento(id); break;
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
@@ -6743,7 +7140,7 @@ document.addEventListener('click', function(ev){
     case 't-area': ui.tArea = b.dataset.a; pintar(); break;
     case 't-borrar-hechas':
       if(!confirm('¿Borrar todas las tareas hechas?')) return;
-      vivos('tareas').forEach(function(x){ if(x.hecha){ x.del = true; x.upd = Date.now(); } });
+      vivos('tareas').forEach(function(x){ if(x.hecha){ x.del = true; x.upd = x.delEn = Date.now(); } });
       guardar(); pintar(); break;
 
     case 'enfoque-ok':
@@ -7005,8 +7402,13 @@ document.addEventListener('click', function(ev){
       if(!evs.length){ aviso('No hay eventos ni recordatorios'); return; }
       bajarICS(evs, 'agenda_' + hoyISO() + '.ics'); break;
     case 'nube-crear': crearBase($('ajLlave').value); break;
+    case 'nube-libros':
+      aviso('Conectando los libros…');
+      crearBaseLibro('personal', nube.key).then(function(){ return crearBaseLibro('oficina', nube.key); })
+        .then(function(){ aviso('Libros en la nube', 'Ahora copia de nuevo el código para tus otros aparatos.'); sincronizarTodo(); pintar(); }, function(e){ aviso('No se pudo', String(e.message || e)); });
+      break;
     case 'nube-unir': unirNube($('ajCodigo').value); break;
-    case 'nube-ya': sincronizar().then(function(){ aviso($('pastillaNube').dataset.estado === 'ok' ? 'Sincronizado' : 'No se pudo conectar'); }); break;
+    case 'nube-ya': sincronizarTodo().then(function(){ aviso($('pastillaNube').dataset.estado === 'ok' ? 'Sincronizado' : 'No se pudo conectar'); }); break;
     case 'nube-codigo':
       var cod = codigoNube();
       abrirFlotante(cabFlot('Código para otro aparato') +
@@ -7021,7 +7423,7 @@ document.addEventListener('click', function(ev){
       break;
     case 'nube-quitar':
       if(!confirm('¿Dejar de sincronizar este aparato?')) return;
-      nube = null; try{ localStorage.removeItem(CLAVE_NUBE); }catch(e){}
+      nube = null; try{ localStorage.removeItem(CLAVE_NUBE); localStorage.removeItem(LIBROS.personal.nube); localStorage.removeItem(LIBROS.oficina.nube); }catch(e){}
       estadoNube('off'); pintar(); break;
     case 'respaldo': descargarRespaldo(); break;
     case 'cargar': $('archivoRespaldo').click(); break;
@@ -7029,7 +7431,7 @@ document.addEventListener('click', function(ev){
     case 'borrar-todo':
       if(!confirm('¿Borrar TODA la agenda de este aparato? Los gastos personales y la oficina no se tocan.')) return;
       if(!confirm('Seguro? No se puede deshacer (salvo con un respaldo).')) return;
-      COLS.forEach(function(c){ db[c].forEach(function(x){ x.del = true; x.upd = Date.now(); }); });
+      COLS.forEach(function(c){ db[c].forEach(function(x){ if(!x.del){ x.del = true; x.upd = x.delEn = Date.now(); } }); });
       guardar(); pintar(); aviso('Agenda vaciada'); break;
   }
 });
@@ -7227,6 +7629,11 @@ document.addEventListener('keydown', function(ev){
   if(ev.key === 'Enter' && ev.target.closest && ev.target.closest('#subs')){
     ev.preventDefault(); if(edAcciones['sub-add']) edAcciones['sub-add'](); return;
   }
+  if((ev.ctrlKey || ev.metaKey) && !ev.altKey && !enCampo && !$('capaFlotante').innerHTML){
+    var kz = ev.key.toLowerCase();
+    if(kz === 'z' && !ev.shiftKey){ ev.preventDefault(); deshacer(); return; }
+    if(kz === 'y' || (kz === 'z' && ev.shiftKey)){ ev.preventDefault(); rehacer(); return; }
+  }
   if(enCampo || ev.ctrlKey || ev.metaKey || ev.altKey) return;
   if($('capaFlotante').innerHTML) return;
   if(ev.key === '/'){ ev.preventDefault(); abrirBuscar(); }
@@ -7241,7 +7648,7 @@ $('btnTema').addEventListener('click', function(ev){
   aplicarTema(document.documentElement.getAttribute('data-tema') === 'claro' ? 'oscuro' : 'claro');
   if(ui.vista === 'ajustes') pintar();
 });
-$('pastillaNube').addEventListener('click', function(ev){ ev.stopPropagation(); sincronizar(); });
+$('pastillaNube').addEventListener('click', function(ev){ ev.stopPropagation(); sincronizarTodo(); });
 
 window.addEventListener('popstate', function(){ ir((location.hash || '#hoy').slice(1), true); });
 
@@ -7261,7 +7668,7 @@ window.addEventListener('storage', function(ev){
 document.addEventListener('visibilitychange', function(){
   if(document.hidden){ ocultoDesde = Date.now(); return; }
   if(pinCfg && ocultoDesde && Date.now() - ocultoDesde > 60000) mostrarCandado('abrir');
-  if(!document.hidden){ ultimoToque = Date.now(); revisarAlarmas(); if(nube) sincronizar(); pintarSeguro(); }
+  if(!document.hidden){ ultimoToque = Date.now(); revisarAlarmas(); if(hayAlgunaNube()) sincronizarTodo(); pintarSeguro(); }
 });
 
 /* ==========================================================================
@@ -7301,7 +7708,7 @@ document.addEventListener('visibilitychange', function(){
   setInterval(tictac, 1000);
   revisarAlarmas();
   setInterval(revisarAlarmas, 15000);
-  if(nube) sincronizar();
+  if(hayAlgunaNube()) sincronizarTodo();
   setInterval(latido, 30000);
 
   /* A medianoche cambia el día: Hoy tiene que enterarse */

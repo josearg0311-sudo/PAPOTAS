@@ -47,6 +47,8 @@
   <symbol id="i-espacios" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2.5"/><rect x="13" y="3" width="8" height="8" rx="2.5"/><rect x="3" y="13" width="8" height="8" rx="2.5"/><circle cx="17" cy="17" r="4"/></symbol>
   <symbol id="i-maletin" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="3"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20M10 13v2h4v-2"/></symbol>
   <symbol id="i-gota" viewBox="0 0 24 24"><path d="M12 2.7s6.5 7 6.5 11.8a6.5 6.5 0 0 1-13 0C5.5 9.7 12 2.7 12 2.7Z"/></symbol>
+  <symbol id="i-deshacer" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-rehacer" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
   <symbol id="i-estrella" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1Z"/></symbol>
 </svg>
 
@@ -79,8 +81,11 @@
         <button type="button" class="pastilla foco oculto" id="pastillaFoco" data-ir="foco" title="Temporizador de enfoque">
           <svg class="i"><use href="#i-reloj"/></svg><span id="pastillaFocoTexto">25:00</span>
         </button>
+        <button type="button" class="btn-icono" id="btnDeshacer" data-acc="deshacer" title="Deshacer (Ctrl+Z)" aria-label="Deshacer" disabled><svg class="i"><use href="#i-deshacer"/></svg></button>
+        <button type="button" class="btn-icono" id="btnRehacer" data-acc="rehacer" title="Rehacer (Ctrl+Y)" aria-label="Rehacer" disabled><svg class="i"><use href="#i-rehacer"/></svg></button>
+        <button type="button" class="btn-icono solo-escritorio" data-ir="papelera" title="Papelera" aria-label="Papelera"><svg class="i"><use href="#i-basura"/></svg></button>
         <button type="button" class="btn-icono" id="btnBuscar" title="Buscar (/)" aria-label="Buscar"><svg class="i"><use href="#i-buscar"/></svg></button>
-        <button type="button" class="btn-icono" id="btnTema" title="Claro u oscuro" aria-label="Cambiar tema"><svg class="i"><use href="#i-luna"/></svg></button>
+        <button type="button" class="btn-icono solo-escritorio" id="btnTema" title="Claro u oscuro" aria-label="Cambiar tema"><svg class="i"><use href="#i-luna"/></svg></button>
         <button type="button" class="btn-icono solo-movil" data-ir="ajustes" aria-label="Ajustes"><svg class="i"><use href="#i-ajustes"/></svg></button>
       </div>
     </header>

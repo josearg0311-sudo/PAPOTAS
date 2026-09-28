@@ -9,7 +9,7 @@
    Esto NO guarda tus datos: viven en el navegador (y en jsonbin.io si
    conectas la nube). Esto solo guarda el programa. */
 
-const CACHE = 'agenda-v2';
+const CACHE = 'agenda-v3';
 /* El programa es un solo archivo: con eso basta para abrir sin red */
 const BASICOS = ['./', './index.html'];
 

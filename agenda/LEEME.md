@@ -81,7 +81,8 @@ Con **"Elegir qué ver en Hoy"** (al final de Hoy o en el menú Todo) ocultas la
 | **Hábitos, Metas, Enfoque, Diario, Progreso** | Rachas, metas con ritmo, temporizador pomodoro (cada sesión cuenta para un espacio), diario con ánimo y gráficas de progreso. |
 | **Dinero** | Los dos libros de un vistazo: resultado del mes, comparación con el mes pasado a estas alturas, presupuesto, últimos 6 meses, en qué se va y anotar en segundos. |
 | **Pagos fijos** | Luz, internet, alquiler… Al marcarlos pagados se anotan solos como gasto en el libro que toca. |
-| **Libro personal y Libro de oficina** | Tus dos libros de cuentas completos, con Excel, PDF y nube propia. |
+| **Libro personal y Libro de oficina** | Tus dos libros de cuentas completos. |
+| **Descargar informes** (en Dinero) | Excel y PDF de tus gastos personales, de la oficina o de los dos, del periodo que elijas: este mes, el pasado, 90 días, el año, todo o entre dos fechas. El Excel trae los movimientos con fórmulas y los resúmenes por mes y por categoría; el PDF, el informe listo para imprimir o enviar. |
 
 ## Escribir como hablas
 
@@ -116,8 +117,21 @@ suena siempre.
 
 - Viven en el navegador de cada aparato. **Respaldo** (Ajustes → Tus datos)
   guarda en un archivo la agenda y los dos libros.
-- **Sincronizar**: la agenda con tu cuenta gratuita de jsonbin.io (Ajustes);
-  cada libro de cuentas tiene su propia nube en su menú ⋯.
+- **Sincronizar celular y laptop** (Ajustes → Sincronizar entre aparatos):
+  1. En el primer aparato pega tu X-Master-Key de jsonbin.io y toca
+     **Crear base**: se crean la base de la agenda y las de los dos libros.
+  2. Toca **Ver código** y pega ese código (empieza por `AGENDA2:`) en el
+     otro aparato → **Conectar**. Con un solo código pasan la agenda, tus
+     gastos personales y las cuentas de la oficina.
+  3. Desde ahí se sincroniza solo: al abrir la app, al volver a ella, cada
+     poco mientras la usas y cuando vuelve el internet. Los cambios de los
+     dos aparatos se juntan uno por uno (nadie pisa a nadie) y lo que borras
+     en uno se borra en el otro.
+- **Deshacer y rehacer**: botones ↶ ↷ arriba (o Ctrl+Z / Ctrl+Y en la
+  laptop). Lo deshecho también viaja al otro aparato.
+- **Papelera**: lo que borras queda 30 días (Ajustes → Papelera, el menú
+  Todo o el icono 🗑 en la laptop). Puedes restaurarlo o borrarlo para
+  siempre.
 - El PIN tapa la agenda, no cifra los datos. Si lo olvidas no se puede
   recuperar: guarda un respaldo.
 
