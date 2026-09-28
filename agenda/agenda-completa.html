@@ -356,6 +356,8 @@ body.en-cuentas .fab{ display:none }
 .ficha .n{ font-size:11px; opacity:.75 }
 .desliza{ overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; margin-left:-16px; margin-right:-16px; padding:0 16px }
 .desliza::-webkit-scrollbar{ display:none }
+/* Un leve desvanecido al borde avisa que la fila sigue de lado */
+.desliza{ -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent) }
 
 .campo{ display:flex; flex-direction:column; gap:5px; min-width:0 }
 .campo > span{ font-size:12px; font-weight:700; color:var(--tinta-2) }
@@ -2621,13 +2623,17 @@ function pintarNav(){
 }
 
 function ir(v, sinHash){
+  /* Si justo se está deshaciendo el paso de una hoja, se va después */
+  if(ignorarPop && !sinHash){ irPendiente = v; return; }
   if(v === 'cuentas') v = 'personal';    // la dirección de antes sigue valiendo
   if(v !== 'ajustes' && !SECCIONES.some(function(s){ return s.id === v; })) v = 'hoy';
   if(v !== 'listas') ui.lista = null;
   if(v !== 'proyectos') ui.proy = null;
   ui.vista = v;
   if(!sinHash && location.hash !== '#' + v){
-    try{ history.pushState(null, '', '#' + v); }catch(e){ location.hash = v; }
+    /* Si había una hoja abierta, su paso en el historial se reutiliza */
+    try{ history[hojaEnHist ? 'replaceState' : 'pushState'](null, '', '#' + v); }catch(e){ location.hash = v; }
+    hojaEnHist = false;
   }
   cerrarFlotante();
   pintar();
@@ -6432,20 +6438,38 @@ VISTAS.ajustes = function(){
    HOJA FLOTANTE (editores, menús)
    ========================================================================== */
 var alCerrarFlot = null;
+/* El botón «atrás» del celular cierra la hoja abierta en vez de cambiar de
+   sección: cada hoja deja un paso en el historial, y al cerrarla con la X
+   ese paso se deshace solo. */
+var hojaEnHist = false, ignorarPop = 0, irPendiente = null;
+function finPop(){
+  ignorarPop = 0;
+  if(irPendiente){ var v = irPendiente; irPendiente = null; ir(v); }
+}
 function abrirFlotante(html, alCerrar){
-  cerrarFlotante();
+  cerrarFlotante(true);
   $('capaFlotante').innerHTML = '<div class="velo" data-velo="1"><div class="hoja-flot" role="dialog" aria-modal="true"><div class="asa"></div>' + html + '</div></div>';
   document.body.classList.add('con-hoja');
   alCerrarFlot = alCerrar || null;
+  if(!hojaEnHist){ try{ history.pushState({ hoja:1 }, '', location.href); hojaEnHist = true; }catch(e){} }
 }
-function cerrarFlotante(){
+function cerrarFlotante(interno){
   var f = alCerrarFlot; alCerrarFlot = null;
   if(f) f();
   edAcciones = {};
   $('capaFlotante').innerHTML = '';
   document.body.classList.remove('con-hoja');
   if(repintarAlSoltar) pintar();
+  /* Se espera un instante: si enseguida se abre otra hoja, reusa el paso */
+  if(interno !== true && hojaEnHist) setTimeout(function(){
+    if(hojaEnHist && !$('capaFlotante').innerHTML){
+      hojaEnHist = false; ignorarPop = 1;
+      try{ history.back(); }catch(e){ ignorarPop = 0; }
+      setTimeout(function(){ if(ignorarPop) finPop(); }, 500);   // por si el atrás nunca llega
+    }
+  }, 0);
 }
+function vibrar(ms){ try{ if(navigator.vibrate) navigator.vibrate(ms || 12); }catch(e){} }
 function cabFlot(t){ return '<div class="cab"><h3>' + t + '</h3><button type="button" class="btn-icono" data-cerrar="1" aria-label="Cerrar">' + ico('i-x') + '</button></div>'; }
 function campo(lbl, inner){ return '<label class="campo"><span>' + lbl + '</span>' + inner + '</label>'; }
 function grupo(lbl, inner){ return '<div class="campo"><span>' + lbl + '</span>' + inner + '</div>'; }
@@ -7752,9 +7776,9 @@ document.addEventListener('click', function(ev){
       $('entradaCaptura').placeholder = ph[ui.capTipo]; $('entradaCaptura').focus();
       break;
 
-    case 'tarea-ok': alternarTarea(id, b); break;
+    case 'tarea-ok': vibrar(); alternarTarea(id, b); break;
     case 'tarea-ed': cerrarFlotante(); editarTarea(id); break;
-    case 'rec-ok': alternarRec(id, b); break;
+    case 'rec-ok': vibrar(); alternarRec(id, b); break;
     case 'rec-ed': cerrarFlotante(); editarRec(id); break;
     case 'rec-posponer': menuPosponer(id); break;
     case 'posponer': posponer(id, isNaN(+b.dataset.m) ? b.dataset.m : +b.dataset.m); break;
@@ -8316,7 +8340,11 @@ $('btnTema').addEventListener('click', function(ev){
 });
 $('pastillaNube').addEventListener('click', function(ev){ ev.stopPropagation(); hojaSync(); });
 
-window.addEventListener('popstate', function(){ ir((location.hash || '#hoy').slice(1), true); });
+window.addEventListener('popstate', function(){
+  if(ignorarPop){ finPop(); return; }
+  if(hojaEnHist){ hojaEnHist = false; cerrarFlotante(true); return; }
+  ir((location.hash || '#hoy').slice(1), true);
+});
 
 /* Cuentas cambió algo en otra pestaña o dentro del marco: Hoy lo refleja */
 window.addEventListener('storage', function(ev){

@@ -90,6 +90,7 @@ Con **"Elegir qué ver en Hoy"** (al final de Hoy o en el menú Todo) ocultas la
 | **Pagos fijos** | Luz, internet, alquiler… Al marcarlos pagados se anotan solos como gasto en el libro que toca. |
 | **Libro personal y Libro de oficina** | Tus dos libros de cuentas completos. |
 | **Descargar informes** (en Dinero) | Excel y PDF de tus gastos personales, de la oficina o de los dos, del periodo que elijas: este mes, el pasado, 90 días, el año, todo o entre dos fechas. El Excel trae los movimientos con fórmulas y los resúmenes por mes y por categoría; el PDF, el informe listo para imprimir o enviar. |
+| **En el celular** | El botón «atrás» cierra la hoja o el menú abierto sin sacarte de la sección. Al marcar una tarea o un recordatorio el celular vibra un poquito, y las filas de fichas que siguen de lado se desvanecen en el borde para que sepas que hay más. |
 
 ## Escribir como hablas
 

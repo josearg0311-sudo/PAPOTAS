@@ -295,6 +295,8 @@ body.en-cuentas .fab{ display:none }
 .ficha .n{ font-size:11px; opacity:.75 }
 .desliza{ overflow-x:auto; flex-wrap:nowrap; scrollbar-width:none; margin-left:-16px; margin-right:-16px; padding:0 16px }
 .desliza::-webkit-scrollbar{ display:none }
+/* Un leve desvanecido al borde avisa que la fila sigue de lado */
+.desliza{ -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent); mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent) }
 
 .campo{ display:flex; flex-direction:column; gap:5px; min-width:0 }
 .campo > span{ font-size:12px; font-weight:700; color:var(--tinta-2) }
