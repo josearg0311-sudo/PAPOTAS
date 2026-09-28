@@ -59,6 +59,19 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 | **Cuenta regresiva** | Marca un evento (un viaje, un examen, un partido) y Hoy te muestra los días que faltan. |
 | **Tema automático** | Claro u oscuro según tu celular, además de fijo en claro u oscuro. |
 
+### La pantalla Hoy, por secciones
+
+| Sección | Qué tiene |
+|---|---|
+| **Saludo** | La fecha, tu frase, el anillo de tareas hechas y cuatro números (por hacer, en agenda, avisos, por pagar). |
+| **Tus espacios** | Los cuatro espacios con lo próximo de cada uno y cómo va su semana. |
+| **Ahora** | **Lo siguiente** que tienes y cuánto falta, tu enfoque del día y **Tu día** por horas, con la semana arriba para saltar a otro día. |
+| **Por hacer** | Las tareas de hoy y **Tu bienestar**: ánimo, hábitos y agua en una sola tarjeta. |
+| **Lo que se viene** | Cuentas regresivas, los próximos 7 días, tus metas y los cumpleaños. |
+| **Dinero** | Los dos libros lado a lado (entró, salió, saldo y cuánto gastaste de lo que entró) y los pagos por vencer. |
+
+Con **"Elegir qué ver en Hoy"** (al final de Hoy o en el menú Todo) ocultas las secciones que no uses. En la computadora, los grupos del menú lateral se pliegan; un grupo plegado muestra sus iconos en una fila. En el celular, el botón **Todo** abre el menú ordenado por grupos.
+
 ### Y además
 
 | Sección | Para qué |

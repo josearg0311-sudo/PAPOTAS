@@ -1612,6 +1612,178 @@ body[data-esp="estudios"] .examenes{ padding-left:36px }
   .esp-tabs button{ flex:1 1 0; min-width:0; flex-direction:column; gap:1px; padding:7px 2px; font-size:10.5px !important; white-space:normal; line-height:1.15; text-align:center; letter-spacing:0 !important }
   .esp-tabs button span{ font-size:18px }
 }
+
+/* ==========================================================================
+   ESTILO 3
+   Orden y calma: Hoy por secciones con su título, tarjetas más limpias,
+   el lateral compacto con grupos que se pliegan y el menú "Todo" del móvil
+   agrupado igual que el lateral.
+   ========================================================================== */
+:root{ --r-card:20px; --borde-card:color-mix(in srgb, var(--regla) 80%, transparent) }
+body{
+  background:
+    radial-gradient(1100px 520px at 70% -220px, color-mix(in srgb, var(--verde) 13%, transparent), transparent 70%),
+    radial-gradient(800px 420px at -10% 0%, color-mix(in srgb, var(--azul) 6%, transparent), transparent 70%),
+    var(--papel);
+  background-attachment:fixed;
+}
+.contenido{ padding-top:20px }
+@media (min-width:900px){ .contenido{ padding:26px 32px 80px } }
+
+/* ----- Tarjetas: una sola forma para todo ----- */
+.tarjeta{
+  border-radius:var(--r-card); border:1px solid var(--borde-card);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--hoja) 100%, var(--tinta) 2%), var(--hoja));
+  box-shadow:0 1px 0 color-mix(in srgb, var(--tinta) 4%, transparent) inset, 0 6px 22px rgba(0,0,0,.12);
+}
+:root[data-tema="claro"] .tarjeta{ box-shadow:0 1px 2px rgba(20,24,40,.04), 0 6px 20px rgba(20,24,40,.05) }
+.tarjeta-cab h2, .tarjeta-cab h3{ font-size:15px; font-weight:780 }
+.cab-num{ display:inline-grid; place-items:center; min-width:22px; height:20px; padding:0 6px; border-radius:99px; background:var(--regla-2); font-size:11.5px; font-weight:800; color:var(--tinta-2); font-family:var(--cifra) }
+.ver-mas{ display:block; width:100%; padding:10px; font-size:12.5px; font-weight:700; color:var(--verde-sube); border-top:1px solid var(--regla-2) }
+.ver-mas:hover{ background:var(--hoja-2) }
+.rejilla{ gap:16px }
+
+/* ----- Títulos de sección ----- */
+.seccion-t{ display:flex; align-items:center; gap:12px; margin:26px 4px 12px; font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--tinta-3) }
+.seccion-t::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--regla), transparent) }
+.seccion-t > small, .seccion-t > .hora-viva{ order:2; font-size:12px; letter-spacing:.04em; text-transform:none; font-weight:700; color:var(--tinta-2) }
+.hora-viva{ font-family:var(--cifra); padding:2px 8px; border-radius:99px; background:var(--hoja); border:1px solid var(--regla) }
+.pie-hoy{ display:flex; justify-content:center; margin-top:26px }
+.pie-hoy .btn{ color:var(--tinta-3) }
+
+/* ----- Saludo de Hoy ----- */
+.heroe-hoy{ padding:24px 22px 18px }
+.heroe-hoy .arriba{ align-items:center }
+.heroe-hoy .saludo-hoy{ min-width:0 }
+.heroe-hoy .frase{ color:#fff; opacity:.88 }
+.heroe-hoy h2 .emoji{ display:inline-block; animation:saluda 2.4s ease-in-out 1 }
+@keyframes saluda{ 20%{ transform:rotate(-12deg) } 40%{ transform:rotate(10deg) } 60%{ transform:rotate(-6deg) } }
+.anillo-hoy{ position:relative; width:84px; height:84px; flex:none }
+.anillo-hoy .anillo{ width:84px; height:84px; transform:rotate(-90deg) }
+.anillo-hoy .anillo circle{ fill:none; stroke-width:7; stroke-linecap:round }
+.anillo-hoy .anillo .fondo{ stroke:rgba(255,255,255,.2) }
+.anillo-hoy .anillo .valor{ stroke:#fff; transition:stroke-dashoffset .6s ease }
+.anillo-hoy > span{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.9 }
+.anillo-hoy > span b{ font-size:18px; letter-spacing:-.02em; text-transform:none; font-family:var(--cifra) }
+.datos-hoy{
+  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:18px; position:relative; z-index:1;
+  border-radius:16px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.16);
+  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); overflow:hidden
+}
+.datos-hoy button{ display:flex; flex-direction:column; align-items:center; gap:0; padding:10px 4px; color:#fff; transition:background .15s }
+.datos-hoy button + button{ border-left:1px solid rgba(255,255,255,.16) }
+.datos-hoy button:hover{ background:rgba(255,255,255,.1) }
+.datos-hoy b{ font-size:22px; font-weight:800; letter-spacing:-.03em; line-height:1.15; font-family:var(--cifra) }
+.datos-hoy span{ font-size:11px; font-weight:700; opacity:.85; white-space:nowrap }
+@media (min-width:760px){ .heroe-hoy{ padding:28px 30px 22px } .heroe-hoy h2{ font-size:34px } }
+
+/* ----- Tus espacios ----- */
+.espacios-hoy{ margin-bottom:0 }
+.esp-tile{ gap:8px; padding:14px; border-radius:18px; border:1px solid var(--borde-card); background:var(--hoja); text-align:left }
+.esp-tile::before{ content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--c) }
+.esp-prox{ font-size:12.5px; line-height:1.35; color:var(--tinta-2); position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px }
+.esp-prox em{ font-style:normal; color:var(--c); font-weight:700 }
+
+/* ----- Ahora ----- */
+.rejilla.bloque-ahora{ grid-template-columns:minmax(0,1fr) }
+@media (min-width:900px){ .rejilla.bloque-ahora{ grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr); align-items:start } }
+.col-ahora{ display:flex; flex-direction:column; gap:16px; min-width:0 }
+.siguiente{
+  position:relative; overflow:hidden; cursor:pointer; padding:18px 18px 16px 22px; display:flex; flex-direction:column; gap:3px;
+  background:linear-gradient(120deg, color-mix(in srgb, var(--c) 16%, var(--hoja)), var(--hoja) 70%);
+  border-color:color-mix(in srgb, var(--c) 35%, var(--regla)); transition:transform .15s, border-color .15s
+}
+.siguiente::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--c) }
+.siguiente:hover{ transform:translateY(-2px); border-color:var(--c) }
+.siguiente small{ font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--c) }
+.siguiente b{ font-size:21px; font-weight:800; letter-spacing:-.03em; line-height:1.2 }
+.sig-cuando{ font-size:15px; font-weight:750; color:var(--tinta) }
+.sig-meta{ font-size:12.5px; color:var(--tinta-3) }
+.siguiente.en-curso small{ animation:parpadeo 1.6s infinite }
+.siguiente.vacia{ --c:var(--haber); cursor:default }
+.siguiente.vacia:hover{ transform:none }
+.tu-dia .semana-mini{ padding:0 16px 10px }
+.semana-mini .pasado{ opacity:.5 }
+
+/* ----- Por hacer ----- */
+.bienestar-hoy h4{ display:flex; justify-content:space-between; align-items:baseline; margin:14px 0 8px; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--tinta-3) }
+.bienestar-hoy h4:first-child{ margin-top:2px }
+.bienestar-hoy h4 span{ font-size:12px; letter-spacing:0; text-transform:none; color:var(--tinta-2); font-family:var(--cifra) }
+.agua-mini{ display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px }
+.agua-mini button{ height:34px; border-radius:9px 9px 12px 12px; display:grid; place-items:center; background:var(--hoja-2); border:1px solid color-mix(in srgb, #38BDF8 35%, var(--regla)); color:color-mix(in srgb, #38BDF8 60%, var(--tinta-3)) }
+.agua-mini button svg{ width:15px; height:15px }
+.agua-mini button.lleno{ background:linear-gradient(180deg, #7DD3FC, #0EA5E9); border-color:#0EA5E9; color:#fff }
+.diario-hoy{ margin:12px 0 0; font-size:13px; font-style:italic; color:var(--tinta-2) }
+
+/* ----- Lo que se viene ----- */
+.regresivas.mini{ display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none }
+.regresivas.mini .regresiva{ flex:0 0 132px; min-height:0; padding:10px 12px }
+.regresivas.mini .regresiva b{ font-size:24px }
+.regresivas.mini .regresiva span{ font-size:12.5px }
+.metas-hoy{ padding:0 0 6px }
+.cumples-hoy{ border-top:1px dashed var(--regla) }
+
+/* ----- Dinero ----- */
+.libros-hoy{ display:grid; grid-template-columns:minmax(0,1fr); gap:10px; padding:14px }
+@media (min-width:640px){ .libros-hoy{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+.libro-hoy{ display:flex; flex-direction:column; gap:8px; padding:14px; border-radius:16px; text-align:left; background:var(--hoja-2); border:1px solid var(--regla); transition:border-color .15s }
+.libro-hoy:hover{ border-color:var(--verde) }
+.libro-cab{ display:flex; justify-content:space-between; align-items:baseline; gap:8px }
+.libro-cab b{ font-size:15px } .libro-cab em{ font-style:normal; font-family:var(--cifra); font-size:12.5px; color:var(--tinta-2); white-space:nowrap }
+.libro-num{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; font-family:var(--cifra); font-weight:800; font-size:16px }
+.libro-num small{ display:block; font-family:var(--letra); font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta-3) }
+.libro-num .entra{ color:var(--haber) } .libro-num .sale{ color:var(--debe) }
+.libro-num > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.libro-barra{ height:6px; border-radius:99px; background:color-mix(in srgb, var(--haber) 25%, var(--regla-2)); overflow:hidden }
+.libro-barra i{ display:block; height:100%; border-radius:99px; background:var(--debe) }
+.libro-pie{ font-size:12px; color:var(--tinta-3) }
+.pagos-hoy{ border-top:1px solid var(--regla-2) }
+.pagos-hoy h4{ display:flex; align-items:center; gap:8px; margin:12px 16px 0; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--debe) }
+.pagos-hoy h4 svg{ width:15px; height:15px }
+
+/* ----- Lateral compacto con grupos plegables ----- */
+.nav-lat{ gap:1px }
+.nav-lat button{ padding:7px 10px; font-size:13.5px; gap:10px; border-radius:10px }
+.nav-lat button svg{ width:18px; height:18px }
+.nav-lat .grupo{ display:flex; align-items:center; justify-content:space-between; width:100%; padding:14px 10px 5px; border-radius:8px; background:none; font-size:10.5px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--tinta-3) }
+.nav-lat .grupo:hover{ background:none; color:var(--tinta-2) }
+.nav-lat .grupo svg{ width:13px; height:13px; transition:transform .2s; opacity:.7 }
+.nav-lat .grupo[aria-expanded="true"] svg{ transform:rotate(90deg) }
+.nav-lat button[aria-current="page"]:not(.grupo){ background:linear-gradient(90deg, var(--verde-piso), color-mix(in srgb, var(--verde-piso) 30%, transparent)); color:var(--tinta); box-shadow:inset 3px 0 0 var(--verde) }
+.nav-lat .nav-esp svg{ color:var(--c) }
+.nav-lat .nav-esp[aria-current="page"]{ box-shadow:inset 3px 0 0 var(--c) !important; background:linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, transparent), transparent) !important }
+.marca{ padding-bottom:12px }
+
+/* ----- Menú "Todo" del móvil ----- */
+.mas-grupo + .mas-grupo{ margin-top:16px }
+.mas-grupo h4{ margin:0 2px 8px; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--tinta-3) }
+.rejilla-mas{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px }
+.rejilla-mas button{ position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; min-height:74px; padding:10px 6px; border-radius:16px;
+  background:var(--hoja-2); border:1px solid var(--regla); font-size:12.5px; font-weight:700; text-align:center; line-height:1.2 }
+.rejilla-mas button[aria-current="page"]{ border-color:var(--verde); background:var(--verde-piso) }
+.rejilla-mas button svg{ width:22px; height:22px }
+.rejilla-mas.espacios{ grid-template-columns:repeat(4,minmax(0,1fr)) }
+.rejilla-mas.espacios button{ min-height:70px; background:color-mix(in srgb, var(--c) 12%, var(--hoja-2)); border-color:color-mix(in srgb, var(--c) 35%, var(--regla)) }
+.rejilla-mas .em{ font-size:22px; line-height:1 }
+.lista-interruptores{ display:flex; flex-direction:column; gap:14px; padding:6px 2px 16px }
+
+.nav-lat button[data-ir]:not(.nav-ico){ padding:6px 10px; min-height:31px }
+.nav-lat .grupo{ padding:11px 10px 4px }
+.nav-iconos{ display:flex; flex-wrap:wrap; gap:2px; padding:0 4px 4px }
+.nav-lat .nav-ico{ position:relative; width:34px; height:32px; padding:0; justify-content:center; border-radius:9px; color:var(--tinta-2) }
+.nav-lat .nav-ico svg{ width:18px; height:18px }
+.nav-lat .nav-ico[aria-current="page"]{ box-shadow:inset 0 -2px 0 var(--verde) }
+.punto-nav{ position:absolute; top:5px; right:5px; width:7px; height:7px; border-radius:50%; background:var(--tinta-3) }
+.punto-nav.alerta{ background:var(--debe) }
+.lateral{ padding:14px 12px 10px }
+.marca{ padding:2px 8px 8px }
+.nav-lat button[data-ir]:not(.nav-ico){ padding:5px 10px; min-height:30px; line-height:1.4 }
+.nav-lat .grupo{ padding:9px 10px 3px }
+.lateral .pie{ padding-top:8px }
+.perfil{ padding:6px 8px }
+.avatar{ width:32px; height:32px; border-radius:10px }
+.nav-lat .nav-ico{ width:31px }
+.nav-iconos{ gap:1px; flex-wrap:nowrap }
 </style>
 </head>
 <body>
@@ -2171,18 +2343,25 @@ function contadores(){
   };
 }
 
+function navPlegados(){ return pref.navPlegado || ['Crecer']; }
 function pintarNav(){
   var k = contadores();
   function num(id){ return id === 'tareas' ? k.tareas : id === 'recordatorios' ? k.recordatorios : id === 'pagos' ? k.pagos : 0; }
+  var grupoNav = '';
   $('navLat').innerHTML = SECCIONES.map(function(s){
     var n = num(s.id);
     var alerta = (s.id === 'tareas' && k.tareasTarde) || ((s.id === 'recordatorios' || s.id === 'pagos') && n);
     var enEsp = s.esp ? ' class="nav-esp" style="--c:' + espInfo(s.esp).c + '"' : '';
     if(s.esp) n = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoyISO() && espDe(t) === s.esp; }).length;
-    return (s.g ? '<div class="grupo">' + s.g + '</div>' : '') +
-      '<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' +
+    if(s.g) grupoNav = s.g;
+    var plegado = navPlegados().indexOf(grupoNav) >= 0;
+    var abre = s.g ? '<button type="button" class="grupo" data-acc="nav-plegar" data-v="' + s.g + '" aria-expanded="' + !plegado + '">' + s.g + ico('i-der') + '</button>' + (plegado ? '<div class="nav-iconos">' : '') : '';
+    var sig = SECCIONES[SECCIONES.indexOf(s) + 1], cierra = plegado && (!sig || sig.g) ? '</div>' : '';
+    if(plegado) return abre + '<button type="button" class="nav-ico" data-ir="' + s.id + '" title="' + s.nom + '" aria-label="' + s.nom + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' + ico(s.ico) + (n ? '<span class="punto-nav' + (alerta ? ' alerta' : '') + '"></span>' : '') + '</button>' + cierra;
+    return abre +
+      ('<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' +
         ico(s.ico) + s.nom + (n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : '') +
-      '</button>';
+      '</button>');
   }).join('');
   var DINERO = ['dinero','personal','oficina','pagos'];
   var enMas = ABAJO.indexOf(ui.vista) < 0 && DINERO.indexOf(ui.vista) < 0;
@@ -2428,7 +2607,44 @@ function lineaDelDia(items){
   return h + '</div>';
 }
 
-/* ---------- Hoy ---------------------------------------------------------- */
+/* ---------- Hoy ----------------------------------------------------------
+   Ordenado por secciones: tus espacios, ahora (lo siguiente, el día y el
+   enfoque), por hacer (tareas y bienestar), lo que se viene y el dinero.
+   Cada sección se puede ocultar desde Ajustes. */
+var SECC_HOY = [
+  ['espacios', 'Tus espacios'], ['ahora', 'Ahora'], ['hacer', 'Por hacer'],
+  ['viene', 'Lo que se viene'], ['dinero', 'Dinero'], ['notas', 'Notas fijadas']
+];
+function hoyVisible(k){ return (pref.hoyOff || []).indexOf(k) < 0; }
+function tituloSecc(t, extra){ return '<h3 class="seccion-t"><span>' + t + '</span>' + (extra || '') + '</h3>'; }
+function minutosHasta(hora){ var p = hora.split(':'), d = new Date(); return (+p[0] * 60 + +p[1]) - (d.getHours() * 60 + d.getMinutes()); }
+function textoFalta(min){ return min <= 0 ? 'ahora' : min < 60 ? 'en ' + min + ' min' : 'en ' + Math.floor(min / 60) + ' h' + (min % 60 ? ' ' + (min % 60) + ' min' : ''); }
+
+/* Lo siguiente con hora: hoy lo que falta, si no, lo primero de mañana */
+function loSiguiente(){
+  var hoy = hoyISO(), ya = horaAhora();
+  var hoyItems = itemsDelDia(hoy).filter(function(x){ return x.hora && !x.hecho && (x.fin || x.hora) >= ya; });
+  if(hoyItems.length){ var x = hoyItems[0]; return { x:x, d:hoy, enCurso:x.hora <= ya }; }
+  for(var i = 1; i <= 7; i++){
+    var d = sumarDias(hoy, i), its = itemsDelDia(d).filter(function(x){ return x.hora && !x.hecho && x.tipo !== 'tarea'; });
+    if(its.length) return { x:its[0], d:d, enCurso:false };
+  }
+  return null;
+}
+function tarjetaSiguiente(){
+  var s = loSiguiente();
+  if(!s) return '<section class="tarjeta siguiente vacia"><small>Lo siguiente</small><b>Nada agendado</b><span>Tienes el día libre. 🌿</span></section>';
+  var x = s.x, E = x.esp ? espInfo(x.esp) : null;
+  var acc = { tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' }[x.tipo];
+  var cuando = s.d === hoyISO() ? (s.enCurso ? 'En curso · hasta las ' + (x.fin || x.hora) : textoFalta(minutosHasta(x.hora))) : cap(relativo(s.d)) + ' · ' + x.hora;
+  var nom = { evento:(TIPOS_EV[x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', tarea:'Tarea', clase:'Clase', pago:'Pago' }[x.tipo];
+  return '<section class="tarjeta siguiente' + (s.enCurso ? ' en-curso' : '') + '" style="--c:' + x.c + '" data-acc="' + acc + '" data-id="' + x.id + '">' +
+    '<small>' + (s.enCurso ? '● Ahora mismo' : 'Lo siguiente') + '</small>' +
+    '<b>' + esc(x.t) + '</b>' +
+    '<span class="sig-cuando">' + cuando + '</span>' +
+    '<span class="sig-meta">' + nom + ' · ' + x.hora + (x.fin ? '–' + x.fin : '') + (x.lugar ? ' · ' + esc(x.lugar) : '') + (E ? ' · ' + E.em + ' ' + E.nom : '') + '</span></section>';
+}
+
 VISTAS.hoy = function(){
   var hoy = hoyISO(), h = new Date().getHours();
   var saludo = h < 6 ? 'Buenas noches' : h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
@@ -2442,22 +2658,24 @@ VISTAS.hoy = function(){
   });
   var hechas = tareasHoy.filter(function(t){ return t.hecha || (t.log && t.log.indexOf(hoy) >= 0 && !(t.fecha <= hoy)); }).length;
   var pct = tareasHoy.length ? hechas / tareasHoy.length : 0;
-  var C = 2 * Math.PI * 22;
+  var C = 2 * Math.PI * 30;
   var agenda = items.filter(function(i){ return i.tipo !== 'tarea'; });
   var pendPagos = pagosProximos(0).length;
 
-  var html = '<section class="heroe"><div class="arriba"><div>' +
+  /* Saludo */
+  var html = '<section class="heroe heroe-hoy"><div class="arriba"><div class="saludo-hoy">' +
       '<div class="fecha">' + cap(fechaLarga(hoy)) + '</div>' +
-      '<h2>' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' ' + emoji + '</h2>' +
+      '<h2>' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' <span class="emoji">' + emoji + '</span></h2>' +
       '<p class="frase">«' + esc(fraseDelDia()) + '»</p></div>' +
-      '<svg class="anillo" viewBox="0 0 54 54" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="27" cy="27" r="22"/>' +
-      '<circle class="valor" cx="27" cy="27" r="22" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
+      '<div class="anillo-hoy"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
+        '<circle class="valor" cx="36" cy="36" r="30" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
+        '<span><b>' + hechas + '/' + tareasHoy.length + '</b>tareas</span></div>' +
     '</div>' +
-    '<div class="datos">' +
-      '<button class="dato" data-ir="tareas">' + ico('i-tareas') + '<b>' + (tareasHoy.length - hechas) + '</b> por hacer</button>' +
-      '<button class="dato" data-ir="calendario">' + ico('i-cal') + '<b>' + agenda.filter(function(i){ return i.tipo === 'evento'; }).length + '</b> eventos</button>' +
-      '<button class="dato" data-ir="recordatorios">' + ico('i-campana') + '<b>' + agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length + '</b> avisos</button>' +
-      (pendPagos ? '<button class="dato" data-ir="pagos">' + ico('i-recibo') + '<b>' + pendPagos + '</b> por pagar</button>' : '') +
+    '<div class="datos-hoy">' +
+      '<button data-ir="tareas"><b>' + (tareasHoy.length - hechas) + '</b><span>por hacer</span></button>' +
+      '<button data-ir="calendario"><b>' + agenda.filter(function(i){ return i.tipo === 'evento' || i.tipo === 'clase'; }).length + '</b><span>en agenda</span></button>' +
+      '<button data-ir="recordatorios"><b>' + agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length + '</b><span>avisos</span></button>' +
+      '<button data-ir="pagos"><b>' + pendPagos + '</b><span>por pagar</span></button>' +
     '</div>' + barraDelDia() + '</section>';
 
   if(!total && !nombre){
@@ -2481,152 +2699,154 @@ VISTAS.hoy = function(){
     }
   }
 
-  /* Tus cuatro espacios, con lo que tienen para hoy */
-  html += '<div class="espacios-hoy">' + ESPACIOS.map(function(E){
-    var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
-    var ag = agendaEsp(E.id, 7).filter(function(a){ return a.x.tipo !== 'tarea'; });
-    var prox = ag[0];
-    var extra = E.id === 'deporte' ? (function(){ var ini = inicioSemana(hoy), m = 0; vivos('entrenos').forEach(function(x){ if(x.fecha >= ini) m += +x.min || 0; }); return Math.round(m / 6) / 10 + ' h entrenadas esta semana'; })()
-              : E.id === 'estudios' ? vivos('cursos').length + ' cursos · ' + eventosTipo('examen', 30).length + ' exámenes en 30 días'
-              : E.id === 'oficina' ? eventosTipo('reunion', 7).length + ' reuniones esta semana'
-              : vivos('habitos').filter(function(x){ return espDe(x) === 'personal'; }).length + ' hábitos';
-    return '<button type="button" class="esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
-      '<span class="esp-tile-cab"><span class="esp-em">' + E.em + '</span><b>' + E.nom + '</b>' + (pend ? '<span class="esp-num">' + pend + '</span>' : '') + '</span>' +
-      (function(){
-        var ini = inicioSemana(hoy), fin = sumarDias(ini, 6);
-        var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= ini && t.fecha <= fin || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= ini); });
-        var h = ts.filter(function(t){ return t.hecha; }).length;
-        return '<span class="esp-semana"><i style="width:' + (ts.length ? h / ts.length * 100 : 0) + '%"></i></span><small class="esp-semana-t">' + (ts.length ? h + ' de ' + ts.length + ' tareas de la semana' : 'Sin tareas esta semana') + '</small>';
-      })() +
-      '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
-      '<small>' + extra + '</small></button>';
-  }).join('') + '</div>';
-  html += '<div class="rejilla dos">' + tarjetaCuentas();
-
-  /* Tu día */
-  html += '<section class="tarjeta">' + cabTarjeta('i-cal', 'Tu día', 'var(--verde)', 'Calendario', 'data-ir="calendario"') +
-    (agenda.length ? lineaDelDia(agenda) : '<div class="vacio" style="padding-top:4px">Sin eventos, avisos ni pagos hoy.</div>') +
-    '</section>';
-
-  /* Enfoque */
-  var enf = buscarId('enfoque', hoy);
-  var ei = (enf && !enf.del && enf.items) || [];
-  html += '<section class="tarjeta">' + cabTarjeta('i-diana', 'Enfoque de hoy', 'var(--haber)') +
-    '<p style="margin:0 16px 6px;font-size:12.5px;color:var(--tinta-3)">Las tres cosas que harían de hoy un buen día.</p>' +
-    '<div class="enfoque">' + [0,1,2].map(function(i){
-      var x = ei[i] || { t:'', ok:false };
-      return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
-        '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
-        casilla('enfoque-ok', String(i), x.ok, 'var(--haber)', true) + '</label>';
-    }).join('') + '</div></section>';
-
-  /* Tareas */
-  var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
-  var atrasadas = pend.filter(function(t){ return t.fecha < hoy; }).length;
-  html += '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Tareas para hoy', 'var(--azul)', 'Todas', 'data-ir="tareas"') +
-    (pend.length ? '<div class="lista-filas">' + pend.slice(0, 8).map(filaTarea).join('') + '</div>' +
-       (pend.length > 8 ? '<div class="vacio" style="padding:8px">y ' + (pend.length - 8) + ' más…</div>' : '') +
-       (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
-     : vacio('✅', 'Nada pendiente para hoy', 'Añade una arriba o disfruta el día.')) + '</section>';
-
-  /* Hábitos */
-  var wd = new Date().getDay();
-  var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-  html += '<section class="tarjeta">' + cabTarjeta('i-habitos', 'Hábitos de hoy', 'var(--oro)', 'Hábitos', 'data-ir="habitos"') +
-    (hab.length ? '<div class="chips-habito">' + hab.map(function(x){
-      var ok = x.marcas && x.marcas[hoy];
-      return '<button type="button" class="chip-habito" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + !!ok + '"><span class="em">' + esc(x.em || '⭐') + '</span>' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>';
-    }).join('') + '</div>'
-    : '<div class="vacio" style="padding-top:4px">Crea hábitos para marcarlos cada día. <br><button class="btn chico" style="margin-top:8px" data-ir="habitos">Crear un hábito</button></div>') +
-    '</section>';
-
-  /* Ánimo del día */
-  var dia = buscarId('diario', hoy);
-  var an = dia && !dia.del ? dia.animo : 0;
-  html += '<section class="tarjeta">' + cabTarjeta('i-diario', '¿Cómo te sientes hoy?', 'var(--rosa)', 'Diario', 'data-ir="diario"') +
-    '<div class="tarjeta-cuerpo">' + animosHTML(an, hoy) +
-    (dia && dia.texto ? '<p style="margin:10px 0 0;font-size:13px;color:var(--tinta-2)">' + esc(dia.texto.slice(0, 140)) + (dia.texto.length > 140 ? '…' : '') + '</p>'
-                      : '<button class="btn chico" style="margin-top:10px" data-ir="diario">' + ico('i-lapiz') + 'Escribir en el diario</button>') +
-    '</div></section>';
-
-  /* Pagos por vencer */
-  var pp = pagosProximos(7);
-  if(pp.length){
-    html += '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos por vencer', 'var(--debe)', 'Pagos', 'data-ir="pagos"') +
-      '<div class="lista-filas">' + pp.slice(0, 5).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>';
+  /* ---- Tus espacios ---- */
+  if(hoyVisible('espacios')){
+    html += tituloSecc('Tus espacios') + '<div class="espacios-hoy">' + ESPACIOS.map(function(E){
+      var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
+      var prox = agendaEsp(E.id, 7).filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
+      var ini = inicioSemana(hoy), fin = sumarDias(ini, 6);
+      var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= ini && t.fecha <= fin || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= ini); });
+      var hh = ts.filter(function(t){ return t.hecha; }).length;
+      return '<button type="button" class="esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
+        '<span class="esp-tile-cab"><span class="esp-em">' + E.em + '</span><b>' + E.nom + '</b>' + (pend ? '<span class="esp-num" title="Tareas para hoy">' + pend + '</span>' : '') + '</span>' +
+        '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
+        '<span class="esp-semana"><i style="width:' + (ts.length ? hh / ts.length * 100 : 0) + '%"></i></span>' +
+        '<small class="esp-semana-t">' + (ts.length ? hh + ' de ' + ts.length + ' tareas de la semana' : 'Sin tareas esta semana') + '</small></button>';
+    }).join('') + '</div>';
   }
 
-  /* Metas */
-  var ms = vivos('metas').filter(function(m){ return !m.archivada; }).slice(0, 3);
-  if(ms.length){
-    html += '<section class="tarjeta">' + cabTarjeta('i-meta', 'Tus metas', 'var(--verde)', 'Metas', 'data-ir="metas"') +
-      ms.map(function(m){
-        var p = Math.min(1, (+m.actual || 0) / (+m.objetivo || 1));
-        return '<div class="barra-h" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px"><span>' + esc((m.em || '🎯') + ' ' + m.t) + '</span>' +
-          '<div class="barra-prog" style="--c:' + color(m.color) + '"><i style="width:' + Math.round(p * 100) + '%"></i></div><b>' + Math.round(p * 100) + '%</b></div>';
-      }).join('') + '<div style="height:10px"></div></section>';
+  /* ---- Ahora: lo siguiente, el día y el enfoque ---- */
+  if(hoyVisible('ahora')){
+    var ini = inicioSemana(hoy);
+    var semana = '<div class="semana-mini">' + [0,1,2,3,4,5,6].map(function(i){
+      var d = sumarDias(ini, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length;
+      return '<button type="button" class="' + (d === hoy ? 'hoy' : '') + (d < hoy ? ' pasado' : '') + '" data-acc="ir-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b>' +
+        '<span class="puntos">' + '<i></i>'.repeat(Math.min(n, 3)) + '</span></button>';
+    }).join('') + '</div>';
+    var enf = buscarId('enfoque', hoy), ei = (enf && !enf.del && enf.items) || [];
+    html += tituloSecc('Ahora', '<span class="hora-viva" id="horaViva">' + horaAhora() + '</span>') +
+      '<div class="rejilla bloque-ahora">' +
+        '<div class="col-ahora">' + tarjetaSiguiente() +
+          '<section class="tarjeta">' + cabTarjeta('i-diana', 'Enfoque de hoy', 'var(--haber)') +
+            '<p class="explica" style="margin:0 16px 6px">Las tres cosas que harían de hoy un buen día.</p>' +
+            '<div class="enfoque">' + [0,1,2].map(function(i){
+              var x = ei[i] || { t:'', ok:false };
+              return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
+                '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
+                casilla('enfoque-ok', String(i), x.ok, 'var(--haber)', true) + '</label>';
+            }).join('') + '</div></section>' +
+        '</div>' +
+        '<section class="tarjeta tu-dia">' + cabTarjeta('i-cal', 'Tu día', 'var(--verde)', 'Calendario', 'data-ir="calendario"') + semana +
+          (agenda.length ? lineaDelDia(agenda) : '<div class="vacio" style="padding-top:4px">Sin eventos, avisos ni pagos hoy.</div>') +
+        '</section>' +
+      '</div>';
   }
 
-  /* Cumpleaños */
-  var cs = proximosCumples(30);
-  if(cs.length){
-    html += '<section class="tarjeta">' + cabTarjeta('i-regalo', 'Próximos cumpleaños', 'var(--rosa)') +
-      '<div class="lista-filas">' + cs.slice(0, 5).map(function(c){
-        var edad = edadCumple(c.e, c.dia);
-        return '<div class="fila"><span class="em-fila">🎂</span><div class="cuerpo" data-acc="evento-ed" data-id="' + c.e.id + '"><div class="titulo">' + esc(c.e.t) + '</div>' +
-          '<div class="meta"><span class="' + (c.en === 0 ? 'hoy' : '') + '">' + (c.en === 0 ? '¡Hoy!' : c.en === 1 ? 'Mañana' : 'En ' + c.en + ' días') + ' · ' + fechaCorta(c.dia) + '</span>' +
-          (edad > 0 ? '<span class="cumple">cumple ' + edad + '</span>' : '') + '</div></div></div>';
-      }).join('') + '</div></section>';
+  /* ---- Por hacer: tareas y bienestar ---- */
+  if(hoyVisible('hacer')){
+    var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
+    var atrasadas = pend.filter(function(t){ return t.fecha < hoy; }).length;
+    var wd = new Date().getDay();
+    var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+    var habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+    var dia = buscarId('diario', hoy), an = dia && !dia.del ? dia.animo : 0, bi = bienestar(hoy);
+    html += tituloSecc('Por hacer') + '<div class="rejilla dos">' +
+      '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Tareas para hoy' + (pend.length ? ' <span class="cab-num">' + pend.length + '</span>' : ''), 'var(--azul)', 'Todas', 'data-ir="tareas"') +
+        (pend.length ? '<div class="lista-filas">' + pend.slice(0, 7).map(filaTarea).join('') + '</div>' +
+           (pend.length > 7 ? '<button class="ver-mas" data-ir="tareas">Ver ' + (pend.length - 7) + ' más</button>' : '') +
+           (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
+         : vacio('✅', 'Nada pendiente para hoy', 'Añade una arriba o disfruta el día.')) + '</section>' +
+      '<section class="tarjeta">' + cabTarjeta('i-habitos', 'Tu bienestar hoy', 'var(--oro)', 'Diario', 'data-ir="diario"') +
+        '<div class="tarjeta-cuerpo bienestar-hoy">' +
+          '<h4>¿Cómo te sientes?</h4>' + animosHTML(an, hoy) +
+          '<h4>Hábitos <span>' + habOk + ' de ' + hab.length + '</span></h4>' +
+          (hab.length ? '<div class="chips-habito" style="padding:0">' + hab.map(function(x){
+            var ok = x.marcas && x.marcas[hoy];
+            return '<button type="button" class="chip-habito" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + !!ok + '"><span class="em">' + esc(x.em || '⭐') + '</span>' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>';
+          }).join('') + '</div>' : '<button class="btn chico" data-ir="habitos">' + ico('i-plus') + 'Crear un hábito</button>') +
+          '<h4>Agua <span>' + bi.agua + ' de ' + META_AGUA + ' vasos</span></h4>' +
+          '<div class="agua-mini">' + Array.apply(null, Array(META_AGUA)).map(function(_, i){
+            return '<button type="button" class="' + (i < bi.agua ? 'lleno' : '') + '" data-acc="agua" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' vasos">' + ico('i-gota') + '</button>';
+          }).join('') + '</div>' +
+          (dia && dia.texto ? '<p class="diario-hoy">«' + esc(dia.texto.slice(0, 140)) + (dia.texto.length > 140 ? '…' : '') + '»</p>' : '') +
+        '</div></section>' +
+    '</div>';
   }
 
-  /* Semana */
-  var ini = inicioSemana(hoy);
-  var semana = '<div class="semana-mini">' + [0,1,2,3,4,5,6].map(function(i){
-    var d = sumarDias(ini, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length;
-    return '<button type="button" class="' + (d === hoy ? 'hoy' : '') + '" data-acc="ir-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b>' +
-      '<span class="puntos">' + '<i></i>'.repeat(Math.min(n, 3)) + '</span></button>';
-  }).join('') + '</div>';
-  var prox = [];
-  for(var i = 1; i <= 7 && prox.length < 5; i++){
-    var d = sumarDias(hoy, i);
-    itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && !x.hecho && prox.length < 5) prox.push({ d:d, x:x }); });
+  /* ---- Lo que se viene: cuentas atrás, cumpleaños y metas ---- */
+  if(hoyVisible('viene')){
+    var cr = cuentasRegresivas().slice(0, 4), cs = proximosCumples(30).slice(0, 4);
+    var ms = vivos('metas').filter(function(m){ return !m.archivada; }).slice(0, 4);
+    var prox = [];
+    for(var i = 1; i <= 7 && prox.length < 5; i++){
+      var d = sumarDias(hoy, i);
+      itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && prox.length < 5) prox.push({ d:d, x:x }); });
+    }
+    if(cr.length || cs.length || ms.length || prox.length){
+      html += tituloSecc('Lo que se viene') + '<div class="rejilla dos">' +
+        '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Próximos días', 'var(--azul)', 'Calendario', 'data-ir="calendario"') +
+          (cr.length ? '<div class="regresivas mini">' + cr.map(function(x){
+            var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
+            return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '"><b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small><span>' + esc(x.e.t) + '</span></button>';
+          }).join('') + '</div>' : '') +
+          (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
+            var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
+            return '<div class="fila"><span class="hora" style="width:62px">' + cap(relativo(p.d)).slice(0, 9) + (p.x.hora ? '<br>' + p.x.hora : '') + '</span><span class="barrita" style="--c:' + p.x.c + '"></span>' +
+              '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div><div class="meta"><span>' + ({ evento:(TIPOS_EV[p.x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', pago:'Pago' }[p.x.tipo] || '') + '</span>' + (p.x.esp ? chipEsp({ esp:p.x.esp }) : '') + '</div></div></div>';
+          }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Nada agendado los próximos 7 días.</div>') + '</section>' +
+        '<section class="tarjeta">' + cabTarjeta('i-meta', 'Metas y fechas', 'var(--oro)', 'Metas', 'data-ir="metas"') +
+          (ms.length ? '<div class="metas-hoy">' + ms.map(function(m){
+            var p = Math.min(1, (+m.actual || 0) / (+m.objetivo || 1));
+            return '<div class="barra-h" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px"><span>' + esc((m.em || '🎯') + ' ' + m.t) + '</span>' +
+              '<div class="barra-prog" style="--c:' + color(m.color) + '"><i style="width:' + Math.round(p * 100) + '%"></i></div><b>' + Math.round(p * 100) + '%</b></div>';
+          }).join('') + '</div>' : '<div class="vacio" style="padding:4px 16px 8px">Sin metas activas. <button class="btn chico" data-ir="metas">Crear una</button></div>') +
+          (cs.length ? '<div class="lista-filas cumples-hoy">' + cs.map(function(c){
+            var edad = edadCumple(c.e, c.dia);
+            return '<div class="fila"><span class="em-fila">🎂</span><div class="cuerpo" data-acc="evento-ed" data-id="' + c.e.id + '"><div class="titulo">' + esc(c.e.t) + '</div>' +
+              '<div class="meta"><span class="' + (c.en === 0 ? 'hoy' : '') + '">' + (c.en === 0 ? '¡Hoy!' : c.en === 1 ? 'Mañana' : 'En ' + c.en + ' días') + ' · ' + fechaCorta(c.dia) + '</span>' +
+              (edad > 0 ? '<span class="cumple">cumple ' + edad + '</span>' : '') + '</div></div></div>';
+          }).join('') + '</div>' : '') + '</section>' +
+      '</div>';
+    }
   }
-  html += '<section class="tarjeta">' + cabTarjeta('i-cal', 'Esta semana', 'var(--azul)') + semana +
-    (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
-      var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
-      return '<div class="fila"><span class="hora" style="width:74px">' + relativo(p.d) + '</span>' +
-        '<span class="barrita" style="--c:' + p.x.c + '"></span>' +
-        '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div>' +
-        '<div class="meta"><span>' + (p.x.hora || 'Todo el día') + '</span></div></div></div>';
-    }).join('') + '</div>' : '<div class="vacio" style="padding-top:0">Nada agendado los próximos 7 días.</div>') +
-    '</section>';
 
-  /* Dinero: los dos libros */
-  var mes = hoy.slice(0, 7);
-  [['personal', CLAVE_LEDGER, 'Gastos personales', 'i-cuentas', 'var(--haber)'], ['oficina', CLAVE_OFICINA, 'Oficina', 'i-maletin', 'var(--azul)']].forEach(function(L){
-    var ent = 0, sal = 0, tot = 0, n = 0;
-    movimientos(L[1]).forEach(function(t){
-      var a = Math.abs(+t.amount || 0), sg = t.type === 'Gasto' ? -a : a;
-      tot += sg; n++;
-      if(t.date.slice(0, 7) === mes){ if(sg < 0) sal += a; else ent += a; }
-    });
-    html += '<section class="tarjeta">' + cabTarjeta(L[3], L[2] + ' · ' + MESES[new Date().getMonth()], L[4], 'Ver', 'data-acc="din-ver" data-v="' + L[0] + '"') +
-      (n ? '<div class="cifras"><div class="entra"><small>Entró</small><b>' + dinero(ent) + '</b></div>' +
-        '<div class="sale"><small>Salió</small><b>' + dinero(sal) + '</b></div>' +
-        '<div><small>Saldo</small><b style="color:' + (tot < 0 ? 'var(--debe)' : 'var(--tinta)') + '">' + dinero(tot) + '</b></div></div>'
-         : '<div class="vacio" style="padding-top:2px">Aún no hay movimientos. <button class="btn chico" style="margin-top:8px" data-acc="din-ver" data-v="' + L[0] + '">' + ico('i-plus') + 'Anotar el primero</button></div>') +
+  /* ---- Dinero: los dos libros y los pagos, en una tarjeta ---- */
+  if(hoyVisible('dinero')){
+    var mes = hoy.slice(0, 7), pp = pagosProximos(7);
+    var libros = [['personal', CLAVE_LEDGER, '🏠 Personal'], ['oficina', CLAVE_OFICINA, '💼 Oficina']].map(function(L){
+      var ent = 0, sal = 0, tot = 0, n = 0;
+      movimientos(L[1]).forEach(function(t){
+        var a = Math.abs(+t.amount || 0), sg = t.type === 'Gasto' ? -a : a;
+        tot += sg; n++;
+        if(t.date.slice(0, 7) === mes){ if(sg < 0) sal += a; else ent += a; }
+      });
+      var p = ent ? Math.min(1, sal / ent) : (sal ? 1 : 0);
+      return '<button type="button" class="libro-hoy" data-acc="din-ver" data-v="' + L[0] + '"><span class="libro-cab"><b>' + L[2] + '</b><em>Saldo ' + dinero(tot) + '</em></span>' +
+        (n ? '<span class="libro-num"><span class="entra"><small>Entró</small>' + dinero(ent) + '</span><span class="sale"><small>Salió</small>' + dinero(sal) + '</span></span>' +
+          '<span class="libro-barra" title="Lo que salió frente a lo que entró"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><small class="libro-pie">' + (ent ? 'Gastaste el ' + Math.round(sal / ent * 100) + '% de lo que entró' : 'Sin ingresos este mes') + '</small>'
+         : '<span class="libro-pie">Aún no hay movimientos. Toca para anotar.</span>') + '</button>';
+    }).join('');
+    html += tituloSecc('Dinero', '<small>' + cap(MESES[new Date().getMonth()]) + '</small>') +
+      '<section class="tarjeta ancho-2 dinero-hoy"><div class="libros-hoy">' + libros + '</div>' +
+      (pp.length ? '<div class="pagos-hoy"><h4>' + ico('i-recibo') + 'Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
+      '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="personal">' + ico('i-plus') + 'Anotar gasto</button><button class="btn chico" data-ir="dinero">' + ico('i-grafica') + 'Ver el resumen</button><button class="btn chico" data-ir="pagos">' + ico('i-recibo') + 'Pagos fijos</button></div>' +
       '</section>';
-  });
-
-  /* Notas fijadas */
-  var fijas = vivos('notas').filter(function(n){ return n.fija; });
-  if(fijas.length){
-    html += '<section class="tarjeta ancho-2">' + cabTarjeta('i-pin', 'Notas fijadas', 'var(--oro)', 'Notas', 'data-ir="notas"') +
-      '<div class="tarjeta-cuerpo"><div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div></div></section>';
   }
-  html += '</div>';
+
+  /* ---- Notas fijadas ---- */
+  var fijas = vivos('notas').filter(function(n){ return n.fija; });
+  if(fijas.length && hoyVisible('notas')){
+    html += tituloSecc('Notas fijadas') + '<section class="tarjeta"><div class="tarjeta-cuerpo" style="padding-top:14px"><div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div></div></section>';
+  }
+  html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
 };
+function personalizarHoy(){
+  abrirFlotante(cabFlot('Qué ver en Hoy') + '<p class="explica">Oculta las secciones que no uses; el saludo y la captura siempre se quedan.</p>' +
+    '<div class="lista-interruptores">' + SECC_HOY.map(function(s){
+      return '<label class="interruptor"><input type="checkbox" data-hoy-secc="' + s[0] + '"' + (hoyVisible(s[0]) ? ' checked' : '') + '>' + s[1] + '</label>';
+    }).join('') + '</div><div class="botones"><button class="btn primario" data-cerrar="1">Listo</button></div>', function(){ pintar(); });
+}
 /* ==========================================================================
    ESPACIOS
    La vida en cuatro: Personal, Estudios, Oficina y Deporte. Cada tarea,
@@ -5202,6 +5422,7 @@ function tictac(){
   $('pastillaFocoTexto').textContent = mmss(r);
   if(foco.fin) document.title = mmss(r) + ' · ' + MODOS[foco.modo].n;
   if(foco.fin && r <= 0) terminarFoco();
+  var hv = $('horaViva'); if(hv) hv.textContent = horaAhora();
   var ro = $('relojOficina'); if(ro && reloj && reloj.inicio) ro.textContent = mmssLargo(Date.now() - reloj.inicio);
 }
 function terminarFoco(){
@@ -5887,13 +6108,22 @@ function menuNuevo(){
   }).join('') + '</div>');
 }
 function menuMas(){
-  var k = contadores();
-  var ops = SECCIONES.filter(function(s){ return ABAJO.indexOf(s.id) < 0; });
-  abrirFlotante(cabFlot('Más') + '<div class="rejilla-mas">' + ops.map(function(s){
-    var n = s.id === 'recordatorios' ? k.recordatorios : 0;
-    return '<button type="button" data-ir="' + s.id + '">' + ico(s.ico) + s.nom + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
-  }).join('') + '<button type="button" data-acc="buscar">' + ico('i-buscar') + 'Buscar</button>' +
-    '<button type="button" data-ir="ajustes">' + ico('i-ajustes') + 'Ajustes</button></div>');
+  var k = contadores(), grupos = [], g = null;
+  SECCIONES.forEach(function(sc){
+    if(sc.id === 'hoy') return;
+    if(sc.g){ g = { n:sc.g, items:[] }; grupos.push(g); }
+    g.items.push(sc);
+  });
+  abrirFlotante(cabFlot('Todo') + grupos.map(function(gr){
+    var esEsp = gr.n === 'Espacios';
+    return '<div class="mas-grupo"><h4>' + gr.n + '</h4><div class="rejilla-mas' + (esEsp ? ' espacios' : '') + '">' + gr.items.map(function(sc){
+      var n = sc.id === 'recordatorios' ? k.recordatorios : sc.id === 'tareas' ? k.tareas : sc.id === 'pagos' ? k.pagos : 0;
+      var E = sc.esp ? espInfo(sc.esp) : null;
+      return '<button type="button" data-ir="' + sc.id + '"' + (E ? ' style="--c:' + E.c + '"' : '') + (ui.vista === sc.id ? ' aria-current="page"' : '') + '>' + (E ? '<span class="em">' + E.em + '</span>' : ico(sc.ico)) + '<span>' + sc.nom + '</span>' + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
+    }).join('') + '</div></div>';
+  }).join('') +
+    '<div class="mas-grupo"><h4>Herramientas</h4><div class="rejilla-mas"><button type="button" data-acc="buscar">' + ico('i-buscar') + '<span>Buscar</span></button>' +
+    '<button type="button" data-ir="ajustes">' + ico('i-ajustes') + '<span>Ajustes</span></button><button type="button" data-acc="personalizar-hoy">' + ico('i-hoy') + '<span>Personalizar Hoy</span></button></div></div>');
 }
 function nuevo(tipo, preset){
   cerrarFlotante();
@@ -6480,6 +6710,11 @@ document.addEventListener('click', function(ev){
 
   switch(a){
     case 'menu-mas': menuMas(); break;
+    case 'personalizar-hoy': personalizarHoy(); break;
+    case 'nav-plegar':
+      var pl = navPlegados().slice(), gi = pl.indexOf(b.dataset.v);
+      if(gi >= 0) pl.splice(gi, 1); else pl.push(b.dataset.v);
+      pref.navPlegado = pl; escribirJSON(CLAVE_PREF, pref); pintarNav(); break;
     case 'buscar': abrirBuscar(); break;
     case 'nuevo': nuevo(b.dataset.tipo); break;
     case 'cap-tipo':
@@ -6928,6 +7163,11 @@ document.addEventListener('input', function(ev){
 
 document.addEventListener('change', function(ev){
   var t = ev.target;
+  if(t.dataset && t.dataset.hoySecc){
+    var off = pref.hoyOff || [], k0 = t.dataset.hoySecc, oi = off.indexOf(k0);
+    if(t.checked && oi >= 0) off.splice(oi, 1); else if(!t.checked && oi < 0) off.push(k0);
+    pref.hoyOff = off; escribirJSON(CLAVE_PREF, pref); return;
+  }
   if(t.dataset && t.dataset.menu){
     var pm = t.dataset.menu.split('|'), mc = JSON.parse(JSON.stringify(menuDia(pm[0])));
     delete mc.del; mc[pm[1]] = t.value.trim().slice(0, 60); poner('menu', mc);
