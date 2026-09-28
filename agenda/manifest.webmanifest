@@ -1,0 +1,25 @@
+{
+  "name": "Agenda · Mi organización",
+  "short_name": "Agenda",
+  "description": "Tareas, listas para marcar, calendario, recordatorios, hábitos, notas y cuentas en un solo sitio.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "id": "/agenda/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A0D14",
+  "theme_color": "#0A0D14",
+  "categories": ["productivity", "lifestyle", "finance"],
+  "lang": "es",
+  "dir": "ltr",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Tareas", "url": "./index.html#tareas", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Calendario", "url": "./index.html#calendario", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] },
+    { "name": "Cuentas", "url": "./index.html#cuentas", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+  ]
+}
