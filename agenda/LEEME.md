@@ -44,7 +44,7 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 | Qué | Para qué |
 |---|---|
 | **Proyectos** | Juntan las tareas de algo grande (la tesis, la web de un cliente, una mudanza), en su espacio y con fecha límite. Ves el avance en un anillo, la siguiente tarea y cuántas tareas por semana necesitas para llegar. |
-| **Calendario por semana** | Los 7 días en columnas y las horas en filas, con la línea roja de "ahora". Además de Mes y Agenda. |
+| **Calendario** | Cinco vistas: **Día** (por horas, con la línea roja de "ahora"), **Semana**, **Mes**, **Agenda** y **Año**. En el celular deslizas el dedo para pasar de día, semana o mes. Tocando un hueco del día o de la semana creas un evento a esa hora; en el Mes escribes «dentista 4pm» o «cumpleaños de Ana» y queda en el día elegido. Muestra los **feriados de Perú**, se filtra por espacio y por tipo (eventos, tareas, avisos, clases, pagos) e **importa de Google Calendar** (archivo .ics) sin duplicar. |
 | **Revisión semanal** | Cada domingo o lunes, Hoy te invita a hacerla: la agenda pone los números de la semana (tareas, entrenos, horas de estudio, hábitos, dinero, ánimo) comparados con la anterior, y tú escribes qué salió bien, qué mejorar y las prioridades de la semana que viene. |
 | **Préstamos** (en Personal) | Quién te debe y a quién le debes. Al saldarlo se anota solo en tu libro. |
 | **Tu día** | Una línea de tiempo con la marca de "ahora"; lo que ya pasó se apaga. El saludo muestra cuánto del día llevas. |
@@ -127,6 +127,12 @@ suena siempre.
      poco mientras la usas y cuando vuelve el internet. Los cambios de los
      dos aparatos se juntan uno por uno (nadie pisa a nadie) y lo que borras
      en uno se borra en el otro.
+  4. En el celular, **tira hacia abajo** desde arriba de cualquier pantalla
+     para sincronizar al momento. La nubecita de arriba muestra cuándo fue la
+     última vez; tócala para ver el estado de la agenda y de cada libro y, si
+     algo falla, qué hacer.
+  5. También viajan tus ajustes de uso: estatura, meta de km, intervalos,
+     feriados, secciones ocultas de Hoy y el día en que empieza la semana.
 - **Deshacer y rehacer**: botones ↶ ↷ arriba (o Ctrl+Z / Ctrl+Y en la
   laptop). Lo deshecho también viaja al otro aparato.
 - **Papelera**: lo que borras queda 30 días (Ajustes → Papelera, el menú
