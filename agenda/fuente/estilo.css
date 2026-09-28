@@ -1928,3 +1928,90 @@ body::before{
 /* Con una hoja abierta, los avisos suben arriba para no tapar sus botones */
 body.con-hoja .avisos{ top:calc(env(safe-area-inset-top) + 10px); bottom:auto !important; z-index:260 }
 body.con-hoja .fab{ display:none }
+
+/* ==========================================================================
+   ADMINISTRAR SECCIONES
+   ========================================================================== */
+.adm-barra .explica{ margin:0 0 12px }
+.adm-barra-prev{
+  display:flex; gap:6px; padding:6px; border-radius:22px; margin-bottom:14px;
+  background:color-mix(in srgb, var(--hoja-2) 80%, transparent); border:1px solid var(--regla);
+}
+.adm-slot{
+  flex:1 1 0; min-width:0; position:relative; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:9px 2px 7px; border-radius:16px; font-size:10.5px; font-weight:700; color:var(--tinta-2);
+  background:var(--hoja); border:1px solid var(--regla);
+}
+.adm-slot span{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.adm-slot svg{ width:20px; height:20px; color:var(--verde-sube) }
+.adm-slot .x{
+  position:absolute; top:-5px; right:-3px; width:18px; height:18px; border-radius:50%; display:grid; place-items:center;
+  font-style:normal; font-size:13px; line-height:1; background:var(--debe); color:#fff; box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.adm-slot.vacio{ justify-content:center; font-size:18px; color:var(--tinta-3); border-style:dashed; background:transparent }
+.adm-slot.fija{ opacity:.6 }
+.adm-slot.fija svg{ color:var(--tinta-3) }
+.adm-cand{ flex-wrap:wrap }
+.adm-cand .ficha svg{ width:15px; height:15px }
+.adm-cand .ficha[disabled]{ opacity:.45 }
+.adm-ayuda{ margin:-4px 2px 10px; font-size:12.5px }
+.adm-grupo{ margin-bottom:12px }
+.adm-grupo-tit{ padding:12px 16px 2px; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta-3) }
+.adm-fila{ align-items:center }
+.adm-fila .cuerpo{ cursor:pointer; min-width:0 }
+.adm-fila .meta span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.adm-ico{
+  width:36px; height:36px; flex:none; border-radius:11px; display:grid; place-items:center; font-size:18px;
+  background:color-mix(in srgb, var(--c, var(--verde)) 16%, transparent); color:var(--c, var(--verde-sube));
+}
+.adm-ico svg{ width:19px; height:19px }
+.adm-fila.apagada .adm-ico, .adm-fila.apagada .cuerpo{ opacity:.45 }
+.adm-lado{ display:flex; align-items:center; gap:2px; flex:none }
+.adm-lado .btn-icono{ width:32px; height:32px }
+.adm-lado .btn-icono[disabled]{ opacity:.25; pointer-events:none }
+.adm-lado .interruptor{ margin-left:6px }
+.adm-lado .interruptor input:disabled{ opacity:.5; cursor:default }
+svg.i.arriba{ transform:rotate(-90deg) }
+svg.i.abajo{ transform:rotate(90deg) }
+@media (max-width:420px){
+  .adm-lado .btn-icono{ width:28px; height:28px }
+  .adm-ico{ width:32px; height:32px }
+}
+
+/* ==========================================================================
+   ELEGIR VARIAS
+   ========================================================================== */
+.herr-sel{ display:flex; align-items:center; gap:10px; margin:-2px 0 10px }
+.pista-sel{ font-size:12px; color:var(--tinta-3) }
+@media (min-width:900px){ .pista-sel{ display:none } }
+.fila.eligiendo{ cursor:pointer }
+.fila.elegida{ background:color-mix(in srgb, var(--verde) 11%, transparent) }
+.fila.eligiendo .casilla.cuadrada{ border-radius:8px }
+body.con-sel .fab{ display:none }
+body.con-sel .contenido{ padding-bottom:210px }
+.barra-sel{
+  position:fixed; z-index:40; left:50%; transform:translateX(-50%);
+  bottom:calc(var(--barra) + 20px + env(safe-area-inset-bottom));
+  width:min(520px, calc(100% - 20px)); padding:10px 10px 10px 16px; border-radius:22px;
+  background:color-mix(in srgb, var(--hoja-2) 94%, transparent); border:1px solid color-mix(in srgb, var(--verde) 40%, var(--regla));
+  box-shadow:0 14px 40px rgba(0,0,0,.4); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  animation:sube-sel .2s ease-out;
+}
+@keyframes sube-sel{ from{ opacity:0; transform:translate(-50%, 10px) } }
+@media (min-width:900px){ .barra-sel{ bottom:24px; left:calc(50% + var(--lateral)/2) } }
+.barra-sel-cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
+.barra-sel-cab b{ font-size:14px }
+.barra-sel-cab .btn-icono{ width:32px; height:32px }
+.barra-sel-acc{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px }
+.barra-sel-acc button{
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 2px; border-radius:14px;
+  font-size:11.5px; font-weight:700; color:var(--tinta); background:var(--hoja); border:1px solid var(--regla);
+}
+.barra-sel-acc button svg{ width:19px; height:19px; color:var(--verde-sube) }
+.barra-sel-acc button.peligro svg{ color:var(--debe) }
+.barra-sel-acc button[disabled]{ opacity:.4 }
+body.con-sel .avisos{ bottom:calc(var(--barra) + 150px + env(safe-area-inset-bottom)) }
+.sel-otra{ display:flex; gap:8px }
+.sel-otra .entrada{ flex:1; min-width:0 }
+.punto-prio{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle }
+body.sin-fab .fab{ display:none }

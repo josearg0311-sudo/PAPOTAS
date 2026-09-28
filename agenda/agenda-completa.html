@@ -1989,6 +1989,93 @@ body::before{
 /* Con una hoja abierta, los avisos suben arriba para no tapar sus botones */
 body.con-hoja .avisos{ top:calc(env(safe-area-inset-top) + 10px); bottom:auto !important; z-index:260 }
 body.con-hoja .fab{ display:none }
+
+/* ==========================================================================
+   ADMINISTRAR SECCIONES
+   ========================================================================== */
+.adm-barra .explica{ margin:0 0 12px }
+.adm-barra-prev{
+  display:flex; gap:6px; padding:6px; border-radius:22px; margin-bottom:14px;
+  background:color-mix(in srgb, var(--hoja-2) 80%, transparent); border:1px solid var(--regla);
+}
+.adm-slot{
+  flex:1 1 0; min-width:0; position:relative; display:flex; flex-direction:column; align-items:center; gap:3px;
+  padding:9px 2px 7px; border-radius:16px; font-size:10.5px; font-weight:700; color:var(--tinta-2);
+  background:var(--hoja); border:1px solid var(--regla);
+}
+.adm-slot span{ max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.adm-slot svg{ width:20px; height:20px; color:var(--verde-sube) }
+.adm-slot .x{
+  position:absolute; top:-5px; right:-3px; width:18px; height:18px; border-radius:50%; display:grid; place-items:center;
+  font-style:normal; font-size:13px; line-height:1; background:var(--debe); color:#fff; box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+.adm-slot.vacio{ justify-content:center; font-size:18px; color:var(--tinta-3); border-style:dashed; background:transparent }
+.adm-slot.fija{ opacity:.6 }
+.adm-slot.fija svg{ color:var(--tinta-3) }
+.adm-cand{ flex-wrap:wrap }
+.adm-cand .ficha svg{ width:15px; height:15px }
+.adm-cand .ficha[disabled]{ opacity:.45 }
+.adm-ayuda{ margin:-4px 2px 10px; font-size:12.5px }
+.adm-grupo{ margin-bottom:12px }
+.adm-grupo-tit{ padding:12px 16px 2px; font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta-3) }
+.adm-fila{ align-items:center }
+.adm-fila .cuerpo{ cursor:pointer; min-width:0 }
+.adm-fila .meta span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.adm-ico{
+  width:36px; height:36px; flex:none; border-radius:11px; display:grid; place-items:center; font-size:18px;
+  background:color-mix(in srgb, var(--c, var(--verde)) 16%, transparent); color:var(--c, var(--verde-sube));
+}
+.adm-ico svg{ width:19px; height:19px }
+.adm-fila.apagada .adm-ico, .adm-fila.apagada .cuerpo{ opacity:.45 }
+.adm-lado{ display:flex; align-items:center; gap:2px; flex:none }
+.adm-lado .btn-icono{ width:32px; height:32px }
+.adm-lado .btn-icono[disabled]{ opacity:.25; pointer-events:none }
+.adm-lado .interruptor{ margin-left:6px }
+.adm-lado .interruptor input:disabled{ opacity:.5; cursor:default }
+svg.i.arriba{ transform:rotate(-90deg) }
+svg.i.abajo{ transform:rotate(90deg) }
+@media (max-width:420px){
+  .adm-lado .btn-icono{ width:28px; height:28px }
+  .adm-ico{ width:32px; height:32px }
+}
+
+/* ==========================================================================
+   ELEGIR VARIAS
+   ========================================================================== */
+.herr-sel{ display:flex; align-items:center; gap:10px; margin:-2px 0 10px }
+.pista-sel{ font-size:12px; color:var(--tinta-3) }
+@media (min-width:900px){ .pista-sel{ display:none } }
+.fila.eligiendo{ cursor:pointer }
+.fila.elegida{ background:color-mix(in srgb, var(--verde) 11%, transparent) }
+.fila.eligiendo .casilla.cuadrada{ border-radius:8px }
+body.con-sel .fab{ display:none }
+body.con-sel .contenido{ padding-bottom:210px }
+.barra-sel{
+  position:fixed; z-index:40; left:50%; transform:translateX(-50%);
+  bottom:calc(var(--barra) + 20px + env(safe-area-inset-bottom));
+  width:min(520px, calc(100% - 20px)); padding:10px 10px 10px 16px; border-radius:22px;
+  background:color-mix(in srgb, var(--hoja-2) 94%, transparent); border:1px solid color-mix(in srgb, var(--verde) 40%, var(--regla));
+  box-shadow:0 14px 40px rgba(0,0,0,.4); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  animation:sube-sel .2s ease-out;
+}
+@keyframes sube-sel{ from{ opacity:0; transform:translate(-50%, 10px) } }
+@media (min-width:900px){ .barra-sel{ bottom:24px; left:calc(50% + var(--lateral)/2) } }
+.barra-sel-cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px }
+.barra-sel-cab b{ font-size:14px }
+.barra-sel-cab .btn-icono{ width:32px; height:32px }
+.barra-sel-acc{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px }
+.barra-sel-acc button{
+  display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 2px; border-radius:14px;
+  font-size:11.5px; font-weight:700; color:var(--tinta); background:var(--hoja); border:1px solid var(--regla);
+}
+.barra-sel-acc button svg{ width:19px; height:19px; color:var(--verde-sube) }
+.barra-sel-acc button.peligro svg{ color:var(--debe) }
+.barra-sel-acc button[disabled]{ opacity:.4 }
+body.con-sel .avisos{ bottom:calc(var(--barra) + 150px + env(safe-area-inset-bottom)) }
+.sel-otra{ display:flex; gap:8px }
+.sel-otra .entrada{ flex:1; min-width:0 }
+.punto-prio{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle }
+body.sin-fab .fab{ display:none }
 </style>
 </head>
 <body>
@@ -2537,7 +2624,7 @@ var SECCIONES = [
   { id:'tareas',        nom:'Tareas',        ico:'i-tareas',  g:'Organizar' },
   { id:'proyectos',     nom:'Proyectos',     ico:'i-carpeta' },
   { id:'calendario',    nom:'Calendario',    ico:'i-cal' },
-  { id:'recordatorios', nom:'Recordatorios', ico:'i-campana' },
+  { id:'recordatorios', nom:'Recordatorios', corto:'Avisos', ico:'i-campana' },
   { id:'listas',        nom:'Listas',        ico:'i-listas' },
   { id:'notas',         nom:'Notas',         ico:'i-notas' },
   { id:'habitos',       nom:'Hábitos',       ico:'i-habitos', g:'Crecer' },
@@ -2547,14 +2634,37 @@ var SECCIONES = [
   { id:'progreso',      nom:'Progreso',      ico:'i-diana' },
   { id:'revision',      nom:'Revisión semanal', movil:'Revisión', ico:'i-check' },
   { id:'dinero',        nom:'Dinero',        ico:'i-grafica', g:'Dinero' },
-  { id:'pagos',         nom:'Pagos fijos',   ico:'i-recibo' },
+  { id:'pagos',         nom:'Pagos fijos',   corto:'Pagos', ico:'i-recibo' },
   { id:'personal',      nom:'Libro personal', movil:'Gastos personales', corto:'Gastos', ico:'i-cuentas' },
   { id:'oficina',       nom:'Libro de oficina', movil:'Oficina', ico:'i-maletin' },
-  { id:'papelera',      nom:'Papelera',      ico:'i-basura', oculta:true }
+  { id:'papelera',      nom:'Papelera',      ico:'i-basura', oculta:true },
+  { id:'secciones',     nom:'Administrar secciones', movil:'Secciones', ico:'i-espacios', oculta:true }
 ];
-var SNAV = SECCIONES.filter(function(s){ return !s.oculta; });
-/* En el móvil: Hoy, los espacios, el calendario, el dinero y "Más" */
+/* Cada sección con su grupo (el grupo lo marca la primera de cada uno) */
+var GRUPO_DE = {}, GRUPOS = [''];
+(function(){ var g = ''; SECCIONES.forEach(function(s){ if(s.oculta) return; if(s.g){ g = s.g; GRUPOS.push(g); } GRUPO_DE[s.id] = g; }); })();
+var FIJAS = ['hoy'];   // no se pueden ocultar
+function secOculta(id){ return (pref.secOff || []).indexOf(id) >= 0 && FIJAS.indexOf(id) < 0; }
+/* Las secciones del menú en el orden y con lo que elegiste mostrar.
+   Los grupos se quedan en su sitio; dentro de cada uno manda tu orden. */
+function navSecs(todas){
+  var orden = pref.secOrden || [];
+  function pos(s){ var i = orden.indexOf(s.id); return i < 0 ? 1000 + SECCIONES.indexOf(s) : i; }
+  var out = [];
+  GRUPOS.forEach(function(g){
+    SECCIONES.filter(function(s){ return !s.oculta && GRUPO_DE[s.id] === g && (todas || !secOculta(s.id)); })
+      .sort(function(a, b){ return pos(a) - pos(b); })
+      .forEach(function(s, i){ var c = Object.assign({}, s); delete c.g; if(!i && g) c.g = g; out.push(c); });
+  });
+  return out;
+}
+/* En el móvil: cuatro botones abajo (tú eliges cuáles) y "Todo" */
 var ABAJO = ['hoy','espacios','calendario','dinero'];
+function abajoValido(id){ return id === 'espacios' || SECCIONES.some(function(s){ return s.id === id && !s.oculta && !s.esp; }); }
+function barraAbajo(){
+  var a = Array.isArray(pref.abajo) ? pref.abajo.filter(abajoValido).slice(0, 4) : null;
+  return a && a.length ? a : ABAJO;
+}
 function esLibro(v){ return v === 'personal' || v === 'oficina'; }
 
 var ui = {
@@ -2575,6 +2685,7 @@ function contadores(){
   };
 }
 
+function nomCorto(s){ return s.corto || s.movil || s.nom; }
 function navPlegados(){ return pref.navPlegado || ['Crecer']; }
 /* Cambia el contenido solo si es distinto: el menú no se redibuja entero
    cada vez que se pinta una sección */
@@ -2583,6 +2694,7 @@ function pintarNav(){
   var k = contadores();
   function num(id){ return id === 'tareas' ? k.tareas : id === 'recordatorios' ? k.recordatorios : id === 'pagos' ? k.pagos : 0; }
   var grupoNav = '';
+  var SNAV = navSecs();
   ponerSiCambia($('navLat'), SNAV.map(function(s){
     var n = num(s.id);
     var alerta = (s.id === 'tareas' && k.tareasTarde) || ((s.id === 'recordatorios' || s.id === 'pagos') && n);
@@ -2598,18 +2710,21 @@ function pintarNav(){
         ico(s.ico) + s.nom + (n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : '') +
       '</button>');
   }).join(''));
-  var DINERO = ['dinero','personal','oficina','pagos'];
-  var enMas = ABAJO.indexOf(ui.vista) < 0 && DINERO.indexOf(ui.vista) < 0;
-  if(ui.vista.indexOf('esp-') === 0) ui.espUlt = ui.vista.slice(4);
-  var otros = k.recordatorios + k.pagos;
-  enMas = enMas && ui.vista.indexOf('esp-') !== 0;
-  ponerSiCambia($('barraInf'), ABAJO.map(function(id){
+  var DINERO = ['dinero','personal','oficina','pagos'], AB = barraAbajo();
+  var enEsp = ui.vista.indexOf('esp-') === 0;
+  if(enEsp) ui.espUlt = ui.vista.slice(4);
+  function activoAbajo(id){
+    return ui.vista === id || (id === 'dinero' && AB.indexOf(ui.vista) < 0 && DINERO.indexOf(ui.vista) >= 0) || (id === 'espacios' && enEsp);
+  }
+  var enMas = !AB.some(activoAbajo);
+  $('barraInf').style.gridTemplateColumns = 'repeat(' + (AB.length + 1) + ',minmax(0,1fr))';
+  var otros = (AB.indexOf('recordatorios') < 0 ? k.recordatorios : 0) + (AB.indexOf('pagos') < 0 ? k.pagos : 0);
+  ponerSiCambia($('barraInf'), AB.map(function(id){
     var s = id === 'espacios' ? { nom:'Espacios', ico:'i-espacios' } : SECCIONES.find(function(x){ return x.id === id; });
     var destino = id === 'espacios' ? 'esp-' + (ui.espUlt || 'personal') : id;
-    var n = id === 'espacios' ? k.tareas : 0;
-    var activo = ui.vista === id || (id === 'dinero' && DINERO.indexOf(ui.vista) >= 0) || (id === 'espacios' && ui.vista.indexOf('esp-') === 0);
-    return '<button type="button" data-ir="' + destino + '"' + (activo ? ' aria-current="page"' : '') + '>' +
-             ico(s.ico) + (s.corto || s.nom) + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
+    var n = id === 'espacios' ? k.tareas : num(id);
+    return '<button type="button" data-ir="' + destino + '"' + (activoAbajo(id) ? ' aria-current="page"' : '') + '>' +
+             ico(s.ico) + nomCorto(s) + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
   }).join('') +
   '<button type="button" data-acc="menu-mas"' + (enMas ? ' aria-current="page"' : '') + '>' + ico('i-mas') + 'Todo' +
     (otros ? '<span class="globo">' + otros + '</span>' : '') + '</button>');
@@ -2629,6 +2744,7 @@ function ir(v, sinHash){
   if(v !== 'ajustes' && !SECCIONES.some(function(s){ return s.id === v; })) v = 'hoy';
   if(v !== 'listas') ui.lista = null;
   if(v !== 'proyectos') ui.proy = null;
+  if(v !== ui.vista) ui.sel = null;
   ui.vista = v;
   if(!sinHash && location.hash !== '#' + v){
     /* Si había una hoja abierta, su paso en el historial se reutiliza */
@@ -2669,6 +2785,8 @@ function pintarVista(){
   $('tituloVista').textContent = v === 'ajustes' ? 'Ajustes' : (v === 'listas' && ui.lista ? (listaActual() || {}).nombre || 'Listas' : (sec.esp ? espInfo(sec.esp).em + ' ' : '') + (innerWidth < 600 && sec.movil ? sec.movil : sec.nom));
   if(!foco.fin) document.title = (v === 'hoy' ? 'Agenda' : $('tituloVista').textContent + ' · Agenda');
   document.body.classList.toggle('en-cuentas', esLibro(v));
+  document.body.classList.toggle('con-sel', !!ui.sel);
+  document.body.classList.toggle('sin-fab', v === 'secciones' || v === 'papelera' || v === 'ajustes');
   document.body.dataset.esp = sec && sec.esp ? sec.esp : '';
 
   if(esLibro(v)){
@@ -2727,10 +2845,11 @@ function metaFecha(fecha, hora, hecha){
 
 function filaTarea(t){
   var sub = t.sub && t.sub.length ? t.sub.filter(function(s){ return s.ok; }).length + '/' + t.sub.length : '';
-  var paraMover = !t.hecha && t.fecha && t.fecha <= hoyISO();
-  return '<div class="fila' + (t.hecha ? ' hecha' : '') + '" data-fila="' + t.id + '">' +
-    casilla('tarea-ok', t.id, t.hecha, t.prio ? PRIOS[t.prio].c : '') +
-    '<div class="cuerpo" data-acc="tarea-ed" data-id="' + t.id + '">' +
+  var sel = enSel('tareas') && ui.vista === 'tareas', ya = sel && elegida(t.id);
+  var paraMover = !sel && !t.hecha && t.fecha && t.fecha <= hoyISO();
+  return '<div class="fila' + (t.hecha ? ' hecha' : '') + (sel ? ' eligiendo' : '') + (ya ? ' elegida' : '') + '" data-fila="' + t.id + '">' +
+    (sel ? casilla('sel-t', t.id, ya, 'var(--verde)', true) : casilla('tarea-ok', t.id, t.hecha, t.prio ? PRIOS[t.prio].c : '')) +
+    '<div class="cuerpo" data-acc="' + (sel ? 'sel-t' : 'tarea-ed') + '" data-id="' + t.id + '">' +
       '<div class="titulo">' + esc(t.t) + '</div>' +
       '<div class="meta">' +
         metaFecha(t.fecha, t.hora, t.hecha) +
@@ -4789,7 +4908,15 @@ function volverA(txt){
     });
     Object.keys(antes).forEach(function(k){ var v = JSON.parse(JSON.stringify(antes[k])); v.upd = ahora; db[c].push(v); cambios++; });
   });
-  if(JSON.stringify(viejo.perfil || {}) !== JSON.stringify(db.perfil || {})){ db.perfil = Object.assign({}, viejo.perfil, { upd:ahora }); cambios++; }
+  /* El perfil vuelve atrás, pero los ajustes (secciones, barra…) se quedan
+     como están: esos se cambian desde sus pantallas, no con deshacer */
+  var prefsHoy = db.perfil && db.perfil.prefs;
+  function sinPrefs(x){ x = Object.assign({}, x); delete x.prefs; return JSON.stringify(x); }
+  if(sinPrefs(viejo.perfil || {}) !== sinPrefs(db.perfil || {})){
+    db.perfil = Object.assign({}, viejo.perfil, { upd:ahora });
+    if(prefsHoy) db.perfil.prefs = prefsHoy; else delete db.perfil.prefs;
+    cambios++;
+  }
   guardarLocal(); programarSubida(); pintar();
   return cambios;
 }
@@ -4897,6 +5024,217 @@ HIST.estable = fotoDB();
 limpiarPapelera();
 
 /* ==========================================================================
+   ADMINISTRAR SECCIONES
+   Una sola pantalla para organizarlo todo: qué secciones ver, en qué orden,
+   qué va en la barra de abajo del celular, cuánto hay en cada una y una
+   limpieza de lo viejo (todo va a la papelera y se puede deshacer).
+   ========================================================================== */
+function resumenSec(id){
+  try{
+    var hoy = hoyISO(), n;
+    if(id.indexOf('esp-') === 0){
+      var e = id.slice(4);
+      n = vivos('tareas').filter(function(t){ return !t.hecha && espDe(t) === e; }).length;
+      return n + (n === 1 ? ' tarea pendiente' : ' tareas pendientes');
+    }
+    switch(id){
+      case 'hoy': return 'Tu día de un vistazo';
+      case 'tareas':
+        var ts = vivos('tareas'), p = ts.filter(function(t){ return !t.hecha; }).length;
+        return p + ' pendientes · ' + (ts.length - p) + ' hechas';
+      case 'proyectos': n = proyectosActivos().length; return n + (n === 1 ? ' proyecto activo' : ' proyectos activos');
+      case 'calendario':
+        var fin = sumarDias(hoy, 7);
+        n = vivos('eventos').filter(function(e){ return e.fecha >= hoy && e.fecha <= fin; }).length;
+        return vivos('eventos').length + ' eventos · ' + n + ' esta semana';
+      case 'recordatorios': n = vivos('recordatorios').filter(function(r){ return !r.hecho; }).length; return n + ' activos';
+      case 'listas':
+        var faltan = 0; vivos('listas').forEach(function(l){ (l.items || []).forEach(function(i){ if(!i.ok) faltan++; }); });
+        return vivos('listas').length + ' listas · ' + faltan + ' por marcar';
+      case 'notas': n = vivos('notas').length; return n + (n === 1 ? ' nota' : ' notas');
+      case 'habitos': n = vivos('habitos').length; return n + (n === 1 ? ' hábito' : ' hábitos');
+      case 'metas': n = vivos('metas').filter(function(m){ return !m.archivada; }).length; return n + (n === 1 ? ' meta activa' : ' metas activas');
+      case 'foco': return 'Temporizador pomodoro';
+      case 'diario': n = vivos('diario').length; return n + (n === 1 ? ' día escrito' : ' días escritos');
+      case 'progreso': return 'Gráficas de cómo vas';
+      case 'revision': n = vivos('revisiones').length; return n + (n === 1 ? ' revisión hecha' : ' revisiones hechas');
+      case 'dinero': return 'Los dos libros juntos';
+      case 'pagos': n = vivos('pagos').length; return n + (n === 1 ? ' pago fijo' : ' pagos fijos');
+      case 'personal': n = movimientos(CLAVE_LEDGER).length; return n + ' movimientos';
+      case 'oficina': n = movimientos(CLAVE_OFICINA).length; return n + ' movimientos';
+    }
+  }catch(e){}
+  return '';
+}
+
+/* Lo que se puede limpiar, con cuántas cosas hay de cada uno */
+function hayParaLimpiar(){
+  var hoy = hoyISO(), mes = Date.now() - 30 * 864e5, ano = sumarDias(hoy, -365), marcadas = 0;
+  vivos('listas').forEach(function(l){ (l.items || []).forEach(function(i){ if(i.ok) marcadas++; }); });
+  return [
+    { k:'tareas', em:'✅', t:'Tareas hechas hace más de un mes', l:vivos('tareas').filter(function(t){ return t.hecha && (t.hechaEn || t.upd || 0) < mes; }) },
+    { k:'recs', em:'🔔', t:'Recordatorios ya hechos', l:vivos('recordatorios').filter(function(r){ return r.hecho && (!r.rep || r.rep === 'no'); }) },
+    { k:'eventos', em:'📅', t:'Eventos de hace más de un año', l:vivos('eventos').filter(function(e){ return e.fecha && e.fecha < ano && (!e.rep || e.rep === 'no') && !e.cumple; }) },
+    { k:'listas', em:'🛒', t:'Cosas ya marcadas en tus listas', n:marcadas },
+    { k:'notas', em:'📝', t:'Notas vacías', l:vivos('notas').filter(function(x){ return !String(x.t || x.titulo || '').trim() && !String(x.texto || x.txt || x.cuerpo || '').trim(); }) }
+  ].map(function(x){ if(x.n == null) x.n = x.l.length; return x; });
+}
+function limpiar(k){
+  var cosa = hayParaLimpiar().find(function(x){ return x.k === k; });
+  if(!cosa || !cosa.n) return;
+  if(!confirm(cosa.t + ': ' + cosa.n + '. ¿Limpiar? ' + (k === 'listas' ? 'Se quitan de sus listas.' : 'Irán a la papelera.'))) return;
+  var ahora = Date.now();
+  if(k === 'listas') vivos('listas').forEach(function(l){
+    if((l.items || []).some(function(i){ return i.ok; })){ l.items = l.items.filter(function(i){ return !i.ok; }); l.upd = ahora; }
+  });
+  else cosa.l.forEach(function(x){ x.del = true; x.upd = x.delEn = ahora; });
+  guardar(); pintar();
+  aviso('🧹 Limpio', cosa.n + (cosa.n === 1 ? ' cosa' : ' cosas') + (k === 'listas' ? ' quitadas' : ' a la papelera'), 'Deshacer', deshacer);
+}
+
+VISTAS.secciones = function(){
+  var AB = barraAbajo(), todas = navSecs(true);
+  var html = '<section class="cab-sec" style="--sc:var(--verde)"><span class="cab-sec-ico">' + ico('i-espacios') + '</span><div class="cab-sec-txt"><b>Administrar secciones</b><small>' +
+    todas.filter(function(s){ return !secOculta(s.id); }).length + ' de ' + todas.length + ' a la vista · ordénalas, ocúltalas y elige tu barra</small></div></section>';
+
+  /* La barra de abajo del celular */
+  var cand = [{ id:'espacios', nom:'Espacios', ico:'i-espacios' }].concat(SECCIONES.filter(function(s){ return !s.oculta && !s.esp; }));
+  html += '<div class="seccion-tit" style="margin-top:0">Barra de abajo del celular</div><section class="tarjeta"><div class="tarjeta-cuerpo adm-barra">' +
+    '<p class="explica">Elige hasta 4 accesos directos; «Todo» siempre va al final. Tócalos para quitarlos.</p>' +
+    '<div class="adm-barra-prev">' + AB.map(function(id, i){
+      var s = cand.find(function(c){ return c.id === id; });
+      return '<button type="button" class="adm-slot" data-acc="abajo-quitar" data-v="' + id + '" aria-label="Quitar ' + esc(s.nom) + ' de la barra">' + ico(s.ico) + '<span>' + nomCorto(s) + '</span><i class="x">×</i></button>';
+    }).join('') + (AB.length < 4 ? '<span class="adm-slot vacio">＋</span>' : '') + '<span class="adm-slot fija">' + ico('i-mas') + '<span>Todo</span></span></div>' +
+    '<div class="fichas adm-cand">' + cand.filter(function(c){ return AB.indexOf(c.id) < 0; }).map(function(c){
+      return '<button type="button" class="ficha" data-acc="abajo-poner" data-v="' + c.id + '"' + (AB.length >= 4 ? ' disabled' : '') + '>' + ico(c.ico) + nomCorto(c) + '</button>';
+    }).join('') + '</div></div></section>';
+
+  /* Las secciones, por grupos */
+  html += '<div class="seccion-tit">Tus secciones</div><p class="explica adm-ayuda">Apaga las que no uses: desaparecen del menú pero no se borra nada. Con las flechas cambias el orden dentro de cada grupo.</p>';
+  GRUPOS.forEach(function(g){
+    var del = todas.filter(function(s){ return GRUPO_DE[s.id] === g; });
+    if(!del.length) return;
+    html += '<section class="tarjeta adm-grupo"><div class="adm-grupo-tit">' + (g || 'Principal') + '</div><div class="lista-filas">' + del.map(function(s, i){
+      var E = s.esp ? espInfo(s.esp) : null, fija = FIJAS.indexOf(s.id) >= 0, off = secOculta(s.id);
+      return '<div class="fila adm-fila' + (off ? ' apagada' : '') + '">' +
+        '<span class="adm-ico"' + (E ? ' style="--c:' + E.c + '"' : '') + '>' + (E ? E.em : ico(s.ico)) + '</span>' +
+        '<div class="cuerpo" data-ir="' + s.id + '"><div class="titulo">' + s.nom + '</div><div class="meta"><span>' + resumenSec(s.id) + '</span></div></div>' +
+        '<div class="lado adm-lado">' +
+          '<button type="button" class="btn-icono" data-acc="sec-mover" data-v="' + s.id + '" data-d="-1" aria-label="Subir ' + s.nom + '"' + (i ? '' : ' disabled') + '>' + ico('i-der', 'arriba') + '</button>' +
+          '<button type="button" class="btn-icono" data-acc="sec-mover" data-v="' + s.id + '" data-d="1" aria-label="Bajar ' + s.nom + '"' + (i < del.length - 1 ? '' : ' disabled') + '>' + ico('i-der', 'abajo') + '</button>' +
+          '<label class="interruptor" title="' + (fija ? 'Siempre visible' : off ? 'Oculta' : 'Visible') + '"><input type="checkbox" data-sec-ver="' + s.id + '"' + (off ? '' : ' checked') + (fija ? ' disabled' : '') + ' aria-label="Mostrar ' + s.nom + '"></label>' +
+        '</div></div>';
+    }).join('') + '</div></section>';
+  });
+
+  /* Limpieza */
+  var lim = hayParaLimpiar(), algo = lim.some(function(x){ return x.n; });
+  html += '<div class="seccion-tit">Limpieza</div><section class="tarjeta"><div class="lista-filas">' + lim.map(function(x){
+    return '<div class="fila adm-fila"><span class="em-fila">' + x.em + '</span><div class="cuerpo"><div class="titulo">' + x.t + '</div><div class="meta"><span>' + (x.n ? x.n + (x.n === 1 ? ' cosa' : ' cosas') : 'Nada que limpiar 👌') + '</span></div></div>' +
+      (x.n ? '<div class="lado"><button class="btn chico" data-acc="limpiar" data-v="' + x.k + '">' + ico('i-basura') + 'Limpiar</button></div>' : '') + '</div>';
+  }).join('') + '</div>' + (algo ? '<p class="explica" style="margin:0 16px 14px">Lo limpiado va a la papelera ' + DIAS_PAPELERA + ' días, y también puedes deshacerlo.</p>' : '') + '</section>';
+
+  html += '<div class="botones" style="margin-top:14px"><button class="btn" data-acc="sec-restablecer">' + ico('i-deshacer') + 'Volver al orden original</button>' +
+    '<button class="btn" data-ir="papelera">' + ico('i-basura') + 'Papelera (' + enPapelera().length + ')</button></div>';
+  return html;
+};
+function moverSec(id, d){
+  var g = GRUPO_DE[id], del = navSecs(true).filter(function(s){ return GRUPO_DE[s.id] === g; }).map(function(s){ return s.id; });
+  var i = del.indexOf(id), j = i + d;
+  if(i < 0 || j < 0 || j >= del.length) return;
+  del[i] = del[j]; del[j] = id;
+  var orden = navSecs(true).map(function(s){ return s.id; }).filter(function(x){ return GRUPO_DE[x] !== g; }).concat(del);
+  pref.secOrden = orden; guardarPref(); pintar();
+}
+
+/* ==========================================================================
+   ELEGIR VARIAS A LA VEZ (Tareas)
+   «Seleccionar» o dejar el dedo sobre una tarea: luego se marcan hechas,
+   se mueven de fecha, se cambian de espacio o prioridad, o se borran todas
+   juntas. Se deshace con un toque.
+   ========================================================================== */
+function enSel(col){ return !!(ui.sel && ui.sel.col === col); }
+function elegida(id){ return !!(ui.sel && ui.sel.ids.indexOf(id) >= 0); }
+function barraSel(){
+  var n = ui.sel.ids.length, ts = ui.sel.ids.map(function(id){ return buscarId('tareas', id); }).filter(Boolean);
+  var todasHechas = ts.length && ts.every(function(t){ return t.hecha; });
+  return '<div class="barra-sel" role="toolbar" aria-label="Acciones con lo elegido">' +
+    '<div class="barra-sel-cab"><b>' + (n ? n + (n === 1 ? ' elegida' : ' elegidas') : 'Toca las tareas') + '</b>' +
+      '<button type="button" class="btn-icono" data-acc="sel-fin" aria-label="Terminar">' + ico('i-x') + '</button></div>' +
+    '<div class="barra-sel-acc">' +
+      '<button type="button" data-acc="sel-hecha"' + (n ? '' : ' disabled') + '>' + ico(todasHechas ? 'i-deshacer' : 'i-check') + (todasHechas ? 'Reabrir' : 'Hechas') + '</button>' +
+      '<button type="button" data-acc="sel-mover"' + (n ? '' : ' disabled') + '>' + ico('i-cal') + 'Fecha</button>' +
+      '<button type="button" data-acc="sel-etiquetar"' + (n ? '' : ' disabled') + '>' + ico('i-espacios') + 'Espacio</button>' +
+      '<button type="button" class="peligro" data-acc="sel-borrar"' + (n ? '' : ' disabled') + '>' + ico('i-basura') + 'Borrar</button>' +
+    '</div></div>';
+}
+function conElegidas(fn, titulo){
+  var ids = ui.sel ? ui.sel.ids.slice() : [], ahora = Date.now(), n = 0;
+  ids.forEach(function(id){ var t = buscarId('tareas', id); if(t && !t.del){ fn(t); t.upd = ahora; n++; } });
+  ui.sel = null; cerrarFlotante();
+  if(!n) return;
+  guardar(); pintar();
+  aviso(titulo + ' · ' + n + (n === 1 ? ' tarea' : ' tareas'), null, 'Deshacer', deshacer);
+}
+function selHecha(){
+  var ts = ui.sel.ids.map(function(id){ return buscarId('tareas', id); }).filter(Boolean);
+  var reabrir = ts.length && ts.every(function(t){ return t.hecha; }), hoy = hoyISO();
+  conElegidas(function(t){
+    if(reabrir){ t.hecha = false; t.hechaEn = 0; return; }
+    if(t.hecha) return;
+    if(t.rep && t.rep !== 'no'){
+      var f = t.fecha || hoy;
+      do{ f = siguiente(f, t.rep); }while(f <= hoy);
+      t.fecha = f; t.veces = (t.veces || 0) + 1; t.log = (t.log || []).concat([hoy]).slice(-60);
+      (t.sub || []).forEach(function(s){ s.ok = false; });
+    } else { t.hecha = true; t.hechaEn = Date.now(); }
+  }, reabrir ? '↩️ Reabiertas' : '✅ Hechas');
+}
+function hojaSelFecha(){
+  var hoy = hoyISO(), d = new Date(), aLunes = ((8 - d.getDay()) % 7) || 7;
+  var ops = [['Hoy', hoy], ['Mañana', sumarDias(hoy, 1)], ['Pasado mañana', sumarDias(hoy, 2)], ['El próximo lunes', sumarDias(hoy, aLunes)], ['En una semana', sumarDias(hoy, 7)], ['Sin fecha', '']];
+  abrirFlotante(cabFlot('Mover ' + ui.sel.ids.length + (ui.sel.ids.length === 1 ? ' tarea' : ' tareas')) +
+    '<div class="menu-lista">' + ops.map(function(o){
+      return '<button type="button" data-acc="sel-fecha" data-f="' + o[1] + '">' + ico(o[1] ? 'i-cal' : 'i-x') + '<span><b>' + o[0] + '</b>' + (o[1] ? '<small>' + fechaCorta(o[1]) + '</small>' : '') + '</span></button>';
+    }).join('') + '</div>' +
+    '<div class="campo" style="margin-top:12px"><span>Otra fecha</span><div class="sel-otra"><input class="entrada" type="date" id="selFechaOtra" value="' + hoy + '"><button class="btn primario" data-acc="sel-fecha" data-f="otra">Poner</button></div></div>');
+}
+function hojaSelEtiquetar(){
+  abrirFlotante(cabFlot('Espacio y prioridad') +
+    '<div class="campo"><span>Pasar al espacio</span><div class="rejilla-mas espacios">' + ESPACIOS.map(function(e){
+      return '<button type="button" style="--c:' + e.c + '" data-acc="sel-esp" data-e="' + e.id + '"><span class="em">' + e.em + '</span><span>' + e.nom + '</span></button>';
+    }).join('') + '</div></div>' +
+    '<div class="campo" style="margin-top:12px"><span>Prioridad</span><div class="selector">' + PRIOS.map(function(p, i){
+      return '<button type="button" data-acc="sel-prio" data-p="' + i + '"><i class="punto-prio" style="background:' + p.c + '"></i>' + p.n + '</button>';
+    }).join('') + '</div></div>');
+}
+
+/* Dejar el dedo sobre una tarea: empieza a elegir */
+(function(){
+  var reloj = null, x0 = 0, y0 = 0, saltarClic = false;
+  document.addEventListener('touchstart', function(ev){
+    clearTimeout(reloj);
+    var f = ev.target.closest && ev.target.closest('.fila[data-fila]');
+    if(!f || ui.sel || ev.touches.length !== 1 || !f.querySelector('[data-acc="tarea-ok"]') || ui.vista !== 'tareas') return;
+    x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY;
+    reloj = setTimeout(function(){
+      reloj = null; saltarClic = true; vibrar(25);
+      ui.sel = { col:'tareas', ids:[f.dataset.fila] }; pintar();
+    }, 520);
+  }, { passive:true });
+  document.addEventListener('touchmove', function(ev){
+    if(reloj && (Math.abs(ev.touches[0].clientX - x0) > 10 || Math.abs(ev.touches[0].clientY - y0) > 10)){ clearTimeout(reloj); reloj = null; }
+  }, { passive:true });
+  document.addEventListener('touchend', function(){
+    clearTimeout(reloj); reloj = null;
+    if(saltarClic) setTimeout(function(){ saltarClic = false; }, 450);   // el clic que sigue al soltar, y nada más
+  }, { passive:true });
+  window.addEventListener('click', function(ev){ if(saltarClic){ saltarClic = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
+  document.addEventListener('contextmenu', function(ev){ if(ev.target.closest && ev.target.closest('.fila[data-fila]') && ui.vista === 'tareas') ev.preventDefault(); });
+})();
+
+
+/* ==========================================================================
    CABECERA DE CADA SECCIÓN
    Cada sección abre con su color, su icono y un resumen de lo que importa
    ahí, para saber de un vistazo cómo vas antes de mirar la lista.
@@ -4964,7 +5302,7 @@ function cabSeccion(v){
   var fila = null, x0 = 0, y0 = 0, dx = 0, horizontal = null;
   document.addEventListener('touchstart', function(ev){
     var f = ev.target.closest && ev.target.closest('.fila[data-fila]');
-    if(!f || ev.touches.length !== 1 || !(f.querySelector('[data-acc="tarea-ok"]') || f.querySelector('[data-acc="rec-ok"]'))){ fila = null; return; }
+    if(!f || ui.sel || ev.touches.length !== 1 || !(f.querySelector('[data-acc="tarea-ok"]') || f.querySelector('[data-acc="rec-ok"]'))){ fila = null; return; }
     fila = f; x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY; dx = 0; horizontal = null;
   }, { passive:true });
   document.addEventListener('touchmove', function(ev){
@@ -5025,6 +5363,13 @@ VISTAS.tareas = function(){
   html += filtroEsp('t-esp', ui.tEsp);
 
   var lista = enArea.filter(F[ui.tFiltro]);
+  var eligiendo = enSel('tareas');
+  if(eligiendo) ui.sel.ids = ui.sel.ids.filter(function(id){ var x = buscarId('tareas', id); return x && !x.del; });
+  ui.selVisibles = lista.map(function(t){ return t.id; });
+  if(lista.length) html += '<div class="herr-sel">' + (eligiendo ?
+      '<button type="button" class="btn chico" data-acc="sel-todas">' + ico('i-check') + (lista.every(function(t){ return elegida(t.id); }) ? 'Ninguna' : 'Elegir las ' + lista.length) + '</button>' :
+      '<button type="button" class="btn chico" data-acc="sel-on" data-col="tareas">' + ico('i-check') + 'Seleccionar</button><span class="pista-sel">o deja el dedo sobre una tarea</span>') + '</div>';
+  if(eligiendo) html += barraSel();
   if(ui.tFiltro === 'hechas'){
     lista.sort(function(a, b){ return (b.hechaEn || 0) - (a.hechaEn || 0); });
     if(!lista.length) return html + '<div class="tarjeta">' + vacio('🗂️', 'Aún no hay tareas hechas') + '</div>';
@@ -6364,6 +6709,12 @@ VISTAS.ajustes = function(){
     '<div class="ajuste"><div class="txt"><b>Tu nombre</b><small>Para saludarte en Hoy.</small></div>' +
     '<input class="entrada" id="ajNombre" style="max-width:240px" maxlength="40" value="' + esc(db.perfil.nombre) + '" placeholder="Tu nombre"></div></div>';
 
+  html += '<div class="seccion-tit">Organización</div><div class="tarjeta">' +
+    '<div class="ajuste"><div class="txt"><b>Administrar secciones</b><small>Muestra u oculta secciones, cámbialas de orden, elige la barra de abajo del celular y limpia lo viejo.</small></div>' +
+      '<button class="btn chico primario" data-ir="secciones">' + ico('i-espacios') + 'Administrar</button></div>' +
+    '<div class="ajuste"><div class="txt"><b>Qué ver en Hoy</b><small>Elige los bloques de la pantalla Hoy.</small></div>' +
+      '<button class="btn chico" data-acc="personalizar-hoy">' + ico('i-hoy') + 'Elegir</button></div></div>';
+
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
     '<div class="ajuste"><div class="txt"><b>Tema</b><small>Se aplica también a Cuentas.</small></div>' +
       '<div class="selector"><button data-acc="tema" data-t="oscuro" aria-pressed="' + (!pref.temaAuto && tema !== 'claro') + '">🌙 Oscuro</button><button data-acc="tema" data-t="claro" aria-pressed="' + (!pref.temaAuto && tema === 'claro') + '">☀️ Claro</button><button data-acc="tema" data-t="auto" aria-pressed="' + !!pref.temaAuto + '">🌓 Automático</button></div></div>' +
@@ -6884,7 +7235,7 @@ function menuNuevo(){
 }
 function menuMas(){
   var k = contadores(), grupos = [], g = null;
-  SNAV.forEach(function(sc){
+  navSecs().forEach(function(sc){
     if(sc.id === 'hoy') return;
     if(sc.g){ g = { n:sc.g, items:[] }; grupos.push(g); }
     g.items.push(sc);
@@ -6897,7 +7248,7 @@ function menuMas(){
       return '<button type="button" data-ir="' + sc.id + '"' + (E ? ' style="--c:' + E.c + '"' : '') + (ui.vista === sc.id ? ' aria-current="page"' : '') + '>' + (E ? '<span class="em">' + E.em + '</span>' : ico(sc.ico)) + '<span>' + sc.nom + '</span>' + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
     }).join('') + '</div></div>';
   }).join('') +
-    '<div class="mas-grupo"><h4>Herramientas</h4><div class="rejilla-mas"><button type="button" data-acc="buscar">' + ico('i-buscar') + '<span>Buscar</span></button>' +
+    '<div class="mas-grupo"><h4>Herramientas</h4><div class="rejilla-mas"><button type="button" data-ir="secciones">' + ico('i-espacios') + '<span>Administrar secciones</span></button><button type="button" data-acc="buscar">' + ico('i-buscar') + '<span>Buscar</span></button>' +
     '<button type="button" data-ir="ajustes">' + ico('i-ajustes') + '<span>Ajustes</span></button><button type="button" data-acc="personalizar-hoy">' + ico('i-hoy') + '<span>Personalizar Hoy</span></button>' +
     '<button type="button" data-ir="papelera">' + ico('i-basura') + '<span>Papelera</span>' + (enPapelera().length ? '<span class="globo gris">' + enPapelera().length + '</span>' : '') + '</button></div></div>');
 }
@@ -7482,7 +7833,7 @@ setInterval(pintarPastillaNube, 30000);
 })();
 
 /* ---------- Ajustes que viajan entre aparatos ------------------------- */
-var PREF_VIAJAN = ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes'];
+var PREF_VIAJAN = ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes', 'secOff', 'secOrden', 'abajo'];
 function prefDesdePerfil(){
   var pp = db.perfil && db.perfil.prefs;
   if(!pp) return;
@@ -7777,6 +8128,45 @@ document.addEventListener('click', function(ev){
       break;
 
     case 'tarea-ok': vibrar(); alternarTarea(id, b); break;
+    /* Elegir varias */
+    case 'sel-on': ui.sel = { col:b.dataset.col, ids:[] }; pintar(); break;
+    case 'sel-fin': ui.sel = null; pintar(); break;
+    case 'sel-t':
+      if(!ui.sel) break;
+      var si = ui.sel.ids.indexOf(id);
+      if(si < 0) ui.sel.ids.push(id); else ui.sel.ids.splice(si, 1);
+      vibrar(8); pintar(); break;
+    case 'sel-todas':
+      var vis = ui.selVisibles || [];
+      ui.sel.ids = vis.every(elegida) ? [] : vis.slice(); pintar(); break;
+    case 'sel-hecha': selHecha(); break;
+    case 'sel-mover': hojaSelFecha(); break;
+    case 'sel-fecha':
+      var nf = b.dataset.f === 'otra' ? ($('selFechaOtra') || {}).value : b.dataset.f;
+      if(b.dataset.f === 'otra' && !nf) break;
+      conElegidas(function(t){ t.fecha = nf; if(!nf) t.hora = ''; }, nf ? '📅 A ' + relativo(nf).toLowerCase() : '💭 Sin fecha');
+      break;
+    case 'sel-etiquetar': hojaSelEtiquetar(); break;
+    case 'sel-esp': var ne = b.dataset.e; conElegidas(function(t){ t.esp = ne; }, espInfo(ne).em + ' A ' + espInfo(ne).nom); break;
+    case 'sel-prio': var np = +b.dataset.p; conElegidas(function(t){ t.prio = np; }, 'Prioridad ' + PRIOS[np].n.toLowerCase()); break;
+    case 'sel-borrar':
+      if(!ui.sel || !ui.sel.ids.length || !confirm('¿Borrar ' + ui.sel.ids.length + (ui.sel.ids.length === 1 ? ' tarea' : ' tareas') + '? Irán a la papelera.')) break;
+      conElegidas(function(t){ t.del = true; t.delEn = Date.now(); }, '🗑️ A la papelera');
+      break;
+    /* Administrar secciones */
+    case 'abajo-quitar':
+      var ab = barraAbajo().slice(), ai = ab.indexOf(b.dataset.v);
+      if(ab.length <= 1){ aviso('Deja al menos un acceso en la barra'); break; }
+      ab.splice(ai, 1); pref.abajo = ab; guardarPref(); pintar(); break;
+    case 'abajo-poner':
+      var ab2 = barraAbajo().slice();
+      if(ab2.length >= 4) break;
+      ab2.push(b.dataset.v); pref.abajo = ab2; guardarPref(); pintar(); break;
+    case 'sec-mover': moverSec(b.dataset.v, +b.dataset.d); break;
+    case 'sec-restablecer':
+      if(!confirm('¿Volver al orden original, mostrar todas las secciones y la barra de siempre?')) break;
+      delete pref.secOrden; delete pref.secOff; delete pref.abajo; guardarPref(); pintar(); aviso('Secciones como al principio'); break;
+    case 'limpiar': limpiar(b.dataset.v); break;
     case 'tarea-ed': cerrarFlotante(); editarTarea(id); break;
     case 'rec-ok': vibrar(); alternarRec(id, b); break;
     case 'rec-ed': cerrarFlotante(); editarRec(id); break;
@@ -8249,6 +8639,11 @@ document.addEventListener('input', function(ev){
 
 document.addEventListener('change', function(ev){
   var t = ev.target;
+  if(t.dataset && t.dataset.secVer){
+    var so = (pref.secOff || []).filter(function(x){ return x !== t.dataset.secVer; });
+    if(!t.checked) so.push(t.dataset.secVer);
+    pref.secOff = so; guardarPref(); pintar(); return;
+  }
   if(t.dataset && t.dataset.hoySecc){
     var off = pref.hoyOff || [], k0 = t.dataset.hoySecc, oi = off.indexOf(k0);
     if(t.checked && oi >= 0) off.splice(oi, 1); else if(!t.checked && oi < 0) off.push(k0);
@@ -8271,7 +8666,7 @@ document.addEventListener('change', function(ev){
     delete e.del;
     poner('enfoque', e);
   } else if(t.id === 'ajNombre'){
-    db.perfil = { nombre:t.value.trim().slice(0, 40), upd:Date.now() }; guardar(); pintarNav();
+    db.perfil = Object.assign({}, db.perfil, { nombre:t.value.trim().slice(0, 40), upd:Date.now() }); guardar(); pintarNav();
   } else if(t.id === 'focoTarea'){
     foco.tarea = t.value; guardarFoco(); pintarSeguro();
   } else if(t.dataset && t.dataset.min){
@@ -8314,7 +8709,7 @@ document.addEventListener('keydown', function(ev){
     else if(ev.key === 'Enter') teclaPIN('ok');
     ev.preventDefault(); return;
   }
-  if(ev.key === 'Escape'){ if($('capaFlotante').innerHTML){ cerrarFlotante(); ev.preventDefault(); } return; }
+  if(ev.key === 'Escape'){ if($('capaFlotante').innerHTML){ cerrarFlotante(); ev.preventDefault(); } else if(ui.sel){ ui.sel = null; pintar(); } return; }
   /* En los pasos de una tarea, Enter añade otro paso en vez de guardar */
   if(ev.key === 'Enter' && ev.target.closest && ev.target.closest('#subs')){
     ev.preventDefault(); if(edAcciones['sub-add']) edAcciones['sub-add'](); return;
