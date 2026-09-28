@@ -9,9 +9,9 @@
    Esto NO guarda tus datos: viven en el navegador (y en jsonbin.io si
    conectas la nube). Esto solo guarda el programa. */
 
-const CACHE = 'agenda-v1';
-const BASICOS = ['./', './index.html', './cuentas.html', './manifest.webmanifest', './icono.svg',
-                 './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+const CACHE = 'agenda-v2';
+/* El programa es un solo archivo: con eso basta para abrir sin red */
+const BASICOS = ['./', './index.html'];
 
 self.addEventListener('install', (ev) => {
   self.skipWaiting();

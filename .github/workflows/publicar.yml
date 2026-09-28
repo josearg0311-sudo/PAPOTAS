@@ -65,6 +65,13 @@ jobs:
           sed -i 's#<meta name="pap-sitio" content="0">#<meta name="pap-sitio" content="1">#' \
             sitio/index.html sitio/papotas-nuevo.html
           grep -q '"pap-sitio" content="1"' sitio/index.html
+          # La agenda personal, en su propia carpeta: /agenda/
+          # Es un solo archivo con todo dentro (logo, manifiesto y los libros
+          # de cuentas); sw.js e iconos van al lado para abrir sin internet.
+          if [ -f agenda/index.html ]; then
+            mkdir -p sitio/agenda
+            cp agenda/index.html agenda/sw.js agenda/icono.svg agenda/*.png sitio/agenda/
+          fi
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll
           ls -la sitio
