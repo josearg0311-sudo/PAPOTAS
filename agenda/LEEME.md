@@ -31,8 +31,9 @@ instalarla en el celular. Funciona en el teléfono y en el ordenador.
 
 | Sección | Para qué |
 |---|---|
+| **Dinero** | Los dos libros de un vistazo: lo que quedó este mes, cuánto entró y salió, si gastas más o menos que el mes pasado *a estas alturas*, tu mayor gasto, hacia dónde vas a fin de mes, presupuesto mensual con lo que te queda por día, los últimos 6 meses en gráfica, en qué se te va el dinero y los últimos movimientos. Y un formulario para **anotar un gasto o ingreso en segundos** en Personal u Oficina (se guarda en ese libro y en su nube). |
 | **Pagos fijos** | Luz, agua, internet, alquiler, tarjeta… Monto y día de vencimiento. Cada mes los marcas pagados; avisa 2 días antes y el mismo día. Total del mes, pagado y lo que falta. |
-| **Gastos personales** | Tu Libro de Cuentas de siempre. Lo que ya tenías en Cuentas aparece aquí tal cual. |
+| **Gastos personales** | Tu Libro de Cuentas de siempre, ya con el diseño y el logo de la agenda. Lo que ya tenías en Cuentas aparece aquí tal cual. |
 | **Oficina** | Otro libro igual pero **aparte**: sus propios movimientos, su propia nube, sus Excel y PDF con el nombre de la oficina. |
 
 Además: buscador que mira en todo, botón **+** que añade según dónde estés,

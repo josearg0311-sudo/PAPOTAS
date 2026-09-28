@@ -831,3 +831,61 @@ body{
 
 /* El logo de la marca: un solo dibujo, metido una vez (ver construir.py) */
 .logo-img{ display:block; flex:none; background:var(--logo) center/contain no-repeat; filter:drop-shadow(0 3px 8px rgba(0,0,0,.3)) }
+
+/* ===== Dinero ============================================================= */
+.dinero-heroe .cifra-heroe{ font-family:var(--cifra); font-size:clamp(30px, 8vw, 44px); letter-spacing:-.04em; margin-top:6px }
+.dinero-heroe .dato{ cursor:default }
+.qa{ display:flex; flex-direction:column; gap:12px }
+.qa-tipo{ align-items:center }
+.qa-tipo button{ display:inline-flex; align-items:center; gap:6px }
+.qa-tipo button svg{ width:15px; height:15px }
+.qa-tipo button.gasto[aria-pressed="true"]{ background:var(--debe-piso); border-color:var(--debe); color:var(--debe) }
+.qa-tipo button.ingreso[aria-pressed="true"]{ background:var(--haber-piso); border-color:var(--haber); color:var(--haber) }
+.qa-sep{ width:1px; height:24px; background:var(--regla); margin:0 4px }
+.qa-campos{ display:grid; gap:10px; grid-template-columns:minmax(0,1fr) minmax(0,1fr) }
+.qa-monto input{ font-family:var(--cifra); font-size:20px !important; font-weight:800; height:48px !important }
+.qa-desc{ grid-column:span 1 }
+@media (min-width:760px){ .qa-campos{ grid-template-columns:160px minmax(0,1.6fr) minmax(0,1fr) 160px } }
+@media (max-width:759px){ .qa-monto{ grid-column:1 / -1 } }
+.chips-cat{ display:flex; gap:6px; flex-wrap:wrap }
+.chips-cat .ficha{ height:28px; font-size:12px }
+
+.ideas{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px }
+.ideas li{ position:relative; padding-left:18px; font-size:13.5px; line-height:1.5; color:var(--tinta-2) }
+.ideas li::before{ content:""; position:absolute; left:2px; top:8px; width:7px; height:7px; border-radius:50%; background:var(--verde) }
+.ideas b{ color:var(--tinta) }
+.ideas b.sale{ color:var(--debe) } .ideas b.entra{ color:var(--haber) }
+
+.presu{ margin-bottom:14px; padding:12px; border-radius:14px; background:var(--hoja-2); border:1px solid var(--regla) }
+.presu-cab{ display:flex; justify-content:space-between; gap:10px; font-size:12.5px; color:var(--tinta-2); margin-bottom:8px; flex-wrap:wrap }
+.presu-cab b{ font-family:var(--cifra); color:var(--tinta) }
+.presu .barra-prog{ position:relative; height:10px; overflow:visible }
+.presu .barra-prog i{ background:linear-gradient(90deg, var(--haber), var(--oro)) }
+.presu.ojo .barra-prog i{ background:linear-gradient(90deg, var(--oro), #F97316) }
+.presu.mal .barra-prog i{ background:var(--debe) }
+.presu .barra-prog em{ position:absolute; top:-4px; width:2px; height:18px; background:var(--tinta); border-radius:2px; opacity:.6 }
+.presu small{ display:block; margin-top:8px; font-size:12.5px; color:var(--tinta-2) }
+.presu.mal small b{ color:var(--debe) }
+
+.meses-graf{ display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; height:190px; align-items:stretch }
+.mes-col{ display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0 }
+.mes-col .par{ flex:1; width:100%; display:flex; gap:4px; align-items:flex-end; justify-content:center; border-bottom:1px solid var(--regla); padding:0 2px }
+.mes-col .par i{ width:min(16px, 40%); border-radius:6px 6px 2px 2px; transition:height .5s ease }
+.mes-col .par i.e{ background:linear-gradient(180deg, color-mix(in srgb, var(--haber) 80%, #fff), var(--haber)) }
+.mes-col .par i.s{ background:linear-gradient(180deg, color-mix(in srgb, var(--debe) 80%, #fff), var(--debe)) }
+.mes-col small{ font-size:11px; font-weight:700; color:var(--tinta-3); text-transform:uppercase }
+.mes-col b{ font-family:var(--cifra); font-size:10.5px; color:var(--haber); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
+.mes-col b.neg{ color:var(--debe) }
+.mes-col.actual small{ color:var(--verde-sube) }
+.mes-col.actual .par{ background:linear-gradient(180deg, transparent, var(--verde-piso)); border-radius:8px 8px 0 0 }
+.leyenda-graf{ display:flex; gap:14px; flex-wrap:wrap; margin-top:10px; font-size:12px; color:var(--tinta-3) }
+.leyenda-graf span{ display:inline-flex; align-items:center; gap:6px }
+.leyenda-graf i{ width:10px; height:10px; border-radius:3px }
+.leyenda-graf i.e{ background:var(--haber) } .leyenda-graf i.s{ background:var(--debe) }
+
+.fila.mov{ align-items:center }
+.mov-ico{ width:34px; height:34px; border-radius:11px; display:grid; place-items:center; flex:none }
+.mov-ico svg{ width:17px; height:17px }
+.mov-ico.g{ background:var(--debe-piso); color:var(--debe) }
+.mov-ico.i{ background:var(--haber-piso); color:var(--haber) }
+.cat-fila .barra-prog i{ transition:width .5s ease }
