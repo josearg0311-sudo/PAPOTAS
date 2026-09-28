@@ -1901,3 +1901,28 @@ body{
 .fila.deslizando{ transition:none; z-index:2; background:var(--hoja) }
 .fila[data-gesto="hecho"]{ box-shadow:inset 4px 0 0 var(--haber); background:color-mix(in srgb, var(--haber) 10%, var(--hoja)) }
 .fila[data-gesto="luego"]{ box-shadow:inset -4px 0 0 var(--oro); background:color-mix(in srgb, var(--oro) 10%, var(--hoja)) }
+
+/* ==========================================================================
+   RENDIMIENTO
+   El halo del fondo va en una capa fija aparte (antes se redibujaba entero
+   en cada movimiento del scroll), los desenfoques quedan solo en la barra de
+   arriba y la de abajo, las tarjetas lejanas no se dibujan hasta acercarse y
+   solo las primeras entran con animación.
+   ========================================================================== */
+body{ background:var(--papel) !important; background-attachment:scroll !important }
+body::before{
+  content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(1100px 520px at 70% -220px, color-mix(in srgb, var(--verde) 13%, transparent), transparent 70%),
+    radial-gradient(800px 420px at -10% 0%, color-mix(in srgb, var(--azul) 6%, transparent), transparent 70%);
+}
+.heroe .dato, .datos-hoy, .heroe.tema-oficina .dato{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important }
+.heroe .dato{ background:rgba(255,255,255,.17) }
+.datos-hoy{ background:rgba(255,255,255,.15) }
+.vista .rejilla > *:nth-child(n+5), .vista .espacios-hoy > *:nth-child(n+5){ animation:none }
+.vista > .rejilla ~ .rejilla > .tarjeta,
+.vista > .rejilla > .tarjeta:nth-child(n+4){ content-visibility:auto; contain-intrinsic-size:auto 380px }
+@media (prefers-reduced-motion:reduce){ .burbujas i, .heroe-hoy h2 .emoji{ animation:none !important } }
+/* Con una hoja abierta, los avisos suben arriba para no tapar sus botones */
+body.con-hoja .avisos{ top:calc(env(safe-area-inset-top) + 10px); bottom:auto !important; z-index:260 }
+body.con-hoja .fab{ display:none }

@@ -1,8 +1,15 @@
 # Agenda · tu organización personal
 
-Un solo archivo (`index.html`) con todo dentro: la agenda, tus **gastos
-personales**, las **cuentas de la oficina**, el logo y lo necesario para
-instalarla en el celular. Funciona en el teléfono y en el ordenador.
+La agenda, tus **gastos personales** y las **cuentas de la oficina** en una
+sola aplicación que se instala en el celular. Funciona en el teléfono y en
+el ordenador, también sin internet.
+
+Viene en dos versiones, las dos con lo mismo:
+
+| Archivo | Para qué |
+|---|---|
+| `index.html` | La **ligera**, la de la dirección web: pesa unos 176 KB al bajarla (antes 1,1 MB). Los iconos, la letra y el logo van al lado (`icon-*.png`, `jakarta.woff2`, `icono.svg`) y el celular los guarda una vez. |
+| `agenda-completa.html` | **Un solo archivo** con todo dentro, para abrirla o compartirla suelta. |
 
 ## Qué trae
 
@@ -97,14 +104,19 @@ Tiene que abrirse desde una dirección **https**:
 - **GitHub Pages** (ya montado en el repositorio): se publica sola en
   `https://josearg0311-sudo.github.io/PAPOTAS/agenda/`. La dirección no cambia
   nunca, así que los datos no se "mudan".
-- **Netlify**: arrastra la carpeta `agenda` (o solo el `index.html`) sobre tu sitio.
+- **Netlify**: arrastra la carpeta `agenda` entera sobre tu sitio.
 
 Luego: Android (Chrome) → menú ⋮ → *Instalar aplicación*; iPhone (Safari) →
 Compartir → *Añadir a pantalla de inicio*. Sale con el logo del calendario y
 el check verde.
 
-`index.html` solo ya se instala con su logo. `sw.js` al lado hace además que
-abra sin internet.
+Una vez abierta, se guarda en el celular: **abre al instante** y funciona
+**sin internet**. Cuando subo una versión nueva, al abrirla aparece
+«✨ Hay una versión nueva · Actualizar».
+
+Si algo fallara al mostrar una sección, la agenda no se queda en blanco:
+avisa y ofrece reintentar, y lo apunta en Ajustes → Tus datos → Registro de
+fallos para poder revisarlo.
 
 ## Sobre los avisos
 
@@ -143,10 +155,13 @@ suena siempre.
 
 ## Para quien toque el código
 
-`index.html` se **genera**: no lo edites a mano. Edita `fuente/estilo.css`,
-`fuente/cuerpo.html` o `fuente/app.js` y ejecuta:
+`index.html` y `agenda-completa.html` se **generan**: no los edites a mano.
+Edita `fuente/estilo.css`, `fuente/cuerpo.html` o `fuente/app.js` y ejecuta:
 
     python3 agenda/construir.py
 
-Eso mete también dentro el Libro de Cuentas (`../libro-de-cuentas/index.html`)
-y los iconos. Si cambias Cuentas, vuelve a ejecutarlo.
+Eso mete también dentro el Libro de Cuentas (`../libro-de-cuentas/index.html`,
+comprimido) y deja `jakarta.woff2` al lado. Si cambias Cuentas, vuelve a
+ejecutarlo. Si tienes [terser](https://terser.org) (`npm i -g terser`, o la
+variable `TERSER` con su ruta), el código de la versión ligera sale además
+achicado; sin él funciona igual, solo pesa algo más.

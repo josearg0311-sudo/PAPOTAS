@@ -66,11 +66,12 @@ jobs:
             sitio/index.html sitio/papotas-nuevo.html
           grep -q '"pap-sitio" content="1"' sitio/index.html
           # La agenda personal, en su propia carpeta: /agenda/
-          # Es un solo archivo con todo dentro (logo, manifiesto y los libros
-          # de cuentas); sw.js e iconos van al lado para abrir sin internet.
+          # index.html es la versión ligera: los iconos, la letra y el logo
+          # van al lado y el celular los guarda una vez. agenda-completa.html
+          # es la misma agenda en un solo archivo, por si se abre suelta.
           if [ -f agenda/index.html ]; then
             mkdir -p sitio/agenda
-            cp agenda/index.html agenda/sw.js agenda/icono.svg agenda/*.png sitio/agenda/
+            cp agenda/index.html agenda/agenda-completa.html agenda/sw.js agenda/icono.svg agenda/jakarta.woff2 agenda/*.png sitio/agenda/
           fi
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll

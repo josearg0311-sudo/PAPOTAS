@@ -58,6 +58,7 @@ function vivos(col){ return db[col].filter(function(x){ return !x.del; }); }
 function buscarId(col, id){ return db[col].find(function(x){ return x.id === id; }); }
 
 function guardarLocal(){
+  if(typeof olvidarDias === 'function') olvidarDias();
   if(!escribirJSON(CLAVE, db)) aviso('No se pudo guardar', 'El almacenamiento del navegador está lleno o bloqueado.');
   if(typeof HIST !== 'undefined'){ HIST.estable = JSON.stringify(db); pintarHist(); }
 }
@@ -195,8 +196,10 @@ function esc(s){
   });
 }
 function ico(id, cls){ return '<svg class="i' + (cls ? ' ' + cls : '') + '"><use href="#' + id + '"/></svg>'; }
+var FMT_DINERO = new Intl.NumberFormat('es-PE', { minimumFractionDigits:2, maximumFractionDigits:2 });
+var FMT_NUM = new Intl.NumberFormat('es-PE', { maximumFractionDigits:2 });
 function dinero(v){
-  return (v < 0 ? '−' : '') + MONEDA + ' ' + Math.abs(v).toLocaleString('es-PE', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  return (v < 0 ? '−' : '') + MONEDA + ' ' + FMT_DINERO.format(Math.abs(v));
 }
 function sinTildes(s){
   return String(s || '').toLowerCase()
@@ -330,7 +333,17 @@ function diaPago(p, ym){
 function pagado(p, ym){ return !!(p.pagados && p.pagados[ym]); }
 function edadCumple(e, dia){ return e.nacio ? +dia.slice(0, 4) - +e.nacio : 0; }
 
+/* Lo de cada día se calcula una vez y se reutiliza hasta el siguiente
+   cambio: el calendario y Hoy piden los mismos días muchas veces. */
+var memoDia = {};
+function olvidarDias(){ memoDia = {}; }
 function itemsDelDia(dia){
+  if(memoDia[dia]) return memoDia[dia].slice();
+  var out = calcularDia(dia);
+  memoDia[dia] = out;
+  return out.slice();
+}
+function calcularDia(dia){
   var out = [];
   vivos('eventos').forEach(function(e){
     if(ocurre(e.fecha, e.rep, dia, e.hasta)){
@@ -449,11 +462,14 @@ function contadores(){
 }
 
 function navPlegados(){ return pref.navPlegado || ['Crecer']; }
+/* Cambia el contenido solo si es distinto: el menú no se redibuja entero
+   cada vez que se pinta una sección */
+function ponerSiCambia(el, html){ if(el.__html !== html){ el.innerHTML = html; el.__html = html; } }
 function pintarNav(){
   var k = contadores();
   function num(id){ return id === 'tareas' ? k.tareas : id === 'recordatorios' ? k.recordatorios : id === 'pagos' ? k.pagos : 0; }
   var grupoNav = '';
-  $('navLat').innerHTML = SNAV.map(function(s){
+  ponerSiCambia($('navLat'), SNAV.map(function(s){
     var n = num(s.id);
     var alerta = (s.id === 'tareas' && k.tareasTarde) || ((s.id === 'recordatorios' || s.id === 'pagos') && n);
     var enEsp = s.esp ? ' class="nav-esp" style="--c:' + espInfo(s.esp).c + '"' : '';
@@ -467,13 +483,13 @@ function pintarNav(){
       ('<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' +
         ico(s.ico) + s.nom + (n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : '') +
       '</button>');
-  }).join('');
+  }).join(''));
   var DINERO = ['dinero','personal','oficina','pagos'];
   var enMas = ABAJO.indexOf(ui.vista) < 0 && DINERO.indexOf(ui.vista) < 0;
   if(ui.vista.indexOf('esp-') === 0) ui.espUlt = ui.vista.slice(4);
   var otros = k.recordatorios + k.pagos;
   enMas = enMas && ui.vista.indexOf('esp-') !== 0;
-  $('barraInf').innerHTML = ABAJO.map(function(id){
+  ponerSiCambia($('barraInf'), ABAJO.map(function(id){
     var s = id === 'espacios' ? { nom:'Espacios', ico:'i-espacios' } : SECCIONES.find(function(x){ return x.id === id; });
     var destino = id === 'espacios' ? 'esp-' + (ui.espUlt || 'personal') : id;
     var n = id === 'espacios' ? k.tareas : 0;
@@ -482,7 +498,7 @@ function pintarNav(){
              ico(s.ico) + (s.corto || s.nom) + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
   }).join('') +
   '<button type="button" data-acc="menu-mas"' + (enMas ? ' aria-current="page"' : '') + '>' + ico('i-mas') + 'Todo' +
-    (otros ? '<span class="globo">' + otros + '</span>' : '') + '</button>';
+    (otros ? '<span class="globo">' + otros + '</span>' : '') + '</button>');
   var nom = db.perfil.nombre || '';
   $('avatar').textContent = nom ? nom.trim().charAt(0).toUpperCase() : '✦';
   $('perfilNombre').textContent = nom || 'Tu agenda';
@@ -516,6 +532,18 @@ function pintarSeguro(){
 }
 
 function pintar(){
+  olvidarDias();
+  try{ pintarVista(); }
+  catch(e){
+    anotarError(e, 'pintar ' + ui.vista);
+    try{
+      $('zonaCuentas').classList.add('oculto'); $('contenido').classList.remove('oculto');
+      $('contenido').innerHTML = '<section class="tarjeta" style="margin-top:10px">' + vacio('⚠️', 'Algo falló al mostrar esta sección', 'Tus datos están bien. Prueba otra vez o vuelve a Hoy.') +
+        '<div class="botones" style="padding:0 16px 16px;justify-content:center"><button class="btn" data-acc="reintentar">Reintentar</button><button class="btn primario" data-ir="hoy">Ir a Hoy</button></div></section>';
+    }catch(e2){}
+  }
+}
+function pintarVista(){
   repintarAlSoltar = false;
   pintarNav();
   var v = ui.vista;
@@ -541,6 +569,22 @@ function pintar(){
   if(v === 'hoy' || v === 'tareas' || v === 'recordatorios') actualizarPista();
   tictac();
 }
+
+/* ==========================================================================
+   REGISTRO DE FALLOS
+   Si algo falla, se apunta aquí (los últimos 20) para poder revisarlo desde
+   Ajustes, en vez de dejar la pantalla en blanco.
+   ========================================================================== */
+var CLAVE_ERRORES = 'agenda_errores';
+function anotarError(e, donde){
+  try{
+    var l = leerJSON(CLAVE_ERRORES, []);
+    l.push({ t:Date.now(), donde:donde || '', msj:String(e && (e.message || e) || '').slice(0, 300), pila:String(e && e.stack || '').split('\n').slice(0, 4).join(' | ').slice(0, 500), v:ui && ui.vista });
+    escribirJSON(CLAVE_ERRORES, l.slice(-20));
+  }catch(x){}
+}
+window.addEventListener('error', function(ev){ anotarError(ev.error || ev.message, 'global'); });
+window.addEventListener('unhandledrejection', function(ev){ anotarError(ev.reason, 'promesa'); });
 
 /* ==========================================================================
    PIEZAS QUE SE REPITEN
@@ -3380,7 +3424,11 @@ function crearMarco(cual){
   m.className = 'marco-cuentas';
   m.title = LIBROS[cual].sub;
   m.style.display = 'none';
-  m.srcdoc = fuenteLibro(cual);
+  if(cacheCuentas) m.srcdoc = fuenteLibro(cual);
+  else {
+    m.srcdoc = '<body style="margin:0;display:grid;place-items:center;height:100vh;font-family:sans-serif;color:#8a93a8;background:transparent">Abriendo el libro…</body>';
+    cargarCuentas().then(function(){ m.srcdoc = fuenteLibro(cual); });
+  }
   $('zonaCuentas').appendChild(m);
   return (marcos[cual] = m);
 }
@@ -3423,17 +3471,28 @@ function tarjetaInformes(){
       '</div>' +
     '</div></section>';
 }
-var cacheCuentas = '';
-function fuenteCuentas(){
-  if(cacheCuentas) return cacheCuentas;
+/* El libro viene comprimido (gzip + base64) para que la agenda pese menos.
+   Se descomprime una sola vez, sin congelar la pantalla, la primera vez
+   que hace falta (o un rato después de abrir, cuando el celular está libre). */
+var cacheCuentas = '', promesaCuentas = null;
+function cargarCuentas(){
+  if(promesaCuentas) return promesaCuentas;
   var el = $('fuenteCuentas');
-  if(!el) return '<p style="font-family:sans-serif;padding:20px">No se encontró el libro de cuentas dentro del archivo.</p>';
+  if(!el){ cacheCuentas = '<p style="font-family:sans-serif;padding:20px">No se encontró el libro de cuentas dentro del archivo.</p>'; return (promesaCuentas = Promise.resolve(cacheCuentas)); }
   var bin = atob(el.textContent.replace(/\s+/g, ''));
   var bytes = new Uint8Array(bin.length);
   for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  cacheCuentas = new TextDecoder('utf-8').decode(bytes);
-  return cacheCuentas;
+  if(!el.dataset.gz){ cacheCuentas = new TextDecoder('utf-8').decode(bytes); return (promesaCuentas = Promise.resolve(cacheCuentas)); }
+  if(typeof DecompressionStream === 'undefined'){
+    cacheCuentas = '<p style="font-family:sans-serif;padding:24px;line-height:1.5">Tu navegador es muy antiguo para abrir el libro de cuentas. Actualiza Chrome o Safari y vuelve a intentarlo.</p>';
+    return (promesaCuentas = Promise.resolve(cacheCuentas));
+  }
+  promesaCuentas = new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text()
+    .then(function(t){ el.textContent = ''; return (cacheCuentas = t); })
+    .catch(function(){ promesaCuentas = null; return (cacheCuentas = '<p style="font-family:sans-serif;padding:24px">No se pudo abrir el libro. Recarga la página.</p>'); });
+  return promesaCuentas;
 }
+function fuenteCuentas(){ return cacheCuentas; }
 function fuenteLibro(cual){
   var L = LIBROS[cual], s = fuenteCuentas();
   function cambia(a, b){ s = s.split(a).join(b); }
@@ -3736,7 +3795,7 @@ VISTAS.metas = function(){
   return '<div class="rejilla dos">' + activas.map(tarjeta).join('') + '</div>' +
     (archivadas.length ? '<div class="seccion-tit">Archivadas <span class="n">' + archivadas.length + '</span></div><div class="rejilla dos">' + archivadas.map(tarjeta).join('') + '</div>' : '');
 };
-function formNum(n){ n = Math.round(n * 100) / 100; return n.toLocaleString('es-PE', { maximumFractionDigits:2 }); }
+function formNum(n){ return FMT_NUM.format(Math.round(n * 100) / 100); }
 
 function editarMeta(id, preset){
   var m = id ? JSON.parse(JSON.stringify(buscarId('metas', id))) :
@@ -4243,6 +4302,7 @@ VISTAS.ajustes = function(){
       '<button class="btn chico" data-acc="respaldo">' + ico('i-bajar') + 'Descargar</button>' +
       '<button class="btn chico" data-acc="cargar">' + ico('i-subir') + 'Cargar</button>' +
       '<input type="file" id="archivoRespaldo" accept=".json,application/json" class="oculto"></div>' +
+    (leerJSON(CLAVE_ERRORES, []).length ? '<div class="ajuste"><div class="txt"><b>Registro de fallos</b><small>Hay ' + leerJSON(CLAVE_ERRORES, []).length + ' anotados. Si notas algo raro, cópialo y envíamelo.</small></div><button class="btn chico" data-acc="errores-ver">Ver</button></div>' : '') +
     '<div class="ajuste"><div class="txt"><b>Papelera</b><small>Lo que borras se guarda ' + DIAS_PAPELERA + ' días por si te arrepientes.</small></div>' +
       '<button class="btn chico" data-ir="papelera">' + ico('i-basura') + 'Abrir (' + enPapelera().length + ')</button></div>' +
     '<div class="ajuste"><div class="txt"><b>Instalar como aplicación</b><small>Con su icono, a pantalla completa y abriendo sin internet.</small></div>' +
@@ -4263,6 +4323,7 @@ var alCerrarFlot = null;
 function abrirFlotante(html, alCerrar){
   cerrarFlotante();
   $('capaFlotante').innerHTML = '<div class="velo" data-velo="1"><div class="hoja-flot" role="dialog" aria-modal="true"><div class="asa"></div>' + html + '</div></div>';
+  document.body.classList.add('con-hoja');
   alCerrarFlot = alCerrar || null;
 }
 function cerrarFlotante(){
@@ -4270,6 +4331,7 @@ function cerrarFlotante(){
   if(f) f();
   edAcciones = {};
   $('capaFlotante').innerHTML = '';
+  document.body.classList.remove('con-hoja');
   if(repintarAlSoltar) pintar();
 }
 function cabFlot(t){ return '<div class="cab"><h3>' + t + '</h3><button type="button" class="btn-icono" data-cerrar="1" aria-label="Cerrar">' + ico('i-x') + '</button></div>'; }
@@ -5535,6 +5597,14 @@ document.addEventListener('click', function(ev){
 
   switch(a){
     case 'menu-mas': menuMas(); break;
+    case 'reintentar': pintar(); break;
+    case 'errores-ver':
+      var le = leerJSON(CLAVE_ERRORES, []), txtE = le.map(function(x){ return new Date(x.t).toLocaleString('es-PE') + ' · ' + x.donde + ' · ' + x.v + '\n' + x.msj + '\n' + x.pila; }).join('\n\n');
+      abrirFlotante(cabFlot('Registro de fallos') + '<p class="explica">Si algo no funcionó bien, aquí queda lo que pasó. Puedes copiarlo y enviármelo.</p>' +
+        '<textarea class="entrada" readonly style="height:220px;padding:10px;font-family:var(--cifra);font-size:11.5px">' + esc(txtE || 'Sin fallos anotados. 👌') + '</textarea>' +
+        '<div class="botones"><button class="btn" data-acc="errores-borrar">Borrar registro</button><button class="btn primario" data-acc="copiar">Copiar</button></div>');
+      break;
+    case 'errores-borrar': escribirJSON(CLAVE_ERRORES, []); cerrarFlotante(); pintar(); aviso('Registro borrado'); break;
     case 'deshacer': deshacer(); break;
     case 'rehacer': rehacer(); break;
     case 'pap-restaurar': restaurarDePapelera(b.dataset.c, id); aviso('Restaurado', PAPELERA_TIPOS[b.dataset.c][0] + ' devuelto a su sitio'); pintar(); break;
@@ -6177,6 +6247,7 @@ document.addEventListener('visibilitychange', function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});
     navigator.serviceWorker.addEventListener('message', function(ev){
       if(ev.data && ev.data.vista) ir(ev.data.vista);
+      if(ev.data && ev.data.nuevaVersion) aviso('✨ Hay una versión nueva de la agenda', 'Toca para usarla ya.', 'Actualizar', function(){ location.reload(); }, true);
     });
   }
 
@@ -6186,13 +6257,14 @@ document.addEventListener('visibilitychange', function(){
   var portada = $('portada'), vista = false;
   try{ vista = sessionStorage.getItem('agenda_portada'); sessionStorage.setItem('agenda_portada', '1'); }catch(e){}
   var instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  setTimeout(function(){ portada.classList.add('fuera'); setTimeout(function(){ portada.remove(); }, 400); }, (vista && !instalada) ? 0 : 750);
+  setTimeout(function(){ portada.classList.add('fuera'); setTimeout(function(){ portada.remove(); }, 400); }, (vista && !instalada) ? 0 : 380);
 
   tictac();
   setInterval(tictac, 1000);
   revisarAlarmas();
   setInterval(revisarAlarmas, 15000);
   if(hayAlgunaNube()) sincronizarTodo();
+  (window.requestIdleCallback || function(f){ return setTimeout(f, 2500); })(function(){ cargarCuentas(); }, { timeout:6000 });
   setInterval(latido, 30000);
 
   /* A medianoche cambia el día: Hoy tiene que enterarse */
