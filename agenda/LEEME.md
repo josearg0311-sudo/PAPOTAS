@@ -26,6 +26,17 @@ Cada espacio tiene además **su propio estilo** y lo suyo:
 | 💼 **Oficina** | Despacho: azul marino con cuadrícula, línea dorada y gráfica de fondo, tarjetas sobrias. | **Cronómetro de horas por cliente**: empiezas, paras y queda anotado. Horas de hoy y de la semana, **facturable del mes** según la tarifa por hora y reparto por cliente. |
 | ⚽ **Deporte** | Una cancha con sus líneas; títulos en cursiva deportiva. | **Tus números en la cancha**: marcador con partidos jugados, goles, asistencias y goles por partido, ganados/empatados/perdidos y tu racha de los últimos 5. Al editar un partido marca "Ya lo jugué". |
 
+### Pestañas de cada espacio
+
+Cada espacio tiene su **Resumen** (lo que viene, lo pendiente y los atajos a proyectos, metas, notas y dinero, todo en una sola tarjeta) y tres pestañas con herramientas que solo tienen sentido ahí. Los números del saludo también cambian según el espacio.
+
+| Espacio | Pestañas propias |
+|---|---|
+| 🏠 Personal | **Casa**: lo que toca cada tanto (sábanas, plantas, refrigeradora…) con barra de "cuánto falta" y botón Hecho, más la compra y los préstamos. **Comidas**: menú de la semana (almuerzo y cena), dado 🎲 con ideas de platos, repetir la semana pasada o llenar lo vacío. **Fechas**: cumpleaños y aniversarios más **documentos que vencen** (DNI, pasaporte, SOAT…) con recordatorio automático un mes antes. |
+| 🎓 Estudios | **Cursos**: horario, notas, nota necesaria y faltas. **Repaso**: **fichas de pregunta y respuesta** por curso, con sistema de cajas (la que sabes tarda más en volver; la que fallas vuelve mañana). **Exámenes**: los **temas** de cada examen para marcar, con cuántos repasar por día. En el Resumen, las clases de hoy y mañana con aviso de "EN CLASE". |
+| 💼 Oficina | **Tablero**: tus tareas de la oficina en Por hacer / En curso / Hecho. **Clientes**: ficha con contacto, WhatsApp, llamada y correo, horas del mes, lo que te debe y lo que te pagó, y botones para anotar un cobro o empezar el cronómetro. **Reuniones**: **actas** con asistentes, lo hablado y acuerdos con responsable; un acuerdo marcado como "Tarea" pasa a tu tablero. |
+| ⚽ Deporte | **Gym**: rutinas y récords, **temporizador de descanso** entre series (pita al final) y tu cuerpo con peso e **IMC**. **Cancha**: tus números, **armar la pichanga** (jugadores, cuota de la cancha por cabeza, quién pagó y lista para pegar en WhatsApp) y los próximos partidos. **Cardio**: km del mes, ritmo medio y mejor ritmo, meta semanal de km, km de las últimas 8 semanas y **temporizador de intervalos** (HIIT/Tabata). En el Resumen, un mapa de tus últimas 12 semanas de actividad. |
+
 En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mandan a ese espacio (también entiende `#trabajo`, `#gym`, `#futbol`, `#uni`…). El Calendario y las Tareas se pueden filtrar por espacio.
 
 ### Para organizarte a fondo
