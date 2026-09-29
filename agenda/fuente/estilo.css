@@ -2584,3 +2584,106 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .cal-mes .celda .barras em{ font-size:9px; line-height:6px; color:var(--tinta-3) }
 .cal-mes .celda.pasado .barras i{ opacity:.45 }
 @media (max-width:480px){ .dinero-heroe .dato b{ font-size:14.5px !important; letter-spacing:-.02em !important } .pe-datos .dato b{ font-size:22px !important } }
+
+/* ==========================================================================
+   TOQUE PERSONAL
+   Es tu agenda, no una oficina: letra a mano para lo tuyo, títulos con
+   curvas suaves, burbujas en vez de renglones, emojis y un fondo tibio.
+   ========================================================================== */
+:root{ --mano:'Caveat', 'Segoe Print', 'Bradley Hand', cursive; --r-card:28px }
+
+/* Títulos más blandos y juguetones (ejes SOFT y WONK de Fraunces) */
+.cabecera h1, .heroe h2, .seccion-t, .seccion-t span, .seccion-tit, .tarjeta-cab h2, .tarjeta-cab h3,
+.cg-tit, .ph-saludo, .ph-dia b, .ph-num, .pe-nom, .pl-fecha b, .pl-tit, .rec-hora b, .lb-nom, .hl-txt h2,
+.md-nom, .md-pct, .notas-muro .nota b, .sub-t, .pb-bloque h4, .libro-saldo, .esp-alta .esp-nom, .esp-alta .esp-big,
+.franja-semana button b, .ph-cuentas b, .pe-datos .dato b, .hoja-flot .cab h3, .cifra-heroe, .siguiente b, .bienvenida-hoy h3{
+  font-variation-settings:"SOFT" 100, "WONK" 1;
+}
+
+/* Fondo tibio: un resplandor suave arriba, como luz de lámpara */
+body{
+  background:
+    radial-gradient(700px 380px at 90% -80px, color-mix(in srgb, var(--verde) 14%, transparent), transparent 70%),
+    radial-gradient(600px 340px at -10% 120px, color-mix(in srgb, var(--rosa) 8%, transparent), transparent 70%),
+    var(--papel) !important;
+  background-attachment:fixed !important;
+}
+
+/* Letra a mano en lo personal */
+.ph-frase, .pe-lema, .notas-muro .nota p, .enfoque-grande .n, .hab-anillo small, .diario-hoy, .cg-sub em.mano{
+  font-family:var(--mano) !important; font-style:normal !important;
+}
+.ph-frase{ font-size:22px !important; line-height:1.25; color:var(--verde-sube) !important; transform:rotate(-1deg); transform-origin:left }
+.pe-lema{ font-size:21px !important; line-height:1.25 }
+.pe-lema b{ font-family:var(--mano); font-weight:700 }
+.notas-muro .nota p{ font-size:19px !important; line-height:1.3 !important; color:var(--tinta) !important }
+.enfoque-grande .n{ font-size:44px !important; font-weight:700 !important; transform:rotate(-6deg) }
+.hab-anillo small{ font-size:15px !important }
+.diario-hoy{ font-size:19px !important }
+
+/* Sticker con emoji en el título de cada sección */
+.cg-sticker{
+  display:inline-grid; place-items:center; width:54px; height:54px; margin-bottom:10px; border-radius:18px; font-size:30px;
+  background:color-mix(in srgb, var(--sc) 20%, var(--hoja)); transform:rotate(-7deg);
+  box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+
+/* Números de Hoy: burbujas de color con emoji, no una tabla */
+.ph-cuentas{ border:0 !important; gap:8px !important; margin-top:18px !important }
+.ph-cuentas button{
+  align-items:center !important; text-align:center; padding:12px 4px 10px !important; border-radius:22px !important;
+  background:color-mix(in srgb, var(--bc) 15%, var(--hoja)) !important; border:0 !important;
+}
+.ph-cuentas button + button{ border-left:0 !important; padding-left:4px !important }
+.ph-cuentas i{ font-style:normal; font-size:18px; line-height:1; margin-bottom:4px }
+.ph-cuentas b{ font-size:26px !important }
+.ph-cuentas span{ color:var(--tinta-2) !important }
+
+/* Espacios y dinero: burbujas en vez de columnas con rayas */
+.pe-datos, .dinero-heroe .datos{ border:0 !important; gap:8px !important }
+.pe-datos .dato, .dinero-heroe .dato{
+  padding:12px !important; border-radius:20px !important; background:color-mix(in srgb, var(--papel) 50%, transparent) !important;
+}
+.dinero-heroe .dato{ background:var(--hoja) !important }
+.pe-datos .dato + .dato, .dinero-heroe .dato + .dato{ border-left:0 !important; padding-left:12px !important }
+
+/* Filas como burbujas separadas (nada de renglones de libro contable) */
+.lista-abierta > .lista-filas, .rec-lista, .pl-cuerpo .lista-filas, .dia-abierto .linea-tiempo{ border:0 !important; display:flex; flex-direction:column; gap:8px }
+.lista-abierta .fila, .rec-lista .fila, .pl-cuerpo .fila{
+  border:0 !important; border-radius:22px !important; background:var(--hoja) !important; padding:12px 14px !important;
+}
+.lista-abierta .fila + .fila, .rec-lista .fila + .fila, .pl-cuerpo .fila + .fila{ border-top:0 !important }
+.pl-dia{ border-top:0 !important; padding-top:18px }
+.planner{ gap:0 }
+.fila.elegida{ background:color-mix(in srgb, var(--verde) 18%, var(--hoja)) !important }
+
+/* Tus 3 de hoy: tarjetitas sueltas */
+.enfoque-grande{ gap:8px }
+.enfoque-grande label{ border:0 !important; border-radius:22px !important; background:var(--hoja) !important; padding:8px 14px !important }
+
+/* Casillas redondas y alegres */
+.casilla{ border-radius:50% !important }
+.casilla[aria-checked="true"]{ transform:scale(1.05) }
+
+/* Hábitos: puntitos de diario en vez de cuadrícula */
+.hab-tabla{ background:none !important; padding:0 !important }
+.ht-fila{ border:0 !important; padding:10px 12px !important; border-radius:22px; background:var(--hoja); margin-bottom:8px }
+.ht-cab{ background:none; padding:0 12px 2px !important; margin-bottom:2px }
+.ht-c{ border-radius:50% !important; background:var(--hoja-2) }
+.ht-c.ok{ background:var(--verde) }
+.ht-c.libre{ box-shadow:none !important; background:transparent; opacity:.4; border:1.5px dashed var(--regla) !important }
+.hab-anillo{ border-radius:28px }
+
+/* Tarjetas y huecos más redondos */
+.tarjeta, .panel-bienestar, .libro-hoy, .esp-alta, .medidor, .bienvenida-hoy{ border-radius:28px !important }
+.captura{ border-radius:24px !important }
+.franja-semana button{ border-radius:20px !important }
+.franja-semana button.hoy{ transform:translateY(-3px); box-shadow:0 8px 20px color-mix(in srgb, var(--verde) 30%, transparent) }
+
+/* El resto de secciones en tono amable */
+.siguiente{ border-radius:28px !important }
+.siguiente small{ font-family:var(--mano); font-size:19px !important; font-weight:700; color:var(--c) !important }
+.cg-prog{ grid-template-columns:1fr auto !important }
+.cg-prog::before, .cg-prog > i{ height:10px !important; border-radius:99px !important }
+.cg-prog > i{ min-width:10px; background:linear-gradient(90deg, var(--sc), color-mix(in srgb, var(--sc) 60%, #fff)) !important }
+.animo-prog{ font-family:var(--mano); font-style:normal; font-size:19px; font-weight:700; color:var(--sc) }

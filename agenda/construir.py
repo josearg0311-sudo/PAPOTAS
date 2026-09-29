@@ -31,7 +31,7 @@ svg    = leer('icono.svg')
 cuentas = base64.b64encode(gzip.compress(leer('../libro-de-cuentas/index.html', 'rb'), 9, mtime=0)).decode()
 
 # La tipografía va también suelta al lado, para la versión ligera
-for f in ('jakarta.woff2', 'fraunces.woff2'):
+for f in ('jakarta.woff2', 'fraunces.woff2', 'caveat.woff2'):
     shutil.copyfile(os.path.join(AQUI, 'fuente', f), os.path.join(AQUI, f))
 
 # Achicar el código de la versión ligera si hay terser a mano (npx terser o
@@ -69,6 +69,7 @@ def armar(completa):
         favicon = 'data:image/svg+xml,' + urllib.parse.quote(' '.join(svg.split()), safe=' =:/";,')
         letra   = 'data:font/woff2;base64,' + b64('fuente/jakarta.woff2')
         serif   = 'data:font/woff2;base64,' + b64('fuente/fraunces.woff2')
+        mano    = 'data:font/woff2;base64,' + b64('fuente/caveat.woff2')
         logo    = 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode()).decode()
         # Iconos del manifiesto: tal cual (son data:)
         iconos_js = json.dumps([
@@ -82,6 +83,7 @@ def armar(completa):
     else:
         apple, favicon, letra, logo = 'apple-touch-icon.png', 'icono.svg', 'jakarta.woff2', 'icono.svg'
         serif = 'fraunces.woff2'
+        mano = 'caveat.woff2'
         # Iconos del manifiesto: archivos al lado, con la dirección completa
         iconos_js = ('[{src:base+carpeta+"icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},'
                      '{src:base+carpeta+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},'
@@ -106,7 +108,7 @@ def armar(completa):
 <meta name="description" content="Agenda personal: tareas, listas, calendario, recordatorios, hábitos, metas, diario, pagos, notas y cuentas.">
 <link rel="icon" type="image/svg+xml" href="{favicon}">
 <link rel="apple-touch-icon" href="{apple}">
-{'' if completa else '<link rel="preload" href="jakarta.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fraunces.woff2" as="font" type="font/woff2" crossorigin>'}
+{'' if completa else '<link rel="preload" href="jakarta.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fraunces.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="caveat.woff2" as="font" type="font/woff2" crossorigin>'}
 <title>Agenda</title>
 <script>
 /* Tema y paleta ANTES de pintar nada (claves propias de la agenda), y el
@@ -158,6 +160,9 @@ def armar(completa):
     # Fraunces (licencia OFL) para los títulos y las cifras grandes
     logo_css += ("@font-face{ font-family:'Fraunces'; src:url(" + serif +
                  ") format('woff2'); font-weight:400 700; font-display:swap }\n")
+    # Caveat (licencia OFL): letra a mano para los toques personales
+    logo_css += ("@font-face{ font-family:'Caveat'; src:url(" + mano +
+                 ") format('woff2'); font-weight:500 700; font-display:swap }\n")
     return (cabeza + '<style>\n' + logo_css + hoja + '</style>\n</head>\n<body>\n' + cuerpo +
             '\n<!-- El Libro de Cuentas entero, comprimido (gzip + base64); se abre en Dinero -->\n'
             '<script type="application/octet-stream" id="fuenteCuentas" data-gz="1">' + cuentas + '</script>\n'
