@@ -136,10 +136,10 @@ def armar(completa):
       categories:['productivity','lifestyle','finance'],
       icons:{iconos_js},
       shortcuts:[
-        {{ name:'Tareas',     url: base + aqui + '#tareas' }},
+        {{ name:'Anotar gasto', short_name:'Gasto', url: base + aqui + '#gasto' }},
+        {{ name:'Añadir tarea', short_name:'Tarea', url: base + aqui + '#anadir' }},
         {{ name:'Calendario', url: base + aqui + '#calendario' }},
-        {{ name:'Gastos personales', url: base + aqui + '#personal' }},
-        {{ name:'Oficina',    url: base + aqui + '#oficina' }}
+        {{ name:'Tareas',     url: base + aqui + '#tareas' }}
       ]
     }};
     var txt = JSON.stringify(m), h;
