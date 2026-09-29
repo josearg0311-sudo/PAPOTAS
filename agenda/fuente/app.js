@@ -1696,7 +1696,7 @@ var MODULOS = {
     }
     var pg = promedioGeneral();
     var T = {};
-    T.cursos = '<section class="tarjeta ancho-2">' + cabTarjeta('i-birrete', 'Mis cursos' + (pg != null ? ' · promedio ' + chipNota(pg) : ''), 'var(--esp-estudios)', 'Nuevo curso', 'data-acc="nuevo" data-tipo="curso"') +
+    T.cursos = '<section class="tarjeta ancho-2">' + cabTarjeta('i-birrete', 'Mis cursos' + (pg != null ? ' ' + chipNota(pg) : ''), 'var(--esp-estudios)', 'Nuevo curso', 'data-acc="nuevo" data-tipo="curso"') +
         (cs.length ? '<div class="lista-filas">' + cs.map(function(c){
           var p = proximaClase(c);
           return '<div class="fila"><span class="curso-ico">' + esc((c.nombre || '?').charAt(0).toUpperCase()) + '</span><div class="cuerpo" data-acc="curso-ed" data-id="' + c.id + '"><div class="titulo">' + esc(c.nombre) + ' ' + chipNota(promedioCurso(c)) + '</div>' +
@@ -1721,7 +1721,7 @@ var MODULOS = {
     var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }).sort(function(a, b){ return (a.vence || '9').localeCompare(b.vence || '9'); });
     var totalCob = cob.reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     var hoyC = hoyISO();
-    var cobros = '<section class="tarjeta">' + cabTarjeta('i-subir', 'Por cobrar' + (totalCob ? ' · ' + dinero(totalCob) : ''), 'var(--haber)', 'Nuevo cobro', 'data-acc="nuevo" data-tipo="cobro"') +
+    var cobros = '<section class="tarjeta">' + cabTarjeta('i-subir', 'Por cobrar' + (totalCob ? ' <small class="cab-num">' + dinero(totalCob) + '</small>' : ''), 'var(--haber)', 'Nuevo cobro', 'data-acc="nuevo" data-tipo="cobro"') +
       (cob.length ? '<div class="lista-filas">' + cob.slice(0, 6).map(function(x){
         var n = x.vence ? diasEntre(hoyC, x.vence) : null;
         var est = n == null ? '<span>Sin fecha</span>' : n < 0 ? '<span class="tarde">Venció hace ' + (-n) + (n === -1 ? ' día' : ' días') + '</span>' : n === 0 ? '<span class="hoy">Vence hoy</span>' : '<span>Vence ' + relativo(x.vence).toLowerCase() + '</span>';
@@ -1732,7 +1732,7 @@ var MODULOS = {
       }).join('') + '</div><p style="margin:0;padding:0 16px 12px;font-size:12px;color:var(--tinta-3)">Al marcarlo como cobrado se anota solo como ingreso en el libro de la oficina.</p>'
        : '<div class="vacio" style="padding-top:4px">Nadie te debe nada. 👌 Apunta aquí lo que te deben tus clientes.</div>') + '</section>';
     var pp = pagosProximos(15).filter(function(x){ return espDe(x.p) === 'oficina'; });
-    var reun = '<section class="tarjeta">' + cabTarjeta('i-maletin', 'Reuniones de la semana', 'var(--esp-oficina)', 'Nueva reunión', 'data-acc="nuevo-reunion"') +
+    var reun = '<section class="tarjeta">' + cabTarjeta('i-maletin', 'Reuniones', 'var(--esp-oficina)', 'Nueva reunión', 'data-acc="nuevo-reunion"') +
         (re.length ? '<div class="lista-filas">' + re.slice(0, 6).map(function(x){
           return '<div class="fila"><span class="hora" style="width:70px">' + (x.e.todo ? cuenta(x.en) : (x.en ? relativo(x.dia).slice(0, 3) + ' ' : '') + x.e.ini) + '</span><span class="barrita" style="--c:var(--esp-oficina)"></span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">' + esc(x.e.t) + '</div><div class="meta"><span>' + cuenta(x.en) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + '</div></div></div>';
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin reuniones esta semana.</div>') + '</section>';
@@ -2072,7 +2072,7 @@ function horarioHTML(){
   dias = dias.filter(function(d){ return porDia[d] && porDia[d].length; });
   if(!dias.length) return '';
   return '<section class="tarjeta">' + cabTarjeta('i-cal', 'Horario de clases', 'var(--esp-estudios)') +
-    '<div class="horario" style="grid-template-columns:repeat(' + dias.length + ',minmax(0,1fr))">' + dias.map(function(d){
+    '<div class="horario" style="grid-template-columns:repeat(' + dias.length + ',minmax(104px,1fr))">' + dias.map(function(d){
       var ks = porDia[d].sort(function(a, b){ return (a.k.ini || '').localeCompare(b.k.ini || ''); });
       return '<div class="hor-col' + (d === hoyW ? ' hoy' : '') + '"><b>' + cap(DIAS3[d]) + '</b>' + ks.map(function(x){
         return '<button type="button" class="hor-clase tono' + x.tono + '" data-acc="curso-ed" data-id="' + x.c.id + '"><small>' + x.k.ini + (x.k.fin ? '–' + x.k.fin : '') + '</small><span>' + esc(x.c.nombre) + '</span>' + (x.c.aula ? '<em>' + esc(x.c.aula) + '</em>' : '') + '</button>';
@@ -2446,10 +2446,10 @@ function tarjetaSemanaEsp(id){
       return '<button type="button" class="chip-habito" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + !!ok + '"><span class="em">' + esc(x.em || '⭐') + '</span>' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>';
     }).join('') + '</div>' : '') +
     '<div class="atajos">' +
-      chip('📁', pa, 'proyectos', 'data-acc="proy-lista" data-v="' + id + '"') +
-      chip('🎯', ms.length, 'metas', 'data-ir="metas"') +
-      chip('🗒️', ns, 'notas', 'data-ir="notas"') +
-      chip('📋', ls, 'listas', 'data-ir="listas"') +
+      (pa ? chip('📁', pa, pa === 1 ? 'proyecto' : 'proyectos', 'data-acc="proy-lista" data-v="' + id + '"') : '') +
+      (ms.length ? chip('🎯', ms.length, ms.length === 1 ? 'meta' : 'metas', 'data-ir="metas"') : '') +
+      (ns ? chip('🗒️', ns, ns === 1 ? 'nota' : 'notas', 'data-ir="notas"') : '') +
+      (ls ? chip('📋', ls, ls === 1 ? 'lista' : 'listas', 'data-ir="listas"') : '') +
       chip('💸', dinero(tm.sal), din.cat ? 'gastado este mes' : 'salió este mes', 'data-acc="din-ver" data-v="' + din.libro + '"') +
     '</div></section>';
 }
@@ -3420,7 +3420,9 @@ function cabSeccion(v){
       var wd = new Date().getDay(), hs = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
       var ok = hs.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
       var mejor = Math.max.apply(null, vivos('habitos').map(function(x){ return racha(x); }).concat([0]));
-      d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:'Hoy ' + ok + ' de ' + hs.length + (mejor ? ' · mejor racha 🔥 ' + mejor + ' días' : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
+      var semH = 0, semT = 0, iniH = inicioSemana(hoy);
+      vivos('habitos').forEach(function(x){ for(var k = 0; k < 7; k++){ var dk = sumarDias(iniH, k); if(dk > hoy) break; if(x.dias && x.dias.indexOf(deISO(dk).getDay()) < 0) continue; semT++; if(x.marcas && x.marcas[dk]) semH++; } });
+      d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:'Hoy ' + ok + ' de ' + hs.length + (semT ? ' · semana ' + Math.round(semH / semT * 100) + '%' : '') + (mejor ? ' · mejor racha 🔥 ' + mejor + ' días' : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
     } else if(v === 'metas'){
       var ms = vivos('metas').filter(function(m){ return !m.archivada; });
       var prom = ms.length ? ms.reduce(function(a, m){ return a + Math.min(1, (+m.actual || 0) / (+m.objetivo || 1)); }, 0) / ms.length : 0;
@@ -3435,8 +3437,8 @@ function cabSeccion(v){
       vivos('pagos').forEach(function(p){ if(p.activo === false || (p.desde && ym < p.desde)) return; n++; tot += +p.monto || 0; if(pagado(p, ym)){ np++; pag += +p.monto || 0; } });
       d = { c:'var(--debe)', i:'i-recibo', t:'Pagos fijos', s:np + ' de ' + n + ' pagados · faltan ' + dinero(tot - pag), p:tot ? pag / tot : null, pt:'pagado' };
     } else if(v === 'diario'){
-      var mes = hoy.slice(0, 7), ents = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === mes && e.texto; });
-      d = { c:'var(--rosa)', i:'i-diario', t:'Diario', s:ents.length + (ents.length === 1 ? ' día escrito' : ' días escritos') + ' este mes' };
+      var mes = hoy.slice(0, 7), ents = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === mes && e.texto; }), rachaD = rachaDiario();
+      d = { c:'var(--rosa)', i:'i-diario', t:'Diario', s:ents.length + (ents.length === 1 ? ' día escrito' : ' días escritos') + ' este mes' + (rachaD > 1 ? ' · 🔥 ' + rachaD + ' días seguidos' : '') };
     } else if(v === 'progreso'){
       d = { c:'var(--haber)', i:'i-grafica', t:'Progreso', s:'Cómo vas en tareas, hábitos, enfoque y ánimo' };
     } else if(v === 'calendario'){
@@ -4475,6 +4477,13 @@ VISTAS.metas = function(){
       var dias = diasEntre(hoyISO(), m.fecha);
       ritmo = dias > 0 ? 'Quedan ' + dias + ' días · ' + formNum(falta / dias) + ' ' + esc(m.unidad || '') + ' al día para llegar'
                        : dias === 0 ? 'La fecha límite es hoy' : 'La fecha límite pasó hace ' + (-dias) + ' días';
+      /* ¿Vas al día? Lo que deberías llevar si avanzaras parejo desde que la creaste */
+      var desde = m.creada ? iso(new Date(+m.creada)) : '', tot = desde ? diasEntre(desde, m.fecha) : 0, pas = desde ? diasEntre(desde, hoyISO()) : 0;
+      if(tot > 0 && pas > 0 && dias > 0){
+        var esper = obj * Math.min(1, pas / tot);
+        ritmo += act >= esper ? '<span class="md-ritmo ok">✅ Vas al día</span>'
+                              : '<span class="md-ritmo atras">⚠️ Vas atrasado: deberías llevar ' + formNum(Math.round(esper * 10) / 10) + '</span>';
+      }
     }
     /* Un medidor en semicírculo con el porcentaje en el centro */
     var L = Math.PI * 44;
@@ -4654,6 +4663,22 @@ function guardarDiario(dia, cambios){
   Object.assign(e, cambios);
   poner('diario', e);
 }
+/* Días seguidos escribiendo, contando hasta hoy (o ayer si hoy aún no) */
+function rachaDiario(){
+  var d = hoyISO(), n = 0, x = buscarId('diario', d);
+  if(!(x && !x.del && x.texto)) d = sumarDias(d, -1);
+  for(;;){ x = buscarId('diario', d); if(!(x && !x.del && x.texto)) break; n++; d = sumarDias(d, -1); }
+  return n;
+}
+document.addEventListener('input', function(ev){
+  if(!ev.target || ev.target.id !== 'buscaDiario') return;
+  var q = sinTildes(ev.target.value.trim().toLowerCase()), vistos = 0;
+  document.querySelectorAll('#entradasDiario .entrada-diario').forEach(function(b){
+    var ok = !q || sinTildes(b.textContent.toLowerCase()).indexOf(q) >= 0;
+    if(!q && vistos >= 40) ok = false;
+    b.style.display = ok ? '' : 'none'; if(ok) vistos++;
+  });
+});
 var PREGUNTAS = ['¿Qué salió bien hoy?', '¿Por qué estás agradecido hoy?', '¿Qué aprendiste hoy?', '¿Qué harías distinto?', '¿Qué te hizo sonreír?', '¿Qué te preocupa y qué puedes hacer al respecto?', '¿Cuál fue el mejor momento del día?'];
 VISTAS.diario = function(){
   var dia = ui.diarioDia, hoy = hoyISO();
@@ -4690,7 +4715,8 @@ VISTAS.diario = function(){
 
   var todas = vivos('diario').filter(function(x){ return x.texto; }).sort(function(a, b){ return b.id.localeCompare(a.id); });
   html += '<section class="tarjeta">' + cabTarjeta('i-diario', 'Entradas', 'var(--verde)') +
-    (todas.length ? '<div>' + todas.slice(0, 40).map(function(x){
+    (todas.length > 3 ? '<div class="busca-diario"><input class="entrada" id="buscaDiario" type="search" placeholder="Buscar en tu diario…" autocomplete="off"></div>' : '') +
+    (todas.length ? '<div id="entradasDiario">' + todas.slice(0, 400).map(function(x){
       return '<button class="entrada-diario" data-acc="diario-dia" data-dia="' + x.id + '"><span class="em">📝</span><div style="min-width:0">' +
         '<b>' + cap(fechaLarga(x.id)) + '</b>' + (x.texto ? '<p>' + esc(x.texto) + '</p>' : '') + '</div></button>';
     }).join('') + '</div>' : vacio('📖', 'Aún no has escrito', 'Cuenta tu día en un par de líneas.')) +
@@ -5045,6 +5071,12 @@ function botonesEd(existe, extra){
   return '<div class="botones">' + (existe ? '<button type="button" class="btn peligro" data-ed="borrar" aria-label="Borrar">' + ico('i-basura') + '</button>' : '') +
     (extra || '') + '<button type="submit" class="btn primario">' + ico('i-check') + 'Guardar</button></div>';
 }
+/* Copia de algo para duplicarlo: sin id, sin fecha de cambio ni historial */
+function copiaDe(o){
+  var c = JSON.parse(JSON.stringify(o));
+  ['id', 'upd', 'del', 'delEn', 'hecha', 'hechaEn', 'log', 'veces', 'plan', 'regalo'].forEach(function(k){ delete c[k]; });
+  return c;
+}
 function proximaHora(){ var d = new Date(); return dos((d.getHours() + 1) % 24) + ':00'; }
 function sumarHora(h, min){
   var p = (h || '09:00').split(':'), t = (+p[0] * 60 + +p[1] + min) % 1440;
@@ -5070,7 +5102,7 @@ function editarTarea(id, preset){
       grupo('Subtareas', '<div class="subtareas" id="subs">' + (t.sub || []).map(filaSub).join('') + '</div>' +
         '<button type="button" class="btn chico" data-ed="sub-add" style="align-self:flex-start;margin-top:4px">' + ico('i-plus') + 'Subtarea</button>') +
       campo('Notas', '<textarea name="notas" maxlength="4000" placeholder="Detalles, enlaces, lo que haga falta">' + esc(t.notas) + '</textarea>') +
-      selectorEsp(t.esp || (id ? espDe(t) : espPorDefecto())) + botonesEd(!!id, id ? '<button type="button" class="btn" data-ed="alternar">' + (t.hecha ? 'Marcar pendiente' : ico('i-check') + 'Hecha') + '</button>' : '') +
+      selectorEsp(t.esp || (id ? espDe(t) : espPorDefecto())) + botonesEd(!!id, id ? '<button type="button" class="btn" data-ed="duplicar" title="Duplicar" aria-label="Duplicar">' + ico('i-copiar') + '</button><button type="button" class="btn" data-ed="alternar">' + (t.hecha ? 'Marcar pendiente' : ico('i-check') + 'Hecha') + '</button>' : '') +
     '</form>');
   var f = $('formEd');
   if(!id) f.t.focus();
@@ -5090,6 +5122,7 @@ function editarTarea(id, preset){
   edAcciones = {
     borrar: function(){ cerrarFlotante(); quitar('tareas', t.id, 'Tarea borrada'); pintar(); },
     alternar: function(){ cerrarFlotante(); alternarTarea(t.id); },
+    duplicar: function(){ cerrarFlotante(); setTimeout(function(){ editarTarea(null, copiaDe(buscarId('tareas', t.id) || t)); }, 60); },
     'sub-add': function(){
       $('subs').insertAdjacentHTML('beforeend', filaSub({ id:nid(), t:'', ok:false }));
       var ins = $('subs').querySelectorAll('input'); ins[ins.length - 1].focus();
@@ -5176,7 +5209,7 @@ function editarEvento(id, preset){
         campo('Aviso', '<select name="aviso">' + AVISOS.map(function(a){ return '<option value="' + a[0] + '"' + (+e.aviso === a[0] ? ' selected' : '') + '>' + a[1] + '</option>'; }).join('') + '</select>') + '</div>' +
       grupo('Color', selector('color', [{ v:'esp', c:colorEsp(e), tt:'el del espacio' }].concat(OPC_COLOR), e.color || 'esp', 'colores')) +
       campo('Notas', '<textarea name="notas" maxlength="4000">' + esc(e.notas) + '</textarea>') +
-      selectorEsp(e.esp || (id ? espDe(e) : espPorDefecto())) + botonesEd(!!id, '<button type="button" class="btn" data-ed="compartir" aria-label="Compartir">' + ico('i-compartir') + '</button>' + (id ? '<button type="button" class="btn" data-ed="google">' + ico('i-enlace') + 'Google</button><button type="button" class="btn" data-ed="ics">.ics</button>' : '')) +
+      selectorEsp(e.esp || (id ? espDe(e) : espPorDefecto())) + botonesEd(!!id, '<button type="button" class="btn" data-ed="compartir" aria-label="Compartir">' + ico('i-compartir') + '</button>' + (id ? '<button type="button" class="btn" data-ed="duplicar" title="Duplicar" aria-label="Duplicar">' + ico('i-copiar') + '</button><button type="button" class="btn" data-ed="google">' + ico('i-enlace') + 'Google</button><button type="button" class="btn" data-ed="ics">.ics</button>' : '')) +
     '</form>');
   var f = $('formEd');
   if(!id) f.t.focus();
@@ -5213,7 +5246,8 @@ function editarEvento(id, preset){
     borrar: function(){ cerrarFlotante(); quitar('eventos', e.id, 'Evento borrado'); pintar(); },
     google: function(){ window.open(enlaceGoogle(leer(), 'evento'), '_blank', 'noopener'); },
     ics: function(){ bajarICS([aVEVENT(leer(), 'evento')], (e.t || 'evento') + '.ics'); },
-    compartir: function(){ var x = leer(); if(x.t) compartir(x.t, textoEvento(x)); }
+    compartir: function(){ var x = leer(); if(x.t) compartir(x.t, textoEvento(x)); },
+    duplicar: function(){ var c = copiaDe(buscarId('eventos', e.id) || e); cerrarFlotante(); setTimeout(function(){ editarEvento(null, c); }, 60); }
   };
 }
 
@@ -5312,6 +5346,7 @@ function editarNota(id){
       '<label class="interruptor"><input type="checkbox" name="fija"' + (n.fija ? ' checked' : '') + '>Fijar arriba y en Hoy</label>' +
       '<div class="botones">' + '<button type="button" class="btn peligro" data-ed="borrar" aria-label="Borrar">' + ico('i-basura') + '</button>' +
         '<button type="button" class="btn" data-ed="casilla" title="Convertir la línea en casilla">☑</button>' +
+        '<button type="button" class="btn" data-ed="a-lista" title="Crear una lista con las líneas de la nota">' + ico('i-listas') + 'A lista</button>' +
         '<button type="submit" class="btn primario">' + ico('i-check') + 'Listo</button></div>' +
     '</form>', function(){ guardarYa(); pintarSeguro(); });
   var f = $('formEd');
@@ -5335,6 +5370,16 @@ function editarNota(id){
       pintar();
     },
     '_color': guardarYa,
+    'a-lista': function(){
+      var lineas = f.cuerpo.value.split('\n').map(function(x){ return x.trim(); }).filter(Boolean);
+      if(!lineas.length){ aviso('La nota está vacía', 'Escribe una cosa por línea y vuelve a tocar «A lista».'); return; }
+      guardarYa();
+      var l = { id:nid(), nombre:(f.t.value.trim() || 'Lista').slice(0, 60), em:'📝', color:'acento', esp:n.esp || 'personal', creada:Date.now(),
+        items:lineas.slice(0, 200).map(function(x){ var ok = /^\[x\]/i.test(x); return { id:nid(), t:x.replace(/^(\[[ x]\]|[-•*·]|\d+[.)])\s*/i, '').slice(0, 160) || x.slice(0, 160), ok:ok }; }) };
+      poner('listas', l); alCerrarFlot = null; cerrarFlotante();
+      aviso('📋 Lista creada con ' + l.items.length + (l.items.length === 1 ? ' cosa' : ' cosas'), l.nombre, 'Abrir', function(){ ir('listas'); ui.lista = l.id; pintar(); });
+      pintar();
+    },
     compartir: function(){ var t = f.t.value.trim(), c = f.cuerpo.value.trim(); if(t || c) compartir(t || 'Nota', (t ? '*' + t + '*\n' : '') + c.replace(/\[x\]/gi, '✅').replace(/\[ \]/g, '⬜')); },
     casilla: function(){
       var ta = f.cuerpo, pos = ta.selectionStart || ta.value.length, ini = ta.value.lastIndexOf('\n', pos - 1) + 1;
@@ -5405,7 +5450,7 @@ function editarLista(id){
       campo('Nombre', '<input name="n" required maxlength="60" value="' + esc(l.nombre) + '" placeholder="Ej. Compras del mes">') +
       grupo('Icono', selector('em', EMOJIS_L.map(function(e){ return { v:e, n:e }; }), l.em, 'emojis')) +
       grupo('Color', selector('color', OPC_COLOR, l.color || 'acento', 'colores')) +
-      selectorEsp(l.esp || (id ? espDe(l) : espPorDefecto())) + botonesEd(!!id) +
+      selectorEsp(l.esp || (id ? espDe(l) : espPorDefecto())) + botonesEd(!!id, id ? '<button type="button" class="btn" data-ed="duplicar">' + ico('i-copiar') + 'Duplicar</button>' : '') +
     '</form>');
   var f = $('formEd'), plantilla = 'vacia';
   if(!id) f.n.focus();
@@ -5420,6 +5465,13 @@ function editarLista(id){
   };
   edAcciones = {
     borrar: function(){ cerrarFlotante(); ui.lista = null; quitar('listas', l.id, 'Lista borrada'); pintar(); },
+    duplicar: function(){
+      var o = buscarId('listas', l.id) || l, c = copiaDe(o);
+      c.id = nid(); c.nombre = (o.nombre + ' (copia)').slice(0, 60); c.creada = Date.now(); delete c.frec;
+      c.items = (o.items || []).map(function(x){ return { id:nid(), t:x.t, ok:false }; });
+      poner('listas', c); cerrarFlotante(); ui.lista = c.id; ir('listas'); pintar();
+      aviso('Lista duplicada', c.nombre + ' · todo sin marcar');
+    },
     plantilla: function(b){
       plantilla = b.dataset.v;
       $('plantillas').querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
@@ -6232,7 +6284,7 @@ function cargarEjemplos(){
   poner('enfoque', { id:hoy, items:[{ t:'Pagar la luz', ok:false },{ t:'Avanzar la presentación', ok:false },{ t:'Caminar 30 minutos', ok:false }], pomos:2, pomosEsp:{ estudios:2 } });
   [-1,-2,-3].forEach(function(k, j){ var d = sumarDias(hoy, k); if(d >= inicioSemana(hoy)) poner('enfoque', { id:d, items:[], pomos:3 - j, pomosEsp:{ estudios:3 - j } }); });
   poner('eventos', { id:nid(), t:'Mamá', fecha:sumarDias(hoy, 9).slice(0, 4) - 58 + sumarDias(hoy, 9).slice(4), todo:true, ini:'09:00', fin:'', lugar:'', color:'rosa', rep:'ano', aviso:1440, notas:'', cumple:true, nacio:+sumarDias(hoy, 9).slice(0, 4) - 58 });
-  poner('metas', { id:nid(), esp:'personal', t:'Ahorrar para el viaje', em:'✈️', actual:650, objetivo:2000, unidad:'soles', fecha:sumarDias(hoy, 120), color:'azul', creada:c++ });
+  poner('metas', { id:nid(), esp:'personal', t:'Ahorrar para el viaje', em:'✈️', actual:650, objetivo:2000, unidad:'soles', fecha:sumarDias(hoy, 120), color:'azul', creada:c - 60 * 864e5 });
   poner('metas', { id:nid(), esp:'estudios', t:'Leer libros este año', em:'📚', actual:4, objetivo:12, unidad:'libros', fecha:hoy.slice(0, 4) + '-12-31', color:'verde', creada:c++ });
   var ym = hoy.slice(0, 7), dHoy = deISO(hoy).getDate();
   var pg = function(){ var o = {}; o[ym] = Date.now(); return o; };

@@ -3090,3 +3090,26 @@ div.nota{ cursor:pointer }
 .ok-regalo{ flex:none; align-self:center }
 .fila > .btn.chico{ flex:none; align-self:center }
 .recuerdos{ margin-bottom:16px }
+
+/* ==========================================================================
+   PULIDO: una sola letra en todos los espacios, cabeceras que no se parten,
+   horario sin cortes, diario con buscador
+   ========================================================================== */
+body[data-esp] .esp-tabs button{ font-family:inherit; font-style:normal; text-transform:none; font-size:12.5px; font-weight:750 }
+body[data-esp="estudios"] .curso-ico{ font-family:var(--serif); font-style:normal; font-weight:700; font-size:19px }
+.tarjeta-cab{ gap:10px; align-items:center }
+.tarjeta-cab h2{ min-width:0; text-wrap:balance; line-height:1.12 }
+@media (max-width:480px){
+  .tarjeta-cab h2, .tarjeta-cab h3{ font-size:18px !important }
+  .tarjeta-cab .mas{ font-size:12.5px; padding-inline:6px }
+}
+.horario{ scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch; scrollbar-width:none }
+.horario::-webkit-scrollbar{ display:none }
+.hor-col{ min-width:0; scroll-snap-align:start }
+.hor-clase span{ overflow-wrap:anywhere }
+.busca-diario{ padding:0 16px 10px }
+.busca-diario .entrada{ height:40px }
+.hoja-flot .botones .btn:not(.primario):not(.peligro) .i{ margin:0 }
+.tarjeta-cab h2 .cab-num{ font-family:var(--letra); font-size:13px; font-weight:800; color:var(--haber); background:color-mix(in srgb, var(--haber) 14%, transparent); padding:3px 8px; border-radius:99px; margin-left:8px; letter-spacing:0; white-space:nowrap }
+.md-ritmo{ display:block; margin-top:6px; font-weight:750; font-size:12.5px }
+.md-ritmo.ok{ color:var(--haber) } .md-ritmo.atras{ color:var(--oro) }

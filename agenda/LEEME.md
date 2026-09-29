@@ -39,10 +39,10 @@ Cada espacio tiene su **Resumen** (lo que viene, lo pendiente y los atajos a pro
 
 | Espacio | Pestañas propias |
 |---|---|
-| 🏠 Personal | **Casa**: la lista de compras y el **menú de la semana** (almuerzo y cena). **Papeles**: cumpleaños y aniversarios, **documentos que vencen** (DNI, pasaporte, SOAT…) con recordatorio automático un mes antes, y los préstamos. |
+| 🏠 Personal | **Casa**: la lista de compras y el **menú de la semana** (almuerzo y cena). **Papeles**: cumpleaños y aniversarios (con regalo y saludo) y los préstamos. |
 | 🎓 Estudios | **Cursos**: horario, notas, nota necesaria y faltas. En el Resumen, tu semana y los **exámenes** con cuenta atrás. |
 | 💼 Oficina | **Clientes**: ficha con contacto, WhatsApp, llamada y correo, lo que te debe y lo que te pagó. **Trabajo**: tablero Por hacer / En curso / Hecho y **actas** de reuniones; un acuerdo marcado como "Tarea" pasa a tu tablero. |
-| ⚽ Deporte | **Entreno**: rutinas y récords, temporizador de descanso entre series y tu cuerpo con peso e **IMC**. **Cancha**: tus partidos. |
+| ⚽ Deporte | **Entreno**: rutinas y récords y tu cuerpo con peso e **IMC**. **Cancha**: tus partidos y tu bolso. |
 
 En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mandan a ese espacio (también entiende `#trabajo`, `#gym`, `#futbol`, `#uni`…). El Calendario y las Tareas se pueden filtrar por espacio.
 
@@ -112,6 +112,11 @@ Con **"Elegir qué ver en Hoy"** (al final de Hoy o en el menú Todo) ocultas la
 | **Tu bolso** | En Cancha, la lista de lo que llevas al partido (chimpunes, canilleras, agua…) para marcar antes de salir y vaciar para la próxima. |
 | **Un día como hoy** | En el Diario, lo que escribiste hace una semana, un mes y un año. |
 | **Cabeceras al día** | Los números de cada espacio muestran lo que sí usas: por comprar, próximo cumple y lo que te deben; promedio, examen y repasos de hoy; por cobrar, en curso y reuniones; semanas activo, entrenos y próximo partido. |
+| **Duplicar** | En el editor de una tarea, un evento o una lista, el botón de copiar crea otra igual para cambiarle lo que haga falta (la lista copiada sale toda sin marcar). |
+| **De nota a lista** | En una nota, «A lista» convierte cada línea en una cosa por marcar (respeta las casillas ya marcadas). |
+| **Diario** | Racha de días seguidos escribiendo y, cuando tienes varias entradas, un buscador para encontrar cualquier día. |
+| **Metas con ritmo** | Cada meta con fecha te dice si vas al día o cuánto deberías llevar ya. |
+| **Hábitos de la semana** | La cabecera muestra el porcentaje cumplido en lo que va de la semana. |
 | **Administrar secciones** (en Ajustes o en «Todo») | Una pantalla para organizarlo todo: apaga las secciones que no uses (desaparecen del menú sin borrar nada), cámbialas de orden con las flechas, elige los 4 accesos de la barra de abajo del celular, mira cuánto hay en cada una y limpia lo viejo (tareas hechas hace más de un mes, recordatorios hechos, eventos de hace más de un año, lo marcado en las listas y las notas vacías). Todo se sincroniza entre aparatos y lo limpiado se puede deshacer. |
 | **Elegir varias tareas** | En Tareas, toca «Seleccionar» o deja el dedo sobre una tarea. Luego márcalas como hechas, cámbialas de fecha, pásalas a otro espacio, ponles prioridad o bórralas todas juntas. Se deshace con un toque. |
 | **En el celular** | El botón «atrás» cierra la hoja o el menú abierto sin sacarte de la sección. Al marcar una tarea o un recordatorio el celular vibra un poquito, y las filas de fichas que siguen de lado se desvanecen en el borde para que sepas que hay más. |
