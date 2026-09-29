@@ -31,7 +31,8 @@ svg    = leer('icono.svg')
 cuentas = base64.b64encode(gzip.compress(leer('../libro-de-cuentas/index.html', 'rb'), 9, mtime=0)).decode()
 
 # La tipografía va también suelta al lado, para la versión ligera
-shutil.copyfile(os.path.join(AQUI, 'fuente/jakarta.woff2'), os.path.join(AQUI, 'jakarta.woff2'))
+for f in ('jakarta.woff2', 'fraunces.woff2'):
+    shutil.copyfile(os.path.join(AQUI, 'fuente', f), os.path.join(AQUI, f))
 
 # Achicar el código de la versión ligera si hay terser a mano (npx terser o
 # la variable TERSER). Si no, va tal cual: funciona igual, solo pesa más.
@@ -67,6 +68,7 @@ def armar(completa):
         apple   = 'data:image/png;base64,' + b64('apple-touch-icon.png')
         favicon = 'data:image/svg+xml,' + urllib.parse.quote(' '.join(svg.split()), safe=' =:/";,')
         letra   = 'data:font/woff2;base64,' + b64('fuente/jakarta.woff2')
+        serif   = 'data:font/woff2;base64,' + b64('fuente/fraunces.woff2')
         logo    = 'data:image/svg+xml;base64,' + base64.b64encode(svg.encode()).decode()
         # Iconos del manifiesto: tal cual (son data:)
         iconos_js = json.dumps([
@@ -76,21 +78,24 @@ def armar(completa):
         ])
         icono_aviso = png192
         letra_js = json.dumps(letra)
+        serif_js = json.dumps(serif)
     else:
         apple, favicon, letra, logo = 'apple-touch-icon.png', 'icono.svg', 'jakarta.woff2', 'icono.svg'
+        serif = 'fraunces.woff2'
         # Iconos del manifiesto: archivos al lado, con la dirección completa
         iconos_js = ('[{src:base+carpeta+"icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},'
                      '{src:base+carpeta+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},'
                      '{src:base+carpeta+"icon-maskable-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}]')
         icono_aviso = 'icon-192.png'
         letra_js = 'new URL("jakarta.woff2", location.href).href'
+        serif_js = 'new URL("fraunces.woff2", location.href).href'
 
     cabeza = f'''<!DOCTYPE html>
-<html lang="es" data-tema="oscuro" data-paleta="medianoche">
+<html lang="es" data-tema="oscuro" data-paleta="brasa">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0A0D14">
+<meta name="theme-color" content="#121110">
 <meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -101,18 +106,18 @@ def armar(completa):
 <meta name="description" content="Agenda personal: tareas, listas, calendario, recordatorios, hábitos, metas, diario, pagos, notas y cuentas.">
 <link rel="icon" type="image/svg+xml" href="{favicon}">
 <link rel="apple-touch-icon" href="{apple}">
-{'' if completa else '<link rel="preload" href="jakarta.woff2" as="font" type="font/woff2" crossorigin>'}
+{'' if completa else '<link rel="preload" href="jakarta.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="fraunces.woff2" as="font" type="font/woff2" crossorigin>'}
 <title>Agenda</title>
 <script>
-/* Tema y paleta ANTES de pintar nada (las mismas claves que Cuentas), y el
+/* Tema y paleta ANTES de pintar nada (claves propias de la agenda), y el
    manifiesto generado aquí mismo: arranca en ESTA página se llame como se
    llame el archivo, y lleva el logo. Sin él Android no ofrece instalar. */
 (function(){{
   try{{
-    var t = localStorage.getItem('libro_cuentas_tema');
-    var p = localStorage.getItem('cuentas_paleta');
+    var t = localStorage.getItem('agenda_tema');
+    var p = localStorage.getItem('agenda_paleta');
     if(t === 'claro') document.documentElement.setAttribute('data-tema','claro');
-    if(p) document.documentElement.setAttribute('data-paleta', p);
+    if(/^(brasa|jade|ciruela|grafito)$/.test(p || '')) document.documentElement.setAttribute('data-paleta', p);
   }}catch(e){{}}
   try{{
     var aqui = location.pathname || './';
@@ -123,7 +128,7 @@ def armar(completa):
       description:'Tareas, listas, calendario, recordatorios, hábitos, metas, diario, pagos, notas y cuentas.',
       start_url: base + aqui, id: base + aqui, scope: base + carpeta,
       display:'standalone', orientation:'any', lang:'es',
-      background_color:'#0A0D14', theme_color:'#0A0D14',
+      background_color:'#121110', theme_color:'#121110',
       categories:['productivity','lifestyle','finance'],
       icons:{iconos_js},
       shortcuts:[
@@ -141,6 +146,7 @@ def armar(completa):
   }}catch(e){{}}
   window.ICONO_AGENDA = '{icono_aviso}';
   window.FUENTE_AGENDA = {letra_js};
+  window.SERIF_AGENDA = {serif_js};
 }})();
 </script>
 '''
@@ -149,6 +155,9 @@ def armar(completa):
     # cubre todos los grosores.
     logo_css += ("@font-face{ font-family:'Jakarta'; src:url(" + letra +
                  ") format('woff2'); font-weight:200 800; font-display:swap }\n")
+    # Fraunces (licencia OFL) para los títulos y las cifras grandes
+    logo_css += ("@font-face{ font-family:'Fraunces'; src:url(" + serif +
+                 ") format('woff2'); font-weight:400 700; font-display:swap }\n")
     return (cabeza + '<style>\n' + logo_css + hoja + '</style>\n</head>\n<body>\n' + cuerpo +
             '\n<!-- El Libro de Cuentas entero, comprimido (gzip + base64); se abre en Dinero -->\n'
             '<script type="application/octet-stream" id="fuenteCuentas" data-gz="1">' + cuentas + '</script>\n'

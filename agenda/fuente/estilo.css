@@ -1,108 +1,62 @@
 /* ==========================================================================
-   AGENDA
-   El mismo papel y la misma tinta que Cuentas: las dos son un solo programa.
-   Todo se dibuja con los mismos tokens, así que la paleta que elijas cambia
-   la agenda entera y el libro de cuentas a la vez.
+   AGENDA · Estilo propio
+   Noche cálida: carbón en vez de azul, títulos con serifa (Fraunces), un
+   solo acento por paleta, tarjetas sin bordes y cifras con la misma letra
+   del texto. Nada que ver con Cuentas ni con PAPOTAS: la agenda tiene su
+   propia cara y sus propias paletas (se guardan aparte).
    ========================================================================== */
 :root{
   color-scheme: dark;
-  --papel:#0A0D14; --hoja:#121724; --hoja-2:#171D2D;
-  --tinta:#E9EDF7; --tinta-2:#98A2BC; --tinta-3:#6B7793;
-  --regla:#242C40; --regla-2:#1C2333;
-  --verde:#7C8CF8; --verde-sube:#98A5FF; --verde-piso:#1A1F34;
-  --haber:#3DDC97; --haber-piso:#112825;
-  --debe:#FF6B81;  --debe-piso:#2A1922;
-  --oro:#F2C14E;   --oro-piso:#28241C;
-  --azul:#5AB0F0;  --rosa:#E98BD6;
+  --papel:#121110; --hoja:#1B1917; --hoja-2:#221F1C;
+  --tinta:#F4EEE6; --tinta-2:#B5AB9E; --tinta-3:#83796D;
+  --regla:#2F2A25; --regla-2:#27231F;
+  --verde:#F4A36C; --verde-sube:#FFBC8F; --verde-piso:#33241A;
+  --haber:#A6D38A; --haber-piso:#1F2A1A;
+  --debe:#F27C6E;  --debe-piso:#33201C;
+  --oro:#EDC46A;   --oro-piso:#302817;
+  --azul:#8FB7EA;  --rosa:#E9A0B7;
 
-  --sombra:     0 1px 2px rgba(0,0,0,.35), 0 4px 16px rgba(0,0,0,.25);
-  --sombra-alta:0 12px 44px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.3);
-  --r-s:8px; --r-m:12px; --r-l:18px;
-  --letra:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --cifra:ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --sombra:     0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.22);
+  --sombra-alta:0 16px 48px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.25);
+  --r-s:10px; --r-m:14px; --r-l:22px;
+  --letra:'Jakarta', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif:'Fraunces', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --cifra:var(--letra);
   --lateral:236px;
-  --barra:62px;
+  --barra:64px;
   --arriba:58px;
 }
 :root[data-tema="claro"]{
   color-scheme: light;
-  --sombra:     0 1px 2px rgba(20,24,26,.05), 0 4px 16px rgba(20,24,26,.06);
-  --sombra-alta:0 10px 40px rgba(20,24,26,.16), 0 2px 8px rgba(20,24,26,.08);
-  --azul:#2F7FC0; --rosa:#B14E9E;
+  --sombra:     0 1px 2px rgba(40,30,20,.05), 0 6px 18px rgba(40,30,20,.06);
+  --sombra-alta:0 12px 40px rgba(40,30,20,.16), 0 2px 8px rgba(40,30,20,.08);
+  --azul:#3F74B5; --rosa:#B04E77;
 }
 
-/* Paletas: copiadas tal cual de Cuentas */
-:root[data-paleta="medianoche"]:not([data-tema="claro"]){
-  --papel:#0A0D14; --hoja:#121724; --hoja-2:#171D2D;
-  --tinta:#E9EDF7; --tinta-2:#98A2BC; --tinta-3:#6B7793;
-  --regla:#242C40; --regla-2:#1C2333;
-  --verde:#7C8CF8; --verde-sube:#98A5FF; --verde-piso:#1A1F34;
-  --haber:#3DDC97; --haber-piso:#112825;
-  --debe:#FF6B81;  --debe-piso:#2A1922;
-  --oro:#F2C14E;   --oro-piso:#28241C;
+/* Paletas propias de la agenda */
+:root[data-paleta="brasa"]:not([data-tema="claro"]){
+  --papel:#121110; --hoja:#1B1917; --hoja-2:#221F1C; --tinta:#F4EEE6; --tinta-2:#B5AB9E; --tinta-3:#83796D; --regla:#2F2A25; --regla-2:#27231F; --verde:#F4A36C; --verde-sube:#FFBC8F; --verde-piso:#33241A; --haber:#A6D38A; --haber-piso:#1F2A1A; --debe:#F27C6E; --debe-piso:#33201C; --oro:#EDC46A; --oro-piso:#302817
 }
-:root[data-paleta="medianoche"][data-tema="claro"]{
-  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
-  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
-  --regla:#E2E5EC; --regla-2:#EDEFF4;
-  --verde:#616DC1; --verde-sube:#4D579A; --verde-piso:#F1F2FE;
-  --haber:#289164; --haber-piso:#E6FAF1;
-  --debe:#B84D5D;  --debe-piso:#FFEDF0;
-  --oro:#967830;   --oro-piso:#FDF5E3;
+:root[data-paleta="brasa"][data-tema="claro"]{
+  --papel:#F6F1EA; --hoja:#FFFCF7; --hoja-2:#FBF6EF; --tinta:#221D18; --tinta-2:#6B6157; --tinta-3:#978C80; --regla:#E7DED2; --regla-2:#EFE8DE; --verde:#C8672F; --verde-sube:#A9551F; --verde-piso:#FBEADD; --haber:#4F8A3A; --haber-piso:#EAF4E2; --debe:#B8483B; --debe-piso:#FBE8E4; --oro:#9A7424; --oro-piso:#F8EFD9
 }
-:root[data-paleta="carbon"]:not([data-tema="claro"]){
-  --papel:#0D0D0C; --hoja:#171716; --hoja-2:#1D1D1B;
-  --tinta:#EFEDE7; --tinta-2:#A3A099; --tinta-3:#75726B;
-  --regla:#2B2B28; --regla-2:#212120;
-  --verde:#E0A72E; --verde-sube:#F2BC4E; --verde-piso:#2B2311;
-  --haber:#8FD14F; --haber-piso:#1E2615;
-  --debe:#F2622E;  --debe-piso:#2B1810;
-  --oro:#E0A72E;   --oro-piso:#282110;
+:root[data-paleta="jade"]:not([data-tema="claro"]){
+  --papel:#0F1312; --hoja:#171C1B; --hoja-2:#1D2322; --tinta:#EAF1EE; --tinta-2:#A2B0AB; --tinta-3:#738380; --regla:#28302E; --regla-2:#212826; --verde:#5FD3B3; --verde-sube:#86E3C9; --verde-piso:#16302A; --haber:#A6D38A; --haber-piso:#1C2A1C; --debe:#F08A7A; --debe-piso:#321F1C; --oro:#E9C66F; --oro-piso:#2E2817
 }
-:root[data-paleta="carbon"][data-tema="claro"]{
-  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
-  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
-  --regla:#E2E5EC; --regla-2:#EDEFF4;
-  --verde:#AF8224; --verde-sube:#8B681D; --verde-piso:#FCF5E8;
-  --haber:#5E8A34; --haber-piso:#F0F9E8;
-  --debe:#AE4721;  --debe-piso:#FDECE6;
-  --oro:#8B681D;   --oro-piso:#FAF1DE;
+:root[data-paleta="jade"][data-tema="claro"]{
+  --papel:#EFF4F1; --hoja:#FBFDFC; --hoja-2:#F4F8F6; --tinta:#18221F; --tinta-2:#566661; --tinta-3:#869690; --regla:#D9E3DF; --regla-2:#E6EDEA; --verde:#23876F; --verde-sube:#1B6B58; --verde-piso:#E1F3EE; --haber:#4F8A3A; --haber-piso:#EAF4E2; --debe:#B8483B; --debe-piso:#FBE8E4; --oro:#9A7424; --oro-piso:#F8EFD9
 }
-:root[data-paleta="violeta"]:not([data-tema="claro"]){
-  --papel:#0C0912; --hoja:#16111F; --hoja-2:#1C1628;
-  --tinta:#EDE7F7; --tinta-2:#A296B8; --tinta-3:#776C8C;
-  --regla:#2B2239; --regla-2:#211A2D;
-  --verde:#B478F5; --verde-sube:#C899FF; --verde-piso:#241932;
-  --haber:#31D0C6; --haber-piso:#112329;
-  --debe:#F2568F;  --debe-piso:#2A1322;
-  --oro:#E8B04B;   --oro-piso:#291F19;
+:root[data-paleta="ciruela"]:not([data-tema="claro"]){
+  --papel:#141015; --hoja:#1D171F; --hoja-2:#241D27; --tinta:#F2EAF3; --tinta-2:#B6A8B8; --tinta-3:#857789; --regla:#322936; --regla-2:#29222C; --verde:#E48FC4; --verde-sube:#F0AED6; --verde-piso:#36203A; --haber:#A6D38A; --haber-piso:#1F2A1C; --debe:#F28B7D; --debe-piso:#35201F; --oro:#EBC56E; --oro-piso:#302718
 }
-:root[data-paleta="violeta"][data-tema="claro"]{
-  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
-  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
-  --regla:#E2E5EC; --regla-2:#EDEFF4;
-  --verde:#8C5EBF; --verde-sube:#704A98; --verde-piso:#F7F0FE;
-  --haber:#208983; --haber-piso:#E4F9F8;
-  --debe:#AE3E67;  --debe-piso:#FDEBF2;
-  --oro:#906D2E;   --oro-piso:#FBF2E2;
+:root[data-paleta="ciruela"][data-tema="claro"]{
+  --papel:#F5EFF4; --hoja:#FFFBFE; --hoja-2:#FAF4F9; --tinta:#251A24; --tinta-2:#6C5B6A; --tinta-3:#9A8898; --regla:#E7DCE5; --regla-2:#EFE6ED; --verde:#A8447F; --verde-sube:#8A3668; --verde-piso:#F7E4F0; --haber:#4F8A3A; --haber-piso:#EAF4E2; --debe:#B8483B; --debe-piso:#FBE8E4; --oro:#9A7424; --oro-piso:#F8EFD9
 }
-:root[data-paleta="bosque"]:not([data-tema="claro"]){
-  --papel:#0E1110; --hoja:#161A18; --hoja-2:#1B201D;
-  --tinta:#ECEFEA; --tinta-2:#9AA5A0; --tinta-3:#6E7A75;
-  --regla:#262C29; --regla-2:#1F2422;
-  --verde:#4FA88C; --verde-sube:#6FC2A7; --verde-piso:#172621;
-  --haber:#3ED598; --haber-piso:#142A22;
-  --debe:#FF6B5E;  --debe-piso:#2D1D1A;
-  --oro:#E0B457;   --oro-piso:#292619;
+:root[data-paleta="grafito"]:not([data-tema="claro"]){
+  --papel:#111211; --hoja:#191A19; --hoja-2:#202120; --tinta:#EEEFEA; --tinta-2:#AAACA4; --tinta-3:#7A7D75; --regla:#2B2D2A; --regla-2:#242623; --verde:#C8E06A; --verde-sube:#D9EC8F; --verde-piso:#2A301A; --haber:#8FD6A0; --haber-piso:#1B2A1F; --debe:#F2836F; --debe-piso:#33201B; --oro:#E8C35E; --oro-piso:#2E2815
 }
-:root[data-paleta="bosque"][data-tema="claro"]{
-  --papel:#F4F5F7; --hoja:#FFFFFF; --hoja-2:#FAFAFC;
-  --tinta:#14171F; --tinta-2:#576076; --tinta-3:#878FA3;
-  --regla:#E2E5EC; --regla-2:#EDEFF4;
-  --verde:#3E836D; --verde-sube:#316857; --verde-piso:#ECF5F2;
-  --haber:#298D64; --haber-piso:#E6FAF2;
-  --debe:#B84D44;  --debe-piso:#FFEDEC;
-  --oro:#8B7036;   --oro-piso:#FAF3E4;
+:root[data-paleta="grafito"][data-tema="claro"]{
+  --papel:#F2F2EE; --hoja:#FCFCFA; --hoja-2:#F6F6F2; --tinta:#1D1E1B; --tinta-2:#5F615A; --tinta-3:#8E9088; --regla:#E0E1DA; --regla-2:#EAEBE5; --verde:#5E7A12; --verde-sube:#4A610D; --verde-piso:#EEF4DC; --haber:#3F8A55; --haber-piso:#E4F3E8; --debe:#B8483B; --debe-piso:#FBE8E4; --oro:#9A7424; --oro-piso:#F8EFD9
 }
 
 *,*::before,*::after{ box-sizing:border-box }
@@ -119,7 +73,7 @@ button{ cursor:pointer; background:none; border:none; padding:0 }
 a{ color:var(--verde) }
 :focus-visible{ outline:2px solid var(--verde); outline-offset:2px; border-radius:6px }
 .oculto{ display:none !important }
-.cifra{ font-family:var(--cifra); font-variant-numeric:tabular-nums; letter-spacing:-.01em }
+.cifra{ font-family:var(--cifra); font-variant-numeric:tabular-nums; letter-spacing:-.01em; font-feature-settings:'tnum' }
 svg.i{ width:20px; height:20px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{ animation-duration:.001ms !important; transition-duration:.001ms !important }
@@ -893,8 +847,8 @@ body{
 .cat-fila .barra-prog i{ transition:width .5s ease }
 
 /* ===== Espacios ============================================================ */
-:root{ --esp-personal:#B794F6; --esp-estudios:#5AB0F0; --esp-oficina:#F2B34B; --esp-deporte:#34D399 }
-:root[data-tema="claro"]{ --esp-personal:#7C4DDB; --esp-estudios:#2A78B8; --esp-oficina:#B7791F; --esp-deporte:#138A5C }
+:root{ --esp-personal:#E9A0B7; --esp-estudios:#94B4F0; --esp-oficina:#E8C267; --esp-deporte:#93D1A0 }
+:root[data-tema="claro"]{ --esp-personal:#B04E77; --esp-estudios:#3F6FB5; --esp-oficina:#9A7424; --esp-deporte:#2F8A4C }
 
 .nav-lat .nav-esp svg{ color:var(--c) }
 .nav-lat .nav-esp[aria-current="page"]{ background:linear-gradient(90deg, color-mix(in srgb, var(--c) 22%, transparent), transparent); box-shadow:inset 3px 0 0 var(--c); color:var(--tinta) }
@@ -2045,3 +1999,258 @@ svg.i.izq{ transform:rotate(180deg) }
 .gesto-nav.der{ right:calc(-44px + var(--p, 0) * 60px) }
 .gesto-nav.listo{ background:var(--verde); color:var(--papel) }
 .gesto-nav svg{ width:22px; height:22px; stroke-width:2.6 }
+
+/* ==========================================================================
+   IDENTIDAD PROPIA
+   Lo último que se aplica, y manda sobre todo lo de arriba:
+   · fondo liso de carbón cálido, sin halos de color
+   · tarjetas sin borde: se separan por el tono, no por una línea
+   · títulos con serifa; nada de etiquetas en MAYÚSCULAS espaciadas
+   · cifras con la letra del texto (sin letra de máquina)
+   · un solo acento, botones redondos, barra de abajo pegada al borde
+   ========================================================================== */
+body{ background:var(--papel) !important; background-attachment:scroll }
+body::before{ display:none !important }
+
+/* ----- Letra ----- */
+.cabecera h1, .heroe h2, .seccion-t, .seccion-t span, .seccion-tit, .tarjeta-cab h2, .tarjeta-cab h3,
+.cab-sec-txt b, .hoja-flot .cab h3, .adm-grupo-tit, .cal-top h2, .cal-titulo, .mas-grupo h4,
+.siguiente b, .cifra-heroe, .datos-hoy b, .heroe .dato b, .vacio h3, .vacio b, .marca b{
+  font-family:var(--serif) !important; font-optical-sizing:auto;
+}
+.cabecera h1{ font-size:23px !important; font-weight:600 !important; letter-spacing:-.01em !important }
+@media (min-width:900px){ .cabecera h1{ font-size:26px !important } }
+
+/* Títulos de sección: frase en serifa, sin mayúsculas ni rayas */
+.seccion-t{
+  margin:30px 2px 12px !important; font-size:22px !important; font-weight:560 !important;
+  letter-spacing:-.01em !important; text-transform:none !important; color:var(--tinta) !important;
+}
+.seccion-t::after{ display:none !important }
+.seccion-t > small, .seccion-t > .hora-viva{ margin-left:auto; font-family:var(--letra); font-size:12.5px !important; font-weight:600 !important; letter-spacing:0 !important; color:var(--tinta-3) !important }
+.hora-viva{ background:var(--hoja) !important; border:0 !important; font-family:var(--letra) !important; font-variant-numeric:tabular-nums }
+.seccion-tit{
+  font-size:19px !important; font-weight:560 !important; letter-spacing:-.01em !important; text-transform:none !important;
+  color:var(--tinta) !important; margin:24px 2px 10px !important;
+}
+.seccion-tit .n{ font-family:var(--letra); font-size:13px; font-weight:600; color:var(--tinta-3); opacity:1 }
+.seccion-tit.rojo{ color:var(--debe) !important }
+.tarjeta-cab{ padding:16px 18px 8px !important }
+.tarjeta-cab h2, .tarjeta-cab h3{ font-size:18px !important; font-weight:560 !important; letter-spacing:-.01em !important; text-transform:none !important; color:var(--tinta) !important }
+.tarjeta-cab .mas{ background:none !important; padding:0 !important; font-size:13px !important; font-weight:650; color:var(--verde) !important }
+.mas-grupo h4, .adm-grupo-tit{ font-size:17px !important; font-weight:560 !important; letter-spacing:0 !important; text-transform:none !important; color:var(--tinta-2) !important }
+
+/* Etiquetas pequeñas en frase normal, no en mayúsculas */
+.siguiente small, .heroe .fecha, .anillo-hoy > span, .cab-sec-txt small, .dia-mini, .ano-mes h4,
+.cal-rejilla .dias-sem span, .kpi small, .rotulo{
+  letter-spacing:.01em !important; text-transform:none !important;
+}
+.heroe .fecha{ font-size:13px !important; font-weight:600 !important; opacity:.8 !important }
+
+/* ----- Tarjetas ----- */
+.tarjeta{
+  border:0 !important; border-radius:26px !important; box-shadow:none !important;
+  background:var(--hoja) !important;
+}
+:root[data-tema="claro"] .tarjeta{ box-shadow:0 1px 3px rgba(40,30,20,.05) !important }
+.tarjeta .tarjeta, .tarjeta .hoja-2{ background:var(--hoja-2) !important }
+.lista-filas .fila + .fila, .fila + .fila{ border-top-color:var(--regla-2) !important }
+.ver-mas{ border-top:0 !important; color:var(--verde) !important }
+.azulejo{
+  border-radius:50% !important; width:34px !important; height:34px !important;
+  background:color-mix(in srgb, var(--c, var(--verde)) 18%, transparent) !important; color:var(--c, var(--verde)) !important; box-shadow:none !important;
+}
+.azulejo svg{ color:inherit !important }
+.cab-num{ font-family:var(--letra) !important; background:var(--hoja-2) !important }
+
+/* ----- Botones, fichas y campos ----- */
+.btn{
+  border-radius:99px !important; border:0 !important; background:var(--hoja-2) !important;
+  font-weight:650 !important; box-shadow:none !important;
+}
+.btn:hover{ background:color-mix(in srgb, var(--tinta) 8%, var(--hoja-2)) !important }
+.btn.primario{
+  background:var(--verde) !important; color:color-mix(in srgb, var(--papel) 92%, #000) !important; box-shadow:none !important;
+}
+:root[data-tema="claro"] .btn.primario{ color:#fff !important }
+.btn.primario:hover{ background:var(--verde-sube) !important }
+.btn.peligro{ color:var(--debe) !important; background:var(--debe-piso) !important }
+.btn-icono{ border-radius:50% !important }
+.ficha{
+  border:0 !important; background:var(--hoja) !important; color:var(--tinta-2) !important; font-weight:600 !important;
+}
+.ficha[aria-pressed="true"]{ background:var(--tinta) !important; color:var(--papel) !important }
+.ficha[aria-pressed="true"] .n{ opacity:.7 }
+.selector button{ border:0 !important; background:var(--hoja-2) !important; border-radius:99px !important }
+.selector button[aria-pressed="true"]{ background:var(--tinta) !important; color:var(--papel) !important }
+.entrada, .campo input, .campo select, .campo textarea, .captura input, .captura, .hoja-flot input:not([type=checkbox]):not([type=radio]), .hoja-flot select, .hoja-flot textarea{
+  border-color:transparent !important; background:var(--hoja-2) !important; border-radius:16px !important;
+}
+.entrada:focus, .campo input:focus, .campo select:focus, .campo textarea:focus, .hoja-flot input:focus, .hoja-flot textarea:focus{
+  border-color:var(--verde) !important; box-shadow:0 0 0 3px color-mix(in srgb, var(--verde) 22%, transparent) !important;
+}
+.captura{ background:var(--hoja) !important }
+.interruptor input:checked{ background:var(--verde) !important }
+.casilla{ border-width:2px !important }
+.casilla[aria-checked="true"]{ background:var(--c, var(--verde)) !important; border-color:var(--c, var(--verde)) !important }
+:focus-visible{ outline-color:var(--verde) }
+
+/* ----- Cabecera y marco ----- */
+.cabecera{
+  background:color-mix(in srgb, var(--papel) 92%, transparent) !important; border-bottom:0 !important; box-shadow:none !important;
+}
+.lateral{ background:var(--papel) !important; border-right:1px solid var(--regla-2) !important; box-shadow:none !important }
+.nav-lat button{ border-radius:14px !important }
+.nav-lat button[aria-current="page"]{ background:var(--hoja) !important; box-shadow:none !important; color:var(--tinta) !important }
+.nav-lat button[aria-current="page"] svg{ color:var(--verde) !important }
+.nav-lat .grupo{ font-family:var(--serif); font-size:14px !important; font-weight:560 !important; letter-spacing:0 !important; text-transform:none !important; color:var(--tinta-3) !important }
+
+/* ----- Barra de abajo: pegada al borde, el activo con un punto ----- */
+@media (max-width:899px){
+  .barra-inf{
+    left:0 !important; right:0 !important; bottom:0 !important; border-radius:0 !important;
+    height:calc(var(--barra) + env(safe-area-inset-bottom)) !important; padding-bottom:env(safe-area-inset-bottom) !important;
+    background:var(--papel) !important; border:0 !important; border-top:1px solid var(--regla-2) !important;
+    box-shadow:none !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+  }
+  .fab{ bottom:calc(var(--barra) + 16px + env(safe-area-inset-bottom)) !important }
+  .avisos{ bottom:calc(var(--barra) + 16px + env(safe-area-inset-bottom)) }
+  .barra-sel{ bottom:calc(var(--barra) + 12px + env(safe-area-inset-bottom)) !important }
+}
+.barra-inf button{ color:var(--tinta-3) !important; font-size:10.5px !important; font-weight:600 !important; gap:4px !important }
+.barra-inf button svg{ width:23px !important; height:23px !important; padding:0 !important; background:none !important; border-radius:0 !important }
+.barra-inf button[aria-current="page"]{ color:var(--tinta) !important }
+.barra-inf button[aria-current="page"] svg{ color:var(--verde) !important; background:none !important }
+.barra-inf button[aria-current="page"]::before{ display:none !important }
+.barra-inf button[aria-current="page"]::after{
+  content:""; position:absolute; bottom:6px; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:var(--verde);
+}
+.barra-inf .globo{ background:var(--verde) !important; color:var(--papel) !important; top:6px !important }
+
+/* ----- Botón de añadir: círculo con el acento, sin brillo ----- */
+.fab{
+  border-radius:50% !important; width:58px !important; height:58px !important;
+  background:var(--verde) !important; color:var(--papel) !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.35) !important;
+}
+:root[data-tema="claro"] .fab{ color:#fff !important; box-shadow:0 8px 22px rgba(40,30,20,.18) !important }
+
+/* ----- Saludos (Hoy, espacios, dinero): tarjeta oscura con un resplandor
+   del color del espacio en la esquina, y el título grande en serifa ----- */
+.heroe, .heroe.esp-heroe, .heroe.tema-personal, .heroe.tema-estudios, .heroe.tema-oficina, .heroe.tema-deporte{
+  color:var(--tinta) !important; border-radius:30px !important;
+  background:
+    radial-gradient(360px 260px at 100% 0%, color-mix(in srgb, var(--ec, var(--verde)) 30%, transparent), transparent 70%),
+    radial-gradient(300px 200px at 0% 100%, color-mix(in srgb, var(--ec, var(--verde)) 10%, transparent), transparent 70%),
+    var(--hoja) !important;
+  box-shadow:none !important; border:0 !important;
+}
+.heroe::after{ border-color:color-mix(in srgb, var(--ec, var(--verde)) 14%, transparent) !important }
+.heroe .deco, .heroe .burbujas{ opacity:.35 }
+.heroe h2{ font-size:31px !important; font-weight:560 !important; letter-spacing:-.02em !important; line-height:1.12 !important; color:var(--tinta) !important }
+.heroe .frase{ color:var(--tinta-2) !important; opacity:1 !important; font-family:var(--serif); font-style:italic; font-size:14.5px !important }
+.heroe .fecha{ color:var(--ec, var(--verde)) !important }
+.heroe .dato, .datos-hoy{
+  background:color-mix(in srgb, var(--tinta) 6%, transparent) !important; border:0 !important; color:var(--tinta) !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+.datos-hoy button{ color:var(--tinta) !important }
+.datos-hoy button + button{ border-left-color:color-mix(in srgb, var(--tinta) 8%, transparent) !important }
+.datos-hoy b, .heroe .dato b{ font-weight:600 !important; letter-spacing:-.01em !important }
+.datos-hoy span{ color:var(--tinta-2) !important; opacity:1 !important }
+.heroe .dato svg{ color:var(--ec, var(--verde)) !important; opacity:1 !important }
+.anillo-hoy .anillo .fondo, .heroe .anillo .fondo, .heroe .anillo-mini circle:first-child{ stroke:color-mix(in srgb, var(--tinta) 12%, transparent) !important }
+.anillo-hoy .anillo .valor, .heroe .anillo .valor{ stroke:var(--ec, var(--verde)) !important }
+.anillo-hoy > span, .anillo-hoy > span b{ color:var(--tinta) !important }
+.anillo-hoy > span b{ font-family:var(--serif) !important; font-weight:600 }
+.heroe .anillo-mini text{ fill:var(--tinta) !important }
+.cifra-heroe{ font-weight:560 !important; letter-spacing:-.02em !important }
+@media (min-width:760px){ .heroe h2{ font-size:38px !important } }
+
+/* ----- Cabecera de cada sección ----- */
+.cab-sec{ border:0 !important; background:var(--hoja) !important; box-shadow:none !important; border-radius:26px !important }
+.cab-sec-ico{ border-radius:50% !important }
+.cab-sec-txt b{ font-size:21px !important; font-weight:560 !important }
+
+/* ----- Pestañas: subrayado del acento, sin cajas ----- */
+.esp-tabs, .cal-modos{ background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important; gap:4px !important }
+.esp-tabs button, .cal-modos button{ border-radius:0 !important; background:none !important; box-shadow:none !important; border-bottom:2px solid transparent !important; color:var(--tinta-3) !important }
+.esp-tabs button[aria-selected="true"], .cal-modos button[aria-pressed="true"], .cal-modos button[aria-current="true"]{
+  background:none !important; color:var(--tinta) !important; border-bottom-color:var(--ec, var(--verde)) !important;
+}
+.cal-modos{ border-bottom:1px solid var(--regla-2) !important; border-radius:0 !important; margin-bottom:12px !important }
+
+/* ----- Espacios en Hoy ----- */
+.esp-tile{ border:0 !important; background:var(--hoja) !important; border-radius:22px !important }
+.esp-tile::before{ top:auto !important; bottom:0 !important; left:18px !important; right:auto; width:28px !important; height:3px !important; border-radius:3px 3px 0 0 !important }
+.siguiente{
+  border:0 !important; border-radius:26px !important;
+  background:radial-gradient(300px 180px at 100% 0%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%), var(--hoja) !important;
+}
+.siguiente::before{ display:none !important }
+.siguiente b{ font-size:24px !important; font-weight:560 !important }
+
+/* ----- Hojas flotantes y menú Todo ----- */
+.velo{ background:rgba(8,6,4,.62) !important }
+.hoja-flot{ background:var(--hoja) !important; border:0 !important }
+.hoja-flot .cab h3{ font-size:22px !important; font-weight:560 !important }
+.rejilla-mas button, .menu-lista button{ border:0 !important; background:var(--hoja-2) !important; border-radius:20px !important }
+.rejilla-mas button[aria-current="page"]{ background:var(--verde-piso) !important; color:var(--tinta) !important }
+.rejilla-mas button svg, .menu-lista svg{ color:var(--verde) !important }
+
+/* ----- Calendario ----- */
+.celda{ border:0 !important }
+.celda.hoy .num, .celda.hoy > b{ background:var(--verde) !important; color:var(--papel) !important }
+.celda.sel{ box-shadow:inset 0 0 0 2px var(--verde) !important }
+
+/* ----- Números: la misma letra del texto, con cifras parejas ----- */
+.cifra, .dinero, [class*="monto"], .cifra-heroe, .datos-hoy b, .hora-viva, .fila .hora, .hora{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' }
+
+/* Nada de etiquetas en MAYÚSCULAS espaciadas: frase normal */
+.acuerdos h4,
+.adm-grupo-tit,
+.ag-fecha small,
+.anillo-hoy > span,
+.bienestar-hoy h4,
+.cifras small,
+.cliente-num small,
+.crono-grande small,
+.cronometro small,
+.dia-h,
+.ej-cab span,
+.heroe .fecha,
+.heroe.tema-deporte h2,
+.hiit label small,
+.hor-col > b,
+.inf-fila > span,
+.kan-col h4,
+.kpi small,
+.libro-num small,
+.marcador small,
+.mas-grupo h4,
+.menu-cab span,
+.mes-col small,
+.nav-lat .grupo,
+.pagos-hoy h4,
+.resumen-pagos small,
+.rev-kpi small,
+.seccion-t,
+.seccion-tit,
+.sem-cab small,
+.semana-cols h4,
+.semana-mini small,
+.siguiente small,
+.sub-flot,
+.tarjeta-cab h2,
+.tarjeta-cab h3,
+body[data-esp="deporte"] .esp-tabs button,
+body[data-esp="deporte"] .tarjeta-cab h2,
+body[data-esp="oficina"] .esp-tabs button,
+body[data-esp="oficina"] .tarjeta-cab h2{
+  text-transform:none !important; letter-spacing:.01em !important;
+}
+.cabecera h1{ font-size:21px !important }
+@media (max-width:420px){ .cabecera h1{ font-size:19.5px !important } }
+@media (min-width:900px){ .cabecera h1{ font-size:26px !important } }
+.tarjeta-cab .mas{ white-space:nowrap; flex:none }
+.esp-tile::before{ display:none !important }

@@ -15,8 +15,9 @@ var CLAVE_PREF     = 'agenda_pref';           // gustos de este aparato
 var CLAVE_LEDGER   = 'ledger_finanzas_simple_v1';   // Gastos personales (lo de Cuentas de siempre)
 var CLAVE_OFICINA  = 'ledger_oficina_v1';           // Cuentas de la oficina
 var CLAVE_NUBE_CTA = 'libro_cuentas_db_cfg';
-var CLAVE_TEMA     = 'libro_cuentas_tema';
-var CLAVE_PALETA   = 'cuentas_paleta';
+/* La agenda guarda su tema y su paleta aparte: tiene su propio estilo */
+var CLAVE_TEMA     = 'agenda_tema';
+var CLAVE_PALETA   = 'agenda_paleta';
 var JSONBIN        = 'https://api.jsonbin.io/v3/b';
 var MONEDA         = 'S/';
 var COLS = ['tareas','listas','eventos','recordatorios','habitos','notas','enfoque','metas','pagos','diario','cursos','entrenos','medidas','cobros','proyectos','revisiones','deudas','rutinas','bienestar','horas','casa','menu','docs','fichas','clientes'];
@@ -976,7 +977,7 @@ VISTAS.hoy = function(){
 
   if(!total && !nombre){
     html += '<div class="tarjeta" style="margin-bottom:16px"><div class="tarjeta-cuerpo" style="padding:18px 16px">' +
-      '<b style="font-size:16px;display:block;margin-bottom:4px">Bienvenido a tu agenda 👋</b>' +
+      '<b style="font-family:var(--serif);font-size:21px;font-weight:560;display:block;margin-bottom:6px">Bienvenido a tu agenda 👋</b>' +
       '<p style="margin:0 0 12px;color:var(--tinta-2);font-size:13.5px">Tareas, listas, calendario, recordatorios que suenan, hábitos, metas, diario, pagos, notas y tu libro de cuentas: todo en un solo sitio y solo para ti. ¿Cómo te llamas?</p>' +
       '<form data-acc="bienvenida" class="captura" style="margin:0 0 10px"><input id="nombreBienvenida" type="text" maxlength="40" placeholder="Tu nombre"><button class="btn primario chico" type="submit">Empezar</button></form>' +
       '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button>' +
@@ -3891,42 +3892,52 @@ function fuenteLibro(cual){
   /* El libro se viste igual que la agenda: mismo logo, mismas tarjetas */
   var logo = getComputedStyle(document.documentElement).getPropertyValue('--logo').trim();
   var fuenteCss = window.FUENTE_AGENDA ? "@font-face{font-family:'Jakarta';src:url(" + window.FUENTE_AGENDA + ") format('woff2');font-weight:200 800}:root{--letra:'Jakarta',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important}body{font-family:var(--letra)!important}" : '';
-  cambia('</head>', '<style id="estilo-agenda">:root{--logo:' + logo + '}' + fuenteCss + ESTILO_LIBRO + '</style></head>');
+  if(window.SERIF_AGENDA) fuenteCss += "@font-face{font-family:'Fraunces';src:url(" + window.SERIF_AGENDA + ") format('woff2');font-weight:400 700}";
+  cambia('</head>', '<style id="estilo-agenda">:root{--logo:' + logo + '}' + fuenteCss + varsAgenda() + ESTILO_LIBRO + '</style></head>');
   return s;
 }
 var ESTILO_LIBRO = [
-  /* fondo con el halo de la paleta, como la agenda */
-  'body{background:radial-gradient(900px 420px at 85% -120px,color-mix(in srgb,var(--verde) 16%,transparent),transparent 70%),radial-gradient(700px 380px at -10% 10%,color-mix(in srgb,var(--haber) 7%,transparent),transparent 70%),var(--papel)!important;background-attachment:fixed}',
-  /* el logo nuevo en la cabecera y en la bienvenida */
-  '.sello,.marca-grande{background:var(--logo) center/contain no-repeat!important;border:0!important;box-shadow:none!important;padding:0!important;filter:drop-shadow(0 3px 8px rgba(0,0,0,.35))}',
+  /* fondo liso, como la agenda */
+  'body{background:var(--papel)!important}',
+  /* el logo de la agenda en la cabecera y en la bienvenida */
+  '.sello,.marca-grande{background:var(--logo) center/contain no-repeat!important;border:0!important;box-shadow:none!important;padding:0!important}',
   '.sello{width:38px!important;height:38px!important;border-radius:0!important}',
   '.marca-grande{width:104px!important;height:104px!important}',
   '.sello svg,.marca-grande svg{visibility:hidden}',
-  '.marca h1{font-size:17px!important;font-weight:800!important;letter-spacing:-.02em}',
-  /* tarjetas: radio grande, borde suave y luz arriba */
-  '.tarjeta,.balance,.kpi{border-radius:20px!important;border-color:color-mix(in srgb,var(--regla) 85%,transparent)!important;background:linear-gradient(180deg,color-mix(in srgb,var(--hoja) 92%,var(--tinta) 3%),var(--hoja))!important}',
-  '.tarjeta-cabeza h2{font-size:15px!important;font-weight:750!important;letter-spacing:-.01em!important;text-transform:none!important;color:var(--tinta)!important}',
-  /* el balance, como el saludo de la agenda */
-  '.balance{position:relative;overflow:hidden;color:#fff;border:0!important;box-shadow:0 18px 40px color-mix(in srgb,var(--verde) 30%,transparent)!important;background:radial-gradient(420px 220px at 100% 0%,rgba(255,255,255,.22),transparent 60%),linear-gradient(135deg,var(--verde-sube) 0%,var(--verde) 45%,color-mix(in srgb,var(--verde) 55%,#140f3a) 100%)!important}',
-  '.balance::before{display:none!important}',
-  '.balance::after{content:"";position:absolute;right:-40px;bottom:-60px;width:200px;height:200px;border-radius:50%;border:28px solid rgba(255,255,255,.08)}',
-  '.balance .rotulo,.balance .periodo,.balance-partes .r{color:rgba(255,255,255,.82)!important}',
-  '.balance .cantidad{color:#fff!important;text-shadow:0 2px 12px rgba(0,0,0,.2)}',
-  '.balance .cantidad.negativo{color:#FFD5DB!important}',
-  '.balance-partes{border-color:rgba(255,255,255,.18)!important}',
-  '.balance-partes .v.entra{color:#C9FFE3!important}.balance-partes .v.sale{color:#FFD5DB!important}',
-  '.balance .tendencia svg *{stroke:#fff}.balance .tendencia .pie-tend{color:rgba(255,255,255,.75)}',
-  /* botones y flotante con el degradado de la agenda */
-  '.btn-lleno,.flotante{background:linear-gradient(135deg,var(--verde-sube),var(--verde))!important;border-color:transparent!important;box-shadow:0 6px 18px color-mix(in srgb,var(--verde) 38%,transparent)!important}',
-  '.flotante{border-radius:20px!important}',
-  '.btn,.control{border-radius:11px!important}',
-  /* pestañas y barra inferior: el activo en pastilla, como la agenda */
-  '.segmentado button[aria-pressed="true"]{background:var(--verde-piso)!important;color:var(--verde-sube)!important;box-shadow:inset 0 0 0 1px var(--verde)!important}',
-  '.barra-inferior button svg{width:44px!important;height:28px!important;padding:3px 11px;border-radius:99px;transition:background .2s}',
-  '.barra-inferior button[aria-current="page"]{color:var(--verde-sube)!important}',
-  '.barra-inferior button[aria-current="page"] svg{background:var(--verde-piso)}',
-  '.modal{border-radius:22px 22px 0 0!important}@media (min-width:700px){.modal{border-radius:22px!important}}'
+  /* títulos y cifras grandes en serifa; el resto, sin letra de máquina */
+  '.marca h1,.tarjeta-cabeza h2,.balance .cantidad,h1,h2,h3{font-family:var(--serif)!important;letter-spacing:-.01em!important}',
+  '.marca h1{font-size:20px!important;font-weight:600!important}',
+  '.tarjeta-cabeza h2{font-size:18px!important;font-weight:560!important;text-transform:none!important;color:var(--tinta)!important}',
+  '*{text-transform:none!important}',
+  '.rotulo,.balance .rotulo,.balance-partes .r,small,label{letter-spacing:.01em!important}',
+  /* tarjetas sin borde, separadas por el tono */
+  '.tarjeta,.balance,.kpi{border:0!important;border-radius:26px!important;box-shadow:none!important;background:var(--hoja)!important}',
+  /* el balance, como los saludos de la agenda */
+  '.balance{position:relative;overflow:hidden;color:var(--tinta)!important;background:radial-gradient(360px 240px at 100% 0%,color-mix(in srgb,var(--verde) 28%,transparent),transparent 70%),var(--hoja)!important}',
+  '.balance::before,.balance::after{display:none!important}',
+  '.balance .cantidad{font-weight:560!important;color:var(--tinta)!important}',
+  '.balance .cantidad.negativo{color:var(--debe)!important}',
+  '.balance .rotulo,.balance .periodo,.balance-partes .r{color:var(--tinta-2)!important}',
+  '.balance-partes{border-color:var(--regla-2)!important}',
+  /* botones redondos con el acento, sin brillo */
+  '.btn-lleno{background:var(--verde)!important;color:var(--papel)!important;border-color:transparent!important;box-shadow:none!important}',
+  '.flotante{background:var(--verde)!important;color:var(--papel)!important;border-radius:50%!important;box-shadow:0 8px 24px rgba(0,0,0,.35)!important;border:0!important}',
+  '.btn,.control{border-radius:99px!important}',
+  'input,select,textarea{border-radius:16px!important}',
+  '.segmentado button[aria-pressed="true"]{background:var(--tinta)!important;color:var(--papel)!important;box-shadow:none!important}',
+  /* barra de abajo: el activo con el color del acento */
+  '.barra-inferior{background:var(--papel)!important;border-top:1px solid var(--regla-2)!important;box-shadow:none!important;backdrop-filter:none!important}',
+  '.barra-inferior button[aria-current="page"]{color:var(--tinta)!important}',
+  '.barra-inferior button[aria-current="page"] svg{color:var(--verde)!important;background:none!important}',
+  '.modal{border-radius:28px 28px 0 0!important;border:0!important}@media (min-width:700px){.modal{border-radius:28px!important}}'
 ].join('');
+/* Los colores de la agenda, tal cual, para vestir al libro */
+var VARS_LIBRO = ['--papel','--hoja','--hoja-2','--tinta','--tinta-2','--tinta-3','--regla','--regla-2','--verde','--verde-sube','--verde-piso','--haber','--haber-piso','--debe','--debe-piso','--oro','--oro-piso','--azul','--rosa'];
+function varsAgenda(){
+  var cs = getComputedStyle(document.documentElement);
+  return ':root,:root[data-tema],:root[data-paleta],:root[data-paleta][data-tema]{' + VARS_LIBRO.map(function(v){ return v + ':' + cs.getPropertyValue(v).trim() + '!important'; }).join(';') +
+    ';--cifra:var(--letra)!important;--serif:\'Fraunces\',Georgia,serif;color-scheme:' + (document.documentElement.getAttribute('data-tema') === 'claro' ? 'light' : 'dark') + '}';
+}
 function recargarCuentas(){
   Object.keys(marcos).forEach(function(k){ marcos[k].srcdoc = fuenteLibro(k) + '<!-- ' + Date.now() + ' -->'; });
 }
@@ -4513,7 +4524,7 @@ function confeti(){
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var c = $('confeti'), g = c.getContext('2d'), W = c.width = innerWidth, H = c.height = innerHeight;
   var cs = getComputedStyle(document.documentElement);
-  var col = ['--verde','--haber','--debe','--oro','--azul','--rosa'].map(function(v){ return cs.getPropertyValue(v).trim() || '#7C8CF8'; });
+  var col = ['--verde','--haber','--debe','--oro','--azul','--rosa'].map(function(v){ return cs.getPropertyValue(v).trim() || '#F4A36C'; });
   var ps = [];
   for(var i = 0; i < 140; i++) ps.push({ x:W / 2 + (Math.random() - .5) * 80, y:H * .35, vx:(Math.random() - .5) * 14, vy:-Math.random() * 14 - 4, r:Math.random() * 6 + 4, c:col[i % col.length], a:Math.random() * 6, va:(Math.random() - .5) * .3 });
   var t0 = performance.now();
@@ -4602,16 +4613,17 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'medianoche', nom:'Medianoche', gotas:['#7C8CF8','#3DDC97','#FF6B81'] },
-  { id:'carbon',     nom:'Carbón',     gotas:['#E0A72E','#8FD14F','#F2622E'] },
-  { id:'violeta',    nom:'Violeta',    gotas:['#B478F5','#31D0C6','#F2568F'] },
-  { id:'bosque',     nom:'Bosque',     gotas:['#4FA88C','#3ED598','#FF6B5E'] }
+  { id:'brasa',   nom:'Brasa',   gotas:['#F4A36C','#A6D38A','#1B1917'] },
+  { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },
+  { id:'ciruela', nom:'Ciruela', gotas:['#E48FC4','#A6D38A','#1D171F'] },
+  { id:'grafito', nom:'Grafito', gotas:['#C8E06A','#8FD6A0','#191A19'] }
 ];
+function paletaValida(p){ return PALETAS.some(function(x){ return x.id === p; }) ? p : 'brasa'; }
 var nube = leerJSON(CLAVE_NUBE, null);
 
 VISTAS.ajustes = function(){
   var tema = document.documentElement.getAttribute('data-tema') || 'oscuro';
-  var pal = document.documentElement.getAttribute('data-paleta') || 'medianoche';
+  var pal = document.documentElement.getAttribute('data-paleta') || 'brasa';
   var permiso = 'Notification' in window ? Notification.permission : 'no';
   var llaveCuentas = (leerJSON(CLAVE_NUBE_CTA, null) || {}).key || '';
 
@@ -4626,7 +4638,7 @@ VISTAS.ajustes = function(){
       '<button class="btn chico" data-acc="personalizar-hoy">' + ico('i-hoy') + 'Elegir</button></div></div>';
 
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
-    '<div class="ajuste"><div class="txt"><b>Tema</b><small>Se aplica también a Cuentas.</small></div>' +
+    '<div class="ajuste"><div class="txt"><b>Tema</b><small>También viste a tus libros de cuentas dentro de la agenda.</small></div>' +
       '<div class="selector"><button data-acc="tema" data-t="oscuro" aria-pressed="' + (!pref.temaAuto && tema !== 'claro') + '">🌙 Oscuro</button><button data-acc="tema" data-t="claro" aria-pressed="' + (!pref.temaAuto && tema === 'claro') + '">☀️ Claro</button><button data-acc="tema" data-t="auto" aria-pressed="' + !!pref.temaAuto + '">🌓 Automático</button></div></div>' +
     '<div class="ajuste"><div class="txt"><b>Colores</b></div><div class="rejilla-paletas">' + PALETAS.map(function(p){
       return '<button type="button" class="muestra" data-acc="paleta" data-p="' + p.id + '" aria-pressed="' + (p.id === pal) + '"><span class="gotas">' +
@@ -5817,6 +5829,7 @@ function aplicarTema(t, desdeAuto){
   colorBarra(); recargarCuentas();
 }
 function aplicarPaleta(p){
+  p = paletaValida(p);
   document.documentElement.setAttribute('data-paleta', p);
   try{ localStorage.setItem(CLAVE_PALETA, p); }catch(e){}
   colorBarra(); recargarCuentas();
@@ -6670,7 +6683,7 @@ window.addEventListener('storage', function(ev){
   else if(ev.key === CLAVE_TEMA || ev.key === CLAVE_PALETA){
     try{
       document.documentElement.setAttribute('data-tema', localStorage.getItem(CLAVE_TEMA) === 'claro' ? 'claro' : 'oscuro');
-      var pp = localStorage.getItem(CLAVE_PALETA); if(pp) document.documentElement.setAttribute('data-paleta', pp);
+      var pp = localStorage.getItem(CLAVE_PALETA); if(pp) document.documentElement.setAttribute('data-paleta', paletaValida(pp));
       colorBarra();
     }catch(e){}
   }
@@ -6690,7 +6703,7 @@ document.addEventListener('visibilitychange', function(){
   zona.id = 'zonaCuentas'; zona.className = 'oculto';
   $('contenido').after(zona);
 
-  if(!document.documentElement.getAttribute('data-paleta')) document.documentElement.setAttribute('data-paleta', 'medianoche');
+  document.documentElement.setAttribute('data-paleta', paletaValida(document.documentElement.getAttribute('data-paleta')));
   colorBarra();
 
   var h = (location.hash || '').slice(1);
