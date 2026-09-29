@@ -71,7 +71,7 @@ jobs:
           # es la misma agenda en un solo archivo, por si se abre suelta.
           if [ -f agenda/index.html ]; then
             mkdir -p sitio/agenda
-            cp agenda/index.html agenda/agenda-completa.html agenda/sw.js agenda/icono.svg agenda/jakarta.woff2 agenda/fraunces.woff2 agenda/caveat.woff2 agenda/*.png sitio/agenda/
+            cp agenda/index.html agenda/agenda-completa.html agenda/sw.js agenda/icono.svg agenda/jakarta.woff2 agenda/barlow-600.woff2 agenda/barlow-700.woff2 agenda/*.png sitio/agenda/
           fi
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll

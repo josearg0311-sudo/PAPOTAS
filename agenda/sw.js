@@ -9,8 +9,8 @@
    Esto NO guarda tus datos: viven en el navegador (y en jsonbin.io si
    conectas la nube). Esto solo guarda el programa. */
 
-const CACHE = 'agenda-v7';
-const BASICOS = ['./', './index.html', './icono.svg', './jakarta.woff2', './fraunces.woff2', './caveat.woff2', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+const CACHE = 'agenda-v8';
+const BASICOS = ['./', './index.html', './icono.svg', './jakarta.woff2', './barlow-600.woff2', './barlow-700.woff2', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', (ev) => {
   self.skipWaiting();

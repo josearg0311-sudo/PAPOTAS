@@ -978,10 +978,10 @@ VISTAS.hoy = function(){
     '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' <span class="emoji">' + emoji + '</span></h2>' +
     '<p class="ph-frase">' + esc(fraseDelDia()) + '</p>' +
     '<nav class="ph-cuentas datos-hoy" aria-label="Tu día en números">' +
-      '<button data-ir="tareas" style="--bc:var(--haber)"><i>✅</i><b>' + (tareasHoy.length - hechas) + '</b><span>por hacer</span></button>' +
-      '<button data-ir="calendario" style="--bc:var(--azul)"><i>📅</i><b>' + nAgenda + '</b><span>' + (nAgenda === 1 ? 'plan' : 'planes') + '</span></button>' +
-      '<button data-ir="recordatorios" style="--bc:var(--oro)"><i>🔔</i><b>' + nAvisos + '</b><span>' + (nAvisos === 1 ? 'aviso' : 'avisos') + '</span></button>' +
-      '<button data-ir="pagos" style="--bc:var(--rosa)"><i>💸</i><b>' + pendPagos + '</b><span>por pagar</span></button>' +
+      '<button data-ir="tareas" style="--bc:var(--haber)"><b>' + (tareasHoy.length - hechas) + '</b><span>por hacer</span></button>' +
+      '<button data-ir="calendario" style="--bc:var(--azul)"><b>' + nAgenda + '</b><span>' + (nAgenda === 1 ? 'plan' : 'planes') + '</span></button>' +
+      '<button data-ir="recordatorios" style="--bc:var(--oro)"><b>' + nAvisos + '</b><span>' + (nAvisos === 1 ? 'aviso' : 'avisos') + '</span></button>' +
+      '<button data-ir="pagos" style="--bc:var(--debe)"><b>' + pendPagos + '</b><span>por pagar</span></button>' +
     '</nav>' + barraDelDia() + '</header>';
 
   /* ---- Franja de la semana ---- */
@@ -1013,9 +1013,9 @@ VISTAS.hoy = function(){
 
   /* ---- Ahora: lo siguiente en grande y el día como una línea de tiempo ---- */
   if(hoyVisible('ahora')){
-    html += tituloSecc('Ahorita 👀', '<span class="hora-viva" id="horaViva">' + horaAhora() + '</span>') +
+    html += tituloSecc('Ahora', '<span class="hora-viva" id="horaViva">' + horaAhora() + '</span>') +
       '<div class="bloque-ahora">' + tarjetaSiguiente() + '</div>' +
-      tituloSecc('Así va tu día', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>') +
+      tituloSecc('Tu día', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>') +
       '<section class="dia-abierto tu-dia">' + (agenda.length ? lineaDelDia(agenda) : '<p class="nada">Sin eventos, avisos ni pagos hoy. 🌿</p>') + '</section>';
   }
 
@@ -1023,17 +1023,17 @@ VISTAS.hoy = function(){
   if(hoyVisible('hacer')){
     var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
     var atrasadas = pend.filter(function(t){ return t.fecha < hoy; }).length;
-    html += tituloSecc('Lo que toca hoy' + (pend.length ? ' <span class="n">' + pend.length + '</span>' : ''), '<button class="ver-link" data-ir="tareas">Todas ' + ico('i-der') + '</button>') +
+    html += tituloSecc('Pendientes de hoy' + (pend.length ? ' <span class="n">' + pend.length + '</span>' : ''), '<button class="ver-link" data-ir="tareas">Todas ' + ico('i-der') + '</button>') +
       '<section class="lista-abierta">' +
         (pend.length ? '<div class="lista-filas">' + pend.slice(0, 8).map(filaTarea).join('') + '</div>' +
            (pend.length > 8 ? '<button class="ver-mas" data-ir="tareas">Ver ' + (pend.length - 8) + ' más</button>' : '') +
            (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
-         : '<p class="nada">🎈 Nada pendiente hoy. ¡Disfruta el día!</p>') +
+         : '<p class="nada">Nada pendiente hoy. Día libre. 👊</p>') +
       '</section>';
 
     /* Enfoque: tres números grandes */
     var enf = buscarId('enfoque', hoy), ei = (enf && !enf.del && enf.items) || [];
-    html += tituloSecc('Tus 3 de hoy ✨') + '<section class="enfoque-grande enfoque">' + [0,1,2].map(function(i){
+    html += tituloSecc('Tus 3 prioridades') + '<section class="enfoque-grande enfoque">' + [0,1,2].map(function(i){
       var x = ei[i] || { t:'', ok:false };
       return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
         '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
@@ -1064,7 +1064,7 @@ VISTAS.hoy = function(){
     var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
     var habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
     var dia = buscarId('diario', hoy), an = dia && !dia.del ? dia.animo : 0, bi = bienestar(hoy);
-    html += tituloSecc('¿Cómo estás? 💛', '<button class="ver-link" data-ir="diario">Diario ' + ico('i-der') + '</button>') +
+    html += tituloSecc('Cómo vas', '<button class="ver-link" data-ir="diario">Diario ' + ico('i-der') + '</button>') +
       '<section class="panel-bienestar bienestar-hoy">' +
         '<div class="pb-bloque"><h4>¿Cómo te sientes?</h4>' + animosHTML(an, hoy) + '</div>' +
         '<div class="pb-bloque"><h4>Hábitos <span>' + habOk + ' de ' + hab.length + '</span></h4>' +
@@ -1090,7 +1090,7 @@ VISTAS.hoy = function(){
       itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && prox.length < 5) prox.push({ d:d, x:x }); });
     }
     if(cr.length || cs.length || ms.length || prox.length){
-      html += tituloSecc('Se viene 🎉', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>');
+      html += tituloSecc('Lo que viene', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>');
       if(cr.length) html += '<div class="regresivas mini regresivas-grandes">' + cr.map(function(x){
         var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
         return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '"><b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small><span>' + esc(x.e.t) + '</span></button>';
@@ -1134,7 +1134,7 @@ VISTAS.hoy = function(){
           '<span class="libro-barra" title="Lo que salió frente a lo que entró"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><small class="libro-pie">' + (ent ? 'Gastaste el ' + Math.round(sal / ent * 100) + '% de lo que entró' : 'Sin ingresos este mes') + '</small>'
          : '<span class="libro-pie">Aún no hay movimientos. Toca para anotar.</span>') + '</button>';
     }).join('');
-    html += tituloSecc('Tu plata 💰', '<small>' + cap(MESES[new Date().getMonth()]) + '</small>') +
+    html += tituloSecc('Tu plata', '<small>' + cap(MESES[new Date().getMonth()]) + '</small>') +
       '<section class="dinero-hoy dinero-abierto"><div class="libros-hoy">' + libros + '</div>' +
       (pp.length ? '<div class="pagos-hoy"><h4 class="sub-t">Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
       '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="personal">' + ico('i-plus') + 'Anotar gasto</button><button class="btn chico" data-ir="dinero">' + ico('i-grafica') + 'Ver el resumen</button><button class="btn chico" data-acc="ir-informes">' + ico('i-bajar') + 'PDF y Excel</button></div>' +
@@ -1144,7 +1144,7 @@ VISTAS.hoy = function(){
   /* ---- Notas fijadas ---- */
   var fijas = vivos('notas').filter(function(n){ return n.fija; });
   if(fijas.length && hoyVisible('notas')){
-    html += tituloSecc('📌 Para no olvidar') + '<div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div>';
+    html += tituloSecc('Fijadas') + '<div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div>';
   }
   html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
@@ -3233,10 +3233,10 @@ function cabSeccion(v){
      resumen debajo y, si hay avance, una línea fina con el porcentaje */
   var STICKER = { tareas:'✅', recordatorios:'🔔', listas:'🛒', notas:'📝', habitos:'🌱', metas:'🏆', proyectos:'📁', pagos:'🧾', diario:'📔', progreso:'📈',
                   calendario:'📅', dinero:'💰', foco:'🍅', revision:'🪞', ajustes:'⚙️', secciones:'🧩', papelera:'🗑️' };
-  return '<header class="cab-grande cab-sec" style="--sc:' + d.c + '">' + (STICKER[v] ? '<span class="cg-sticker">' + STICKER[v] + '</span>' : '<span class="cg-ico">' + ico(d.i) + '</span>') +
+  return '<header class="cab-grande cab-sec" style="--sc:' + d.c + '">' + '<span class="cg-ico">' + ico(d.i) + '</span>' +
     '<h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p>' +
     (d.p != null ? '<div class="cg-prog" title="' + esc(d.pt || '') + '"><i style="width:' + Math.round(Math.max(0, Math.min(1, d.p)) * 100) + '%"></i><b>' + Math.round(d.p * 100) + '%</b>' +
-      '<span><em class="animo-prog">' + (d.p >= 1 ? '¡Todo listo! 🎉' : d.p >= .7 ? '¡Ya casi! 🙌' : d.p >= .3 ? 'Vas muy bien 👍' : d.p > 0 ? 'Buen comienzo ✨' : '¡Tú puedes! 💪') + '</em> · ' + esc(d.pt || '') + '</span></div>' : '') + '</header>';
+      '<span><em class="animo-prog">' + (d.p >= 1 ? 'Misión cumplida' : d.p >= .7 ? 'Recta final' : d.p >= .3 ? 'Buen ritmo' : d.p > 0 ? 'En marcha' : 'A darle') + '</em> · ' + esc(d.pt || '') + '</span></div>' : '') + '</header>';
 }
 
 /* ==========================================================================
@@ -3950,7 +3950,7 @@ function fuenteLibro(cual){
   /* El libro se viste igual que la agenda: mismo logo, mismas tarjetas */
   var logo = getComputedStyle(document.documentElement).getPropertyValue('--logo').trim();
   var fuenteCss = window.FUENTE_AGENDA ? "@font-face{font-family:'Jakarta';src:url(" + window.FUENTE_AGENDA + ") format('woff2');font-weight:200 800}:root{--letra:'Jakarta',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important}body{font-family:var(--letra)!important}" : '';
-  if(window.SERIF_AGENDA) fuenteCss += "@font-face{font-family:'Fraunces';src:url(" + window.SERIF_AGENDA + ") format('woff2');font-weight:400 700}";
+  if(window.SERIF_AGENDA) fuenteCss += "@font-face{font-family:'Barlow Condensed';src:url(" + window.SERIF_AGENDA + ") format('woff2');font-weight:500 900}";
   cambia('</head>', '<style id="estilo-agenda">:root{--logo:' + logo + '}' + fuenteCss + varsAgenda() + ESTILO_LIBRO + '</style></head>');
   return s;
 }
@@ -3994,7 +3994,7 @@ var VARS_LIBRO = ['--papel','--hoja','--hoja-2','--tinta','--tinta-2','--tinta-3
 function varsAgenda(){
   var cs = getComputedStyle(document.documentElement);
   return ':root,:root[data-tema],:root[data-paleta],:root[data-paleta][data-tema]{' + VARS_LIBRO.map(function(v){ return v + ':' + cs.getPropertyValue(v).trim() + '!important'; }).join(';') +
-    ';--cifra:var(--letra)!important;--serif:\'Fraunces\',Georgia,serif;color-scheme:' + (document.documentElement.getAttribute('data-tema') === 'claro' ? 'light' : 'dark') + '}';
+    ';--cifra:var(--letra)!important;--serif:\'Barlow Condensed\',\'Arial Narrow\',sans-serif;color-scheme:' + (document.documentElement.getAttribute('data-tema') === 'claro' ? 'light' : 'dark') + '}';
 }
 function recargarCuentas(){
   Object.keys(marcos).forEach(function(k){ marcos[k].srcdoc = fuenteLibro(k) + '<!-- ' + Date.now() + ' -->'; });
@@ -4674,9 +4674,9 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'brasa',   nom:'Brasa',   gotas:['#F4A36C','#A6D38A','#1B1917'] },
+  { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },
-  { id:'ciruela', nom:'Ciruela', gotas:['#E48FC4','#A6D38A','#1D171F'] },
+  { id:'acero',   nom:'Acero',   gotas:['#62A8E5','#E0A43A','#15181B'] },
   { id:'grafito', nom:'Grafito', gotas:['#C8E06A','#8FD6A0','#191A19'] }
 ];
 function paletaValida(p){ return PALETAS.some(function(x){ return x.id === p; }) ? p : 'brasa'; }
