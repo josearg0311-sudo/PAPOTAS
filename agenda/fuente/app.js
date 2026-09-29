@@ -675,6 +675,10 @@ function hojaHistorialNav(){
   document.addEventListener('touchcancel', function(){ lado = 0; quitar_(); }, { passive:true });
 })();
 
+/* Al bajar, el título grande se va y aparece el pequeño de la barra */
+function marcarBajado(){ document.body.classList.toggle('bajado', (window.scrollY || 0) > 64); }
+window.addEventListener('scroll', function(){ marcarBajado(); }, { passive:true });
+
 function pintar(){
   olvidarDias();
   try{ pintarVista(); }
@@ -712,6 +716,8 @@ function pintarVista(){
   var html = sec && sec.esp ? VISTAS.espacio(sec.esp) : cabSeccion(v) + VISTAS[v]();
   var nueva = ui.antes !== v + (ui.lista || '');
   $('contenido').innerHTML = '<div class="' + (nueva ? 'vista' : '') + '">' + html + '</div>';
+  document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp'));
+  marcarBajado();
   ui.antes = v + (ui.lista || '');
   if(v === 'hoy' || v === 'tareas' || v === 'recordatorios') actualizarPista();
   tictac();
@@ -943,7 +949,7 @@ function tarjetaSiguiente(){
 }
 
 VISTAS.hoy = function(){
-  var hoy = hoyISO(), h = new Date().getHours();
+  var hoy = hoyISO(), ahora = new Date(), h = ahora.getHours();
   var saludo = h < 6 ? 'Buenas noches' : h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
   var emoji = h < 6 ? '🌙' : h < 12 ? '☀️' : h < 19 ? '🌤️' : '🌙';
   var nombre = db.perfil.nombre;
@@ -958,33 +964,42 @@ VISTAS.hoy = function(){
   var C = 2 * Math.PI * 30;
   var agenda = items.filter(function(i){ return i.tipo !== 'tarea'; });
   var pendPagos = pagosProximos(0).length;
+  var nAgenda = agenda.filter(function(i){ return i.tipo === 'evento' || i.tipo === 'clase'; }).length;
+  var nAvisos = agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length;
 
-  /* Saludo */
-  var html = '<section class="heroe heroe-hoy"><div class="arriba"><div class="saludo-hoy">' +
-      '<div class="fecha">' + cap(fechaLarga(hoy)) + '</div>' +
-      '<h2>' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' <span class="emoji">' + emoji + '</span></h2>' +
-      '<p class="frase">«' + esc(fraseDelDia()) + '»</p></div>' +
-      '<div class="anillo-hoy"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
+  /* ---- Portada: la fecha en grande, sin caja ---- */
+  var html = '<header class="portada-hoy heroe-hoy">' +
+    '<div class="ph-fecha"><span class="ph-num">' + ahora.getDate() + '</span>' +
+      '<span class="ph-dia"><b>' + cap(DIAS[ahora.getDay()]) + '</b><span>' + cap(MESES[ahora.getMonth()]) + ' ' + ahora.getFullYear() + '</span></span>' +
+      '<div class="anillo-hoy ph-anillo"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
         '<circle class="valor" cx="36" cy="36" r="30" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
-        '<span><b>' + hechas + '/' + tareasHoy.length + '</b>tareas</span></div>' +
+        '<span><b>' + hechas + '/' + tareasHoy.length + '</b>hechas</span></div>' +
     '</div>' +
-    '<div class="datos-hoy">' +
+    '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' <span class="emoji">' + emoji + '</span></h2>' +
+    '<p class="ph-frase">' + esc(fraseDelDia()) + '</p>' +
+    '<nav class="ph-cuentas datos-hoy" aria-label="Tu día en números">' +
       '<button data-ir="tareas"><b>' + (tareasHoy.length - hechas) + '</b><span>por hacer</span></button>' +
-      '<button data-ir="calendario"><b>' + agenda.filter(function(i){ return i.tipo === 'evento' || i.tipo === 'clase'; }).length + '</b><span>en agenda</span></button>' +
-      '<button data-ir="recordatorios"><b>' + agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length + '</b><span>avisos</span></button>' +
+      '<button data-ir="calendario"><b>' + nAgenda + '</b><span>en agenda</span></button>' +
+      '<button data-ir="recordatorios"><b>' + nAvisos + '</b><span>' + (nAvisos === 1 ? 'aviso' : 'avisos') + '</span></button>' +
       '<button data-ir="pagos"><b>' + pendPagos + '</b><span>por pagar</span></button>' +
-    '</div>' + barraDelDia() + '</section>';
+    '</nav>' + barraDelDia() + '</header>';
+
+  /* ---- Franja de la semana ---- */
+  var ini = inicioSemana(hoy);
+  html += '<div class="franja-semana semana-mini">' + [0,1,2,3,4,5,6].map(function(i){
+    var d = sumarDias(ini, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length;
+    return '<button type="button" class="' + (d === hoy ? 'hoy' : '') + (d < hoy ? ' pasado' : '') + '" data-acc="ir-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b>' +
+      '<span class="puntos">' + '<i></i>'.repeat(Math.min(n, 4)) + '</span></button>';
+  }).join('') + '</div>';
 
   if(!total && !nombre){
-    html += '<div class="tarjeta" style="margin-bottom:16px"><div class="tarjeta-cuerpo" style="padding:18px 16px">' +
-      '<b style="font-family:var(--serif);font-size:21px;font-weight:560;display:block;margin-bottom:6px">Bienvenido a tu agenda 👋</b>' +
-      '<p style="margin:0 0 12px;color:var(--tinta-2);font-size:13.5px">Tareas, listas, calendario, recordatorios que suenan, hábitos, metas, diario, pagos, notas y tu libro de cuentas: todo en un solo sitio y solo para ti. ¿Cómo te llamas?</p>' +
+    html += '<section class="bienvenida-hoy"><h3>Bienvenido a tu agenda 👋</h3>' +
+      '<p>Tareas, listas, calendario, recordatorios que suenan, hábitos, metas, diario, pagos, notas y tu libro de cuentas: todo en un solo sitio y solo para ti. ¿Cómo te llamas?</p>' +
       '<form data-acc="bienvenida" class="captura" style="margin:0 0 10px"><input id="nombreBienvenida" type="text" maxlength="40" placeholder="Tu nombre"><button class="btn primario chico" type="submit">Empezar</button></form>' +
-      '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button>' +
-    '</div></div>';
+      '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button></section>';
   }
 
-  html += captura(['tarea','rec','evento','nota'], 'Añade algo… (Enter para guardar) · usa #estudios #oficina #deporte');
+  html += '<div class="captura-hoy">' + captura(['tarea','rec','evento','nota'], 'Añade algo… (Enter para guardar) · usa #estudios #oficina #deporte') + '</div>';
 
   var wdR = deISO(hoy).getDay();
   if(wdR === 0 || wdR === 1){
@@ -996,81 +1011,76 @@ VISTAS.hoy = function(){
     }
   }
 
-  /* ---- Tus espacios ---- */
-  if(hoyVisible('espacios')){
-    html += tituloSecc('Tus espacios') + '<div class="espacios-hoy">' + ESPACIOS.map(function(E){
-      var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
-      var prox = agendaEsp(E.id, 7).filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
-      var ini = inicioSemana(hoy), fin = sumarDias(ini, 6);
-      var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= ini && t.fecha <= fin || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= ini); });
-      var hh = ts.filter(function(t){ return t.hecha; }).length;
-      return '<button type="button" class="esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
-        '<span class="esp-tile-cab"><span class="esp-em">' + E.em + '</span><b>' + E.nom + '</b>' + (pend ? '<span class="esp-num" title="Tareas para hoy">' + pend + '</span>' : '') + '</span>' +
-        '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
-        '<span class="esp-semana"><i style="width:' + (ts.length ? hh / ts.length * 100 : 0) + '%"></i></span>' +
-        '<small class="esp-semana-t">' + (ts.length ? hh + ' de ' + ts.length + ' tareas de la semana' : 'Sin tareas esta semana') + '</small></button>';
-    }).join('') + '</div>';
-  }
-
-  /* ---- Ahora: lo siguiente, el día y el enfoque ---- */
+  /* ---- Ahora: lo siguiente en grande y el día como una línea de tiempo ---- */
   if(hoyVisible('ahora')){
-    var ini = inicioSemana(hoy);
-    var semana = '<div class="semana-mini">' + [0,1,2,3,4,5,6].map(function(i){
-      var d = sumarDias(ini, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length;
-      return '<button type="button" class="' + (d === hoy ? 'hoy' : '') + (d < hoy ? ' pasado' : '') + '" data-acc="ir-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b>' +
-        '<span class="puntos">' + '<i></i>'.repeat(Math.min(n, 3)) + '</span></button>';
-    }).join('') + '</div>';
-    var enf = buscarId('enfoque', hoy), ei = (enf && !enf.del && enf.items) || [];
     html += tituloSecc('Ahora', '<span class="hora-viva" id="horaViva">' + horaAhora() + '</span>') +
-      '<div class="rejilla bloque-ahora">' +
-        '<div class="col-ahora">' + tarjetaSiguiente() +
-          '<section class="tarjeta">' + cabTarjeta('i-diana', 'Enfoque de hoy', 'var(--haber)') +
-            '<p class="explica" style="margin:0 16px 6px">Las tres cosas que harían de hoy un buen día.</p>' +
-            '<div class="enfoque">' + [0,1,2].map(function(i){
-              var x = ei[i] || { t:'', ok:false };
-              return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
-                '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
-                casilla('enfoque-ok', String(i), x.ok, 'var(--haber)', true) + '</label>';
-            }).join('') + '</div></section>' +
-        '</div>' +
-        '<section class="tarjeta tu-dia">' + cabTarjeta('i-cal', 'Tu día', 'var(--verde)', 'Calendario', 'data-ir="calendario"') + semana +
-          (agenda.length ? lineaDelDia(agenda) : '<div class="vacio" style="padding-top:4px">Sin eventos, avisos ni pagos hoy.</div>') +
-        '</section>' +
-      '</div>';
+      '<div class="bloque-ahora">' + tarjetaSiguiente() + '</div>' +
+      tituloSecc('Tu día', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>') +
+      '<section class="dia-abierto tu-dia">' + (agenda.length ? lineaDelDia(agenda) : '<p class="nada">Sin eventos, avisos ni pagos hoy. 🌿</p>') + '</section>';
   }
 
-  /* ---- Por hacer: tareas y bienestar ---- */
+  /* ---- Por hacer: una lista abierta, sin caja ---- */
   if(hoyVisible('hacer')){
     var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
     var atrasadas = pend.filter(function(t){ return t.fecha < hoy; }).length;
+    html += tituloSecc('Por hacer' + (pend.length ? ' <span class="n">' + pend.length + '</span>' : ''), '<button class="ver-link" data-ir="tareas">Todas ' + ico('i-der') + '</button>') +
+      '<section class="lista-abierta">' +
+        (pend.length ? '<div class="lista-filas">' + pend.slice(0, 8).map(filaTarea).join('') + '</div>' +
+           (pend.length > 8 ? '<button class="ver-mas" data-ir="tareas">Ver ' + (pend.length - 8) + ' más</button>' : '') +
+           (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
+         : '<p class="nada">✅ Nada pendiente para hoy. Añade algo arriba o disfruta el día.</p>') +
+      '</section>';
+
+    /* Enfoque: tres números grandes */
+    var enf = buscarId('enfoque', hoy), ei = (enf && !enf.del && enf.items) || [];
+    html += tituloSecc('Tus tres de hoy') + '<section class="enfoque-grande enfoque">' + [0,1,2].map(function(i){
+      var x = ei[i] || { t:'', ok:false };
+      return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
+        '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
+        casilla('enfoque-ok', String(i), x.ok, 'var(--haber)', true) + '</label>';
+    }).join('') + '</section>';
+  }
+
+  /* ---- Tus espacios: carrusel de tarjetas altas ---- */
+  if(hoyVisible('espacios')){
+    html += tituloSecc('Tus espacios') + '<div class="espacios-carrusel espacios-hoy">' + ESPACIOS.map(function(E){
+      var pendE = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
+      var prox = agendaEsp(E.id, 7).filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
+      var iniS = inicioSemana(hoy), finS = sumarDias(iniS, 6);
+      var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= iniS && t.fecha <= finS || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= iniS); });
+      var hh = ts.filter(function(t){ return t.hecha; }).length;
+      return '<button type="button" class="esp-tile esp-alta" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
+        '<span class="esp-em">' + E.em + '</span>' +
+        '<b class="esp-nom">' + E.nom + '</b>' +
+        '<span class="esp-big">' + pendE + '<small>' + (pendE === 1 ? 'tarea hoy' : 'tareas hoy') + '</small></span>' +
+        '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
+        '<span class="esp-semana"><i style="width:' + (ts.length ? hh / ts.length * 100 : 0) + '%"></i></span></button>';
+    }).join('') + '</div>';
+  }
+
+  /* ---- Bienestar: ánimo, hábitos y agua en un panel ---- */
+  if(hoyVisible('hacer')){
     var wd = new Date().getDay();
     var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
     var habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
     var dia = buscarId('diario', hoy), an = dia && !dia.del ? dia.animo : 0, bi = bienestar(hoy);
-    html += tituloSecc('Por hacer') + '<div class="rejilla dos">' +
-      '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Tareas para hoy' + (pend.length ? ' <span class="cab-num">' + pend.length + '</span>' : ''), 'var(--azul)', 'Todas', 'data-ir="tareas"') +
-        (pend.length ? '<div class="lista-filas">' + pend.slice(0, 7).map(filaTarea).join('') + '</div>' +
-           (pend.length > 7 ? '<button class="ver-mas" data-ir="tareas">Ver ' + (pend.length - 7) + ' más</button>' : '') +
-           (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
-         : vacio('✅', 'Nada pendiente para hoy', 'Añade una arriba o disfruta el día.')) + '</section>' +
-      '<section class="tarjeta">' + cabTarjeta('i-habitos', 'Tu bienestar hoy', 'var(--oro)', 'Diario', 'data-ir="diario"') +
-        '<div class="tarjeta-cuerpo bienestar-hoy">' +
-          '<h4>¿Cómo te sientes?</h4>' + animosHTML(an, hoy) +
-          '<h4>Hábitos <span>' + habOk + ' de ' + hab.length + '</span></h4>' +
+    html += tituloSecc('Cómo vas', '<button class="ver-link" data-ir="diario">Diario ' + ico('i-der') + '</button>') +
+      '<section class="panel-bienestar bienestar-hoy">' +
+        '<div class="pb-bloque"><h4>¿Cómo te sientes?</h4>' + animosHTML(an, hoy) + '</div>' +
+        '<div class="pb-bloque"><h4>Hábitos <span>' + habOk + ' de ' + hab.length + '</span></h4>' +
           (hab.length ? '<div class="chips-habito" style="padding:0">' + hab.map(function(x){
             var ok = x.marcas && x.marcas[hoy];
             return '<button type="button" class="chip-habito" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + !!ok + '"><span class="em">' + esc(x.em || '⭐') + '</span>' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>';
-          }).join('') + '</div>' : '<button class="btn chico" data-ir="habitos">' + ico('i-plus') + 'Crear un hábito</button>') +
-          '<h4>Agua <span>' + bi.agua + ' de ' + META_AGUA + ' vasos</span></h4>' +
+          }).join('') + '</div>' : '<button class="btn chico" data-ir="habitos">' + ico('i-plus') + 'Crear un hábito</button>') + '</div>' +
+        '<div class="pb-bloque"><h4>Agua <span>' + bi.agua + ' de ' + META_AGUA + ' vasos</span></h4>' +
           '<div class="agua-mini">' + Array.apply(null, Array(META_AGUA)).map(function(_, i){
             return '<button type="button" class="' + (i < bi.agua ? 'lleno' : '') + '" data-acc="agua" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' vasos">' + ico('i-gota') + '</button>';
-          }).join('') + '</div>' +
-          (dia && dia.texto ? '<p class="diario-hoy">«' + esc(dia.texto.slice(0, 140)) + (dia.texto.length > 140 ? '…' : '') + '»</p>' : '') +
-        '</div></section>' +
-    '</div>';
+          }).join('') + '</div></div>' +
+        (dia && dia.texto ? '<p class="diario-hoy">«' + esc(dia.texto.slice(0, 140)) + (dia.texto.length > 140 ? '…' : '') + '»</p>' : '') +
+      '</section>';
   }
 
-  /* ---- Lo que se viene: cuentas atrás, cumpleaños y metas ---- */
+  /* ---- Lo que se viene: cuentas atrás arriba, luego los próximos días ---- */
   if(hoyVisible('viene')){
     var cr = cuentasRegresivas().slice(0, 4), cs = proximosCumples(30).slice(0, 4);
     var ms = vivos('metas').filter(function(m){ return !m.archivada; }).slice(0, 4);
@@ -1080,34 +1090,34 @@ VISTAS.hoy = function(){
       itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && prox.length < 5) prox.push({ d:d, x:x }); });
     }
     if(cr.length || cs.length || ms.length || prox.length){
-      html += tituloSecc('Lo que se viene') + '<div class="rejilla dos">' +
-        '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Próximos días', 'var(--azul)', 'Calendario', 'data-ir="calendario"') +
-          (cr.length ? '<div class="regresivas mini">' + cr.map(function(x){
-            var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
-            return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '"><b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small><span>' + esc(x.e.t) + '</span></button>';
-          }).join('') + '</div>' : '') +
-          (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
-            var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
-            return '<div class="fila"><span class="hora" style="width:62px">' + cap(relativo(p.d)).slice(0, 9) + (p.x.hora ? '<br>' + p.x.hora : '') + '</span><span class="barrita" style="--c:' + p.x.c + '"></span>' +
-              '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div><div class="meta"><span>' + ({ evento:(TIPOS_EV[p.x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', pago:'Pago' }[p.x.tipo] || '') + '</span>' + (p.x.esp ? chipEsp({ esp:p.x.esp }) : '') + '</div></div></div>';
-          }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Nada agendado los próximos 7 días.</div>') + '</section>' +
-        '<section class="tarjeta">' + cabTarjeta('i-meta', 'Metas y fechas', 'var(--oro)', 'Metas', 'data-ir="metas"') +
+      html += tituloSecc('Lo que se viene', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>');
+      if(cr.length) html += '<div class="regresivas mini regresivas-grandes">' + cr.map(function(x){
+        var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
+        return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '"><b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small><span>' + esc(x.e.t) + '</span></button>';
+      }).join('') + '</div>';
+      html += '<div class="rejilla dos viene-rejilla">';
+      html += '<section class="lista-abierta proximos-abiertos"><h4 class="sub-t">Próximos días</h4>' + (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
+          var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
+          return '<div class="fila"><span class="hora" style="width:62px">' + cap(relativo(p.d)).slice(0, 9) + (p.x.hora ? '<br>' + p.x.hora : '') + '</span><span class="barrita" style="--c:' + p.x.c + '"></span>' +
+            '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div><div class="meta"><span>' + ({ evento:(TIPOS_EV[p.x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', pago:'Pago' }[p.x.tipo] || '') + '</span>' + (p.x.esp ? chipEsp({ esp:p.x.esp }) : '') + '</div></div></div>';
+        }).join('') + '</div>' : '<p class="nada">Nada agendado los próximos 7 días.</p>') + '</section>';
+      html += '<section class="lista-abierta"><h4 class="sub-t">Metas y fechas <button class="ver-link" data-ir="metas">Metas ' + ico('i-der') + '</button></h4>' +
           (ms.length ? '<div class="metas-hoy">' + ms.map(function(m){
             var p = Math.min(1, (+m.actual || 0) / (+m.objetivo || 1));
             return '<div class="barra-h" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px"><span>' + esc((m.em || '🎯') + ' ' + m.t) + '</span>' +
               '<div class="barra-prog" style="--c:' + color(m.color) + '"><i style="width:' + Math.round(p * 100) + '%"></i></div><b>' + Math.round(p * 100) + '%</b></div>';
-          }).join('') + '</div>' : '<div class="vacio" style="padding:4px 16px 8px">Sin metas activas. <button class="btn chico" data-ir="metas">Crear una</button></div>') +
+          }).join('') + '</div>' : '<p class="nada">Sin metas activas. <button class="btn chico" data-ir="metas">Crear una</button></p>') +
           (cs.length ? '<div class="lista-filas cumples-hoy">' + cs.map(function(c){
             var edad = edadCumple(c.e, c.dia);
             return '<div class="fila"><span class="em-fila">🎂</span><div class="cuerpo" data-acc="evento-ed" data-id="' + c.e.id + '"><div class="titulo">' + esc(c.e.t) + '</div>' +
               '<div class="meta"><span class="' + (c.en === 0 ? 'hoy' : '') + '">' + (c.en === 0 ? '¡Hoy!' : c.en === 1 ? 'Mañana' : 'En ' + c.en + ' días') + ' · ' + fechaCorta(c.dia) + '</span>' +
               (edad > 0 ? '<span class="cumple">cumple ' + edad + '</span>' : '') + '</div></div></div>';
-          }).join('') + '</div>' : '') + '</section>' +
-      '</div>';
+          }).join('') + '</div>' : '') + '</section>';
+      html += '</div>';
     }
   }
 
-  /* ---- Dinero: los dos libros y los pagos, en una tarjeta ---- */
+  /* ---- Dinero: los dos libros lado a lado y los pagos ---- */
   if(hoyVisible('dinero')){
     var mes = hoy.slice(0, 7), pp = pagosProximos(7);
     var libros = [['personal', CLAVE_LEDGER, '🏠 Personal'], ['oficina', CLAVE_OFICINA, '💼 Oficina']].map(function(L){
@@ -1118,14 +1128,15 @@ VISTAS.hoy = function(){
         if(t.date.slice(0, 7) === mes){ if(sg < 0) sal += a; else ent += a; }
       });
       var p = ent ? Math.min(1, sal / ent) : (sal ? 1 : 0);
-      return '<button type="button" class="libro-hoy" data-acc="din-ver" data-v="' + L[0] + '"><span class="libro-cab"><b>' + L[2] + '</b><em>Saldo ' + dinero(tot) + '</em></span>' +
+      return '<button type="button" class="libro-hoy" data-acc="din-ver" data-v="' + L[0] + '"><span class="libro-cab"><b>' + L[2] + '</b></span>' +
+        '<span class="libro-saldo">' + dinero(tot) + '</span>' +
         (n ? '<span class="libro-num"><span class="entra"><small>Entró</small>' + dinero(ent) + '</span><span class="sale"><small>Salió</small>' + dinero(sal) + '</span></span>' +
           '<span class="libro-barra" title="Lo que salió frente a lo que entró"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><small class="libro-pie">' + (ent ? 'Gastaste el ' + Math.round(sal / ent * 100) + '% de lo que entró' : 'Sin ingresos este mes') + '</small>'
          : '<span class="libro-pie">Aún no hay movimientos. Toca para anotar.</span>') + '</button>';
     }).join('');
     html += tituloSecc('Dinero', '<small>' + cap(MESES[new Date().getMonth()]) + '</small>') +
-      '<section class="tarjeta ancho-2 dinero-hoy"><div class="libros-hoy">' + libros + '</div>' +
-      (pp.length ? '<div class="pagos-hoy"><h4>' + ico('i-recibo') + 'Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
+      '<section class="dinero-hoy dinero-abierto"><div class="libros-hoy">' + libros + '</div>' +
+      (pp.length ? '<div class="pagos-hoy"><h4 class="sub-t">Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
       '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="personal">' + ico('i-plus') + 'Anotar gasto</button><button class="btn chico" data-ir="dinero">' + ico('i-grafica') + 'Ver el resumen</button><button class="btn chico" data-acc="ir-informes">' + ico('i-bajar') + 'PDF y Excel</button></div>' +
       '</section>';
   }
@@ -1133,7 +1144,7 @@ VISTAS.hoy = function(){
   /* ---- Notas fijadas ---- */
   var fijas = vivos('notas').filter(function(n){ return n.fija; });
   if(fijas.length && hoyVisible('notas')){
-    html += tituloSecc('Notas fijadas') + '<section class="tarjeta"><div class="tarjeta-cuerpo" style="padding-top:14px"><div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div></div></section>';
+    html += tituloSecc('Notas fijadas') + '<div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div>';
   }
   html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
@@ -1422,16 +1433,17 @@ VISTAS.espacio = function(id){
   var hoyItems = ag7.filter(function(a){ return a.d === hoy && a.x.tipo !== 'tarea'; });
   var din = dineroEsp(id), tm = totalesMes(din.lista, ym);
 
-  var html = '<div class="cambia-esp">' + ESPACIOS.map(function(e){
-    return '<button type="button" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '"><span>' + e.em + '</span>' + e.nom + '</button>';
-  }).join('') + '</div>';
-
+  /* Portada del espacio: una franja de su color a todo lo ancho, el
+     nombre en grande y los otros espacios como círculos para saltar */
   var prox = ag7.filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
-  html += '<section class="heroe esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' + DECO_ESP[id] + '<div class="arriba"><div>' +
-      '<div class="fecha">' + E.em + ' ' + cap(fechaLarga(hoy)) + '</div>' +
-      '<h2>' + E.nom + '</h2><p class="frase" style="font-style:normal">' +
-      (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p></div></div>' +
-    '<div class="datos">' + datosHeroe(id) + '</div></section>';
+  var html = '<header class="portada-esp esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' +
+    '<nav class="pe-cambia cambia-esp" aria-label="Espacios">' + ESPACIOS.map(function(e){
+      return '<button type="button" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '" aria-label="' + e.nom + '"><span>' + e.em + '</span></button>';
+    }).join('') + '</nav>' +
+    '<span class="pe-em">' + E.em + '</span>' +
+    '<h2 class="pe-nom">' + E.nom + '</h2>' +
+    '<p class="pe-lema">' + (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p>' +
+    '<div class="pe-datos datos">' + datosHeroe(id) + '</div></header>';
 
   var tab = tabEsp(id);
   html += pestanasEsp(id);
@@ -3005,8 +3017,7 @@ function limpiar(k){
 
 VISTAS.secciones = function(){
   var AB = barraAbajo(), todas = navSecs(true);
-  var html = '<section class="cab-sec" style="--sc:var(--verde)"><span class="cab-sec-ico">' + ico('i-espacios') + '</span><div class="cab-sec-txt"><b>Administrar secciones</b><small>' +
-    todas.filter(function(s){ return !secOculta(s.id); }).length + ' de ' + todas.length + ' a la vista · ordénalas, ocúltalas y elige tu barra</small></div></section>';
+  var html = '';
 
   /* La barra de abajo del celular */
   var cand = [{ id:'espacios', nom:'Espacios', ico:'i-espacios' }].concat(SECCIONES.filter(function(s){ return !s.oculta && !s.esp; }));
@@ -3197,11 +3208,32 @@ function cabSeccion(v){
       d = { c:'var(--rosa)', i:'i-diario', t:'Diario', s:ents.length + (ents.length === 1 ? ' día escrito' : ' días escritos') + ' este mes' + (media ? ' · ánimo medio ' + ['😢','😕','😐','🙂','😄'][Math.round(media) - 1] : '') };
     } else if(v === 'progreso'){
       d = { c:'var(--haber)', i:'i-grafica', t:'Progreso', s:'Cómo vas en tareas, hábitos, enfoque y ánimo' };
+    } else if(v === 'calendario'){
+      var fin7 = sumarDias(hoy, 6), ne = 0;
+      for(var ci = 0; ci < 7; ci++) ne += itemsDelDia(sumarDias(hoy, ci)).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
+      d = { c:'var(--azul)', i:'i-cal', t:'Calendario', s:ne + (ne === 1 ? ' cosa agendada' : ' cosas agendadas') + ' en los próximos 7 días' + (feriado(hoy) ? ' · hoy es feriado 🇵🇪' : '') };
+    } else if(v === 'dinero'){
+      d = { c:'var(--haber)', i:'i-grafica', t:'Dinero', s:'Tus gastos personales y la oficina, de un vistazo' };
+    } else if(v === 'foco'){
+      d = { c:'var(--debe)', i:'i-reloj', t:'Enfoque', s:'Trabaja por bloques y descansa entre medio' };
+    } else if(v === 'revision'){
+      d = { c:'var(--verde)', i:'i-check', t:'Revisión semanal', s:'Mira cómo te fue y elige lo importante de la próxima semana' };
+    } else if(v === 'ajustes'){
+      d = { c:'var(--tinta-2)', i:'i-ajustes', t:'Ajustes', s:'Tu nombre, apariencia, avisos, nube y respaldos' };
+    } else if(v === 'secciones'){
+      var tv = navSecs(true);
+      d = { c:'var(--verde)', i:'i-espacios', t:'Secciones', s:tv.filter(function(x){ return !secOculta(x.id); }).length + ' de ' + tv.length + ' a la vista · ordénalas, ocúltalas y elige tu barra' };
+    } else if(v === 'papelera'){
+      var np = enPapelera().length;
+      d = { c:'var(--debe)', i:'i-basura', t:'Papelera', s:np ? np + (np === 1 ? ' cosa' : ' cosas') + ' para recuperar · se borran solas a los ' + DIAS_PAPELERA + ' días' : 'Vacía' };
     }
   }catch(e){ d = null; }
   if(!d) return '';
-  return '<section class="cab-sec" style="--sc:' + d.c + '"><span class="cab-sec-ico">' + ico(d.i) + '</span><div class="cab-sec-txt"><b>' + d.t + '</b><small>' + d.s + '</small></div>' +
-    (d.p != null ? '<div class="cab-sec-prog" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') + '</section>';
+  /* Título grande y abierto, sin caja: el color de la sección arriba, el
+     resumen debajo y, si hay avance, una línea fina con el porcentaje */
+  return '<header class="cab-grande cab-sec" style="--sc:' + d.c + '"><span class="cg-ico">' + ico(d.i) + '</span>' +
+    '<h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p>' +
+    (d.p != null ? '<div class="cg-prog" title="' + esc(d.pt || '') + '"><i style="width:' + Math.round(Math.max(0, Math.min(1, d.p)) * 100) + '%"></i><b>' + Math.round(d.p * 100) + '%</b><span>' + esc(d.pt || '') + '</span></div>' : '') + '</header>';
 }
 
 /* ==========================================================================
@@ -3296,23 +3328,27 @@ VISTAS.tareas = function(){
     return html + '<div class="tarjeta">' + vacio(txt[0], txt[1], txt[2]) + '</div>';
   }
 
+  /* Como una agenda de papel: cada grupo con su fecha grande a la izquierda */
   var grupos = [], idx = {};
-  function meter(clave, titulo, rojo, t){
-    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[] }); }
+  function meter(clave, titulo, rojo, t, num, sub){
+    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[], num:num, sub:sub, hoy:clave === 'b' }); }
     grupos[idx[clave]].l.push(t);
   }
   lista.forEach(function(t){
-    if(!t.fecha) meter('z', 'Sin fecha', false, t);
-    else if(t.fecha < hoy) meter('a', 'Atrasadas', true, t);
-    else if(t.fecha === hoy) meter('b', 'Hoy', false, t);
-    else if(t.fecha <= fin7) meter('c' + t.fecha, cap(relativo(t.fecha)) + ' · ' + fechaCorta(t.fecha), false, t);
-    else meter('y' + t.fecha.slice(0, 7), cap(MESES[deISO(t.fecha).getMonth()]) + ' ' + t.fecha.slice(0, 4), false, t);
+    var f = t.fecha && deISO(t.fecha);
+    if(!t.fecha) meter('z', 'Sin fecha', false, t, '∞', 'algún día');
+    else if(t.fecha < hoy) meter('a', 'Atrasadas', true, t, '!', 'pendiente');
+    else if(t.fecha === hoy) meter('b', 'Hoy', false, t, f.getDate(), DIAS3[f.getDay()]);
+    else if(t.fecha <= fin7) meter('c' + t.fecha, cap(relativo(t.fecha)), false, t, f.getDate(), DIAS3[f.getDay()]);
+    else meter('y' + t.fecha.slice(0, 7), cap(MESES[f.getMonth()]) + ' ' + t.fecha.slice(0, 4), false, t, MESES3[f.getMonth()], t.fecha.slice(0, 4));
   });
-  return html + grupos.map(function(g){
-    return '<div class="seccion-tit' + (g.rojo ? ' rojo' : '') + '">' + g.t + ' <span class="n">' + g.l.length + '</span>' +
-      (g.rojo ? '<button class="btn chico" style="margin-left:auto;text-transform:none;letter-spacing:0" data-acc="t-atrasadas-hoy">Pasar a hoy</button>' : '') + '</div>' +
-      '<div class="tarjeta"><div class="lista-filas">' + g.l.map(filaTarea).join('') + '</div></div>';
-  }).join('');
+  return html + '<div class="planner">' + grupos.map(function(g){
+    return '<section class="pl-dia' + (g.rojo ? ' rojo' : '') + (g.hoy ? ' es-hoy' : '') + '">' +
+      '<div class="pl-fecha"><b>' + g.num + '</b><span>' + g.sub + '</span></div>' +
+      '<div class="pl-cuerpo"><h3 class="pl-tit">' + g.t + ' <span class="n">' + g.l.length + '</span>' +
+        (g.rojo ? '<button class="btn chico" data-acc="t-atrasadas-hoy">Pasar a hoy</button>' : '') + '</h3>' +
+        '<div class="lista-filas">' + g.l.map(filaTarea).join('') + '</div></div></section>';
+  }).join('') + '</div>';
 };
 
 /* ---------- Calendario ---------------------------------------------------- */
@@ -3604,16 +3640,18 @@ function importarICS(archivo){
 function filaRec(r){
   var hecho = r.hecho && (!r.rep || r.rep === 'no');
   var m = momentoR(r), f = m.slice(0, 10), h = m.slice(11, 16);
-  return '<div class="fila' + (hecho ? ' hecha' : '') + '" data-fila="' + r.id + '">' +
-    casilla('rec-ok', r.id, hecho, 'var(--oro)') +
+  var tarde = !hecho && m <= hoyISO() + 'T' + horaAhora();
+  return '<div class="fila fila-rec' + (hecho ? ' hecha' : '') + (tarde ? ' tarde' : '') + '" data-fila="' + r.id + '">' +
+    '<div class="rec-hora" data-acc="rec-ed" data-id="' + r.id + '"><b>' + (h || '—') + '</b><span>' + (f === hoyISO() ? 'hoy' : relativo(f).toLowerCase().slice(0, 12)) + '</span></div>' +
     '<div class="cuerpo" data-acc="rec-ed" data-id="' + r.id + '">' +
       '<div class="titulo">' + esc(r.t) + '</div>' +
-      '<div class="meta">' + metaFecha(f, h, hecho) +
+      '<div class="meta">' + (f !== hoyISO() ? '<span>' + fechaCorta(f) + '</span>' : '') +
         (r.rep && r.rep !== 'no' ? '<span>' + ico('i-rep') + REPS_CORTO[r.rep] + '</span>' : '') +
         (r.pospuesto ? '<span>' + ico('i-dormir') + 'pospuesto</span>' : '') +
       '</div>' +
     '</div>' +
-    (!hecho ? '<div class="lado"><button class="btn-icono" data-acc="rec-posponer" data-id="' + r.id + '" title="Posponer" aria-label="Posponer">' + ico('i-dormir') + '</button></div>' : '') +
+    '<div class="lado">' + (!hecho ? '<button class="btn-icono" data-acc="rec-posponer" data-id="' + r.id + '" title="Posponer" aria-label="Posponer">' + ico('i-dormir') + '</button>' : '') +
+      casilla('rec-ok', r.id, hecho, 'var(--oro)') + '</div>' +
   '</div>';
 }
 
@@ -3640,8 +3678,8 @@ VISTAS.recordatorios = function(){
   if(!pend.length && !hechos.length) return html + '<div class="tarjeta">' + vacio('🔔', 'Sin recordatorios', 'Escribe arriba qué y cuándo, y la agenda te avisa.') + '</div>';
   function bloque(t, l, rojo){
     if(!l.length) return '';
-    return '<div class="seccion-tit' + (rojo ? ' rojo' : '') + '">' + t + ' <span class="n">' + l.length + '</span></div>' +
-      '<div class="tarjeta"><div class="lista-filas">' + l.map(filaRec).join('') + '</div></div>';
+    return '<section class="rec-bloque' + (rojo ? ' rojo' : '') + '"><h3 class="seccion-tit' + (rojo ? ' rojo' : '') + '">' + t + ' <span class="n">' + l.length + '</span></h3>' +
+      '<div class="lista-filas rec-lista">' + l.map(filaRec).join('') + '</div></section>';
   }
   html += bloque('Pasados sin marcar', venc, true) + bloque('Hoy', hoyL) + bloque('Próximos', prox);
   if(!pend.length) html += '<div class="tarjeta">' + vacio('✨', 'Todo al día') + '</div>';
@@ -3666,21 +3704,18 @@ VISTAS.listas = function(){
     var items = l.items || [];
     var ok = items.filter(function(x){ return x.ok; }).length;
     var orden = items.filter(function(x){ return !x.ok; }).concat(items.filter(function(x){ return x.ok; }));
-    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">' +
-        '<button class="btn chico" data-acc="lista-volver">' + ico('i-izq') + 'Listas</button>' +
-        '<div style="flex:1"></div>' +
-        '<button class="btn-icono" data-acc="lista-ed" data-id="' + l.id + '" title="Editar lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button>' +
-      '</div>' +
-      '<div class="tarjeta" style="--c:' + color(l.color) + '">' +
-        '<div class="tarjeta-cuerpo" style="padding:16px">' +
-          '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="font-size:28px">' + esc(l.em || '📝') + '</span>' +
-          '<div style="flex:1;min-width:0"><b style="font-size:18px;display:block">' + esc(l.nombre) + '</b><small style="color:var(--tinta-3)">' + ok + ' de ' + items.length + ' marcados</small></div></div>' +
-          '<div class="barra-prog"><i style="width:' + (items.length ? ok / items.length * 100 : 0) + '%"></i></div>' +
-        '</div>' +
-        '<form class="captura" data-acc="item-nuevo" style="margin:0 12px 10px;box-shadow:none" autocomplete="off">' +
+    var pl = items.length ? ok / items.length : 0, CL = 2 * Math.PI * 22;
+    return '<div class="hoja-lista" style="--c:' + color(l.color) + '">' +
+        '<div class="hl-barra"><button class="btn chico" data-acc="lista-volver">' + ico('i-izq') + 'Listas</button>' +
+          '<button class="btn-icono" data-acc="lista-ed" data-id="' + l.id + '" title="Editar lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button></div>' +
+        '<header class="hl-cab"><span class="hl-em">' + esc(l.em || '📝') + '</span>' +
+          '<div class="hl-txt"><h2>' + esc(l.nombre) + '</h2><p>' + (items.length ? (items.length - ok) + ' por marcar · ' + ok + ' de ' + items.length + ' listos' : 'Todavía vacía') + '</p></div>' +
+          '<svg class="hl-anillo" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" class="f"/><circle cx="26" cy="26" r="22" class="v" stroke-dasharray="' + CL.toFixed(1) + '" stroke-dashoffset="' + (CL * (1 - pl)).toFixed(1) + '"/><text x="26" y="30" text-anchor="middle">' + Math.round(pl * 100) + '%</text></svg>' +
+        '</header>' +
+        '<form class="captura hl-captura" data-acc="item-nuevo" autocomplete="off">' +
           '<input id="nuevoItem" type="text" maxlength="160" placeholder="Añadir a la lista… (Enter)" enterkeyhint="enter">' +
           '<button type="submit" class="btn primario chico">' + ico('i-plus') + '</button></form>' +
-        (orden.length ? '<div class="lista-filas" style="border-top:1px solid var(--regla-2)">' + orden.map(function(x){
+        (orden.length ? '<div class="lista-filas hl-renglones">' + orden.map(function(x){
           return '<div class="item-lista' + (x.ok ? ' ok' : '') + '">' + casilla('item-ok', x.id, x.ok, color(l.color), true) +
             '<span class="t" data-acc="item-ed" data-id="' + x.id + '">' + esc(x.t) + '</span>' +
             '<button class="btn-icono" data-acc="item-quitar" data-id="' + x.id + '" aria-label="Quitar">' + ico('i-x') + '</button></div>';
@@ -3694,14 +3729,20 @@ VISTAS.listas = function(){
   var ls = vivos('listas').sort(function(a, b){ return (a.creada || 0) - (b.creada || 0); });
   return '<div class="listas-rejilla">' + ls.map(function(x){
       var its = x.items || [], ok2 = its.filter(function(i){ return i.ok; }).length;
-      return '<button type="button" class="tarjeta tarjeta-lista" style="--c:' + color(x.color) + '" data-acc="lista-abrir" data-id="' + x.id + '">' +
-        '<div class="cab"><span class="em">' + esc(x.em || '📝') + '</span><div style="min-width:0"><b>' + esc(x.nombre) + '</b>' +
-        '<small>' + (its.length ? (its.length - ok2) + ' por marcar · ' + its.length + ' en total' : 'Vacía') + '</small></div></div>' +
-        '<div class="barra-prog"><i style="width:' + (its.length ? ok2 / its.length * 100 : 0) + '%"></i></div>' +
+      /* Una tapa de libreta: su color arriba, lo primero que falta a la vista */
+      var pl = its.length ? ok2 / its.length : 0, CL = 2 * Math.PI * 15;
+      var faltan = its.filter(function(i){ return !i.ok; }).slice(0, 3);
+      return '<button type="button" class="tarjeta tarjeta-lista libreta" style="--c:' + color(x.color) + '" data-acc="lista-abrir" data-id="' + x.id + '">' +
+        '<span class="lb-lomo"></span>' +
+        '<span class="lb-cab"><span class="em">' + esc(x.em || '📝') + '</span>' +
+          '<svg class="lb-anillo" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="f"/><circle cx="18" cy="18" r="15" class="v" stroke-dasharray="' + CL.toFixed(1) + '" stroke-dashoffset="' + (CL * (1 - pl)).toFixed(1) + '"/></svg></span>' +
+        '<b class="lb-nom">' + esc(x.nombre) + '</b>' +
+        '<small class="lb-cuenta">' + (its.length ? (its.length - ok2) + ' por marcar · ' + its.length + ' en total' : 'Vacía') + '</small>' +
+        (faltan.length ? '<span class="lb-items">' + faltan.map(function(i){ return '<span>' + esc(i.t) + '</span>'; }).join('') + '</span>' : '') +
       '</button>';
     }).join('') +
-    '<button type="button" class="tarjeta tarjeta-lista" data-acc="nuevo" data-tipo="lista" style="border-style:dashed;align-items:center;justify-content:center;min-height:98px;color:var(--tinta-2)">' +
-      ico('i-plus') + '<b style="font-size:14px">Nueva lista</b></button>' +
+    '<button type="button" class="tarjeta tarjeta-lista libreta nueva" data-acc="nuevo" data-tipo="lista">' +
+      ico('i-plus') + '<b>Nueva lista</b></button>' +
   '</div>' +
   (!ls.length ? '<p style="color:var(--tinta-3);font-size:13px;margin-top:14px">Listas para marcar: la compra, la maleta, lo que falta en casa, pelis por ver… Se pueden desmarcar enteras para volver a usarlas.</p>' : '');
 };
@@ -3739,24 +3780,38 @@ VISTAS.habitos = function(){
       }).join('') + '</div></div>' +
       '<div style="margin-top:12px"><button class="btn primario" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Crear mi propio hábito</button></div>';
   }
-  return '<div class="rejilla dos">' + hs.map(function(x){
-    var r = racha(x), pc = cumplimiento(x);
-    var dias = [];
-    for(var i = 6; i >= 0; i--) dias.push(sumarDias(hoy, -i));
-    var frec = !x.dias || x.dias.length === 7 ? 'Cada día' : x.dias.length + ' días por semana';
-    return '<section class="tarjeta habito">' +
-      '<div class="cab"><span class="em">' + esc(x.em || '⭐') + '</span>' +
-        '<div class="nom"><b>' + esc(x.nombre) + '</b><small>' + frec + '</small></div>' +
-        '<span class="racha" title="Racha">🔥 ' + r + '</span>' +
-        '<button class="btn-icono" data-acc="habito-ed" data-id="' + x.id + '" aria-label="Editar">' + ico('i-lapiz') + '</button></div>' +
-      '<div class="dias-habito">' + dias.map(function(d){
-        var w = deISO(d).getDay(), libre = x.dias && x.dias.indexOf(w) < 0, ok = x.marcas && x.marcas[d];
-        return '<button type="button" class="dia-h' + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '">' +
-          DIAS3[w] + '<span class="c">' + CHECK + '</span></button>';
-      }).join('') + '</div>' +
-      '<div class="pie-h"><span>Últimos 30 días</span><div class="barra-prog"><i style="width:' + Math.round(pc * 100) + '%"></i></div><b>' + Math.round(pc * 100) + '%</b></div>' +
-    '</section>';
-  }).join('') + '</div>';
+  /* Arriba: lo de hoy en anillos grandes, un toque y listo */
+  var wd = deISO(hoy).getDay(), CH = 2 * Math.PI * 30;
+  var deHoy = hs.filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+  var okHoy = deHoy.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+  var html = '<section class="hab-hoy"><h3 class="seccion-tit">Hoy <span class="n">' + okHoy + ' de ' + deHoy.length + '</span></h3>' +
+    (deHoy.length ? '<div class="hab-anillos">' + deHoy.map(function(x){
+      var ok = !!(x.marcas && x.marcas[hoy]), r = racha(x);
+      return '<button type="button" class="hab-anillo' + (ok ? ' ok' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + hoy + '" aria-pressed="' + ok + '">' +
+        '<svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" class="f"/><circle cx="36" cy="36" r="30" class="v" stroke-dasharray="' + CH.toFixed(1) + '" stroke-dashoffset="' + (ok ? 0 : CH).toFixed(1) + '"/></svg>' +
+        '<span class="em">' + esc(x.em || '⭐') + '</span>' +
+        '<b>' + esc(x.nombre) + '</b><small>' + (r ? '🔥 ' + r + (r === 1 ? ' día' : ' días') : 'Empieza hoy') + '</small></button>';
+    }).join('') + '</div>' : '<p class="nada">Hoy no toca ningún hábito. 😌</p>') + '</section>';
+
+  /* Abajo: la tabla de seguimiento, como en un cuaderno (14 días) */
+  var dias = [];
+  for(var i = 13; i >= 0; i--) dias.push(sumarDias(hoy, -i));
+  html += '<h3 class="seccion-tit">Seguimiento <span class="n">últimos 14 días</span></h3>' +
+    '<section class="hab-tabla"><div class="ht-fila ht-cab"><span class="ht-nom"></span>' + dias.map(function(d, k){
+      return '<span class="ht-d' + (k < 4 ? ' lejos' : '') + (d === hoy ? ' hoy' : '') + '">' + DIAS3[deISO(d).getDay()].charAt(0) + '<i>' + deISO(d).getDate() + '</i></span>';
+    }).join('') + '<span class="ht-racha">🔥</span></div>' +
+    hs.map(function(x){
+      var r = racha(x), pc = cumplimiento(x);
+      var frec = !x.dias || x.dias.length === 7 ? 'Cada día' : x.dias.length + ' días por semana';
+      return '<div class="ht-fila habito"><button type="button" class="ht-nom" data-acc="habito-ed" data-id="' + x.id + '" title="Editar"><span class="em">' + esc(x.em || '⭐') + '</span><span class="t"><b>' + esc(x.nombre) + '</b><small>' + frec + ' · ' + Math.round(pc * 100) + '%</small></span></button>' +
+        dias.map(function(d, k){
+          var w = deISO(d).getDay(), libre = x.dias && x.dias.indexOf(w) < 0, ok = x.marcas && x.marcas[d];
+          return '<button type="button" class="ht-c dia-h' + (k < 4 ? ' lejos' : '') + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '" aria-label="' + esc(x.nombre) + ' el ' + fechaCorta(d) + '"><span class="c">' + CHECK + '</span></button>';
+        }).join('') +
+        '<span class="ht-racha"><b>' + r + '</b></span></div>';
+    }).join('') + '</section>' +
+    '<div class="pie-fila-btn" style="padding:14px 0 0"><button class="btn chico" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Nuevo hábito</button></div>';
+  return html;
 };
 
 /* ---------- Notas ---------------------------------------------------------- */
@@ -4161,12 +4216,15 @@ VISTAS.metas = function(){
       ritmo = dias > 0 ? 'Quedan ' + dias + ' días · ' + formNum(falta / dias) + ' ' + esc(m.unidad || '') + ' al día para llegar'
                        : dias === 0 ? 'La fecha límite es hoy' : 'La fecha límite pasó hace ' + (-dias) + ' días';
     }
-    return '<section class="tarjeta meta-t' + (p >= 1 ? ' lograda' : '') + '" style="--c:' + color(m.color) + '">' +
-      '<div class="cab"><span class="em">' + esc(m.em || '🎯') + '</span><div class="nom"><b>' + esc(m.t) + '</b>' +
-        '<small>' + (p >= 1 ? '🎉 ¡Lograda!' : 'Faltan ' + formNum(falta) + ' ' + esc(m.unidad || '')) + (m.fecha ? ' · hasta el ' + fechaCorta(m.fecha) : '') + '</small></div>' +
+    /* Un medidor en semicírculo con el porcentaje en el centro */
+    var L = Math.PI * 44;
+    return '<section class="tarjeta meta-t medidor' + (p >= 1 ? ' lograda' : '') + '" style="--c:' + color(m.color) + '">' +
+      '<div class="md-cab"><span class="em">' + esc(m.em || '🎯') + '</span><b class="md-nom">' + esc(m.t) + '</b>' +
         '<button class="btn-icono" data-acc="meta-ed" data-id="' + m.id + '" aria-label="Editar">' + ico('i-lapiz') + '</button></div>' +
-      '<div class="cifra-grande">' + formNum(act) + ' <small>/ ' + formNum(obj) + ' ' + esc(m.unidad || '') + ' · ' + Math.round(p * 100) + '%</small></div>' +
-      '<div class="barra-prog"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div>' +
+      '<div class="md-arco"><svg viewBox="0 0 104 60"><path d="M8 54 A44 44 0 0 1 96 54" class="f"/><path d="M8 54 A44 44 0 0 1 96 54" class="v" stroke-dasharray="' + L.toFixed(1) + '" stroke-dashoffset="' + (L * (1 - p)).toFixed(1) + '"/></svg>' +
+        '<span class="md-pct">' + Math.round(p * 100) + '<small>%</small></span></div>' +
+      '<div class="md-cifras"><b>' + formNum(act) + '</b> de ' + formNum(obj) + ' ' + esc(m.unidad || '') + '</div>' +
+      '<div class="md-falta">' + (p >= 1 ? '🎉 ¡Lograda!' : 'Faltan ' + formNum(falta) + ' ' + esc(m.unidad || '')) + (m.fecha ? ' · hasta el ' + fechaCorta(m.fecha) : '') + '</div>' +
       (ritmo ? '<div class="ritmo">' + ritmo + '</div>' : '') +
       '<div class="acciones">' +
         '<button class="btn chico" data-acc="meta-sumar" data-id="' + m.id + '" data-n="-1">−1</button>' +

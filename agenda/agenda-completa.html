@@ -2317,6 +2317,336 @@ body[data-esp="oficina"] .tarjeta-cab h2{
 @media (min-width:900px){ .cabecera h1{ font-size:26px !important } }
 .tarjeta-cab .mas{ white-space:nowrap; flex:none }
 .esp-tile::before{ display:none !important }
+
+/* ==========================================================================
+   NUEVA DISTRIBUCIÓN
+   ========================================================================== */
+/* ----- Título grande de cada sección (sin caja) ----- */
+.cab-grande{
+  display:block !important; position:relative; padding:6px 2px 18px !important; margin:0 0 6px !important;
+  background:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important;
+}
+.cab-grande .cg-ico{
+  display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; margin-bottom:8px;
+  background:color-mix(in srgb, var(--sc) 18%, transparent); color:var(--sc);
+}
+.cab-grande .cg-ico svg{ width:16px; height:16px }
+.cab-grande .cg-tit{ margin:0; font-family:var(--serif); font-size:40px; font-weight:560; line-height:1.02; letter-spacing:-.025em }
+.cab-grande .cg-sub{ margin:8px 0 0; font-size:14px; line-height:1.45; color:var(--tinta-2) }
+.cab-grande .cg-sub em{ font-style:normal; color:var(--debe); font-weight:650 }
+.cg-prog{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:4px 10px; margin-top:14px; max-width:420px }
+.cg-prog > i{ display:block; height:4px; border-radius:4px; background:var(--sc); box-shadow:0 0 0 0 transparent; position:relative; grid-column:1; grid-row:1 }
+.cg-prog::before{ content:""; grid-column:1; grid-row:1; height:4px; border-radius:4px; background:var(--regla) }
+.cg-prog > i{ z-index:1; max-width:100% }
+.cg-prog b{ grid-column:2; grid-row:1; font-family:var(--serif); font-size:16px; font-weight:600 }
+.cg-prog span{ grid-column:1 / -1; font-size:12px; color:var(--tinta-3) }
+@media (min-width:900px){ .cab-grande .cg-tit{ font-size:48px } }
+
+/* La barra de arriba muestra el título pequeño solo al bajar */
+.cabecera h1{ transition:opacity .2s, transform .2s }
+body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translateY(6px); pointer-events:none }
+
+/* Bloques abiertos (sin tarjeta) */
+.lista-abierta, .dia-abierto, .dinero-abierto, .rec-bloque{ background:none !important; border:0 !important }
+.lista-abierta > .lista-filas, .rec-lista{ border-top:1px solid var(--regla-2) }
+.lista-abierta .fila, .rec-lista .fila{ padding-left:2px !important; padding-right:2px !important }
+.nada{ margin:0; padding:14px 2px; color:var(--tinta-3); font-size:14px }
+.ver-link{ margin-left:auto; display:inline-flex; align-items:center; gap:2px; font-family:var(--letra); font-size:13px; font-weight:650; color:var(--verde) }
+.ver-link svg{ width:14px; height:14px }
+.sub-t{ display:flex; align-items:center; margin:0 0 8px; font-family:var(--serif); font-size:18px; font-weight:560 }
+.seccion-t .n, .seccion-tit .n{ font-family:var(--letra); font-size:13px; font-weight:600; color:var(--tinta-3) }
+
+/* ----- HOY ----- */
+.portada-hoy{ padding:6px 2px 4px; margin-bottom:14px }
+.ph-fecha{ display:flex; align-items:center; gap:14px }
+.ph-num{ font-family:var(--serif); font-size:84px; line-height:.85; font-weight:500; letter-spacing:-.04em; color:var(--verde) }
+.ph-dia{ display:flex; flex-direction:column; line-height:1.15 }
+.ph-dia b{ font-family:var(--serif); font-size:24px; font-weight:560 }
+.ph-dia span{ font-size:13px; color:var(--tinta-3); margin-top:2px }
+.ph-anillo{ margin-left:auto; width:70px !important; height:70px !important }
+.ph-anillo .anillo{ width:70px !important; height:70px !important }
+.ph-anillo > span{ font-size:10px !important }
+.ph-anillo > span b{ font-size:17px !important }
+.ph-saludo{ margin:18px 0 0; font-family:var(--serif); font-size:32px; font-weight:560; line-height:1.1; letter-spacing:-.02em }
+.ph-saludo .emoji{ display:inline-block; animation:saluda 2.4s ease-in-out 1 }
+.ph-frase{ margin:8px 0 0; font-family:var(--serif); font-style:italic; font-size:15px; color:var(--tinta-2) }
+.ph-cuentas{
+  display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:18px !important;
+  background:none !important; border:0 !important; border-radius:0 !important; overflow:visible !important;
+  border-top:1px solid var(--regla-2) !important; border-bottom:1px solid var(--regla-2) !important;
+}
+.ph-cuentas button{ padding:12px 2px !important; align-items:flex-start !important; text-align:left }
+.ph-cuentas button + button{ border-left:1px solid var(--regla-2) !important; padding-left:12px !important }
+.ph-cuentas b{ font-family:var(--serif) !important; font-size:28px !important; font-weight:560 !important; line-height:1 !important }
+.ph-cuentas span{ font-size:11.5px !important; margin-top:4px; color:var(--tinta-3) !important }
+.portada-hoy .barra-dia{ margin-top:14px }
+.barra-dia-cab{ color:var(--tinta-3) }
+.barra-dia-riel{ background:var(--regla-2) !important; height:3px !important }
+.barra-dia-riel i{ background:var(--verde) !important }
+
+.franja-semana{
+  display:grid !important; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; margin:0 0 18px !important;
+  background:none !important; border:0 !important; padding:0 !important;
+}
+.franja-semana button{
+  display:flex; flex-direction:column; align-items:center; gap:2px; padding:10px 0 8px !important; border-radius:18px !important;
+  background:var(--hoja) !important; border:0 !important; color:var(--tinta-2);
+}
+.franja-semana button small{ font-size:11px; text-transform:none !important; letter-spacing:0 !important }
+.franja-semana button b{ font-family:var(--serif); font-size:20px; font-weight:560; color:var(--tinta) }
+.franja-semana button.hoy{ background:var(--verde) !important; color:var(--papel) }
+.franja-semana button.hoy b{ color:var(--papel) }
+.franja-semana button.hoy .puntos i{ background:var(--papel) !important }
+.franja-semana button.pasado{ opacity:.55 }
+.franja-semana .puntos{ display:flex; gap:2px; height:5px }
+.franja-semana .puntos i{ width:4px; height:4px; border-radius:50%; background:var(--verde) }
+.captura-hoy{ margin-bottom:6px }
+
+.bloque-ahora{ display:block !important }
+.bloque-ahora .siguiente{ padding:22px 22px 20px !important }
+.dia-abierto .linea-tiempo{ padding:0 !important }
+.dia-abierto .lt-item .fila{ background:none !important }
+
+.enfoque-grande{ display:flex; flex-direction:column; gap:2px; padding:0 !important }
+.enfoque-grande label{
+  display:grid !important; grid-template-columns:44px 1fr auto; align-items:center; gap:8px;
+  padding:6px 2px !important; border:0 !important; border-bottom:1px solid var(--regla-2) !important; background:none !important; border-radius:0 !important;
+}
+.enfoque-grande .n{ font-family:var(--serif); font-size:34px !important; font-weight:500; color:var(--verde) !important; background:none !important; width:auto !important; height:auto !important; line-height:1 }
+.enfoque-grande input{ background:none !important; border:0 !important; font-size:16px !important; padding:10px 0 !important }
+.enfoque-grande label.hecho input{ text-decoration:line-through; color:var(--tinta-3) }
+
+.espacios-carrusel{
+  display:grid !important; grid-auto-flow:column; grid-auto-columns:minmax(150px, 42%); grid-template-columns:none !important;
+  gap:10px; overflow-x:auto; scrollbar-width:none; margin:0 -16px 6px !important; padding:0 16px 4px; scroll-snap-type:x mandatory;
+}
+.espacios-carrusel::-webkit-scrollbar{ display:none }
+@media (min-width:900px){ .espacios-carrusel{ grid-auto-flow:row; grid-template-columns:repeat(4,minmax(0,1fr)) !important; margin:0 0 6px !important; padding:0; overflow:visible } }
+.esp-alta{
+  scroll-snap-align:start; display:flex !important; flex-direction:column; align-items:flex-start; gap:6px !important;
+  min-height:190px; padding:16px !important; border-radius:26px !important; position:relative; overflow:hidden;
+  background:linear-gradient(170deg, color-mix(in srgb, var(--c) 30%, var(--hoja)) 0%, var(--hoja) 70%) !important;
+}
+.esp-alta .esp-em{ font-size:26px; width:auto !important; height:auto !important; background:none !important }
+.esp-alta .esp-nom{ font-family:var(--serif); font-size:20px; font-weight:560 }
+.esp-alta .esp-big{ font-family:var(--serif); font-size:40px; font-weight:500; line-height:1; color:var(--c); margin-top:auto; display:flex; align-items:baseline; gap:6px }
+.esp-alta .esp-big small{ font-family:var(--letra); font-size:12px; color:var(--tinta-2); font-weight:600 }
+.esp-alta .esp-prox{ font-size:12px !important; min-height:0 !important }
+.esp-alta .esp-semana{ width:100%; height:3px; border-radius:3px; background:color-mix(in srgb, var(--c) 18%, transparent); overflow:hidden; display:block }
+.esp-alta .esp-semana i{ display:block; height:100%; background:var(--c) }
+
+.panel-bienestar{ display:grid; gap:16px; padding:18px; border-radius:26px; background:var(--hoja) }
+@media (min-width:900px){ .panel-bienestar{ grid-template-columns:repeat(3,minmax(0,1fr)) } }
+.pb-bloque h4{ margin:0 0 10px !important; font-family:var(--serif); font-size:17px !important; font-weight:560 !important; color:var(--tinta) !important; display:flex; justify-content:space-between }
+.pb-bloque h4 span{ font-family:var(--letra); font-size:12.5px; color:var(--tinta-3); font-weight:600 }
+.regresivas-grandes{ margin:0 0 14px !important; padding:0 !important }
+.regresivas-grandes .regresiva{ border:0 !important; background:color-mix(in srgb, var(--c) 16%, var(--hoja)) !important; border-radius:22px !important }
+.regresivas-grandes .regresiva b{ font-family:var(--serif); font-size:34px !important; font-weight:500 }
+.viene-rejilla{ gap:22px !important }
+.libros-hoy{ gap:10px !important }
+.libro-hoy{ border:0 !important; background:var(--hoja) !important; border-radius:24px !important; padding:16px !important }
+.libro-saldo{ display:block; font-family:var(--serif); font-size:28px; font-weight:560; margin:4px 0 8px; letter-spacing:-.01em }
+.dinero-abierto .pagos-hoy{ margin-top:18px }
+.bienvenida-hoy{ padding:20px; border-radius:26px; background:var(--hoja); margin-bottom:16px }
+.bienvenida-hoy h3{ margin:0 0 6px; font-family:var(--serif); font-size:24px; font-weight:560 }
+.bienvenida-hoy p{ margin:0 0 12px; color:var(--tinta-2); font-size:14px }
+
+/* ----- TAREAS: agenda de papel ----- */
+.planner{ display:flex; flex-direction:column; gap:6px; margin-top:8px }
+.pl-dia{ display:grid; grid-template-columns:58px minmax(0,1fr); gap:10px; padding-top:12px; border-top:1px solid var(--regla-2) }
+.pl-fecha{ position:sticky; top:calc(var(--arriba) + 8px); align-self:start; text-align:center; padding-top:2px }
+.pl-fecha b{ display:block; font-family:var(--serif); font-size:38px; font-weight:500; line-height:1; letter-spacing:-.03em }
+.pl-fecha span{ display:block; font-size:11.5px; color:var(--tinta-3); margin-top:3px }
+.pl-dia.es-hoy .pl-fecha b{ color:var(--verde) }
+.pl-dia.rojo .pl-fecha b, .pl-dia.rojo .pl-tit{ color:var(--debe) }
+.pl-tit{ display:flex; align-items:center; gap:8px; margin:4px 0 4px; font-family:var(--serif); font-size:19px; font-weight:560 }
+.pl-tit .btn{ margin-left:auto; font-family:var(--letra) }
+.pl-cuerpo .fila{ padding-left:0 !important; padding-right:0 !important; background:none !important }
+.herr-sel{ margin:8px 0 2px !important }
+
+/* ----- RECORDATORIOS: la hora primero ----- */
+.rec-bloque{ margin-bottom:8px }
+.fila-rec{ display:grid !important; grid-template-columns:64px minmax(0,1fr) auto; align-items:center; gap:10px }
+.rec-hora{ cursor:pointer; line-height:1.05 }
+.rec-hora b{ display:block; font-family:var(--serif); font-size:24px; font-weight:560; letter-spacing:-.02em }
+.rec-hora span{ display:block; font-size:11px; color:var(--tinta-3); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.fila-rec.tarde .rec-hora b{ color:var(--debe) }
+.fila-rec .lado{ display:flex; align-items:center; gap:6px }
+
+/* ----- LISTAS ----- */
+.listas-rejilla{ display:grid !important; grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:12px !important }
+@media (min-width:900px){ .listas-rejilla{ grid-template-columns:repeat(4,minmax(0,1fr)) !important } }
+.libreta{
+  display:flex !important; flex-direction:column; align-items:flex-start !important; gap:4px !important; text-align:left;
+  min-height:200px; padding:0 16px 16px !important; position:relative; overflow:hidden; border-radius:22px 22px 22px 8px !important;
+}
+.lb-lomo{ align-self:stretch; height:10px; margin:0 -16px 12px; background:var(--c) }
+.lb-cab{ display:flex; width:100%; align-items:center; justify-content:space-between }
+.lb-cab .em{ font-size:30px }
+.lb-anillo{ width:36px; height:36px; transform:rotate(-90deg) }
+.lb-anillo circle, .hl-anillo circle{ fill:none; stroke-width:4; stroke-linecap:round }
+.lb-anillo .f, .hl-anillo .f{ stroke:var(--regla) }
+.lb-anillo .v, .hl-anillo .v{ stroke:var(--c) }
+.lb-nom{ font-family:var(--serif); font-size:20px; font-weight:560; line-height:1.15; margin-top:6px }
+.lb-cuenta{ font-size:12px; color:var(--tinta-3) }
+.lb-items{ display:flex; flex-direction:column; gap:3px; margin-top:auto; padding-top:10px; width:100%; font-size:12.5px; color:var(--tinta-2) }
+.lb-items span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding-left:14px; position:relative }
+.lb-items span::before{ content:""; position:absolute; left:0; top:50%; width:7px; height:7px; margin-top:-4px; border-radius:2px; border:1.5px solid var(--tinta-3) }
+.libreta.nueva{ align-items:center !important; justify-content:center; color:var(--tinta-2); padding-top:16px !important; background:none !important; box-shadow:inset 0 0 0 2px var(--regla) !important }
+.libreta.nueva b{ font-size:14px }
+.hoja-lista{ display:block }
+.hl-barra{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px }
+.hl-cab{ display:flex; align-items:center; gap:14px; margin-bottom:14px }
+.hl-em{ font-size:40px }
+.hl-txt{ flex:1; min-width:0 }
+.hl-txt h2{ margin:0; font-family:var(--serif); font-size:32px; font-weight:560; line-height:1.05 }
+.hl-txt p{ margin:6px 0 0; color:var(--tinta-2); font-size:13.5px }
+.hl-anillo{ width:58px; height:58px; flex:none }
+.hl-anillo circle{ transform:rotate(-90deg); transform-origin:26px 26px }
+.hl-anillo text{ fill:var(--tinta); font-size:12px; font-weight:700; font-family:var(--letra) }
+.hl-captura{ margin-bottom:6px !important }
+.hl-renglones{
+  background:repeating-linear-gradient(180deg, transparent 0 51px, var(--regla-2) 51px 52px) !important;
+  border-left:2px solid color-mix(in srgb, var(--c) 55%, transparent); padding-left:6px; margin-top:6px;
+}
+.hl-renglones .item-lista{ min-height:52px; border:0 !important; background:none !important }
+
+/* ----- HÁBITOS ----- */
+.hab-anillos{ display:grid; grid-template-columns:repeat(auto-fill, minmax(104px, 1fr)); gap:10px; margin-bottom:10px }
+.hab-anillo{ position:relative; display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 6px 12px; border-radius:24px; background:var(--hoja); text-align:center }
+.hab-anillo svg{ width:74px; height:74px; transform:rotate(-90deg) }
+.hab-anillo circle{ fill:none; stroke-width:6; stroke-linecap:round }
+.hab-anillo .f{ stroke:var(--regla) }
+.hab-anillo .v{ stroke:var(--verde); transition:stroke-dashoffset .4s ease }
+.hab-anillo .em{ position:absolute; top:37px; left:50%; transform:translate(-50%, -50%); font-size:28px }
+.hab-anillo b{ font-size:13px; line-height:1.2; margin-top:4px }
+.hab-anillo small{ font-size:11.5px; color:var(--tinta-3) }
+.hab-anillo.ok{ background:color-mix(in srgb, var(--verde) 12%, var(--hoja)) }
+.hab-tabla{ border-radius:24px; background:var(--hoja); padding:10px 12px; overflow:hidden }
+.ht-fila{ display:grid; grid-template-columns:minmax(0,1fr) repeat(14, 20px) 28px; align-items:center; gap:3px; padding:6px 0 }
+.ht-fila + .ht-fila{ border-top:1px solid var(--regla-2) }
+.ht-cab{ padding-bottom:4px }
+.ht-d{ display:flex; flex-direction:column; align-items:center; font-size:10px; color:var(--tinta-3); line-height:1.1 }
+.ht-d i{ font-style:normal; font-size:10.5px; color:var(--tinta-2) }
+.ht-d.hoy, .ht-d.hoy i{ color:var(--verde); font-weight:800 }
+.ht-nom{ display:flex; align-items:center; gap:8px; min-width:0; text-align:left }
+.ht-nom .em{ font-size:20px; flex:none }
+.ht-nom .t{ min-width:0 }
+.ht-nom b{ display:block; font-size:13.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.ht-nom small{ display:block; font-size:11px; color:var(--tinta-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.ht-c{ width:20px; height:20px; border-radius:6px; background:var(--hoja-2); display:grid; place-items:center; padding:0 !important; border:0 !important }
+.ht-c .c{ display:none }
+.ht-c.ok{ background:var(--verde) }
+.ht-c.ok .c{ display:grid; color:var(--papel) }
+.ht-c.ok .c svg{ width:12px; height:12px; stroke-width:3 }
+.ht-c.libre{ background:transparent; box-shadow:inset 0 0 0 1px var(--regla-2) }
+.ht-c.hoy{ box-shadow:inset 0 0 0 2px var(--verde) }
+.ht-c.hoy.ok{ box-shadow:none }
+.ht-racha{ text-align:center; font-size:12px }
+.ht-racha b{ font-family:var(--serif); font-size:16px; font-weight:600; color:var(--oro) }
+@media (max-width:480px){
+  .ht-fila{ grid-template-columns:minmax(0,1fr) repeat(10, 19px) 26px }
+  .ht-fila .lejos{ display:none }
+  .ht-c{ width:19px; height:19px }
+}
+.cab-grande::before, .cab-grande::after{ display:none !important }
+@media (max-width:480px){
+  .ht-fila{ grid-template-columns:repeat(10, minmax(0,1fr)) 30px !important; gap:4px !important }
+  .ht-fila .ht-nom{ grid-column:1 / -1; margin-bottom:4px }
+  .ht-cab .ht-nom{ display:none }
+  .ht-c{ width:100% !important; height:auto !important; aspect-ratio:1; max-height:30px; border-radius:8px }
+}
+
+/* ----- ESPACIOS: franja de color a todo lo ancho ----- */
+.portada-esp{
+  position:relative; margin:-20px -16px 14px; padding:22px 20px 20px;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--ec) 34%, var(--papel)) 0%, color-mix(in srgb, var(--ec) 12%, var(--papel)) 70%, var(--papel) 100%);
+}
+@media (min-width:900px){ .portada-esp{ margin:-26px -32px 18px; padding:30px 32px 24px } }
+.pe-cambia{ display:flex !important; gap:8px; justify-content:flex-end; margin:0 0 6px !important; padding:0 !important; background:none !important; border:0 !important }
+.pe-cambia button{
+  width:40px !important; height:40px !important; padding:0 !important; border-radius:50% !important; display:grid !important; place-items:center;
+  background:color-mix(in srgb, var(--papel) 55%, transparent) !important; box-shadow:none !important; opacity:.7;
+}
+.pe-cambia button span{ font-size:19px !important }
+.pe-cambia button[aria-pressed="true"]{ opacity:1; box-shadow:0 0 0 2px var(--c) !important; background:var(--papel) !important }
+.pe-em{ display:block; font-size:54px; line-height:1; margin-top:-2px }
+.pe-nom{ margin:10px 0 0; font-family:var(--serif); font-size:46px; font-weight:560; line-height:1; letter-spacing:-.03em }
+.pe-lema{ margin:10px 0 0; color:var(--tinta-2); font-size:14.5px; font-family:var(--serif); font-style:italic }
+.pe-lema b{ font-style:normal; color:var(--tinta) }
+.pe-datos{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 !important; margin-top:18px !important; border-top:1px solid color-mix(in srgb, var(--tinta) 10%, transparent) }
+.pe-datos .dato{
+  display:flex !important; flex-direction:column; align-items:flex-start !important; gap:2px !important; padding:12px 8px 0 0 !important;
+  background:none !important; border:0 !important; border-radius:0 !important; color:var(--tinta-2) !important; font-size:12px !important; text-align:left;
+  backdrop-filter:none !important;
+}
+.pe-datos .dato + .dato{ border-left:1px solid color-mix(in srgb, var(--tinta) 10%, transparent) !important; padding-left:12px !important }
+.pe-datos .dato svg{ display:none }
+.pe-datos .dato b{ font-family:var(--serif); font-size:26px !important; font-weight:560 !important; color:var(--tinta); line-height:1.05 }
+.portada-esp .deco{ display:none }
+
+/* ----- METAS: medidor ----- */
+.medidor{ display:flex !important; flex-direction:column; align-items:stretch; padding:16px 18px 16px !important }
+.md-cab{ display:flex; align-items:center; gap:10px }
+.md-cab .em{ font-size:24px }
+.md-nom{ flex:1; font-family:var(--serif); font-size:19px; font-weight:560; line-height:1.2 }
+.md-arco{ position:relative; width:190px; max-width:80%; margin:10px auto 0 }
+.md-arco svg{ display:block; width:100% }
+.md-arco path{ fill:none; stroke-width:9; stroke-linecap:round }
+.md-arco .f{ stroke:var(--regla) }
+.md-arco .v{ stroke:var(--c); transition:stroke-dashoffset .6s ease }
+.md-pct{ position:absolute; left:0; right:0; bottom:0; text-align:center; font-family:var(--serif); font-size:40px; font-weight:560; line-height:1 }
+.md-pct small{ font-size:18px; color:var(--tinta-3) }
+.md-cifras{ text-align:center; margin-top:8px; color:var(--tinta-2); font-size:14px }
+.md-cifras b{ font-family:var(--serif); font-size:20px; color:var(--tinta) }
+.md-falta{ text-align:center; font-size:12.5px; color:var(--tinta-3); margin-top:2px }
+.medidor .ritmo{ text-align:center; margin-top:6px }
+.medidor .acciones{ margin-top:14px }
+.medidor.lograda .md-pct{ color:var(--c) }
+
+/* ----- NOTAS: muro de notas adhesivas en dos columnas ----- */
+.notas-muro{ display:block !important; columns:2; column-gap:12px }
+@media (min-width:900px){ .notas-muro{ columns:3 } }
+.notas-muro .nota{
+  display:block !important; width:100%; break-inside:avoid; margin:0 0 12px !important; text-align:left;
+  padding:16px 16px 12px !important; border-radius:6px 22px 22px 22px !important;
+  background:color-mix(in srgb, var(--c, var(--oro)) 20%, var(--hoja)) !important;
+}
+.notas-muro .nota b{ display:block; font-family:var(--serif); font-size:18px; font-weight:560; line-height:1.2; margin-bottom:6px }
+.notas-muro .nota p{ margin:0 0 10px; font-size:13.5px; line-height:1.5; color:var(--tinta-2); white-space:pre-line; display:-webkit-box; -webkit-line-clamp:9; -webkit-box-orient:vertical; overflow:hidden }
+.notas-muro .nota small{ display:flex; align-items:center; gap:4px; font-size:11.5px; color:var(--tinta-3) }
+.notas-muro .nota:nth-child(3n+2){ transform:rotate(.6deg) }
+.notas-muro .nota:nth-child(3n){ transform:rotate(-.5deg) }
+
+/* ----- DINERO: la cifra en grande, sin caja ----- */
+.heroe.dinero-heroe{ background:none !important; padding:4px 2px 10px !important; border-radius:0 !important }
+.heroe.dinero-heroe::after{ display:none !important }
+.dinero-heroe .fecha{ color:var(--haber) !important }
+.dinero-heroe .cifra-heroe{ font-size:clamp(44px, 13vw, 64px) !important; line-height:1 !important; margin-top:8px !important }
+.dinero-heroe .datos{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 !important; border-top:1px solid var(--regla-2); border-bottom:1px solid var(--regla-2); margin-top:16px !important }
+.dinero-heroe .dato{ flex-direction:column; align-items:flex-start !important; gap:2px !important; padding:12px 8px 12px 0 !important; background:none !important; border:0 !important; border-radius:0 !important; color:var(--tinta-3) !important }
+.dinero-heroe .dato + .dato{ border-left:1px solid var(--regla-2) !important; padding-left:12px !important }
+.dinero-heroe .dato b{ font-size:17px !important; color:var(--tinta) !important }
+
+/* ----- CALENDARIO: mes sin cajas, puntos en vez de barras ----- */
+.cal-mes-caja{ background:none !important; border:0 !important; padding:0 !important; box-shadow:none !important }
+.cal-dias span{ font-size:11px !important; color:var(--tinta-3) !important; text-transform:none !important; letter-spacing:0 !important }
+.cal-mes{ gap:2px !important }
+.cal-mes .celda{ background:none !important; border:0 !important; box-shadow:none !important; border-radius:16px !important; min-height:56px !important; align-items:center !important; padding-top:6px !important }
+.cal-mes .celda .num{
+  font-family:var(--serif); font-size:19px !important; font-weight:500 !important; width:34px; height:34px; border-radius:50%;
+  display:grid !important; place-items:center; margin:0 auto !important; background:none !important; color:var(--tinta) !important;
+}
+.cal-mes .celda.fuera .num{ color:var(--tinta-3) !important; opacity:.5 }
+.cal-mes .celda.hoy .num{ box-shadow:inset 0 0 0 1.5px var(--verde); color:var(--verde) !important; background:none !important }
+.cal-mes .celda.sel .num{ background:var(--verde) !important; color:var(--papel) !important; box-shadow:none }
+.cal-mes .celda.sel{ box-shadow:none !important }
+.cal-mes .celda.fer .num{ color:var(--debe) !important }
+.cal-mes .celda .barras{ display:flex !important; justify-content:center; gap:3px; margin-top:4px; height:6px }
+.cal-mes .celda .barras i{ width:5px !important; height:5px !important; border-radius:50% !important; background:var(--c) !important; flex:none !important }
+.cal-mes .celda .barras em{ font-size:9px; line-height:6px; color:var(--tinta-3) }
+.cal-mes .celda.pasado .barras i{ opacity:.45 }
+@media (max-width:480px){ .dinero-heroe .dato b{ font-size:14.5px !important; letter-spacing:-.02em !important } .pe-datos .dato b{ font-size:22px !important } }
 </style>
 </head>
 <body>
@@ -3121,6 +3451,10 @@ function hojaHistorialNav(){
   document.addEventListener('touchcancel', function(){ lado = 0; quitar_(); }, { passive:true });
 })();
 
+/* Al bajar, el título grande se va y aparece el pequeño de la barra */
+function marcarBajado(){ document.body.classList.toggle('bajado', (window.scrollY || 0) > 64); }
+window.addEventListener('scroll', function(){ marcarBajado(); }, { passive:true });
+
 function pintar(){
   olvidarDias();
   try{ pintarVista(); }
@@ -3158,6 +3492,8 @@ function pintarVista(){
   var html = sec && sec.esp ? VISTAS.espacio(sec.esp) : cabSeccion(v) + VISTAS[v]();
   var nueva = ui.antes !== v + (ui.lista || '');
   $('contenido').innerHTML = '<div class="' + (nueva ? 'vista' : '') + '">' + html + '</div>';
+  document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp'));
+  marcarBajado();
   ui.antes = v + (ui.lista || '');
   if(v === 'hoy' || v === 'tareas' || v === 'recordatorios') actualizarPista();
   tictac();
@@ -3389,7 +3725,7 @@ function tarjetaSiguiente(){
 }
 
 VISTAS.hoy = function(){
-  var hoy = hoyISO(), h = new Date().getHours();
+  var hoy = hoyISO(), ahora = new Date(), h = ahora.getHours();
   var saludo = h < 6 ? 'Buenas noches' : h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches';
   var emoji = h < 6 ? '🌙' : h < 12 ? '☀️' : h < 19 ? '🌤️' : '🌙';
   var nombre = db.perfil.nombre;
@@ -3404,33 +3740,42 @@ VISTAS.hoy = function(){
   var C = 2 * Math.PI * 30;
   var agenda = items.filter(function(i){ return i.tipo !== 'tarea'; });
   var pendPagos = pagosProximos(0).length;
+  var nAgenda = agenda.filter(function(i){ return i.tipo === 'evento' || i.tipo === 'clase'; }).length;
+  var nAvisos = agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length;
 
-  /* Saludo */
-  var html = '<section class="heroe heroe-hoy"><div class="arriba"><div class="saludo-hoy">' +
-      '<div class="fecha">' + cap(fechaLarga(hoy)) + '</div>' +
-      '<h2>' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' <span class="emoji">' + emoji + '</span></h2>' +
-      '<p class="frase">«' + esc(fraseDelDia()) + '»</p></div>' +
-      '<div class="anillo-hoy"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
+  /* ---- Portada: la fecha en grande, sin caja ---- */
+  var html = '<header class="portada-hoy heroe-hoy">' +
+    '<div class="ph-fecha"><span class="ph-num">' + ahora.getDate() + '</span>' +
+      '<span class="ph-dia"><b>' + cap(DIAS[ahora.getDay()]) + '</b><span>' + cap(MESES[ahora.getMonth()]) + ' ' + ahora.getFullYear() + '</span></span>' +
+      '<div class="anillo-hoy ph-anillo"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
         '<circle class="valor" cx="36" cy="36" r="30" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
-        '<span><b>' + hechas + '/' + tareasHoy.length + '</b>tareas</span></div>' +
+        '<span><b>' + hechas + '/' + tareasHoy.length + '</b>hechas</span></div>' +
     '</div>' +
-    '<div class="datos-hoy">' +
+    '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre) : '') + ' <span class="emoji">' + emoji + '</span></h2>' +
+    '<p class="ph-frase">' + esc(fraseDelDia()) + '</p>' +
+    '<nav class="ph-cuentas datos-hoy" aria-label="Tu día en números">' +
       '<button data-ir="tareas"><b>' + (tareasHoy.length - hechas) + '</b><span>por hacer</span></button>' +
-      '<button data-ir="calendario"><b>' + agenda.filter(function(i){ return i.tipo === 'evento' || i.tipo === 'clase'; }).length + '</b><span>en agenda</span></button>' +
-      '<button data-ir="recordatorios"><b>' + agenda.filter(function(i){ return i.tipo === 'rec' && !i.hecho; }).length + '</b><span>avisos</span></button>' +
+      '<button data-ir="calendario"><b>' + nAgenda + '</b><span>en agenda</span></button>' +
+      '<button data-ir="recordatorios"><b>' + nAvisos + '</b><span>' + (nAvisos === 1 ? 'aviso' : 'avisos') + '</span></button>' +
       '<button data-ir="pagos"><b>' + pendPagos + '</b><span>por pagar</span></button>' +
-    '</div>' + barraDelDia() + '</section>';
+    '</nav>' + barraDelDia() + '</header>';
+
+  /* ---- Franja de la semana ---- */
+  var ini = inicioSemana(hoy);
+  html += '<div class="franja-semana semana-mini">' + [0,1,2,3,4,5,6].map(function(i){
+    var d = sumarDias(ini, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length;
+    return '<button type="button" class="' + (d === hoy ? 'hoy' : '') + (d < hoy ? ' pasado' : '') + '" data-acc="ir-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b>' +
+      '<span class="puntos">' + '<i></i>'.repeat(Math.min(n, 4)) + '</span></button>';
+  }).join('') + '</div>';
 
   if(!total && !nombre){
-    html += '<div class="tarjeta" style="margin-bottom:16px"><div class="tarjeta-cuerpo" style="padding:18px 16px">' +
-      '<b style="font-family:var(--serif);font-size:21px;font-weight:560;display:block;margin-bottom:6px">Bienvenido a tu agenda 👋</b>' +
-      '<p style="margin:0 0 12px;color:var(--tinta-2);font-size:13.5px">Tareas, listas, calendario, recordatorios que suenan, hábitos, metas, diario, pagos, notas y tu libro de cuentas: todo en un solo sitio y solo para ti. ¿Cómo te llamas?</p>' +
+    html += '<section class="bienvenida-hoy"><h3>Bienvenido a tu agenda 👋</h3>' +
+      '<p>Tareas, listas, calendario, recordatorios que suenan, hábitos, metas, diario, pagos, notas y tu libro de cuentas: todo en un solo sitio y solo para ti. ¿Cómo te llamas?</p>' +
       '<form data-acc="bienvenida" class="captura" style="margin:0 0 10px"><input id="nombreBienvenida" type="text" maxlength="40" placeholder="Tu nombre"><button class="btn primario chico" type="submit">Empezar</button></form>' +
-      '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button>' +
-    '</div></div>';
+      '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button></section>';
   }
 
-  html += captura(['tarea','rec','evento','nota'], 'Añade algo… (Enter para guardar) · usa #estudios #oficina #deporte');
+  html += '<div class="captura-hoy">' + captura(['tarea','rec','evento','nota'], 'Añade algo… (Enter para guardar) · usa #estudios #oficina #deporte') + '</div>';
 
   var wdR = deISO(hoy).getDay();
   if(wdR === 0 || wdR === 1){
@@ -3442,81 +3787,76 @@ VISTAS.hoy = function(){
     }
   }
 
-  /* ---- Tus espacios ---- */
-  if(hoyVisible('espacios')){
-    html += tituloSecc('Tus espacios') + '<div class="espacios-hoy">' + ESPACIOS.map(function(E){
-      var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
-      var prox = agendaEsp(E.id, 7).filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
-      var ini = inicioSemana(hoy), fin = sumarDias(ini, 6);
-      var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= ini && t.fecha <= fin || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= ini); });
-      var hh = ts.filter(function(t){ return t.hecha; }).length;
-      return '<button type="button" class="esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
-        '<span class="esp-tile-cab"><span class="esp-em">' + E.em + '</span><b>' + E.nom + '</b>' + (pend ? '<span class="esp-num" title="Tareas para hoy">' + pend + '</span>' : '') + '</span>' +
-        '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
-        '<span class="esp-semana"><i style="width:' + (ts.length ? hh / ts.length * 100 : 0) + '%"></i></span>' +
-        '<small class="esp-semana-t">' + (ts.length ? hh + ' de ' + ts.length + ' tareas de la semana' : 'Sin tareas esta semana') + '</small></button>';
-    }).join('') + '</div>';
-  }
-
-  /* ---- Ahora: lo siguiente, el día y el enfoque ---- */
+  /* ---- Ahora: lo siguiente en grande y el día como una línea de tiempo ---- */
   if(hoyVisible('ahora')){
-    var ini = inicioSemana(hoy);
-    var semana = '<div class="semana-mini">' + [0,1,2,3,4,5,6].map(function(i){
-      var d = sumarDias(ini, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length;
-      return '<button type="button" class="' + (d === hoy ? 'hoy' : '') + (d < hoy ? ' pasado' : '') + '" data-acc="ir-dia" data-dia="' + d + '"><small>' + DIAS3[deISO(d).getDay()] + '</small><b>' + deISO(d).getDate() + '</b>' +
-        '<span class="puntos">' + '<i></i>'.repeat(Math.min(n, 3)) + '</span></button>';
-    }).join('') + '</div>';
-    var enf = buscarId('enfoque', hoy), ei = (enf && !enf.del && enf.items) || [];
     html += tituloSecc('Ahora', '<span class="hora-viva" id="horaViva">' + horaAhora() + '</span>') +
-      '<div class="rejilla bloque-ahora">' +
-        '<div class="col-ahora">' + tarjetaSiguiente() +
-          '<section class="tarjeta">' + cabTarjeta('i-diana', 'Enfoque de hoy', 'var(--haber)') +
-            '<p class="explica" style="margin:0 16px 6px">Las tres cosas que harían de hoy un buen día.</p>' +
-            '<div class="enfoque">' + [0,1,2].map(function(i){
-              var x = ei[i] || { t:'', ok:false };
-              return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
-                '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
-                casilla('enfoque-ok', String(i), x.ok, 'var(--haber)', true) + '</label>';
-            }).join('') + '</div></section>' +
-        '</div>' +
-        '<section class="tarjeta tu-dia">' + cabTarjeta('i-cal', 'Tu día', 'var(--verde)', 'Calendario', 'data-ir="calendario"') + semana +
-          (agenda.length ? lineaDelDia(agenda) : '<div class="vacio" style="padding-top:4px">Sin eventos, avisos ni pagos hoy.</div>') +
-        '</section>' +
-      '</div>';
+      '<div class="bloque-ahora">' + tarjetaSiguiente() + '</div>' +
+      tituloSecc('Tu día', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>') +
+      '<section class="dia-abierto tu-dia">' + (agenda.length ? lineaDelDia(agenda) : '<p class="nada">Sin eventos, avisos ni pagos hoy. 🌿</p>') + '</section>';
   }
 
-  /* ---- Por hacer: tareas y bienestar ---- */
+  /* ---- Por hacer: una lista abierta, sin caja ---- */
   if(hoyVisible('hacer')){
     var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
     var atrasadas = pend.filter(function(t){ return t.fecha < hoy; }).length;
+    html += tituloSecc('Por hacer' + (pend.length ? ' <span class="n">' + pend.length + '</span>' : ''), '<button class="ver-link" data-ir="tareas">Todas ' + ico('i-der') + '</button>') +
+      '<section class="lista-abierta">' +
+        (pend.length ? '<div class="lista-filas">' + pend.slice(0, 8).map(filaTarea).join('') + '</div>' +
+           (pend.length > 8 ? '<button class="ver-mas" data-ir="tareas">Ver ' + (pend.length - 8) + ' más</button>' : '') +
+           (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
+         : '<p class="nada">✅ Nada pendiente para hoy. Añade algo arriba o disfruta el día.</p>') +
+      '</section>';
+
+    /* Enfoque: tres números grandes */
+    var enf = buscarId('enfoque', hoy), ei = (enf && !enf.del && enf.items) || [];
+    html += tituloSecc('Tus tres de hoy') + '<section class="enfoque-grande enfoque">' + [0,1,2].map(function(i){
+      var x = ei[i] || { t:'', ok:false };
+      return '<label class="' + (x.ok ? 'hecho' : '') + '"><span class="n">' + (i + 1) + '</span>' +
+        '<input type="text" maxlength="120" data-enfoque="' + i + '" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante','Lo segundo','Lo tercero'][i] + '">' +
+        casilla('enfoque-ok', String(i), x.ok, 'var(--haber)', true) + '</label>';
+    }).join('') + '</section>';
+  }
+
+  /* ---- Tus espacios: carrusel de tarjetas altas ---- */
+  if(hoyVisible('espacios')){
+    html += tituloSecc('Tus espacios') + '<div class="espacios-carrusel espacios-hoy">' + ESPACIOS.map(function(E){
+      var pendE = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
+      var prox = agendaEsp(E.id, 7).filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
+      var iniS = inicioSemana(hoy), finS = sumarDias(iniS, 6);
+      var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id && t.fecha >= iniS && t.fecha <= finS || (espDe(t) === E.id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= iniS); });
+      var hh = ts.filter(function(t){ return t.hecha; }).length;
+      return '<button type="button" class="esp-tile esp-alta" style="--c:' + E.c + '" data-ir="esp-' + E.id + '">' +
+        '<span class="esp-em">' + E.em + '</span>' +
+        '<b class="esp-nom">' + E.nom + '</b>' +
+        '<span class="esp-big">' + pendE + '<small>' + (pendE === 1 ? 'tarea hoy' : 'tareas hoy') + '</small></span>' +
+        '<span class="esp-prox">' + (prox ? esc(prox.x.t) + ' · <em>' + (prox.d === hoy ? (prox.x.hora || 'hoy') : relativo(prox.d).toLowerCase()) + '</em>' : 'Nada agendado esta semana') + '</span>' +
+        '<span class="esp-semana"><i style="width:' + (ts.length ? hh / ts.length * 100 : 0) + '%"></i></span></button>';
+    }).join('') + '</div>';
+  }
+
+  /* ---- Bienestar: ánimo, hábitos y agua en un panel ---- */
+  if(hoyVisible('hacer')){
     var wd = new Date().getDay();
     var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
     var habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
     var dia = buscarId('diario', hoy), an = dia && !dia.del ? dia.animo : 0, bi = bienestar(hoy);
-    html += tituloSecc('Por hacer') + '<div class="rejilla dos">' +
-      '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Tareas para hoy' + (pend.length ? ' <span class="cab-num">' + pend.length + '</span>' : ''), 'var(--azul)', 'Todas', 'data-ir="tareas"') +
-        (pend.length ? '<div class="lista-filas">' + pend.slice(0, 7).map(filaTarea).join('') + '</div>' +
-           (pend.length > 7 ? '<button class="ver-mas" data-ir="tareas">Ver ' + (pend.length - 7) + ' más</button>' : '') +
-           (atrasadas ? '<div class="pie-fila-btn"><button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar las ' + atrasadas + ' atrasadas a hoy</button></div>' : '')
-         : vacio('✅', 'Nada pendiente para hoy', 'Añade una arriba o disfruta el día.')) + '</section>' +
-      '<section class="tarjeta">' + cabTarjeta('i-habitos', 'Tu bienestar hoy', 'var(--oro)', 'Diario', 'data-ir="diario"') +
-        '<div class="tarjeta-cuerpo bienestar-hoy">' +
-          '<h4>¿Cómo te sientes?</h4>' + animosHTML(an, hoy) +
-          '<h4>Hábitos <span>' + habOk + ' de ' + hab.length + '</span></h4>' +
+    html += tituloSecc('Cómo vas', '<button class="ver-link" data-ir="diario">Diario ' + ico('i-der') + '</button>') +
+      '<section class="panel-bienestar bienestar-hoy">' +
+        '<div class="pb-bloque"><h4>¿Cómo te sientes?</h4>' + animosHTML(an, hoy) + '</div>' +
+        '<div class="pb-bloque"><h4>Hábitos <span>' + habOk + ' de ' + hab.length + '</span></h4>' +
           (hab.length ? '<div class="chips-habito" style="padding:0">' + hab.map(function(x){
             var ok = x.marcas && x.marcas[hoy];
             return '<button type="button" class="chip-habito" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + !!ok + '"><span class="em">' + esc(x.em || '⭐') + '</span>' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>';
-          }).join('') + '</div>' : '<button class="btn chico" data-ir="habitos">' + ico('i-plus') + 'Crear un hábito</button>') +
-          '<h4>Agua <span>' + bi.agua + ' de ' + META_AGUA + ' vasos</span></h4>' +
+          }).join('') + '</div>' : '<button class="btn chico" data-ir="habitos">' + ico('i-plus') + 'Crear un hábito</button>') + '</div>' +
+        '<div class="pb-bloque"><h4>Agua <span>' + bi.agua + ' de ' + META_AGUA + ' vasos</span></h4>' +
           '<div class="agua-mini">' + Array.apply(null, Array(META_AGUA)).map(function(_, i){
             return '<button type="button" class="' + (i < bi.agua ? 'lleno' : '') + '" data-acc="agua" data-v="' + (i + 1) + '" aria-label="' + (i + 1) + ' vasos">' + ico('i-gota') + '</button>';
-          }).join('') + '</div>' +
-          (dia && dia.texto ? '<p class="diario-hoy">«' + esc(dia.texto.slice(0, 140)) + (dia.texto.length > 140 ? '…' : '') + '»</p>' : '') +
-        '</div></section>' +
-    '</div>';
+          }).join('') + '</div></div>' +
+        (dia && dia.texto ? '<p class="diario-hoy">«' + esc(dia.texto.slice(0, 140)) + (dia.texto.length > 140 ? '…' : '') + '»</p>' : '') +
+      '</section>';
   }
 
-  /* ---- Lo que se viene: cuentas atrás, cumpleaños y metas ---- */
+  /* ---- Lo que se viene: cuentas atrás arriba, luego los próximos días ---- */
   if(hoyVisible('viene')){
     var cr = cuentasRegresivas().slice(0, 4), cs = proximosCumples(30).slice(0, 4);
     var ms = vivos('metas').filter(function(m){ return !m.archivada; }).slice(0, 4);
@@ -3526,34 +3866,34 @@ VISTAS.hoy = function(){
       itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && prox.length < 5) prox.push({ d:d, x:x }); });
     }
     if(cr.length || cs.length || ms.length || prox.length){
-      html += tituloSecc('Lo que se viene') + '<div class="rejilla dos">' +
-        '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Próximos días', 'var(--azul)', 'Calendario', 'data-ir="calendario"') +
-          (cr.length ? '<div class="regresivas mini">' + cr.map(function(x){
-            var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
-            return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '"><b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small><span>' + esc(x.e.t) + '</span></button>';
-          }).join('') + '</div>' : '') +
-          (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
-            var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
-            return '<div class="fila"><span class="hora" style="width:62px">' + cap(relativo(p.d)).slice(0, 9) + (p.x.hora ? '<br>' + p.x.hora : '') + '</span><span class="barrita" style="--c:' + p.x.c + '"></span>' +
-              '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div><div class="meta"><span>' + ({ evento:(TIPOS_EV[p.x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', pago:'Pago' }[p.x.tipo] || '') + '</span>' + (p.x.esp ? chipEsp({ esp:p.x.esp }) : '') + '</div></div></div>';
-          }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Nada agendado los próximos 7 días.</div>') + '</section>' +
-        '<section class="tarjeta">' + cabTarjeta('i-meta', 'Metas y fechas', 'var(--oro)', 'Metas', 'data-ir="metas"') +
+      html += tituloSecc('Lo que se viene', '<button class="ver-link" data-ir="calendario">Calendario ' + ico('i-der') + '</button>');
+      if(cr.length) html += '<div class="regresivas mini regresivas-grandes">' + cr.map(function(x){
+        var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
+        return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '"><b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small><span>' + esc(x.e.t) + '</span></button>';
+      }).join('') + '</div>';
+      html += '<div class="rejilla dos viene-rejilla">';
+      html += '<section class="lista-abierta proximos-abiertos"><h4 class="sub-t">Próximos días</h4>' + (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
+          var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
+          return '<div class="fila"><span class="hora" style="width:62px">' + cap(relativo(p.d)).slice(0, 9) + (p.x.hora ? '<br>' + p.x.hora : '') + '</span><span class="barrita" style="--c:' + p.x.c + '"></span>' +
+            '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div><div class="meta"><span>' + ({ evento:(TIPOS_EV[p.x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', pago:'Pago' }[p.x.tipo] || '') + '</span>' + (p.x.esp ? chipEsp({ esp:p.x.esp }) : '') + '</div></div></div>';
+        }).join('') + '</div>' : '<p class="nada">Nada agendado los próximos 7 días.</p>') + '</section>';
+      html += '<section class="lista-abierta"><h4 class="sub-t">Metas y fechas <button class="ver-link" data-ir="metas">Metas ' + ico('i-der') + '</button></h4>' +
           (ms.length ? '<div class="metas-hoy">' + ms.map(function(m){
             var p = Math.min(1, (+m.actual || 0) / (+m.objetivo || 1));
             return '<div class="barra-h" style="grid-template-columns:minmax(0,1fr) minmax(0,1fr) 42px"><span>' + esc((m.em || '🎯') + ' ' + m.t) + '</span>' +
               '<div class="barra-prog" style="--c:' + color(m.color) + '"><i style="width:' + Math.round(p * 100) + '%"></i></div><b>' + Math.round(p * 100) + '%</b></div>';
-          }).join('') + '</div>' : '<div class="vacio" style="padding:4px 16px 8px">Sin metas activas. <button class="btn chico" data-ir="metas">Crear una</button></div>') +
+          }).join('') + '</div>' : '<p class="nada">Sin metas activas. <button class="btn chico" data-ir="metas">Crear una</button></p>') +
           (cs.length ? '<div class="lista-filas cumples-hoy">' + cs.map(function(c){
             var edad = edadCumple(c.e, c.dia);
             return '<div class="fila"><span class="em-fila">🎂</span><div class="cuerpo" data-acc="evento-ed" data-id="' + c.e.id + '"><div class="titulo">' + esc(c.e.t) + '</div>' +
               '<div class="meta"><span class="' + (c.en === 0 ? 'hoy' : '') + '">' + (c.en === 0 ? '¡Hoy!' : c.en === 1 ? 'Mañana' : 'En ' + c.en + ' días') + ' · ' + fechaCorta(c.dia) + '</span>' +
               (edad > 0 ? '<span class="cumple">cumple ' + edad + '</span>' : '') + '</div></div></div>';
-          }).join('') + '</div>' : '') + '</section>' +
-      '</div>';
+          }).join('') + '</div>' : '') + '</section>';
+      html += '</div>';
     }
   }
 
-  /* ---- Dinero: los dos libros y los pagos, en una tarjeta ---- */
+  /* ---- Dinero: los dos libros lado a lado y los pagos ---- */
   if(hoyVisible('dinero')){
     var mes = hoy.slice(0, 7), pp = pagosProximos(7);
     var libros = [['personal', CLAVE_LEDGER, '🏠 Personal'], ['oficina', CLAVE_OFICINA, '💼 Oficina']].map(function(L){
@@ -3564,14 +3904,15 @@ VISTAS.hoy = function(){
         if(t.date.slice(0, 7) === mes){ if(sg < 0) sal += a; else ent += a; }
       });
       var p = ent ? Math.min(1, sal / ent) : (sal ? 1 : 0);
-      return '<button type="button" class="libro-hoy" data-acc="din-ver" data-v="' + L[0] + '"><span class="libro-cab"><b>' + L[2] + '</b><em>Saldo ' + dinero(tot) + '</em></span>' +
+      return '<button type="button" class="libro-hoy" data-acc="din-ver" data-v="' + L[0] + '"><span class="libro-cab"><b>' + L[2] + '</b></span>' +
+        '<span class="libro-saldo">' + dinero(tot) + '</span>' +
         (n ? '<span class="libro-num"><span class="entra"><small>Entró</small>' + dinero(ent) + '</span><span class="sale"><small>Salió</small>' + dinero(sal) + '</span></span>' +
           '<span class="libro-barra" title="Lo que salió frente a lo que entró"><i style="width:' + (p * 100).toFixed(1) + '%"></i></span><small class="libro-pie">' + (ent ? 'Gastaste el ' + Math.round(sal / ent * 100) + '% de lo que entró' : 'Sin ingresos este mes') + '</small>'
          : '<span class="libro-pie">Aún no hay movimientos. Toca para anotar.</span>') + '</button>';
     }).join('');
     html += tituloSecc('Dinero', '<small>' + cap(MESES[new Date().getMonth()]) + '</small>') +
-      '<section class="tarjeta ancho-2 dinero-hoy"><div class="libros-hoy">' + libros + '</div>' +
-      (pp.length ? '<div class="pagos-hoy"><h4>' + ico('i-recibo') + 'Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
+      '<section class="dinero-hoy dinero-abierto"><div class="libros-hoy">' + libros + '</div>' +
+      (pp.length ? '<div class="pagos-hoy"><h4 class="sub-t">Pagos por vencer</h4><div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></div>' : '') +
       '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="personal">' + ico('i-plus') + 'Anotar gasto</button><button class="btn chico" data-ir="dinero">' + ico('i-grafica') + 'Ver el resumen</button><button class="btn chico" data-acc="ir-informes">' + ico('i-bajar') + 'PDF y Excel</button></div>' +
       '</section>';
   }
@@ -3579,7 +3920,7 @@ VISTAS.hoy = function(){
   /* ---- Notas fijadas ---- */
   var fijas = vivos('notas').filter(function(n){ return n.fija; });
   if(fijas.length && hoyVisible('notas')){
-    html += tituloSecc('Notas fijadas') + '<section class="tarjeta"><div class="tarjeta-cuerpo" style="padding-top:14px"><div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div></div></section>';
+    html += tituloSecc('Notas fijadas') + '<div class="notas-muro">' + fijas.map(tarjetaNota).join('') + '</div>';
   }
   html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
@@ -3868,16 +4209,17 @@ VISTAS.espacio = function(id){
   var hoyItems = ag7.filter(function(a){ return a.d === hoy && a.x.tipo !== 'tarea'; });
   var din = dineroEsp(id), tm = totalesMes(din.lista, ym);
 
-  var html = '<div class="cambia-esp">' + ESPACIOS.map(function(e){
-    return '<button type="button" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '"><span>' + e.em + '</span>' + e.nom + '</button>';
-  }).join('') + '</div>';
-
+  /* Portada del espacio: una franja de su color a todo lo ancho, el
+     nombre en grande y los otros espacios como círculos para saltar */
   var prox = ag7.filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
-  html += '<section class="heroe esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' + DECO_ESP[id] + '<div class="arriba"><div>' +
-      '<div class="fecha">' + E.em + ' ' + cap(fechaLarga(hoy)) + '</div>' +
-      '<h2>' + E.nom + '</h2><p class="frase" style="font-style:normal">' +
-      (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p></div></div>' +
-    '<div class="datos">' + datosHeroe(id) + '</div></section>';
+  var html = '<header class="portada-esp esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' +
+    '<nav class="pe-cambia cambia-esp" aria-label="Espacios">' + ESPACIOS.map(function(e){
+      return '<button type="button" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '" aria-label="' + e.nom + '"><span>' + e.em + '</span></button>';
+    }).join('') + '</nav>' +
+    '<span class="pe-em">' + E.em + '</span>' +
+    '<h2 class="pe-nom">' + E.nom + '</h2>' +
+    '<p class="pe-lema">' + (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p>' +
+    '<div class="pe-datos datos">' + datosHeroe(id) + '</div></header>';
 
   var tab = tabEsp(id);
   html += pestanasEsp(id);
@@ -5451,8 +5793,7 @@ function limpiar(k){
 
 VISTAS.secciones = function(){
   var AB = barraAbajo(), todas = navSecs(true);
-  var html = '<section class="cab-sec" style="--sc:var(--verde)"><span class="cab-sec-ico">' + ico('i-espacios') + '</span><div class="cab-sec-txt"><b>Administrar secciones</b><small>' +
-    todas.filter(function(s){ return !secOculta(s.id); }).length + ' de ' + todas.length + ' a la vista · ordénalas, ocúltalas y elige tu barra</small></div></section>';
+  var html = '';
 
   /* La barra de abajo del celular */
   var cand = [{ id:'espacios', nom:'Espacios', ico:'i-espacios' }].concat(SECCIONES.filter(function(s){ return !s.oculta && !s.esp; }));
@@ -5643,11 +5984,32 @@ function cabSeccion(v){
       d = { c:'var(--rosa)', i:'i-diario', t:'Diario', s:ents.length + (ents.length === 1 ? ' día escrito' : ' días escritos') + ' este mes' + (media ? ' · ánimo medio ' + ['😢','😕','😐','🙂','😄'][Math.round(media) - 1] : '') };
     } else if(v === 'progreso'){
       d = { c:'var(--haber)', i:'i-grafica', t:'Progreso', s:'Cómo vas en tareas, hábitos, enfoque y ánimo' };
+    } else if(v === 'calendario'){
+      var fin7 = sumarDias(hoy, 6), ne = 0;
+      for(var ci = 0; ci < 7; ci++) ne += itemsDelDia(sumarDias(hoy, ci)).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
+      d = { c:'var(--azul)', i:'i-cal', t:'Calendario', s:ne + (ne === 1 ? ' cosa agendada' : ' cosas agendadas') + ' en los próximos 7 días' + (feriado(hoy) ? ' · hoy es feriado 🇵🇪' : '') };
+    } else if(v === 'dinero'){
+      d = { c:'var(--haber)', i:'i-grafica', t:'Dinero', s:'Tus gastos personales y la oficina, de un vistazo' };
+    } else if(v === 'foco'){
+      d = { c:'var(--debe)', i:'i-reloj', t:'Enfoque', s:'Trabaja por bloques y descansa entre medio' };
+    } else if(v === 'revision'){
+      d = { c:'var(--verde)', i:'i-check', t:'Revisión semanal', s:'Mira cómo te fue y elige lo importante de la próxima semana' };
+    } else if(v === 'ajustes'){
+      d = { c:'var(--tinta-2)', i:'i-ajustes', t:'Ajustes', s:'Tu nombre, apariencia, avisos, nube y respaldos' };
+    } else if(v === 'secciones'){
+      var tv = navSecs(true);
+      d = { c:'var(--verde)', i:'i-espacios', t:'Secciones', s:tv.filter(function(x){ return !secOculta(x.id); }).length + ' de ' + tv.length + ' a la vista · ordénalas, ocúltalas y elige tu barra' };
+    } else if(v === 'papelera'){
+      var np = enPapelera().length;
+      d = { c:'var(--debe)', i:'i-basura', t:'Papelera', s:np ? np + (np === 1 ? ' cosa' : ' cosas') + ' para recuperar · se borran solas a los ' + DIAS_PAPELERA + ' días' : 'Vacía' };
     }
   }catch(e){ d = null; }
   if(!d) return '';
-  return '<section class="cab-sec" style="--sc:' + d.c + '"><span class="cab-sec-ico">' + ico(d.i) + '</span><div class="cab-sec-txt"><b>' + d.t + '</b><small>' + d.s + '</small></div>' +
-    (d.p != null ? '<div class="cab-sec-prog" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') + '</section>';
+  /* Título grande y abierto, sin caja: el color de la sección arriba, el
+     resumen debajo y, si hay avance, una línea fina con el porcentaje */
+  return '<header class="cab-grande cab-sec" style="--sc:' + d.c + '"><span class="cg-ico">' + ico(d.i) + '</span>' +
+    '<h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p>' +
+    (d.p != null ? '<div class="cg-prog" title="' + esc(d.pt || '') + '"><i style="width:' + Math.round(Math.max(0, Math.min(1, d.p)) * 100) + '%"></i><b>' + Math.round(d.p * 100) + '%</b><span>' + esc(d.pt || '') + '</span></div>' : '') + '</header>';
 }
 
 /* ==========================================================================
@@ -5742,23 +6104,27 @@ VISTAS.tareas = function(){
     return html + '<div class="tarjeta">' + vacio(txt[0], txt[1], txt[2]) + '</div>';
   }
 
+  /* Como una agenda de papel: cada grupo con su fecha grande a la izquierda */
   var grupos = [], idx = {};
-  function meter(clave, titulo, rojo, t){
-    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[] }); }
+  function meter(clave, titulo, rojo, t, num, sub){
+    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[], num:num, sub:sub, hoy:clave === 'b' }); }
     grupos[idx[clave]].l.push(t);
   }
   lista.forEach(function(t){
-    if(!t.fecha) meter('z', 'Sin fecha', false, t);
-    else if(t.fecha < hoy) meter('a', 'Atrasadas', true, t);
-    else if(t.fecha === hoy) meter('b', 'Hoy', false, t);
-    else if(t.fecha <= fin7) meter('c' + t.fecha, cap(relativo(t.fecha)) + ' · ' + fechaCorta(t.fecha), false, t);
-    else meter('y' + t.fecha.slice(0, 7), cap(MESES[deISO(t.fecha).getMonth()]) + ' ' + t.fecha.slice(0, 4), false, t);
+    var f = t.fecha && deISO(t.fecha);
+    if(!t.fecha) meter('z', 'Sin fecha', false, t, '∞', 'algún día');
+    else if(t.fecha < hoy) meter('a', 'Atrasadas', true, t, '!', 'pendiente');
+    else if(t.fecha === hoy) meter('b', 'Hoy', false, t, f.getDate(), DIAS3[f.getDay()]);
+    else if(t.fecha <= fin7) meter('c' + t.fecha, cap(relativo(t.fecha)), false, t, f.getDate(), DIAS3[f.getDay()]);
+    else meter('y' + t.fecha.slice(0, 7), cap(MESES[f.getMonth()]) + ' ' + t.fecha.slice(0, 4), false, t, MESES3[f.getMonth()], t.fecha.slice(0, 4));
   });
-  return html + grupos.map(function(g){
-    return '<div class="seccion-tit' + (g.rojo ? ' rojo' : '') + '">' + g.t + ' <span class="n">' + g.l.length + '</span>' +
-      (g.rojo ? '<button class="btn chico" style="margin-left:auto;text-transform:none;letter-spacing:0" data-acc="t-atrasadas-hoy">Pasar a hoy</button>' : '') + '</div>' +
-      '<div class="tarjeta"><div class="lista-filas">' + g.l.map(filaTarea).join('') + '</div></div>';
-  }).join('');
+  return html + '<div class="planner">' + grupos.map(function(g){
+    return '<section class="pl-dia' + (g.rojo ? ' rojo' : '') + (g.hoy ? ' es-hoy' : '') + '">' +
+      '<div class="pl-fecha"><b>' + g.num + '</b><span>' + g.sub + '</span></div>' +
+      '<div class="pl-cuerpo"><h3 class="pl-tit">' + g.t + ' <span class="n">' + g.l.length + '</span>' +
+        (g.rojo ? '<button class="btn chico" data-acc="t-atrasadas-hoy">Pasar a hoy</button>' : '') + '</h3>' +
+        '<div class="lista-filas">' + g.l.map(filaTarea).join('') + '</div></div></section>';
+  }).join('') + '</div>';
 };
 
 /* ---------- Calendario ---------------------------------------------------- */
@@ -6050,16 +6416,18 @@ function importarICS(archivo){
 function filaRec(r){
   var hecho = r.hecho && (!r.rep || r.rep === 'no');
   var m = momentoR(r), f = m.slice(0, 10), h = m.slice(11, 16);
-  return '<div class="fila' + (hecho ? ' hecha' : '') + '" data-fila="' + r.id + '">' +
-    casilla('rec-ok', r.id, hecho, 'var(--oro)') +
+  var tarde = !hecho && m <= hoyISO() + 'T' + horaAhora();
+  return '<div class="fila fila-rec' + (hecho ? ' hecha' : '') + (tarde ? ' tarde' : '') + '" data-fila="' + r.id + '">' +
+    '<div class="rec-hora" data-acc="rec-ed" data-id="' + r.id + '"><b>' + (h || '—') + '</b><span>' + (f === hoyISO() ? 'hoy' : relativo(f).toLowerCase().slice(0, 12)) + '</span></div>' +
     '<div class="cuerpo" data-acc="rec-ed" data-id="' + r.id + '">' +
       '<div class="titulo">' + esc(r.t) + '</div>' +
-      '<div class="meta">' + metaFecha(f, h, hecho) +
+      '<div class="meta">' + (f !== hoyISO() ? '<span>' + fechaCorta(f) + '</span>' : '') +
         (r.rep && r.rep !== 'no' ? '<span>' + ico('i-rep') + REPS_CORTO[r.rep] + '</span>' : '') +
         (r.pospuesto ? '<span>' + ico('i-dormir') + 'pospuesto</span>' : '') +
       '</div>' +
     '</div>' +
-    (!hecho ? '<div class="lado"><button class="btn-icono" data-acc="rec-posponer" data-id="' + r.id + '" title="Posponer" aria-label="Posponer">' + ico('i-dormir') + '</button></div>' : '') +
+    '<div class="lado">' + (!hecho ? '<button class="btn-icono" data-acc="rec-posponer" data-id="' + r.id + '" title="Posponer" aria-label="Posponer">' + ico('i-dormir') + '</button>' : '') +
+      casilla('rec-ok', r.id, hecho, 'var(--oro)') + '</div>' +
   '</div>';
 }
 
@@ -6086,8 +6454,8 @@ VISTAS.recordatorios = function(){
   if(!pend.length && !hechos.length) return html + '<div class="tarjeta">' + vacio('🔔', 'Sin recordatorios', 'Escribe arriba qué y cuándo, y la agenda te avisa.') + '</div>';
   function bloque(t, l, rojo){
     if(!l.length) return '';
-    return '<div class="seccion-tit' + (rojo ? ' rojo' : '') + '">' + t + ' <span class="n">' + l.length + '</span></div>' +
-      '<div class="tarjeta"><div class="lista-filas">' + l.map(filaRec).join('') + '</div></div>';
+    return '<section class="rec-bloque' + (rojo ? ' rojo' : '') + '"><h3 class="seccion-tit' + (rojo ? ' rojo' : '') + '">' + t + ' <span class="n">' + l.length + '</span></h3>' +
+      '<div class="lista-filas rec-lista">' + l.map(filaRec).join('') + '</div></section>';
   }
   html += bloque('Pasados sin marcar', venc, true) + bloque('Hoy', hoyL) + bloque('Próximos', prox);
   if(!pend.length) html += '<div class="tarjeta">' + vacio('✨', 'Todo al día') + '</div>';
@@ -6112,21 +6480,18 @@ VISTAS.listas = function(){
     var items = l.items || [];
     var ok = items.filter(function(x){ return x.ok; }).length;
     var orden = items.filter(function(x){ return !x.ok; }).concat(items.filter(function(x){ return x.ok; }));
-    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">' +
-        '<button class="btn chico" data-acc="lista-volver">' + ico('i-izq') + 'Listas</button>' +
-        '<div style="flex:1"></div>' +
-        '<button class="btn-icono" data-acc="lista-ed" data-id="' + l.id + '" title="Editar lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button>' +
-      '</div>' +
-      '<div class="tarjeta" style="--c:' + color(l.color) + '">' +
-        '<div class="tarjeta-cuerpo" style="padding:16px">' +
-          '<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="font-size:28px">' + esc(l.em || '📝') + '</span>' +
-          '<div style="flex:1;min-width:0"><b style="font-size:18px;display:block">' + esc(l.nombre) + '</b><small style="color:var(--tinta-3)">' + ok + ' de ' + items.length + ' marcados</small></div></div>' +
-          '<div class="barra-prog"><i style="width:' + (items.length ? ok / items.length * 100 : 0) + '%"></i></div>' +
-        '</div>' +
-        '<form class="captura" data-acc="item-nuevo" style="margin:0 12px 10px;box-shadow:none" autocomplete="off">' +
+    var pl = items.length ? ok / items.length : 0, CL = 2 * Math.PI * 22;
+    return '<div class="hoja-lista" style="--c:' + color(l.color) + '">' +
+        '<div class="hl-barra"><button class="btn chico" data-acc="lista-volver">' + ico('i-izq') + 'Listas</button>' +
+          '<button class="btn-icono" data-acc="lista-ed" data-id="' + l.id + '" title="Editar lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button></div>' +
+        '<header class="hl-cab"><span class="hl-em">' + esc(l.em || '📝') + '</span>' +
+          '<div class="hl-txt"><h2>' + esc(l.nombre) + '</h2><p>' + (items.length ? (items.length - ok) + ' por marcar · ' + ok + ' de ' + items.length + ' listos' : 'Todavía vacía') + '</p></div>' +
+          '<svg class="hl-anillo" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" class="f"/><circle cx="26" cy="26" r="22" class="v" stroke-dasharray="' + CL.toFixed(1) + '" stroke-dashoffset="' + (CL * (1 - pl)).toFixed(1) + '"/><text x="26" y="30" text-anchor="middle">' + Math.round(pl * 100) + '%</text></svg>' +
+        '</header>' +
+        '<form class="captura hl-captura" data-acc="item-nuevo" autocomplete="off">' +
           '<input id="nuevoItem" type="text" maxlength="160" placeholder="Añadir a la lista… (Enter)" enterkeyhint="enter">' +
           '<button type="submit" class="btn primario chico">' + ico('i-plus') + '</button></form>' +
-        (orden.length ? '<div class="lista-filas" style="border-top:1px solid var(--regla-2)">' + orden.map(function(x){
+        (orden.length ? '<div class="lista-filas hl-renglones">' + orden.map(function(x){
           return '<div class="item-lista' + (x.ok ? ' ok' : '') + '">' + casilla('item-ok', x.id, x.ok, color(l.color), true) +
             '<span class="t" data-acc="item-ed" data-id="' + x.id + '">' + esc(x.t) + '</span>' +
             '<button class="btn-icono" data-acc="item-quitar" data-id="' + x.id + '" aria-label="Quitar">' + ico('i-x') + '</button></div>';
@@ -6140,14 +6505,20 @@ VISTAS.listas = function(){
   var ls = vivos('listas').sort(function(a, b){ return (a.creada || 0) - (b.creada || 0); });
   return '<div class="listas-rejilla">' + ls.map(function(x){
       var its = x.items || [], ok2 = its.filter(function(i){ return i.ok; }).length;
-      return '<button type="button" class="tarjeta tarjeta-lista" style="--c:' + color(x.color) + '" data-acc="lista-abrir" data-id="' + x.id + '">' +
-        '<div class="cab"><span class="em">' + esc(x.em || '📝') + '</span><div style="min-width:0"><b>' + esc(x.nombre) + '</b>' +
-        '<small>' + (its.length ? (its.length - ok2) + ' por marcar · ' + its.length + ' en total' : 'Vacía') + '</small></div></div>' +
-        '<div class="barra-prog"><i style="width:' + (its.length ? ok2 / its.length * 100 : 0) + '%"></i></div>' +
+      /* Una tapa de libreta: su color arriba, lo primero que falta a la vista */
+      var pl = its.length ? ok2 / its.length : 0, CL = 2 * Math.PI * 15;
+      var faltan = its.filter(function(i){ return !i.ok; }).slice(0, 3);
+      return '<button type="button" class="tarjeta tarjeta-lista libreta" style="--c:' + color(x.color) + '" data-acc="lista-abrir" data-id="' + x.id + '">' +
+        '<span class="lb-lomo"></span>' +
+        '<span class="lb-cab"><span class="em">' + esc(x.em || '📝') + '</span>' +
+          '<svg class="lb-anillo" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="f"/><circle cx="18" cy="18" r="15" class="v" stroke-dasharray="' + CL.toFixed(1) + '" stroke-dashoffset="' + (CL * (1 - pl)).toFixed(1) + '"/></svg></span>' +
+        '<b class="lb-nom">' + esc(x.nombre) + '</b>' +
+        '<small class="lb-cuenta">' + (its.length ? (its.length - ok2) + ' por marcar · ' + its.length + ' en total' : 'Vacía') + '</small>' +
+        (faltan.length ? '<span class="lb-items">' + faltan.map(function(i){ return '<span>' + esc(i.t) + '</span>'; }).join('') + '</span>' : '') +
       '</button>';
     }).join('') +
-    '<button type="button" class="tarjeta tarjeta-lista" data-acc="nuevo" data-tipo="lista" style="border-style:dashed;align-items:center;justify-content:center;min-height:98px;color:var(--tinta-2)">' +
-      ico('i-plus') + '<b style="font-size:14px">Nueva lista</b></button>' +
+    '<button type="button" class="tarjeta tarjeta-lista libreta nueva" data-acc="nuevo" data-tipo="lista">' +
+      ico('i-plus') + '<b>Nueva lista</b></button>' +
   '</div>' +
   (!ls.length ? '<p style="color:var(--tinta-3);font-size:13px;margin-top:14px">Listas para marcar: la compra, la maleta, lo que falta en casa, pelis por ver… Se pueden desmarcar enteras para volver a usarlas.</p>' : '');
 };
@@ -6185,24 +6556,38 @@ VISTAS.habitos = function(){
       }).join('') + '</div></div>' +
       '<div style="margin-top:12px"><button class="btn primario" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Crear mi propio hábito</button></div>';
   }
-  return '<div class="rejilla dos">' + hs.map(function(x){
-    var r = racha(x), pc = cumplimiento(x);
-    var dias = [];
-    for(var i = 6; i >= 0; i--) dias.push(sumarDias(hoy, -i));
-    var frec = !x.dias || x.dias.length === 7 ? 'Cada día' : x.dias.length + ' días por semana';
-    return '<section class="tarjeta habito">' +
-      '<div class="cab"><span class="em">' + esc(x.em || '⭐') + '</span>' +
-        '<div class="nom"><b>' + esc(x.nombre) + '</b><small>' + frec + '</small></div>' +
-        '<span class="racha" title="Racha">🔥 ' + r + '</span>' +
-        '<button class="btn-icono" data-acc="habito-ed" data-id="' + x.id + '" aria-label="Editar">' + ico('i-lapiz') + '</button></div>' +
-      '<div class="dias-habito">' + dias.map(function(d){
-        var w = deISO(d).getDay(), libre = x.dias && x.dias.indexOf(w) < 0, ok = x.marcas && x.marcas[d];
-        return '<button type="button" class="dia-h' + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '">' +
-          DIAS3[w] + '<span class="c">' + CHECK + '</span></button>';
-      }).join('') + '</div>' +
-      '<div class="pie-h"><span>Últimos 30 días</span><div class="barra-prog"><i style="width:' + Math.round(pc * 100) + '%"></i></div><b>' + Math.round(pc * 100) + '%</b></div>' +
-    '</section>';
-  }).join('') + '</div>';
+  /* Arriba: lo de hoy en anillos grandes, un toque y listo */
+  var wd = deISO(hoy).getDay(), CH = 2 * Math.PI * 30;
+  var deHoy = hs.filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+  var okHoy = deHoy.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+  var html = '<section class="hab-hoy"><h3 class="seccion-tit">Hoy <span class="n">' + okHoy + ' de ' + deHoy.length + '</span></h3>' +
+    (deHoy.length ? '<div class="hab-anillos">' + deHoy.map(function(x){
+      var ok = !!(x.marcas && x.marcas[hoy]), r = racha(x);
+      return '<button type="button" class="hab-anillo' + (ok ? ' ok' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + hoy + '" aria-pressed="' + ok + '">' +
+        '<svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" class="f"/><circle cx="36" cy="36" r="30" class="v" stroke-dasharray="' + CH.toFixed(1) + '" stroke-dashoffset="' + (ok ? 0 : CH).toFixed(1) + '"/></svg>' +
+        '<span class="em">' + esc(x.em || '⭐') + '</span>' +
+        '<b>' + esc(x.nombre) + '</b><small>' + (r ? '🔥 ' + r + (r === 1 ? ' día' : ' días') : 'Empieza hoy') + '</small></button>';
+    }).join('') + '</div>' : '<p class="nada">Hoy no toca ningún hábito. 😌</p>') + '</section>';
+
+  /* Abajo: la tabla de seguimiento, como en un cuaderno (14 días) */
+  var dias = [];
+  for(var i = 13; i >= 0; i--) dias.push(sumarDias(hoy, -i));
+  html += '<h3 class="seccion-tit">Seguimiento <span class="n">últimos 14 días</span></h3>' +
+    '<section class="hab-tabla"><div class="ht-fila ht-cab"><span class="ht-nom"></span>' + dias.map(function(d, k){
+      return '<span class="ht-d' + (k < 4 ? ' lejos' : '') + (d === hoy ? ' hoy' : '') + '">' + DIAS3[deISO(d).getDay()].charAt(0) + '<i>' + deISO(d).getDate() + '</i></span>';
+    }).join('') + '<span class="ht-racha">🔥</span></div>' +
+    hs.map(function(x){
+      var r = racha(x), pc = cumplimiento(x);
+      var frec = !x.dias || x.dias.length === 7 ? 'Cada día' : x.dias.length + ' días por semana';
+      return '<div class="ht-fila habito"><button type="button" class="ht-nom" data-acc="habito-ed" data-id="' + x.id + '" title="Editar"><span class="em">' + esc(x.em || '⭐') + '</span><span class="t"><b>' + esc(x.nombre) + '</b><small>' + frec + ' · ' + Math.round(pc * 100) + '%</small></span></button>' +
+        dias.map(function(d, k){
+          var w = deISO(d).getDay(), libre = x.dias && x.dias.indexOf(w) < 0, ok = x.marcas && x.marcas[d];
+          return '<button type="button" class="ht-c dia-h' + (k < 4 ? ' lejos' : '') + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '" aria-label="' + esc(x.nombre) + ' el ' + fechaCorta(d) + '"><span class="c">' + CHECK + '</span></button>';
+        }).join('') +
+        '<span class="ht-racha"><b>' + r + '</b></span></div>';
+    }).join('') + '</section>' +
+    '<div class="pie-fila-btn" style="padding:14px 0 0"><button class="btn chico" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Nuevo hábito</button></div>';
+  return html;
 };
 
 /* ---------- Notas ---------------------------------------------------------- */
@@ -6607,12 +6992,15 @@ VISTAS.metas = function(){
       ritmo = dias > 0 ? 'Quedan ' + dias + ' días · ' + formNum(falta / dias) + ' ' + esc(m.unidad || '') + ' al día para llegar'
                        : dias === 0 ? 'La fecha límite es hoy' : 'La fecha límite pasó hace ' + (-dias) + ' días';
     }
-    return '<section class="tarjeta meta-t' + (p >= 1 ? ' lograda' : '') + '" style="--c:' + color(m.color) + '">' +
-      '<div class="cab"><span class="em">' + esc(m.em || '🎯') + '</span><div class="nom"><b>' + esc(m.t) + '</b>' +
-        '<small>' + (p >= 1 ? '🎉 ¡Lograda!' : 'Faltan ' + formNum(falta) + ' ' + esc(m.unidad || '')) + (m.fecha ? ' · hasta el ' + fechaCorta(m.fecha) : '') + '</small></div>' +
+    /* Un medidor en semicírculo con el porcentaje en el centro */
+    var L = Math.PI * 44;
+    return '<section class="tarjeta meta-t medidor' + (p >= 1 ? ' lograda' : '') + '" style="--c:' + color(m.color) + '">' +
+      '<div class="md-cab"><span class="em">' + esc(m.em || '🎯') + '</span><b class="md-nom">' + esc(m.t) + '</b>' +
         '<button class="btn-icono" data-acc="meta-ed" data-id="' + m.id + '" aria-label="Editar">' + ico('i-lapiz') + '</button></div>' +
-      '<div class="cifra-grande">' + formNum(act) + ' <small>/ ' + formNum(obj) + ' ' + esc(m.unidad || '') + ' · ' + Math.round(p * 100) + '%</small></div>' +
-      '<div class="barra-prog"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div>' +
+      '<div class="md-arco"><svg viewBox="0 0 104 60"><path d="M8 54 A44 44 0 0 1 96 54" class="f"/><path d="M8 54 A44 44 0 0 1 96 54" class="v" stroke-dasharray="' + L.toFixed(1) + '" stroke-dashoffset="' + (L * (1 - p)).toFixed(1) + '"/></svg>' +
+        '<span class="md-pct">' + Math.round(p * 100) + '<small>%</small></span></div>' +
+      '<div class="md-cifras"><b>' + formNum(act) + '</b> de ' + formNum(obj) + ' ' + esc(m.unidad || '') + '</div>' +
+      '<div class="md-falta">' + (p >= 1 ? '🎉 ¡Lograda!' : 'Faltan ' + formNum(falta) + ' ' + esc(m.unidad || '')) + (m.fecha ? ' · hasta el ' + fechaCorta(m.fecha) : '') + '</div>' +
       (ritmo ? '<div class="ritmo">' + ritmo + '</div>' : '') +
       '<div class="acciones">' +
         '<button class="btn chico" data-acc="meta-sumar" data-id="' + m.id + '" data-n="-1">−1</button>' +
