@@ -19,8 +19,8 @@ Todo (tareas, eventos, recordatorios, notas, listas, hábitos, metas y pagos) pe
 
 | Espacio | Lo propio |
 |---|---|
-| 🏠 **Personal** | Cómo te sientes hoy, pagos de la casa, tus cuentas personales. |
-| 🎓 **Estudios** | **Cursos con horario** (las clases salen solas en el calendario), **notas y promedio** de cada curso (sobre 20, con pesos), **exámenes** con cuenta atrás, **horas de estudio** con el temporizador y lo que gastas en estudios. |
+| 🏠 **Personal** | Tu semana, pagos de la casa y tus cuentas personales. |
+| 🎓 **Estudios** | **Cursos con horario** (las clases salen solas en el calendario), **notas y promedio** de cada curso (sobre 20, con pesos), **exámenes** con cuenta atrás y lo que gastas en estudios. |
 | 💼 **Oficina** | **Reuniones** de la semana, **cobros pendientes** de clientes (al cobrar, el ingreso se anota solo en el libro de la oficina), pagos y cuentas de la oficina. |
 | ⚽ **Deporte** | **Entrenamientos** con un toque (fútbol, gym, correr, bici, nadar), horas y sesiones de los últimos 7 días, **semanas seguidas activo**, **partidos** con resultado, **peso** con su gráfica y lo que gastas en deporte. |
 
@@ -28,21 +28,21 @@ Cada espacio tiene además **su propio estilo** y lo suyo:
 
 | Espacio | Cómo se ve | Qué trae de propio |
 |---|---|---|
-| 🏠 **Personal** | Cálido: degradado melocotón y lila, burbujas, tarjetas redondas. | **Agua** (8 vasos al día, con un toque) y **sueño** (horas y tu semana), **lista de compras** para tachar con un toque o añadir sin salir, **fechas importantes** (cumpleaños y aniversarios con cuenta atrás). |
+| 🏠 **Personal** | Cálido: degradado melocotón y lila, burbujas, tarjetas redondas. | **Lista de compras** para tachar con un toque o añadir sin salir, **fechas importantes** (cumpleaños y aniversarios con cuenta atrás). |
 | 🎓 **Estudios** | Pizarra con marco de madera y fórmulas en tiza; tarjetas de cuaderno con margen rojo y títulos con serifa. | **Nota que necesitas** en lo que falta para aprobar (con pesos que sumen 100 %), **faltas** por curso con su límite y botón −1 para anotar una falta. |
 | 💼 **Oficina** | Despacho: azul marino con cuadrícula, línea dorada y gráfica de fondo, tarjetas sobrias. | **Cronómetro de horas por cliente**: empiezas, paras y queda anotado. Horas de hoy y de la semana, **facturable del mes** según la tarifa por hora y reparto por cliente. |
 | ⚽ **Deporte** | Una cancha con sus líneas; títulos en cursiva deportiva. | **Tus números en la cancha**: marcador con partidos jugados, goles, asistencias y goles por partido, ganados/empatados/perdidos y tu racha de los últimos 5. Al editar un partido marca "Ya lo jugué". |
 
 ### Pestañas de cada espacio
 
-Cada espacio tiene su **Resumen** (lo que viene, lo pendiente y los atajos a proyectos, metas, notas y dinero, todo en una sola tarjeta) y tres pestañas con herramientas que solo tienen sentido ahí. Los números del saludo también cambian según el espacio.
+Cada espacio tiene su **Resumen** (lo que viene, lo pendiente y los atajos a proyectos, metas, notas y dinero, todo en una sola tarjeta) y sus pestañas con herramientas que solo tienen sentido ahí. Los números del saludo también cambian según el espacio.
 
 | Espacio | Pestañas propias |
 |---|---|
-| 🏠 Personal | **Casa**: lo que toca cada tanto (sábanas, plantas, refrigeradora…) con barra de "cuánto falta" y botón Hecho, más la compra y los préstamos. **Comidas**: menú de la semana (almuerzo y cena), dado 🎲 con ideas de platos, repetir la semana pasada o llenar lo vacío. **Fechas**: cumpleaños y aniversarios más **documentos que vencen** (DNI, pasaporte, SOAT…) con recordatorio automático un mes antes. |
-| 🎓 Estudios | **Cursos**: horario, notas, nota necesaria y faltas. **Repaso**: **fichas de pregunta y respuesta** por curso, con sistema de cajas (la que sabes tarda más en volver; la que fallas vuelve mañana). **Exámenes**: los **temas** de cada examen para marcar, con cuántos repasar por día. En el Resumen, las clases de hoy y mañana con aviso de "EN CLASE". |
-| 💼 Oficina | **Tablero**: tus tareas de la oficina en Por hacer / En curso / Hecho. **Clientes**: ficha con contacto, WhatsApp, llamada y correo, horas del mes, lo que te debe y lo que te pagó, y botones para anotar un cobro o empezar el cronómetro. **Reuniones**: **actas** con asistentes, lo hablado y acuerdos con responsable; un acuerdo marcado como "Tarea" pasa a tu tablero. |
-| ⚽ Deporte | **Gym**: rutinas y récords, **temporizador de descanso** entre series (pita al final) y tu cuerpo con peso e **IMC**. **Cancha**: tus números, **armar la pichanga** (jugadores, cuota de la cancha por cabeza, quién pagó y lista para pegar en WhatsApp) y los próximos partidos. **Cardio**: km del mes, ritmo medio y mejor ritmo, meta semanal de km, km de las últimas 8 semanas y **temporizador de intervalos** (HIIT/Tabata). En el Resumen, un mapa de tus últimas 12 semanas de actividad. |
+| 🏠 Personal | **Casa**: la lista de compras y el **menú de la semana** (almuerzo y cena). **Papeles**: cumpleaños y aniversarios, **documentos que vencen** (DNI, pasaporte, SOAT…) con recordatorio automático un mes antes, y los préstamos. |
+| 🎓 Estudios | **Cursos**: horario, notas, nota necesaria y faltas. En el Resumen, tu semana y los **exámenes** con cuenta atrás. |
+| 💼 Oficina | **Clientes**: ficha con contacto, WhatsApp, llamada y correo, lo que te debe y lo que te pagó. **Trabajo**: tablero Por hacer / En curso / Hecho y **actas** de reuniones; un acuerdo marcado como "Tarea" pasa a tu tablero. |
+| ⚽ Deporte | **Entreno**: rutinas y récords, temporizador de descanso entre series y tu cuerpo con peso e **IMC**. **Cancha**: tus partidos. |
 
 En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mandan a ese espacio (también entiende `#trabajo`, `#gym`, `#futbol`, `#uni`…). El Calendario y las Tareas se pueden filtrar por espacio.
 
@@ -51,7 +51,7 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 | Qué | Para qué |
 |---|---|
 | **Proyectos** | Juntan las tareas de algo grande (la tesis, la web de un cliente, una mudanza), en su espacio y con fecha límite. Ves el avance en un anillo, la siguiente tarea y cuántas tareas por semana necesitas para llegar. |
-| **Calendario** | Cinco vistas: **Día** (por horas, con la línea roja de "ahora"), **Semana**, **Mes**, **Agenda** y **Año**. En el celular deslizas el dedo para pasar de día, semana o mes. Tocando un hueco del día o de la semana creas un evento a esa hora; en el Mes escribes «dentista 4pm» o «cumpleaños de Ana» y queda en el día elegido. Muestra los **feriados de Perú**, se filtra por espacio y por tipo (eventos, tareas, avisos, clases, pagos) e **importa de Google Calendar** (archivo .ics) sin duplicar. |
+| **Calendario** | Cinco vistas: **Día** (por horas, con la línea roja de "ahora"), **Semana**, **Mes**, **Agenda** y **Año**. En el celular deslizas el dedo para pasar de día, semana o mes. Tocando un hueco del día o de la semana creas un evento a esa hora; en el Mes escribes «dentista 4pm» o «cumpleaños de Ana» y queda en el día elegido. Se filtra por espacio y por tipo (eventos, tareas, avisos, clases, pagos) e **importa de Google Calendar** (archivo .ics) sin duplicar. |
 | **Préstamos** (en Personal) | Quién te debe y a quién le debes. Al saldarlo se anota solo en tu libro. |
 | **Tu día** | Una línea de tiempo con la marca de "ahora"; lo que ya pasó se apaga. El saludo muestra cuánto del día llevas. |
 
@@ -71,8 +71,8 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 |---|---|
 | **Saludo** | La fecha, tu frase, el anillo de tareas hechas y cuatro números (por hacer, en agenda, avisos, por pagar). |
 | **Tus espacios** | Los cuatro espacios con lo próximo de cada uno y cómo va su semana. |
-| **Ahora** | **Lo siguiente** que tienes y cuánto falta, tu enfoque del día y **Tu día** por horas, con la semana arriba para saltar a otro día. |
-| **Por hacer** | Las tareas de hoy y **Tu bienestar**: ánimo, hábitos y agua en una sola tarjeta. |
+| **Ahora** | **Lo siguiente** que tienes y cuánto falta y **Tu día** por horas, con la semana arriba para saltar a otro día. |
+| **Por hacer** | Las tareas de hoy y tus hábitos. |
 | **Lo que se viene** | Cuentas regresivas, los próximos 7 días, tus metas y los cumpleaños. |
 | **Dinero** | Los dos libros lado a lado (entró, salió, saldo y cuánto gastaste de lo que entró) y los pagos por vencer. |
 
@@ -82,29 +82,26 @@ Con **"Elegir qué ver en Hoy"** (al final de Hoy o en el menú Todo) ocultas la
 
 | Sección | Para qué |
 |---|---|
-| **Hoy** | Saludo, frase del día, tus 4 espacios con lo que tienen para hoy, tu día por horas, enfoque del día, tareas, hábitos, ánimo, pagos, metas, cumpleaños, la semana y el dinero de los dos libros. |
+| **Hoy** | Saludo, frase del día, tus 4 espacios con lo que tienen para hoy, tu día por horas, tareas, hábitos, pagos, metas, cumpleaños, la semana y el dinero de los dos libros. |
 | **Tareas, Calendario, Recordatorios, Listas, Notas** | Lo de siempre, ahora con su espacio y su color. Los eventos pueden ser evento, reunión, examen, partido o cita. |
-| **Hábitos** (pestañas Hábitos · Metas · Diario) | Rachas, metas con ritmo y diario con ánimo. El temporizador pomodoro (Enfoque) está dentro de Estudios, en «Estudiar ahora». |
+| **Hábitos** (pestañas Hábitos · Metas · Diario) | Rachas, metas con ritmo y un diario para contar tu día en un par de líneas. |
 | **Dinero** | Los dos libros de un vistazo: resultado del mes, comparación con el mes pasado a estas alturas, presupuesto, últimos 6 meses, en qué se va y anotar en segundos. |
 | **Pagos fijos** | Luz, internet, alquiler… Al marcarlos pagados se anotan solos como gasto en el libro que toca. |
 | **Libro personal y Libro de oficina** | Tus dos libros de cuentas completos. |
 | **Descargar informes** (en Dinero) | Excel y PDF de tus gastos personales, de la oficina o de los dos, del periodo que elijas: este mes, el pasado, 90 días, el año, todo o entre dos fechas. El Excel trae los movimientos con fórmulas y los resúmenes por mes y por categoría; el PDF, el informe listo para imprimir o enviar. |
 | **Con carácter** | Letra condensada y fuerte (Barlow Condensed) tipo marcador deportivo, títulos grandes en mayúsculas, cifras de tablero, esquinas rectas, colores sobrios: grafito con azul eléctrico, y cada espacio en su tono (celeste, turquesa, pizarra y verde) y frases cortas de ánimo en las barras de avance («A darle», «En marcha», «Buen ritmo», «Recta final», «Misión cumplida»). |
-| **Espacios con lo justo** | Cada espacio tiene Resumen y dos pestañas: Personal (Casa · Papeles), Estudios (Cursos · Repaso), Oficina (Clientes · Trabajo) y Deporte (Entreno · Cancha). |
+| **Espacios con lo justo** | Cada espacio tiene Resumen y sus pestañas: Personal (Casa · Papeles), Estudios (Cursos), Oficina (Clientes · Trabajo) y Deporte (Entreno · Cancha). |
 | **Gasto rápido** | Una hoja con el monto en grande (teclado numérico con suma), tus categorías más usadas a un toque, Personal u Oficina y gasto o ingreso; te dice cuánto te queda para hoy. Se abre desde Hoy, desde el +, manteniendo pulsado el + o desde el acceso directo del icono. |
 | **Menú rápido del +** | Mantén pulsado el botón +: Gasto, Tarea, Evento, Aviso y Nota a un toque. |
 | **Accesos directos del icono** | Mantén pulsado el icono de la agenda instalada: «Anotar gasto», «Añadir tarea», Calendario y Tareas. |
 | **Notas con casillas** | Las líneas que empiezan con [ ] son casillas que se marcan desde el muro, sin abrir la nota (el botón ☑ del editor las crea). |
 | **Búsquedas recientes** | El buscador recuerda tus últimas búsquedas. |
-| **Teclado propio** | En el celular, los campos usan el teclado de la agenda: letras con ñ, tildes manteniendo pulsada la vocal (o con la fila á é í ó ú ¿ ¡), mayúsculas automáticas al empezar, números y símbolos, emojis, atajos de fecha y hora al crear algo (hoy, mañana, 9am, 6pm, !!, #estudios…), dictado 🎤 y borrar manteniendo ⌫. Para montos sale un teclado numérico tipo calculadora (25+10 = 35). El botón ⌨ vuelve al teclado del celular en ese campo, y en Ajustes se apaga del todo. En la laptop no aparece. |
-| **Dictar por voz** | 🎤 en la hoja de añadir y en las listas: dices «pichanga el sábado a las 5» y lo escribe (en Chrome del celular). |
-| **Compartir por WhatsApp** | Listas, notas, eventos y tus pendientes de hoy, con un toque (usa el menú de compartir del celular o abre WhatsApp). |
-| **Hoy puedes gastar** | Con tu presupuesto personal del mes, la agenda reparte lo que te queda entre los días que faltan y te dice cuánto puedes gastar hoy (en Dinero y en Hoy). |
+| **Teclado propio** | En el celular, los campos usan el teclado de la agenda: letras con ñ, tildes manteniendo pulsada la vocal (o con la fila á é í ó ú ¿ ¡), mayúsculas automáticas al empezar, números y símbolos, emojis, atajos de fecha y hora al crear algo (hoy, mañana, 9am, 6pm, !!, #estudios…) y borrar manteniendo ⌫. Para montos sale un teclado numérico tipo calculadora (25+10 = 35). El botón ⌨ vuelve al teclado del celular en ese campo, y en Ajustes se apaga del todo. En la laptop no aparece. |
+| **Compartir por WhatsApp** | Listas, eventos y tus pendientes de hoy, con un toque (usa el menú de compartir del celular o abre WhatsApp). |
 | **Ordenar pendientes** | En Tareas, repasa una a una las atrasadas y las sin fecha: hoy, mañana, el lunes, algún día, ya la hice o borrar. |
 | **Aviso del hábito** | Cada hábito puede avisarte a una hora si ese día aún no lo marcaste. |
-| **Choque de horario** | Al guardar un evento que se cruza con otro, te avisa y te lleva a ver el día. |
 | **Menos secciones, mejor ordenadas** | El menú tiene Hoy, los 4 espacios y cinco secciones, cada una con sus pestañas: **Tareas** (Tareas · Proyectos), **Calendario** (Calendario · Avisos), **Notas** (Notas · Listas), **Hábitos** (Hábitos · Metas · Diario) y **Dinero** (Resumen · Pagos · Personal · Oficina). Se quitaron Progreso y la Revisión semanal; tus datos anteriores no se borran. |
-| **Como una app** | Hoy es un panel de bloques que se tocan: lo siguiente, pendientes, tu día, hábitos (un toque en el anillo), agua (+1 vaso), lo gastado del mes, tus 3 prioridades, espacios, lo que viene, ánimo y fijadas; cada uno con «Ver todo». Para añadir, el botón + abre una hoja con la escritura rápida y todo lo demás (lista, hábito, meta, gasto…); en las pantallas queda un botón «Añadir…». Encabezados compactos con su anillo de avance, pestañas fijas arriba que se cambian también deslizando el dedo, el filtro de espacio en un menú, transiciones al cambiar de pantalla, hojas que se cierran arrastrándolas hacia abajo y tareas que se tachan con animación. |
+| **Como una app** | Hoy es un panel de bloques que se tocan: lo siguiente, pendientes, tu día, hábitos (un toque en el anillo), lo gastado del mes, tus 3 prioridades, espacios, lo que viene y fijadas; cada uno con «Ver todo». Para añadir, el botón + abre una hoja con la escritura rápida y todo lo demás (lista, hábito, meta, gasto…); en las pantallas queda un botón «Añadir…». Encabezados compactos con su anillo de avance, pestañas fijas arriba que se cambian también deslizando el dedo, el filtro de espacio en un menú, transiciones al cambiar de pantalla, hojas que se cierran arrastrándolas hacia abajo y tareas que se tachan con animación. |
 | **Cada pantalla con su forma** | Hoy abre con la fecha gigante, tus números en línea y la franja de la semana; luego lo siguiente, tu día en línea de tiempo, lo por hacer, «tus tres de hoy» y los espacios en carrusel. Tareas es una agenda de papel (la fecha grande a la izquierda); Recordatorios pone la hora primero; Listas son tapas de libreta con lo que falta a la vista y se abren con renglones; Hábitos tiene anillos para marcar hoy y una tabla de seguimiento de 14 días; Metas, un medidor en semicírculo; Notas, un muro de notas adhesivas; el Calendario, días sin cajas con puntos de color; cada Espacio, una franja de su color a todo lo ancho; y Dinero, la cifra del mes en grande. Todas las secciones abren con su título grande (el pequeño de arriba aparece al bajar). |
 | **Estilo propio** | Oscura y sobria: fondo carbón, un solo color de acento y tarjetas sin bordes. Cuatro paletas propias en Ajustes: Eléctrico (grafito y azul eléctrico, la principal), Brasa (naranja quemado), Jade y Grafito, en oscuro o claro. Se guardan aparte de Cuentas y de PAPOTAS, y los libros de cuentas se visten igual cuando los abres dentro de la agenda. |
 | **Atrás y adelante** | Las flechas ‹ › de la cabecera te llevan a la pantalla anterior y a la siguiente, como en un navegador: secciones, pestañas de cada espacio, listas y proyectos, y vuelves a la misma altura donde estabas. En el celular también puedes deslizar desde el borde izquierdo (atrás) o el derecho (adelante). Si mantienes pulsada una flecha (o le das clic derecho), ves las pantallas recientes y saltas a cualquiera. En el teclado: Alt+← y Alt+→. |
@@ -165,14 +162,12 @@ suena siempre.
      última vez; tócala para ver el estado de la agenda y de cada libro y, si
      algo falla, qué hacer.
   5. También viajan tus ajustes de uso: estatura, meta de km, intervalos,
-     feriados, secciones ocultas de Hoy y el día en que empieza la semana.
+     secciones ocultas de Hoy y el día en que empieza la semana.
 - **Deshacer y rehacer**: botones ↶ ↷ arriba (o Ctrl+Z / Ctrl+Y en la
   laptop). Lo deshecho también viaja al otro aparato.
 - **Papelera**: lo que borras queda 30 días (Ajustes → Papelera, el menú
   Todo o el icono 🗑 en la laptop). Puedes restaurarlo o borrarlo para
   siempre.
-- El PIN tapa la agenda, no cifra los datos. Si lo olvidas no se puede
-  recuperar: guarda un respaldo.
 
 ## Para quien toque el código
 
