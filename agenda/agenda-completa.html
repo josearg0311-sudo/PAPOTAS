@@ -3139,6 +3139,24 @@ div.nota{ cursor:pointer }
 /* Con un aviso en pantalla, el botón + sube para no quedar tapado */
 .fab{ transition:transform .2s ease }
 @media (max-width:899px){ body:has(#avisos > *) .fab{ transform:translateY(-78px) } }
+
+/* ==========================================================================
+   COMPLEMENTOS: lo de siempre, bolso, recordar por WhatsApp, recuerdos
+   ========================================================================== */
+.siempre{ padding:0 16px 12px }
+.siempre small{ display:block; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--tinta-3); margin-bottom:6px }
+.siempre > div{ display:flex; flex-wrap:wrap; gap:6px }
+.siempre button{ padding:5px 10px; border-radius:99px; font-size:12.5px; font-weight:650; color:var(--tinta-2); background:transparent; border:1px dashed var(--regla) }
+.siempre button:hover, .siempre button:active{ color:var(--tinta); border-color:var(--esp-personal); border-style:solid }
+.bolso{ display:flex; flex-wrap:wrap; gap:6px; padding:4px 16px 8px }
+.bolso button{ padding:7px 12px; border-radius:99px; font-size:13px; font-weight:650; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); transition:background .2s, color .2s }
+.bolso button.listo{ background:color-mix(in srgb, var(--esp-deporte) 18%, transparent); border-color:var(--esp-deporte); color:var(--esp-deporte) }
+.bolso-pie{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 16px 12px; font-size:12.5px; color:var(--tinta-3) }
+.btn-icono.recordar{ font-size:15px; flex:none; margin-left:2px }
+.plan-ok{ color:var(--esp-estudios) }
+.ok-regalo{ flex:none; align-self:center }
+.fila > .btn.chico{ flex:none; align-self:center }
+.recuerdos{ margin-bottom:16px }
 </style>
 </head>
 <body>
@@ -4975,9 +4993,10 @@ var MODULOS = {
             (textoNecesaria(c) || textoFaltas(c) ? '<div class="meta curso-extra">' + textoNecesaria(c) + textoFaltas(c) + '</div>' : '') + '</div>' +
             '<div class="lado"><button class="btn-icono falta-btn" data-acc="curso-falta" data-id="' + c.id + '" title="Anotar una falta" aria-label="Anotar una falta">−1</button></div></div>';
         }).join('') + '</div>' : vacio('📚', 'Añade tus cursos', 'Pon su horario y las clases saldrán solas en el calendario.')) + '</section>';
-    T.examenes = '<section class="tarjeta">' + cabTarjeta('i-diana', 'Próximos exámenes', 'var(--debe)', 'Preparar', 'data-acc="esp-tab" data-esp="estudios" data-v="examenes"') +
+    T.examenes = '<section class="tarjeta">' + cabTarjeta('i-diana', 'Próximos exámenes', 'var(--debe)', 'Nuevo examen', 'data-acc="nuevo-examen"') +
         (ex.length ? '<div class="lista-filas">' + ex.slice(0, 5).map(function(x){
-          return '<div class="fila"><span class="cuenta-atras ' + (x.en <= 3 ? 'urge' : '') + '"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">' + esc(x.e.t) + '</div><div class="meta"><span>' + cap(fechaLarga(x.dia)) + (x.e.todo ? '' : ' · ' + x.e.ini) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + '</div></div></div>';
+          return '<div class="fila"><span class="cuenta-atras ' + (x.en <= 3 ? 'urge' : '') + '"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">' + esc(x.e.t) + '</div><div class="meta"><span>' + cap(fechaLarga(x.dia)) + (x.e.todo ? '' : ' · ' + x.e.ini) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + (planDe(x.e.id).length ? '<span class="plan-ok">📚 ' + planDe(x.e.id).filter(function(t){ return t.hecha; }).length + '/' + planDe(x.e.id).length + ' repasos</span>' : '') + '</div></div>' +
+            (x.en >= 2 && !planDe(x.e.id).length ? '<button class="btn chico" data-acc="examen-plan" data-id="' + x.e.id + '" data-dia="' + x.dia + '">📚 Plan</button>' : '') + '</div>';
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin exámenes a la vista. 😌</div>') + '</section>';
     T.horas = '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Horas de estudio esta semana', 'var(--esp-estudios)', 'Estudiar ahora', 'data-acc="estudiar"') +
         '<div class="tarjeta-cuerpo">' + barras(porDia, eti, 'var(--esp-estudios)', 120) +
@@ -4996,7 +5015,8 @@ var MODULOS = {
         var est = n == null ? '<span>Sin fecha</span>' : n < 0 ? '<span class="tarde">Venció hace ' + (-n) + (n === -1 ? ' día' : ' días') + '</span>' : n === 0 ? '<span class="hoy">Vence hoy</span>' : '<span>Vence ' + relativo(x.vence).toLowerCase() + '</span>';
         return '<div class="fila">' + casilla('cobro-ok', x.id, false, 'var(--haber)') +
           '<div class="cuerpo" data-acc="cobro-ed" data-id="' + x.id + '"><div class="titulo">' + esc(x.cliente) + (x.concepto ? ' · ' + esc(x.concepto) : '') + '</div><div class="meta">' + est + '</div></div>' +
-          '<span class="monto" style="color:var(--haber)">' + dinero(+x.monto || 0) + '</span></div>';
+          '<span class="monto" style="color:var(--haber)">' + dinero(+x.monto || 0) + '</span>' +
+          '<button class="btn-icono recordar" data-acc="cobro-recordar" data-id="' + x.id + '" title="Recordar el pago al cliente" aria-label="Recordar el pago al cliente">💬</button></div>';
       }).join('') + '</div><p style="margin:0;padding:0 16px 12px;font-size:12px;color:var(--tinta-3)">Al marcarlo como cobrado se anota solo como ingreso en el libro de la oficina.</p>'
        : '<div class="vacio" style="padding-top:4px">Nadie te debe nada. 👌 Apunta aquí lo que te deben tus clientes.</div>') + '</section>';
     var pp = pagosProximos(15).filter(function(x){ return espDe(x.p) === 'oficina'; });
@@ -5048,7 +5068,7 @@ var MODULOS = {
           return '<div class="fila"><span class="cuenta-atras"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">⚽ ' + esc(x.e.t) + '</div><div class="meta"><span>' + cap(relativo(x.dia)) + (x.e.todo ? '' : ' · ' + x.e.ini) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + '</div></div></div>';
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin partidos programados. ¿Armamos una pichanga?</div>') + '</section>';
     if(tab === 'entreno') return tarjetaRutinas() + tarjetaCuerpo();
-    if(tab === 'cancha') return T.partidos;
+    if(tab === 'cancha') return T.partidos + tarjetaBolso(pa);
     var hr = rutinasHoy();
     return tarjetaSemanaEsp('deporte') + T.entrenos +
       (hr.length ? '<section class="tarjeta">' + cabTarjeta('i-meta', 'Hoy toca', 'var(--esp-deporte)', 'Entreno', 'data-acc="esp-tab" data-esp="deporte" data-v="entreno"') + '<div class="hoy-toca">' + hr.map(function(r){
@@ -5222,7 +5242,8 @@ function tarjetaPrestamos(){
       return '<div class="fila">' + casilla('deuda-ok', d.id, false, m ? 'var(--haber)' : 'var(--oro)') +
         '<div class="cuerpo" data-acc="deuda-ed" data-id="' + d.id + '"><div class="titulo">' + (m ? esc(d.persona) + ' te debe' : 'Le debes a ' + esc(d.persona)) + '</div>' +
         '<div class="meta">' + (d.concepto ? '<span>' + esc(d.concepto) + '</span>' : '') + (n != null ? '<span class="' + (n < 0 ? 'tarde' : n <= 2 ? 'hoy' : '') + '">' + (n < 0 ? 'desde hace ' + (-n) + ' días' : relativo(d.fecha)) + '</span>' : '') + '</div></div>' +
-        '<span class="monto" style="color:' + (m ? 'var(--haber)' : 'var(--oro)') + '">' + dinero(+d.monto || 0) + '</span></div>';
+        '<span class="monto" style="color:' + (m ? 'var(--haber)' : 'var(--oro)') + '">' + dinero(+d.monto || 0) + '</span>' +
+        (m ? '<button class="btn-icono recordar" data-acc="deuda-recordar" data-id="' + d.id + '" title="Recordárselo por WhatsApp" aria-label="Recordárselo por WhatsApp">💬</button>' : '') + '</div>';
     }).join('') + '</div>' : '<div class="vacio" style="padding-top:2px">Nadie te debe y no debes nada. 🙌</div>') + '</section>';
 }
 
@@ -5410,12 +5431,14 @@ function tarjetaFechas(){
   var otros = vivos('eventos').filter(function(e){ return !e.cumple && e.rep === 'ano' && espDe(e) === 'personal'; });
   var hoy = hoyISO(), anivs = [];
   otros.forEach(function(e){ var d = proximaDesde(e.fecha, 'ano', hoy); if(d && diasEntre(hoy, d) <= 60) anivs.push({ e:e, dia:d, en:diasEntre(hoy, d) }); });
-  var todo = cs.map(function(c){ return { t:'🎂 ' + c.e.t, extra:edadCumple(c.e, c.dia) > 0 ? 'cumple ' + edadCumple(c.e, c.dia) : '', en:c.en, dia:c.dia, id:c.e.id }; })
+  var todo = cs.map(function(c){ return { t:'🎂 ' + c.e.t, extra:'', en:c.en, dia:c.dia, id:c.e.id, cumple:true }; })
     .concat(anivs.map(function(a){ return { t:'💝 ' + a.e.t, extra:'', en:a.en, dia:a.dia, id:a.e.id }; })).sort(function(a, b){ return a.en - b.en; });
   return '<section class="tarjeta">' + cabTarjeta('i-regalo', 'Fechas importantes', 'var(--rosa)', 'Añadir', 'data-acc="nuevo-cumple"') +
     (todo.length ? '<div class="lista-filas">' + todo.slice(0, 5).map(function(x){
       return '<div class="fila"><span class="cuenta-atras' + (x.en <= 3 ? ' urge' : '') + '"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span>' +
-        '<div class="cuerpo" data-acc="evento-ed" data-id="' + x.id + '"><div class="titulo">' + esc(x.t) + '</div><div class="meta"><span>' + cap(fechaLarga(x.dia)) + '</span>' + (x.extra ? '<span class="cumple">' + x.extra + '</span>' : '') + '</div></div></div>';
+        '<div class="cuerpo" data-acc="evento-ed" data-id="' + x.id + '"><div class="titulo">' + esc(x.t) + '</div><div class="meta"><span>' + cap(fechaLarga(x.dia)) + '</span>' + (x.extra ? '<span class="cumple">' + x.extra + '</span>' : '') + '</div></div>' +
+        (x.en === 0 ? '<button class="btn chico" data-acc="fecha-felicitar" data-id="' + x.id + '">🎉 Saludar</button>'
+         : x.cumple && x.en <= 30 ? (tareaRegalo(x.id) ? '<span class="etiqueta ok-regalo">🎁 anotado</span>' : '<button class="btn-icono" data-acc="cumple-regalo" data-id="' + x.id + '" data-dia="' + x.dia + '" title="Anotar el regalo" aria-label="Anotar el regalo">🎁</button>') : '') + '</div>';
     }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Añade cumpleaños y aniversarios para que nunca se te pasen.</div>') + '</section>';
 }
 function tarjetaCompras(){
@@ -5426,7 +5449,84 @@ function tarjetaCompras(){
     '<div class="compras">' + (faltan.length ? faltan.slice(0, 12).map(function(i){
       return '<button type="button" class="compra" data-acc="compra-ok" data-lista="' + l.id + '" data-id="' + i.id + '">' + esc(i.t) + '</button>';
     }).join('') : '<span class="vacio" style="padding:4px 0">Nada que comprar. 🛒</span>') + '</div>' +
+    siempreHTML(l) +
     '<form class="captura" data-acc="compra-nueva" data-lista="' + l.id + '" style="margin:0 12px 12px;box-shadow:none" autocomplete="off"><input id="compraNueva" maxlength="80" placeholder="Añadir a la compra… (Enter)"><button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form></section>';
+}
+
+/* ---------- Complementos: lo de siempre, recordar, regalo, plan, bolso ------ */
+var BASICOS_COMPRA = ['Arroz', 'Huevos', 'Leche', 'Pan', 'Pollo', 'Papas', 'Fruta', 'Aceite', 'Azúcar', 'Papel higiénico'];
+function claveCompra(t){ return sinTildes(String(t)).toLowerCase().trim(); }
+function esListaCompras(l){ return !!l && /compra|super|mercado/i.test(sinTildes(l.nombre || '')); }
+/* Cada vez que tachas algo de la compra se cuenta, y lo que más compras
+   sale como botón para volver a apuntarlo con un toque. */
+function contarCompra(l, t){
+  var f = l.frec = l.frec || {}, k = Object.keys(f).find(function(x){ return claveCompra(x) === claveCompra(t); }) || String(t).trim().slice(0, 60);
+  f[k] = (f[k] || 0) + 1;
+  var ks = Object.keys(f);
+  if(ks.length > 60) ks.sort(function(a, b){ return f[a] - f[b]; }).slice(0, ks.length - 60).forEach(function(x){ delete f[x]; });
+}
+function siempreHTML(l){
+  var f = l.frec || {}, pend = (l.items || []).filter(function(i){ return !i.ok; }).map(function(i){ return claveCompra(i.t); });
+  var ks = Object.keys(f).sort(function(a, b){ return f[b] - f[a] || a.localeCompare(b); });
+  if(ks.length < 4) BASICOS_COMPRA.forEach(function(b){ if(!ks.some(function(k){ return claveCompra(k) === claveCompra(b); })) ks.push(b); });
+  ks = ks.filter(function(k){ return pend.indexOf(claveCompra(k)) < 0; }).slice(0, 10);
+  if(!ks.length) return '';
+  return '<div class="siempre"><small>Lo de siempre</small><div>' + ks.map(function(k){
+    return '<button type="button" data-acc="compra-siempre" data-lista="' + l.id + '" data-t="' + esc(k) + '">+ ' + esc(k) + '</button>';
+  }).join('') + '</div></div>';
+}
+function nombreCumple(t){ return String(t || '').replace(/^\s*(cumple(años|anos)?|cumple)\s*(de\s+)?/i, '').trim() || String(t || ''); }
+function tareaRegalo(evId){ return vivos('tareas').find(function(t){ return t.regalo === evId && !t.hecha; }); }
+function planDe(evId){ return vivos('tareas').filter(function(t){ return t.plan === evId; }); }
+function crearPlanExamen(evId, dia){
+  var e = buscarId('eventos', evId); if(!e) return;
+  var hoy = hoyISO(), dias = [];
+  for(var i = 5; i >= 1; i--){ var d = sumarDias(dia, -i); if(d >= hoy) dias.push(d); }
+  if(!dias.length){ aviso('Ya no hay días para repasar', 'El examen es mañana: ¡a darle hoy!'); return; }
+  var ids = dias.map(function(d, k){
+    var t = poner('tareas', { id:nid(), t:(k === dias.length - 1 ? 'Repaso final: ' : 'Repasar (' + (k + 1) + '/' + dias.length + '): ') + e.t, fecha:d, hora:'', prio:k === dias.length - 1 ? 2 : 1, area:'', esp:'estudios', rep:'no', sub:[], notas:'Plan de repaso para «' + e.t + '» del ' + fechaCorta(dia) + '.', plan:evId, creada:Date.now() });
+    return t.id;
+  });
+  aviso('📚 Plan listo: ' + dias.length + (dias.length === 1 ? ' día' : ' días') + ' de repaso', 'Del ' + fechaCorta(dias[0]) + ' al ' + fechaCorta(dias[dias.length - 1]) + ', en tus tareas.', 'Deshacer', function(){
+    ids.forEach(function(id){ var t = buscarId('tareas', id); if(t){ t.del = true; t.upd = t.delEn = Date.now(); } });
+    guardar(); pintar();
+  });
+  pintar();
+}
+function telCliente(nombre){
+  var c = vivos('clientes').find(function(x){ return claveCompra(x.nombre) === claveCompra(nombre); });
+  return c ? (c.tel || '').replace(/[^\d]/g, '') : '';
+}
+function whatsapp(tel, texto){
+  if(!tel) return compartir('Mensaje', texto);
+  if(tel.length === 9) tel = '51' + tel;
+  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(texto), '_blank', 'noopener');
+}
+var BOLSO_BASE = ['Chimpunes', 'Canilleras', 'Camiseta y short', 'Medias', 'Agua', 'Toalla', 'Plata para la cancha'];
+function listaBolso(){ return vivos('listas').find(function(x){ return /bolso|partido|pichanga|futbol/i.test(sinTildes(x.nombre || '')); }); }
+function tarjetaBolso(pa){
+  var l = listaBolso(), prox = (pa || [])[0];
+  var tit = 'Tu bolso' + (prox && prox.en <= 1 ? ' · partido ' + (prox.en ? 'mañana' : 'hoy') : '');
+  if(!l) return '<section class="tarjeta">' + cabTarjeta('i-listas', 'Tu bolso', 'var(--esp-deporte)') +
+    '<div class="vacio" style="padding-top:4px">Que no se te quede nada: chimpunes, canilleras, agua…<br><button class="btn chico primario" style="margin-top:10px" data-acc="bolso-crear">🎒 Armar mi bolso</button></div></section>';
+  var its = l.items || [], listos = its.filter(function(i){ return i.ok; }).length;
+  return '<section class="tarjeta">' + cabTarjeta('i-listas', tit, 'var(--esp-deporte)', 'Editar', 'data-acc="lista-abrir" data-id="' + l.id + '"') +
+    '<div class="bolso">' + its.map(function(i){
+      return '<button type="button" class="' + (i.ok ? 'listo' : '') + '" aria-pressed="' + !!i.ok + '" data-acc="bolso-ok" data-lista="' + l.id + '" data-id="' + i.id + '">' + (i.ok ? '✓ ' : '') + esc(i.t) + '</button>';
+    }).join('') + '</div>' +
+    '<div class="bolso-pie"><span>' + (its.length && listos === its.length ? '🎒 ¡Todo listo, a la cancha!' : listos + ' de ' + its.length + ' en el bolso') + '</span>' +
+    (listos ? '<button class="btn chico" data-acc="bolso-vaciar" data-lista="' + l.id + '">Vaciar</button>' : '') + '</div></section>';
+}
+/* Diario: lo que escribiste hace una semana, un mes y un año */
+function recuerdosHTML(dia){
+  var y = +dia.slice(0, 4), m = +dia.slice(5, 7), d = dia.slice(8);
+  var mes = m === 1 ? (y - 1) + '-12-' + d : y + '-' + dos(m - 1) + '-' + d;
+  var ops = [['Hace una semana', sumarDias(dia, -7)], ['Hace un mes', mes], ['Hace un año', (y - 1) + dia.slice(4)]];
+  var hay = ops.map(function(o){ var x = buscarId('diario', o[1]); return x && !x.del && x.texto ? { n:o[0], x:x } : null; }).filter(Boolean);
+  if(!hay.length) return '';
+  return '<section class="tarjeta recuerdos">' + cabTarjeta('i-diario', 'Un día como hoy', 'var(--rosa)') + '<div>' + hay.map(function(h){
+    return '<button class="entrada-diario" data-acc="diario-dia" data-dia="' + h.x.id + '"><span class="em">🕰️</span><div style="min-width:0"><b>' + h.n + ' · ' + fechaCorta(h.x.id) + '</b><p>' + esc(h.x.texto) + '</p></div></button>';
+  }).join('') + '</div></section>';
 }
 
 /* ---------- Estudios: nota que necesitas y faltas --------------------------- */
@@ -5576,29 +5676,31 @@ function datosHeroe(id){
   function d(icono, v, txt, acc){ return '<' + (acc ? 'button' : 'span') + ' class="dato"' + (acc ? ' ' + acc : '') + '>' + ico(icono) + '<b>' + v + '</b> ' + txt + '</' + (acc ? 'button' : 'span') + '>'; }
   var hoy = hoyISO();
   if(id === 'personal'){
-    var b = bienestar(hoy), l = listaCompras(), falta = l ? (l.items || []).filter(function(i){ return !i.ok; }).length : 0;
-    var tocaCasa = vivos('casa').filter(function(c){ return estadoCasa(c).resta <= 0; }).length;
-    return d('i-gota', b.agua + '/' + META_AGUA, 'vasos de agua') +
-      d('i-casa', tocaCasa, tocaCasa === 1 ? 'cosa de la casa toca' : 'cosas de la casa tocan', 'data-acc="esp-tab" data-esp="personal" data-v="casa"') +
-      d('i-listas', falta, 'por comprar', 'data-acc="esp-tab" data-esp="personal" data-v="casa"');
+    var l = listaCompras(), falta = l ? (l.items || []).filter(function(i){ return !i.ok; }).length : 0;
+    var cu = proximosCumples(60)[0], teDeben = vivos('deudas').filter(function(x){ return !x.saldada && x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
+    return d('i-listas', falta, 'por comprar', 'data-acc="esp-tab" data-esp="personal" data-v="casa"') +
+      d('i-regalo', cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', cu ? (cu.en === 0 ? 'hay cumpleaños' : cu.en === 1 ? 'día al próximo cumple' : 'días al próximo cumple') : 'sin cumpleaños cerca', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"') +
+      d('i-cuentas', dinero(teDeben), 'te deben', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"');
   }
   if(id === 'estudios'){
-    var pg = promedioGeneral(), ex = eventosTipo('examen', 90)[0], rep = fichasParaHoy('').length;
+    var pg = promedioGeneral(), ex = eventosTipo('examen', 90)[0];
+    var rep = vivos('tareas').filter(function(t){ return t.plan && !t.hecha && t.fecha <= hoy; }).length;
     return d('i-birrete', pg != null ? pg.toFixed(1) : '—', 'de promedio', 'data-acc="esp-tab" data-esp="estudios" data-v="cursos"') +
-      d('i-diana', ex ? (ex.en === 0 ? '¡Hoy!' : ex.en) : '—', ex ? (ex.en === 0 ? 'hay examen' : ex.en === 1 ? 'día al próximo examen' : 'días al próximo examen') : 'sin exámenes', 'data-acc="esp-tab" data-esp="estudios" data-v="examenes"') +
-      d('i-estrella', rep, 'fichas para repasar', 'data-acc="esp-tab" data-esp="estudios" data-v="repaso"');
+      d('i-diana', ex ? (ex.en === 0 ? '¡Hoy!' : ex.en) : '—', ex ? (ex.en === 0 ? 'hay examen' : ex.en === 1 ? 'día al próximo examen' : 'días al próximo examen') : 'sin exámenes', 'data-acc="esp-tab" data-esp="estudios" data-v="inicio"') +
+      d('i-estrella', rep, rep === 1 ? 'repaso para hoy' : 'repasos para hoy', 'data-acc="esp-tareas" data-v="estudios"');
   }
   if(id === 'oficina'){
     var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     var enCurso = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha && t.estado === 'curso'; }).length;
-    return d('i-reloj', (minutosHoras(inicioSemana(hoy)) / 60).toFixed(1) + ' h', 'esta semana') +
-      d('i-subir', dinero(cob), 'por cobrar') +
-      d('i-tareas', enCurso, 'en curso', 'data-acc="esp-tab" data-esp="oficina" data-v="tablero"');
+    var reu = eventosTipo('reunion', 7).length;
+    return d('i-subir', dinero(cob), 'por cobrar', 'data-acc="esp-tab" data-esp="oficina" data-v="clientes"') +
+      d('i-tareas', enCurso, 'en curso', 'data-acc="esp-tab" data-esp="oficina" data-v="trabajo"') +
+      d('i-maletin', reu, reu === 1 ? 'reunión en 7 días' : 'reuniones en 7 días', 'data-acc="esp-tab" data-esp="oficina" data-v="trabajo"');
   }
-  var c = statsCardio(), s = statsFutbol();
+  var ses = vivos('entrenos').filter(function(e){ return e.fecha > sumarDias(hoy, -7) && e.fecha <= hoy; }).length, pa = eventosTipo('partido', 60)[0];
   return d('i-habitos', semanasSeguidas(), 'semanas activo') +
-    d('i-flecha', formNum(c.kmMes), 'km este mes', 'data-acc="esp-tab" data-esp="deporte" data-v="cardio"') +
-    d('i-balon', s.g, 'goles', 'data-acc="esp-tab" data-esp="deporte" data-v="cancha"');
+    d('i-flecha', ses, ses === 1 ? 'entreno en 7 días' : 'entrenos en 7 días', 'data-acc="esp-tab" data-esp="deporte" data-v="entreno"') +
+    d('i-balon', pa ? (pa.en === 0 ? '¡Hoy!' : pa.en) : '—', pa ? (pa.en === 0 ? 'hay partido' : pa.en === 1 ? 'día al partido' : 'días al partido') : 'sin partidos', 'data-acc="esp-tab" data-esp="deporte" data-v="cancha"');
 }
 
 /* Resumen compacto: lo que viene y lo pendiente del espacio, en una sola tarjeta */
@@ -6621,9 +6723,8 @@ function cabSeccion(v){
       vivos('pagos').forEach(function(p){ if(p.activo === false || (p.desde && ym < p.desde)) return; n++; tot += +p.monto || 0; if(pagado(p, ym)){ np++; pag += +p.monto || 0; } });
       d = { c:'var(--debe)', i:'i-recibo', t:'Pagos fijos', s:np + ' de ' + n + ' pagados · faltan ' + dinero(tot - pag), p:tot ? pag / tot : null, pt:'pagado' };
     } else if(v === 'diario'){
-      var mes = hoy.slice(0, 7), ents = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === mes && (e.animo || e.texto); });
-      var an = ents.filter(function(e){ return e.animo; }), media = an.length ? an.reduce(function(a, e){ return a + +e.animo; }, 0) / an.length : 0;
-      d = { c:'var(--rosa)', i:'i-diario', t:'Diario', s:ents.length + (ents.length === 1 ? ' día escrito' : ' días escritos') + ' este mes' + (media ? ' · ánimo medio ' + ['😢','😕','😐','🙂','😄'][Math.round(media) - 1] : '') };
+      var mes = hoy.slice(0, 7), ents = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === mes && e.texto; });
+      d = { c:'var(--rosa)', i:'i-diario', t:'Diario', s:ents.length + (ents.length === 1 ? ' día escrito' : ' días escritos') + ' este mes' };
     } else if(v === 'progreso'){
       d = { c:'var(--haber)', i:'i-grafica', t:'Progreso', s:'Cómo vas en tareas, hábitos, enfoque y ánimo' };
     } else if(v === 'calendario'){
@@ -7852,7 +7953,7 @@ VISTAS.diario = function(){
     '<div class="tarjeta-cuerpo">' +
       '<textarea class="entrada" id="textoDiario" data-dia="' + dia + '" maxlength="10000" placeholder="' + esc(PREGUNTAS[deISO(dia).getDate() % PREGUNTAS.length]) + '" style="height:auto;min-height:170px;padding:12px;margin-top:12px;line-height:1.55;resize:vertical">' + esc(e ? e.texto : '') + '</textarea>' +
       '<small style="color:var(--tinta-3);font-size:12px">Se guarda solo mientras escribes.</small>' +
-    '</div></section>';
+    '</div></section>' + recuerdosHTML(dia);
 
   /* El mes en caritas */
   var ym = dia.slice(0, 7), y = +ym.slice(0, 4), mm = +ym.slice(5, 7) - 1;
@@ -9694,7 +9795,7 @@ document.addEventListener('click', function(ev){
     case 'lista-volver': ui.lista = null; pintar(); break;
     case 'lista-ed': editarLista(id); break;
     case 'item-ok':
-      cambiarLista(function(l){ var it = l.items.find(function(x){ return x.id === id; }); if(it) it.ok = !it.ok; });
+      cambiarLista(function(l){ var it = l.items.find(function(x){ return x.id === id; }); if(it){ it.ok = !it.ok; if(it.ok && esListaCompras(l)) contarCompra(l, it.t); } });
       b.setAttribute('aria-checked', b.getAttribute('aria-checked') !== 'true'); b.classList.add('pop');
       setTimeout(pintarSeguro, 260); break;
     case 'item-quitar': cambiarLista(function(l){ l.items = l.items.filter(function(x){ return x.id !== id; }); }); pintarSeguro(); break;
@@ -9760,9 +9861,46 @@ document.addEventListener('click', function(ev){
     case 'sueno':
       var bS = JSON.parse(JSON.stringify(bienestar(hoyISO()))), vS = +b.dataset.v;
       delete bS.del; bS.sueno = +bS.sueno === vS ? '' : vS; poner('bienestar', bS); pintarSeguro(); break;
+    case 'compra-siempre':
+      var lS = buscarId('listas', b.dataset.lista);
+      if(lS){ lS = JSON.parse(JSON.stringify(lS)); lS.items = lS.items || []; lS.items.push({ id:nid(), t:b.dataset.t, ok:false }); poner('listas', lS); vibrar(10); pintar(); }
+      break;
+    case 'deuda-recordar':
+      var dR = buscarId('deudas', id);
+      if(dR) compartir('Recordatorio', 'Hola ' + dR.persona + ' 👋, te escribo para recordarte lo que quedó pendiente: ' + dinero(+dR.monto || 0) + (dR.concepto ? ' (' + dR.concepto + ')' : '') + '. ¡Gracias! 🙌');
+      break;
+    case 'cobro-recordar':
+      var cR = buscarId('cobros', id);
+      if(cR) whatsapp(telCliente(cR.cliente), 'Hola, ' + cR.cliente + '. Te escribo por el pago pendiente de ' + dinero(+cR.monto || 0) + (cR.concepto ? ' por ' + cR.concepto : '') + (cR.vence ? ', con fecha ' + fechaCorta(cR.vence) : '') + '. Quedo atento. ¡Gracias!');
+      break;
+    case 'fecha-felicitar':
+      var eF = buscarId('eventos', id);
+      if(eF) compartir('Saludo', eF.cumple ? '¡Feliz cumpleaños, ' + nombreCumple(eF.t) + '! 🎂🎉 Que la pases increíble.' : '¡Feliz ' + eF.t.toLowerCase() + '! 💝');
+      break;
+    case 'cumple-regalo':
+      var eR = buscarId('eventos', id);
+      if(eR && !tareaRegalo(id)){
+        var fR = sumarDias(b.dataset.dia, -3); if(fR < hoyISO()) fR = hoyISO();
+        var tR = poner('tareas', { id:nid(), t:'Regalo para ' + nombreCumple(eR.t), fecha:fR, hora:'', prio:1, area:'', esp:'personal', rep:'no', sub:[], notas:'Cumpleaños el ' + fechaCorta(b.dataset.dia) + '.', regalo:id, creada:Date.now() });
+        aviso('🎁 Anotado para el ' + fechaCorta(fR), tR.t, 'Deshacer', function(){ quitar('tareas', tR.id, 'Regalo'); pintar(); });
+        pintar();
+      }
+      break;
+    case 'examen-plan': crearPlanExamen(id, b.dataset.dia); break;
+    case 'bolso-crear':
+      poner('listas', { id:nid(), nombre:'Bolso del partido', em:'🎒', color:'verde', esp:'deporte', creada:Date.now(), items:BOLSO_BASE.map(function(t){ return { id:nid(), t:t, ok:false }; }) }); pintar(); break;
+    case 'bolso-ok':
+      var lB = buscarId('listas', b.dataset.lista);
+      if(lB){ lB = JSON.parse(JSON.stringify(lB)); var iB = (lB.items || []).find(function(x){ return x.id === id; });
+        if(iB){ iB.ok = !iB.ok; poner('listas', lB); vibrar(10); if(iB.ok && lB.items.every(function(x){ return x.ok; })) aviso('🎒 ¡Todo listo!', 'A la cancha.'); pintar(); } }
+      break;
+    case 'bolso-vaciar':
+      var lV = buscarId('listas', b.dataset.lista);
+      if(lV){ lV = JSON.parse(JSON.stringify(lV)); (lV.items || []).forEach(function(x){ x.ok = false; }); poner('listas', lV); pintar(); }
+      break;
     case 'compra-ok':
       var lC = buscarId('listas', b.dataset.lista);
-      if(lC){ lC = JSON.parse(JSON.stringify(lC)); var itC = (lC.items || []).find(function(x){ return x.id === id; }); if(itC){ itC.ok = true; poner('listas', lC); b.classList.add('comprado'); setTimeout(pintarSeguro, 280); } }
+      if(lC){ lC = JSON.parse(JSON.stringify(lC)); var itC = (lC.items || []).find(function(x){ return x.id === id; }); if(itC){ itC.ok = true; contarCompra(lC, itC.t); poner('listas', lC); b.classList.add('comprado'); setTimeout(pintarSeguro, 280); } }
       break;
     case 'curso-falta':
       var cF = buscarId('cursos', id);
