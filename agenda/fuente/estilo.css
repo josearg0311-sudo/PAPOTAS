@@ -2706,3 +2706,159 @@ body{
 .pe-datos .dato, .pe-datos .dato + .dato{ padding:10px 10px 10px 14px !important }
 .dinero-heroe .dato, .dinero-heroe .dato + .dato{ padding:12px !important }
 .ph-cuentas span{ letter-spacing:.02em !important; font-size:10.5px !important }
+
+/* ==========================================================================
+   COMO UNA APP
+   Pantallas cortas y ordenadas: Hoy como panel de bloques, encabezados
+   compactos, pestañas fijas arriba, añadir desde el botón +, y movimiento
+   (transiciones, hojas que se arrastran, tareas que se tachan).
+   ========================================================================== */
+
+/* ----- Encabezado compacto de sección ----- */
+.cab-compacta{ display:grid !important; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; padding:4px 0 14px !important; margin:0 0 4px !important }
+.cab-compacta .cg-ico{ margin:0 !important; width:46px !important; height:46px !important }
+.cab-compacta .cg-txt{ min-width:0 }
+.cab-compacta .cg-tit{ font-size:34px !important; line-height:.95 !important }
+.cab-compacta .cg-sub{ margin:4px 0 0 !important; font-size:12.5px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cg-anillo{ position:relative; width:50px; height:50px }
+.cg-anillo .cab-sec-anillo{ width:50px; height:50px; transform:rotate(-90deg) }
+.cg-anillo .cab-sec-anillo circle{ fill:none; stroke-width:5; stroke-linecap:butt }
+.cg-anillo .cab-sec-anillo .f{ stroke:var(--regla) }
+.cg-anillo .cab-sec-anillo .v{ stroke:var(--sc); transition:stroke-dashoffset .6s ease }
+.cg-anillo .cab-sec-pct{ position:absolute; inset:0; display:grid; place-items:center; font-family:var(--serif); font-size:15px; font-weight:700 }
+@media (min-width:900px){ .cab-compacta .cg-tit{ font-size:42px !important } }
+
+/* ----- Pestañas fijas arriba ----- */
+.segmento-fijo, .esp-tabs{ position:sticky; top:var(--arriba); z-index:6; background:var(--papel); margin-left:-16px !important; margin-right:-16px !important; padding:6px 16px 8px !important }
+@media (min-width:900px){ .segmento-fijo, .esp-tabs{ margin-left:-32px !important; margin-right:-32px !important; padding:6px 32px 8px !important } }
+.segmento{ display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; padding:4px; border-radius:12px; background:var(--hoja) }
+.segmento::-webkit-scrollbar{ display:none }
+.segmento .ficha{ flex:1 0 auto; justify-content:center; background:none !important; height:36px; border-radius:9px !important; font-weight:700 !important }
+.segmento .ficha[aria-pressed="true"]{ background:var(--verde) !important; color:var(--papel) !important }
+.barra-herr{ display:flex !important; gap:8px; align-items:center; margin:10px 0 8px !important; flex-wrap:wrap }
+.btn-filtro{ max-width:60% }
+
+/* ----- Botón «Añadir…» de cada pantalla ----- */
+.anadir-rapido{
+  display:flex; align-items:center; gap:10px; width:100%; margin:6px 0 10px; padding:13px 14px; border-radius:12px;
+  background:var(--hoja); color:var(--tinta-3); font-weight:600; font-size:14.5px; text-align:left;
+  border:1.5px dashed color-mix(in srgb, var(--verde) 35%, var(--regla));
+}
+.anadir-rapido svg{ color:var(--verde); width:20px; height:20px }
+.anadir-rapido:active{ transform:scale(.98) }
+
+/* ----- Hoja de añadir ----- */
+.hoja-anadir .captura{ margin-bottom:6px }
+.hoja-anadir #entradaCaptura{ font-size:16px }
+.ha-mas{ margin:16px 0 8px; font-family:var(--serif); font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--tinta-2) }
+.ha-rejilla{ grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:8px !important }
+.ha-rejilla button{ padding:12px 4px !important; font-size:11.5px !important; gap:6px !important; min-height:0 !important }
+.ha-rejilla button svg{ width:20px !important; height:20px !important }
+.menu-lista .em-menu{ font-size:22px; width:28px; text-align:center }
+.menu-lista button{ align-items:center !important }
+.menu-lista button[aria-current="true"]{ box-shadow:inset 0 0 0 2px var(--verde) }
+
+/* ----- HOY: cabecera corta y panel de bloques ----- */
+.hoy-cab{ display:flex !important; align-items:center; gap:14px; padding:4px 0 12px !important; margin:0 !important }
+.hc-txt{ flex:1; min-width:0 }
+.hc-txt small{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--verde) }
+.hoy-cab .ph-saludo{ margin:4px 0 0 !important; font-size:36px !important }
+.hc-frase{ margin:6px 0 0; font-size:13px; color:var(--tinta-3) }
+.hoy-cab .ph-anillo{ margin:0 !important; width:74px !important; height:74px !important }
+.hoy-cab .ph-anillo .anillo{ width:74px !important; height:74px !important }
+.franja-semana{ margin-bottom:14px !important }
+.franja-semana button{ padding:8px 0 6px !important }
+.franja-semana button b{ font-size:21px !important }
+
+.panel-hoy{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
+@media (min-width:900px){ .panel-hoy{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px } .panel-hoy .w-2{ grid-column:span 2 } }
+.w{ background:var(--hoja); border-radius:16px; padding:14px; min-width:0; animation:w-entra .35s ease both }
+.w-2{ grid-column:1 / -1 }
+@media (min-width:900px){ .w-2{ grid-column:span 2 } .w-sig, .w-tareas{ grid-column:1 / -1 !important } }
+.w-sig{ padding:0; background:none }
+.w-sig .siguiente{ margin:0 !important }
+.panel-hoy .w:nth-child(2){ animation-delay:.04s } .panel-hoy .w:nth-child(3){ animation-delay:.08s } .panel-hoy .w:nth-child(4){ animation-delay:.12s }
+.panel-hoy .w:nth-child(5){ animation-delay:.16s } .panel-hoy .w:nth-child(6){ animation-delay:.2s } .panel-hoy .w:nth-child(n+7){ animation-delay:.24s }
+@keyframes w-entra{ from{ opacity:0; transform:translateY(10px) } }
+.w-cab{ display:flex; align-items:center; gap:8px; margin:0 0 8px }
+.w-cab b{ font-family:var(--serif); font-size:19px; font-weight:700; text-transform:uppercase; letter-spacing:.02em }
+.w-n{ min-width:22px; height:22px; padding:0 7px; border-radius:6px; background:var(--hoja-2); display:grid; place-items:center; font-size:12px; font-weight:800; color:var(--tinta-2) }
+.w .ver-link{ margin-left:auto }
+.w .lista-filas{ display:flex; flex-direction:column; gap:6px }
+.w .lista-filas .fila{ background:var(--hoja-2) !important; border:0 !important; border-radius:12px !important; padding:10px 12px !important }
+.w .nada{ padding:6px 0 }
+.w-mas{ display:block; width:100%; margin-top:6px; padding:8px; border-radius:10px; font-size:13px; font-weight:700; color:var(--verde); background:var(--hoja-2) }
+.w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px }
+.w-pie .anadir-rapido{ margin:0; padding:10px 12px; flex:1 1 160px; background:var(--hoja-2) }
+.w-dia .linea-tiempo{ padding:0 !important }
+.w-dia .lt-item .fila{ background:none !important; padding:8px 0 !important }
+
+.w-habs{ display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; margin:0 -14px; padding:0 14px 2px }
+.w-habs::-webkit-scrollbar{ display:none }
+.w-hab{ position:relative; flex:0 0 76px; display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center }
+.w-hab svg{ width:58px; height:58px; transform:rotate(-90deg) }
+.w-hab circle{ fill:none; stroke-width:5 }
+.w-hab .f{ stroke:var(--regla) }
+.w-hab .v{ stroke:var(--haber); transition:stroke-dashoffset .45s ease }
+.w-hab .em{ position:absolute; top:29px; left:50%; transform:translate(-50%, -50%); font-size:24px; transition:transform .2s }
+.w-hab small{ font-size:11px; line-height:1.2; color:var(--tinta-2); display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }
+.w-hab.ok small{ color:var(--haber) }
+.w-hab:active .em{ transform:translate(-50%, -50%) scale(1.25) }
+
+.w-1{ display:flex; flex-direction:column; gap:4px }
+.w-ico{ font-size:22px }
+.w-big{ font-family:var(--serif); font-size:38px; font-weight:700; line-height:1 }
+.w-big small{ font-size:18px; color:var(--tinta-3) }
+.w-dinero{ font-size:26px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.w-lbl{ font-size:11.5px; color:var(--tinta-3); font-weight:600 }
+.w-riel{ height:6px; border-radius:2px; background:var(--regla); overflow:hidden; margin:4px 0 8px }
+.w-riel i{ display:block; height:100%; background:var(--verde) }
+.w-agua .w-riel i{ background:var(--azul) }
+.w-1 .btn{ margin-top:auto; justify-content:center }
+
+.w-prio .enfoque-grande label{ background:var(--hoja-2) !important; padding:4px 12px !important }
+.w-prio .enfoque-grande .n{ font-size:28px !important }
+.w-prio .enfoque-grande input{ padding:8px 0 !important; font-size:14.5px !important }
+
+.w-esps{ display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px }
+.w-espb{ display:flex !important; flex-direction:column; align-items:center; gap:2px; padding:12px 4px !important; border-radius:12px !important; min-height:0 !important;
+  background:var(--hoja-2) !important; box-shadow:inset 0 -3px 0 var(--c) !important; text-align:center }
+.w-espb .em{ font-size:24px }
+.w-espb b{ font-size:12.5px }
+.w-espn{ font-size:11px; color:var(--c); font-weight:800 }
+.w-regre{ display:flex; align-items:center; gap:12px; width:100%; padding:10px 12px; margin-bottom:8px; border-radius:12px; background:color-mix(in srgb, var(--c) 14%, var(--hoja-2)); text-align:left }
+.w-regre b{ font-family:var(--serif); font-size:40px; font-weight:700; line-height:1; color:var(--c) }
+.w-regre span{ font-size:12px; color:var(--tinta-3); display:flex; flex-direction:column }
+.w-regre em{ font-style:normal; font-size:15px; font-weight:700; color:var(--tinta) }
+.w-viene .fila .hora{ width:60px }
+.w-animo .animos{ gap:6px }
+.w-chips{ display:flex; flex-wrap:wrap; gap:6px }
+.w-chips .ficha svg{ width:13px; height:13px }
+
+/* ----- ESPACIOS: portada compacta ----- */
+.portada-esp{ display:grid !important; grid-template-columns:auto minmax(0,1fr); grid-template-areas:"cambia cambia" "em nom" "em lema" "datos datos"; column-gap:14px; padding:12px 16px 14px !important }
+.portada-esp .pe-cambia{ grid-area:cambia; margin:0 0 8px !important; justify-content:flex-start !important }
+.portada-esp .pe-cambia button{ width:36px !important; height:36px !important }
+.portada-esp .pe-em{ grid-area:em; font-size:40px !important; align-self:center; margin:0 }
+.portada-esp .pe-nom{ grid-area:nom; margin:0 !important; font-size:40px !important; align-self:end }
+.portada-esp .pe-lema{ grid-area:lema; margin:2px 0 0 !important; font-size:13px !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.portada-esp .pe-datos{ grid-area:datos; margin-top:12px !important }
+.portada-esp .pe-datos .dato{ padding:8px 10px 8px 12px !important; font-size:11px !important }
+.portada-esp .pe-datos .dato b{ font-size:22px !important }
+.esp-tabs{ border-bottom:1px solid var(--regla-2) }
+
+/* ----- Movimiento ----- */
+.vista.entra-der{ animation:entra-der .26s cubic-bezier(.2,.8,.2,1) both }
+.vista.entra-izq{ animation:entra-izq .26s cubic-bezier(.2,.8,.2,1) both }
+@keyframes entra-der{ from{ opacity:0; transform:translateX(28px) } }
+@keyframes entra-izq{ from{ opacity:0; transform:translateX(-28px) } }
+.fila.completando{ animation:completa .42s ease forwards }
+.fila.completando .titulo{ text-decoration:line-through; text-decoration-color:var(--haber); color:var(--tinta-3) }
+@keyframes completa{ 0%{ transform:none } 40%{ transform:scale(1.02); background:color-mix(in srgb, var(--haber) 18%, var(--hoja-2)) } 100%{ opacity:0; transform:translateX(40px) } }
+.hoja-flot{ transition:transform .2s ease; will-change:transform }
+.btn:active, .ficha:active, .w-espb:active, .franja-semana button:active, .rejilla-mas button:active, .barra-inf button:active{ transform:scale(.96) }
+.barra-inf button[aria-current="page"] svg{ animation:salta .3s ease }
+@keyframes salta{ 40%{ transform:translateY(-3px) scale(1.1) } }
+@media (prefers-reduced-motion: reduce){ .vista.entra-der, .vista.entra-izq, .w, .fila.completando{ animation:none !important } }
+.w-espb::before, .w-espb::after{ display:none !important }
+@media (min-width:900px){ .panel-hoy .w-tareas{ grid-column:span 2 !important } }
