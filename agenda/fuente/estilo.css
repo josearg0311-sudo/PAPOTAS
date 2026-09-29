@@ -2977,3 +2977,51 @@ body{ line-height:1.55 }
 .w-plata .w-riel i{ background:var(--haber) }
 .w-plata.pasado .w-riel i{ background:var(--debe) }
 .barra-herr{ flex-wrap:nowrap !important } .barra-herr .btn-filtro{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; justify-content:flex-start } .btn-compartir{ margin-left:auto; flex:none; width:40px !important; height:40px !important; background:var(--hoja) !important; color:var(--verde) }
+
+/* ==========================================================================
+   TECLADO PROPIO
+   ========================================================================== */
+
+.tkb{
+  position:fixed; left:0; right:0; bottom:0; z-index:400; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  background:color-mix(in srgb, var(--papel) 70%, #000); border-top:1px solid var(--regla);
+  user-select:none; -webkit-user-select:none; touch-action:manipulation;
+  animation:tk-sube .16s ease-out;
+}
+@keyframes tk-sube{ from{ transform:translateY(30%); opacity:.4 } }
+.tk-cab{ display:flex; align-items:center; gap:6px; margin:0 2px 6px }
+.tk-barra{ flex:1; min-width:0; display:flex; gap:6px; overflow-x:auto; scrollbar-width:none }
+.tk-barra::-webkit-scrollbar{ display:none }
+.tk-atajo{ flex:none; height:34px; padding:0 12px; border-radius:8px; background:var(--hoja-2); color:var(--verde-sube); font-size:13.5px; font-weight:700; white-space:nowrap }
+.tk-acento{ color:var(--tinta); min-width:36px; padding:0 8px; font-size:16px }
+.tk-cab-acc{ display:flex; gap:4px; flex:none }
+.tk-mini{ width:36px; height:34px; border-radius:8px; display:grid; place-items:center; background:var(--hoja-2); color:var(--tinta-2); font-size:16px }
+.tk-mini svg{ width:18px; height:18px }
+.tk-teclas{ display:flex; flex-direction:column; gap:8px }
+.tk-fila{ display:flex; gap:5px; justify-content:center }
+.tk{
+  flex:1 1 0; min-width:0; height:46px; border-radius:8px; display:grid; place-items:center;
+  background:var(--hoja-2); color:var(--tinta); font-family:var(--letra); font-size:21px; font-weight:500;
+  box-shadow:0 1px 0 rgba(0,0,0,.45); transition:transform .06s, background .06s;
+}
+.tk-fila:nth-child(2) .tk:first-child{ margin-left:0 }
+.tk-fn{ background:color-mix(in srgb, var(--hoja-2) 60%, var(--regla)); font-size:15px; font-weight:700; color:var(--tinta-2) }
+.tk-on{ background:var(--tinta) !important; color:var(--papel) !important }
+.tk-esp{ flex:5 1 0; font-size:13px; color:var(--tinta-3); font-weight:600 }
+.tk-ok{ flex:1.6 1 0; background:var(--verde) !important; color:var(--papel) !important; font-size:20px }
+.tk-pulsada{ transform:translateY(-3px) scale(1.08); background:var(--regla) !important }
+.tk-numpad .tk{ height:54px; font-size:24px }
+.tk-numpad .tk-fila:first-child .tk:last-child, .tk-numpad .tk-fila:nth-child(2) .tk:last-child{ color:var(--verde-sube); font-weight:700 }
+.tk-pop{ position:absolute; display:flex; gap:4px; padding:4px; border-radius:10px; background:var(--hoja); box-shadow:var(--sombra-alta); z-index:2 }
+.tk-pop button{ width:40px; height:44px; border-radius:8px; background:var(--hoja-2); color:var(--tinta); font-size:21px }
+.tk-pop button:hover, .tk-pop button:active{ background:var(--verde); color:var(--papel) }
+/* Con el teclado abierto: la barra y el + se esconden y el contenido deja sitio */
+body.con-teclado .barra-inf, body.con-teclado .fab{ display:none !important }
+body.con-teclado .contenido{ padding-bottom:calc(var(--kb, 280px) + 24px) !important }
+body.con-teclado .velo{ padding-bottom:var(--kb, 280px) }
+body.con-teclado .hoja-flot{ max-height:calc(100dvh - var(--kb, 280px) - 20px); overflow-y:auto }
+body.con-teclado .avisos{ bottom:calc(var(--kb, 280px) + 12px) !important }
+@media (pointer:fine){ .tkb{ display:none !important } }
+.tk-teclas{ touch-action:none }
+.tk-barra{ touch-action:pan-x }
+.tk-pop button.tk-sobre{ background:var(--verde); color:var(--papel) }

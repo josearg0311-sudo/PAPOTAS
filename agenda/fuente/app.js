@@ -4832,7 +4832,9 @@ VISTAS.ajustes = function(){
     '<div class="ajuste"><div class="txt"><b>Administrar secciones</b><small>Muestra u oculta secciones, cámbialas de orden, elige la barra de abajo del celular y limpia lo viejo.</small></div>' +
       '<button class="btn chico primario" data-ir="secciones">' + ico('i-espacios') + 'Administrar</button></div>' +
     '<div class="ajuste"><div class="txt"><b>Qué ver en Hoy</b><small>Elige los bloques de la pantalla Hoy.</small></div>' +
-      '<button class="btn chico" data-acc="personalizar-hoy">' + ico('i-hoy') + 'Elegir</button></div></div>';
+      '<button class="btn chico" data-acc="personalizar-hoy">' + ico('i-hoy') + 'Elegir</button></div>' +
+    '<div class="ajuste"><div class="txt"><b>Teclado de la agenda</b><small>' + (TECLADO.tactil ? 'Usa el teclado propio al escribir (con ñ, tildes, atajos, emojis y calculadora para montos). Apágalo para volver al del celular.' : 'Solo aparece en el celular o la tableta.') + '</small></div>' +
+      '<label class="interruptor"><input type="checkbox" data-teclado="1"' + (pref.teclado !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Teclado de la agenda"></label></div></div>';
 
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
     '<div class="ajuste"><div class="txt"><b>Tema</b><small>También viste a tus libros de cuentas dentro de la agenda.</small></div>' +
@@ -6805,6 +6807,7 @@ document.addEventListener('input', function(ev){
 
 document.addEventListener('change', function(ev){
   var t = ev.target;
+  if(t.dataset && t.dataset.teclado){ pref.teclado = t.checked; escribirJSON(CLAVE_PREF, pref); if(!t.checked) TECLADO.ocultar(); aviso(t.checked ? '⌨️ Teclado de la agenda activado' : 'Vuelves al teclado del celular'); return; }
   if(t.dataset && t.dataset.secVer){
     var so = (pref.secOff || []).filter(function(x){ return x !== t.dataset.secVer; });
     if(!t.checked) so.push(t.dataset.secVer);
@@ -6934,6 +6937,229 @@ document.addEventListener('visibilitychange', function(){
   if(pinCfg && ocultoDesde && Date.now() - ocultoDesde > 60000) mostrarCandado('abrir');
   if(!document.hidden){ ultimoToque = Date.now(); revisarAlarmas(); if(hayAlgunaNube()) sincronizarTodo(); pintarSeguro(); }
 });
+
+
+/* ==========================================================================
+   TECLADO PROPIO
+   En el celular, los campos de texto usan el teclado de la agenda en vez
+   del del sistema: letras con ñ y tildes (manteniendo pulsada la vocal),
+   números y símbolos, emojis, atajos de fecha y hora al crear algo, un
+   teclado numérico tipo calculadora para los montos, dictado por voz y un
+   botón para volver al teclado del celular. Se apaga en Ajustes.
+   ========================================================================== */
+var TECLADO = (function(){
+  var tactil = window.matchMedia && matchMedia('(pointer:coarse)').matches;
+  function activo(){ return tactil && pref.teclado !== false; }
+  var el = null, capa = 'abc', mayus = 0, caja = null, ocultarReloj = null, repetir = null, largo = null, saltarClick = false;
+  var FILAS = {
+    abc: ['qwertyuiop', 'asdfghjklñ', '⇧zxcvbnm⌫', ['123', '😊', ',', ' ', '.', '↵']],
+    num: ['1234567890', ['-', '/', ':', ';', '(', ')', 'S/', '&', '@', '"'], ['#+=', '.', ',', '?', '!', "'", '%', '⌫'], ['abc', '😊', ',', ' ', '.', '↵']],
+    sim: [['[', ']', '{', '}', '#', '%', '^', '*', '+', '='], ['_', '\\', '|', '~', '<', '>', '€', '$', '£', '•'], ['123', '°', '…', '¿', '¡', '«', '»', '⌫'], ['abc', '😊', ',', ' ', '.', '↵']],
+    emo: [['😀', '😂', '😅', '😍', '😎', '🤔', '😴', '😢', '😡', '🙌'], ['👍', '👎', '👊', '💪', '🙏', '👏', '❤️', '🔥', '✅', '❌'], ['⚽', '🏋️', '🏃', '📚', '💼', '🏠', '💰', '🎉', '⌫'], ['abc', '🍕', '☕', ' ', '📅', '↵']],
+    numpad: [['1', '2', '3', '+'], ['4', '5', '6', '−'], ['7', '8', '9', '⌫'], ['.', '0', '=', '↵']]
+  };
+  var TILDES = { a:'áàä', e:'éèë', i:'íìï', o:'óòö', u:'úüù', n:'ñ', A:'ÁÀÄ', E:'ÉÈË', I:'ÍÌÏ', O:'ÓÒÖ', U:'ÚÜÙ', N:'Ñ', '?':'¿', '!':'¡' };
+  var ATAJOS = ['hoy', 'mañana', 'pasado mañana', 'el lunes', 'el viernes', 'el sábado', '9am', '12pm', '6pm', '8pm', '!!', '#personal', '#estudios', '#oficina', '#deporte'];
+
+  function valido(x){
+    if(!x || !x.matches || x.closest('#candado')) return false;
+    if(x.tagName === 'TEXTAREA') return !x.readOnly;
+    if(x.tagName !== 'INPUT' || x.readOnly || x.disabled) return false;
+    var t = (x.getAttribute('type') || 'text').toLowerCase();
+    return ['text', 'search', 'email', 'url', 'tel', ''].indexOf(t) >= 0;
+  }
+  function esNum(x){ var m = x.getAttribute('data-im') || x.getAttribute('inputmode') || ''; return m === 'decimal' || m === 'numeric' || m === 'tel'; }
+  function preparar(x){
+    if(!activo() || !valido(x) || x.dataset.nativo) return;
+    if(!x.hasAttribute('data-im')) x.setAttribute('data-im', x.getAttribute('inputmode') || '');
+    x.setAttribute('inputmode', 'none');
+  }
+  function crear(){
+    if(caja) return caja;
+    caja = document.createElement('div'); caja.id = 'tecladoApp'; caja.className = 'tkb oculto'; caja.setAttribute('role', 'group'); caja.setAttribute('aria-label', 'Teclado');
+    document.body.appendChild(caja);
+    /* Tocar el teclado nunca le quita el foco al campo */
+    caja.addEventListener('pointerdown', function(ev){ ev.preventDefault(); pulsar(ev); });
+    caja.addEventListener('pointerup', soltar);
+    caja.addEventListener('pointercancel', function(ev){ if(!caja.querySelector('.tk-pop')) soltar(ev); });
+    caja.addEventListener('pointerleave', function(){ if(!caja.querySelector('.tk-pop')) parar(); });
+    /* Con la ventanita de tildes abierta, se elige deslizando o tocando */
+    caja.addEventListener('pointermove', function(ev){
+      var pop = caja.querySelector('.tk-pop'); if(!pop) return;
+      var sobre = document.elementFromPoint(ev.clientX, ev.clientY);
+      pop.querySelectorAll('button').forEach(function(x){ x.classList.toggle('tk-sobre', x === (sobre && sobre.closest && sobre.closest('.tk-pop button'))); });
+    });
+    caja.addEventListener('mousedown', function(ev){ ev.preventDefault(); });
+    return caja;
+  }
+  function tecla(k){
+    var nom = { '⇧':'Mayúsculas', '⌫':'Borrar', '↵':'Aceptar', ' ':'Espacio', '123':'Números', 'abc':'Letras', '#+=':'Símbolos', '😊':'Emojis', '=':'Calcular' }[k] || k;
+    var txt = k === ' ' ? 'espacio' : k === '⇧' ? (mayus === 2 ? '⇪' : '⇧') : (capa === 'abc' && k.length === 1 && mayus ? k.toUpperCase() : k);
+    var cls = 'tk' + (k === ' ' ? ' tk-esp' : '') + (['⇧','⌫','↵','123','abc','#+=','😊'].indexOf(k) >= 0 ? ' tk-fn' : '') + (k === '↵' ? ' tk-ok' : '') + (k === '⇧' && mayus ? ' tk-on' : '');
+    return '<button type="button" class="' + cls + '" data-k="' + esc(k) + '" aria-label="' + esc(nom) + '">' + esc(txt) + '</button>';
+  }
+  function pintarTeclado(){
+    if(!el) return;
+    var filas = FILAS[capa], barra = '';
+    if(capa !== 'numpad'){
+      var enCaptura = el.id === 'entradaCaptura' || el.id === 'calRapido';
+      barra = '<div class="tk-barra">' +
+        (enCaptura ? ATAJOS.map(function(a){ return '<button type="button" class="tk-atajo" data-t="' + esc(a) + '">' + esc(a) + '</button>'; }).join('') : '') +
+        ['á','é','í','ó','ú','ñ','¿','¡'].map(function(a){ return '<button type="button" class="tk-atajo tk-acento" data-t="' + a + '">' + a + '</button>'; }).join('') +
+      '</div>';
+    }
+    var cab = '<div class="tk-cab">' + barra + '<span class="tk-cab-acc">' +
+      (VOZ && capa !== 'numpad' ? '<button type="button" class="tk-mini" data-k="🎤" aria-label="Dictar">' + ico('i-mic') + '</button>' : '') +
+      '<button type="button" class="tk-mini" data-k="⌨" aria-label="Usar el teclado del celular" title="Teclado del celular">⌨︎</button>' +
+      '<button type="button" class="tk-mini" data-k="▾" aria-label="Ocultar teclado">▾</button></span></div>';
+    crear().innerHTML = cab + '<div class="tk-teclas' + (capa === 'numpad' ? ' tk-numpad' : '') + '">' + filas.map(function(f){
+      var ks = typeof f === 'string' ? f.split('') : f;
+      return '<div class="tk-fila">' + ks.map(tecla).join('') + '</div>';
+    }).join('') + '</div>';
+  }
+  function mostrar(x){
+    clearTimeout(ocultarReloj);
+    var cambio = el !== x; el = x;
+    if(cambio){ capa = esNum(x) ? 'numpad' : 'abc'; mayus = 0; autoMayus(); }
+    pintarTeclado();
+    caja.classList.remove('oculto');
+    document.body.classList.add('con-teclado');
+    document.documentElement.style.setProperty('--kb', caja.offsetHeight + 'px');
+    setTimeout(function(){ if(el) el.scrollIntoView({ block:'center', behavior:'smooth' }); }, 60);
+  }
+  function ocultar(){
+    el = null;
+    if(caja) caja.classList.add('oculto');
+    document.body.classList.remove('con-teclado');
+    document.documentElement.style.setProperty('--kb', '0px');
+  }
+  function autoMayus(){
+    if(!el || capa !== 'abc' || esNum(el) || /email|url/.test(el.type || '')) return;
+    var v = el.value.slice(0, el.selectionStart || 0);
+    if(!v.trim() || /[.!?¡¿]\s+$/.test(v) || /\n\s*$/.test(v)) mayus = mayus === 2 ? 2 : 1;
+  }
+  function avisarCambio(){ el.dispatchEvent(new Event('input', { bubbles:true })); }
+  function escribir(t){
+    if(!el) return;
+    var s = el.selectionStart, e = el.selectionEnd;
+    if(s == null){ el.value += t; } else el.setRangeText(t, s, e, 'end');
+    avisarCambio();
+  }
+  function borrar(){
+    if(!el) return;
+    var s = el.selectionStart, e = el.selectionEnd;
+    if(s == null){ el.value = el.value.slice(0, -1); avisarCambio(); return; }
+    if(s !== e){ el.setRangeText('', s, e, 'end'); avisarCambio(); return; }
+    if(!s) return;
+    var cp = el.value.codePointAt(s - 2);
+    var n = cp && cp > 0xFFFF ? 2 : 1;
+    el.setRangeText('', s - n, s, 'end'); avisarCambio();
+  }
+  function calcular(){
+    var v = el.value.replace(/−/g, '-').replace(/,/g, '.').replace(/\s/g, '');
+    if(!/^[\d.+\-]+$/.test(v) || !/\d[+\-]/.test(v)) return;
+    var partes = v.match(/[+\-]?[\d.]+/g) || [], t = 0;
+    partes.forEach(function(p){ t += parseFloat(p) || 0; });
+    el.value = String(Math.round(t * 100) / 100); avisarCambio();
+  }
+  function aceptar(){
+    if(!el) return;
+    if(capa === 'numpad') calcular();
+    if(el.tagName === 'TEXTAREA'){ escribir('\n'); return; }
+    var ev = new KeyboardEvent('keydown', { key:'Enter', bubbles:true, cancelable:true });
+    var siguio = el.dispatchEvent(ev);
+    if(siguio && el.form){
+      if(el.form.requestSubmit) el.form.requestSubmit(); else el.form.dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+    } else if(siguio && !el.form){ el.blur(); }
+  }
+  function accion(k){
+    vibrar(4);
+    if(k === '⌫'){ borrar(); return; }
+    if(k === '↵'){ aceptar(); return; }
+    if(k === '⇧'){ mayus = mayus === 0 ? 1 : mayus === 1 ? 2 : 0; pintarTeclado(); return; }
+    if(k === '123' || k === 'abc' || k === '#+=' || k === '😊'){ capa = { '123':'num', abc:'abc', '#+=':'sim', '😊':'emo' }[k]; pintarTeclado(); return; }
+    if(k === '▾'){ var x = el; ocultar(); if(x) x.blur(); return; }
+    if(k === '⌨'){
+      var y = el; ocultar();
+      y.dataset.nativo = '1'; y.dataset.cambiando = '1'; y.setAttribute('inputmode', y.getAttribute('data-im') || 'text');
+      y.blur(); setTimeout(function(){ y.focus(); delete y.dataset.cambiando; }, 30);
+      return;
+    }
+    if(k === '🎤'){ dictar(el.id, null); return; }
+    if(k === '='){ calcular(); return; }
+    if(k === '−'){ escribir('-'); return; }
+    var t = capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k;
+    if(k === ' ' && capa !== 'abc') capa = 'abc';
+    escribir(t);
+    if(capa === 'abc' && mayus === 1){ mayus = 0; }
+    autoMayus(); pintarTeclado();
+  }
+  function parar(){ clearTimeout(largo); clearInterval(repetir); largo = repetir = null; }
+  function pulsar(ev){
+    var b = ev.target.closest('button');
+    if(!b || !el) return;
+    var popAbierto = caja.querySelector('.tk-pop');
+    if(popAbierto){
+      if(b.closest('.tk-pop')){ escribir(b.getAttribute('data-t')); if(mayus === 1){ mayus = 0; } autoMayus(); pintarTeclado(); saltarClick = true; return; }
+      popAbierto.remove();
+    }
+    parar();
+    b.classList.add('tk-pulsada');
+    var at = b.getAttribute('data-t');
+    if(at){ escribir((/\S$/.test(el.value.slice(0, el.selectionStart || 0)) && at.length > 1 ? ' ' : '') + at + (at.length > 1 ? ' ' : '')); vibrar(4); saltarClick = true; return; }
+    var k = b.getAttribute('data-k');
+    if(k === '⌫'){ accion(k); largo = setTimeout(function(){ repetir = setInterval(borrar, 70); }, 420); saltarClick = true; return; }
+    /* Mantener pulsada una vocal: las tildes */
+    var base = capa === 'abc' && mayus ? k.toUpperCase() : k;
+    if(TILDES[base]){
+      largo = setTimeout(function(){
+        largo = null; saltarClick = true;
+        var pop = document.createElement('div'); pop.className = 'tk-pop';
+        pop.innerHTML = TILDES[base].split('').map(function(c){ return '<button type="button" data-t="' + c + '">' + c + '</button>'; }).join('');
+        var r = b.getBoundingClientRect(), rc = caja.getBoundingClientRect();
+        pop.style.left = Math.max(4, Math.min(rc.width - 44 * TILDES[base].length - 4, r.left - rc.left - 10)) + 'px';
+        pop.style.top = (r.top - rc.top - 52) + 'px';
+        caja.appendChild(pop); vibrar(12);
+      }, 380);
+    }
+    b.dataset.pend = '1';
+  }
+  function soltar(ev){
+    var b = ev.target.closest && ev.target.closest('button');
+    caja.querySelectorAll('.tk-pulsada').forEach(function(x){ x.classList.remove('tk-pulsada'); });
+    var pop = caja.querySelector('.tk-pop');
+    if(pop){
+      var sobre = document.elementFromPoint(ev.clientX, ev.clientY), elegido = sobre && sobre.closest && sobre.closest('.tk-pop button');
+      var marcado = pop.querySelector('.tk-sobre');
+      elegido = elegido || marcado;
+      if(elegido){ escribir(elegido.getAttribute('data-t')); if(mayus === 1){ mayus = 0; } autoMayus(); pintarTeclado(); }
+      /* si soltó sin elegir, la ventanita se queda para tocar una */
+      parar(); saltarClick = false; return;
+    }
+    if(largo){ parar(); }
+    if(repetir){ parar(); return; }
+    if(saltarClick){ saltarClick = false; return; }
+    if(b && b.dataset.pend){ delete b.dataset.pend; accion(b.getAttribute('data-k')); }
+  }
+
+  /* Antes de que el sistema abra su teclado */
+  document.addEventListener('touchstart', function(ev){ if(ev.target && valido(ev.target)) preparar(ev.target); }, { passive:true, capture:true });
+  document.addEventListener('focusin', function(ev){
+    var x = ev.target;
+    if(!activo() || !valido(x) || x.dataset.nativo) return;
+    preparar(x); mostrar(x);
+  });
+  document.addEventListener('focusout', function(ev){
+    var x = ev.target;
+    if(x.dataset && x.dataset.nativo && !x.dataset.cambiando){ delete x.dataset.nativo; x.setAttribute('inputmode', x.getAttribute('data-im') || ''); x.removeAttribute('data-im'); }
+    if(x !== el) return;
+    clearTimeout(ocultarReloj);
+    ocultarReloj = setTimeout(function(){ var a = document.activeElement; if(!(a && valido(a) && activo())) ocultar(); }, 120);
+  });
+  /* Tocar dentro del campo (mover el cursor) recalcula la mayúscula */
+  document.addEventListener('click', function(ev){ if(el && ev.target === el){ autoMayus(); pintarTeclado(); } });
+  return { activo:activo, tactil:tactil, ocultar:ocultar };
+})();
 
 /* ==========================================================================
    ARRANQUE
