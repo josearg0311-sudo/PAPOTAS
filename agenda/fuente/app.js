@@ -421,25 +421,44 @@ var SECCIONES = [
   { id:'esp-estudios',  nom:'Estudios',      ico:'i-birrete', esp:'estudios' },
   { id:'esp-oficina',   nom:'Oficina',       ico:'i-maletin', esp:'oficina' },
   { id:'esp-deporte',   nom:'Deporte',       ico:'i-balon',   esp:'deporte' },
+  /* Cinco secciones y, dentro de cada una, sus pestañas (las «hijas») */
   { id:'tareas',        nom:'Tareas',        ico:'i-tareas',  g:'Organizar' },
-  { id:'proyectos',     nom:'Proyectos',     ico:'i-carpeta' },
+  { id:'proyectos',     nom:'Proyectos',     ico:'i-carpeta', padre:'tareas', oculta:true },
   { id:'calendario',    nom:'Calendario',    ico:'i-cal' },
-  { id:'recordatorios', nom:'Recordatorios', corto:'Avisos', ico:'i-campana' },
-  { id:'listas',        nom:'Listas',        ico:'i-listas' },
+  { id:'recordatorios', nom:'Avisos',        corto:'Avisos', ico:'i-campana', padre:'calendario', oculta:true },
   { id:'notas',         nom:'Notas',         ico:'i-notas' },
-  { id:'habitos',       nom:'Hábitos',       ico:'i-habitos', g:'Crecer' },
-  { id:'metas',         nom:'Metas',         ico:'i-meta' },
-  { id:'foco',          nom:'Enfoque',       ico:'i-reloj' },
-  { id:'diario',        nom:'Diario',        ico:'i-diario' },
-  { id:'progreso',      nom:'Progreso',      ico:'i-diana' },
-  { id:'revision',      nom:'Revisión semanal', movil:'Revisión', ico:'i-check' },
-  { id:'dinero',        nom:'Dinero',        ico:'i-grafica', g:'Dinero' },
-  { id:'pagos',         nom:'Pagos fijos',   corto:'Pagos', ico:'i-recibo' },
-  { id:'personal',      nom:'Libro personal', movil:'Gastos personales', corto:'Gastos', ico:'i-cuentas' },
-  { id:'oficina',       nom:'Libro de oficina', movil:'Oficina', ico:'i-maletin' },
+  { id:'listas',        nom:'Listas',        ico:'i-listas', padre:'notas', oculta:true },
+  { id:'habitos',       nom:'Hábitos',       ico:'i-habitos' },
+  { id:'metas',         nom:'Metas',         ico:'i-meta', padre:'habitos', oculta:true },
+  { id:'diario',        nom:'Diario',        ico:'i-diario', padre:'habitos', oculta:true },
+  { id:'dinero',        nom:'Dinero',        ico:'i-grafica' },
+  { id:'pagos',         nom:'Pagos fijos',   corto:'Pagos', ico:'i-recibo', padre:'dinero', oculta:true },
+  { id:'personal',      nom:'Libro personal', movil:'Gastos personales', corto:'Personal', ico:'i-cuentas', padre:'dinero', oculta:true },
+  { id:'oficina',       nom:'Libro de oficina', movil:'Oficina', corto:'Oficina', ico:'i-maletin', padre:'dinero', oculta:true },
+  /* Enfoque vive dentro de Estudios (se abre con «Estudiar ahora») */
+  { id:'foco',          nom:'Enfoque',       ico:'i-reloj', oculta:true },
   { id:'papelera',      nom:'Papelera',      ico:'i-basura', oculta:true },
   { id:'secciones',     nom:'Administrar secciones', movil:'Secciones', ico:'i-espacios', oculta:true }
 ];
+/* Las pestañas de cada sección: la madre primero y luego sus hijas */
+var PEST_GRUPO = {
+  tareas:     [['tareas','Tareas'], ['proyectos','Proyectos']],
+  calendario: [['calendario','Calendario'], ['recordatorios','Avisos']],
+  notas:      [['notas','Notas'], ['listas','Listas']],
+  habitos:    [['habitos','Hábitos'], ['metas','Metas'], ['diario','Diario']],
+  dinero:     [['dinero','Resumen'], ['pagos','Pagos'], ['personal','Personal'], ['oficina','Oficina']]
+};
+function secPadre(v){ var s = SECCIONES.find(function(x){ return x.id === v; }); return s && s.padre ? s.padre : v; }
+function pestanasGrupo(v){
+  var g = PEST_GRUPO[secPadre(v)];
+  if(!g) return '';
+  var k = contadores();
+  var num = { recordatorios:k.recordatorios, pagos:k.pagos };
+  return '<nav class="pest-grupo" aria-label="Pestañas">' + g.map(function(p){
+    return '<button type="button" data-ir="' + p[0] + '"' + (p[0] === v ? ' aria-current="page"' : '') + '>' + p[1] +
+      (num[p[0]] ? '<span class="pg-n">' + num[p[0]] + '</span>' : '') + '</button>';
+  }).join('') + '</nav>';
+}
 /* Cada sección con su grupo (el grupo lo marca la primera de cada uno) */
 var GRUPO_DE = {}, GRUPOS = [''];
 (function(){ var g = ''; SECCIONES.forEach(function(s){ if(s.oculta) return; if(s.g){ g = s.g; GRUPOS.push(g); } GRUPO_DE[s.id] = g; }); })();
@@ -486,27 +505,28 @@ function contadores(){
 }
 
 function nomCorto(s){ return s.corto || s.movil || s.nom; }
-function navPlegados(){ return pref.navPlegado || ['Crecer']; }
+function navPlegados(){ return pref.navPlegado || []; }
 /* Cambia el contenido solo si es distinto: el menú no se redibuja entero
    cada vez que se pinta una sección */
 function ponerSiCambia(el, html){ if(el.__html !== html){ el.innerHTML = html; el.__html = html; } }
 function pintarNav(){
   var k = contadores();
-  function num(id){ return id === 'tareas' ? k.tareas : id === 'recordatorios' ? k.recordatorios : id === 'pagos' ? k.pagos : 0; }
+  function num(id){ return id === 'tareas' ? k.tareas : id === 'calendario' ? k.recordatorios : id === 'dinero' ? k.pagos : 0; }
+  var vPadre = secPadre(ui.vista);
   var grupoNav = '';
   var SNAV = navSecs();
   ponerSiCambia($('navLat'), SNAV.map(function(s){
     var n = num(s.id);
-    var alerta = (s.id === 'tareas' && k.tareasTarde) || ((s.id === 'recordatorios' || s.id === 'pagos') && n);
+    var alerta = (s.id === 'tareas' && k.tareasTarde) || ((s.id === 'calendario' || s.id === 'dinero') && n);
     var enEsp = s.esp ? ' class="nav-esp" style="--c:' + espInfo(s.esp).c + '"' : '';
     if(s.esp) n = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoyISO() && espDe(t) === s.esp; }).length;
     if(s.g) grupoNav = s.g;
     var plegado = navPlegados().indexOf(grupoNav) >= 0;
     var abre = s.g ? '<button type="button" class="grupo" data-acc="nav-plegar" data-v="' + s.g + '" aria-expanded="' + !plegado + '">' + s.g + ico('i-der') + '</button>' + (plegado ? '<div class="nav-iconos">' : '') : '';
     var sig = SNAV[SNAV.indexOf(s) + 1], cierra = plegado && (!sig || sig.g) ? '</div>' : '';
-    if(plegado) return abre + '<button type="button" class="nav-ico" data-ir="' + s.id + '" title="' + s.nom + '" aria-label="' + s.nom + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' + ico(s.ico) + (n ? '<span class="punto-nav' + (alerta ? ' alerta' : '') + '"></span>' : '') + '</button>' + cierra;
+    if(plegado) return abre + '<button type="button" class="nav-ico" data-ir="' + s.id + '" title="' + s.nom + '" aria-label="' + s.nom + '"' + (vPadre === s.id ? ' aria-current="page"' : '') + '>' + ico(s.ico) + (n ? '<span class="punto-nav' + (alerta ? ' alerta' : '') + '"></span>' : '') + '</button>' + cierra;
     return abre +
-      ('<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (ui.vista === s.id ? ' aria-current="page"' : '') + '>' +
+      ('<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (vPadre === s.id ? ' aria-current="page"' : '') + '>' +
         ico(s.ico) + s.nom + (n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : '') +
       '</button>');
   }).join(''));
@@ -514,11 +534,11 @@ function pintarNav(){
   var enEsp = ui.vista.indexOf('esp-') === 0;
   if(enEsp) ui.espUlt = ui.vista.slice(4);
   function activoAbajo(id){
-    return ui.vista === id || (id === 'dinero' && AB.indexOf(ui.vista) < 0 && DINERO.indexOf(ui.vista) >= 0) || (id === 'espacios' && enEsp);
+    return ui.vista === id || (AB.indexOf(ui.vista) < 0 && vPadre === id) || (id === 'espacios' && enEsp);
   }
   var enMas = !AB.some(activoAbajo);
   $('barraInf').style.gridTemplateColumns = 'repeat(' + (AB.length + 1) + ',minmax(0,1fr))';
-  var otros = (AB.indexOf('recordatorios') < 0 ? k.recordatorios : 0) + (AB.indexOf('pagos') < 0 ? k.pagos : 0);
+  var otros = (AB.indexOf('calendario') < 0 ? k.recordatorios : 0) + (AB.indexOf('dinero') < 0 ? k.pagos : 0);
   ponerSiCambia($('barraInf'), AB.map(function(id){
     var s = id === 'espacios' ? { nom:'Espacios', ico:'i-espacios' } : SECCIONES.find(function(x){ return x.id === id; });
     var destino = id === 'espacios' ? 'esp-' + (ui.espUlt || 'personal') : id;
@@ -541,6 +561,7 @@ function ir(v, sinHash){
   /* Si justo se está deshaciendo el paso de una hoja, se va después */
   if(ignorarPop && !sinHash){ irPendiente = v; return; }
   if(v === 'cuentas') v = 'personal';    // la dirección de antes sigue valiendo
+  if(v === 'progreso' || v === 'revision'){ v = 'hoy'; try{ history.replaceState(null, '', '#hoy'); }catch(e){} }   // secciones que ya no existen
   if(v !== 'ajustes' && !SECCIONES.some(function(s){ return s.id === v; })) v = 'hoy';
   if(v !== 'listas') ui.lista = null;
   if(v !== 'proyectos') ui.proy = null;
@@ -757,7 +778,10 @@ function pintarVista(){
   document.body.dataset.esp = sec && sec.esp ? sec.esp : '';
 
   if(esLibro(v)){
-    $('contenido').classList.add('oculto');
+    /* Los libros: arriba las pestañas de Dinero y debajo el libro */
+    $('contenido').classList.remove('oculto');
+    $('contenido').innerHTML = '<div class="pest-sobre-libro">' + pestanasGrupo(v) + '</div>';
+    document.body.classList.remove('con-titulo-grande');
     mostrarLibro(v);
     ui.antes = v;
     return;
@@ -765,7 +789,7 @@ function pintarVista(){
   $('zonaCuentas').classList.add('oculto');
   $('contenido').classList.remove('oculto');
 
-  var html = sec && sec.esp ? VISTAS.espacio(sec.esp) : cabSeccion(v) + VISTAS[v]();
+  var html = sec && sec.esp ? VISTAS.espacio(sec.esp) : cabSeccion(v) + pestanasGrupo(v) + VISTAS[v]();
   var nueva = ui.antes !== v + (ui.lista || '');
   var dirCls = nueva ? (ui.dir < 0 ? 'vista entra-izq' : 'vista entra-der') : '';
   ui.dir = 1;
@@ -1065,16 +1089,6 @@ VISTAS.hoy = function(){
       '<form data-acc="bienvenida" class="captura" style="margin:0 0 10px"><input id="nombreBienvenida" type="text" maxlength="40" placeholder="Tu nombre"><button class="btn primario chico" type="submit">Empezar</button></form>' +
       '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button></section>';
   }
-  var wdR = deISO(hoy).getDay();
-  if(wdR === 0 || wdR === 1){
-    var semR = wdR === 0 ? inicioSemana(hoy) : sumarDias(inicioSemana(hoy), -7);
-    var hechaR = buscarId('revisiones', semR);
-    if(!hechaR || hechaR.del || !(hechaR.logros || hechaR.prioridades)){
-      html += '<button type="button" class="aviso-rev" data-acc="ir-revision" data-v="' + semR + '">' + ico('i-check') +
-        '<span><b>Haz tu revisión semanal</b>Cinco minutos para ver cómo te fue y elegir lo importante de la semana que viene.</span>' + ico('i-der') + '</button>';
-    }
-  }
-
   html += '<div class="panel-hoy">';
 
   /* Lo siguiente */
@@ -3207,7 +3221,7 @@ function cabSeccion(v){
     } else if(v === 'recordatorios'){
       var rs = vivos('recordatorios').filter(function(r){ return !r.hecho; }), venc = recordatoriosVencidos().length;
       var hoyR = rs.filter(function(r){ return momentoR(r).slice(0, 10) === hoy; }).length;
-      d = { c:'var(--oro)', i:'i-campana', t:'Recordatorios', s:hoyR + ' para hoy' + (venc ? ' · <em>' + venc + ' pasados sin marcar</em>' : '') + ' · ' + rs.length + ' activos' };
+      d = { c:'var(--oro)', i:'i-campana', t:'Avisos', s:hoyR + ' para hoy' + (venc ? ' · <em>' + venc + ' pasados sin marcar</em>' : '') + ' · ' + rs.length + ' activos' };
     } else if(v === 'listas' && !ui.lista){
       var ls = vivos('listas'), faltan = 0, total = 0;
       ls.forEach(function(l){ (l.items || []).forEach(function(i){ total++; if(!i.ok) faltan++; }); });
@@ -5260,9 +5274,9 @@ function menuMas(){
   abrirFlotante(cabFlot('Todo') + grupos.map(function(gr){
     var esEsp = gr.n === 'Espacios';
     return '<div class="mas-grupo"><h4>' + gr.n + '</h4><div class="rejilla-mas' + (esEsp ? ' espacios' : '') + '">' + gr.items.map(function(sc){
-      var n = sc.id === 'recordatorios' ? k.recordatorios : sc.id === 'tareas' ? k.tareas : sc.id === 'pagos' ? k.pagos : 0;
+      var n = sc.id === 'calendario' ? k.recordatorios : sc.id === 'tareas' ? k.tareas : sc.id === 'dinero' ? k.pagos : 0;
       var E = sc.esp ? espInfo(sc.esp) : null;
-      return '<button type="button" data-ir="' + sc.id + '"' + (E ? ' style="--c:' + E.c + '"' : '') + (ui.vista === sc.id ? ' aria-current="page"' : '') + '>' + (E ? '<span class="em">' + E.em + '</span>' : ico(sc.ico)) + '<span>' + sc.nom + '</span>' + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
+      return '<button type="button" data-ir="' + sc.id + '"' + (E ? ' style="--c:' + E.c + '"' : '') + (secPadre(ui.vista) === sc.id ? ' aria-current="page"' : '') + '>' + (E ? '<span class="em">' + E.em + '</span>' : ico(sc.ico)) + '<span>' + sc.nom + '</span>' + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
     }).join('') + '</div></div>';
   }).join('') +
     '<div class="mas-grupo"><h4>Herramientas</h4><div class="rejilla-mas"><button type="button" data-ir="secciones">' + ico('i-espacios') + '<span>Administrar secciones</span></button><button type="button" data-acc="buscar">' + ico('i-buscar') + '<span>Buscar</span></button>' +
@@ -6752,7 +6766,7 @@ document.addEventListener('keydown', function(ev){
   if($('capaFlotante').innerHTML) return;
   if(ev.key === '/'){ ev.preventDefault(); abrirBuscar(); }
   else if(ev.key === 'n' || ev.key === 'N'){ ev.preventDefault(); nuevoSegunVista(); }
-  else if(/^[1-9]$/.test(ev.key)){ ir(SECCIONES[+ev.key - 1].id); }
+  else if(/^[1-9]$/.test(ev.key)){ var ns = navSecs(); if(ns[+ev.key - 1]) ir(ns[+ev.key - 1].id); }
 });
 
 $('fab').addEventListener('click', function(ev){ ev.stopPropagation(); nuevoSegunVista(); });

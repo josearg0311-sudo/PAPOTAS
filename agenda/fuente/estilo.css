@@ -2862,3 +2862,23 @@ body{
 @media (prefers-reduced-motion: reduce){ .vista.entra-der, .vista.entra-izq, .w, .fila.completando{ animation:none !important } }
 .w-espb::before, .w-espb::after{ display:none !important }
 @media (min-width:900px){ .panel-hoy .w-tareas{ grid-column:span 2 !important } }
+
+/* ----- Pestañas de cada sección (Tareas·Proyectos, Calendario·Avisos…) ----- */
+.pest-grupo{
+  display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; margin:0 0 12px; padding:4px;
+  border-radius:12px; background:var(--hoja);
+}
+.pest-grupo::-webkit-scrollbar{ display:none }
+.pest-grupo button{
+  flex:1 0 auto; display:inline-flex; align-items:center; justify-content:center; gap:6px; height:38px; padding:0 14px;
+  border-radius:9px; font-family:var(--serif); font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--tinta-3);
+}
+.pest-grupo button[aria-current="page"]{ background:var(--hoja-2); color:var(--tinta); box-shadow:inset 0 -3px 0 var(--verde) }
+.pest-grupo button:active{ transform:scale(.96) }
+.pg-n{ min-width:18px; height:18px; padding:0 5px; border-radius:5px; background:var(--debe); color:#fff; font-family:var(--letra); font-size:10.5px; font-weight:800; display:grid; place-items:center }
+/* Sobre los libros de cuentas: solo las pestañas, y el libro justo debajo */
+body.en-cuentas .contenido{ padding-bottom:0 !important; min-height:0 !important }
+.pest-sobre-libro{ padding-top:2px }
+.pest-sobre-libro .pest-grupo{ margin-bottom:8px }
+body.en-cuentas .marco-cuentas{ height:calc(100vh - var(--arriba) - var(--barra) - 88px - env(safe-area-inset-bottom)) !important; height:calc(100dvh - var(--arriba) - var(--barra) - 88px - env(safe-area-inset-bottom)) !important }
+@media (min-width:900px){ body.en-cuentas .marco-cuentas{ height:calc(100vh - var(--arriba) - 100px) !important; height:calc(100dvh - var(--arriba) - 100px) !important } }
