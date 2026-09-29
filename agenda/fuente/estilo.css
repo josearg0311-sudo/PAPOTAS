@@ -7,14 +7,14 @@
    ========================================================================== */
 :root{
   color-scheme: dark;
-  --papel:#121110; --hoja:#1B1917; --hoja-2:#221F1C;
-  --tinta:#F4EEE6; --tinta-2:#B5AB9E; --tinta-3:#83796D;
-  --regla:#2F2A25; --regla-2:#27231F;
-  --verde:#F0883E; --verde-sube:#FFA15C; --verde-piso:#382313;
-  --haber:#A6D38A; --haber-piso:#1F2A1A;
-  --debe:#F27C6E;  --debe-piso:#33201C;
-  --oro:#EDC46A;   --oro-piso:#302817;
-  --azul:#62A8E5;  --rosa:#D9734E;
+  --papel:#0F1011; --hoja:#18191B; --hoja-2:#1F2123;
+  --tinta:#EEF0F2; --tinta-2:#A4A9B0; --tinta-3:#737880;
+  --regla:#2A2D31; --regla-2:#222427;
+  --verde:#3D8BFF; --verde-sube:#6BA6FF; --verde-piso:#15243A;
+  --haber:#45C97A; --haber-piso:#13261B;
+  --debe:#FF5D5D;  --debe-piso:#2E1719;
+  --oro:#F5B83D;   --oro-piso:#2B2313;
+  --azul:#5AA9FF;  --rosa:#FF7A6B;
 
   --sombra:     0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.22);
   --sombra-alta:0 16px 48px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.25);
@@ -30,7 +30,7 @@
   color-scheme: light;
   --sombra:     0 1px 2px rgba(40,30,20,.05), 0 6px 18px rgba(40,30,20,.06);
   --sombra-alta:0 12px 40px rgba(40,30,20,.16), 0 2px 8px rgba(40,30,20,.08);
-  --azul:#2A6FAE; --rosa:#B5532F;
+  --azul:#1F6FEB; --rosa:#C8452F;
 }
 
 /* Paletas propias de la agenda */
@@ -46,11 +46,11 @@
 :root[data-paleta="jade"][data-tema="claro"]{
   --papel:#EFF4F1; --hoja:#FBFDFC; --hoja-2:#F4F8F6; --tinta:#18221F; --tinta-2:#566661; --tinta-3:#869690; --regla:#D9E3DF; --regla-2:#E6EDEA; --verde:#23876F; --verde-sube:#1B6B58; --verde-piso:#E1F3EE; --haber:#4F8A3A; --haber-piso:#EAF4E2; --debe:#B8483B; --debe-piso:#FBE8E4; --oro:#9A7424; --oro-piso:#F8EFD9
 }
-:root[data-paleta="acero"]:not([data-tema="claro"]){
-  --papel:#101214; --hoja:#181B1F; --hoja-2:#1F2328; --tinta:#E9EDF1; --tinta-2:#A3ACB6; --tinta-3:#737D88; --regla:#2A3037; --regla-2:#22272D; --verde:#62A8E5; --verde-sube:#8CC2F0; --verde-piso:#172838; --haber:#8FC45A; --haber-piso:#1C2A17; --debe:#E8674A; --debe-piso:#33201A; --oro:#E0A43A; --oro-piso:#2E2415
+:root[data-paleta="electrico"]:not([data-tema="claro"]){
+  --papel:#0F1011; --hoja:#18191B; --hoja-2:#1F2123; --tinta:#EEF0F2; --tinta-2:#A4A9B0; --tinta-3:#737880; --regla:#2A2D31; --regla-2:#222427; --verde:#3D8BFF; --verde-sube:#6BA6FF; --verde-piso:#15243A; --haber:#45C97A; --haber-piso:#13261B; --debe:#FF5D5D; --debe-piso:#2E1719; --oro:#F5B83D; --oro-piso:#2B2313
 }
-:root[data-paleta="acero"][data-tema="claro"]{
-  --papel:#EEF1F4; --hoja:#FBFCFD; --hoja-2:#F3F6F8; --tinta:#161A1F; --tinta-2:#56606B; --tinta-3:#86909B; --regla:#D8DEE4; --regla-2:#E5E9EE; --verde:#2A6FAE; --verde-sube:#1F5890; --verde-piso:#E2EEF8; --haber:#3F7A2A; --haber-piso:#E6F1DF; --debe:#B84A30; --debe-piso:#FAE6DF; --oro:#94691C; --oro-piso:#F6ECD8
+:root[data-paleta="electrico"][data-tema="claro"]{
+  --papel:#F2F4F7; --hoja:#FFFFFF; --hoja-2:#F6F7F9; --tinta:#111418; --tinta-2:#56606B; --tinta-3:#8A929C; --regla:#DCE1E7; --regla-2:#E8EBEF; --verde:#1F6FEB; --verde-sube:#1858BF; --verde-piso:#E3EEFD; --haber:#1E8A4C; --haber-piso:#E3F3E9; --debe:#C7353D; --debe-piso:#FBE5E6; --oro:#A36F0A; --oro-piso:#F8EEDA
 }
 :root[data-paleta="grafito"]:not([data-tema="claro"]){
   --papel:#111211; --hoja:#191A19; --hoja-2:#202120; --tinta:#EEEFEA; --tinta-2:#AAACA4; --tinta-3:#7A7D75; --regla:#2B2D2A; --regla-2:#242623; --verde:#C8E06A; --verde-sube:#D9EC8F; --verde-piso:#2A301A; --haber:#8FD6A0; --haber-piso:#1B2A1F; --debe:#F2836F; --debe-piso:#33201B; --oro:#E8C35E; --oro-piso:#2E2815
@@ -847,8 +847,8 @@ body{
 .cat-fila .barra-prog i{ transition:width .5s ease }
 
 /* ===== Espacios ============================================================ */
-:root{ --esp-personal:#62A8E5; --esp-estudios:#E0A43A; --esp-oficina:#9AA7B4; --esp-deporte:#6CC24A }
-:root[data-tema="claro"]{ --esp-personal:#2A6FAE; --esp-estudios:#94691C; --esp-oficina:#56606B; --esp-deporte:#3F7A2A }
+:root{ --esp-personal:#5AA9FF; --esp-estudios:#2DD4BF; --esp-oficina:#94A3B8; --esp-deporte:#4ADE80 }
+:root[data-tema="claro"]{ --esp-personal:#1F6FEB; --esp-estudios:#0F8F80; --esp-oficina:#56606B; --esp-deporte:#1E8A4C }
 
 .nav-lat .nav-esp svg{ color:var(--c) }
 .nav-lat .nav-esp[aria-current="page"]{ background:linear-gradient(90deg, color-mix(in srgb, var(--c) 22%, transparent), transparent); box-shadow:inset 3px 0 0 var(--c); color:var(--tinta) }
@@ -2191,7 +2191,7 @@ body::before{ display:none !important }
 .siguiente b{ font-size:24px !important; font-weight:560 !important }
 
 /* ----- Hojas flotantes y menú Todo ----- */
-.velo{ background:rgba(8,6,4,.62) !important }
+.velo{ background:rgba(4,6,10,.66) !important }
 .hoja-flot{ background:var(--hoja) !important; border:0 !important }
 .hoja-flot .cab h3{ font-size:22px !important; font-weight:560 !important }
 .rejilla-mas button, .menu-lista button{ border:0 !important; background:var(--hoja-2) !important; border-radius:20px !important }

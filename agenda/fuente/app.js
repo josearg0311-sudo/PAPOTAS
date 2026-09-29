@@ -4617,7 +4617,7 @@ function confeti(){
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var c = $('confeti'), g = c.getContext('2d'), W = c.width = innerWidth, H = c.height = innerHeight;
   var cs = getComputedStyle(document.documentElement);
-  var col = ['--verde','--haber','--debe','--oro','--azul','--rosa'].map(function(v){ return cs.getPropertyValue(v).trim() || '#F4A36C'; });
+  var col = ['--verde','--haber','--debe','--oro','--azul','--rosa'].map(function(v){ return cs.getPropertyValue(v).trim() || '#3D8BFF'; });
   var ps = [];
   for(var i = 0; i < 140; i++) ps.push({ x:W / 2 + (Math.random() - .5) * 80, y:H * .35, vx:(Math.random() - .5) * 14, vy:-Math.random() * 14 - 4, r:Math.random() * 6 + 4, c:col[i % col.length], a:Math.random() * 6, va:(Math.random() - .5) * .3 });
   var t0 = performance.now();
@@ -4706,17 +4706,17 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
+  { id:'electrico', nom:'Eléctrico', gotas:['#3D8BFF','#45C97A','#18191B'] },
   { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },
-  { id:'acero',   nom:'Acero',   gotas:['#62A8E5','#E0A43A','#15181B'] },
   { id:'grafito', nom:'Grafito', gotas:['#C8E06A','#8FD6A0','#191A19'] }
 ];
-function paletaValida(p){ return PALETAS.some(function(x){ return x.id === p; }) ? p : 'brasa'; }
+function paletaValida(p){ return PALETAS.some(function(x){ return x.id === p; }) ? p : 'electrico'; }
 var nube = leerJSON(CLAVE_NUBE, null);
 
 VISTAS.ajustes = function(){
   var tema = document.documentElement.getAttribute('data-tema') || 'oscuro';
-  var pal = document.documentElement.getAttribute('data-paleta') || 'brasa';
+  var pal = document.documentElement.getAttribute('data-paleta') || 'electrico';
   var permiso = 'Notification' in window ? Notification.permission : 'no';
   var llaveCuentas = (leerJSON(CLAVE_NUBE_CTA, null) || {}).key || '';
 

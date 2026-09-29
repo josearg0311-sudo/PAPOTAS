@@ -92,11 +92,11 @@ def armar(completa):
         serif_js = 'new URL("barlow-700.woff2", location.href).href'
 
     cabeza = f'''<!DOCTYPE html>
-<html lang="es" data-tema="oscuro" data-paleta="brasa">
+<html lang="es" data-tema="oscuro" data-paleta="electrico">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#121110">
+<meta name="theme-color" content="#0F1011">
 <meta name="color-scheme" content="dark light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -117,8 +117,11 @@ def armar(completa):
   try{{
     var t = localStorage.getItem('agenda_tema');
     var p = localStorage.getItem('agenda_paleta');
+    /* Eléctrico pasa a ser la de siempre: quien tenía Brasa por defecto, cambia una vez */
+    if(p === 'brasa' && !localStorage.getItem('agenda_pal_v2')){{ p = 'electrico'; localStorage.setItem('agenda_paleta', p); }}
+    localStorage.setItem('agenda_pal_v2', '1');
     if(t === 'claro') document.documentElement.setAttribute('data-tema','claro');
-    if(/^(brasa|jade|acero|grafito)$/.test(p || '')) document.documentElement.setAttribute('data-paleta', p);
+    if(/^(electrico|brasa|jade|grafito)$/.test(p || '')) document.documentElement.setAttribute('data-paleta', p);
   }}catch(e){{}}
   try{{
     var aqui = location.pathname || './';
@@ -129,7 +132,7 @@ def armar(completa):
       description:'Tareas, listas, calendario, recordatorios, hábitos, metas, diario, pagos, notas y cuentas.',
       start_url: base + aqui, id: base + aqui, scope: base + carpeta,
       display:'standalone', orientation:'any', lang:'es',
-      background_color:'#121110', theme_color:'#121110',
+      background_color:'#0F1011', theme_color:'#0F1011',
       categories:['productivity','lifestyle','finance'],
       icons:{iconos_js},
       shortcuts:[
