@@ -73,6 +73,10 @@
       <button type="button" class="btn-icono solo-movil" id="btnMarcaMovil" data-ir="hoy" aria-label="Ir a Hoy" style="width:34px">
         <i class="logo-img" style="width:32px;height:32px" aria-hidden="true"></i>
       </button>
+      <div class="pasos" role="group" aria-label="Moverte entre pantallas">
+        <button type="button" class="btn-icono" id="btnAtras" data-acc="nav-atras" title="Pantalla anterior (Alt+←)" aria-label="Pantalla anterior" disabled><svg class="i izq"><use href="#i-der"/></svg></button>
+        <button type="button" class="btn-icono" id="btnAdelante" data-acc="nav-adelante" title="Pantalla siguiente (Alt+→)" aria-label="Pantalla siguiente" disabled><svg class="i"><use href="#i-der"/></svg></button>
+      </div>
       <h1 id="tituloVista">Hoy</h1>
       <div class="acciones">
         <button type="button" class="pastilla oculto" id="pastillaNube" data-estado="off" title="Sincronizar ahora">

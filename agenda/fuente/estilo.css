@@ -2015,3 +2015,33 @@ body.con-sel .avisos{ bottom:calc(var(--barra) + 150px + env(safe-area-inset-bot
 .sel-otra .entrada{ flex:1; min-width:0 }
 .punto-prio{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; vertical-align:middle }
 body.sin-fab .fab{ display:none }
+
+/* ==========================================================================
+   ATRÁS Y ADELANTE
+   ========================================================================== */
+svg.i.izq{ transform:rotate(180deg) }
+.pasos{ display:flex; align-items:center; gap:0; flex:none; margin-right:4px }
+.pasos .btn-icono{ width:32px; height:36px }
+.pasos .btn-icono svg{ width:21px; height:21px; stroke-width:2.4 }
+.pasos .btn-icono:disabled{ opacity:.28; cursor:default }
+@media (max-width:899px){
+  /* En el celular las flechas ocupan el sitio del logo cuando ya te moviste */
+  body.con-pasos #btnMarcaMovil{ display:none }
+  body:not(.con-pasos) .pasos{ display:none }
+  .pasos .btn-icono{ width:30px }
+  .cabecera h1{ font-size:18px }
+}
+.nav-hist .nav-hist-ico{ width:30px; height:30px; flex:none; display:grid; place-items:center; border-radius:10px; background:var(--verde-piso); font-size:16px }
+.nav-hist .nav-hist-ico svg{ width:17px; height:17px; margin:0 }
+.nav-hist button{ align-items:center }
+.nav-hist-aqui{ display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:14px; border:1.5px dashed var(--verde); color:var(--verde-sube) }
+.nav-hist-aqui small{ margin-left:auto; font-size:12px; color:var(--tinta-3) }
+.gesto-nav{
+  position:fixed; top:45%; z-index:300; width:44px; height:44px; border-radius:50%; display:grid; place-items:center;
+  background:var(--hoja-2); border:1px solid var(--regla); box-shadow:var(--sombra-alta); color:var(--tinta-2);
+  opacity:calc(.3 + var(--p, 0) * .7); pointer-events:none; transition:background .15s, color .15s;
+}
+.gesto-nav.izq{ left:calc(-44px + var(--p, 0) * 60px) }
+.gesto-nav.der{ right:calc(-44px + var(--p, 0) * 60px) }
+.gesto-nav.listo{ background:var(--verde); color:var(--papel) }
+.gesto-nav svg{ width:22px; height:22px; stroke-width:2.6 }

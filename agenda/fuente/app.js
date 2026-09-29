@@ -564,6 +564,116 @@ function pintarSeguro(){
   pintar();
 }
 
+/* ==========================================================================
+   ATRÁS Y ADELANTE ENTRE PANTALLAS
+   Como en un navegador, pero dentro de la agenda: cada pantalla que visitas
+   (una sección, la pestaña de un espacio, una lista, un proyecto) queda
+   anotada con hasta dónde habías bajado. ‹ vuelve a la anterior y › a la
+   siguiente. En el celular también se desliza desde el borde.
+   ========================================================================== */
+var NAV = { atras:[], adelante:[], clave:null, foto:null, moviendo:false };
+function fotoPantalla(){
+  var v = ui.vista, e = v.indexOf('esp-') === 0 ? v.slice(4) : '';
+  return { v:v, lista:v === 'listas' ? ui.lista || null : null, proy:v === 'proyectos' ? ui.proy || null : null,
+           esp:e, tab:e ? tabEsp(e) : '', y:window.scrollY || 0 };
+}
+function clavePantalla(f){ return [f.v, f.lista || '', f.proy || '', f.tab || ''].join('|'); }
+function anotarPantalla(){
+  var f = fotoPantalla(), k = clavePantalla(f);
+  if(NAV.clave !== null && k !== NAV.clave && !NAV.moviendo && NAV.foto){
+    NAV.foto.y = window.scrollY || 0;   // hasta dónde bajaste en la que dejas
+    NAV.atras.push(NAV.foto);
+    if(NAV.atras.length > 60) NAV.atras.shift();
+    NAV.adelante = [];
+  }
+  NAV.clave = k; NAV.foto = f;
+  pintarPasos();
+}
+function pintarPasos(){
+  var a = $('btnAtras'), d = $('btnAdelante');
+  if(!a) return;
+  a.disabled = !NAV.atras.length; d.disabled = !NAV.adelante.length;
+  var ant = NAV.atras[NAV.atras.length - 1], sig = NAV.adelante[NAV.adelante.length - 1];
+  a.title = ant ? 'Volver a ' + nombrePantalla(ant) + ' (Alt+←)' : 'Pantalla anterior';
+  d.title = sig ? 'Ir a ' + nombrePantalla(sig) + ' (Alt+→)' : 'Pantalla siguiente';
+  document.body.classList.toggle('con-pasos', !!(NAV.atras.length || NAV.adelante.length));
+}
+function nombrePantalla(f){
+  var s = SECCIONES.find(function(x){ return x.id === f.v; }), n = f.v === 'ajustes' ? 'Ajustes' : s ? s.nom : f.v;
+  if(f.esp){ var p = PESTANAS[f.esp].find(function(x){ return x[0] === f.tab; }); if(p && p[0] !== 'inicio') n += ' · ' + p[1]; }
+  if(f.lista){ var l = buscarId('listas', f.lista); if(l && !l.del) n = l.nombre || n; }
+  if(f.proy){ var pr = buscarId('proyectos', f.proy); if(pr && !pr.del) n = pr.nombre || n; }
+  return n;
+}
+function iconoPantalla(f){
+  var s = SECCIONES.find(function(x){ return x.id === f.v; });
+  return f.esp ? espInfo(f.esp).em : ico(s ? s.ico : 'i-ajustes');
+}
+/* d = -1 atrás, 1 adelante; n = cuántos pasos; sinHash si ya lo movió el navegador */
+function pasoNav(d, n, sinHash){
+  n = n || 1;
+  var de = d < 0 ? NAV.atras : NAV.adelante, a = d < 0 ? NAV.adelante : NAV.atras;
+  if(de.length < n) return false;
+  NAV.foto.y = window.scrollY || 0;
+  a.push(NAV.foto);
+  for(var i = 1; i < n; i++) a.push(de.pop());
+  var f = de.pop();
+  NAV.moviendo = true;
+  try{
+    cerrarFlotante();
+    if(f.esp){ ui.espTab = ui.espTab || {}; ui.espTab[f.esp] = f.tab; }
+    ui.lista = f.lista; ui.proy = f.proy;
+    ir(f.v, sinHash);
+  } finally { NAV.moviendo = false; }
+  NAV.clave = clavePantalla(fotoPantalla()); NAV.foto = fotoPantalla();
+  pintarPasos();
+  var y = f.y || 0;
+  requestAnimationFrame(function(){ window.scrollTo(0, y); });
+  return true;
+}
+/* Mantener pulsado ‹ (o clic derecho): la lista de pantallas recientes */
+function hojaHistorialNav(){
+  var at = NAV.atras.slice().reverse().slice(0, 12), ad = NAV.adelante.slice().reverse().slice(0, 6);
+  if(!at.length && !ad.length) return;
+  function fila(f, d, n){
+    return '<button type="button" data-acc="nav-saltar" data-d="' + d + '" data-n="' + n + '"><span class="nav-hist-ico">' + iconoPantalla(f) + '</span><span><b>' + esc(nombrePantalla(f)) + '</b><small>' + (d < 0 ? (n === 1 ? 'La anterior' : 'Hace ' + n + ' pantallas') : (n === 1 ? 'La siguiente' : n + ' más adelante')) + '</small></span></button>';
+  }
+  abrirFlotante(cabFlot('Pantallas recientes') + '<div class="menu-lista nav-hist">' +
+    ad.map(function(f, i){ return fila(f, 1, ad.length - i); }).join('') +
+    '<div class="nav-hist-aqui"><span class="nav-hist-ico">' + iconoPantalla(NAV.foto) + '</span><b>' + esc(nombrePantalla(NAV.foto)) + '</b><small>Estás aquí</small></div>' +
+    at.map(function(f, i){ return fila(f, -1, i + 1); }).join('') + '</div>');
+}
+/* Deslizar desde el borde: desde la izquierda, atrás; desde la derecha, adelante */
+(function(){
+  var x0 = 0, y0 = 0, lado = 0, marca = null, dx = 0;
+  var BORDE = 24;
+  document.addEventListener('touchstart', function(ev){
+    lado = 0;
+    if(ev.touches.length !== 1 || $('capaFlotante').innerHTML || ui.sel || esLibro(ui.vista)) return;
+    x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY;
+    if(x0 < BORDE && NAV.atras.length) lado = -1;
+    else if(x0 > innerWidth - BORDE && NAV.adelante.length) lado = 1;
+    dx = 0;
+  }, { passive:true });
+  document.addEventListener('touchmove', function(ev){
+    if(!lado) return;
+    var mx = ev.touches[0].clientX - x0, my = ev.touches[0].clientY - y0;
+    if(Math.abs(my) > 40 && Math.abs(my) > Math.abs(mx)){ quitar_(); lado = 0; return; }
+    dx = lado < 0 ? Math.max(0, mx) : Math.max(0, -mx);
+    if(!marca){ marca = document.createElement('div'); marca.className = 'gesto-nav ' + (lado < 0 ? 'izq' : 'der'); marca.innerHTML = ico('i-der', lado < 0 ? 'izq' : ''); document.body.appendChild(marca); }
+    var p = Math.min(1, dx / 90);
+    marca.style.setProperty('--p', p.toFixed(2));
+    marca.classList.toggle('listo', dx > 90);
+  }, { passive:true });
+  function quitar_(){ if(marca){ marca.remove(); marca = null; } }
+  document.addEventListener('touchend', function(){
+    if(!lado) return;
+    var d = lado; lado = 0; quitar_();
+    if(dx > 90){ vibrar(10); pasoNav(d); }
+  }, { passive:true });
+  document.addEventListener('touchcancel', function(){ lado = 0; quitar_(); }, { passive:true });
+})();
+
 function pintar(){
   olvidarDias();
   try{ pintarVista(); }
@@ -578,6 +688,7 @@ function pintar(){
 }
 function pintarVista(){
   repintarAlSoltar = false;
+  anotarPantalla();
   pintarNav();
   var v = ui.vista;
   var sec = SECCIONES.find(function(s){ return s.id === v; });
@@ -3101,7 +3212,7 @@ function cabSeccion(v){
   var fila = null, x0 = 0, y0 = 0, dx = 0, horizontal = null;
   document.addEventListener('touchstart', function(ev){
     var f = ev.target.closest && ev.target.closest('.fila[data-fila]');
-    if(!f || ui.sel || ev.touches.length !== 1 || !(f.querySelector('[data-acc="tarea-ok"]') || f.querySelector('[data-acc="rec-ok"]'))){ fila = null; return; }
+    if(!f || ui.sel || ev.touches.length !== 1 || ev.touches[0].clientX < 24 || ev.touches[0].clientX > innerWidth - 24 || !(f.querySelector('[data-acc="tarea-ok"]') || f.querySelector('[data-acc="rec-ok"]'))){ fila = null; return; }
     fila = f; x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY; dx = 0; horizontal = null;
   }, { passive:true });
   document.addEventListener('touchmove', function(ev){
@@ -3473,7 +3584,7 @@ function importarICS(archivo){
   var x0 = 0, y0 = 0, t0 = 0, activo = false;
   document.addEventListener('touchstart', function(ev){
     var c = ev.target.closest && ev.target.closest('[data-desliza]');
-    activo = !!c && !ev.target.closest('.sem-envoltura,.fichas.desliza,input,textarea,.ano-rejilla');
+    activo = !!c && !ev.target.closest('.sem-envoltura,.fichas.desliza,input,textarea,.ano-rejilla') && ev.touches[0].clientX >= 24 && ev.touches[0].clientX <= innerWidth - 24;
     if(!activo) return;
     x0 = ev.touches[0].clientX; y0 = ev.touches[0].clientY; t0 = Date.now();
   }, { passive:true });
@@ -5883,6 +5994,9 @@ document.addEventListener('click', function(ev){
 
   switch(a){
     case 'menu-mas': menuMas(); break;
+    case 'nav-atras': pasoNav(-1); break;
+    case 'nav-adelante': pasoNav(1); break;
+    case 'nav-saltar': pasoNav(+b.dataset.d, +b.dataset.n); break;
     case 'reintentar': pintar(); break;
     case 'errores-ver':
       var le = leerJSON(CLAVE_ERRORES, []), txtE = le.map(function(x){ return new Date(x.t).toLocaleString('es-PE') + ' · ' + x.donde + ' · ' + x.v + '\n' + x.msj + '\n' + x.pila; }).join('\n\n');
@@ -6502,6 +6616,9 @@ document.addEventListener('focusout', function(){
 document.addEventListener('keydown', function(ev){
   ultimoToque = Date.now();
   var enCampo = /INPUT|TEXTAREA|SELECT/.test((ev.target.tagName || '')) || ev.target.isContentEditable;
+  if(ev.altKey && !enCampo && (ev.key === 'ArrowLeft' || ev.key === 'ArrowRight') && $('candado').classList.contains('oculto')){
+    ev.preventDefault(); pasoNav(ev.key === 'ArrowLeft' ? -1 : 1); return;
+  }
   if(!$('candado').classList.contains('oculto')){
     if(/^[0-9]$/.test(ev.key)) teclaPIN(ev.key);
     else if(ev.key === 'Backspace') teclaPIN('b');
@@ -6526,6 +6643,9 @@ document.addEventListener('keydown', function(ev){
 });
 
 $('fab').addEventListener('click', function(ev){ ev.stopPropagation(); nuevoSegunVista(); });
+['btnAtras', 'btnAdelante'].forEach(function(id){
+  $(id).addEventListener('contextmenu', function(ev){ ev.preventDefault(); hojaHistorialNav(); });
+});
 $('btnBuscar').addEventListener('click', function(ev){ ev.stopPropagation(); abrirBuscar(); });
 $('btnTema').addEventListener('click', function(ev){
   ev.stopPropagation();
@@ -6537,7 +6657,10 @@ $('pastillaNube').addEventListener('click', function(ev){ ev.stopPropagation(); 
 window.addEventListener('popstate', function(){
   if(ignorarPop){ finPop(); return; }
   if(hojaEnHist){ hojaEnHist = false; cerrarFlotante(true); return; }
-  ir((location.hash || '#hoy').slice(1), true);
+  var dest = (location.hash || '#hoy').slice(1), ant = NAV.atras[NAV.atras.length - 1], sig = NAV.adelante[NAV.adelante.length - 1];
+  if(ant && ant.v === dest && dest !== ui.vista && pasoNav(-1, 1, true)) return;
+  if(sig && sig.v === dest && dest !== ui.vista && pasoNav(1, 1, true)) return;
+  ir(dest, true);
 });
 
 /* Cuentas cambió algo en otra pestaña o dentro del marco: Hoy lo refleja */
