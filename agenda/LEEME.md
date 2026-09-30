@@ -117,6 +117,13 @@ Con **"Elegir qué ver en Hoy"** (al final de Hoy o en el menú Todo) ocultas la
 | **Diario** | Racha de días seguidos escribiendo y, cuando tienes varias entradas, un buscador para encontrar cualquier día. |
 | **Metas con ritmo** | Cada meta con fecha te dice si vas al día o cuánto deberías llevar ya. |
 | **Hábitos de la semana** | La cabecera muestra el porcentaje cumplido en lo que va de la semana. |
+| **Mañana, en Hoy** | Lo que trae mañana (a qué hora empiezas, tareas, pagos y lo agendado), con botones para añadir un evento o una tarea para mañana. |
+| **Tu día en números** | Desde las 6 de la tarde, Hoy resume tu día: tareas, hábitos, lo gastado y el deporte, con acceso directo al diario. El bloque del dinero muestra también lo gastado hoy. |
+| **Esta semana (Dinero)** | Lo gastado cada día de la semana, el promedio por día y la comparación con la semana pasada a la misma altura. |
+| **Repetir un movimiento** | En Últimos movimientos, ↻ vuelve a anotar ese gasto o ingreso con la fecha de hoy (con deshacer). |
+| **Se repiten cada mes** | La agenda detecta los gastos que aparecen mes a mes (3 meses o más) y te ofrece convertirlos en pago fijo con un toque. |
+| **Huecos libres** | En el Calendario, al elegir un día ves tus horas libres entre las 7:00 y las 22:00; toca una y creas el evento a esa hora. La cabecera dice cuál es el día más lleno de la semana. |
+| **Fecha rápida** | En el editor de eventos: Hoy, Mañana, +1 día, +1 semana y −1 día para mover la fecha sin abrir el calendario. |
 | **Administrar secciones** (en Ajustes o en «Todo») | Una pantalla para organizarlo todo: apaga las secciones que no uses (desaparecen del menú sin borrar nada), cámbialas de orden con las flechas, elige los 4 accesos de la barra de abajo del celular, mira cuánto hay en cada una y limpia lo viejo (tareas hechas hace más de un mes, recordatorios hechos, eventos de hace más de un año, lo marcado en las listas y las notas vacías). Todo se sincroniza entre aparatos y lo limpiado se puede deshacer. |
 | **Elegir varias tareas** | En Tareas, toca «Seleccionar» o deja el dedo sobre una tarea. Luego márcalas como hechas, cámbialas de fecha, pásalas a otro espacio, ponles prioridad o bórralas todas juntas. Se deshace con un toque. |
 | **En el celular** | El botón «atrás» cierra la hoja o el menú abierto sin sacarte de la sección. Al marcar una tarea o un recordatorio el celular vibra un poquito, y las filas de fichas que siguen de lado se desvanecen en el borde para que sepas que hay más. |

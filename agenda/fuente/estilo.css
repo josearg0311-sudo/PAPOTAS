@@ -3071,7 +3071,7 @@ div.nota{ cursor:pointer }
 .busq-rec .ficha svg{ width:13px; height:13px }
 /* Con un aviso en pantalla, el botón + sube para no quedar tapado */
 .fab{ transition:transform .2s ease }
-@media (max-width:899px){ body:has(#avisos > *) .fab{ transform:translateY(-78px) } }
+@media (max-width:899px){ body:has(#avisos > *) .fab{ transform:translateY(calc(-1 * var(--avisos-h, 70px) - 8px)) } .fab{ transition:transform .2s ease } }
 
 /* ==========================================================================
    COMPLEMENTOS: lo de siempre, bolso, recordar por WhatsApp, recuerdos
@@ -3113,3 +3113,29 @@ body[data-esp="estudios"] .curso-ico{ font-family:var(--serif); font-style:norma
 .tarjeta-cab h2 .cab-num{ font-family:var(--letra); font-size:13px; font-weight:800; color:var(--haber); background:color-mix(in srgb, var(--haber) 14%, transparent); padding:3px 8px; border-radius:99px; margin-left:8px; letter-spacing:0; white-space:nowrap }
 .md-ritmo{ display:block; margin-top:6px; font-weight:750; font-size:12.5px }
 .md-ritmo.ok{ color:var(--haber) } .md-ritmo.atras{ color:var(--oro) }
+
+/* ==========================================================================
+   HOY, DINERO Y CALENDARIO: mañana, cierre del día, semana de gasto,
+   gastos que se repiten, huecos libres y fecha rápida
+   ========================================================================== */
+.manana-res{ margin:0 0 8px; font-size:13px; color:var(--tinta-2) }
+.manana-res b{ color:var(--tinta) }
+.w-manana .w-pie, .w-cierre .w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
+.cierre-nums{ display:grid; grid-template-columns:repeat(auto-fit, minmax(72px, 1fr)); gap:8px }
+.cierre-nums > div{ background:var(--hoja-2); border:1px solid var(--regla); border-radius:14px; padding:10px 12px; min-width:0 }
+.cierre-nums b{ display:block; font-family:var(--serif); font-size:22px; font-weight:700; line-height:1.05; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cierre-nums small{ font-size:11.5px; color:var(--tinta-3); font-weight:650 }
+.btn-icono.repetir-mov{ flex:none; margin-left:2px; opacity:.7 }
+.btn-icono.repetir-mov:hover, .btn-icono.repetir-mov:active{ opacity:1; color:var(--acento, var(--azul)) }
+.sem-gasto-num{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:12px }
+.sem-gasto-num small{ display:block; font-size:11px; font-weight:700; color:var(--tinta-3); text-transform:uppercase; letter-spacing:.04em }
+.sem-gasto-num b{ font-family:var(--serif); font-size:19px; font-weight:700; white-space:nowrap }
+.sem-gasto-num b.sale{ color:var(--debe) } .sem-gasto-num b.entra{ color:var(--haber) }
+.explica-t{ margin:0; padding:0 20px 8px; font-size:12.5px; color:var(--tinta-3) }
+.huecos{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:0 16px 10px; font-size:12.5px; font-weight:700; color:var(--haber) }
+.huecos button{ padding:5px 10px; border-radius:99px; font-size:12.5px; font-weight:700; color:var(--tinta); background:color-mix(in srgb, var(--haber) 14%, transparent); border:1px solid color-mix(in srgb, var(--haber) 40%, transparent); font-variant-numeric:tabular-nums }
+.huecos.lleno{ color:var(--tinta-3); font-weight:650 }
+.fecha-rapida{ display:flex; flex-wrap:wrap; gap:6px; margin:-4px 0 12px }
+.fecha-rapida button{ padding:6px 11px; border-radius:99px; font-size:12.5px; font-weight:700; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-2) }
+.fecha-rapida button:active{ background:var(--azul); color:#fff; border-color:var(--azul) }
+@media (max-width:899px){ body:not(.con-teclado):not(.en-cuentas):not(.con-sel):has(#avisos > *) .contenido{ padding-bottom:calc(110px + var(--avisos-h, 70px)) !important } }
