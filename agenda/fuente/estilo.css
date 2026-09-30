@@ -3464,3 +3464,46 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .mas, .ver-link, .mas-mini, .ag-link, .ag-mas, .w-mas, body .anadir-rapido, body .anadir-rapido .i, .hoy-cab small, .portada-hoy small, .siguiente small,
 .barra-inf button[aria-current="page"], .ag-dias i, .ag-dias button.hoy b, .rejilla-mas button[aria-current="page"], .enfoque-grande .n, .din-saldo .i, a{ color:var(--acento-txt, var(--verde)) !important }
 .ag-dias button.sel b, .ag-dias button.sel i, .ag-dias button.sel small{ color:var(--sobre-acento, #fff) !important }
+
+/* ==========================================================================
+   PANELES DE INICIO: mosaicos grandes que explican y llevan a cada sección
+   ========================================================================== */
+.panel-cab{ padding:6px 0 14px }
+.panel-cab h2{ margin:0; font-size:34px; font-weight:800; letter-spacing:-.02em; line-height:1.08 }
+.panel-cab p{ margin:4px 0 0; color:var(--tinta-2); font-size:14px }
+.panel-acciones{ display:flex; gap:8px; flex-wrap:wrap; margin:0 0 20px }
+.panel-acciones .btn{ height:40px; padding:0 14px !important }
+.mosaicos{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; margin-bottom:26px }
+.mosaico{
+  position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:10px; min-height:168px; padding:16px; text-align:left;
+  background:var(--hoja); border-radius:20px; color:var(--tinta); overflow:hidden; transition:transform .12s ease, background .2s
+}
+.mosaico:active{ transform:scale(.97) }
+.mosaico::after{ content:""; position:absolute; right:-30px; top:-30px; width:110px; height:110px; border-radius:50%; background:var(--mc); opacity:.13; pointer-events:none }
+.mosaico.ancho{ grid-column:1 / -1; min-height:0; flex-direction:row; flex-wrap:wrap; align-items:center; column-gap:14px }
+.mosaico.ancho .mo-txt{ flex:1; min-width:150px }
+.mo-ico{ width:46px; height:46px; border-radius:14px; display:grid; place-items:center; background:color-mix(in srgb, var(--mc) 22%, transparent); color:var(--mc); flex:none }
+.mo-ico .i{ width:24px; height:24px; stroke-width:2.2 }
+.mo-em{ font-size:26px; line-height:1 }
+.mo-txt{ display:flex; flex-direction:column; gap:3px; min-width:0 }
+.mo-txt b{ font-size:17px; font-weight:750; letter-spacing:-.01em }
+.mo-txt small{ font-size:12.5px; color:var(--tinta-3); line-height:1.35 }
+.mo-dato{ display:flex; align-items:baseline; gap:6px; margin-top:auto; flex-wrap:wrap }
+.mo-dato strong{ font-size:24px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--tinta) }
+.mo-dato em{ font-style:normal; font-size:12.5px; color:var(--tinta-2); font-weight:600 }
+.mosaico.ancho .mo-dato{ margin-top:0; flex-basis:100%; padding-left:60px }
+.mosaico.alerta .mo-dato em{ color:var(--debe) }
+.mo-flecha{ position:absolute; right:14px; bottom:16px; color:var(--tinta-3) }
+.mo-flecha .i{ width:18px; height:18px }
+.panel-sub{ margin:0 0 10px; font-size:13px; font-weight:700; color:var(--tinta-3) }
+.panel-lista{ border-top:1px solid var(--regla) }
+.pl-fila{ display:flex; align-items:center; gap:14px; width:100%; padding:14px 0; border-bottom:1px solid var(--regla); text-align:left; color:var(--tinta) }
+.pl-fila > .i:first-child{ width:22px; height:22px; color:var(--acento-txt, var(--verde)) }
+.pl-fila span{ flex:1; display:flex; flex-direction:column; gap:2px }
+.pl-fila b{ font-size:15.5px; font-weight:600 }
+.pl-fila small{ font-size:12.5px; color:var(--tinta-3) }
+.pl-fila > .i:last-child{ width:16px; height:16px; color:var(--tinta-3) }
+.volver-panel{ display:inline-flex; align-items:center; gap:4px; margin:0 0 4px -4px; padding:6px 10px 6px 4px; border-radius:99px; font-size:15px; font-weight:650; color:var(--acento-txt, var(--verde)) }
+.volver-panel .i{ width:18px; height:18px }
+@media (min-width:900px){ .mosaicos{ grid-template-columns:repeat(3, minmax(0, 1fr)) } .mosaico.ancho{ grid-column:span 3 } }
+.mo-dato{ padding-right:22px } .mo-dato em{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100% }

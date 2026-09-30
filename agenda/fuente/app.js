@@ -448,6 +448,11 @@ var SECCIONES = [
   /* Enfoque vive dentro de Estudios (se abre con «Estudiar ahora») */
   { id:'foco',          nom:'Enfoque',       ico:'i-reloj', oculta:true },
   { id:'papelera',      nom:'Papelera',      ico:'i-basura', oculta:true },
+  /* Paneles de inicio: lo que abre cada botón de la barra de abajo */
+  { id:'panel-agenda',  nom:'Agenda',        ico:'i-cal',     oculta:true },
+  { id:'panel-dinero',  nom:'Dinero',        ico:'i-grafica', oculta:true },
+  { id:'panel-notas',   nom:'Notas',         ico:'i-notas',   oculta:true },
+  { id:'panel-mas',     nom:'Más',           ico:'i-mas',     oculta:true },
   { id:'secciones',     nom:'Administrar secciones', movil:'Secciones', ico:'i-espacios', oculta:true }
 ];
 /* Las pestañas de cada sección: la madre primero y luego sus hijas */
@@ -494,6 +499,17 @@ function abajoValido(id){ return id === 'espacios' || SECCIONES.some(function(s)
 function barraAbajo(){
   var a = Array.isArray(pref.abajo) ? pref.abajo.filter(abajoValido).slice(0, 4) : null;
   return a && a.length ? a : ABAJO;
+}
+/* A qué panel pertenece cada pantalla (para volver y para la barra de abajo) */
+function panelDe(v){
+  if(!v) return '';
+  if(v.indexOf('panel-') === 0) return v;
+  var p = secPadre(v);
+  if(p === 'agenda') return 'panel-agenda';
+  if(p === 'dinero') return 'panel-dinero';
+  if(p === 'notas') return 'panel-notas';
+  if(p === 'habitos' || v.indexOf('esp-') === 0 || v === 'ajustes' || v === 'secciones' || v === 'papelera') return 'panel-mas';
+  return '';
 }
 function esLibro(v){ return false; }   // los libros se muestran dentro de la agenda
 
@@ -544,20 +560,22 @@ function pintarNav(){
   var DINERO = ['dinero','personal','oficina','pagos'], AB = barraAbajo();
   var enEsp = ui.vista.indexOf('esp-') === 0;
   if(enEsp) ui.espUlt = ui.vista.slice(4);
+  var PANEL_DE_BOTON = { agenda:'panel-agenda', dinero:'panel-dinero', notas:'panel-notas' };
   function activoAbajo(id){
+    if(PANEL_DE_BOTON[id]) return panelDe(ui.vista) === PANEL_DE_BOTON[id];
     return ui.vista === id || (AB.indexOf(ui.vista) < 0 && vPadre === id) || (id === 'espacios' && enEsp);
   }
-  var enMas = !AB.some(activoAbajo);
+  var enMas = ui.vista !== 'hoy' && !AB.some(activoAbajo);
   $('barraInf').style.gridTemplateColumns = 'repeat(' + (AB.length + 1) + ',minmax(0,1fr))';
   var otros = (AB.indexOf('calendario') < 0 && AB.indexOf('agenda') < 0 ? k.recordatorios : 0) + (AB.indexOf('dinero') < 0 ? k.pagos : 0);
   ponerSiCambia($('barraInf'), AB.map(function(id){
     var s = id === 'espacios' ? { nom:'Espacios', ico:'i-espacios' } : SECCIONES.find(function(x){ return x.id === id; });
-    var destino = id === 'espacios' ? 'esp-' + (ui.espUlt || 'personal') : id;
+    var destino = id === 'espacios' ? 'esp-' + (ui.espUlt || 'personal') : (PANEL_DE_BOTON[id] || id);
     var n = id === 'espacios' ? k.tareas : num(id);
     return '<button type="button" data-ir="' + destino + '"' + (activoAbajo(id) ? ' aria-current="page"' : '') + '>' +
              ico(s.ico) + nomCorto(s) + (n ? '<span class="globo">' + n + '</span>' : '') + '</button>';
   }).join('') +
-  '<button type="button" data-acc="menu-mas"' + (enMas ? ' aria-current="page"' : '') + '>' + ico('i-mas') + 'Más' +
+  '<button type="button" data-ir="panel-mas"' + (enMas ? ' aria-current="page"' : '') + '>' + ico('i-mas') + 'Más' +
     (otros ? '<span class="globo">' + otros + '</span>' : '') + '</button>');
   var nom = db.perfil.nombre || '';
   $('avatar').textContent = nom ? nom.trim().charAt(0).toUpperCase() : '✦';
@@ -810,12 +828,14 @@ function pintarVista(){
   $('zonaCuentas').classList.add('oculto');
   $('contenido').classList.remove('oculto');
 
-  var html = sec && sec.esp ? VISTAS.espacio(sec.esp) : cabSeccion(v) + pestanasGrupo(v) + VISTAS[v]();
+  var html = v.indexOf('panel-') === 0 ? VISTAS[v]()
+           : sec && sec.esp ? volverPanel(v) + VISTAS.espacio(sec.esp)
+           : volverPanel(v) + cabSeccion(v) + VISTAS[v]();
   var nueva = ui.antes !== v + (ui.lista || '');
   var dirCls = nueva ? (ui.dir < 0 ? 'vista entra-izq' : 'vista entra-der') : '';
   ui.dir = 1;
   $('contenido').innerHTML = '<div class="' + dirCls + '">' + html + '</div>';
-  document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp'));
+  document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp, .panel-cab'));
   marcarBajado();
   ui.antes = v + (ui.lista || '');
   if(v === 'hoy' || v === 'tareas' || v === 'recordatorios') actualizarPista();
@@ -4498,6 +4518,101 @@ VISTAS.agenda = function(){
     '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="rec" data-dia="' + dia + '">' + ico('i-plus') + 'Aviso</button></div>';
   var sf = vivos('tareas').filter(function(t){ return !t.hecha && !t.fecha; }).length;
   if(sf) html += '<button type="button" class="ag-sinfecha" data-acc="ag-tareas" data-v="algun"><span>' + ico('i-tareas') + sf + (sf === 1 ? ' tarea sin fecha' : ' tareas sin fecha') + '</span>' + ico('i-der') + '</button>';
+  return html;
+};
+
+/* ==========================================================================
+   PANELES DE INICIO
+   Agenda, Dinero, Notas y Más abren un panel de mosaicos grandes: cada uno
+   dice para qué sirve y lo que tiene ahora. Al tocarlo entras a su pantalla;
+   arriba de esa pantalla, «‹ Agenda» (o el que sea) te devuelve al panel.
+   ========================================================================== */
+var NOM_PANEL = { 'panel-agenda':'Agenda', 'panel-dinero':'Dinero', 'panel-notas':'Notas', 'panel-mas':'Más' };
+function volverPanel(v){
+  var p = panelDe(v);
+  if(!p) return '';
+  return '<button type="button" class="volver-panel" data-ir="' + p + '">' + ico('i-izq') + NOM_PANEL[p] + '</button>';
+}
+/* Un mosaico: icono en su color, nombre, para qué sirve y el dato de ahora */
+function mosaico(o){
+  if(o.ir && secOculta(o.ir)) return '';   // lo que ocultaste en «Administrar secciones» tampoco sale aquí
+  return '<button type="button" class="mosaico' + (o.ancho ? ' ancho' : '') + (o.alerta ? ' alerta' : '') + '" ' + (o.acc || 'data-ir="' + o.ir + '"') + ' style="--mc:' + o.c + '">' +
+    '<span class="mo-ico">' + (o.em ? '<span class="mo-em">' + o.em + '</span>' : ico(o.i)) + '</span>' +
+    '<span class="mo-txt"><b>' + o.t + '</b><small>' + o.d + '</small></span>' +
+    (o.n != null ? '<span class="mo-dato"><strong>' + o.n + '</strong>' + (o.nl ? '<em>' + o.nl + '</em>' : '') + '</span>' : '') +
+    '<span class="mo-flecha">' + ico('i-der') + '</span></button>';
+}
+function cabPanel(t, sub, acciones){
+  return '<header class="panel-cab"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</header>' +
+    (acciones ? '<div class="panel-acciones">' + acciones + '</div>' : '');
+}
+function accPanel(txt, attrs, clase){ return '<button type="button" class="btn ' + (clase || '') + '" ' + attrs + '>' + ico('i-plus') + txt + '</button>'; }
+
+VISTAS['panel-agenda'] = function(){
+  var hoy = hoyISO(), k = contadores();
+  var pendHoy = itemsDelDia(hoy).filter(function(x){ return !x.hecho; }).length;
+  var ne = 0; for(var i = 0; i < 7; i++) ne += itemsDelDia(sumarDias(hoy, i)).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
+  var tHoy = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
+  var recHoy = vivos('recordatorios').filter(function(r){ return !r.hecho && r.fecha === hoy; }).length;
+  var pa = proyectosActivos().length;
+  return cabPanel('Agenda', cap(fechaLarga(hoy)) + ' · ' + pendHoy + (pendHoy === 1 ? ' cosa pendiente hoy' : ' cosas pendientes hoy'),
+      accPanel('Tarea', 'data-acc="nuevo" data-tipo="tarea"', 'primario') + accPanel('Evento', 'data-acc="nuevo" data-tipo="evento"') + accPanel('Aviso', 'data-acc="nuevo" data-tipo="rec"')) +
+    '<div class="mosaicos">' +
+      mosaico({ ir:'agenda', i:'i-hoy', c:'#2E6BFF', t:'Mi día', d:'Todo lo de un día junto: tareas, eventos y avisos', n:pendHoy, nl:'para hoy', ancho:true }) +
+      mosaico({ ir:'calendario', i:'i-cal', c:'#30D158', t:'Calendario', d:'Tu mes, semana o año de un vistazo', n:ne, nl:'en 7 días' }) +
+      mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy, nl:k.tareasTarde ? k.tareasTarde + ' atrasadas' : 'para hoy', alerta:!!k.tareasTarde }) +
+      mosaico({ ir:'recordatorios', i:'i-campana', c:'#FF9F0A', t:'Avisos', d:'Lo que no se te puede olvidar', n:k.recordatorios || recHoy, nl:k.recordatorios ? 'pasados' : 'para hoy', alerta:!!k.recordatorios }) +
+      mosaico({ ir:'proyectos', i:'i-carpeta', c:'#BF5AF2', t:'Proyectos', d:'Metas grandes paso a paso', n:pa, nl:pa === 1 ? 'activo' : 'activos' }) +
+    '</div>';
+};
+VISTAS['panel-dinero'] = function(){
+  var ym = hoyISO().slice(0, 7), todo = movsDe('todo'), tm = totalesMes(todo, ym);
+  var nMes = todo.filter(function(t){ return t.date.slice(0, 7) === ym; }).length;
+  var np = 0, pend = 0;
+  vivos('pagos').forEach(function(p){ if(p.activo === false || (p.desde && ym < p.desde)) return; if(!pagado(p, ym)){ np++; pend += +p.monto || 0; } });
+  var queda = tm.ent - tm.sal;
+  return cabPanel('Dinero', cap(MESES[+ym.slice(5, 7) - 1]) + ': te queda ' + (queda < 0 ? '−' : '') + dinero(Math.abs(queda)),
+      accPanel('Gasto', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"', 'primario') + accPanel('Ingreso', 'data-acc="din-anotar" data-libro="personal" data-t="Ingreso"', 'btn-ingreso')) +
+    '<div class="mosaicos">' +
+      mosaico({ ir:'dinero', i:'i-grafica', c:'#2E6BFF', t:'Resumen del mes', d:'Cuánto entró, cuánto salió, en qué se va y cómo vas', n:dinero(tm.sal), nl:'gastado', ancho:true }) +
+      mosaico({ ir:'movimientos', i:'i-cuentas', c:'#30D158', t:'Movimientos', d:'Cada gasto e ingreso, para ver o corregir', n:nMes, nl:'este mes' }) +
+      mosaico({ ir:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos fijos', d:'Luz, internet, alquiler…', n:np, nl:np ? dinero(pend) + ' por pagar' : 'todo pagado', alerta:!!k0Pagos() }) +
+      mosaico({ acc:'data-acc="mov-ver" data-v="personal"', i:'i-casa', c:'#5AA9FF', t:'Libro personal', d:'Tus gastos personales', n:dinero(totalesMes(movsDe('personal'), ym).sal), nl:'gastado' }) +
+      mosaico({ acc:'data-acc="mov-ver" data-v="oficina"', i:'i-maletin', c:'#94A3B8', t:'Libro de la oficina', d:'Cuentas de la oficina', n:dinero(totalesMes(movsDe('oficina'), ym).ent), nl:'facturado' }) +
+    '</div>';
+};
+function k0Pagos(){ return pagosProximos(0).length; }
+VISTAS['panel-notas'] = function(){
+  var ns = vivos('notas'), ls = vivos('listas'), fij = ns.filter(function(n){ return n.fija; }).length;
+  var porMarcar = ls.reduce(function(a, l){ return a + (l.items || []).filter(function(i){ return !i.ok; }).length; }, 0);
+  return cabPanel('Notas', ns.length + (ns.length === 1 ? ' nota' : ' notas') + ' y ' + ls.length + (ls.length === 1 ? ' lista' : ' listas'),
+      accPanel('Nota', 'data-acc="nuevo" data-tipo="nota"', 'primario') + accPanel('Lista', 'data-acc="nuevo" data-tipo="lista"')) +
+    '<div class="mosaicos">' +
+      mosaico({ ir:'notas', i:'i-notas', c:'#FFD60A', t:'Notas', d:'Ideas, datos y apuntes; con casillas si quieres', n:ns.length, nl:fij ? fij + ' fijadas' : 'notas' }) +
+      mosaico({ ir:'listas', i:'i-listas', c:'#30D158', t:'Listas', d:'Compras, bolso, pendientes para marcar', n:porMarcar, nl:'por marcar' }) +
+    '</div>';
+};
+VISTAS['panel-mas'] = function(){
+  var hoy = hoyISO(), wd = new Date().getDay();
+  var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; }), habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+  var escritos = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === hoy.slice(0, 7) && e.texto; }).length;
+  var html = cabPanel('Más', 'Tus espacios, hábitos y ajustes');
+  html += '<h3 class="panel-sub">Tus espacios</h3><div class="mosaicos">' + ESPACIOS.map(function(E){
+    var n = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
+    return mosaico({ ir:'esp-' + E.id, em:E.em, c:E.c, t:E.nom, d:E.lema, n:n, nl:'para hoy' });
+  }).join('') + '</div>';
+  html += '<h3 class="panel-sub">Constancia</h3><div class="mosaicos">' +
+    mosaico({ ir:'habitos', i:'i-habitos', c:'#FF9F0A', t:'Hábitos', d:'Lo que haces cada día y tus rachas', n:habOk + '/' + hab.length, nl:'hoy' }) +
+    mosaico({ ir:'metas', i:'i-meta', c:'#FFD60A', t:'Metas', d:'Ahorrar, leer, entrenar… y cuánto falta', n:vivos('metas').length, nl:'metas' }) +
+    mosaico({ ir:'diario', i:'i-diario', c:'#FF6482', t:'Diario', d:'Cuenta tu día en un par de líneas', n:escritos, nl:'días este mes' }) +
+  '</div>';
+  html += '<h3 class="panel-sub">Ajustes y herramientas</h3><div class="panel-lista">' +
+    [['ajustes', 'i-ajustes', 'Ajustes', 'Tu nombre, apariencia, avisos, nube y respaldos'], ['acc:buscar', 'i-buscar', 'Buscar', 'En todo lo que tienes'],
+     ['acc:personalizar-hoy', 'i-hoy', 'Elegir qué ver en Hoy', 'Muestra u oculta bloques'], ['secciones', 'i-espacios', 'Administrar secciones', 'Orden y secciones del menú'],
+     ['papelera', 'i-basura', 'Papelera', enPapelera().length ? enPapelera().length + ' cosas borradas' : 'Vacía']].map(function(x){
+      var at = x[0].indexOf('acc:') === 0 ? 'data-acc="' + x[0].slice(4) + '"' : 'data-ir="' + x[0] + '"';
+      return '<button type="button" class="pl-fila" ' + at + '>' + ico(x[1]) + '<span><b>' + x[2] + '</b><small>' + x[3] + '</small></span>' + ico('i-der') + '</button>';
+    }).join('') + '</div>';
   return html;
 };
 
