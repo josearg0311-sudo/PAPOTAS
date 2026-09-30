@@ -5180,7 +5180,7 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'negro',   nom:'Negro',   gotas:['#FF6A13','#30D158','#000000'] },
+  { id:'negro',   nom:'Negro',   gotas:['#2E6BFF','#30D158','#000000'] },
   { id:'electrico', nom:'Eléctrico', gotas:['#3D8BFF','#45C97A','#18191B'] },
   { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },

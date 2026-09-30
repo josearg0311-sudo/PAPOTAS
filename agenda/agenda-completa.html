@@ -3269,19 +3269,19 @@ html{ overflow-x:clip }
 
 /* ==========================================================================
    DISEÑO NEGRO (septiembre 2026)
-   Negro puro con un solo acento naranja, una sola letra (Jakarta) sin
+   Negro puro con un solo acento azul, una sola letra (Jakarta) sin
    mayúsculas angostas, y casi sin tarjetas: listas planas con separadores y
    títulos grandes, como las apps del iPhone. Esta capa manda sobre todo lo
    anterior.
    ========================================================================== */
 :root[data-paleta="negro"]:not([data-tema="claro"]){
   --papel:#000000; --hoja:#121214; --hoja-2:#1C1C1E; --tinta:#F5F5F7; --tinta-2:#A1A1A6; --tinta-3:#6E6E73;
-  --regla:#26262A; --regla-2:#1A1A1D; --verde:#FF6A13; --verde-sube:#FF8A45; --verde-piso:#2A1406;
+  --regla:#26262A; --regla-2:#1A1A1D; --verde:#2E6BFF; --verde-sube:#5A8CFF; --verde-piso:#0B1633; --sobre-acento:#FFFFFF;
   --haber:#30D158; --haber-piso:#0E2415; --debe:#FF453A; --debe-piso:#2B0F0D; --oro:#FFD60A; --oro-piso:#2A2406; --azul:#0A84FF; --rosa:#FF6482;
 }
 :root[data-paleta="negro"][data-tema="claro"]{
   --papel:#FFFFFF; --hoja:#F4F4F6; --hoja-2:#ECECEF; --tinta:#0A0A0A; --tinta-2:#5E5E63; --tinta-3:#8E8E93;
-  --regla:#E3E3E7; --regla-2:#EEEEF1; --verde:#E8590C; --verde-sube:#C94C08; --verde-piso:#FFF0E6;
+  --regla:#E3E3E7; --regla-2:#EEEEF1; --verde:#1F55E0; --verde-sube:#1846BD; --verde-piso:#E6EEFF; --sobre-acento:#FFFFFF;
   --haber:#1F9D46; --haber-piso:#E6F6EB; --debe:#D92D20; --debe-piso:#FDECEA; --oro:#B88A00; --oro-piso:#FFF6D6; --azul:#0A6CDB; --rosa:#D6336C;
 }
 :root{ --serif:var(--letra); --acento:var(--verde) }
@@ -3305,8 +3305,8 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .barra-inf button{ color:var(--tinta-3) !important; font-size:10.5px !important; font-weight:600 !important; background:none !important }
 .barra-inf button[aria-current="page"]{ color:var(--verde) !important }
 .barra-inf button[aria-current="page"]::before, .barra-inf button[aria-current="page"]::after{ display:none !important }
-.barra-inf .globo{ background:var(--verde) !important; color:#000 !important }
-.fab{ background:var(--verde) !important; color:#000 !important; border-radius:50% !important; width:58px !important; height:58px !important; box-shadow:0 8px 24px color-mix(in srgb, var(--verde) 35%, transparent) !important }
+.barra-inf .globo{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
+.fab{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important; border-radius:50% !important; width:58px !important; height:58px !important; box-shadow:0 8px 24px color-mix(in srgb, var(--verde) 35%, transparent) !important }
 .fab .i{ stroke-width:2.6 }
 
 /* ---- Títulos grandes de cada sección, sin cajita de color ---- */
@@ -3325,7 +3325,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .pest-grupo button{ flex:none !important; background:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:10px 0 11px !important; font-size:15px !important; font-weight:650 !important; color:var(--tinta-3) !important; position:relative; min-width:0 !important; height:auto !important }
 .pest-grupo button[aria-current="page"]{ color:var(--tinta) !important }
 .pest-grupo button[aria-current="page"]::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; border-radius:2px; background:var(--verde) !important; display:block !important }
-.pest-grupo .pg-n{ background:var(--verde) !important; color:#000 !important }
+.pest-grupo .pg-n{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
 .esp-tabs{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; box-shadow:none !important; padding:0 !important; gap:22px !important; justify-content:flex-start !important }
 .esp-tabs button{ flex:none !important; background:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:10px 0 11px !important; font-size:15px !important; font-weight:650 !important; color:var(--tinta-3) !important; flex-direction:row !important; gap:6px !important; position:relative }
 .esp-tabs button span{ display:none !important }
@@ -3339,8 +3339,8 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 
 /* ---- Botones ---- */
 .btn{ border-radius:12px !important; box-shadow:none !important; border:0 !important; background:var(--hoja-2) !important; color:var(--tinta) !important; font-weight:650 !important }
-.btn.primario, .btn.primario:hover{ background:var(--verde) !important; color:#000 !important }
-.btn.primario .i{ color:#000 }
+.btn.primario, .btn.primario:hover{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
+.btn.primario .i{ color:var(--sobre-acento, #fff) }
 .btn.peligro{ background:var(--debe-piso) !important; color:var(--debe) !important }
 .btn-icono{ background:none !important; border:0 !important; box-shadow:none !important }
 .mas, .ver-link, .mas-mini, .ag-link{ color:var(--verde) !important; background:none !important; border:0 !important; font-weight:650 !important; font-size:14px !important }
@@ -3368,7 +3368,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .fila .hora{ color:var(--tinta-2) !important; font-weight:600 !important }
 .etiqueta{ background:var(--hoja-2) !important; color:var(--tinta-2) !important; border:0 !important }
 .casilla{ border-radius:50% !important }
-.casilla[aria-checked="true"]{ background:var(--verde) !important; border-color:var(--verde) !important; color:#000 !important }
+.casilla[aria-checked="true"]{ background:var(--verde) !important; border-color:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
 
 /* Campos */
 .entrada, .campo input, .campo select, .campo textarea, .captura, .captura input, input.entrada, textarea.entrada, select.entrada{
@@ -3395,8 +3395,8 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .anillo-hoy .valor{ stroke:var(--verde) !important }
 .franja-semana{ background:none !important; border:0 !important; gap:4px !important; margin-bottom:22px !important }
 .franja-semana button{ background:none !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
-.franja-semana button.hoy{ background:var(--verde) !important; color:#000 !important }
-.franja-semana button.hoy small, .franja-semana button.hoy b{ color:#000 !important }
+.franja-semana button.hoy{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
+.franja-semana button.hoy small, .franja-semana button.hoy b{ color:var(--sobre-acento, #fff) !important }
 .franja-semana .puntos i{ background:var(--tinta-3) !important }
 .panel-hoy{ display:block !important }
 .panel-hoy > .w, .panel-hoy > section.w, .panel-hoy > div.w{ padding:0 !important; margin:0 0 30px !important; animation:none !important }
@@ -3469,7 +3469,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .ag-dias i{ font-style:normal; font-size:10px; line-height:8px; height:8px; color:var(--verde); letter-spacing:1px }
 .ag-dias button.hoy b{ color:var(--verde) }
 .ag-dias button.sel{ background:var(--verde) }
-.ag-dias button.sel small, .ag-dias button.sel b, .ag-dias button.sel i{ color:#000 !important }
+.ag-dias button.sel small, .ag-dias button.sel b, .ag-dias button.sel i{ color:var(--sobre-acento, #fff) !important }
 .ag-cab{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px; margin-bottom:14px }
 .ag-cab h2{ margin:0; font-size:26px; font-weight:800 }
 .ag-cab span{ color:var(--tinta-2); font-size:14px; flex:1 }
@@ -3498,8 +3498,8 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 /* Vacíos y avisos */
 .vacio{ color:var(--tinta-3) !important }
 .aviso{ background:var(--hoja-2) !important; border:0 !important; border-radius:14px !important; box-shadow:0 10px 30px rgba(0,0,0,.5) !important; color:var(--tinta) !important }
-.aviso.alarma{ background:var(--verde) !important; color:#000 !important }
-.aviso.alarma *{ color:#000 !important }
+.aviso.alarma{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
+.aviso.alarma *{ color:var(--sobre-acento, #fff) !important }
 /* Restos de cajas del diseño anterior */
 body .panel-hoy .fila, body .w .fila, body .w-tareas .fila, body .lista-filas > .fila{ background:none !important; border-radius:0 !important; padding:13px 0 !important; box-shadow:none !important }
 body .anadir-rapido{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:13px 0 !important; margin:0 0 10px !important; color:var(--verde) !important; font-weight:650 !important; justify-content:flex-start !important }
@@ -8838,7 +8838,7 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'negro',   nom:'Negro',   gotas:['#FF6A13','#30D158','#000000'] },
+  { id:'negro',   nom:'Negro',   gotas:['#2E6BFF','#30D158','#000000'] },
   { id:'electrico', nom:'Eléctrico', gotas:['#3D8BFF','#45C97A','#18191B'] },
   { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },
