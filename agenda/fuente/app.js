@@ -830,7 +830,7 @@ function pintarVista(){
 
   var html = v.indexOf('panel-') === 0 ? VISTAS[v]()
            : sec && sec.esp ? VISTAS.espacio(sec.esp)
-           : volverPanel(v) + cabSeccion(v) + VISTAS[v]();
+           : volverPanel(v) + cabSeccion(v) + VISTAS[v]() + navPanel(v);
   var nueva = ui.antes !== v + (ui.lista || '');
   var dirCls = nueva ? (ui.dir < 0 ? 'vista entra-izq' : 'vista entra-der') : '';
   ui.dir = 1;
@@ -1324,6 +1324,8 @@ VISTAS.hoy = function(){
       '<form data-acc="bienvenida" class="captura" style="margin:0 0 10px"><input id="nombreBienvenida" type="text" maxlength="40" placeholder="Tu nombre"><button class="btn primario chico" type="submit">Empezar</button></form>' +
       '<button type="button" class="btn chico" data-acc="ejemplos">Ver con ejemplos</button></section>';
   }
+  if(!nombre && total) html += '<section class="pide-nombre"><b>¿Cómo te llamas?</b><span>Para saludarte por tu nombre cada día.</span>' +
+    '<form data-acc="bienvenida" class="pn-form" autocomplete="off"><input id="nombreBienvenida" class="entrada" type="text" maxlength="40" placeholder="Tu nombre, ej. José"><button class="btn primario" type="submit">Listo</button></form></section>';
   html += '<div class="panel-hoy">';
 
   /* Tus espacios: lo primero, con lo que tiene cada uno para hoy */
@@ -1437,9 +1439,14 @@ function espaciosHoy(hoy){
 function queHacerAhora(hoy, h){
   var k = contadores(), out = [];
   function s(c, i, txt, btn, attrs){ out.push('<div class="qh-fila" style="--qc:' + c + '"><span class="qh-ico">' + ico(i) + '</span><span class="qh-txt">' + txt + '</span><button type="button" class="qh-btn" ' + attrs + '>' + btn + '</button></div>'); }
+  proximosCumples(0).forEach(function(c){ s('var(--rosa)', 'i-regalo', 'Hoy es <b>' + esc(c.e.t) + '</b> 🎂', 'Saludar', 'data-acc="fecha-felicitar" data-id="' + c.e.id + '"'); });
   if(k.recordatorios) s('var(--debe)', 'i-campana', 'Tienes <b>' + k.recordatorios + (k.recordatorios === 1 ? ' aviso pasado' : ' avisos pasados') + '</b> sin marcar', 'Ver', 'data-ir="recordatorios"');
   var tarde = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoy; }).length;
   if(tarde) s('var(--debe)', 'i-tareas', '<b>' + tarde + (tarde === 1 ? ' tarea atrasada' : ' tareas atrasadas') + '</b>: decide qué hacer con cada una', 'Ordenar', 'data-acc="ordenar"');
+  var exC = eventosTipo('examen', 3)[0];
+  if(exC) s('var(--oro)', 'i-diana', (exC.en === 0 ? '<b>Hoy</b> tienes ' : exC.en === 1 ? '<b>Mañana</b> tienes ' : 'En <b>' + exC.en + ' días</b> tienes ') + esc(exC.e.t), 'Repasar', 'data-acc="esp-tab" data-esp="estudios" data-v="examenes"');
+  var cobV = vivos('cobros').filter(function(x){ return !x.cobrado && x.vence && x.vence < hoy; });
+  if(cobV.length) s('var(--haber)', 'i-subir', '<b>' + cobV.length + (cobV.length === 1 ? ' cobro vencido' : ' cobros vencidos') + '</b>: ' + dinero(cobV.reduce(function(a, x){ return a + (+x.monto || 0); }, 0)), 'Cobrar', 'data-acc="esp-tab" data-esp="oficina" data-v="cobros"');
   var pv = pagosProximos(0);
   if(pv.length) s('var(--oro)', 'i-recibo', 'Pago de <b>' + esc(pv[0].p.t) + '</b> ' + (pv.length > 1 ? 'y ' + (pv.length - 1) + ' más ' : '') + 'por pagar', 'Pagar', 'data-ir="pagos"');
   var wd = new Date().getDay(), hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
@@ -1452,7 +1459,7 @@ function queHacerAhora(hoy, h){
   var tHoy = vivos('tareas').filter(function(t){ return t.fecha === hoy; }).length;
   if(!tHoy && h < 14) s('var(--verde)', 'i-plus', 'Aún no tienes tareas para hoy: <b>planea tu día</b>', 'Añadir', 'data-acc="nuevo" data-tipo="tarea"');
   if(!out.length) return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b></header><p class="qh-ok">Todo al día. 👌 Si quieres añadir algo, toca el <b>+</b>.</p></section>';
-  return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b><span class="w-n">' + out.length + '</span></header>' + out.slice(0, 5).join('') + '</section>';
+  return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b><span class="w-n">' + out.length + '</span></header>' + out.slice(0, 6).join('') + '</section>';
 }
 
 /* Mañana: lo agendado, las tareas y los pagos que tocan */
@@ -4690,6 +4697,22 @@ VISTAS.agenda = function(){
    dice para qué sirve y lo que tiene ahora. Al tocarlo entras a su pantalla;
    arriba de esa pantalla, «‹ Agenda» (o el que sea) te devuelve al panel.
    ========================================================================== */
+/* Las pantallas de cada panel, en orden, para pasar de una a otra */
+var HIJOS_PANEL = {
+  'panel-agenda':[['agenda','Mi día'],['calendario','Calendario'],['tareas','Tareas'],['recordatorios','Avisos'],['proyectos','Proyectos']],
+  'panel-dinero':[['dinero','Resumen del mes'],['movimientos','Movimientos'],['pagos','Pagos fijos']],
+  'panel-notas':[['notas','Notas'],['listas','Listas']],
+  'panel-mas':[['habitos','Hábitos'],['metas','Metas'],['diario','Diario']]
+};
+function navPanel(v){
+  var hs = HIJOS_PANEL[panelDe(v)];
+  if(!hs || (v === 'proyectos' && ui.proy) || (v === 'listas' && ui.lista)) return '';
+  var i = hs.findIndex(function(x){ return x[0] === v; });
+  if(i < 0) return '';
+  var a = hs[i - 1], b = hs[i + 1];
+  function bt(x, cls, txt){ return x ? '<button type="button" class="sn-' + cls + '" data-ir="' + x[0] + '">' + (cls === 'ant' ? ico('i-izq') : '') + '<span><small>' + txt + '</small>' + x[1] + '</span>' + (cls === 'sig' ? ico('i-der') : '') + '</button>' : '<span></span>'; }
+  return '<nav class="sub-nav nav-panel">' + bt(a, 'ant', 'Anterior') + bt(b, 'sig', 'Siguiente') + '</nav>';
+}
 var NOM_PANEL = { 'panel-agenda':'Agenda', 'panel-dinero':'Dinero', 'panel-notas':'Notas', 'panel-mas':'Más' };
 function volverPanel(v){
   var p = panelDe(v);
@@ -7335,7 +7358,7 @@ document.addEventListener('click', function(ev){
         pintar(); }
       break;
     case 'hora-nueva': editarHora(null); break;
-    case 'esp-tab':
+    case 'esp-tab': vibrar(8);
       ui.espTab = ui.espTab || {}; ui.espTab[b.dataset.esp] = b.dataset.v;
       if(ui.vista !== 'esp-' + b.dataset.esp) ir('esp-' + b.dataset.esp); else { pintar(); window.scrollTo(0, 0); }
       break;
@@ -8118,3 +8141,9 @@ var TECLADO = (function(){
 })();
 
 })();
+
+/* Un toque en un mosaico se siente: una vibración cortita (en el celular) */
+document.addEventListener('click', function(ev){
+  var m = ev.target && ev.target.closest && ev.target.closest('.mosaico, .eh, .qh-btn, .acc-fila');
+  if(m && typeof vibrar === 'function') vibrar(8);
+}, true);
