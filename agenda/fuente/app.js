@@ -1326,6 +1326,8 @@ VISTAS.hoy = function(){
   }
   html += '<div class="panel-hoy">';
 
+  /* Tus espacios: lo primero, con lo que tiene cada uno para hoy */
+  if(hoyVisible('espacios')) html += espaciosHoy(hoy);
   /* Qué hacer ahora: la agenda te dice lo que toca y te lleva */
   if(hoyVisible('ahora')) html += queHacerAhora(hoy, h);
   /* Lo siguiente */
@@ -1386,15 +1388,6 @@ VISTAS.hoy = function(){
     }).join('') + '</div>');
   }
 
-  /* Espacios: cuatro accesos */
-  if(hoyVisible('espacios')){
-    html += w('w-2 w-esp', 'Espacios', null, '', '<div class="w-esps espacios-hoy">' + ESPACIOS.map(function(E){
-      var pendE = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
-      return '<button type="button" class="w-espb esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '"><span class="em">' + E.em + '</span><b>' + E.nom + '</b>' +
-        '<span class="w-espn">' + (pendE ? pendE + ' hoy' : '—') + '</span></button>';
-    }).join('') + '</div>');
-  }
-
   /* Lo que viene: lo próximo de la semana y la cuenta atrás más cercana */
   if(hoyVisible('viene')){
     var prox = [];
@@ -1425,6 +1418,26 @@ VISTAS.hoy = function(){
   html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
 };
+/* Tus cuatro espacios en grande: cuánto tienen hoy, lo próximo y cómo vas */
+function espaciosHoy(hoy){
+  return '<section class="w w-2 esp-hoy"><header class="w-cab"><b>Tus espacios</b></header><div class="eh-rejilla">' + ESPACIOS.map(function(E){
+    var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id; });
+    var pend = ts.filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
+    var hechas = ts.filter(function(t){ return t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) === hoy; }).length;
+    var ag = agendaEsp(E.id, 7), hoyAg = ag.filter(function(a){ return a.d === hoy && a.x.tipo !== 'tarea'; }).length;
+    var prox = ag.filter(function(a){ return a.x.tipo !== 'tarea'; })[0] || ag[0];
+    var total = pend + hoyAg, p = hechas + pend ? hechas / (hechas + pend) : (total ? 0 : 1);
+    var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
+    return '<button type="button" class="eh" data-ir="esp-' + E.id + '" style="--ec:' + E.c + '">' +
+      '<span class="eh-cab"><span class="eh-em">' + E.em + '</span><b>' + E.nom + '</b></span>' +
+      '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
+      '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
+      '<span class="eh-barra"><i style="width:' + Math.round(p * 100) + '%"></i></span>' +
+      '<span class="eh-pie">' + (hechas ? hechas + ' ' + (hechas === 1 ? 'hecha' : 'hechas') + ' hoy' : pend ? pend + ' ' + (pend === 1 ? 'tarea pendiente' : 'tareas pendientes') : 'Al día ✓') + '</span>' +
+    '</button>';
+  }).join('') + '</div></section>';
+}
+
 /* Lo que toca ahora, en frases, cada una con su botón que te lleva */
 function queHacerAhora(hoy, h){
   var k = contadores(), out = [];

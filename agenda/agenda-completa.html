@@ -3599,6 +3599,30 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .qh-txt b{ color:var(--tinta); font-weight:650 }
 .qh-btn{ flex:none; padding:8px 14px; border-radius:99px; background:var(--verde); color:var(--sobre-acento, #fff); font-size:13.5px; font-weight:700 }
 .qh-ok{ margin:0; padding:6px 0; color:var(--tinta-2) }
+
+/* ==========================================================================
+   TUS ESPACIOS EN HOY: cuatro mosaicos grandes, lo primero de la pantalla
+   ========================================================================== */
+.esp-hoy{ margin-bottom:26px !important }
+.eh-rejilla{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px }
+.eh{
+  position:relative; display:flex; flex-direction:column; gap:8px; padding:14px 14px 12px; text-align:left; border-radius:20px; overflow:hidden; color:var(--tinta);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--ec) 26%, var(--hoja)) 0%, var(--hoja) 62%); border:1px solid color-mix(in srgb, var(--ec) 30%, transparent);
+  transition:transform .12s ease
+}
+.eh:active{ transform:scale(.97) }
+.eh-cab{ display:flex; align-items:center; gap:8px }
+.eh-em{ font-size:26px; line-height:1 }
+.eh-cab b{ font-size:17px; font-weight:750; letter-spacing:-.01em }
+.eh-num{ display:flex; align-items:baseline; gap:6px }
+.eh-num strong{ font-size:32px; font-weight:800; line-height:1; letter-spacing:-.02em; color:var(--tinta) }
+.eh-num em{ font-style:normal; font-size:12.5px; color:var(--tinta-2); font-weight:600 }
+.eh-prox{ font-size:12.5px; color:var(--tinta-2); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px }
+.eh-prox i{ display:block; font-style:normal; font-size:10.5px; font-weight:750; color:var(--ec); letter-spacing:.02em }
+.eh-barra{ height:4px; border-radius:4px; background:color-mix(in srgb, var(--tinta) 12%, transparent); overflow:hidden }
+.eh-barra i{ display:block; height:100%; background:var(--ec); border-radius:4px }
+.eh-pie{ font-size:11.5px; color:var(--tinta-3); font-weight:600 }
+@media (min-width:900px){ .eh-rejilla{ grid-template-columns:repeat(4, minmax(0, 1fr)) } }
 </style>
 </head>
 <body>
@@ -5057,6 +5081,8 @@ VISTAS.hoy = function(){
   }
   html += '<div class="panel-hoy">';
 
+  /* Tus espacios: lo primero, con lo que tiene cada uno para hoy */
+  if(hoyVisible('espacios')) html += espaciosHoy(hoy);
   /* Qué hacer ahora: la agenda te dice lo que toca y te lleva */
   if(hoyVisible('ahora')) html += queHacerAhora(hoy, h);
   /* Lo siguiente */
@@ -5117,15 +5143,6 @@ VISTAS.hoy = function(){
     }).join('') + '</div>');
   }
 
-  /* Espacios: cuatro accesos */
-  if(hoyVisible('espacios')){
-    html += w('w-2 w-esp', 'Espacios', null, '', '<div class="w-esps espacios-hoy">' + ESPACIOS.map(function(E){
-      var pendE = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
-      return '<button type="button" class="w-espb esp-tile" style="--c:' + E.c + '" data-ir="esp-' + E.id + '"><span class="em">' + E.em + '</span><b>' + E.nom + '</b>' +
-        '<span class="w-espn">' + (pendE ? pendE + ' hoy' : '—') + '</span></button>';
-    }).join('') + '</div>');
-  }
-
   /* Lo que viene: lo próximo de la semana y la cuenta atrás más cercana */
   if(hoyVisible('viene')){
     var prox = [];
@@ -5156,6 +5173,26 @@ VISTAS.hoy = function(){
   html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
 };
+/* Tus cuatro espacios en grande: cuánto tienen hoy, lo próximo y cómo vas */
+function espaciosHoy(hoy){
+  return '<section class="w w-2 esp-hoy"><header class="w-cab"><b>Tus espacios</b></header><div class="eh-rejilla">' + ESPACIOS.map(function(E){
+    var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id; });
+    var pend = ts.filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
+    var hechas = ts.filter(function(t){ return t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) === hoy; }).length;
+    var ag = agendaEsp(E.id, 7), hoyAg = ag.filter(function(a){ return a.d === hoy && a.x.tipo !== 'tarea'; }).length;
+    var prox = ag.filter(function(a){ return a.x.tipo !== 'tarea'; })[0] || ag[0];
+    var total = pend + hoyAg, p = hechas + pend ? hechas / (hechas + pend) : (total ? 0 : 1);
+    var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
+    return '<button type="button" class="eh" data-ir="esp-' + E.id + '" style="--ec:' + E.c + '">' +
+      '<span class="eh-cab"><span class="eh-em">' + E.em + '</span><b>' + E.nom + '</b></span>' +
+      '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
+      '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
+      '<span class="eh-barra"><i style="width:' + Math.round(p * 100) + '%"></i></span>' +
+      '<span class="eh-pie">' + (hechas ? hechas + ' ' + (hechas === 1 ? 'hecha' : 'hechas') + ' hoy' : pend ? pend + ' ' + (pend === 1 ? 'tarea pendiente' : 'tareas pendientes') : 'Al día ✓') + '</span>' +
+    '</button>';
+  }).join('') + '</div></section>';
+}
+
 /* Lo que toca ahora, en frases, cada una con su botón que te lleva */
 function queHacerAhora(hoy, h){
   var k = contadores(), out = [];
