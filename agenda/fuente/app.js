@@ -439,6 +439,7 @@ var SECCIONES = [
   { id:'metas',         nom:'Metas',         ico:'i-meta', padre:'habitos', oculta:true },
   { id:'diario',        nom:'Diario',        ico:'i-diario', padre:'habitos', oculta:true },
   { id:'dinero',        nom:'Dinero',        ico:'i-grafica' },
+  { id:'movimientos',   nom:'Movimientos',   corto:'Movimientos', ico:'i-cuentas', padre:'dinero', oculta:true },
   { id:'pagos',         nom:'Pagos fijos',   corto:'Pagos', ico:'i-recibo', padre:'dinero', oculta:true },
   { id:'personal',      nom:'Libro personal', movil:'Gastos personales', corto:'Personal', ico:'i-cuentas', padre:'dinero', oculta:true },
   { id:'oficina',       nom:'Libro de oficina', movil:'Oficina', corto:'Oficina', ico:'i-maletin', padre:'dinero', oculta:true },
@@ -453,7 +454,7 @@ var PEST_GRUPO = {
   calendario: [['calendario','Calendario'], ['recordatorios','Avisos']],
   notas:      [['notas','Notas'], ['listas','Listas']],
   habitos:    [['habitos','Hábitos'], ['metas','Metas'], ['diario','Diario']],
-  dinero:     [['dinero','Resumen'], ['pagos','Pagos'], ['personal','Personal'], ['oficina','Oficina']]
+  dinero:     [['dinero','Resumen'], ['movimientos','Movimientos'], ['pagos','Pagos']]
 };
 function secPadre(v){ var s = SECCIONES.find(function(x){ return x.id === v; }); return s && s.padre ? s.padre : v; }
 function pestanasGrupo(v){
@@ -491,7 +492,7 @@ function barraAbajo(){
   var a = Array.isArray(pref.abajo) ? pref.abajo.filter(abajoValido).slice(0, 4) : null;
   return a && a.length ? a : ABAJO;
 }
-function esLibro(v){ return v === 'personal' || v === 'oficina'; }
+function esLibro(v){ return false; }   // los libros se muestran dentro de la agenda
 
 var ui = {
   vista:'hoy', antes:'', tFiltro:'hoy', tArea:'',
@@ -567,7 +568,8 @@ function pintarNav(){
 function ir(v, sinHash){
   /* Si justo se está deshaciendo el paso de una hoja, se va después */
   if(ignorarPop && !sinHash){ irPendiente = v; return; }
-  if(v === 'cuentas') v = 'personal';    // la dirección de antes sigue valiendo
+  /* Los libros ya no se abren aparte: sus movimientos viven en Dinero → Movimientos */
+  if(v === 'cuentas' || v === 'personal' || v === 'oficina'){ ui.movLibro = v === 'oficina' ? 'oficina' : 'personal'; ui.movCat = ''; v = 'movimientos'; }
   if(v === 'progreso' || v === 'revision' || v === 'foco'){ v = 'hoy'; try{ history.replaceState(null, '', '#hoy'); }catch(e){} }   // secciones que ya no existen
   if(v !== 'ajustes' && !SECCIONES.some(function(s){ return s.id === v; })) v = 'hoy';
   if(v !== 'listas') ui.lista = null;
@@ -2501,18 +2503,15 @@ function tarjetaSemanaEsp(id){
 
 /* Las cuentas del espacio, solo donde son el centro: Personal y Oficina */
 function tarjetaDineroEsp(id){
-  var din = dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym);
-  var ult = din.lista.slice().sort(function(a, b){ return b.date.localeCompare(a.date); }).slice(0, 4);
+  var din = dineroEsp(id);
+  var ult = din.lista.slice().sort(function(a, b){ return b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)); }).slice(0, 4);
   if(!ult.length) return '';
-  return '<section class="tarjeta">' + cabTarjeta('i-cuentas', 'Últimos movimientos', 'var(--haber)', 'Ver todo', 'data-acc="din-ver" data-v="' + din.libro + '"') +
-    (ult.length ? '<div class="lista-filas">' + ult.map(function(t){
-      var g = t.type === 'Gasto';
-      return '<div class="fila mov"><span class="mov-ico ' + (g ? 'g' : 'i') + '">' + ico(g ? 'i-bajar' : 'i-subir') + '</span><div class="cuerpo" data-ir="' + t.libro + '"><div class="titulo">' + esc(t.desc || t.cat) + '</div><div class="meta"><span>' + relativo(t.date) + '</span>' + (t.cat ? '<span class="etiqueta">' + esc(t.cat) + '</span>' : '') + '</div></div><span class="monto" style="color:' + (g ? 'var(--debe)' : 'var(--haber)') + '">' + (g ? '−' : '+') + dinero(t.amount) + '</span></div>';
-    }).join('') + '</div>' : '') + '</section>';
+  return '<section class="tarjeta">' + cabTarjeta('i-cuentas', 'Últimos movimientos', 'var(--haber)', 'Ver todos', 'data-acc="mov-ver" data-v="' + din.libro + '"') +
+    '<div class="lista-filas">' + ult.map(function(t){ return filaMov(t, false, false); }).join('') + '</div></section>';
 }
 /* Gasto e ingreso del mes, lado a lado, cada uno con su botón para anotar */
 function bloquesDinero(id){
-  var din = dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym), ta = totalesMes(din.lista, mesAntes(ym, 1));
+  var din = id === 'todo' ? { libro:'personal', lista:movsDe('todo'), cat:'' } : dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym), ta = totalesMes(din.lista, mesAntes(ym, 1));
   var hoy = hoyISO(), gHoy = 0, iHoy = 0;
   din.lista.forEach(function(t){ if(t.date === hoy){ if(t.type === 'Gasto') gHoy += t.amount; else iHoy += t.amount; } });
   var queda = tm.ent - tm.sal;
@@ -3510,7 +3509,12 @@ function cabSeccion(v){
       for(var ci = 0; ci < 7; ci++) ne += itemsDelDia(sumarDias(hoy, ci)).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
       d = { c:'var(--azul)', i:'i-cal', t:'Calendario', s:ne + (ne === 1 ? ' cosa' : ' cosas') + ' en 7 días' + diaCargado(hoy) };
     } else if(v === 'dinero'){
-      d = { c:'var(--haber)', i:'i-grafica', t:'Dinero', s:'Tus gastos personales y la oficina, de un vistazo' };
+      var selD = ui.dinLibro || 'todo';
+      d = { c:'var(--haber)', i:'i-grafica', t:'Dinero', s:cap(MESES[+hoy.slice(5, 7) - 1]) + ' · ' + (selD === 'todo' ? 'los dos libros' : 'libro ' + NOM_LIBRO[selD].toLowerCase()) };
+    } else if(v === 'movimientos'){
+      var libM = ui.movLibro || 'personal', mesM = ui.movMes || hoy.slice(0, 7);
+      var nM = movsDe(libM === 'ambos' ? 'todo' : libM).filter(function(t){ return mesM === 'todo' || t.date.slice(0, 7) === mesM; }).length;
+      d = { c:'var(--haber)', i:'i-cuentas', t:'Movimientos', s:nM + (nM === 1 ? ' movimiento' : ' movimientos') + ' · ' + (mesM === 'todo' ? 'todo el libro' : MESES[+mesM.slice(5, 7) - 1] + ' ' + mesM.slice(0, 4)) + ' · ' + (libM === 'ambos' ? 'los dos libros' : NOM_LIBRO[libM]) };
     } else if(v === 'foco'){
       d = { c:'var(--debe)', i:'i-reloj', t:'Enfoque', s:'Trabaja por bloques y descansa entre medio' };
     } else if(v === 'revision'){
@@ -4379,8 +4383,7 @@ function pct(a, b){ return b ? Math.round((a - b) / b * 100) : 0; }
 VISTAS.dinero = function(){
   var sel = ui.dinLibro || 'todo', hoy = hoyISO(), ym = hoy.slice(0, 7), ymA = mesAntes(ym, 1);
   var lista = movsDe(sel);
-  var m = totalesMes(lista, ym), a = totalesMes(lista, ymA);
-  var neto = m.ent - m.sal;
+  var m = totalesMes(lista, ym);
   var diaMes = deISO(hoy).getDate(), diasMes = new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate();
   /* Comparar con el mes pasado HASTA EL MISMO DÍA, que es lo justo */
   var aHastaHoy = 0;
@@ -4388,46 +4391,13 @@ VISTAS.dinero = function(){
   var dif = pct(m.sal, aHastaHoy);
   var saldo = 0; lista.forEach(function(t){ saldo += t.type === 'Gasto' ? -t.amount : t.amount; });
 
-  var html = '<div class="fichas desliza">' + [['todo','Todo'],['personal','Personal'],['oficina','Oficina']].map(function(o){
+  var html = '<div class="fichas desliza din-libros">' + [['todo','Los dos'],['personal','🏠 Personal'],['oficina','💼 Oficina']].map(function(o){
     return '<button type="button" class="ficha" data-acc="din-libro" data-v="' + o[0] + '" aria-pressed="' + (sel === o[0]) + '">' + o[1] + '</button>';
   }).join('') + '</div>';
 
-  /* Saludo del dinero */
-  html += '<section class="heroe dinero-heroe"><div class="arriba"><div>' +
-      '<div class="fecha">' + cap(MESES[+ym.slice(5, 7) - 1]) + ' · ' + (sel === 'todo' ? 'los dos libros' : NOM_LIBRO[sel]) + '</div>' +
-      '<h2 class="cifra-heroe">' + (neto < 0 ? '−' : '+') + ' ' + dinero(Math.abs(neto)).replace('−', '') + '</h2>' +
-      '<p class="frase" style="font-style:normal">' + (m.n ? (neto >= 0 ? 'Este mes va entrando más de lo que sale.' : 'Este mes está saliendo más de lo que entra.') : 'Aún no hay movimientos este mes.') + '</p></div></div>' +
-    '<div class="datos">' +
-      '<span class="dato">' + ico('i-subir') + '<b>' + dinero(m.ent) + '</b> entró</span>' +
-      '<span class="dato">' + ico('i-bajar') + '<b>' + dinero(m.sal) + '</b> salió</span>' +
-      '<span class="dato">' + ico('i-cuentas') + '<b>' + dinero(saldo) + '</b> saldo total</span>' +
-    '</div></section>';
-
-  /* Anotar rápido */
-  var cats = {};
-  lista.forEach(function(t){ if(t.cat) cats[t.cat] = (cats[t.cat] || 0) + 1; });
-  var catsOrden = Object.keys(cats).sort(function(x, y){ return cats[y] - cats[x]; });
-  var qaLibro = sel === 'todo' ? (ui.qaLibro || 'personal') : sel;
-  html += '<section class="tarjeta" style="margin-bottom:14px">' + cabTarjeta('i-plus', 'Anotar un movimiento', 'var(--verde)') +
-    '<form class="tarjeta-cuerpo qa" data-acc="qa" autocomplete="off">' +
-      '<div class="selector qa-tipo">' +
-        '<button type="button" data-acc="qa-tipo" data-v="Gasto" aria-pressed="' + (ui.qaTipo !== 'Ingreso') + '" class="gasto">' + ico('i-bajar') + 'Gasto</button>' +
-        '<button type="button" data-acc="qa-tipo" data-v="Ingreso" aria-pressed="' + (ui.qaTipo === 'Ingreso') + '" class="ingreso">' + ico('i-subir') + 'Ingreso</button>' +
-        (sel === 'todo' ? '<span class="qa-sep"></span>' + ['personal','oficina'].map(function(l){
-          return '<button type="button" data-acc="qa-libro" data-v="' + l + '" aria-pressed="' + (qaLibro === l) + '">' + ico(l === 'oficina' ? 'i-maletin' : 'i-cuentas') + NOM_LIBRO[l] + '</button>';
-        }).join('') : '') +
-      '</div>' +
-      '<div class="qa-campos">' +
-        '<label class="campo qa-monto"><span>Monto (' + MONEDA + ')</span><input id="qaMonto" name="monto" inputmode="decimal" placeholder="0.00" required></label>' +
-        '<label class="campo qa-desc"><span>En qué</span><input id="qaDesc" name="desc" maxlength="160" placeholder="' + (ui.qaTipo === 'Ingreso' ? 'Ej. Sueldo, venta, cobro a cliente' : 'Ej. Almuerzo, taxi, útiles de oficina') + '"></label>' +
-        '<label class="campo qa-cat"><span>Categoría</span><input id="qaCat" name="cat" maxlength="40" list="qaCats" placeholder="Opcional" value="' + esc(ui.qaCatPre || '') + '"><datalist id="qaCats">' +
-          catsOrden.concat(['Comida','Transporte','Casa','Servicios','Salud','Estudios','Deporte','Ocio','Sueldo','Ventas','Insumos']).filter(function(c, i, arr){ return arr.indexOf(c) === i; }).map(function(c){ return '<option value="' + esc(c) + '">'; }).join('') +
-        '</datalist></label>' +
-        '<label class="campo qa-fecha"><span>Fecha</span><input id="qaFecha" name="fecha" type="date" value="' + hoy + '"></label>' +
-      '</div>' +
-      (catsOrden.length ? '<div class="chips-cat">' + catsOrden.slice(0, 6).map(function(c){ return '<button type="button" class="ficha" data-acc="qa-cat" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' : '') +
-      '<button type="submit" class="btn primario" style="width:100%">' + ico('i-check') + 'Anotar en ' + NOM_LIBRO[qaLibro] + '</button>' +
-    '</form></section>';
+  /* Lo gastado y lo que entró este mes, con sus botones, y el saldo del libro */
+  html += bloquesDinero(sel) +
+    '<button type="button" class="din-saldo" data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '"><span>Saldo total ' + (sel === 'todo' ? 'de los dos libros' : 'del libro') + '</span><b class="' + (saldo < 0 ? 'neg' : '') + '">' + (saldo < 0 ? '−' : '') + dinero(Math.abs(saldo)) + '</b>' + ico('i-der') + '</button>';
 
   html += '<div class="rejilla dos">';
 
@@ -4458,54 +4428,169 @@ VISTAS.dinero = function(){
                   : '<div class="vacio" style="padding:8px 0">Anota tus movimientos y aquí verás cómo vas: comparación con el mes pasado, tu mayor gasto y hacia dónde vas.</div>') +
     '</div></section>';
 
+  html += tarjetaSemanaGasto(lista, hoy);
+
+  /* En qué se va: cada categoría lleva a sus movimientos */
+  var porCat = {};
+  lista.forEach(function(t){ if(t.type === 'Gasto' && t.date.slice(0, 7) === ym){ var c = t.cat || 'Sin categoría'; porCat[c] = (porCat[c] || 0) + t.amount; } });
+  var catL = Object.keys(porCat).sort(function(x, y){ return porCat[y] - porCat[x]; });
+  html += '<section class="tarjeta">' + cabTarjeta('i-listas', 'En qué se va este mes', 'var(--debe)') +
+    (catL.length ? '<div class="cats-din">' + catL.slice(0, 7).map(function(c, i){
+      var p = m.sal ? porCat[c] / m.sal : 0;
+      return '<button type="button" class="barra-h cat-fila" style="--c:' + ['var(--debe)','var(--oro)','var(--azul)','var(--rosa)','var(--verde)','var(--haber)','var(--tinta-3)'][i] + '" data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '" data-cat="' + esc(c) + '"><span>' + esc(c) + '</span>' +
+        '<div class="barra-prog"><i style="width:' + (p * 100).toFixed(1) + '%;background:var(--c)"></i></div><b>' + dinero(porCat[c]) + '</b></button>';
+    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin gastos este mes todavía.</div>') + '</section>';
+
+  /* Últimos movimientos: se tocan para editarlos, ↻ los repite hoy */
+  var ult = lista.slice().sort(function(x, y){ return y.date.localeCompare(x.date) || String(y.id).localeCompare(String(x.id)); }).slice(0, 5);
+  html += '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Últimos movimientos', 'var(--verde)', 'Ver todos', 'data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '"') +
+    (ult.length ? '<div class="lista-filas">' + ult.map(function(t){ return filaMov(t, sel === 'todo', false); }).join('') + '</div>' : '<div class="vacio">Aún no hay movimientos.</div>') + '</section>';
+
   /* Últimos 6 meses */
   var meses = [], maxV = 1;
   for(var i = 5; i >= 0; i--){ var y = mesAntes(ym, i), tt = totalesMes(lista, y); meses.push({ ym:y, t:tt }); maxV = Math.max(maxV, tt.ent, tt.sal); }
   html += '<section class="tarjeta">' + cabTarjeta('i-grafica', 'Últimos 6 meses', 'var(--azul)') +
     '<div class="tarjeta-cuerpo"><div class="meses-graf">' + meses.map(function(x){
       var he = x.t.ent / maxV * 100, hs = x.t.sal / maxV * 100;
-      return '<div class="mes-col' + (x.ym === ym ? ' actual' : '') + '" title="' + cap(MESES[+x.ym.slice(5, 7) - 1]) + ': entró ' + dinero(x.t.ent) + ', salió ' + dinero(x.t.sal) + '">' +
+      return '<button type="button" class="mes-col' + (x.ym === ym ? ' actual' : '') + '" data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '" data-mes="' + x.ym + '" title="' + cap(MESES[+x.ym.slice(5, 7) - 1]) + ': entró ' + dinero(x.t.ent) + ', salió ' + dinero(x.t.sal) + '">' +
         '<div class="par"><i class="e" style="height:' + (x.t.ent ? Math.max(3, he) : 0) + '%"></i><i class="s" style="height:' + (x.t.sal ? Math.max(3, hs) : 0) + '%"></i></div>' +
-        '<small>' + MESES3[+x.ym.slice(5, 7) - 1] + '</small><b class="' + (x.t.ent - x.t.sal < 0 ? 'neg' : '') + '">' + (x.t.n ? (x.t.ent - x.t.sal < 0 ? '−' : '+') + formNum(Math.abs(x.t.ent - x.t.sal)) : '—') + '</b></div>';
+        '<small>' + MESES3[+x.ym.slice(5, 7) - 1] + '</small><b class="' + (x.t.ent - x.t.sal < 0 ? 'neg' : '') + '">' + (x.t.n ? (x.t.ent - x.t.sal < 0 ? '−' : '+') + formNum(Math.round(Math.abs(x.t.ent - x.t.sal))) : '—') + '</b></button>';
     }).join('') + '</div><div class="leyenda-graf"><span><i class="e"></i>Entró</span><span><i class="s"></i>Salió</span><span>Debajo: lo que quedó</span></div></div></section>';
 
-  /* En qué se va */
-  var porCat = {};
-  lista.forEach(function(t){ if(t.type === 'Gasto' && t.date.slice(0, 7) === ym){ var c = t.cat || 'Sin categoría'; porCat[c] = (porCat[c] || 0) + t.amount; } });
-  var catL = Object.keys(porCat).sort(function(x, y){ return porCat[y] - porCat[x]; });
-  html += '<section class="tarjeta">' + cabTarjeta('i-listas', 'En qué se va este mes', 'var(--debe)') +
-    (catL.length ? catL.slice(0, 6).map(function(c, i){
-      var p = m.sal ? porCat[c] / m.sal : 0;
-      return '<div class="barra-h cat-fila" style="--c:' + ['var(--debe)','var(--oro)','var(--azul)','var(--rosa)','var(--verde)','var(--haber)'][i] + '"><span>' + esc(c) + '</span>' +
-        '<div class="barra-prog"><i style="width:' + (p * 100).toFixed(1) + '%;background:var(--c)"></i></div><b>' + Math.round(p * 100) + '%</b></div>';
-    }).join('') + '<div style="height:10px"></div>' : '<div class="vacio" style="padding-top:4px">Sin gastos este mes todavía.</div>') + '</section>';
-
-  html += tarjetaSemanaGasto(lista, hoy) + tarjetaRepetidos(lista, ym);
-
-  /* Últimos movimientos */
-  var ult = lista.slice().sort(function(x, y){ return y.date.localeCompare(x.date) || String(y.id).localeCompare(String(x.id)); }).slice(0, 8);
-  html += '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Últimos movimientos', 'var(--verde)') +
-    (ult.length ? '<div class="lista-filas">' + ult.map(function(t){
-      var g = t.type === 'Gasto';
-      return '<div class="fila mov"><span class="mov-ico ' + (g ? 'g' : 'i') + '">' + ico(g ? 'i-bajar' : 'i-subir') + '</span>' +
-        '<div class="cuerpo" data-ir="' + t.libro + '"><div class="titulo">' + esc(t.desc || t.cat || (g ? 'Gasto' : 'Ingreso')) + '</div>' +
-        '<div class="meta"><span>' + relativo(t.date) + '</span>' + (t.cat ? '<span class="etiqueta">' + esc(t.cat) + '</span>' : '') + (sel === 'todo' ? '<span>' + NOM_LIBRO[t.libro] + '</span>' : '') + '</div></div>' +
-        '<span class="monto" style="color:' + (g ? 'var(--debe)' : 'var(--haber)') + '">' + (g ? '−' : '+') + dinero(t.amount) + '</span>' +
-        '<button class="btn-icono repetir-mov" data-acc="mov-repetir" data-libro="' + t.libro + '" data-id="' + esc(String(t.id)) + '" title="Repetir hoy" aria-label="Repetir hoy">' + ico('i-rep') + '</button></div>';
-    }).join('') + '</div>' : '<div class="vacio">Aún no hay movimientos.</div>') +
-    '<div class="pie-fila-btn">' +
-      '<button class="btn chico" data-ir="personal">' + ico('i-cuentas') + 'Libro personal</button>' +
-      '<button class="btn chico" data-ir="oficina">' + ico('i-maletin') + 'Libro de la oficina</button></div></section>';
-
-  /* Pagos del mes */
-  var pp = pagosProximos(10);
-  if(pp.length){
-    html += '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos que vienen', 'var(--debe)', 'Pagos fijos', 'data-ir="pagos"') +
-      '<div class="lista-filas">' + pp.slice(0, 5).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>';
-  }
+  html += tarjetaRepetidos(lista, ym);
   /* Los informes (PDF y Excel), al final: están, pero no mandan */
   return html + '</div><div style="margin-top:16px">' + tarjetaInformes() + '</div>';
 };
+
+/* Una fila de movimiento: se toca para editar */
+function filaMov(t, conLibro, conRepetir){
+  var g = t.type === 'Gasto';
+  return '<div class="fila mov" data-busca="' + esc(sinTildes(((t.desc || '') + ' ' + (t.cat || '') + ' ' + t.amount).toLowerCase())) + '"><span class="mov-ico ' + (g ? 'g' : 'i') + '">' + ico(g ? 'i-bajar' : 'i-subir') + '</span>' +
+    '<div class="cuerpo" data-acc="mov-ed" data-libro="' + t.libro + '" data-id="' + esc(String(t.id)) + '"><div class="titulo">' + esc(t.desc || t.cat || (g ? 'Gasto' : 'Ingreso')) + '</div>' +
+    '<div class="meta"><span>' + relativo(t.date) + '</span>' + (t.cat ? '<span class="etiqueta">' + esc(t.cat) + '</span>' : '') + (conLibro ? '<span title="' + NOM_LIBRO[t.libro] + '">' + (t.libro === 'oficina' ? '💼' : '🏠') + '</span>' : '') + '</div></div>' +
+    '<span class="monto" style="color:' + (g ? 'var(--debe)' : 'var(--haber)') + '">' + (g ? '−' : '+') + dinero(t.amount) + '</span>' +
+    (conRepetir ? '<button class="btn-icono repetir-mov" data-acc="mov-repetir" data-libro="' + t.libro + '" data-id="' + esc(String(t.id)) + '" title="Repetir hoy" aria-label="Repetir hoy">' + ico('i-rep') + '</button>' : '') + '</div>';
+}
+
+/* ---------- Movimientos: los dos libros, dentro de la agenda --------------- */
+VISTAS.movimientos = function(){
+  var lib = ui.movLibro || 'personal', hoy = hoyISO(), mesHoy = hoy.slice(0, 7), mes = ui.movMes || mesHoy, tipo = ui.movTipo || 'todo', cat = ui.movCat || '';
+  var todos = movsDe(lib === 'ambos' ? 'todo' : lib);
+  var delPer = mes === 'todo' ? todos : todos.filter(function(t){ return t.date.slice(0, 7) === mes; });
+  var ent = 0, sal = 0;
+  delPer.forEach(function(t){ if(t.type === 'Gasto') sal += t.amount; else ent += t.amount; });
+  var lista = delPer.filter(function(t){ return (tipo === 'todo' || (tipo === 'g') === (t.type === 'Gasto')) && (!cat || (t.cat || 'Sin categoría') === cat); })
+    .sort(function(a, b){ return b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)); });
+  var libAnotar = lib === 'oficina' ? 'oficina' : 'personal';
+
+  var html = '<div class="fichas desliza din-libros">' + [['personal','🏠 Personal'],['oficina','💼 Oficina'],['ambos','Los dos']].map(function(o){
+    return '<button type="button" class="ficha" data-acc="mov-libro" data-v="' + o[0] + '" aria-pressed="' + (lib === o[0]) + '">' + o[1] + '</button>';
+  }).join('') + '</div>';
+
+  /* El mes, con flechas, o todo el libro */
+  html += '<div class="mov-mes">' +
+    '<button type="button" class="btn-icono" data-acc="mov-mes" data-n="-1" aria-label="Mes anterior"' + (mes === 'todo' ? ' disabled' : '') + '>' + ico('i-izq') + '</button>' +
+    '<b>' + (mes === 'todo' ? 'Todo el libro' : cap(MESES[+mes.slice(5, 7) - 1]) + ' ' + mes.slice(0, 4)) + '</b>' +
+    '<button type="button" class="btn-icono" data-acc="mov-mes" data-n="1" aria-label="Mes siguiente"' + (mes === 'todo' || mes >= mesHoy ? ' disabled' : '') + '>' + ico('i-der') + '</button>' +
+    '<button type="button" class="ficha" data-acc="mov-mes" data-n="' + (mes === 'todo' ? 'hoy' : 'todo') + '">' + (mes === 'todo' ? 'Este mes' : 'Todo') + '</button></div>';
+
+  html += '<div class="mov-cifras"><div class="entra"><small>Entró</small><b>' + dinero(ent) + '</b></div><div class="sale"><small>Salió</small><b>' + dinero(sal) + '</b></div>' +
+    '<div class="' + (ent - sal < 0 ? 'sale' : '') + '"><small>Quedó</small><b>' + (ent - sal < 0 ? '−' : '') + dinero(Math.abs(ent - sal)) + '</b></div></div>';
+
+  html += '<div class="mov-anotar"><button class="btn primario" data-acc="din-anotar" data-libro="' + libAnotar + '" data-t="Gasto">' + ico('i-plus') + 'Gasto</button>' +
+    '<button class="btn btn-ingreso" data-acc="din-anotar" data-libro="' + libAnotar + '" data-t="Ingreso">' + ico('i-plus') + 'Ingreso</button></div>';
+
+  html += '<div class="mov-filtros"><div class="selector mov-tipo">' + [['todo','Todos'],['g','Gastos'],['i','Ingresos']].map(function(o){
+      return '<button type="button" data-acc="mov-tipo" data-v="' + o[0] + '" aria-pressed="' + (tipo === o[0]) + '">' + o[1] + '</button>';
+    }).join('') + '</div>' +
+    '<input class="entrada" id="buscaMov" type="search" placeholder="Buscar…" autocomplete="off"></div>' +
+    (cat ? '<button type="button" class="ficha mov-cat-activa" data-acc="mov-cat" data-v="">Categoría: ' + esc(cat) + ' ✕</button>' : '');
+
+  if(!lista.length){
+    html += '<section class="tarjeta">' + vacio(todos.length ? '🔎' : '💸', todos.length ? 'Nada por aquí' : 'Aún no hay movimientos', todos.length ? 'No hay movimientos con estos filtros en este periodo.' : 'Anota tu primer gasto o ingreso con los botones de arriba.') + '</section>';
+    return html;
+  }
+  /* Agrupados por día, con lo que quedó ese día */
+  var dias = [], porDia = {};
+  lista.slice(0, 400).forEach(function(t){ if(!porDia[t.date]){ porDia[t.date] = []; dias.push(t.date); } porDia[t.date].push(t); });
+  html += '<div id="listaMovs">' + dias.map(function(d){
+    var neto = porDia[d].reduce(function(a, t){ return a + (t.type === 'Gasto' ? -t.amount : t.amount); }, 0);
+    return '<section class="tarjeta mov-dia"><div class="mov-dia-cab"><b>' + cap(fechaLarga(d)) + '</b><span class="' + (neto < 0 ? 'sale' : 'entra') + '">' + (neto < 0 ? '−' : '+') + dinero(Math.abs(neto)) + '</span></div>' +
+      '<div class="lista-filas">' + porDia[d].map(function(t){ return filaMov(t, lib === 'ambos', false); }).join('') + '</div></section>';
+  }).join('') + '</div>' +
+  (lista.length > 400 ? '<p class="explica-t" style="text-align:center">Se muestran los 400 más recientes. Usa el buscador o elige un mes.</p>' : '');
+  return html;
+};
+/* El buscador de movimientos filtra sin repintar */
+document.addEventListener('input', function(ev){
+  if(!ev.target || ev.target.id !== 'buscaMov') return;
+  var q = sinTildes(ev.target.value.trim().toLowerCase());
+  document.querySelectorAll('#listaMovs .mov-dia').forEach(function(sec){
+    var vis = 0;
+    sec.querySelectorAll('.fila.mov').forEach(function(f){ var ok = !q || (f.dataset.busca || '').indexOf(q) >= 0; f.style.display = ok ? '' : 'none'; if(ok) vis++; });
+    sec.style.display = vis ? '' : 'none';
+  });
+});
+
+/* Lo que hay guardado en un libro, tal cual */
+function libroCrudo(cual){
+  var raw = leerJSON(LIBROS[cual].clave, null);
+  return raw && Array.isArray(raw.transactions) ? raw.transactions : (Array.isArray(raw) ? raw : []);
+}
+/* Editor de un movimiento: monto, tipo, en qué, categoría, fecha y libro */
+function editarMovimiento(cual, id, preset){
+  var o = null;
+  if(id){ o = libroCrudo(cual).find(function(x){ return String(x.id) === String(id); }); if(!o){ aviso('Ese movimiento ya no está', 'Quizá se borró en otro aparato.'); pintar(); return; } }
+  var t = o ? { date:o.date, desc:o.desc || '', type:o.type === 'Gasto' ? 'Gasto' : 'Ingreso', amount:Math.abs(+o.amount || 0), cat:o.cat || '' }
+            : Object.assign({ date:hoyISO(), desc:'', type:'Gasto', amount:'', cat:'' }, preset || {});
+  var usadas = {};
+  ['personal', 'oficina'].forEach(function(l){ libroDatos(l).forEach(function(x){ if(x.cat) usadas[x.cat] = (usadas[x.cat] || 0) + 1; }); });
+  var cats = Object.keys(usadas).sort(function(a, b){ return usadas[b] - usadas[a]; }).concat(CATS_BASE, ['Sueldo', 'Ventas', 'Cobro']).filter(function(c, i, arr){ return arr.indexOf(c) === i; });
+  abrirFlotante(cabFlot(id ? 'Movimiento' : 'Nuevo movimiento') +
+    '<form class="form" id="formEd" autocomplete="off">' +
+      grupo('Tipo', selector('movTipoEd', [{ v:'Gasto', n:'💸 Gasto' }, { v:'Ingreso', n:'💰 Ingreso' }], t.type)) +
+      '<div class="fila-campos">' + campo('Monto (' + MONEDA + ')', '<input name="monto" inputmode="decimal" required value="' + (t.amount || '') + '" placeholder="0.00">') +
+        campo('Fecha', '<input type="date" name="fecha" value="' + esc(t.date) + '">') + '</div>' +
+      campo('En qué', '<input name="desc" maxlength="160" value="' + esc(t.desc) + '" placeholder="Ej. Almuerzo, taxi, sueldo">') +
+      campo('Categoría', '<input name="cat" maxlength="40" list="movCats" value="' + esc(t.cat) + '" placeholder="Opcional"><datalist id="movCats">' + cats.map(function(c){ return '<option value="' + esc(c) + '">'; }).join('') + '</datalist>') +
+      '<div class="chips-cat">' + cats.slice(0, 8).map(function(c){ return '<button type="button" class="ficha" data-ed="cat" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
+      grupo('Libro', selector('movLibroEd', [{ v:'personal', n:'🏠 Personal' }, { v:'oficina', n:'💼 Oficina' }], cual)) +
+      botonesEd(!!id, id ? '<button type="button" class="btn" data-ed="repetir">' + ico('i-rep') + 'Repetir hoy</button>' : '') +
+    '</form>');
+  var f = $('formEd');
+  if(!id) setTimeout(function(){ f.monto.focus(); }, 60);
+  f.onsubmit = function(ev){
+    ev.preventDefault();
+    var v = String(f.monto.value || '').replace(/−/g, '-').replace(/,/g, '.');
+    if(/\d[+\-]/.test(v)){ var tot = 0; (v.match(/[+\-]?[\d.]+/g) || []).forEach(function(x){ tot += parseFloat(x) || 0; }); v = String(tot); }
+    var monto = Math.round(Math.abs(num(v)) * 100) / 100;
+    if(!monto){ f.monto.focus(); aviso('Falta el monto'); return; }
+    var tipo = leerSelector('movTipoEd') || t.type, dest = leerSelector('movLibroEd') || cual;
+    var datos = { date:/^\d{4}-\d{2}-\d{2}$/.test(f.fecha.value) ? f.fecha.value : hoyISO(), desc:f.desc.value.trim() || f.cat.value.trim() || tipo, type:tipo, amount:monto, cat:f.cat.value.trim().slice(0, 40) };
+    if(id && dest === cual) cambiarLibro(cual, function(l){ return l.map(function(x){ return String(x.id) === String(id) ? Object.assign({}, x, datos) : x; }); });
+    else {
+      if(id) cambiarLibro(cual, function(l){ return l.filter(function(x){ return String(x.id) !== String(id); }); });
+      cambiarLibro(dest, function(l){ return l.concat([Object.assign({}, o || {}, datos, { id:o ? o.id : nid() })]); });
+    }
+    cerrarFlotante(); pintar(); vibrar(12);
+    aviso(id ? 'Movimiento guardado' : (tipo === 'Gasto' ? '💸 ' : '💰 ') + dinero(monto), datos.desc + (dest !== cual && id ? ' · pasó a ' + NOM_LIBRO[dest] : ''));
+  };
+  edAcciones = {
+    cat: function(b){ f.cat.value = b.dataset.v; },
+    borrar: function(){
+      var copia = o;
+      cerrarFlotante();
+      cambiarLibro(cual, function(l){ return l.filter(function(x){ return String(x.id) !== String(id); }); });
+      pintar();
+      aviso('Movimiento borrado', (copia.desc || '') + ' · ' + dinero(Math.abs(+copia.amount || 0)), 'Deshacer', function(){ cambiarLibro(cual, function(l){ return l.concat([copia]); }); pintar(); });
+    },
+    repetir: function(){
+      var c = Object.assign({}, o, { id:nid(), date:hoyISO() });
+      cerrarFlotante(); cambiarLibro(cual, function(l){ return l.concat([c]); }); pintar();
+      aviso('↻ Repetido hoy: ' + dinero(Math.abs(+c.amount || 0)), c.desc || null, 'Deshacer', function(){ cambiarLibro(cual, function(l){ return l.filter(function(x){ return x.id !== c.id; }); }); pintar(); });
+    }
+  };
+}
 
 /* Esta semana, día por día, contra la semana pasada a la misma altura */
 function tarjetaSemanaGasto(lista, hoy){
@@ -5678,10 +5763,7 @@ function nuevo(tipo, preset){
   else if(tipo === 'pago') editarPago(null, preset);
   else if(tipo === 'diario'){ ui.diarioDia = hoyISO(); ir('diario'); setTimeout(function(){ var t = $('textoDiario'); if(t) t.focus(); }, 60); }
   else if(tipo === 'personal' || tipo === 'oficina'){ gastoRapido(tipo, 'Gasto'); }
-  else if(tipo === 'dinero'){
-    ui.qaLibro = tipo === 'oficina' ? 'oficina' : 'personal'; ui.dinLibro = 'todo'; ui.qaTipo = 'Gasto'; ui.qaCatPre = '';
-    ir('dinero'); setTimeout(function(){ var m = $('qaMonto'); if(m) m.focus(); }, 60);
-  }
+  else if(tipo === 'dinero'){ gastoRapido('personal', 'Gasto'); }
 }
 function nuevoSegunVista(){
   var v = ui.vista;
@@ -5689,7 +5771,7 @@ function nuevoSegunVista(){
   else if(v === 'metas') nuevo('meta');
   else if(v === 'pagos') nuevo('pago');
   else if(v === 'proyectos'){ if(ui.proy && $('proyTarea')) $('proyTarea').focus(); else nuevo('proyecto'); }
-  else if(v === 'dinero'){ var qm = $('qaMonto'); if(qm){ qm.focus(); qm.scrollIntoView({ block:'center', behavior:'smooth' }); } }
+  else if(v === 'dinero' || v === 'movimientos'){ var lb = v === 'movimientos' ? ui.movLibro : ui.dinLibro; gastoRapido(lb === 'oficina' ? 'oficina' : 'personal', 'Gasto'); }
   else if(v === 'diario'){ var td = $('textoDiario'); if(td) td.focus(); }
   else if(v === 'listas'){ if(ui.lista && $('nuevoItem')) $('nuevoItem').focus(); else nuevo('lista'); }
   else hojaAnadir();
@@ -6898,6 +6980,21 @@ document.addEventListener('click', function(ev){
       '<div class="botones"><button class="btn primario" data-acc="nuevo" data-tipo="entreno">' + ico('i-plus') + 'Anotar entrenamiento</button></div>');
       break;
     case 'din-libro': ui.dinLibro = b.dataset.v; pintar(); break;
+    case 'din-anotar': gastoRapido(b.dataset.libro === 'oficina' ? 'oficina' : 'personal', b.dataset.t === 'Ingreso' ? 'Ingreso' : 'Gasto'); break;
+    case 'mov-ver':
+      ui.movLibro = b.dataset.v || 'personal'; ui.movCat = b.dataset.cat || ''; ui.movTipo = b.dataset.cat ? 'g' : 'todo';
+      ui.movMes = b.dataset.mes || hoyISO().slice(0, 7);
+      ir('movimientos'); break;
+    case 'mov-libro': ui.movLibro = b.dataset.v; pintar(); break;
+    case 'mov-tipo': ui.movTipo = b.dataset.v; pintar(); break;
+    case 'mov-cat': ui.movCat = b.dataset.v || ''; if(!ui.movCat) ui.movTipo = 'todo'; pintar(); break;
+    case 'mov-mes':
+      var mh = hoyISO().slice(0, 7), mn = b.dataset.n;
+      if(mn === 'todo') ui.movMes = 'todo';
+      else if(mn === 'hoy') ui.movMes = mh;
+      else { var mc = ui.movMes && ui.movMes !== 'todo' ? ui.movMes : mh; ui.movMes = +mn < 0 ? mesAntes(mc, 1) : mesAntes(mc, -1); if(ui.movMes > mh) ui.movMes = mh; }
+      pintar(); break;
+    case 'mov-ed': editarMovimiento(b.dataset.libro === 'oficina' ? 'oficina' : 'personal', id); break;
     case 'mov-repetir':
       var libR = b.dataset.libro, nuevoR = null;
       cambiarLibro(libR, function(l){
