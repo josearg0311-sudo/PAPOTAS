@@ -1791,13 +1791,13 @@ VISTAS.espacio = function(id){
     /* El espacio como panel: cada mosaico es una subpantalla con su dato */
     return volverPanel('esp-' + id) + html + botonAnadir('tarea', 'Añadir en ' + E.nom + '…') +
       '<div class="mosaicos esp-mosaicos">' + subs.map(function(x, i){
-        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0 });
+        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0, viz:vizSub(id, x.k) });
       }).join('') + '</div>';
   }
   var sub = subs.find(function(x){ return x.k === tab; }) || subs[0];
   return '<button type="button" class="volver-panel" data-acc="esp-tab" data-esp="' + id + '" data-v="inicio">' + ico('i-izq') + E.em + ' ' + E.nom + '</button>' +
     '<header class="sub-cab" style="--ec:' + E.c + '"><h2>' + sub.t + '</h2><p>' + sub.d + '</p></header>' +
-    '<div class="rejilla dos esp-sub esp-' + tab + '">' + sub.html() + '</div>';
+    '<div class="rejilla dos esp-sub esp-' + tab + '">' + sub.html() + '</div>' + relacionados(id, sub.k) + navSub(id, subs, sub.k);
 };
 function tarjetaProyEsp(id){
   var E = espInfo(id), hoy = hoyISO(), pa = proyectosActivos(id);
@@ -2542,6 +2542,12 @@ function tabEsp(id){
   var t = (ui.espTab || {})[id];
   t = ALIAS_TAB[t] || t;
   return PESTANAS[id].some(function(p){ return p[0] === t; }) ? t : 'inicio';
+}
+/* Pasar a la subpantalla de al lado sin volver al panel */
+function navSub(id, subs, k){
+  var i = subs.findIndex(function(x){ return x.k === k; }), a = subs[i - 1], b = subs[i + 1];
+  function bt(x, cls, txt){ return x ? '<button type="button" class="sn-' + cls + '" data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '">' + (cls === 'ant' ? ico('i-izq') : '') + '<span><small>' + txt + '</small>' + x.t + '</span>' + (cls === 'sig' ? ico('i-der') : '') + '</button>' : '<span></span>'; }
+  return '<nav class="sub-nav">' + bt(a, 'ant', 'Anterior') + bt(b, 'sig', 'Siguiente') + '</nav>';
 }
 function nomSub(id, k){ var x = PESTANAS[id].find(function(p){ return p[0] === k; }); return x ? x[1] : ''; }
 
@@ -4697,7 +4703,108 @@ function mosaico(o){
     '<span class="mo-ico">' + (o.em ? '<span class="mo-em">' + o.em + '</span>' : ico(o.i)) + '</span>' +
     '<span class="mo-txt"><b>' + o.t + '</b><small>' + o.d + '</small></span>' +
     (o.n != null ? '<span class="mo-dato' + (String(o.n).length > 6 ? ' largo' : '') + '"><strong>' + o.n + '</strong>' + (o.nl ? '<em>' + o.nl + '</em>' : '') + '</span>' : '') +
+    vizHTML(o.viz || (o.ir ? vizDe(o.ir) : null)) +
     '<span class="mo-flecha">' + ico('i-der') + '</span></button>';
+}
+/* Un dibujo chico dentro del mosaico: barra de avance (p de 0 a 1) o
+   barritas (una lista de números, con la última resaltada si se pide) */
+function vizHTML(v){
+  if(!v) return '';
+  if(v.barras && v.barras.length){
+    var mx = Math.max.apply(null, v.barras.concat([0.0001]));
+    return '<span class="mo-mini" aria-hidden="true">' + v.barras.map(function(x, i){
+      return '<i class="' + (v.marca === i ? 'm' : '') + '" style="height:' + Math.max(x ? 12 : 4, Math.round(x / mx * 100)) + '%"></i>';
+    }).join('') + '</span>';
+  }
+  if(v.p != null) return '<span class="mo-barra" aria-hidden="true"><i style="width:' + Math.round(Math.max(0, Math.min(1, v.p)) * 100) + '%"></i></span>';
+  return '';
+}
+function porDiaProx(filtro){ var hoy = hoyISO(), out = []; for(var i = 0; i < 7; i++) out.push(itemsDelDia(sumarDias(hoy, i)).filter(function(x){ return !x.hecho && (!filtro || filtro(x)); }).length); return out; }
+function gastoMeses(lista, n){ var ym = hoyISO().slice(0, 7), out = []; for(var i = n - 1; i >= 0; i--) out.push(totalesMes(lista, mesAntes(ym, i)).sal); return out; }
+function pagadoMes(esp){
+  var ym = hoyISO().slice(0, 7), t = 0, pg = 0;
+  vivos('pagos').forEach(function(p){ if(p.activo === false || (p.desde && ym < p.desde) || (esp && espDe(p) !== esp)) return; t++; if(pagado(p, ym)) pg++; });
+  return t ? pg / t : null;
+}
+/* El dibujo de cada mosaico de los paneles generales */
+function vizDe(ir){
+  var hoy = hoyISO();
+  if(ir === 'agenda'){ var its = itemsDelDia(hoy), h = its.filter(function(x){ return x.hecho; }).length; return its.length ? { p:h / its.length } : null; }
+  if(ir === 'calendario') return { barras:porDiaProx(function(x){ return x.tipo !== 'tarea'; }), marca:0 };
+  if(ir === 'tareas'){ var ts = vivos('tareas'), hh = ts.filter(function(t){ return t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) === hoy; }).length, pe = ts.filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length; return hh + pe ? { p:hh / (hh + pe) } : null; }
+  if(ir === 'dinero') return { barras:gastoMeses(movsDe('todo'), 6), marca:5 };
+  if(ir === 'movimientos'){ var l = movsDe('todo'), b = []; for(var i = 6; i >= 0; i--){ var d = sumarDias(hoy, -i); b.push(l.filter(function(t){ return t.date === d && t.type === 'Gasto'; }).reduce(function(a, t){ return a + t.amount; }, 0)); } return { barras:b, marca:6 }; }
+  if(ir === 'pagos'){ var pm = pagadoMes(''); return pm == null ? null : { p:pm }; }
+  if(ir === 'listas'){ var it = []; vivos('listas').forEach(function(x){ it = it.concat(x.items || []); }); return it.length ? { p:it.filter(function(i){ return i.ok; }).length / it.length } : null; }
+  if(ir === 'habitos'){ var wd = new Date().getDay(), hb = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; }); return hb.length ? { p:hb.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length / hb.length } : null; }
+  if(ir === 'metas'){ var ms = vivos('metas'); return ms.length ? { p:ms.reduce(function(a, m){ return a + Math.min(1, (+m.actual || 0) / (+m.objetivo || 1)); }, 0) / ms.length } : null; }
+  if(ir.indexOf('esp-') === 0){
+    var id = ir.slice(4), tt = vivos('tareas').filter(function(t){ return espDe(t) === id; });
+    var he = tt.filter(function(t){ return t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) === hoy; }).length, pn = tt.filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
+    return he + pn ? { p:he / (he + pn) } : null;
+  }
+  return null;
+}
+/* El dibujo de cada subpantalla de los espacios */
+function vizSub(id, k){
+  var hoy = hoyISO(), ym = hoy.slice(0, 7);
+  if(k === 'semana') return { barras:porDiaProx(function(x){ return x.esp === id; }), marca:0 };
+  if(k === 'dinero'){
+    var dn = dineroEsp(id);
+    if(id === 'personal' || id === 'oficina'){ var tm = totalesMes(dn.lista, ym); return tm.ent ? { p:tm.sal / tm.ent } : null; }
+    return { barras:gastoMeses(dn.lista, 6), marca:5 };
+  }
+  if(k === 'compras'){ var l = listaCompras(), it = l ? l.items || [] : []; return it.length ? { p:it.filter(function(i){ return i.ok; }).length / it.length } : null; }
+  if(k === 'pagos'){ var pm = pagadoMes(id); return pm == null ? null : { p:pm }; }
+  if(k === 'cursos'){ var pg = promedioGeneral(); return pg == null ? null : { p:pg / 20 }; }
+  if(k === 'trabajo'){ var ts = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina'; }); return ts.length ? { p:ts.filter(function(t){ return t.hecha; }).length / ts.length } : null; }
+  if(k === 'entrenos'){ var b = []; for(var i = 6; i >= 0; i--){ var d = sumarDias(hoy, -i); b.push(vivos('entrenos').filter(function(e){ return e.fecha === d; }).reduce(function(a, e){ return a + (+e.min || 0); }, 0)); } return { barras:b, marca:6 }; }
+  if(k === 'cuerpo'){
+    var ps = vivos('medidas').filter(function(x){ return +x.peso; }).sort(function(a, c){ return a.id.localeCompare(c.id); }).slice(-8).map(function(x){ return +x.peso; });
+    if(ps.length < 2) return null;
+    var mn = Math.min.apply(null, ps) - 0.5; return { barras:ps.map(function(x){ return x - mn; }), marca:ps.length - 1 };
+  }
+  if(k === 'bolso'){ var bl = listaBolso(), bi = bl ? bl.items || [] : []; return bi.length ? { p:bi.filter(function(i){ return i.ok; }).length / bi.length } : null; }
+  if(k === 'actividad'){
+    var ini = inicioSemana(hoy), sem = [];
+    for(var w = 7; w >= 0; w--){ var a = sumarDias(ini, -7 * w), f = sumarDias(a, 6); sem.push(vivos('entrenos').filter(function(e){ return e.fecha >= a && e.fecha <= f; }).length); }
+    return { barras:sem, marca:7 };
+  }
+  return null;
+}
+/* Lo relacionado con cada subpantalla: a dónde seguir desde ahí */
+function relacionados(id, k){
+  function sub(v){ return { t:nomSub(id, v), a:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + v + '"' }; }
+  function ir(t, v){ return { t:t, a:'data-ir="' + v + '"' }; }
+  function mov(l){ return { t:'Movimientos', a:'data-acc="mov-ver" data-v="' + l + '"' }; }
+  var R = {
+    semana:[ir('Mi día', 'agenda'), ir('Tareas', 'tareas'), ir('Calendario', 'calendario')],
+    'personal.dinero':[mov('personal'), sub('pagos'), sub('prestamos')],
+    'personal.compras':[sub('menu'), sub('dinero'), ir('Todas tus listas', 'listas')],
+    'personal.menu':[sub('compras'), sub('semana')],
+    'personal.fechas':[ir('Calendario', 'calendario'), sub('semana')],
+    'personal.prestamos':[sub('dinero'), mov('personal')],
+    'personal.pagos':[ir('Pagos fijos', 'pagos'), sub('dinero')],
+    'estudios.cursos':[sub('examenes'), ir('Calendario', 'calendario')],
+    'estudios.examenes':[sub('cursos'), ir('Tareas', 'tareas')],
+    'estudios.dinero':[mov('personal'), ir('Resumen del dinero', 'dinero')],
+    'oficina.cobros':[sub('clientes'), sub('dinero')],
+    'oficina.clientes':[sub('cobros'), sub('reuniones')],
+    'oficina.trabajo':[sub('reuniones'), ir('Proyectos', 'proyectos'), sub('semana')],
+    'oficina.reuniones':[sub('trabajo'), ir('Calendario', 'calendario')],
+    'oficina.dinero':[sub('cobros'), mov('oficina'), sub('pagos')],
+    'oficina.pagos':[ir('Pagos fijos', 'pagos'), sub('dinero')],
+    'deporte.entrenos':[sub('rutinas'), sub('actividad')],
+    'deporte.rutinas':[sub('entrenos'), sub('cuerpo')],
+    'deporte.cuerpo':[sub('rutinas'), ir('Metas', 'metas')],
+    'deporte.partidos':[sub('bolso'), ir('Calendario', 'calendario')],
+    'deporte.bolso':[sub('partidos')],
+    'deporte.actividad':[sub('entrenos'), ir('Hábitos', 'habitos')],
+    'deporte.dinero':[mov('personal'), ir('Resumen del dinero', 'dinero')]
+  };
+  var xs = R[id + '.' + k] || R[k] || [];
+  if(!xs.length) return '';
+  return '<div class="relacion"><small>Relacionado</small><div>' + xs.map(function(x){ return '<button type="button" class="ficha" ' + x.a + '>' + x.t + ico('i-der') + '</button>'; }).join('') + '</div></div>';
 }
 function cabPanel(t, sub, acciones){
   return '<header class="panel-cab"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</header>' +
