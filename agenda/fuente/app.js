@@ -1722,7 +1722,7 @@ var MODULOS = {
     if(tab === 'casa') return (tarjetaCompras() || tarjetaSinCompras()) + tarjetaMenu();
     if(tab === 'papeles') return tarjetaFechas() + tarjetaPrestamos();
     var pp = pagosProximos(10).filter(function(x){ return espDe(x.p) === 'personal'; });
-    return tarjetaSemanaEsp('personal') +
+    return bloquesDinero('personal') + tarjetaSemanaEsp('personal') +
       (pp.length ? '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos que vienen', 'var(--debe)', 'Pagos', 'data-ir="pagos"') +
         '<div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>' : '') +
       tarjetaDineroEsp('personal');
@@ -1785,7 +1785,7 @@ var MODULOS = {
         '<div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>' : '');
     if(tab === 'clientes') return tarjetaClientes() + cobros;
     if(tab === 'trabajo') return tarjetaTablero() + reun;
-    return tarjetaSemanaEsp('oficina') + cobros + reun + tarjetaDineroEsp('oficina') + pagosO;
+    return bloquesDinero('oficina') + tarjetaSemanaEsp('oficina') + cobros + reun + tarjetaDineroEsp('oficina') + pagosO;
   },
   deporte: function(tab){
     var hoy = hoyISO(), ini = sumarDias(hoy, -6), porDia = [], eti = [], total = 0, ses = 0;
@@ -2503,13 +2503,32 @@ function tarjetaSemanaEsp(id){
 function tarjetaDineroEsp(id){
   var din = dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym);
   var ult = din.lista.slice().sort(function(a, b){ return b.date.localeCompare(a.date); }).slice(0, 4);
-  return '<section class="tarjeta">' + cabTarjeta('i-cuentas', id === 'oficina' ? 'Cuentas de la oficina' : 'Tus cuentas personales', 'var(--haber)', 'Ver todo', 'data-acc="din-ver" data-v="' + din.libro + '"') +
-    '<div class="cifras"><div class="entra"><small>Entró</small><b>' + dinero(tm.ent) + '</b></div><div class="sale"><small>Salió</small><b>' + dinero(tm.sal) + '</b></div><div><small>Quedó</small><b>' + dinero(tm.ent - tm.sal) + '</b></div></div>' +
+  if(!ult.length) return '';
+  return '<section class="tarjeta">' + cabTarjeta('i-cuentas', 'Últimos movimientos', 'var(--haber)', 'Ver todo', 'data-acc="din-ver" data-v="' + din.libro + '"') +
     (ult.length ? '<div class="lista-filas">' + ult.map(function(t){
       var g = t.type === 'Gasto';
       return '<div class="fila mov"><span class="mov-ico ' + (g ? 'g' : 'i') + '">' + ico(g ? 'i-bajar' : 'i-subir') + '</span><div class="cuerpo" data-ir="' + t.libro + '"><div class="titulo">' + esc(t.desc || t.cat) + '</div><div class="meta"><span>' + relativo(t.date) + '</span>' + (t.cat ? '<span class="etiqueta">' + esc(t.cat) + '</span>' : '') + '</div></div><span class="monto" style="color:' + (g ? 'var(--debe)' : 'var(--haber)') + '">' + (g ? '−' : '+') + dinero(t.amount) + '</span></div>';
-    }).join('') + '</div>' : '') +
-    '<div class="pie-fila-btn"><button class="btn chico primario" data-acc="esp-anotar" data-v="' + id + '">' + ico('i-plus') + 'Anotar movimiento</button></div></section>';
+    }).join('') + '</div>' : '') + '</section>';
+}
+/* Gasto e ingreso del mes, lado a lado, cada uno con su botón para anotar */
+function bloquesDinero(id){
+  var din = dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym), ta = totalesMes(din.lista, mesAntes(ym, 1));
+  var hoy = hoyISO(), gHoy = 0, iHoy = 0;
+  din.lista.forEach(function(t){ if(t.date === hoy){ if(t.type === 'Gasto') gHoy += t.amount; else iHoy += t.amount; } });
+  var queda = tm.ent - tm.sal;
+  function bloque(tipo, em, monto, lbl, extra, riel, nota){
+    return '<div class="din-bloque ' + tipo + '"><span class="w-ico">' + em + '</span><b class="db-monto">' + dinero(monto) + '</b><span class="w-lbl">' + lbl + '</span>' +
+      '<div class="w-riel"><i style="width:' + Math.max(0, Math.min(100, riel * 100)).toFixed(1) + '%"></i></div>' +
+      '<small class="db-nota">' + nota + '</small>' +
+      '<button class="btn chico ' + (tipo === 'g' ? 'primario' : 'btn-ingreso') + '" data-acc="esp-anotar" data-v="' + id + '" data-t="' + (tipo === 'g' ? 'Gasto' : 'Ingreso') + '">' + ico('i-plus') + extra + '</button></div>';
+  }
+  return '<div class="din-bloques">' +
+    bloque('g', '💸', tm.sal, 'gastado este mes', 'Gasto', tm.ent ? tm.sal / tm.ent : (tm.sal ? 1 : 0),
+      gHoy ? '<b>' + dinero(gHoy) + '</b> hoy' : tm.ent ? Math.round(tm.sal / tm.ent * 100) + '% de lo que entró' : 'Nada hoy') +
+    bloque('i', '💰', tm.ent, id === 'oficina' ? 'facturado este mes' : 'ingresó este mes', 'Ingreso', ta.ent ? tm.ent / ta.ent : (tm.ent ? 1 : 0),
+      iHoy ? '<b>' + dinero(iHoy) + '</b> hoy' : ta.ent ? 'Mes pasado: ' + MONEDA + ' ' + formNum(Math.round(ta.ent)) : 'Nada hoy') +
+    '<div class="din-queda ' + (queda < 0 ? 'neg' : '') + '"><span>' + (queda < 0 ? 'Este mes vas en rojo' : 'Te queda este mes') + '</span><b>' + (queda < 0 ? '−' : '') + dinero(Math.abs(queda)) + '</b></div>' +
+  '</div>';
 }
 
 /* ==========================================================================
@@ -6715,9 +6734,9 @@ document.addEventListener('click', function(ev){
     case 'esp-tareas': ui.tEsp = b.dataset.v; ui.tFiltro = 'todas'; ir('tareas'); break;
     case 'esp-cal': ui.calEsp = b.dataset.v; ui.calModo = 'agenda'; ir('calendario'); break;
     case 'esp-anotar':
-      var de = dineroEsp(b.dataset.v);
-      gastoRapido(de.libro, 'Gasto');
-      if(de.cat){ ui.grCat = de.cat; var bc = document.querySelector('[data-acc="gr-cat"][data-v="' + de.cat + '"]'); if(bc) bc.setAttribute('aria-pressed', 'true'); }
+      var de = dineroEsp(b.dataset.v), tipoA = b.dataset.t === 'Ingreso' ? 'Ingreso' : 'Gasto';
+      gastoRapido(de.libro, tipoA);
+      if(de.cat && tipoA === 'Gasto'){ ui.grCat = de.cat; var bc = document.querySelector('[data-acc="gr-cat"][data-v="' + de.cat + '"]'); if(bc) bc.setAttribute('aria-pressed', 'true'); }
       break;
     case 'curso-ed': cerrarFlotante(); editarCurso(id); break;
     case 'cobro-ed': cerrarFlotante(); editarCobro(id); break;
