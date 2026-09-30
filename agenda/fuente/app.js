@@ -3485,7 +3485,7 @@ function cabSeccion(v){
       var mejor = Math.max.apply(null, vivos('habitos').map(function(x){ return racha(x); }).concat([0]));
       var semH = 0, semT = 0, iniH = inicioSemana(hoy);
       vivos('habitos').forEach(function(x){ for(var k = 0; k < 7; k++){ var dk = sumarDias(iniH, k); if(dk > hoy) break; if(x.dias && x.dias.indexOf(deISO(dk).getDay()) < 0) continue; semT++; if(x.marcas && x.marcas[dk]) semH++; } });
-      d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:'Hoy ' + ok + ' de ' + hs.length + (semT ? ' · semana ' + Math.round(semH / semT * 100) + '%' : '') + (mejor ? ' · mejor racha 🔥 ' + mejor + ' días' : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
+      d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:'Hoy ' + ok + ' de ' + hs.length + (semT ? ' · semana ' + Math.round(semH / semT * 100) + '%' : '') + (mejor ? ' · racha 🔥 ' + mejor : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
     } else if(v === 'metas'){
       var ms = vivos('metas').filter(function(m){ return !m.archivada; });
       var prom = ms.length ? ms.reduce(function(a, m){ return a + Math.min(1, (+m.actual || 0) / (+m.objetivo || 1)); }, 0) / ms.length : 0;
@@ -5303,7 +5303,8 @@ function sumarHora(h, min){
   var p = (h || '09:00').split(':'), t = (+p[0] * 60 + +p[1] + min) % 1440;
   return dos(Math.floor(t / 60)) + ':' + dos(t % 60);
 }
-function fechaPorDefecto(){ return ui.vista === 'calendario' ? ui.calSel : hoyISO(); }
+/* Pasadas las 11 de la noche, la próxima hora ya es mañana */
+function fechaPorDefecto(){ return ui.vista === 'calendario' ? ui.calSel : (new Date().getHours() >= 23 ? sumarDias(hoyISO(), 1) : hoyISO()); }
 
 /* ---------- Editor de tarea ------------------------------------------------ */
 function editarTarea(id, preset){
@@ -7235,7 +7236,7 @@ function crearDesdeCaptura(v){
   } else if(tipo === 'rec'){
     if(!p.fecha && !p.hora){ editarRec(null, { t:p.texto, esp:esp }); return; }
     var h = p.hora || '09:00', f = p.fecha || hoyISO();
-    if(f === hoyISO() && h <= horaAhora() && !p.hora) h = proximaHora();
+    if(f === hoyISO() && h <= horaAhora() && !p.hora){ h = proximaHora(); if(h === '00:00') f = sumarDias(f, 1); }
     poner('recordatorios', { id:nid(), t:p.texto, fecha:f, hora:h, rep:'no', notas:'', esp:esp });
     aviso('Te lo recordaré', relativo(f) + ' · ' + h);
   } else if(tipo === 'evento'){

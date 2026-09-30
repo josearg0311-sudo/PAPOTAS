@@ -3195,3 +3195,7 @@ body[data-esp="estudios"] .curso-ico{ font-family:var(--serif); font-style:norma
 .mov-dia-cab .sale{ color:var(--debe) } .mov-dia-cab .entra{ color:var(--haber) }
 .fila.mov .cuerpo{ cursor:pointer }
 @media (max-width:420px){ .mov-filtros{ flex-wrap:wrap } .mov-filtros .selector{ width:100% } .mov-filtros .selector button{ flex:1 } }
+
+/* La animación al cambiar de pantalla no debe ensanchar la página en el celular */
+html{ overflow-x:clip }
+.contenido{ overflow-x:clip }
