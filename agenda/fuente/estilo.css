@@ -3209,12 +3209,12 @@ html{ overflow-x:clip }
    ========================================================================== */
 :root[data-paleta="negro"]:not([data-tema="claro"]){
   --papel:#000000; --hoja:#121214; --hoja-2:#1C1C1E; --tinta:#F5F5F7; --tinta-2:#A1A1A6; --tinta-3:#6E6E73;
-  --regla:#26262A; --regla-2:#1A1A1D; --verde:#2E6BFF; --verde-sube:#5A8CFF; --verde-piso:#0B1633; --sobre-acento:#FFFFFF;
+  --regla:#26262A; --regla-2:#1A1A1D; --verde:#1D45C4; --verde-sube:#3A62DA; --verde-piso:#0A1430; --sobre-acento:#FFFFFF; --acento-txt:#6A8CF0;
   --haber:#30D158; --haber-piso:#0E2415; --debe:#FF453A; --debe-piso:#2B0F0D; --oro:#FFD60A; --oro-piso:#2A2406; --azul:#0A84FF; --rosa:#FF6482;
 }
 :root[data-paleta="negro"][data-tema="claro"]{
   --papel:#FFFFFF; --hoja:#F4F4F6; --hoja-2:#ECECEF; --tinta:#0A0A0A; --tinta-2:#5E5E63; --tinta-3:#8E8E93;
-  --regla:#E3E3E7; --regla-2:#EEEEF1; --verde:#1F55E0; --verde-sube:#1846BD; --verde-piso:#E6EEFF; --sobre-acento:#FFFFFF;
+  --regla:#E3E3E7; --regla-2:#EEEEF1; --verde:#1A3FB0; --verde-sube:#153594; --verde-piso:#E6ECFF; --sobre-acento:#FFFFFF; --acento-txt:#1A3FB0;
   --haber:#1F9D46; --haber-piso:#E6F6EB; --debe:#D92D20; --debe-piso:#FDECEA; --oro:#B88A00; --oro-piso:#FFF6D6; --azul:#0A6CDB; --rosa:#D6336C;
 }
 :root{ --serif:var(--letra); --acento:var(--verde) }
@@ -3459,3 +3459,8 @@ body .esp-tabs{ padding-bottom:0 !important }
 body .rec-hora b{ font-size:22px !important; font-weight:750 !important }
 body .rec-hora span{ letter-spacing:0 !important; font-weight:600 !important }
 body .dato b{ font-size:18px !important; white-space:nowrap }
+
+/* El azul oscuro va de fondo; donde el azul es letra se usa uno más claro para que se lea */
+.mas, .ver-link, .mas-mini, .ag-link, .ag-mas, .w-mas, body .anadir-rapido, body .anadir-rapido .i, .hoy-cab small, .portada-hoy small, .siguiente small,
+.barra-inf button[aria-current="page"], .ag-dias i, .ag-dias button.hoy b, .rejilla-mas button[aria-current="page"], .enfoque-grande .n, .din-saldo .i, a{ color:var(--acento-txt, var(--verde)) !important }
+.ag-dias button.sel b, .ag-dias button.sel i, .ag-dias button.sel small{ color:var(--sobre-acento, #fff) !important }
