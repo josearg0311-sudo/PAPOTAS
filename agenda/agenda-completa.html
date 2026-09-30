@@ -5590,7 +5590,7 @@ VISTAS.espacio = function(id){
   var sub = subs.find(function(x){ return x.k === tab; }) || subs[0];
   return '<button type="button" class="volver-panel" data-acc="esp-tab" data-esp="' + id + '" data-v="inicio">' + ico('i-izq') + E.em + ' ' + E.nom + '</button>' +
     '<header class="sub-cab" style="--ec:' + E.c + '"><h2>' + sub.t + '</h2><p>' + sub.d + '</p></header>' +
-    '<div class="rejilla dos esp-sub esp-' + tab + '">' + sub.html() + '</div>' + relacionados(id, sub.k) + navSub(id, subs, sub.k);
+    '<div class="rejilla dos esp-sub sub-' + tab + '">' + sub.html() + '</div>' + relacionados(id, sub.k) + navSub(id, subs, sub.k);
 };
 function tarjetaProyEsp(id){
   var E = espInfo(id), hoy = hoyISO(), pa = proyectosActivos(id);
@@ -10024,9 +10024,15 @@ function resultados(texto){
   var out = [];
   /* Primero lo que puedes HACER y a DÓNDE IR con esas palabras */
   var palabras = q.split(/\s+/).filter(Boolean);
-  function calza(x){ var h = sinTildes((x.t + ' ' + x.d + ' ' + x.p).toLowerCase()); return palabras.every(function(w){ return h.indexOf(w.toLowerCase()) >= 0; }); }
-  var accs = ACCIONES.filter(calza).slice(0, 3), dests = DESTINOS.filter(calza).slice(0, 3);
-  if(accs.length || dests.length) out.push('<div class="busq-guia">' + accs.map(filaAccion).join('') + dests.map(filaDestino).join('') + '</div>');
+  /* «préstamos» también encuentra «préstamo»: se mira la palabra sin su plural */
+  function calza(x){ var h = sinTildes((x.t + ' ' + x.d + ' ' + x.p).toLowerCase()); return palabras.every(function(w){ w = w.toLowerCase(); return h.indexOf(w) >= 0 || (w.length > 4 && h.indexOf(w.replace(/(es|s)$/, '')) >= 0); }); }
+  var CLAVES_SUB = { cuerpo:'peso imc kilos', bolso:'mochila chimpunes', cobros:'cobrar deben facturas', prestamos:'deuda debe presto', fechas:'cumpleanos aniversario regalo', menu:'comida almuerzo cena platos', compras:'mercado super lista', entrenos:'entrenar gym correr', partidos:'pichanga futbol cancha', actividad:'constancia racha', trabajo:'tablero pendientes', reuniones:'reunion junta', examenes:'examen parcial final repaso', cursos:'notas promedio faltas horario clases' };
+  /* Las subpantallas de los espacios también son lugares a los que ir */
+  var subsE = [];
+  Object.keys(PESTANAS).forEach(function(e){ var E = espInfo(e); PESTANAS[e].forEach(function(x){ if(x[0] !== 'inicio') subsE.push({ t:x[1], d:E.em + ' ' + E.nom, p:e + ' ' + x[1] + ' ' + x[0] + ' ' + (CLAVES_SUB[x[0]] || ''), e:e, k:x[0] }); }); });
+  var accs = ACCIONES.filter(calza).slice(0, 3), dests = DESTINOS.filter(calza).slice(0, 3), subsC = subsE.filter(calza).slice(0, 3);
+  if(accs.length || dests.length || subsC.length) out.push('<div class="busq-guia">' + accs.map(filaAccion).join('') + dests.map(filaDestino).join('') +
+    subsC.map(function(x){ return '<button type="button" class="acc-fila destino" data-acc="esp-tab" data-esp="' + x.e + '" data-v="' + x.k + '"><span class="acc-ico"><span style="font-size:18px">' + espInfo(x.e).em + '</span></span><span class="acc-txt"><b>Ir a ' + x.t + '</b><small>' + x.d + '</small></span>' + ico('i-der') + '</button>'; }).join('') + '</div>');
   function add(icono, t, sub, acc, id, extra){ out.push('<button class="resultado" data-acc="' + acc + '" data-id="' + id + '"' + (extra || '') + '>' + ico(icono) + '<div style="min-width:0"><b>' + marca(t) + '</b><small>' + esc(sub) + '</small></div></button>'); }
   vivos('tareas').forEach(function(t){ if(sinTildes(t.t + ' ' + (t.notas || '') + ' ' + (t.area || '')).indexOf(q) >= 0) add('i-tareas', t.t, 'Tarea' + (t.hecha ? ' hecha' : '') + (t.fecha ? ' · ' + relativo(t.fecha) : ''), 'tarea-ed', t.id); });
   vivos('eventos').forEach(function(e){ if(sinTildes(e.t + ' ' + (e.lugar || '') + ' ' + (e.notas || '')).indexOf(q) >= 0) add('i-cal', e.t, 'Evento · ' + fechaCorta(e.fecha), 'evento-ed', e.id); });
