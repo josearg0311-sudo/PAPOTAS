@@ -3624,6 +3624,21 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .eh-pie{ font-size:11.5px; color:var(--tinta-3); font-weight:600 }
 @media (min-width:900px){ .eh-rejilla{ grid-template-columns:repeat(4, minmax(0, 1fr)) } }
 .w-dinero-hoy .din-bloques{ margin-bottom:0 !important }
+
+/* ==========================================================================
+   ESPACIOS COMO PANEL: subpantallas con lo más relevante
+   ========================================================================== */
+.esp-mosaicos{ margin-top:6px }
+.sub-cab{ padding:4px 0 16px; border-bottom:1px solid var(--regla); margin-bottom:20px }
+.sub-cab h2{ margin:0; font-size:30px; font-weight:800; letter-spacing:-.02em; line-height:1.1 }
+.sub-cab h2::before{ content:""; display:inline-block; width:10px; height:10px; border-radius:50%; background:var(--ec); margin-right:10px; vertical-align:middle; position:relative; top:-3px }
+.sub-cab p{ margin:4px 0 0; color:var(--tinta-2); font-size:14px }
+.mo-dato strong{ white-space:nowrap }
+.mo-dato.largo{ flex-direction:column; align-items:flex-start; gap:0 }
+.mo-dato.largo strong{ font-size:20px }
+.mosaico.ancho .mo-dato.largo{ flex-direction:row; align-items:baseline; gap:6px }
+body .dato{ min-width:0 }
+body .dato b{ font-size:clamp(14px, 4.3vw, 18px) !important; overflow:hidden; text-overflow:ellipsis; display:block }
 </style>
 </head>
 <body>
@@ -4585,7 +4600,7 @@ function pintarVista(){
   $('contenido').classList.remove('oculto');
 
   var html = v.indexOf('panel-') === 0 ? VISTAS[v]()
-           : sec && sec.esp ? volverPanel(v) + VISTAS.espacio(sec.esp)
+           : sec && sec.esp ? VISTAS.espacio(sec.esp)
            : volverPanel(v) + cabSeccion(v) + VISTAS[v]();
   var nueva = ui.antes !== v + (ui.lista || '');
   var dirCls = nueva ? (ui.dir < 0 ? 'vista entra-izq' : 'vista entra-der') : '';
@@ -5542,13 +5557,18 @@ VISTAS.espacio = function(id){
     '<p class="pe-lema">' + (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p>' +
     '<div class="pe-datos datos">' + datosHeroe(id) + '</div></header>';
 
-  var tab = tabEsp(id);
-  html += pestanasEsp(id);
+  var tab = tabEsp(id), subs = subpantallas(id);
   if(tab === 'inicio'){
-    var ph = { personal:'Añade algo de tu vida… ej. «llamar a mamá el domingo»', estudios:'Ej. «entregar monografía el viernes !!»', oficina:'Ej. «reunión con el cliente mañana a las 10»', deporte:'Ej. «pichanga el sábado a las 5»' }[id];
-    html += botonAnadir('tarea', 'Añadir en ' + E.nom + '…');
+    /* El espacio como panel: cada mosaico es una subpantalla con su dato */
+    return volverPanel('esp-' + id) + html + botonAnadir('tarea', 'Añadir en ' + E.nom + '…') +
+      '<div class="mosaicos esp-mosaicos">' + subs.map(function(x, i){
+        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0 });
+      }).join('') + '</div>';
   }
-  return html + '<div class="rejilla dos esp-' + tab + '">' + MODULOS[id](tab) + '</div>';
+  var sub = subs.find(function(x){ return x.k === tab; }) || subs[0];
+  return '<button type="button" class="volver-panel" data-acc="esp-tab" data-esp="' + id + '" data-v="inicio">' + ico('i-izq') + E.em + ' ' + E.nom + '</button>' +
+    '<header class="sub-cab" style="--ec:' + E.c + '"><h2>' + sub.t + '</h2><p>' + sub.d + '</p></header>' +
+    '<div class="rejilla dos esp-sub esp-' + tab + '">' + sub.html() + '</div>';
 };
 function tarjetaProyEsp(id){
   var E = espInfo(id), hoy = hoyISO(), pa = proyectosActivos(id);
@@ -5625,6 +5645,7 @@ var MODULOS = {
     T.horas = '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Horas de estudio esta semana', 'var(--esp-estudios)', 'Estudiar ahora', 'data-acc="estudiar"') +
         '<div class="tarjeta-cuerpo">' + barras(porDia, eti, 'var(--esp-estudios)', 120) +
         '<p style="margin:10px 0 0;font-size:12.5px;color:var(--tinta-3)">Se cuentan las sesiones del temporizador de Enfoque marcadas como Estudios.</p></div></section>';
+    if(tab === '_T') return T;
     if(tab === 'cursos') return horarioHTML() + T.cursos;
     return tarjetaSemanaEsp('estudios') + T.examenes;
   },
@@ -5650,6 +5671,7 @@ var MODULOS = {
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin reuniones esta semana.</div>') + '</section>';
     var pagosO = (pp.length ? '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos de la oficina', 'var(--debe)', 'Pagos', 'data-ir="pagos"') +
         '<div class="lista-filas">' + pp.slice(0, 4).map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>' : '');
+    if(tab === '_T') return { cobros:cobros, reun:reun, pagosO:pagosO };
     if(tab === 'clientes') return tarjetaClientes() + cobros;
     if(tab === 'trabajo') return tarjetaTablero() + reun;
     return bloquesDinero('oficina') + tarjetaSemanaEsp('oficina') + cobros + reun + tarjetaDineroEsp('oficina') + pagosO;
@@ -5691,6 +5713,7 @@ var MODULOS = {
         (pa.length ? '<div class="lista-filas">' + pa.slice(0, 4).map(function(x){
           return '<div class="fila"><span class="cuenta-atras"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + x.e.id + '"><div class="titulo">⚽ ' + esc(x.e.t) + '</div><div class="meta"><span>' + cap(relativo(x.dia)) + (x.e.todo ? '' : ' · ' + x.e.ini) + '</span>' + (x.e.lugar ? '<span>' + ico('i-lugar') + esc(x.e.lugar) + '</span>' : '') + '</div></div></div>';
         }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin partidos programados. ¿Armamos una pichanga?</div>') + '</section>';
+    if(tab === '_T'){ T.pa = pa; return T; }
     if(tab === 'entreno') return tarjetaRutinas() + tarjetaCuerpo();
     if(tab === 'cancha') return T.partidos + tarjetaBolso(pa);
     var hr = rutinasHoy();
@@ -6279,14 +6302,77 @@ function tarjetaFutbol(){
    cancha y el cardio en Deporte.
    ========================================================================== */
 var PESTANAS = {
-  personal:[['inicio','Resumen','🏠'],['casa','Casa','🧹'],['papeles','Papeles','📄']],
-  estudios:[['inicio','Resumen','🎓'],['cursos','Cursos','📚']],
-  oficina:[['inicio','Resumen','💼'],['clientes','Clientes','🤝'],['trabajo','Trabajo','📋']],
-  deporte:[['inicio','Resumen','⚽'],['entreno','Entreno','🏋️'],['cancha','Cancha','🥅']]
+  personal:[['inicio','Personal','🏠'],['semana','Tu semana','🗓️'],['dinero','Tu dinero','💰'],['compras','Compras','🛒'],['menu','Menú','🍽️'],['fechas','Fechas importantes','🎂'],['prestamos','Préstamos','🤝'],['pagos','Pagos de la casa','🧾']],
+  estudios:[['inicio','Estudios','🎓'],['semana','Tu semana','🗓️'],['cursos','Cursos y horario','📚'],['examenes','Exámenes','📝'],['dinero','Gastos de estudio','💰']],
+  oficina:[['inicio','Oficina','💼'],['semana','Tu semana','🗓️'],['cobros','Por cobrar','💵'],['clientes','Clientes','🤝'],['trabajo','Tablero','📋'],['reuniones','Reuniones','🗣️'],['dinero','Cuentas','💰'],['pagos','Pagos','🧾']],
+  deporte:[['inicio','Deporte','⚽'],['semana','Tu semana','🗓️'],['entrenos','Entrenamientos','🏃'],['rutinas','Rutinas y récords','🏋️'],['cuerpo','Tu cuerpo','⚖️'],['partidos','Partidos','🥅'],['bolso','Tu bolso','🎒'],['actividad','Tus 12 semanas','📈'],['dinero','Gastos de deporte','💰']]
 };
+/* Nombres de antes que siguen llevando a su sitio */
+var ALIAS_TAB = { casa:'compras', papeles:'fechas', entreno:'rutinas', cancha:'partidos' };
 function tabEsp(id){
   var t = (ui.espTab || {})[id];
+  t = ALIAS_TAB[t] || t;
   return PESTANAS[id].some(function(p){ return p[0] === t; }) ? t : 'inicio';
+}
+function nomSub(id, k){ var x = PESTANAS[id].find(function(p){ return p[0] === k; }); return x ? x[1] : ''; }
+
+/* Cada subpantalla: para qué sirve, el dato que sale de ella y lo que muestra */
+function subpantallas(id){
+  var hoy = hoyISO(), ym = hoy.slice(0, 7), E = espInfo(id);
+  var ag = agendaEsp(id, 7), dn = dineroEsp(id), tmE = totalesMes(dn.lista, ym);
+  var semana = { k:'semana', i:'i-cal', c:E.c, t:'Tu semana', d:'Lo que viene y lo pendiente de ' + E.nom.toLowerCase(), n:ag.length, nl:ag.length === 1 ? 'cosa en 7 días' : 'cosas en 7 días', html:function(){ return tarjetaSemanaEsp(id) + tarjetaProyEsp(id); } };
+  function pagosDe(esp){ return pagosProximos(20).filter(function(x){ return espDe(x.p) === esp; }); }
+  function tarjPagos(esp, pp){ return pp.length ? '<section class="tarjeta">' + cabTarjeta('i-recibo', 'Pagos que vienen', 'var(--debe)', 'Todos', 'data-ir="pagos"') + '<div class="lista-filas">' + pp.map(function(x){ return filaPago(x.p, x.ym); }).join('') + '</div></section>' : '<section class="tarjeta">' + vacio('🧾', 'Sin pagos por ahora', 'Agrega luz, internet o alquiler en Pagos fijos y aparecerán aquí.') + '</section>'; }
+  if(id === 'personal'){
+    var l = listaCompras(), falta = l ? (l.items || []).filter(function(i){ return !i.ok; }).length : 0;
+    var cu = proximosCumples(60)[0];
+    var deb = vivos('deudas').filter(function(x){ return !x.saldada; }), teDeben = deb.filter(function(x){ return x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0), debes = deb.filter(function(x){ return x.tipo !== 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
+    var ppP = pagosDe('personal');
+    return [semana,
+      { k:'dinero', i:'i-grafica', c:'#30D158', t:'Tu dinero', d:'Gasto e ingreso del mes y tus movimientos', n:dinero(tmE.sal), nl:'gastado', html:function(){ return bloquesDinero('personal') + tarjetaDineroEsp('personal'); } },
+      { k:'compras', i:'i-listas', c:'#5AA9FF', t:'Compras', d:'Tu lista del mercado y lo de siempre', n:falta, nl:'por comprar', html:function(){ return tarjetaCompras() || tarjetaSinCompras(); } },
+      { k:'menu', em:'🍽️', c:'#FF9F0A', t:'Menú', d:'Almuerzo y cena de la semana', html:function(){ return tarjetaMenu(); } },
+      { k:'fechas', i:'i-regalo', c:'#FF6482', t:'Fechas importantes', d:'Cumpleaños y aniversarios, con regalo', n:cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', nl:cu ? (cu.en === 0 ? 'cumpleaños' : 'días al cumple') : 'sin cumples cerca', alerta:!!cu && cu.en <= 3, html:function(){ return tarjetaFechas(); } },
+      { k:'prestamos', i:'i-cuentas', c:'#FFD60A', t:'Préstamos', d:'Quién te debe y a quién le debes', n:dinero(teDeben), nl:debes ? 'te deben · debes ' + dinero(debes) : 'te deben', html:function(){ return tarjetaPrestamos(); } },
+      { k:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos de la casa', d:'Luz, agua, internet, alquiler', n:ppP.length, nl:'por pagar', alerta:ppP.some(function(x){ return !x.p.pagadoHoy; }) && pagosProximos(0).some(function(x){ return espDe(x.p) === 'personal'; }), html:function(){ return tarjPagos('personal', ppP); } }];
+  }
+  if(id === 'estudios'){
+    var pg = promedioGeneral(), ex = eventosTipo('examen', 90)[0], nc = vivos('cursos').length;
+    var rep = vivos('tareas').filter(function(t){ return t.plan && !t.hecha && t.fecha <= hoy; }).length;
+    var TE = MODULOS.estudios('_T');
+    return [semana,
+      { k:'cursos', i:'i-birrete', c:'#2DD4BF', t:'Cursos y horario', d:'Tus clases, notas, lo que necesitas y faltas', n:pg != null ? pg.toFixed(1) : nc, nl:pg != null ? 'de promedio' : (nc === 1 ? 'curso' : 'cursos'), html:function(){ return horarioHTML() + TE.cursos; } },
+      { k:'examenes', i:'i-diana', c:'#FF453A', t:'Exámenes', d:'Cuenta atrás y plan de repaso', n:ex ? (ex.en === 0 ? '¡Hoy!' : ex.en) : '—', nl:ex ? (ex.en === 0 ? 'hay examen' : 'días al próximo') + (rep ? ' · ' + rep + ' repasos hoy' : '') : 'sin exámenes', alerta:!!ex && ex.en <= 3, html:function(){ return TE.examenes; } },
+      { k:'dinero', i:'i-grafica', c:'#30D158', t:'Gastos de estudio', d:'Lo que gastas en libros, pasajes, cursos', n:dinero(tmE.sal), nl:'este mes', html:function(){ return tarjetaDineroEsp('estudios') || '<section class="tarjeta">' + vacio('💰', 'Sin gastos de estudio', 'Anota un gasto con la categoría «Estudios» y saldrá aquí.') + '</section>'; } }];
+  }
+  if(id === 'oficina'){
+    var TO = MODULOS.oficina('_T');
+    var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }), totC = cob.reduce(function(a, x){ return a + (+x.monto || 0); }, 0), venc = cob.filter(function(x){ return x.vence && x.vence < hoy; }).length;
+    var enCurso = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha && t.estado === 'curso'; }).length, porHacer = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha; }).length;
+    var reu = eventosTipo('reunion', 7).length, ppO = pagosDe('oficina');
+    return [semana,
+      { k:'cobros', i:'i-subir', c:'#30D158', t:'Por cobrar', d:'Lo que te deben tus clientes y cuándo vence', n:dinero(totC), nl:venc ? venc + ' vencidos' : cob.length + ' pendientes', alerta:!!venc, html:function(){ return TO.cobros; } },
+      { k:'clientes', i:'i-maletin', c:'#94A3B8', t:'Clientes', d:'Contacto, horas, lo que deben y pagaron', n:clientesTodos().length, nl:'clientes', html:function(){ return tarjetaClientes(); } },
+      { k:'trabajo', i:'i-tareas', c:'#5AA9FF', t:'Tablero', d:'Por hacer, en curso y hecho', n:porHacer, nl:enCurso ? enCurso + ' en curso' : 'por hacer', html:function(){ return tarjetaTablero(); } },
+      { k:'reuniones', em:'🗣️', c:'#BF5AF2', t:'Reuniones', d:'Las de esta semana', n:reu, nl:'en 7 días', html:function(){ return TO.reun; } },
+      { k:'dinero', i:'i-grafica', c:'#FFD60A', t:'Cuentas', d:'Lo facturado, lo gastado y tus movimientos', n:dinero(tmE.ent), nl:'facturado', html:function(){ return bloquesDinero('oficina') + tarjetaDineroEsp('oficina'); } },
+      { k:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos', d:'Pagos fijos de la oficina', n:ppO.length, nl:'por pagar', html:function(){ return tarjPagos('oficina', ppO); } }];
+  }
+  var TD = MODULOS.deporte('_T');
+  var ses = vivos('entrenos').filter(function(e){ return e.fecha > sumarDias(hoy, -7) && e.fecha <= hoy; }).length;
+  var hr = rutinasHoy(), pa = eventosTipo('partido', 60)[0];
+  var pesos = vivos('medidas').filter(function(x){ return +x.peso; }).sort(function(a, b){ return a.id.localeCompare(b.id); }), ultP = pesos[pesos.length - 1];
+  var bl = listaBolso(), bIt = bl ? bl.items || [] : [], bOk = bIt.filter(function(i){ return i.ok; }).length;
+  return [semana,
+    { k:'entrenos', em:'🏃', c:'#4ADE80', t:'Entrenamientos', d:'Anota con un toque y mira tu semana', n:ses, nl:'en 7 días' + (hr.length ? ' · hoy toca ' + hr[0].nombre : ''), html:function(){
+      return TD.entrenos + (hr.length ? '<section class="tarjeta">' + cabTarjeta('i-meta', 'Hoy toca', 'var(--esp-deporte)') + '<div class="hoy-toca">' + hr.map(function(r){
+        return '<div class="hoy-toca-item"><span>🏋️ <b>' + esc(r.nombre) + '</b> · ' + (r.ejercicios || []).length + ' ejercicios</span><button class="btn chico primario" data-acc="rutina-empezar" data-id="' + r.id + '">' + ico('i-play') + 'Anotar</button></div>'; }).join('') + '</div></section>' : ''); } },
+    { k:'rutinas', em:'🏋️', c:'#FF9F0A', t:'Rutinas y récords', d:'Tus ejercicios y tus mejores marcas', n:vivos('rutinas').length, nl:hr.length ? 'hoy toca ' + hr[0].nombre : 'rutinas', html:function(){ return tarjetaRutinas(); } },
+    { k:'cuerpo', em:'⚖️', c:'#5AA9FF', t:'Tu cuerpo', d:'Peso, gráfica e IMC', n:ultP ? formNum(+ultP.peso) : '—', nl:ultP ? 'kg' : 'anota tu peso', html:function(){ return tarjetaCuerpo(); } },
+    { k:'partidos', i:'i-balon', c:'#30D158', t:'Partidos', d:'Los próximos y dónde se juega', n:pa ? (pa.en === 0 ? '¡Hoy!' : pa.en) : '—', nl:pa ? (pa.en === 0 ? 'hay partido' : 'días al partido') : 'sin partidos', html:function(){ return TD.partidos; } },
+    { k:'bolso', em:'🎒', c:'#FFD60A', t:'Tu bolso', d:'Que no se te quede nada para el partido', n:bl ? bOk + '/' + bIt.length : '—', nl:bl ? 'listos' : 'ármalo', html:function(){ return tarjetaBolso(eventosTipo('partido', 30)); } },
+    { k:'actividad', em:'📈', c:'#BF5AF2', t:'Tus 12 semanas', d:'Tu constancia de un vistazo', n:semanasSeguidas(), nl:'semanas seguidas', html:function(){ return tarjetaMapaActividad(); } },
+    { k:'dinero', i:'i-grafica', c:'#94A3B8', t:'Gastos de deporte', d:'Cancha, gym, implementos', n:dinero(tmE.sal), nl:'este mes', html:function(){ return tarjetaDineroEsp('deporte') || '<section class="tarjeta">' + vacio('💰', 'Sin gastos de deporte', 'Anota un gasto con la categoría «Deporte» y saldrá aquí.') + '</section>'; } }];
 }
 function pestanasEsp(id){
   var act = tabEsp(id);
@@ -6304,7 +6390,7 @@ function datosHeroe(id){
     var cu = proximosCumples(60)[0], teDeben = vivos('deudas').filter(function(x){ return !x.saldada && x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     return d('i-listas', falta, 'por comprar', 'data-acc="esp-tab" data-esp="personal" data-v="casa"') +
       d('i-regalo', cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', cu ? (cu.en === 0 ? 'hay cumpleaños' : cu.en === 1 ? 'día al próximo cumple' : 'días al próximo cumple') : 'sin cumpleaños cerca', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"') +
-      d('i-cuentas', dinero(teDeben), 'te deben', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"');
+      d('i-cuentas', MONEDA + ' ' + formNum(Math.round(teDeben)), 'te deben', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"');
   }
   if(id === 'estudios'){
     var pg = promedioGeneral(), ex = eventosTipo('examen', 90)[0];
@@ -6317,7 +6403,7 @@ function datosHeroe(id){
     var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     var enCurso = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha && t.estado === 'curso'; }).length;
     var reu = eventosTipo('reunion', 7).length;
-    return d('i-subir', dinero(cob), 'por cobrar', 'data-acc="esp-tab" data-esp="oficina" data-v="clientes"') +
+    return d('i-subir', MONEDA + ' ' + formNum(Math.round(cob)), 'por cobrar', 'data-acc="esp-tab" data-esp="oficina" data-v="clientes"') +
       d('i-tareas', enCurso, 'en curso', 'data-acc="esp-tab" data-esp="oficina" data-v="trabajo"') +
       d('i-maletin', reu, reu === 1 ? 'reunión en 7 días' : 'reuniones en 7 días', 'data-acc="esp-tab" data-esp="oficina" data-v="trabajo"');
   }
@@ -8381,7 +8467,7 @@ function mosaico(o){
   return '<button type="button" class="mosaico' + (o.ancho ? ' ancho' : '') + (o.alerta ? ' alerta' : '') + '" ' + (o.acc || 'data-ir="' + o.ir + '"') + ' style="--mc:' + o.c + '">' +
     '<span class="mo-ico">' + (o.em ? '<span class="mo-em">' + o.em + '</span>' : ico(o.i)) + '</span>' +
     '<span class="mo-txt"><b>' + o.t + '</b><small>' + o.d + '</small></span>' +
-    (o.n != null ? '<span class="mo-dato"><strong>' + o.n + '</strong>' + (o.nl ? '<em>' + o.nl + '</em>' : '') + '</span>' : '') +
+    (o.n != null ? '<span class="mo-dato' + (String(o.n).length > 6 ? ' largo' : '') + '"><strong>' + o.n + '</strong>' + (o.nl ? '<em>' + o.nl + '</em>' : '') + '</span>' : '') +
     '<span class="mo-flecha">' + ico('i-der') + '</span></button>';
 }
 function cabPanel(t, sub, acciones){
@@ -10909,8 +10995,7 @@ document.addEventListener('click', function(ev){
     case 'hora-nueva': editarHora(null); break;
     case 'esp-tab':
       ui.espTab = ui.espTab || {}; ui.espTab[b.dataset.esp] = b.dataset.v;
-      if(ui.vista !== 'esp-' + b.dataset.esp) ir('esp-' + b.dataset.esp); else pintar();
-      var pt = document.querySelector('.esp-tabs'); if(pt && pt.getBoundingClientRect().top < 0) pt.scrollIntoView({ block:'start' });
+      if(ui.vista !== 'esp-' + b.dataset.esp) ir('esp-' + b.dataset.esp); else { pintar(); window.scrollTo(0, 0); }
       break;
     case 'casa-nueva': editarCasa(null); break;
     case 'casa-ed': editarCasa(id); break;
