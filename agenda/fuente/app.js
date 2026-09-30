@@ -947,6 +947,59 @@ function captura(tipos, placeholder, esp){
     '<div class="pista" id="pista"></div>';
 }
 
+/* ==========================================================================
+   GUÍA: qué puedes hacer y a dónde ir, dicho con palabras
+   Un solo catálogo lo usan el botón + («¿Qué quieres hacer?»), el buscador
+   (escribes «gasto» y te ofrece anotarlo o ir a Movimientos) y Hoy.
+   ========================================================================== */
+var ACCIONES = [
+  { g:'Tu día', t:'Crear una tarea', d:'Algo que tienes que hacer, con fecha si quieres', i:'i-tareas', a:'data-acc="nuevo" data-tipo="tarea"', p:'tarea hacer pendiente to do' },
+  { g:'Tu día', t:'Agendar un evento', d:'Cita, reunión, examen o partido con día y hora', i:'i-cal', a:'data-acc="nuevo" data-tipo="evento"', p:'evento cita reunion examen partido agendar calendario' },
+  { g:'Tu día', t:'Poner un recordatorio', d:'La agenda te avisa a la hora que digas', i:'i-campana', a:'data-acc="nuevo" data-tipo="rec"', p:'recordatorio aviso alarma avisar recordar' },
+  { g:'Tu día', t:'Empezar un proyecto', d:'Algo grande que vas armando por tareas', i:'i-carpeta', a:'data-acc="nuevo" data-tipo="proyecto"', p:'proyecto plan' },
+  { g:'Dinero', t:'Anotar un gasto', d:'Lo que acabas de gastar (tu libro personal)', i:'i-bajar', a:'data-acc="din-anotar" data-libro="personal" data-t="Gasto"', p:'gasto gaste pagar compra plata dinero salio' },
+  { g:'Dinero', t:'Anotar un ingreso', d:'Sueldo, venta o lo que te pagaron', i:'i-subir', a:'data-acc="din-anotar" data-libro="personal" data-t="Ingreso"', p:'ingreso sueldo cobre entro plata dinero venta' },
+  { g:'Dinero', t:'Movimiento de la oficina', d:'Un gasto o ingreso del libro de la oficina', i:'i-maletin', a:'data-acc="din-anotar" data-libro="oficina" data-t="Gasto"', p:'oficina empresa factura trabajo' },
+  { g:'Dinero', t:'Agregar un pago fijo', d:'Luz, internet, alquiler… y te avisa antes de que venza', i:'i-recibo', a:'data-acc="nuevo" data-tipo="pago"', p:'pago fijo luz agua internet alquiler recibo servicio mensual' },
+  { g:'Dinero', t:'Anotar un préstamo', d:'Alguien te debe o tú le debes a alguien', i:'i-cuentas', a:'data-acc="nuevo" data-tipo="deuda"', p:'prestamo deuda debe presté' },
+  { g:'Dinero', t:'Anotar un cobro de la oficina', d:'Lo que te debe un cliente y cuándo vence', i:'i-subir', a:'data-acc="nuevo" data-tipo="cobro"', p:'cobro cliente factura por cobrar' },
+  { g:'Escribir', t:'Escribir una nota', d:'Ideas, datos, apuntes; con casillas si quieres', i:'i-notas', a:'data-acc="nuevo" data-tipo="nota"', p:'nota apunte idea escribir' },
+  { g:'Escribir', t:'Hacer una lista', d:'Compras, bolso, cosas para marcar', i:'i-listas', a:'data-acc="nuevo" data-tipo="lista"', p:'lista compras super mercado marcar' },
+  { g:'Escribir', t:'Escribir en el diario', d:'Cuenta tu día en un par de líneas', i:'i-diario', a:'data-acc="nuevo" data-tipo="diario"', p:'diario dia contar escribir' },
+  { g:'Constancia', t:'Crear un hábito', d:'Algo que quieres hacer seguido y llevar la racha', i:'i-habitos', a:'data-acc="nuevo" data-tipo="habito"', p:'habito racha rutina diario' },
+  { g:'Constancia', t:'Ponerte una meta', d:'Un número al que quieres llegar: ahorrar, leer…', i:'i-meta', a:'data-acc="nuevo" data-tipo="meta"', p:'meta objetivo ahorrar leer' },
+  { g:'Tus espacios', t:'Agregar un curso', d:'Con su horario, notas y faltas (Estudios)', i:'i-birrete', a:'data-acc="nuevo" data-tipo="curso"', p:'curso clase universidad estudios horario nota' },
+  { g:'Tus espacios', t:'Anotar un entrenamiento', d:'Fútbol, gym, correr… (Deporte)', i:'i-balon', a:'data-acc="nuevo" data-tipo="entreno"', p:'entreno entrenamiento gym futbol correr deporte' },
+  { g:'Tus espacios', t:'Crear una rutina de gym', d:'Tus ejercicios y récords (Deporte)', i:'i-meta', a:'data-acc="nuevo" data-tipo="rutina"', p:'rutina gym ejercicios pesas' }
+];
+var DESTINOS = [
+  { t:'Mi día', d:'Agenda · todo lo de hoy junto', i:'i-hoy', ir:'agenda', p:'dia hoy agenda pendientes' },
+  { t:'Calendario', d:'Agenda · mes, semana o año', i:'i-cal', ir:'calendario', p:'calendario mes semana eventos' },
+  { t:'Tareas', d:'Agenda · lo que tienes que hacer', i:'i-tareas', ir:'tareas', p:'tareas pendientes atrasadas' },
+  { t:'Avisos', d:'Agenda · tus recordatorios', i:'i-campana', ir:'recordatorios', p:'avisos recordatorios alarmas' },
+  { t:'Proyectos', d:'Agenda · tus proyectos', i:'i-carpeta', ir:'proyectos', p:'proyectos' },
+  { t:'Resumen del dinero', d:'Dinero · cómo vas este mes', i:'i-grafica', ir:'dinero', p:'dinero plata resumen presupuesto gasto mes' },
+  { t:'Movimientos', d:'Dinero · cada gasto e ingreso', i:'i-cuentas', ir:'movimientos', p:'movimientos gastos ingresos libro cuentas' },
+  { t:'Pagos fijos', d:'Dinero · luz, internet, alquiler…', i:'i-recibo', ir:'pagos', p:'pagos fijos recibos servicios' },
+  { t:'Notas', d:'Notas · tus apuntes', i:'i-notas', ir:'notas', p:'notas apuntes' },
+  { t:'Listas', d:'Notas · compras y cosas por marcar', i:'i-listas', ir:'listas', p:'listas compras' },
+  { t:'Hábitos', d:'Más · rachas de cada día', i:'i-habitos', ir:'habitos', p:'habitos rachas' },
+  { t:'Metas', d:'Más · cuánto te falta', i:'i-meta', ir:'metas', p:'metas objetivos' },
+  { t:'Diario', d:'Más · lo que escribiste', i:'i-diario', ir:'diario', p:'diario' },
+  { t:'Personal', d:'Espacio · casa, compras, cumpleaños, préstamos', i:'i-casa', ir:'esp-personal', p:'personal casa compras cumpleaños prestamos' },
+  { t:'Estudios', d:'Espacio · cursos, horario, exámenes', i:'i-birrete', ir:'esp-estudios', p:'estudios cursos universidad examenes horario' },
+  { t:'Oficina', d:'Espacio · clientes, cobros, reuniones', i:'i-maletin', ir:'esp-oficina', p:'oficina trabajo clientes cobros reuniones' },
+  { t:'Deporte', d:'Espacio · entrenos, rutinas, partidos', i:'i-balon', ir:'esp-deporte', p:'deporte futbol gym partidos entrenos cancha' },
+  { t:'Ajustes', d:'Nombre, apariencia, avisos, nube, respaldo', i:'i-ajustes', ir:'ajustes', p:'ajustes configuracion nube respaldo tema color' },
+  { t:'Papelera', d:'Lo que borraste en los últimos 30 días', i:'i-basura', ir:'papelera', p:'papelera borrado recuperar' }
+];
+function filaAccion(x){
+  return '<button type="button" class="acc-fila" ' + x.a + '><span class="acc-ico">' + ico(x.i) + '</span><span class="acc-txt"><b>' + x.t + '</b><small>' + x.d + '</small></span>' + ico('i-der') + '</button>';
+}
+function filaDestino(x){
+  return '<button type="button" class="acc-fila destino" data-ir="' + x.ir + '"><span class="acc-ico">' + ico(x.i) + '</span><span class="acc-txt"><b>Ir a ' + x.t + '</b><small>' + x.d + '</small></span>' + ico('i-der') + '</button>';
+}
+
 /* Añadir desde un solo sitio: el botón + (o «Añadir…» de cada pantalla)
    abre esta hoja con la escritura rápida arriba y lo demás debajo */
 var TIPO_POR_VISTA = { tareas:'tarea', recordatorios:'rec', calendario:'evento', notas:'nota' };
@@ -954,14 +1007,15 @@ function hojaAnadir(tipo){
   var v = ui.vista, esp = v.indexOf('esp-') === 0 ? v.slice(4) : '';
   if(tipo) ui.capTipo = tipo; else if(TIPO_POR_VISTA[v]) ui.capTipo = TIPO_POR_VISTA[v];
   var ph = esp ? espInfo(esp).em + ' Añadir en ' + espInfo(esp).nom + '… ej. «mañana 5pm pichanga»' : 'Escribe y listo… ej. «pagar la luz el viernes 6pm»';
-  var MAS = [['lista','i-listas','Lista'],['habito','i-habitos','Hábito'],['meta','i-meta','Meta'],['proyecto','i-carpeta','Proyecto'],['pago','i-recibo','Pago fijo'],
+  var MAS_VIEJO = [['lista','i-listas','Lista'],['habito','i-habitos','Hábito'],['meta','i-meta','Meta'],['proyecto','i-carpeta','Proyecto'],['pago','i-recibo','Pago fijo'],
     ['personal','i-cuentas','Gasto'],['oficina','i-maletin','Mov. oficina'],['diario','i-diario','Diario'],['curso','i-birrete','Curso'],['entreno','i-balon','Entreno'],['rutina','i-meta','Rutina gym'],['deuda','i-cuentas','Préstamo'],['cobro','i-subir','Cobro']];
-  abrirFlotante(cabFlot('Añadir') + '<div class="hoja-anadir">' + captura(['tarea','rec','evento','nota'], ph, esp) +
-    '<h4 class="ha-mas">Más cosas</h4><div class="rejilla-mas ha-rejilla">' + MAS.map(function(o){
-      return '<button type="button" data-acc="nuevo" data-tipo="' + o[0] + '">' + ico(o[1]) + '<span>' + o[2] + '</span></button>';
-    }).join('') + '</div></div>');
+  var grupos = [];
+  ACCIONES.forEach(function(x){ var g = grupos.find(function(y){ return y.n === x.g; }); if(!g){ g = { n:x.g, xs:[] }; grupos.push(g); } g.xs.push(x); });
+  abrirFlotante(cabFlot('¿Qué quieres hacer?') + '<div class="hoja-anadir">' +
+    '<p class="ha-guia">Toca lo que quieres hacer, o escríbelo abajo y la agenda entiende la fecha y la hora.</p>' +
+    grupos.map(function(g){ return '<h4 class="ha-mas">' + g.n + '</h4><div class="acc-lista">' + g.xs.map(filaAccion).join('') + '</div>'; }).join('') +
+    '<h4 class="ha-mas">O escríbelo rápido</h4>' + captura(['tarea','rec','evento','nota'], ph, esp) + '</div>');
   actualizarPista();
-  setTimeout(function(){ var i = $('entradaCaptura'); if(i) i.focus(); }, 60);
 }
 /* ---------- Dictar por voz (si el navegador puede) ------------------------ */
 var VOZ = null;   // el dictado por voz se quitó de la agenda
@@ -1272,6 +1326,8 @@ VISTAS.hoy = function(){
   }
   html += '<div class="panel-hoy">';
 
+  /* Qué hacer ahora: la agenda te dice lo que toca y te lleva */
+  if(hoyVisible('ahora')) html += queHacerAhora(hoy, h);
   /* Lo siguiente */
   if(hoyVisible('ahora')) html += '<div class="w w-2 w-sig">' + tarjetaSiguiente() + '</div>';
 
@@ -1369,6 +1425,28 @@ VISTAS.hoy = function(){
   html += '<div class="pie-hoy"><button class="btn chico" data-acc="personalizar-hoy">' + ico('i-ajustes') + 'Elegir qué ver en Hoy</button></div>';
   return html;
 };
+/* Lo que toca ahora, en frases, cada una con su botón que te lleva */
+function queHacerAhora(hoy, h){
+  var k = contadores(), out = [];
+  function s(c, i, txt, btn, attrs){ out.push('<div class="qh-fila" style="--qc:' + c + '"><span class="qh-ico">' + ico(i) + '</span><span class="qh-txt">' + txt + '</span><button type="button" class="qh-btn" ' + attrs + '>' + btn + '</button></div>'); }
+  if(k.recordatorios) s('var(--debe)', 'i-campana', 'Tienes <b>' + k.recordatorios + (k.recordatorios === 1 ? ' aviso pasado' : ' avisos pasados') + '</b> sin marcar', 'Ver', 'data-ir="recordatorios"');
+  var tarde = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoy; }).length;
+  if(tarde) s('var(--debe)', 'i-tareas', '<b>' + tarde + (tarde === 1 ? ' tarea atrasada' : ' tareas atrasadas') + '</b>: decide qué hacer con cada una', 'Ordenar', 'data-acc="ordenar"');
+  var pv = pagosProximos(0);
+  if(pv.length) s('var(--oro)', 'i-recibo', 'Pago de <b>' + esc(pv[0].p.t) + '</b> ' + (pv.length > 1 ? 'y ' + (pv.length - 1) + ' más ' : '') + 'por pagar', 'Pagar', 'data-ir="pagos"');
+  var wd = new Date().getDay(), hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+  var falta = hab.filter(function(x){ return !(x.marcas && x.marcas[hoy]); }).length;
+  if(hab.length && falta && h >= 12) s('var(--azul)', 'i-habitos', 'Te ' + (falta === 1 ? 'falta <b>1 hábito</b>' : 'faltan <b>' + falta + ' hábitos</b>') + ' de hoy', 'Marcar', 'data-ir="habitos"');
+  var gastoHoy = libroDatos('personal').some(function(t){ return t.date === hoy; });
+  if(!gastoHoy && h >= 13) s('var(--haber)', 'i-bajar', '¿Gastaste algo hoy? <b>Anótalo</b> en 5 segundos', 'Anotar', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"');
+  var di = buscarId('diario', hoy);
+  if(h >= 20 && !(di && !di.del && di.texto)) s('var(--rosa)', 'i-diario', 'Cierra el día: <b>cuenta cómo te fue</b>', 'Escribir', 'data-ir="diario"');
+  var tHoy = vivos('tareas').filter(function(t){ return t.fecha === hoy; }).length;
+  if(!tHoy && h < 14) s('var(--verde)', 'i-plus', 'Aún no tienes tareas para hoy: <b>planea tu día</b>', 'Añadir', 'data-acc="nuevo" data-tipo="tarea"');
+  if(!out.length) return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b></header><p class="qh-ok">Todo al día. 👌 Si quieres añadir algo, toca el <b>+</b>.</p></section>';
+  return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b><span class="w-n">' + out.length + '</span></header>' + out.slice(0, 5).join('') + '</section>';
+}
+
 /* Mañana: lo agendado, las tareas y los pagos que tocan */
 function widgetManana(hoy){
   var m = sumarDias(hoy, 1), its = itemsDelDia(m);
@@ -5936,13 +6014,13 @@ function nuevoSegunVista(){
 
 /* ---------- Buscar en todo ------------------------------------------------- */
 function abrirBuscar(){
-  abrirFlotante(cabFlot('Buscar') + '<input class="entrada" id="q" type="search" placeholder="Tareas, eventos, notas, listas…" autocomplete="off">' +
+  abrirFlotante(cabFlot('Buscar') + '<input class="entrada" id="q" type="search" placeholder="Qué buscas o qué quieres hacer… ej. «gasto», «luz», «examen»" autocomplete="off">' +
     '<div id="resultados" style="margin-top:10px"></div>');
   var q = $('q');
   q.focus();
   var recientes = pref.busq || [];
   function inicio(){
-    return recientes.length ? '<div class="busq-rec"><small>Recientes</small>' + recientes.map(function(r){ return '<button type="button" class="ficha" data-acc="busq-reciente" data-v="' + esc(r) + '">' + ico('i-buscar') + esc(r) + '</button>'; }).join('') + '</div>' : '';
+    return '<p class="ha-guia" style="margin-top:12px">Escribe una palabra: te muestro qué puedes hacer, a dónde ir y lo que ya tienes guardado.</p>' + (recientes.length ? '<div class="busq-rec"><small>Recientes</small>' + recientes.map(function(r){ return '<button type="button" class="ficha" data-acc="busq-reciente" data-v="' + esc(r) + '">' + ico('i-buscar') + esc(r) + '</button>'; }).join('') + '</div>' : '');
   }
   $('resultados').innerHTML = inicio();
   var guardarReloj = null;
@@ -5965,6 +6043,11 @@ function resultados(texto){
     return esc(s.slice(0, i)) + '<mark>' + esc(s.slice(i, i + q.length)) + '</mark>' + esc(s.slice(i + q.length));
   }
   var out = [];
+  /* Primero lo que puedes HACER y a DÓNDE IR con esas palabras */
+  var palabras = q.split(/\s+/).filter(Boolean);
+  function calza(x){ var h = sinTildes((x.t + ' ' + x.d + ' ' + x.p).toLowerCase()); return palabras.every(function(w){ return h.indexOf(w.toLowerCase()) >= 0; }); }
+  var accs = ACCIONES.filter(calza).slice(0, 3), dests = DESTINOS.filter(calza).slice(0, 3);
+  if(accs.length || dests.length) out.push('<div class="busq-guia">' + accs.map(filaAccion).join('') + dests.map(filaDestino).join('') + '</div>');
   function add(icono, t, sub, acc, id, extra){ out.push('<button class="resultado" data-acc="' + acc + '" data-id="' + id + '"' + (extra || '') + '>' + ico(icono) + '<div style="min-width:0"><b>' + marca(t) + '</b><small>' + esc(sub) + '</small></div></button>'); }
   vivos('tareas').forEach(function(t){ if(sinTildes(t.t + ' ' + (t.notas || '') + ' ' + (t.area || '')).indexOf(q) >= 0) add('i-tareas', t.t, 'Tarea' + (t.hecha ? ' hecha' : '') + (t.fecha ? ' · ' + relativo(t.fecha) : ''), 'tarea-ed', t.id); });
   vivos('eventos').forEach(function(e){ if(sinTildes(e.t + ' ' + (e.lugar || '') + ' ' + (e.notas || '')).indexOf(q) >= 0) add('i-cal', e.t, 'Evento · ' + fechaCorta(e.fecha), 'evento-ed', e.id); });

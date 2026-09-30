@@ -3507,3 +3507,28 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .volver-panel .i{ width:18px; height:18px }
 @media (min-width:900px){ .mosaicos{ grid-template-columns:repeat(3, minmax(0, 1fr)) } .mosaico.ancho{ grid-column:span 3 } }
 .mo-dato{ padding-right:22px } .mo-dato em{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100% }
+
+/* ==========================================================================
+   GUÍA: «¿Qué quieres hacer?», «Qué hacer ahora» y buscador que lleva
+   ========================================================================== */
+.ha-guia{ margin:0 0 6px; font-size:13.5px; color:var(--tinta-2); line-height:1.45 }
+.hoja-anadir .ha-mas{ margin:18px 0 4px !important; font-size:13px !important; font-weight:700 !important; color:var(--tinta-3) !important; letter-spacing:0 !important }
+.acc-lista{ border-top:1px solid var(--regla) }
+.acc-fila{ display:flex; align-items:center; gap:14px; width:100%; padding:12px 0; border-bottom:1px solid var(--regla); text-align:left; color:var(--tinta) }
+.acc-ico{ width:38px; height:38px; border-radius:12px; display:grid; place-items:center; background:var(--hoja-2); color:var(--acento-txt, var(--verde)); flex:none }
+.acc-ico .i{ width:20px; height:20px }
+.acc-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px }
+.acc-txt b{ font-size:15.5px; font-weight:650 }
+.acc-txt small{ font-size:12.5px; color:var(--tinta-3); line-height:1.35 }
+.acc-fila > .i:last-child{ width:16px; height:16px; color:var(--tinta-3) }
+.acc-fila.destino .acc-ico{ background:color-mix(in srgb, var(--verde) 22%, transparent) }
+.busq-guia{ margin:4px 0 14px; border-top:1px solid var(--regla) }
+.qh{ margin-bottom:26px !important }
+.qh-fila{ display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--regla) }
+.qh-fila:last-child{ border-bottom:0 }
+.qh-ico{ width:34px; height:34px; border-radius:11px; display:grid; place-items:center; background:color-mix(in srgb, var(--qc) 20%, transparent); color:var(--qc); flex:none }
+.qh-ico .i{ width:18px; height:18px }
+.qh-txt{ flex:1; min-width:0; font-size:14.5px; line-height:1.35; color:var(--tinta-2) }
+.qh-txt b{ color:var(--tinta); font-weight:650 }
+.qh-btn{ flex:none; padding:8px 14px; border-radius:99px; background:var(--verde); color:var(--sobre-acento, #fff); font-size:13.5px; font-weight:700 }
+.qh-ok{ margin:0; padding:6px 0; color:var(--tinta-2) }
