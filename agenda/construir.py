@@ -29,6 +29,8 @@ cuerpo = leer('fuente/cuerpo.html')
 app    = leer('fuente/app.js')
 svg    = leer('icono.svg')
 cuentas = base64.b64encode(gzip.compress(leer('../libro-de-cuentas/index.html', 'rb'), 9, mtime=0)).decode()
+# Palabras del español más usadas (para el autocorrector del teclado), comprimidas igual
+palabras = base64.b64encode(gzip.compress(leer('fuente/palabras_es.txt', 'rb'), 9, mtime=0)).decode()
 
 # La tipografía va también suelta al lado, para la versión ligera
 for f in ('jakarta.woff2', 'barlow-600.woff2', 'barlow-700.woff2'):
@@ -168,6 +170,7 @@ def armar(completa):
     return (cabeza + '<style>\n' + logo_css + hoja + '</style>\n</head>\n<body>\n' + cuerpo +
             '\n<!-- El Libro de Cuentas entero, comprimido (gzip + base64); se abre en Dinero -->\n'
             '<script type="application/octet-stream" id="fuenteCuentas" data-gz="1">' + cuentas + '</script>\n'
+            '<script type="application/octet-stream" id="palabrasES" data-gz="1">' + palabras + '</script>\n'
             '<script>\n' + js_app + '</script>\n</body>\n</html>\n')
 
 for nombre, completa in (('index.html', False), ('agenda-completa.html', True)):

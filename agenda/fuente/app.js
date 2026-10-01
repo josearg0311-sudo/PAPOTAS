@@ -5266,7 +5266,9 @@ VISTAS.ajustes = function(){
     '<div class="ajuste"><div class="txt"><b>Qué ver en Hoy</b><small>Elige los bloques de la pantalla Hoy.</small></div>' +
       '<button class="btn chico" data-acc="personalizar-hoy">' + ico('i-hoy') + 'Elegir</button></div>' +
     '<div class="ajuste"><div class="txt"><b>Teclado de la agenda</b><small>' + (TECLADO.tactil ? 'Usa el teclado propio al escribir (con ñ, tildes, atajos, emojis y calculadora para montos). Apágalo para volver al del celular.' : 'Solo aparece en el celular o la tableta.') + '</small></div>' +
-      '<label class="interruptor"><input type="checkbox" data-teclado="1"' + (pref.teclado !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Teclado de la agenda"></label></div></div>';
+      '<label class="interruptor"><input type="checkbox" data-teclado="1"' + (pref.teclado !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Teclado de la agenda"></label></div>' +
+    '<div class="ajuste"><div class="txt"><b>Autocorrector</b><small>Mientras escribes con el teclado de la agenda: sugiere palabras arriba y corrige al poner espacio («manana» → «mañana»). Si no querías el cambio, borra una vez y vuelve tu palabra.</small></div>' +
+      '<label class="interruptor"><input type="checkbox" data-autocorr="1"' + (pref.autocorr !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Autocorrector"></label></div></div>';
 
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
     '<div class="ajuste"><div class="txt"><b>Tema</b><small>Oscuro, claro o según la hora de tu celular.</small></div>' +
@@ -7462,6 +7464,7 @@ document.addEventListener('input', function(ev){
 
 document.addEventListener('change', function(ev){
   var t = ev.target;
+  if(t.dataset && t.dataset.autocorr){ pref.autocorr = t.checked; escribirJSON(CLAVE_PREF, pref); aviso(t.checked ? '✍️ Autocorrector activado' : 'Autocorrector apagado'); return; }
   if(t.dataset && t.dataset.teclado){ pref.teclado = t.checked; escribirJSON(CLAVE_PREF, pref); if(!t.checked) TECLADO.ocultar(); aviso(t.checked ? '⌨️ Teclado de la agenda activado' : 'Vuelves al teclado del celular'); return; }
   if(t.dataset && t.dataset.secVer){
     var so = (pref.secOff || []).filter(function(x){ return x !== t.dataset.secVer; });
@@ -7615,10 +7618,120 @@ document.addEventListener('visibilitychange', function(){
    teclado numérico tipo calculadora para los montos, dictado por voz y un
    botón para volver al teclado del celular. Se apaga en Ajustes.
    ========================================================================== */
+/* ==========================================================================
+   AUTOCORRECTOR
+   20 000 palabras del español ordenadas por uso (comprimidas dentro del
+   archivo) más las que tú usas en la agenda. Sugiere mientras escribes y,
+   al poner espacio o un signo, corrige tildes («manana» → «mañana») y
+   errores de una letra («qeu» → «que»). Si borras justo después, vuelve tu
+   palabra y la agenda la aprende.
+   ========================================================================== */
+var AUTOCORR = (function(){
+  var D = null, prom = null, propias = new Set(leerJSON('agenda_palabras', []));
+  function clave(w){ return String(w).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  function cargar(){
+    if(prom) return prom;
+    var el = document.getElementById('palabrasES');
+    if(!el || typeof DecompressionStream === 'undefined') return (prom = Promise.resolve(null));
+    var bin = atob(el.textContent.replace(/\s+/g, '')), bytes = new Uint8Array(bin.length);
+    for(var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    prom = new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text().then(function(t){
+      var ws = t.split(' '), rango = new Map(), porClave = new Map(), claves = new Array(ws.length);
+      ws.forEach(function(w, i){ rango.set(w, i); var k = claves[i] = clave(w); if(!porClave.has(k)) porClave.set(k, w); });
+      /* Tus palabras (nombres, lugares, cosas tuyas) cuentan como conocidas */
+      try{ (JSON.stringify(db).match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/g) || []).forEach(function(w){ var l = w.toLowerCase(); if(!rango.has(l)) propias.add(l); }); }catch(e){}
+      D = { ws:ws, rango:rango, porClave:porClave, claves:claves };
+      return D;
+    }).catch(function(){ return null; });
+    return prom;
+  }
+  function listo(){ return !!D; }
+  function conocida(l){ return D.rango.has(l) || propias.has(l); }
+  function conCaso(c, w){
+    if(w.length > 1 && w === w.toUpperCase()) return c.toUpperCase();
+    if(w.charAt(0) !== w.charAt(0).toLowerCase()) return c.charAt(0).toUpperCase() + c.slice(1);
+    return c;
+  }
+  var ABC = 'abcdefghijklmnopqrstuvwxyz';
+  function cerca(k){
+    var c = new Set(), i, j;
+    for(i = 0; i <= k.length; i++){
+      if(i < k.length) c.add(k.slice(0, i) + k.slice(i + 1));
+      if(i < k.length - 1) c.add(k.slice(0, i) + k[i + 1] + k[i] + k.slice(i + 2));
+      for(j = 0; j < 26; j++){
+        if(i < k.length) c.add(k.slice(0, i) + ABC[j] + k.slice(i + 1));
+        c.add(k.slice(0, i) + ABC[j] + k.slice(i));
+      }
+    }
+    c.delete(k); return c;
+  }
+  /* ¿Qué palabra quisiste escribir? null si está bien o no hay una clara */
+  function corregir(w, inicioFrase){
+    if(!D || !w || w.length < 2 || /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(w)) return null;
+    var l = w.toLowerCase();
+    if(conocida(l)) return null;
+    /* Con mayúscula a mitad de frase suele ser un nombre: no se toca */
+    var mayus = w.charAt(0) !== l.charAt(0);
+    if(mayus && !inicioFrase) return null;
+    var k = clave(l);
+    if(D.porClave.has(k)) return conCaso(D.porClave.get(k), w);
+    if(mayus || l.length < 3) return null;
+    var mejor = null, rm = Infinity, tope = l.length < 5 ? 4000 : 20000;
+    cerca(k).forEach(function(x){ var c = D.porClave.get(x); if(c){ var r = D.rango.get(c); if(r < rm && r < tope){ rm = r; mejor = c; } } });
+    return mejor ? conCaso(mejor, w) : null;
+  }
+  /* Hasta 3 palabras que empiezan como lo que vas escribiendo */
+  function sugerir(pre){
+    if(!D || !pre) return [];
+    var kp = clave(pre), out = [];
+    propias.forEach(function(p){ if(out.length < 1 && p.length > pre.length && clave(p).indexOf(kp) === 0) out.push(p); });
+    for(var i = 0; i < D.claves.length && out.length < 3; i++){
+      var w = D.ws[i];
+      if(D.claves[i].indexOf(kp) === 0 && w.length >= pre.length && out.indexOf(w) < 0 && (w.length > pre.length || w !== pre.toLowerCase())) out.push(w);
+    }
+    return out.map(function(w){ return conCaso(w, pre); });
+  }
+  function aprender(w){
+    var l = String(w).toLowerCase(); if(!l || l.length < 2) return;
+    propias.add(l);
+    var g = leerJSON('agenda_palabras', []); if(g.indexOf(l) < 0){ g.push(l); escribirJSON('agenda_palabras', g.slice(-500)); }
+  }
+  return { cargar:cargar, listo:listo, corregir:corregir, sugerir:sugerir, aprender:aprender, conocida:function(w){ return D ? conocida(String(w).toLowerCase()) : true; } };
+})();
+
 var TECLADO = (function(){
   var tactil = window.matchMedia && matchMedia('(pointer:coarse)').matches;
   function activo(){ return tactil && pref.teclado !== false; }
-  var el = null, capa = 'abc', mayus = 0, caja = null, ocultarReloj = null, repetir = null, largo = null, saltarClick = false;
+  var el = null, capa = 'abc', mayus = 0, caja = null, ocultarReloj = null, repetir = null, largo = null, saltarClick = false, ultCorr = null;
+  function corrigeAqui(){
+    if(!el || pref.autocorr === false || esNum(el) || /email|url|tel/.test(el.type || '')) return false;
+    if(el.getAttribute('autocorrect') === 'off' || /nombre|llave|codigo|clave|key|mail|ruc|tel/i.test((el.id || '') + ' ' + (el.name || ''))) return false;
+    return true;
+  }
+  /* La palabra que estás escribiendo (justo antes del cursor) */
+  function palabraActual(){
+    if(!el || el.selectionStart == null) return null;
+    var antes = el.value.slice(0, el.selectionStart), m = antes.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+$/);
+    if(!m) return null;
+    var ini = antes.length - m[0].length, previo = antes.slice(0, ini);
+    if(/[#@\d]$/.test(previo)) return null;
+    return { w:m[0], ini:ini, fin:antes.length, inicioFrase:!previo.trim() || /[.!?¡¿\n]\s*$/.test(previo) };
+  }
+  /* Antes del espacio o un signo: corrige la palabra si hace falta */
+  function autocorregir(){
+    ultCorr = null;
+    if(capa !== 'abc' || !corrigeAqui() || !AUTOCORR.listo()) return;
+    var p = palabraActual(); if(!p) return;
+    var c = AUTOCORR.corregir(p.w, p.inicioFrase);
+    if(!c || c === p.w) return;
+    el.setRangeText(c, p.ini, p.fin, 'end'); avisarCambio();
+    ultCorr = { ini:p.ini, orig:p.w, nuevo:c };
+  }
+  function reemplazarPalabra(w){
+    var p = palabraActual();
+    if(p) el.setRangeText(w, p.ini, p.fin, 'end'); else escribir(w);
+    escribir(' '); ultCorr = null;
+  }
   var FILAS = {
     abc: ['qwertyuiop', 'asdfghjklñ', '⇧zxcvbnm⌫', ['123', '😊', ',', ' ', '.', '↵']],
     num: ['1234567890', ['-', '/', ':', ';', '(', ')', 'S/', '&', '@', '"'], ['#+=', '.', ',', '?', '!', "'", '%', '⌫'], ['abc', '😊', ',', ' ', '.', '↵']],
@@ -7668,8 +7781,28 @@ var TECLADO = (function(){
   }
   function pintarTeclado(){
     if(!el) return;
-    var filas = FILAS[capa], barra = '';
-    if(capa !== 'numpad'){
+    var filas = FILAS[capa];
+    crear().innerHTML = cabHTML() + '<div class="tk-teclas' + (capa === 'numpad' ? ' tk-numpad' : '') + '">' + filas.map(function(f){
+      var ks = typeof f === 'string' ? f.split('') : f;
+      return '<div class="tk-fila">' + ks.map(tecla).join('') + '</div>';
+    }).join('') + '</div>';
+  }
+  /* Solo la barra de arriba (al borrar, sin tocar las teclas que tienes bajo el dedo) */
+  function refrescarCab(){
+    var c = caja && caja.querySelector('.tk-cab'); if(!c || !el) return;
+    var t = document.createElement('div'); t.innerHTML = cabHTML(); c.replaceWith(t.firstChild);
+  }
+  function cabHTML(){
+    var barra = '';
+    var pw = capa === 'abc' && corrigeAqui() && AUTOCORR.listo() ? palabraActual() : null;
+    var sug = pw ? AUTOCORR.sugerir(pw.w) : [];
+    var corr = pw ? AUTOCORR.corregir(pw.w, pw.inicioFrase) : null;
+    if(pw && (sug.length || corr)){
+      var lista = (corr ? [corr] : []).concat(sug.filter(function(x){ return x !== corr; })).slice(0, corr ? 2 : 3);
+      barra = '<div class="tk-barra tk-sugs">' +
+        (corr ? '<button type="button" class="tk-sug tk-tal" data-s="' + esc(pw.w) + '">«' + esc(pw.w) + '»</button>' : '') +
+        lista.map(function(x, i){ return '<button type="button" class="tk-sug' + (i === 0 && corr ? ' tk-mejor' : '') + '" data-s="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>';
+    } else if(capa !== 'numpad'){
       var enCaptura = el.id === 'entradaCaptura' || el.id === 'calRapido';
       barra = '<div class="tk-barra">' +
         (enCaptura ? ATAJOS.map(function(a){ return '<button type="button" class="tk-atajo" data-t="' + esc(a) + '">' + esc(a) + '</button>'; }).join('') : '') +
@@ -7680,13 +7813,11 @@ var TECLADO = (function(){
       (VOZ && capa !== 'numpad' ? '<button type="button" class="tk-mini" data-k="🎤" aria-label="Dictar">' + ico('i-mic') + '</button>' : '') +
       '<button type="button" class="tk-mini" data-k="⌨" aria-label="Usar el teclado del celular" title="Teclado del celular">⌨︎</button>' +
       '<button type="button" class="tk-mini" data-k="▾" aria-label="Ocultar teclado">▾</button></span></div>';
-    crear().innerHTML = cab + '<div class="tk-teclas' + (capa === 'numpad' ? ' tk-numpad' : '') + '">' + filas.map(function(f){
-      var ks = typeof f === 'string' ? f.split('') : f;
-      return '<div class="tk-fila">' + ks.map(tecla).join('') + '</div>';
-    }).join('') + '</div>';
+    return cab;
   }
   function mostrar(x){
     clearTimeout(ocultarReloj);
+    if(!AUTOCORR.listo()) AUTOCORR.cargar().then(function(){ if(el) pintarTeclado(); });
     var cambio = el !== x; el = x;
     if(cambio){ capa = esNum(x) ? 'numpad' : 'abc'; mayus = 0; autoMayus(); }
     pintarTeclado();
@@ -7742,8 +7873,18 @@ var TECLADO = (function(){
   }
   function accion(k){
     vibrar(4);
-    if(k === '⌫'){ borrar(); return; }
-    if(k === '↵'){ aceptar(); return; }
+    if(k === '⌫'){
+      if(ultCorr && el && el.selectionStart === el.selectionEnd){
+        var u = ultCorr, fin = u.ini + u.nuevo.length, pos = el.selectionStart;
+        if(el.value.slice(u.ini, fin) === u.nuevo && pos > fin && pos <= fin + 1){
+          el.setRangeText(u.orig, u.ini, pos, 'end'); avisarCambio(); AUTOCORR.aprender(u.orig); ultCorr = null; refrescarCab(); return;
+        }
+      }
+      ultCorr = null; borrar(); refrescarCab(); return;
+    }
+    if(k === '↵'){ autocorregir(); ultCorr = null; aceptar(); return; }
+    if(k === ' ' || k === ',' || k === '.'){ autocorregir(); }
+    else ultCorr = null;
     if(k === '⇧'){ mayus = mayus === 0 ? 1 : mayus === 1 ? 2 : 0; pintarTeclado(); return; }
     if(k === '123' || k === 'abc' || k === '#+=' || k === '😊'){ capa = { '123':'num', abc:'abc', '#+=':'sim', '😊':'emo' }[k]; pintarTeclado(); return; }
     if(k === '▾'){ var x = el; ocultar(); if(x) x.blur(); return; }
@@ -7773,6 +7914,8 @@ var TECLADO = (function(){
     }
     parar();
     b.classList.add('tk-pulsada');
+    var su = b.getAttribute('data-s');
+    if(su){ if(b.classList.contains('tk-tal')) AUTOCORR.aprender(su); reemplazarPalabra(su); if(mayus === 1) mayus = 0; autoMayus(); pintarTeclado(); vibrar(4); saltarClick = true; return; }
     var at = b.getAttribute('data-t');
     if(at){ escribir((/\S$/.test(el.value.slice(0, el.selectionStart || 0)) && at.length > 1 ? ' ' : '') + at + (at.length > 1 ? ' ' : '')); vibrar(4); saltarClick = true; return; }
     var k = b.getAttribute('data-k');
