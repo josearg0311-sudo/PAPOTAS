@@ -3536,6 +3536,46 @@ form[data-acc="meta-cantidad"]{ align-items:center }
 .qh-x:active{ background:var(--hoja) }
 .qh-volver{ display:block; margin:10px auto 0; padding:6px 12px; font-size:12.5px; font-weight:650; color:var(--tinta-3); border-radius:99px }
 .qh-volver:active{ background:var(--hoja) }
+
+/* ===== MARCOS: cada bloque en su recuadro, nada flotando ===== */
+:root{ --marco-fondo:color-mix(in srgb, var(--tinta) 3.5%, var(--papel)); --marco-borde:color-mix(in srgb, var(--tinta) 10%, transparent) }
+.tarjeta, .tarjeta.ancho-2, .w, section.w, .siguiente, .tarjeta.siguiente, .ordenar-cta, .bienvenida-hoy{
+  background:var(--marco-fondo) !important; border:1px solid var(--marco-borde) !important; border-radius:20px !important;
+  padding:16px !important; margin:0 0 14px !important
+}
+.panel-hoy{ gap:14px !important }
+.panel-hoy > .w{ margin:0 !important }
+/* Sin marcos dentro de marcos */
+.tarjeta .tarjeta, .w .tarjeta, .tarjeta .w, .w .w, .tarjeta .siguiente, .w .siguiente, .tarjeta .ordenar-cta, .hoja-flot .tarjeta{
+  background:none !important; border:0 !important; border-radius:0 !important; padding:0 !important; margin:0 0 12px !important
+}
+/* Las tarjetas que ya tienen su propio diseño se quedan como están */
+.mosaico, .tarjeta-lista, .libreta, .notas-muro .nota{ margin:0 !important }
+.rejilla > *, .rejilla.dos > *{ margin-bottom:14px !important }
+/* La última fila de cada recuadro sin raya debajo */
+.tarjeta > .lista-filas:last-child > .fila:last-child, .w .lista-filas > .fila:last-child, .tarjeta > .fila:last-child, .tarjeta .ajuste:last-child, .qh-fila:last-of-type{ border-bottom:0 !important }
+.tarjeta-cab{ padding-bottom:10px !important }
+body .panel-hoy > .w, body .panel-hoy > section.w, body .panel-hoy > div.w{ padding:16px !important; margin:0 !important }
+/* Tus espacios ya son tarjetas: sin recuadro alrededor */
+body .panel-hoy > .w.esp-hoy{ background:none !important; border:0 !important; padding:0 !important }
+/* Filas dentro de un recuadro: la raya no toca los bordes */
+body .w .lista-filas .fila, body .tarjeta .lista-filas .fila{ padding-left:0 !important; padding-right:0 !important }
+body .panel-hoy > .w{ margin:0 0 14px !important }
+.din-bloque .db-monto{ font-size:clamp(19px, 6.2vw, 26px) !important; white-space:nowrap }
+@media (min-width:760px){ .din-bloque .db-monto{ font-size:28px !important } }
+/* Lo último de cada recuadro, sin raya debajo */
+body .w > *:last-child, body .w > *:last-child > *:last-child, body .tarjeta > *:last-child, body .tarjeta > *:last-child > *:last-child,
+body .enfoque-grande label:last-child, body .w .lista-filas > .fila:last-child{ border-bottom:0 !important }
+body .w > .din-bloques, body .w .din-queda{ border-bottom:0 !important }
+/* Listas de Agenda, Tareas, Avisos y el mes del calendario, también en su recuadro */
+.ag-bloque, .pl-dia, .rec-bloque, .cal-mes-caja{
+  background:var(--marco-fondo) !important; border:1px solid var(--marco-borde) !important; border-radius:20px !important;
+  padding:14px 16px !important; margin:0 0 14px !important
+}
+.cal-mes-caja{ padding:10px 8px !important }
+.ag-bloque > :last-child, .ag-bloque .fila:last-child, .pl-dia .fila:last-child, .rec-bloque > :last-child, .rec-bloque .fila:last-child{ border-bottom:0 !important }
+.pl-dia{ display:flex; gap:12px }
+.ag-bloque > :first-child, .rec-bloque > :first-child, .pl-dia :first-child, .tarjeta > :first-child, .w > :first-child{ margin-top:0 !important; padding-top:0 !important }
 </style>
 </head>
 <body>
