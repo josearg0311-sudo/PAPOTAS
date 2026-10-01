@@ -1370,7 +1370,7 @@ VISTAS.hoy = function(){
   if(hoyVisible('dinero')){
     /* Dinero del mes: lo gastado y lo que entró, cada uno con su botón */
     var ppH = pagosProximos(7);
-    html += '<section class="w w-2 w-dinero-hoy"><header class="w-cab"><b>Tu dinero este mes</b>' + (ppH.length ? '<span class="w-n">' + ppH.length + ' por pagar</span>' : '') +
+    html += '<section class="w w-2 w-dinero-hoy"><header class="w-cab"><b>Tu dinero</b>' + (ppH.length ? '<span class="w-n">' + ppH.length + ' por pagar</span>' : '') +
       '<button class="ver-link" data-ir="panel-dinero">Ver todo ' + ico('i-der') + '</button></header>' + bloquesDinero('todo') + '</section>';
   }
 
@@ -5610,7 +5610,7 @@ VISTAS.ajustes = function(){
       '<label class="interruptor"><input type="checkbox" data-teclado="1"' + (pref.teclado !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Teclado de la agenda"></label></div></div>';
 
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
-    '<div class="ajuste"><div class="txt"><b>Tema</b><small>También viste a tus libros de cuentas dentro de la agenda.</small></div>' +
+    '<div class="ajuste"><div class="txt"><b>Tema</b><small>Oscuro, claro o según la hora de tu celular.</small></div>' +
       '<div class="selector"><button data-acc="tema" data-t="oscuro" aria-pressed="' + (!pref.temaAuto && tema !== 'claro') + '">🌙 Oscuro</button><button data-acc="tema" data-t="claro" aria-pressed="' + (!pref.temaAuto && tema === 'claro') + '">☀️ Claro</button><button data-acc="tema" data-t="auto" aria-pressed="' + !!pref.temaAuto + '">🌓 Automático</button></div></div>' +
     '<div class="ajuste"><div class="txt"><b>Colores</b></div><div class="rejilla-paletas">' + PALETAS.map(function(p){
       return '<button type="button" class="muestra" data-acc="paleta" data-p="' + p.id + '" aria-pressed="' + (p.id === pal) + '"><span class="gotas">' +
