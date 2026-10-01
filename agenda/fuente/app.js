@@ -2681,7 +2681,7 @@ function dineroDosLibros(){
   var filas = [['personal','🏠','Personal'],['oficina','💼','Oficina']].map(function(L){
     var tm = totalesMes(movsDe(L[0]), ym), q = tm.ent - tm.sal; totQ += q;
     return '<button type="button" class="dlh" data-acc="mov-ver" data-v="' + L[0] + '"><span class="dlh-ico">' + L[1] + '</span>' +
-      '<span class="dlh-txt"><b>' + L[2] + '</b><small><em class="sale">Salió ' + dinero(tm.sal) + '</em><em class="entra">Entró ' + dinero(tm.ent) + '</em></small></span>' +
+      '<span class="dlh-txt"><b>' + L[2] + '</b><small><em class="sale">Salió ' + monCorto(tm.sal) + '</em><em class="entra">Entró ' + monCorto(tm.ent) + '</em></small></span>' +
       '<span class="dlh-q' + (q < 0 ? ' neg' : '') + '"><small>' + (q < 0 ? 'En rojo' : 'Queda') + '</small><b>' + (q < 0 ? '−' : '') + dinero(Math.abs(q)) + '</b></span>' + ico('i-der') + '</button>';
   }).join('');
   return '<div class="din-libros-hoy">' + filas + '</div>' +
