@@ -3661,3 +3661,12 @@ body .w .din-queda.din-total{ border-bottom:0 !important }
 .pend-grupo{ margin:10px 0 2px; font-size:12px; font-weight:700; color:var(--tinta-3) }
 .pend-grupo:empty{ display:none }
 .w-tareas .pend-grupo:first-of-type{ margin-top:0 }
+
+/* ===== Hoy: anotar al vuelo en Pendientes ===== */
+.hoy-rapida{ display:flex; align-items:center; gap:8px; margin:12px 0 0; padding:6px 6px 6px 12px; border-radius:14px; background:var(--hoja); border:1px solid var(--marco-borde) }
+.hoy-rapida > .i{ width:18px; height:18px; color:var(--acento-txt, var(--verde)); flex:none }
+.hoy-rapida .entrada{ flex:1; min-width:0; background:none !important; border:0 !important; box-shadow:none !important; padding:8px 4px !important; height:auto !important }
+.hoy-rapida .btn{ flex:none; width:38px; height:38px; padding:0 !important; justify-content:center }
+.hoy-rapida:focus-within{ border-color:color-mix(in srgb, var(--verde) 55%, transparent) }
+.w-tareas .w-pie:empty{ display:none }
+.sig-tarea small{ color:var(--acento-txt, var(--verde)) !important }

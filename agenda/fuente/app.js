@@ -1248,7 +1248,16 @@ function loSiguiente(){
 }
 function tarjetaSiguiente(){
   var s = loSiguiente();
-  if(!s) return '<section class="tarjeta siguiente vacia"><small>Lo siguiente</small><b>Nada agendado</b><span>Tienes el día libre. 🌿</span></section>';
+  if(!s){
+    var hoyS = hoyISO(), pt = vivos('tareas').filter(function(t){ return !t.hecha; });
+    var ya = pt.filter(function(t){ return t.fecha && t.fecha <= hoyS; }).sort(ordenTareas);
+    var sinF = pt.filter(function(t){ return !t.fecha; }).sort(function(a, b){ return (b.prio || 0) - (a.prio || 0) || (b.creada || 0) - (a.creada || 0); });
+    var sug = ya[0] || sinF[0];
+    if(!sug) return '<section class="tarjeta siguiente vacia"><small>Lo siguiente</small><b>Nada agendado</b><span>Tienes el día libre. 🌿</span></section>';
+    var Es = espInfo(espDe(sug));
+    return '<section class="tarjeta siguiente sig-tarea" data-acc="tarea-ed" data-id="' + sug.id + '"><small>Nada agendado · buen momento para</small><b>' + esc(sug.t) + '</b>' +
+      '<span class="sig-meta">' + (sug.fecha ? (sug.fecha < hoyS ? 'Atrasada · ' : 'Para hoy · ') : 'Sin fecha · ') + Es.em + ' ' + esc(Es.nom) + (pt.length > 1 ? ' · ' + (pt.length - 1) + ' pendientes más' : '') + '</span></section>';
+  }
   var x = s.x, E = x.esp ? espInfo(x.esp) : null;
   var acc = { tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' }[x.tipo];
   var cuando = s.d === hoyISO() ? (s.enCurso ? 'En curso · hasta las ' + (x.fin || x.hora) : textoFalta(minutosHasta(x.hora))) : cap(relativo(s.d)) + ' · ' + x.hora;
@@ -1331,13 +1340,14 @@ VISTAS.hoy = function(){
     html += w('w-2 w-tareas', 'Pendientes', pend.length, 'data-ir="tareas"',
       (pend.length ? h1 + h2 + h3 +
         (pend.length > MAXP ? '<button class="w-mas" data-acc="t-filtro" data-f="todas" data-ir-tras="tareas">+' + (pend.length - MAXP) + ' más</button>' : '') : '<p class="nada">Nada pendiente. Día libre. 👊</p>') +
-      '<div class="w-pie">' + botonAnadir('tarea', 'Añadir tarea') + (atrasadas ? '<button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar ' + atrasadas + ' atrasadas a hoy</button>' : '') + '</div>');
+      '<form class="hoy-rapida" data-acc="hoy-tarea" autocomplete="off">' + ico('i-plus') + '<input id="hoyTarea" class="entrada" type="text" maxlength="160" placeholder="Anota una tarea… ej. pagar la luz mañana 6pm" enterkeyhint="done"><button type="submit" class="btn chico primario" aria-label="Añadir">' + ico('i-check') + '</button></form>' +
+      '<div class="w-pie">' + (atrasadas ? '<button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar ' + atrasadas + ' atrasadas a hoy</button>' : '') + '</div>');
   }
 
   /* Tu día: lo agendado de hoy */
   if(hoyVisible('ahora')){
     html += w('w-2 w-dia tu-dia', 'Tu día', agenda.length, 'data-ir="calendario"',
-      agenda.length ? lineaDelDia(agenda.slice(0, 5)) + (agenda.length > 5 ? '<button class="w-mas" data-ir="calendario">+' + (agenda.length - 5) + ' más</button>' : '') : '<p class="nada">Sin eventos ni avisos hoy.</p>');
+      agenda.length ? lineaDelDia(agenda.slice(0, 5)) + (agenda.length > 5 ? '<button class="w-mas" data-ir="calendario">+' + (agenda.length - 5) + ' más</button>' : '') : '<p class="nada">Sin eventos ni avisos hoy.</p><div class="w-pie">' + accPanel('Evento', 'data-acc="nuevo" data-tipo="evento"') + accPanel('Aviso', 'data-acc="nuevo" data-tipo="rec"') + '</div>');
   }
   /* Al final de la tarde: cómo te fue y qué trae mañana */
   if(hoyVisible('ahora') && h >= 18) html += widgetCierre(hoy, hechas, tareasHoy.length);
@@ -7463,6 +7473,13 @@ document.addEventListener('submit', function(ev){
     if(enHoja && $('capaFlotante').querySelector('form[data-acc="captura"]')) cerrarFlotante();
     pintar();
     if(!enHoja){ var ni = $('entradaCaptura'); if(ni) ni.focus(); }
+  } else if(a === 'hoy-tarea'){
+    var hi = $('hoyTarea'), hv = hi ? hi.value.trim() : '';
+    if(!hv) return;
+    var ph = interpretar(hv), eh = ph.esp || 'personal', Eh = espInfo(eh);
+    poner('tareas', { id:nid(), t:ph.texto || hv, fecha:ph.fecha, hora:ph.hora, prio:ph.prio, area:ph.area, esp:eh, rep:'no', sub:[], notas:'', creada:Date.now() });
+    aviso(Eh.em + ' Tarea añadida', ph.fecha ? relativo(ph.fecha) + (ph.hora ? ' · ' + ph.hora : '') : 'Sin fecha');
+    pintar(); var hn = $('hoyTarea'); if(hn) hn.focus();
   } else if(a === 'proy-tarea'){
     var pi = $('proyTarea'), pv = pi.value.trim();
     if(!pv) return;
