@@ -137,9 +137,9 @@ def armar(completa):
       icons:{iconos_js},
       shortcuts:[
         {{ name:'Anotar gasto', short_name:'Gasto', url: base + aqui + '#gasto' }},
+        {{ name:'Anotar ingreso', short_name:'Ingreso', url: base + aqui + '#ingreso' }},
         {{ name:'Añadir tarea', short_name:'Tarea', url: base + aqui + '#anadir' }},
-        {{ name:'Calendario', url: base + aqui + '#calendario' }},
-        {{ name:'Tareas',     url: base + aqui + '#tareas' }}
+        {{ name:'Mi día', short_name:'Agenda', url: base + aqui + '#agenda' }}
       ]
     }};
     var txt = JSON.stringify(m), h;

@@ -583,6 +583,15 @@ function pintarNav(){
     if(ui.vista === 'ajustes') b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
   });
   $('marcaNombre').textContent = db.perfil.nombre ? 'de ' + db.perfil.nombre : 'Mi organización';
+  ponerInsignia(k.tareas + k.recordatorios);
+}
+
+/* El número en el icono de la app instalada: lo que te falta hoy */
+var insigniaPuesta = -1;
+function ponerInsignia(n){
+  if(n === insigniaPuesta || !('setAppBadge' in navigator)) return;
+  insigniaPuesta = n;
+  try{ (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(function(){}); }catch(e){}
 }
 
 function ir(v, sinHash){
@@ -1405,8 +1414,11 @@ function espaciosHoy(hoy){
 
 /* Lo que toca ahora, en frases, cada una con su botón que te lleva */
 function queHacerAhora(hoy, h){
-  var k = contadores(), out = [];
-  function s(c, i, txt, btn, attrs){ out.push('<div class="qh-fila" style="--qc:' + c + '"><span class="qh-ico">' + ico(i) + '</span><span class="qh-txt">' + txt + '</span><button type="button" class="qh-btn" ' + attrs + '>' + btn + '</button></div>'); }
+  var k = contadores(), out = [], ocultas = qhOcultas(hoy), nOc = 0;
+  function s(c, i, txt, btn, attrs){
+    if(ocultas.indexOf(i) >= 0){ nOc++; return; }
+    out.push('<div class="qh-fila" style="--qc:' + c + '"><span class="qh-ico">' + ico(i) + '</span><span class="qh-txt">' + txt + '</span><button type="button" class="qh-btn" ' + attrs + '>' + btn + '</button>' +
+      '<button type="button" class="qh-x" data-acc="qh-ocultar" data-k="' + i + '" aria-label="Ahora no" title="Ahora no (vuelve mañana)">' + ico('i-x') + '</button></div>'); }
   proximosCumples(0).forEach(function(c){ s('var(--rosa)', 'i-regalo', 'Hoy es <b>' + esc(c.e.t) + '</b> 🎂', 'Saludar', 'data-acc="fecha-felicitar" data-id="' + c.e.id + '"'); });
   if(k.recordatorios) s('var(--debe)', 'i-campana', 'Tienes <b>' + k.recordatorios + (k.recordatorios === 1 ? ' aviso pasado' : ' avisos pasados') + '</b> sin marcar', 'Ver', 'data-ir="recordatorios"');
   var tarde = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoy; }).length;
@@ -1426,8 +1438,16 @@ function queHacerAhora(hoy, h){
   if(h >= 20 && !(di && !di.del && di.texto)) s('var(--rosa)', 'i-diario', 'Cierra el día: <b>cuenta cómo te fue</b>', 'Escribir', 'data-ir="diario"');
   var tHoy = vivos('tareas').filter(function(t){ return t.fecha === hoy; }).length;
   if(!tHoy && h < 14) s('var(--verde)', 'i-plus', 'Aún no tienes tareas para hoy: <b>planea tu día</b>', 'Añadir', 'data-acc="nuevo" data-tipo="tarea"');
-  if(!out.length) return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b></header><p class="qh-ok">Todo al día. 👌 Si quieres añadir algo, toca el <b>+</b>.</p></section>';
-  return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b><span class="w-n">' + out.length + '</span></header>' + out.slice(0, 6).join('') + '</section>';
+  var volver = nOc ? '<button type="button" class="qh-volver" data-acc="qh-mostrar">Mostrar ' + (nOc === 1 ? 'la sugerencia oculta' : 'las ' + nOc + ' ocultas') + '</button>' : '';
+  if(!out.length) return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b></header><p class="qh-ok">Todo al día. 👌 Si quieres añadir algo, toca el <b>+</b>.</p>' + volver + '</section>';
+  return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b><span class="w-n">' + out.length + '</span></header>' + out.slice(0, 6).join('') + volver + '</section>';
+}
+/* Sugerencias que dijiste «ahora no»: se esconden solo por hoy */
+function qhOcultas(hoy){
+  try{ var x = JSON.parse(localStorage.getItem('agenda_qh_oculto') || 'null'); return x && x.dia === hoy ? x.k : []; }catch(e){ return []; }
+}
+function qhGuardar(lista){
+  try{ localStorage.setItem('agenda_qh_oculto', JSON.stringify({ dia:hoyISO(), k:lista })); }catch(e){}
 }
 
 /* Mañana: lo agendado, las tareas y los pagos que tocan */
@@ -7045,6 +7065,8 @@ document.addEventListener('click', function(ev){
     case 'ag-dia': ui.agDia = b.dataset.dia; pintar(); break;
     case 'ag-sem': ui.agDia = sumarDias(ui.agDia || hoyISO(), +b.dataset.n); pintar(); break;
     case 'ag-tareas': ui.tFiltro = b.dataset.v || 'hoy'; ir('tareas'); break;
+    case 'qh-ocultar': vibrar(8); qhGuardar(qhOcultas(hoyISO()).concat([b.dataset.k])); pintar(); break;
+    case 'qh-mostrar': qhGuardar([]); pintar(); break;
     case 'din-anotar': gastoRapido(b.dataset.libro === 'oficina' ? 'oficina' : 'personal', b.dataset.t === 'Ingreso' ? 'Ingreso' : 'Gasto'); break;
     case 'mov-ver':
       ui.movLibro = b.dataset.v || 'personal'; ui.movCat = b.dataset.cat || ''; ui.movTipo = b.dataset.cat ? 'g' : 'todo';
@@ -7443,10 +7465,10 @@ $('pastillaNube').addEventListener('click', function(ev){ ev.stopPropagation(); 
 
 window.addEventListener('popstate', function(){
   var hashA = (location.hash || '').slice(1);
-  if(hashA === 'gasto' || hashA === 'anadir'){
+  if(hashA === 'gasto' || hashA === 'ingreso' || hashA === 'anadir'){
     ignorarPop = 0; hojaEnHist = false; cerrarFlotante(true);
     try{ history.replaceState(null, '', '#' + ui.vista); }catch(e){}
-    if(hashA === 'gasto') gastoRapido('personal'); else hojaAnadir('tarea');
+    if(hashA === 'anadir') hojaAnadir('tarea'); else gastoRapido('personal', hashA === 'ingreso' ? 'Ingreso' : 'Gasto');
     return;
   }
   if(ignorarPop){ finPop(); return; }
@@ -7711,9 +7733,9 @@ var TECLADO = (function(){
   colorBarra();
 
   var h = (location.hash || '').slice(1), atajo = '';
-  if(h === 'gasto' || h === 'anadir'){ atajo = h; h = 'hoy'; try{ history.replaceState(null, '', '#hoy'); }catch(e){} }
+  if(h === 'gasto' || h === 'ingreso' || h === 'anadir'){ atajo = h; h = 'hoy'; try{ history.replaceState(null, '', '#hoy'); }catch(e){} }
   if(h === 'cuentas') h = 'personal';
-  if(atajo) setTimeout(function(){ if(atajo === 'gasto') gastoRapido('personal'); else hojaAnadir('tarea'); }, 400);
+  if(atajo) setTimeout(function(){ if(atajo === 'anadir') hojaAnadir('tarea'); else gastoRapido('personal', atajo === 'ingreso' ? 'Ingreso' : 'Gasto'); }, 400);
   ui.vista = (h === 'ajustes' || SECCIONES.some(function(s){ return s.id === h; })) ? h : 'hoy';
   pintar();
   estadoNube(nube ? 'ok' : 'off');
@@ -7752,6 +7774,6 @@ var TECLADO = (function(){
 
 /* Un toque en un mosaico se siente: una vibración cortita (en el celular) */
 document.addEventListener('click', function(ev){
-  var m = ev.target && ev.target.closest && ev.target.closest('.mosaico, .eh, .qh-btn, .acc-fila');
+  var m = ev.target && ev.target.closest && ev.target.closest('.mosaico, .eh, .qh-btn, .acc-fila, .barra-inf button');
   if(m && typeof vibrar === 'function') vibrar(8);
 }, true);
