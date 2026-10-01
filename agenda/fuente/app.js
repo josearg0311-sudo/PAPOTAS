@@ -1824,6 +1824,26 @@ function eventosTipo(tipo, dias, esp){
   return out.sort(function(a, b){ return a.en - b.en || (a.e.ini || '').localeCompare(b.e.ini || ''); });
 }
 function cuenta(en){ return en === 0 ? '¡Hoy!' : en === 1 ? 'Mañana' : 'En ' + en + ' días'; }
+/* Todos los eventos (de cualquier tipo) en los próximos días, cada uno en su próxima fecha */
+function proximosEventos(dias){
+  var hoy = hoyISO(), out = [];
+  vivos('eventos').forEach(function(e){
+    for(var i = 0; i <= dias; i++){ var d = sumarDias(hoy, i); if(ocurre(e.fecha, e.rep, d, e.hasta)){ out.push({ e:e, dia:d, en:i }); break; } }
+  });
+  return out.sort(function(a, b){ return a.en - b.en || (a.e.todo ? '' : a.e.ini || '').localeCompare(b.e.todo ? '' : b.e.ini || ''); });
+}
+function filaEventoProx(x){
+  var e = x.e, es = espDe(e), E = espInfo(es);
+  return '<div class="fila"><span class="cuenta-atras' + (x.en <= 1 ? ' urge' : '') + '"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span>' +
+    '<div class="cuerpo" data-acc="evento-ed" data-id="' + e.id + '"><div class="titulo">' + (e.cumple ? '🎂 ' : '') + esc(e.t) + '</div>' +
+    '<div class="meta"><span>' + cap(fechaLarga(x.dia)) + (e.todo ? '' : ' · ' + e.ini) + '</span>' + (e.lugar ? '<span>' + ico('i-lugar') + esc(e.lugar) + '</span>' : '') +
+    (es !== 'personal' ? '<span class="etiqueta">' + E.em + ' ' + esc(E.nom) + '</span>' : '') + '</div></div></div>';
+}
+/* En Personal: ver lo de todos tus espacios o solo lo de Personal */
+function filtroPers(){
+  var solo = pref.persSolo === true;
+  return '<div class="selector filtro-pers"><button type="button" data-acc="pers-todo" data-v="0" aria-pressed="' + !solo + '">De todos tus espacios</button><button type="button" data-acc="pers-todo" data-v="1" aria-pressed="' + solo + '">Solo Personal</button></div>';
+}
 
 var MODULOS = {
   personal: function(tab){
@@ -2419,7 +2439,7 @@ function editarHora(id){
    cancha y el cardio en Deporte.
    ========================================================================== */
 var PESTANAS = {
-  personal:[['inicio','Personal','🏠'],['semana','Tu semana','🗓️'],['dinero','Tu dinero','💰'],['compras','Compras','🛒'],['menu','Menú','🍽️'],['fechas','Fechas importantes','🎂'],['prestamos','Préstamos','🤝'],['pagos','Pagos de la casa','🧾']],
+  personal:[['inicio','Personal','🏠'],['semana','Tu semana','🗓️'],['eventos','Eventos','📅'],['avisos','Recordatorios','🔔'],['tareas','Tareas','✅'],['notas','Notas y listas','📝'],['dinero','Tu dinero','💰'],['compras','Compras','🛒'],['menu','Menú','🍽️'],['fechas','Fechas importantes','🎂'],['prestamos','Préstamos','🤝'],['pagos','Pagos de la casa','🧾']],
   estudios:[['inicio','Estudios','🎓'],['semana','Tu semana','🗓️'],['cursos','Cursos y horario','📚'],['examenes','Exámenes','📝'],['dinero','Gastos de estudio','💰']],
   oficina:[['inicio','Oficina','💼'],['semana','Tu semana','🗓️'],['cobros','Por cobrar','💵'],['clientes','Clientes','🤝'],['trabajo','Tablero','📋'],['reuniones','Reuniones','🗣️'],['dinero','Cuentas','💰'],['pagos','Pagos','🧾']],
   deporte:[['inicio','Deporte','⚽'],['semana','Tu semana','🗓️'],['entrenos','Entrenamientos','🏃'],['rutinas','Rutinas y récords','🏋️'],['cuerpo','Tu cuerpo','⚖️'],['partidos','Partidos','🥅'],['bolso','Tu bolso','🎒'],['actividad','Tus 12 semanas','📈'],['dinero','Gastos de deporte','💰']]
@@ -2451,7 +2471,34 @@ function subpantallas(id){
     var cu = proximosCumples(60)[0];
     var deb = vivos('deudas').filter(function(x){ return !x.saldada; }), teDeben = deb.filter(function(x){ return x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0), debes = deb.filter(function(x){ return x.tipo !== 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     var ppP = pagosDe('personal');
+    /* Eventos, recordatorios, tareas y notas: los de Personal o, si quieres, los de todos tus espacios */
+    var todosP = pref.persSolo !== true;
+    var deP = function(x){ return todosP || espDe(x) === 'personal'; };
+    var evP = proximosEventos(60).filter(function(x){ return deP(x.e); });
+    var recP = vivos('recordatorios').filter(function(r){ return !(r.hecho && (!r.rep || r.rep === 'no')) && deP(r); }).sort(function(a, b){ return momentoR(a).localeCompare(momentoR(b)); });
+    var tarP = vivos('tareas').filter(function(t){ return !t.hecha && deP(t); }).sort(function(a, b){ return (a.fecha || '9999').localeCompare(b.fecha || '9999') || (b.prio || 0) - (a.prio || 0); });
+    var notP = vivos('notas').filter(deP).sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || (b.upd || 0) - (a.upd || 0); });
+    var lisP = vivos('listas').filter(deP);
+    var recTarde = recP.filter(function(r){ return momentoR(r) <= hoy + 'T' + horaAhora(); }).length;
+    var tarTarde = tarP.filter(function(t){ return t.fecha && t.fecha < hoy; }).length;
+    var porMarcar = lisP.reduce(function(a, l){ return a + (l.items || []).filter(function(i){ return !i.ok; }).length; }, 0);
     return [semana,
+      { k:'eventos', i:'i-cal', c:'#5E5CE6', t:'Eventos', d:'Citas, salidas, cumpleaños y todo lo que viene', n:evP.length, nl:'en 60 días', html:function(){
+          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-cal', 'Lo que viene', '#5E5CE6', 'Nuevo evento', 'data-acc="nuevo" data-tipo="evento"') +
+            (evP.length ? '<div class="lista-filas">' + evP.map(filaEventoProx).join('') + '</div>' : vacio('📅', 'Sin eventos por ahora', 'Toca «Nuevo evento» para agendar una cita, una salida o un cumpleaños.')) + '</section>'; } },
+      { k:'avisos', i:'i-campana', c:'#FFD60A', t:'Recordatorios', d:'Lo que la agenda te avisa a su hora', n:recP.length, nl:recTarde ? recTarde + ' pasados sin marcar' : 'activos', alerta:recTarde > 0, html:function(){
+          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-campana', 'Tus recordatorios', 'var(--oro)', 'Nuevo', 'data-acc="nuevo" data-tipo="rec"') +
+            (recP.length ? '<div class="lista-filas rec-lista">' + recP.map(filaRec).join('') + '</div>' : vacio('🔔', 'Sin recordatorios', 'Toca «Nuevo» y la agenda te avisará a la hora que digas.')) + '</section>'; } },
+      { k:'tareas', i:'i-tareas', c:'#FF453A', t:'Tareas', d:'Lo que tienes pendiente', n:tarP.length, nl:tarTarde ? tarTarde + ' atrasadas' : 'pendientes', alerta:tarTarde > 0, html:function(){
+          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Pendientes', 'var(--debe)', 'Nueva tarea', 'data-acc="nuevo" data-tipo="tarea"') +
+            (tarP.length ? '<div class="lista-filas">' + tarP.slice(0, 60).map(filaTarea).join('') + '</div>' : vacio('✅', 'Nada pendiente', 'Todo al día. Toca «Nueva tarea» para anotar algo.')) + '</section>'; } },
+      { k:'notas', i:'i-notas', c:'#E7B24A', t:'Notas y listas', d:'Tus apuntes y listas para marcar', n:notP.length, nl:(notP.length === 1 ? 'nota' : 'notas') + (porMarcar ? ' · ' + porMarcar + ' por marcar' : ''), html:function(){
+          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-notas', 'Notas', '#E7B24A', 'Nueva nota', 'data-acc="nuevo" data-tipo="nota"') +
+            (notP.length ? '<div class="notas-muro">' + notP.map(tarjetaNota).join('') + '</div>' : vacio('📝', 'Sin notas', 'Toca «Nueva nota» para guardar una idea, una clave o un apunte.')) + '</section>' +
+            '<section class="tarjeta">' + cabTarjeta('i-listas', 'Listas', 'var(--haber)', 'Nueva lista', 'data-acc="nuevo" data-tipo="lista"') +
+            (lisP.length ? '<div class="lista-filas">' + lisP.map(function(l){ var its = l.items || [], f = its.filter(function(i){ return !i.ok; }).length;
+                return '<div class="fila" data-acc="lista-abrir" data-id="' + l.id + '"><span class="hora" style="font-size:20px">' + esc(l.em || '📝') + '</span><div class="cuerpo"><div class="titulo">' + esc(l.nombre) + '</div><div class="meta"><span>' + (its.length ? f + ' por marcar · ' + its.length + ' en total' : 'Vacía') + '</span></div></div></div>'; }).join('') + '</div>'
+              : vacio('🛒', 'Sin listas', 'Toca «Nueva lista» para la compra, la maleta o lo que quieras marcar.')) + '</section>'; } },
       { k:'dinero', i:'i-grafica', c:'#30D158', t:'Tu dinero', d:'Gasto e ingreso del mes y tus movimientos', n:dinero(tmE.sal), nl:'gastado', html:function(){ return bloquesDinero('personal') + tarjetaDineroEsp('personal'); } },
       { k:'compras', i:'i-listas', c:'#5AA9FF', t:'Compras', d:'Tu lista del mercado y lo de siempre', n:falta, nl:'por comprar', html:function(){ return tarjetaCompras() || tarjetaSinCompras(); } },
       { k:'menu', em:'🍽️', c:'#FF9F0A', t:'Menú', d:'Almuerzo y cena de la semana', html:function(){ return tarjetaMenu(); } },
@@ -5911,7 +5958,7 @@ function resultados(texto){
   var palabras = q.split(/\s+/).filter(Boolean);
   /* «préstamos» también encuentra «préstamo»: se mira la palabra sin su plural */
   function calza(x){ var h = sinTildes((x.t + ' ' + x.d + ' ' + x.p).toLowerCase()); return palabras.every(function(w){ w = w.toLowerCase(); return h.indexOf(w) >= 0 || (w.length > 4 && h.indexOf(w.replace(/(es|s)$/, '')) >= 0); }); }
-  var CLAVES_SUB = { cuerpo:'peso imc kilos', bolso:'mochila chimpunes', cobros:'cobrar deben facturas', prestamos:'deuda debe presto', fechas:'cumpleanos aniversario regalo', menu:'comida almuerzo cena platos', compras:'mercado super lista', entrenos:'entrenar gym correr', partidos:'pichanga futbol cancha', actividad:'constancia racha', trabajo:'tablero pendientes', reuniones:'reunion junta', examenes:'examen parcial final repaso', cursos:'notas promedio faltas horario clases' };
+  var CLAVES_SUB = { eventos:'eventos citas salidas agenda', avisos:'recordatorios avisos alarmas', tareas:'tareas pendientes', notas:'notas apuntes listas', cuerpo:'peso imc kilos', bolso:'mochila chimpunes', cobros:'cobrar deben facturas', prestamos:'deuda debe presto', fechas:'cumpleanos aniversario regalo', menu:'comida almuerzo cena platos', compras:'mercado super lista', entrenos:'entrenar gym correr', partidos:'pichanga futbol cancha', actividad:'constancia racha', trabajo:'tablero pendientes', reuniones:'reunion junta', examenes:'examen parcial final repaso', cursos:'notas promedio faltas horario clases' };
   /* Las subpantallas de los espacios también son lugares a los que ir */
   var subsE = [];
   Object.keys(PESTANAS).forEach(function(e){ var E = espInfo(e); PESTANAS[e].forEach(function(x){ if(x[0] !== 'inicio') subsE.push({ t:x[1], d:E.em + ' ' + E.nom, p:e + ' ' + x[1] + ' ' + x[0] + ' ' + (CLAVES_SUB[x[0]] || ''), e:e, k:x[0] }); }); });
@@ -7269,6 +7316,7 @@ document.addEventListener('click', function(ev){
 
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
+    case 'pers-todo': pref.persSolo = b.dataset.v === '1'; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;
     case 'paleta': aplicarPaleta(b.dataset.p); pintar(); break;
     case 'lunes': pref.lunes = b.dataset.v === '1'; guardarPref(); pintar(); break;

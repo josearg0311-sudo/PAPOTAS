@@ -3581,3 +3581,6 @@ body .tarjeta .ajuste{ padding-left:0 !important; padding-right:0 !important }
 .tk-sug.tk-mejor{ background:color-mix(in srgb, var(--verde) 22%, transparent); color:var(--tinta); font-weight:750 }
 .tk-sug.tk-tal{ color:var(--tinta-3); font-weight:500 }
 .tk-sug.tk-pulsada{ background:var(--hoja-2) }
+.filtro-pers{ margin:0 0 14px }
+/* Notas dentro de un recuadro: cada una con su fondo */
+body .tarjeta .notas-muro .nota{ background:var(--hoja) !important; border:1px solid var(--marco-borde) !important; border-radius:16px !important; padding:14px !important; margin:0 0 10px !important }
