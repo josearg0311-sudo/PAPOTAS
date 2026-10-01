@@ -442,6 +442,7 @@ var SECCIONES = [
   { id:'dinero',        nom:'Dinero',        ico:'i-grafica' },
   { id:'movimientos',   nom:'Movimientos',   corto:'Movimientos', ico:'i-cuentas', padre:'dinero', oculta:true },
   { id:'pagos',         nom:'Pagos fijos',   corto:'Pagos', ico:'i-recibo', padre:'dinero', oculta:true },
+  { id:'informes',      nom:'Informes',      corto:'Informes', ico:'i-bajar', padre:'dinero', oculta:true },
   { id:'personal',      nom:'Libro personal', movil:'Gastos personales', corto:'Personal', ico:'i-cuentas', padre:'dinero', oculta:true },
   { id:'oficina',       nom:'Libro de oficina', movil:'Oficina', corto:'Oficina', ico:'i-maletin', padre:'dinero', oculta:true },
   /* Enfoque vive dentro de Estudios (se abre con «Estudiar ahora») */
@@ -989,6 +990,7 @@ var DESTINOS = [
   { t:'Resumen del dinero', d:'Dinero · cómo vas este mes', i:'i-grafica', ir:'dinero', p:'dinero plata resumen presupuesto gasto mes' },
   { t:'Movimientos', d:'Dinero · cada gasto e ingreso', i:'i-cuentas', ir:'movimientos', p:'movimientos gastos ingresos libro cuentas' },
   { t:'Pagos fijos', d:'Dinero · luz, internet, alquiler…', i:'i-recibo', ir:'pagos', p:'pagos fijos recibos servicios' },
+  { t:'Informes Excel y PDF', d:'Dinero · descarga tus cuentas', i:'i-bajar', ir:'informes', p:'informes informe excel pdf descargar exportar reporte imprimir cuentas' },
   { t:'Notas', d:'Notas · tus apuntes', i:'i-notas', ir:'notas', p:'notas apuntes' },
   { t:'Listas', d:'Notas · compras y cosas por marcar', i:'i-listas', ir:'listas', p:'listas compras' },
   { t:'Hábitos', d:'Más · rachas de cada día', i:'i-habitos', ir:'habitos', p:'habitos rachas' },
@@ -3357,6 +3359,8 @@ function cabSeccion(v){
       var pa = proyectosActivos(), pt = 0, ph = 0;
       pa.forEach(function(x){ var a = avanceProy(x.id); pt += a.total; ph += a.hechas; });
       d = { c:'#A78BFA', i:'i-carpeta', t:'Proyectos', s:pa.length + (pa.length === 1 ? ' activo' : ' activos') + ' · ' + (pt - ph) + ' tareas por hacer', p:pt ? ph / pt : null, pt:'avance' };
+    } else if(v === 'informes'){
+      d = { c:'var(--azul)', i:'i-bajar', t:'Informes', s:'Tus cuentas en <b>Excel</b> o <b>PDF</b>' };
     } else if(v === 'pagos'){
       var ym = ui.pagosMes || hoy.slice(0, 7), tot = 0, pag = 0, n = 0, np = 0;
       vivos('pagos').forEach(function(p){ if(p.activo === false || (p.desde && ym < p.desde)) return; n++; tot += +p.monto || 0; if(pagado(p, ym)){ np++; pag += +p.monto || 0; } });
@@ -4090,6 +4094,20 @@ function exportarLibro(cual, formato, periodo, desde, hasta){
     setTimeout(prueba, 100);
   })();
 }
+function accesoInformes(){
+  return '<button type="button" class="acceso-inf" data-ir="informes"><span class="ai-ico">' + ico('i-bajar') + '</span>' +
+    '<span class="ai-txt"><b>Descargar Excel o PDF</b><small>Tus cuentas listas para guardar, imprimir o enviar</small></span>' + ico('i-der') + '</button>';
+}
+VISTAS.informes = function(){
+  var n = movsDe('personal').length, o = movsDe('oficina').length;
+  return tarjetaInformes() +
+    '<section class="tarjeta inf-ayuda">' + cabTarjeta('i-diana', 'Qué trae cada archivo', 'var(--oro)') +
+      '<div class="tarjeta-cuerpo"><ul class="inf-lista">' +
+        '<li><b>Excel</b>: todos los movimientos del periodo con sus fórmulas, un resumen por mes y otro por categoría. Se abre en Excel, Google Sheets o Numbers.</li>' +
+        '<li><b>PDF</b>: un informe ordenado con totales, listo para imprimir o mandar por WhatsApp o correo.</li>' +
+        '<li><b>Los dos libros</b>: se descargan dos archivos, uno del personal y otro de la oficina.</li>' +
+      '</ul><p class="inf-cuenta">Tienes <b>' + n + '</b> movimientos en el libro personal y <b>' + o + '</b> en el de la oficina.</p></div></section>';
+};
 function tarjetaInformes(){
   var I = ui.inf || (ui.inf = { libro:ui.dinLibro === 'oficina' ? 'oficina' : ui.dinLibro === 'personal' ? 'personal' : 'ambos', periodo:'mes', desde:'', hasta:'' });
   var PER = [['mes','Este mes'],['mes-1','Mes pasado'],['90','Últimos 90 días'],['anio','Este año'],['todo','Todo'],['rango','Elegir fechas']];
@@ -4308,8 +4326,8 @@ VISTAS.dinero = function(){
     }).join('') + '</div><div class="leyenda-graf"><span><i class="e"></i>Entró</span><span><i class="s"></i>Salió</span><span>Debajo: lo que quedó</span></div></div></section>';
 
   html += tarjetaRepetidos(lista, ym);
-  /* Los informes (PDF y Excel), al final: están, pero no mandan */
-  return html + '</div><div style="margin-top:16px">' + tarjetaInformes() + '</div>';
+  /* Los informes tienen su propia pantalla: aquí, un acceso directo */
+  return html + '</div>' + accesoInformes();
 };
 
 /* ---------- Agenda: el día, con sus tareas, eventos, avisos y pagos -------- */
@@ -4353,7 +4371,7 @@ VISTAS.agenda = function(){
 /* Las pantallas de cada panel, en orden, para pasar de una a otra */
 var HIJOS_PANEL = {
   'panel-agenda':[['agenda','Mi día'],['calendario','Calendario'],['tareas','Tareas'],['recordatorios','Avisos'],['proyectos','Proyectos']],
-  'panel-dinero':[['dinero','Resumen del mes'],['movimientos','Movimientos'],['pagos','Pagos fijos']],
+  'panel-dinero':[['dinero','Resumen del mes'],['movimientos','Movimientos'],['pagos','Pagos fijos'],['informes','Informes']],
   'panel-notas':[['notas','Notas'],['listas','Listas']],
   'panel-mas':[['habitos','Hábitos'],['metas','Metas'],['diario','Diario']]
 };
@@ -4519,6 +4537,7 @@ VISTAS['panel-dinero'] = function(){
       mosaico({ ir:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos fijos', d:'Luz, internet, alquiler…', n:np, nl:np ? dinero(pend) + ' por pagar' : 'todo pagado', alerta:!!k0Pagos() }) +
       mosaico({ acc:'data-acc="mov-ver" data-v="personal"', i:'i-casa', c:'#5AA9FF', t:'Libro personal', d:'Tus gastos personales', n:dinero(totalesMes(movsDe('personal'), ym).sal), nl:'gastado' }) +
       mosaico({ acc:'data-acc="mov-ver" data-v="oficina"', i:'i-maletin', c:'#94A3B8', t:'Libro de la oficina', d:'Cuentas de la oficina', n:dinero(totalesMes(movsDe('oficina'), ym).ent), nl:'facturado' }) +
+      mosaico({ ir:'informes', i:'i-bajar', c:'#22C55E', t:'Informes · Excel y PDF', d:'Descarga tus cuentas del mes, del año o de las fechas que elijas', n:todo.length, nl:'movimientos guardados', ancho:true }) +
     '</div>';
 };
 function k0Pagos(){ return pagosProximos(0).length; }
@@ -4612,7 +4631,7 @@ VISTAS.movimientos = function(){
     return '<section class="tarjeta mov-dia"><div class="mov-dia-cab"><b>' + cap(fechaLarga(d)) + '</b><span class="' + (neto < 0 ? 'sale' : 'entra') + '">' + (neto < 0 ? '−' : '+') + dinero(Math.abs(neto)) + '</span></div>' +
       '<div class="lista-filas">' + porDia[d].map(function(t){ return filaMov(t, lib === 'ambos', false); }).join('') + '</div></section>';
   }).join('') + '</div>' +
-  (lista.length > 400 ? '<p class="explica-t" style="text-align:center">Se muestran los 400 más recientes. Usa el buscador o elige un mes.</p>' : '');
+  (lista.length > 400 ? '<p class="explica-t" style="text-align:center">Se muestran los 400 más recientes. Usa el buscador o elige un mes.</p>' : '') + accesoInformes();
   return html;
 };
 /* El buscador de movimientos filtra sin repintar */
@@ -6753,7 +6772,7 @@ document.addEventListener('click', function(ev){
       var nP = enPapelera().length;
       if(!confirm('¿Vaciar la papelera? Se borrarán para siempre ' + nP + (nP === 1 ? ' cosa.' : ' cosas.'))) return;
       enPapelera().forEach(function(p){ purgar(p.c, p.x.id); }); guardar(); pintar(); aviso('🗑️ Papelera vacía'); break;
-    case 'ir-informes': ir('dinero'); setTimeout(function(){ var t = document.querySelector('.informes'); if(t) t.scrollIntoView({ block:'start', behavior:'smooth' }); }, 60); break;
+    case 'ir-informes': ir('informes'); break;
     case 'inf-libro': ui.inf.libro = b.dataset.v; pintar(); break;
     case 'inf-per': ui.inf.periodo = b.dataset.v; pintar(); break;
     case 'inf-bajar':
