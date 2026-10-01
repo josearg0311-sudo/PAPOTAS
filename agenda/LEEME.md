@@ -156,7 +156,12 @@ Tiene que abrirse desde una dirección **https**:
 - **GitHub Pages** (ya montado en el repositorio): se publica sola en
   `https://josearg0311-sudo.github.io/PAPOTAS/agenda/`. La dirección no cambia
   nunca, así que los datos no se "mudan".
-- **Netlify**: arrastra la carpeta `agenda` entera sobre tu sitio.
+- **Netlify**: arrastra a https://app.netlify.com/drop una carpeta (o un .zip) con
+  `index.html`, `agenda-completa.html`, `sw.js`, `_headers`, `icono.svg`, las tres
+  letras `.woff2` y los cinco `.png`. No hacen falta `fuente/`, `construir.py` ni
+  este LEEME. El archivo `_headers` hace que el celular siempre reciba la versión
+  nueva. Para actualizar, arrastra la carpeta nueva **sobre el mismo sitio**
+  (Deploys), así la dirección no cambia y tus datos siguen ahí.
 
 Luego: Android (Chrome) → menú ⋮ → *Instalar aplicación*; iPhone (Safari) →
 Compartir → *Añadir a pantalla de inicio*. Sale con el logo del calendario y
