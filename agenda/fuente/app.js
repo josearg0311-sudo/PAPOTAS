@@ -1317,11 +1317,20 @@ VISTAS.hoy = function(){
 
   /* Pendientes: lo justo, con su botón de añadir */
   if(hoyVisible('hacer')){
-    var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
-    var atrasadas = pend.filter(function(t){ return t.fecha < hoy; }).length;
+    /* Todo lo que anotaste y falta: primero lo atrasado y lo de hoy, luego lo sin fecha y lo que viene */
+    var pendT = vivos('tareas').filter(function(t){ return !t.hecha; });
+    var pYa = pendT.filter(function(t){ return t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
+    var pSin = pendT.filter(function(t){ return !t.fecha; }).sort(function(a, b){ return (b.prio || 0) - (a.prio || 0) || (b.creada || b.upd || 0) - (a.creada || a.upd || 0); });
+    var pVie = pendT.filter(function(t){ return t.fecha && t.fecha > hoy; }).sort(ordenTareas);
+    var pend = pYa.concat(pSin, pVie), MAXP = 6;
+    var atrasadas = pYa.filter(function(t){ return t.fecha < hoy; }).length;
+    var grupoP = function(tit, l, quedan){ return l.length && quedan > 0 ? '<div class="pend-grupo">' + tit + '</div><div class="lista-filas">' + l.slice(0, quedan).map(filaTarea).join('') + '</div>' : ''; };
+    var q1 = MAXP, h1 = grupoP(pYa.length ? 'Hoy' + (atrasadas ? ' y atrasadas' : '') : '', pYa, q1); q1 -= Math.min(pYa.length, q1);
+    var h2 = grupoP('Sin fecha', pSin, q1); q1 -= Math.min(pSin.length, q1);
+    var h3 = grupoP('Lo que viene', pVie, q1);
     html += w('w-2 w-tareas', 'Pendientes', pend.length, 'data-ir="tareas"',
-      (pend.length ? '<div class="lista-filas">' + pend.slice(0, 4).map(filaTarea).join('') + '</div>' +
-        (pend.length > 4 ? '<button class="w-mas" data-ir="tareas">+' + (pend.length - 4) + ' más</button>' : '') : '<p class="nada">Nada pendiente hoy. Día libre. 👊</p>') +
+      (pend.length ? h1 + h2 + h3 +
+        (pend.length > MAXP ? '<button class="w-mas" data-acc="t-filtro" data-f="todas" data-ir-tras="tareas">+' + (pend.length - MAXP) + ' más</button>' : '') : '<p class="nada">Nada pendiente. Día libre. 👊</p>') +
       '<div class="w-pie">' + botonAnadir('tarea', 'Añadir tarea') + (atrasadas ? '<button class="btn chico" data-acc="t-atrasadas-hoy">' + ico('i-rep') + 'Pasar ' + atrasadas + ' atrasadas a hoy</button>' : '') + '</div>');
   }
 
@@ -3579,6 +3588,7 @@ VISTAS.tareas = function(){
     hechas:  function(t){ return t.hecha; }
   };
   var NOM = { hoy:'Hoy', prox:'Próximas', todas:'Pendientes', algun:'Algún día', hechas:'Hechas' };
+  if(ui.tFiltro === 'hoy' && !ui.tFiltroElegido && !enArea.filter(F.hoy).length && enArea.filter(F.todas).length) ui.tFiltro = 'todas';
   var html = '';
 
   /* Pestañas fijas arriba (se deslizan con el dedo) y una barra de herramientas */
@@ -4623,6 +4633,7 @@ VISTAS['panel-agenda'] = function(){
   var pendHoy = itemsDelDia(hoy).filter(function(x){ return !x.hecho; }).length;
   var ne = 0; for(var i = 0; i < 7; i++) ne += itemsDelDia(sumarDias(hoy, i)).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
   var tHoy = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
+  var tPend = vivos('tareas').filter(function(t){ return !t.hecha; }).length;
   var recHoy = vivos('recordatorios').filter(function(r){ return !r.hecho && r.fecha === hoy; }).length;
   var pa = proyectosActivos().length;
   return cabPanel('Agenda', cap(fechaLarga(hoy)) + ' · ' + pendHoy + (pendHoy === 1 ? ' cosa pendiente hoy' : ' cosas pendientes hoy'),
@@ -4630,7 +4641,7 @@ VISTAS['panel-agenda'] = function(){
     '<div class="mosaicos">' +
       mosaico({ ir:'agenda', i:'i-hoy', c:'#2E6BFF', t:'Mi día', d:'Todo lo de un día junto: tareas, eventos y avisos', n:pendHoy, nl:'para hoy', ancho:true }) +
       mosaico({ ir:'calendario', i:'i-cal', c:'#30D158', t:'Calendario', d:'Tu mes, semana o año de un vistazo', n:ne, nl:'en 7 días' }) +
-      mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy, nl:k.tareasTarde ? k.tareasTarde + ' atrasadas' : 'para hoy', alerta:!!k.tareasTarde }) +
+      mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy || tPend, nl:k.tareasTarde ? k.tareasTarde + ' atrasadas' : tHoy ? 'para hoy' + (tPend > tHoy ? ' · ' + tPend + ' en total' : '') : (tPend === 1 ? 'pendiente' : 'pendientes'), alerta:!!k.tareasTarde }) +
       mosaico({ ir:'recordatorios', i:'i-campana', c:'#FF9F0A', t:'Avisos', d:'Lo que no se te puede olvidar', n:k.recordatorios || recHoy, nl:k.recordatorios ? 'pasados' : 'para hoy', alerta:!!k.recordatorios }) +
       mosaico({ ir:'proyectos', i:'i-carpeta', c:'#BF5AF2', t:'Proyectos', d:'Metas grandes paso a paso', n:pa, nl:pa === 1 ? 'activo' : 'activos' }) +
     '</div>';
@@ -4669,8 +4680,8 @@ VISTAS['panel-mas'] = function(){
   var escritos = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === hoy.slice(0, 7) && e.texto; }).length;
   var html = cabPanel('Más', 'Tus espacios, hábitos y ajustes');
   html += '<h3 class="panel-sub">Tus espacios</h3><div class="mosaicos">' + ESPACIOS.map(function(E){
-    var n = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy && espDe(t) === E.id; }).length;
-    return mosaico({ ir:'esp-' + E.id, em:E.em, c:E.c, t:E.nom, d:E.lema, n:n, nl:'para hoy' });
+    var n = vivos('tareas').filter(function(t){ return !t.hecha && espDe(t) === E.id; }).length;
+    return mosaico({ ir:'esp-' + E.id, em:E.em, c:E.c, t:E.nom, d:E.lema, n:n, nl:n === 1 ? 'tarea pendiente' : 'tareas pendientes' });
   }).join('') + '</div>';
   html += '<h3 class="panel-sub">Constancia</h3><div class="mosaicos">' +
     mosaico({ ir:'habitos', i:'i-habitos', c:'#FF9F0A', t:'Hábitos', d:'Lo que haces cada día y tus rachas', n:habOk + '/' + hab.length, nl:'hoy' }) +
@@ -7031,7 +7042,7 @@ document.addEventListener('click', function(ev){
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
     case 'habito-ed': cerrarFlotante(); editarHabito(id); break;
 
-    case 't-filtro': ui.tFiltro = b.dataset.f; pintar(); break;
+    case 't-filtro': ui.tFiltro = b.dataset.f; ui.tFiltroElegido = true; if(b.dataset.irTras && ui.vista !== b.dataset.irTras){ ir(b.dataset.irTras); break; } pintar(); break;
     case 't-area': ui.tArea = b.dataset.a; pintar(); break;
     case 't-borrar-hechas':
       if(!confirm('¿Borrar todas las tareas hechas?')) return;
