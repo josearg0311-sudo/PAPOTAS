@@ -3569,3 +3569,7 @@ body .tarjeta .ajuste{ padding-left:0 !important; padding-right:0 !important }
 .inf-lista b{ color:var(--tinta) }
 .inf-cuenta{ margin:14px 0 0; font-size:13px; color:var(--tinta-3) }
 .informes .inf-btn{ min-height:64px }
+/* Aviso de datos de ejemplo en Hoy */
+.banda-ejemplos{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; justify-content:space-between; margin:0 0 14px; padding:12px 14px;
+  border-radius:16px; border:1px dashed color-mix(in srgb, var(--oro) 55%, transparent); background:color-mix(in srgb, var(--oro) 10%, transparent); font-size:13.5px; color:var(--tinta-2) }
+.banda-ejemplos b{ color:var(--tinta) }

@@ -1305,6 +1305,7 @@ VISTAS.hoy = function(){
   }
   if(!nombre && total) html += '<section class="pide-nombre"><b>¿Cómo te llamas?</b><span>Para saludarte por tu nombre cada día.</span>' +
     '<form data-acc="bienvenida" class="pn-form" autocomplete="off"><input id="nombreBienvenida" class="entrada" type="text" maxlength="40" placeholder="Tu nombre, ej. José"><button class="btn primario" type="submit">Listo</button></form></section>';
+  if(hayEjemplos()) html += '<section class="banda-ejemplos"><span>👀 Estás viendo <b>datos de ejemplo</b>.</span><button type="button" class="btn chico" data-acc="quitar-ejemplos">Quitar los ejemplos</button></section>';
   html += '<div class="panel-hoy">';
 
   /* Tus espacios: lo primero, con lo que tiene cada uno para hoy */
@@ -5318,6 +5319,7 @@ VISTAS.ajustes = function(){
       '<button class="btn chico" data-acc="cargar">' + ico('i-subir') + 'Cargar</button>' +
       '<input type="file" id="archivoRespaldo" accept=".json,application/json" class="oculto"></div>' +
     (leerJSON(CLAVE_ERRORES, []).length ? '<div class="ajuste"><div class="txt"><b>Registro de fallos</b><small>Hay ' + leerJSON(CLAVE_ERRORES, []).length + ' anotados. Si notas algo raro, cópialo y envíamelo.</small></div><button class="btn chico" data-acc="errores-ver">Ver</button></div>' : '') +
+    (hayEjemplos() ? '<div class="ajuste"><div class="txt"><b>Datos de ejemplo</b><small>Quita solo lo que cargó «Ver con ejemplos». Lo tuyo se queda.</small></div><button class="btn chico" data-acc="quitar-ejemplos">Quitar</button></div>' : '') +
     '<div class="ajuste"><div class="txt"><b>Papelera</b><small>Lo que borras se guarda ' + DIAS_PAPELERA + ' días por si te arrepientes.</small></div>' +
       '<button class="btn chico" data-ir="papelera">' + ico('i-basura') + 'Abrir (' + enPapelera().length + ')</button></div>' +
     '<div class="ajuste"><div class="txt"><b>Instalar como aplicación</b><small>Con su icono, a pantalla completa y abriendo sin internet.</small></div>' +
@@ -6550,6 +6552,11 @@ function aplicarPaleta(p){
    EJEMPLOS, para ver cómo queda antes de llenarla
    ========================================================================== */
 function cargarEjemplos(){
+  /* Se anota qué había antes, para poder quitar SOLO los ejemplos después */
+  var antes = {};
+  Object.keys(db).forEach(function(k){ if(Array.isArray(db[k])) antes[k] = db[k].map(function(x){ return x.id; }); });
+  var libAntes = { personal:movimientos(CLAVE_LEDGER).length, oficina:movimientos(CLAVE_OFICINA).length };
+  var presuAntes = db.perfil && db.perfil.presu ? JSON.parse(JSON.stringify(db.perfil.presu)) : null;
   var hoy = hoyISO(), c = Date.now(), w = deISO(hoy).getDay();
   function T(o){ return Object.assign({ id:nid(), prio:0, area:'', rep:'no', sub:[], notas:'', hora:'', creada:c++ }, o); }
   var sab = sumarDias(hoy, (6 - w + 7) % 7 || 7);
@@ -6663,8 +6670,68 @@ function cargarEjemplos(){
   [[-3,'correr',40,6.5],[-9,'correr',30,5],[-16,'bici',60,22],[-18,'correr',45,7.2]].forEach(function(x){ poner('entrenos', { id:nid(), fecha:sumarDias(hoy, x[0]), tipo:x[1], min:x[2], km:x[3], int:2, notas:'' }); });
   vivos('tareas').forEach(function(t){ if(t.t === 'Textos e imágenes' || t.t === 'Preparar la presentación del cliente'){ t.estado = 'curso'; poner('tareas', t); } });
   vivos('cursos').forEach(function(k, j){ if(j < 2){ k.faltas = j ? 4 : 1; k.maxFaltas = 5; poner('cursos', k); } });
+  var reg = leerJSON('agenda_ejemplos', null) || { cols:{}, libros:{}, presuAntes:presuAntes };
+  Object.keys(db).forEach(function(k){
+    if(!Array.isArray(db[k])) return;
+    var nuevos = db[k].filter(function(x){ return (antes[k] || []).indexOf(x.id) < 0; }).map(function(x){ return x.id; });
+    if(nuevos.length) reg.cols[k] = (reg.cols[k] || []).concat(nuevos);
+  });
+  if(!libAntes.personal) reg.libros.personal = movimientos(CLAVE_LEDGER).map(function(t){ return t.id; });
+  if(!libAntes.oficina) reg.libros.oficina = movimientos(CLAVE_OFICINA).map(function(t){ return t.id; });
+  escribirJSON('agenda_ejemplos', reg);
   pintar();
-  aviso('Ejemplos cargados', 'Bórralos cuando quieras; son solo para ver cómo queda.');
+  aviso('Ejemplos cargados', 'Cuando quieras empezar con lo tuyo, toca «Quitar los ejemplos» en Hoy o en Ajustes.');
+}
+/* Firmas de los datos de ejemplo de versiones anteriores (que no anotaban cuáles eran) */
+var EJ_CAMPOS = {"tareas": ["t"], "eventos": ["t"], "recordatorios": ["t"], "listas": ["nombre"], "habitos": ["nombre"], "notas": ["t"], "metas": ["t"], "pagos": ["t"], "cursos": ["nombre"], "proyectos": ["nombre"], "cobros": ["cliente", "concepto"], "deudas": ["persona", "concepto"], "rutinas": ["nombre"], "casa": ["t"], "docs": ["t"], "fichas": ["q"], "clientes": ["nombre"], "horas": ["cliente", "nota", "min"], "entrenos": ["tipo", "min", "km", "notas"], "medidas": ["peso"], "diario": ["animo", "texto"]};
+var EJ_FIRMAS = {"tareas": ["Pagar el recibo de luz", "Llamar al banco", "Regar las plantas", "Preparar la presentación del cliente", "Enviar el informe mensual", "Resolver la práctica de Matemática", "Leer el capítulo 4 de Economía", "Comprar chimpunes nuevos", "Elegir el tema", "Buscar 5 fuentes", "Escribir la introducción", "Revisión con el grupo", "Reunión de requisitos", "Maqueta de la portada", "Textos e imágenes", "Publicar la web"], "eventos": ["Almuerzo con la familia", "Reunión con el equipo", "Revisión semanal", "Examen parcial de Matemática II", "Pichanga con los amigos", "Gimnasio", "Viaje a Cusco", "Mamá", "Pichanga del jueves", "Fulbito con la oficina", "Liga del barrio"], "recordatorios": ["Tomar vitaminas", "Renovar el seguro del auto", "Llevar la camiseta para la pichanga"], "listas": ["Compras", "Mochila del gym"], "habitos": ["Beber 2 litros de agua", "Leer 20 minutos", "Anotar mis gastos"], "notas": ["Wifi de casa", "Rutina de gym", "Temas del parcial"], "metas": ["Ahorrar para el viaje", "Leer libros este año"], "pagos": ["Luz", "Internet", "Alquiler"], "cursos": ["Matemática II", "Economía", "Inglés intermedio"], "proyectos": ["Monografía de Economía", "Web de Empresa ABC"], "cobros": ["Empresa ABC|Factura F001-245", "Juan Pérez|Asesoría de agosto"], "deudas": ["Carlos|Entradas del concierto", "Ana|Almuerzo del viernes"], "rutinas": ["Pecho y tríceps", "Espalda y bíceps"], "casa": ["Cambiar las sábanas", "Regar las plantas", "Limpiar la refrigeradora", "Cambiar el cepillo de dientes"], "docs": ["DNI", "SOAT", "Pasaporte"], "fichas": ["¿Derivada de sen x?", "¿Derivada de eˣ?", "Regla de la cadena", "∫ 1/x dx", "¿Qué es la elasticidad precio?", "Ley de la oferta"], "clientes": ["Empresa ABC", "Juan Pérez"], "horas": ["Empresa ABC|Diseño de la portada|95", "Empresa ABC|Reunión y ajustes|120", "Juan Pérez|Asesoría contable|80", "Empresa ABC|Maquetación|150", "Juan Pérez|Revisión de facturas|60"], "entrenos": ["gym|65||Pecho y tríceps", "gym|60||Espalda y bíceps", "gym|70||Pecho y tríceps", "correr|35|5.2|", "futbol|90||Ganamos 5-3", "gym|65||Espalda y bíceps", "gym|60||Pierna", "futbol|90||Empate 2-2", "correr|40|6.5|", "correr|30|5|", "bici|60|22|", "correr|45|7.2|"], "medidas": ["76.4", "75.9", "75.6", "75.1", "74.8"], "diario": ["4|Buen día en el trabajo, terminé el informe.", "5|Cena con amigos 🥳", "2|Cansado, dormí poco."]};
+var EJ_LIBROS = {"personal": ["Sueldo|Sueldo|3500", "Alquiler|Casa|1200", "Supermercado|Comida|380", "Supermercado|Comida|405", "Supermercado|Comida|430", "Supermercado|Comida|455", "Gimnasio|Deporte|120", "Curso de inglés|Estudios|180", "Almuerzos|Comida|210", "Almuerzos|Comida|200", "Almuerzos|Comida|190", "Almuerzos|Comida|180", "Taxi|Transporte|65", "Cine|Ocio|48"], "oficina": ["Factura cliente A|Ventas|4200", "Factura cliente A|Ventas|4350", "Factura cliente A|Ventas|4500", "Factura cliente A|Ventas|4650", "Útiles de oficina|Insumos|160", "Internet oficina|Servicios|129", "Factura cliente B|Ventas|1800", "Planilla asistente|Personal|1500"]};
+function esMovEjemplo(cual){ return function(t){ return EJ_LIBROS[cual].indexOf(t.desc + '|' + t.cat + '|' + (+t.amount)) >= 0; }; }
+function firmaEj(col, x){ return EJ_CAMPOS[col].map(function(f){ return x[f] == null ? '' : String(x[f]); }).join('|'); }
+/* Si los ejemplos se cargaron con una versión anterior, se reconocen por su contenido */
+function detectarEjemplosViejos(){
+  if(leerJSON('agenda_ejemplos', null) || leerJSON('agenda_ejemplos_revisado', false)) return;
+  var reg = { cols:{}, libros:{}, viejos:true }, n = 0;
+  Object.keys(EJ_CAMPOS).forEach(function(col){
+    var ids = (db[col] || []).filter(function(x){ return !x.del && EJ_FIRMAS[col].indexOf(firmaEj(col, x)) >= 0; }).map(function(x){ return x.id; });
+    if(ids.length){ reg.cols[col] = ids; n += ids.length; }
+  });
+  var marcas = ['Wifi de casa', 'Pichanga con los amigos', 'Monografía de Economía'].filter(function(t){
+    return vivos('notas').concat(vivos('eventos')).concat(vivos('proyectos')).some(function(x){ return x.t === t || x.nombre === t; });
+  }).length;
+  escribirJSON('agenda_ejemplos_revisado', true);
+  if(n < 15 || marcas < 2) return;
+  [['personal', CLAVE_LEDGER], ['oficina', CLAVE_OFICINA]].forEach(function(L){
+    var nEj = movimientos(L[1]).filter(esMovEjemplo(L[0])).length;
+    if(nEj) reg.libros[L[0]] = 'firma';
+  });
+  var pr = (db.perfil || {}).presu;
+  reg.presuAntes = pr && !(pr.personal === 2400 && pr.oficina === 2200) ? pr : null;
+  escribirJSON('agenda_ejemplos', reg);
+}
+function hayEjemplos(){ var r = leerJSON('agenda_ejemplos', null); return !!(r && (Object.keys(r.cols || {}).length || Object.keys(r.libros || {}).length)); }
+/* Quita solo lo que puso «Ver con ejemplos»; lo que anotaste tú se queda */
+function quitarEjemplos(){
+  var r = leerJSON('agenda_ejemplos', null);
+  if(!r) return;
+  if(!confirm('¿Quitar todos los datos de ejemplo? Lo que anotaste tú se queda tal cual.')) return;
+  var n = 0;
+  Object.keys(r.cols || {}).forEach(function(col){
+    if(!Array.isArray(db[col])) return;
+    r.cols[col].forEach(function(id){ if(buscarId(col, id)){ purgar(col, id); n++; } });
+  });
+  db.perfil = Object.assign({}, db.perfil, { upd:Date.now() });
+  if(r.presuAntes) db.perfil.presu = r.presuAntes; else delete db.perfil.presu;
+  guardar();
+  Object.keys(r.libros || {}).forEach(function(cual){
+    var ids = r.libros[cual] || [], porFirma = ids === 'firma';
+    if(!LIBROS[cual] || !ids.length) return;
+    var esEj = porFirma ? esMovEjemplo(cual) : function(t){ return !!t.id && ids.indexOf(t.id) >= 0; };
+    cambiarLibro(cual, function(l){ return l.filter(function(t){ if(esEj(t)){ n++; return false; } return true; }); });
+  });
+  try{ localStorage.removeItem('agenda_ejemplos'); }catch(e){}
+  pintar();
+  aviso('✨ Listo, agenda limpia', 'Se quitaron ' + n + ' datos de ejemplo. Ahora empieza con lo tuyo.');
 }
 
 /* ==========================================================================
@@ -7199,6 +7266,7 @@ document.addEventListener('click', function(ev){
       aviso('PIN quitado'); pintar(); break;
 
     case 'ejemplos': cargarEjemplos(); break;
+    case 'quitar-ejemplos': quitarEjemplos(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;
     case 'paleta': aplicarPaleta(b.dataset.p); pintar(); break;
     case 'lunes': pref.lunes = b.dataset.v === '1'; guardarPref(); pintar(); break;
@@ -7772,6 +7840,7 @@ var TECLADO = (function(){
   document.documentElement.setAttribute('data-paleta', paletaValida(document.documentElement.getAttribute('data-paleta')));
   colorBarra();
 
+  try{ detectarEjemplosViejos(); }catch(e){}
   var h = (location.hash || '').slice(1), atajo = '';
   if(h === 'gasto' || h === 'ingreso' || h === 'anadir'){ atajo = h; h = 'hoy'; try{ history.replaceState(null, '', '#hoy'); }catch(e){} }
   if(h === 'cuentas') h = 'personal';
