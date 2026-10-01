@@ -2936,6 +2936,45 @@ padding:14px 16px !important; margin:0 0 14px !important
 .ag-bloque > :last-child, .ag-bloque .fila:last-child, .pl-dia .fila:last-child, .rec-bloque > :last-child, .rec-bloque .fila:last-child{ border-bottom:0 !important }
 .pl-dia{ display:flex; gap:12px }
 .ag-bloque > :first-child, .rec-bloque > :first-child, .pl-dia :first-child, .tarjeta > :first-child, .w > :first-child{ margin-top:0 !important; padding-top:0 !important }
+.panel-hoy > .qh{ --wc:var(--verde) } .panel-hoy > .w-sig{ --wc:var(--azul) } .panel-hoy > .w-tareas{ --wc:var(--debe) }
+.panel-hoy > .tu-dia{ --wc:var(--azul) } .panel-hoy > .w-manana{ --wc:#9B7BFF } .panel-hoy > .w-habitos{ --wc:var(--oro) }
+.panel-hoy > .w-dinero-hoy{ --wc:var(--haber) } .panel-hoy > .w-prio{ --wc:var(--verde) } .panel-hoy > .w-viene{ --wc:var(--esp-estudios) }
+.panel-hoy > .w-notas{ --wc:var(--oro) }
+.ag-bloque{ --wc:var(--azul) } .ag-sin-hora{ --wc:var(--verde) } .pl-dia{ --wc:var(--debe) } .rec-bloque{ --wc:var(--oro) } .cal-mes-caja{ --wc:var(--azul) }
+body .panel-hoy > .w:not(.esp-hoy), .ag-bloque, .pl-dia, .rec-bloque, .cal-mes-caja, .tarjeta{
+background:
+radial-gradient(240px 120px at 0% 0%, color-mix(in srgb, var(--wc, var(--verde)) 13%, transparent), transparent 70%),
+var(--marco-fondo) !important;
+border-color:color-mix(in srgb, var(--wc, var(--verde)) 16%, var(--marco-borde)) !important;
+box-shadow:inset 0 1px 0 color-mix(in srgb, var(--tinta) 5%, transparent), 0 10px 28px -14px rgba(0,0,0,.55) !important
+}
+:root[data-tema="claro"] body .panel-hoy > .w:not(.esp-hoy), :root[data-tema="claro"] .tarjeta, :root[data-tema="claro"] .ag-bloque, :root[data-tema="claro"] .pl-dia, :root[data-tema="claro"] .rec-bloque, :root[data-tema="claro"] .cal-mes-caja{
+box-shadow:0 6px 20px -12px rgba(20,30,60,.25) !important
+}
+body .panel-hoy > .w:not(.esp-hoy) > .w-cab b::before, .ag-bloque > :first-child::before, .rec-bloque > :first-child::before{
+content:""; display:inline-block; width:4px; height:1em; border-radius:4px; background:var(--wc); margin-right:9px; vertical-align:-2px
+}
+.tarjeta-cab .azulejo{ display:inline-grid !important; place-items:center; width:30px !important; height:30px !important; border-radius:10px !important; margin-right:10px;
+background:color-mix(in srgb, var(--c) 20%, transparent) !important; color:var(--c) !important; vertical-align:middle; flex:none }
+.tarjeta-cab .azulejo .i{ width:17px; height:17px }
+.tarjeta-cab h2, .tarjeta-cab h3{ display:flex !important; align-items:center }
+.tarjeta:has(.tarjeta-cab .azulejo){ --wc:var(--verde) }
+body .panel-hoy > section.w, body .panel-hoy > div.w, body .panel-hoy > .w{ margin:0 0 14px !important }
+body .w .siguiente, body .w-sig > *{ box-shadow:none !important; background:none !important; border:0 !important }
+.vista > .din-bloques, .vista > .din-saldo, .vista > .mov-cifras{
+background:radial-gradient(240px 120px at 0% 0%, color-mix(in srgb, var(--haber) 12%, transparent), transparent 70%), var(--marco-fondo) !important;
+border:1px solid color-mix(in srgb, var(--haber) 16%, var(--marco-borde)) !important; border-radius:20px !important; padding:16px !important; margin:0 0 14px !important;
+box-shadow:inset 0 1px 0 color-mix(in srgb, var(--tinta) 5%, transparent), 0 10px 28px -14px rgba(0,0,0,.55) !important
+}
+.vista > .din-saldo{ display:flex !important; width:100%; align-items:center }
+.vista > .din-bloques .din-queda{ border-bottom:0 !important; padding-bottom:0 !important }
+.tarjeta-cab h2, .tarjeta-cab h3{ font-size:18px !important; line-height:1.2 !important }
+body .w .tarjeta, body .tarjeta .tarjeta, body .hoja-flot .tarjeta, :root[data-tema="claro"] body .w .tarjeta, :root[data-tema="claro"] body .tarjeta .tarjeta{
+background:none !important; box-shadow:none !important; border:0 !important; padding:0 !important
+}
+.mov-cifras b{ font-size:clamp(14px, 4.3vw, 18px) !important }
+.vista > .mov-cifras{ padding:14px 12px !important }
+body .tarjeta .ajuste{ padding-left:0 !important; padding-right:0 !important }
 </style>
 </head>
 <body>
