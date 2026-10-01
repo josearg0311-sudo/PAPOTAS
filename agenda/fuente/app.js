@@ -1350,8 +1350,12 @@ VISTAS.hoy = function(){
   if(hoyVisible('dinero')){
     /* Dinero del mes: lo gastado y lo que entró, cada uno con su botón */
     var ppH = pagosProximos(7);
+    var libH = /^(personal|oficina)$/.test(pref.hoyLibro || '') ? pref.hoyLibro : 'todo';
     html += '<section class="w w-2 w-dinero-hoy"><header class="w-cab"><b>Tu dinero</b>' + (ppH.length ? '<span class="w-n">' + ppH.length + ' por pagar</span>' : '') +
-      '<button class="ver-link" data-ir="panel-dinero">Ver todo ' + ico('i-der') + '</button></header>' + bloquesDinero('todo') + '</section>';
+      '<button class="ver-link" data-acc="mov-ver" data-v="' + (libH === 'todo' ? 'ambos' : libH) + '">Ver todo ' + ico('i-der') + '</button></header>' +
+      '<div class="selector din-hoy-sel">' + [['todo','Los dos'],['personal','🏠 Personal'],['oficina','💼 Oficina']].map(function(o){
+        return '<button type="button" data-acc="hoy-libro" data-v="' + o[0] + '" aria-pressed="' + (libH === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+      (libH === 'todo' ? dineroDosLibros() : bloquesDinero(libH)) + '</section>';
   }
 
   /* Tus 3 prioridades */
@@ -2625,6 +2629,20 @@ function tarjetaDineroEsp(id){
     '<div class="lista-filas">' + ult.map(function(t){ return filaMov(t, false, false); }).join('') + '</div></section>';
 }
 /* Gasto e ingreso del mes, lado a lado, cada uno con su botón para anotar */
+/* Hoy, «Los dos»: cada libro en su fila (toca para ir a sus movimientos) y el total */
+function dineroDosLibros(){
+  var ym = hoyISO().slice(0, 7), totQ = 0;
+  var filas = [['personal','🏠','Personal'],['oficina','💼','Oficina']].map(function(L){
+    var tm = totalesMes(movsDe(L[0]), ym), q = tm.ent - tm.sal; totQ += q;
+    return '<button type="button" class="dlh" data-acc="mov-ver" data-v="' + L[0] + '"><span class="dlh-ico">' + L[1] + '</span>' +
+      '<span class="dlh-txt"><b>' + L[2] + '</b><small><em class="sale">Salió ' + dinero(tm.sal) + '</em><em class="entra">Entró ' + dinero(tm.ent) + '</em></small></span>' +
+      '<span class="dlh-q' + (q < 0 ? ' neg' : '') + '"><small>' + (q < 0 ? 'En rojo' : 'Queda') + '</small><b>' + (q < 0 ? '−' : '') + dinero(Math.abs(q)) + '</b></span>' + ico('i-der') + '</button>';
+  }).join('');
+  return '<div class="din-libros-hoy">' + filas + '</div>' +
+    '<div class="din-hoy-acc"><button class="btn primario" data-acc="din-anotar" data-libro="personal" data-t="Gasto">' + ico('i-plus') + 'Gasto</button>' +
+      '<button class="btn btn-ingreso" data-acc="din-anotar" data-libro="personal" data-t="Ingreso">' + ico('i-plus') + 'Ingreso</button></div>' +
+    '<div class="din-queda din-total' + (totQ < 0 ? ' neg' : '') + '"><span>' + (totQ < 0 ? 'Entre los dos vas en rojo' : 'Entre los dos te queda') + '</span><b>' + (totQ < 0 ? '−' : '') + dinero(Math.abs(totQ)) + '</b></div>';
+}
 function bloquesDinero(id){
   var din = id === 'todo' ? { libro:'personal', lista:movsDe('todo'), cat:'' } : dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym), ta = totalesMes(din.lista, mesAntes(ym, 1));
   var hoy = hoyISO(), gHoy = 0, iHoy = 0;
@@ -7316,6 +7334,7 @@ document.addEventListener('click', function(ev){
 
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
+    case 'hoy-libro': pref.hoyLibro = b.dataset.v; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'pers-todo': pref.persSolo = b.dataset.v === '1'; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;
     case 'paleta': aplicarPaleta(b.dataset.p); pintar(); break;

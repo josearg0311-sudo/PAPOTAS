@@ -3684,6 +3684,32 @@ body .semana-esp .atajos{ display:flex; flex-wrap:wrap; gap:8px; padding:12px 0 
 body .heroe.esp-heroe .datos{ gap:8px !important; border-bottom:0 !important }
 body .heroe.esp-heroe .dato{ flex-direction:row !important; border-left:1px solid var(--marco-borde) !important; margin:0 !important }
 body .heroe.esp-heroe .dato::before, body .heroe.esp-heroe .dato::after{ display:none !important }
+
+/* ===== Hoy · Tu dinero: personal, oficina o los dos ===== */
+.din-hoy-sel{ margin:2px 0 12px !important }
+.din-libros-hoy{ display:flex; flex-direction:column; gap:8px }
+.dlh{ display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px; text-align:left; color:var(--tinta);
+  background:var(--hoja); border:1px solid var(--marco-borde); border-radius:16px }
+.dlh:active{ transform:scale(.985) }
+.dlh-ico{ width:40px; height:40px; flex:none; display:grid; place-items:center; border-radius:12px; font-size:20px; background:var(--hoja-2) }
+.dlh-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px }
+.dlh-txt b{ font-size:15.5px; font-weight:750 }
+.dlh-txt small{ font-size:12.5px; color:var(--tinta-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.dlh-txt em{ font-style:normal } .dlh-txt em.sale{ color:color-mix(in srgb, var(--debe) 85%, var(--tinta)) } .dlh-txt em.entra{ color:color-mix(in srgb, var(--haber) 85%, var(--tinta)) }
+.dlh-q{ display:flex; flex-direction:column; align-items:flex-end; flex:none }
+.dlh-q small{ font-size:11.5px; color:var(--tinta-3) }
+.dlh-q b{ font-size:18px; font-weight:800; font-variant-numeric:tabular-nums }
+.dlh-q.neg b{ color:var(--debe) }
+.dlh > .i{ width:16px; height:16px; color:var(--tinta-3); flex:none }
+.din-hoy-acc{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0 0 }
+.din-hoy-acc .btn{ justify-content:center }
+.din-queda.din-total{ display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:12px; border-top:1px solid var(--regla) }
+.din-queda.din-total b{ font-size:20px }
+@media (max-width:420px){ .dlh-txt small{ white-space:normal } }
+.dlh-txt small{ display:flex; flex-wrap:wrap; column-gap:12px; row-gap:1px; white-space:normal !important }
+.dlh-txt em{ white-space:nowrap }
+body .w .din-queda.din-total{ border-bottom:0 !important }
+.din-hoy-acc + .din-queda.din-total{ border-top:1px solid var(--regla) !important }
 </style>
 </head>
 <body>
@@ -5167,8 +5193,12 @@ VISTAS.hoy = function(){
   if(hoyVisible('dinero')){
     /* Dinero del mes: lo gastado y lo que entró, cada uno con su botón */
     var ppH = pagosProximos(7);
+    var libH = /^(personal|oficina)$/.test(pref.hoyLibro || '') ? pref.hoyLibro : 'todo';
     html += '<section class="w w-2 w-dinero-hoy"><header class="w-cab"><b>Tu dinero</b>' + (ppH.length ? '<span class="w-n">' + ppH.length + ' por pagar</span>' : '') +
-      '<button class="ver-link" data-ir="panel-dinero">Ver todo ' + ico('i-der') + '</button></header>' + bloquesDinero('todo') + '</section>';
+      '<button class="ver-link" data-acc="mov-ver" data-v="' + (libH === 'todo' ? 'ambos' : libH) + '">Ver todo ' + ico('i-der') + '</button></header>' +
+      '<div class="selector din-hoy-sel">' + [['todo','Los dos'],['personal','🏠 Personal'],['oficina','💼 Oficina']].map(function(o){
+        return '<button type="button" data-acc="hoy-libro" data-v="' + o[0] + '" aria-pressed="' + (libH === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+      (libH === 'todo' ? dineroDosLibros() : bloquesDinero(libH)) + '</section>';
   }
 
   /* Tus 3 prioridades */
@@ -6442,6 +6472,20 @@ function tarjetaDineroEsp(id){
     '<div class="lista-filas">' + ult.map(function(t){ return filaMov(t, false, false); }).join('') + '</div></section>';
 }
 /* Gasto e ingreso del mes, lado a lado, cada uno con su botón para anotar */
+/* Hoy, «Los dos»: cada libro en su fila (toca para ir a sus movimientos) y el total */
+function dineroDosLibros(){
+  var ym = hoyISO().slice(0, 7), totQ = 0;
+  var filas = [['personal','🏠','Personal'],['oficina','💼','Oficina']].map(function(L){
+    var tm = totalesMes(movsDe(L[0]), ym), q = tm.ent - tm.sal; totQ += q;
+    return '<button type="button" class="dlh" data-acc="mov-ver" data-v="' + L[0] + '"><span class="dlh-ico">' + L[1] + '</span>' +
+      '<span class="dlh-txt"><b>' + L[2] + '</b><small><em class="sale">Salió ' + dinero(tm.sal) + '</em><em class="entra">Entró ' + dinero(tm.ent) + '</em></small></span>' +
+      '<span class="dlh-q' + (q < 0 ? ' neg' : '') + '"><small>' + (q < 0 ? 'En rojo' : 'Queda') + '</small><b>' + (q < 0 ? '−' : '') + dinero(Math.abs(q)) + '</b></span>' + ico('i-der') + '</button>';
+  }).join('');
+  return '<div class="din-libros-hoy">' + filas + '</div>' +
+    '<div class="din-hoy-acc"><button class="btn primario" data-acc="din-anotar" data-libro="personal" data-t="Gasto">' + ico('i-plus') + 'Gasto</button>' +
+      '<button class="btn btn-ingreso" data-acc="din-anotar" data-libro="personal" data-t="Ingreso">' + ico('i-plus') + 'Ingreso</button></div>' +
+    '<div class="din-queda din-total' + (totQ < 0 ? ' neg' : '') + '"><span>' + (totQ < 0 ? 'Entre los dos vas en rojo' : 'Entre los dos te queda') + '</span><b>' + (totQ < 0 ? '−' : '') + dinero(Math.abs(totQ)) + '</b></div>';
+}
 function bloquesDinero(id){
   var din = id === 'todo' ? { libro:'personal', lista:movsDe('todo'), cat:'' } : dineroEsp(id), ym = hoyISO().slice(0, 7), tm = totalesMes(din.lista, ym), ta = totalesMes(din.lista, mesAntes(ym, 1));
   var hoy = hoyISO(), gHoy = 0, iHoy = 0;
@@ -11133,6 +11177,7 @@ document.addEventListener('click', function(ev){
 
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
+    case 'hoy-libro': pref.hoyLibro = b.dataset.v; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'pers-todo': pref.persSolo = b.dataset.v === '1'; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;
     case 'paleta': aplicarPaleta(b.dataset.p); pintar(); break;
