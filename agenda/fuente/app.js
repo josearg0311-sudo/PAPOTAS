@@ -1436,6 +1436,10 @@ function queHacerAhora(hoy, h){
   if(!gastoHoy && h >= 13) s('var(--haber)', 'i-bajar', '¿Gastaste algo hoy? <b>Anótalo</b> en 5 segundos', 'Anotar', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"');
   var di = buscarId('diario', hoy);
   if(h >= 20 && !(di && !di.del && di.texto)) s('var(--rosa)', 'i-diario', 'Cierra el día: <b>cuenta cómo te fue</b>', 'Escribir', 'data-ir="diario"');
+  /* Tus datos viven solo en este aparato: que no se pierdan */
+  var rs = diasSinRespaldo(), cosas = vivos('tareas').length + vivos('eventos').length + vivos('notas').length + libroDatos('personal').length;
+  if(!hayAlgunaNube() && cosas >= 10 && rs.dias >= (rs.nunca ? 3 : 14))
+    s('var(--oro)', 'i-candado', 'Tus datos solo están en este celular: <b>guarda un respaldo</b>' + (rs.nunca ? '' : ' (el último fue hace ' + rs.dias + ' días)'), 'Guardar', 'data-acc="respaldo"');
   var tHoy = vivos('tareas').filter(function(t){ return t.fecha === hoy; }).length;
   if(!tHoy && h < 14) s('var(--verde)', 'i-plus', 'Aún no tienes tareas para hoy: <b>planea tu día</b>', 'Añadir', 'data-acc="nuevo" data-tipo="tarea"');
   var volver = nOc ? '<button type="button" class="qh-volver" data-acc="qh-mostrar">Mostrar ' + (nOc === 1 ? 'la sugerencia oculta' : 'las ' + nOc + ' ocultas') + '</button>' : '';
@@ -5290,7 +5294,7 @@ VISTAS.ajustes = function(){
   html += '</div>';
 
   html += '<div class="seccion-tit">Tus datos</div><div class="tarjeta">' +
-    '<div class="ajuste"><div class="txt"><b>Respaldo completo</b><small>Un archivo con toda la agenda, tus gastos personales y las cuentas de la oficina. Guárdalo de vez en cuando.</small></div>' +
+    '<div class="ajuste"><div class="txt"><b>Respaldo completo</b><small>Un archivo con toda la agenda, tus gastos personales y las cuentas de la oficina. Guárdalo de vez en cuando (en Drive o en tu correo). <b>' + textoRespaldo() + '</b></small></div>' +
       '<button class="btn chico" data-acc="respaldo">' + ico('i-bajar') + 'Descargar</button>' +
       '<button class="btn chico" data-acc="cargar">' + ico('i-subir') + 'Cargar</button>' +
       '<input type="file" id="archivoRespaldo" accept=".json,application/json" class="oculto"></div>' +
@@ -6451,6 +6455,23 @@ prefDesdePerfil();
 function descargarRespaldo(){
   var datos = { app:'agenda', version:2, exportadoEn:new Date().toISOString(), agenda:db, cuentas:leerJSON(CLAVE_LEDGER, null), oficina:leerJSON(CLAVE_OFICINA, null) };
   bajar(new Blob([JSON.stringify(datos, null, 1)], { type:'application/json' }), 'agenda_' + hoyISO() + '.json');
+  try{ localStorage.setItem('agenda_respaldo_ult', hoyISO()); }catch(e){}
+}
+/* Días desde el último respaldo (o desde que empezaste a usarla, si nunca guardaste uno) */
+function diasSinRespaldo(){
+  var ult = '', desde = '';
+  try{
+    ult = localStorage.getItem('agenda_respaldo_ult') || '';
+    desde = localStorage.getItem('agenda_desde') || '';
+    if(!desde){ desde = hoyISO(); localStorage.setItem('agenda_desde', desde); }
+  }catch(e){ return { dias:0, nunca:false }; }
+  var ref = ult || desde;
+  return { dias:Math.round((deISO(hoyISO()) - deISO(ref)) / 864e5), nunca:!ult, ult:ult };
+}
+function textoRespaldo(){
+  var r = diasSinRespaldo();
+  if(r.nunca) return 'Aún no guardaste ninguno.';
+  return r.dias === 0 ? 'El último lo guardaste hoy. 👍' : r.dias === 1 ? 'El último lo guardaste ayer.' : 'El último lo guardaste hace ' + r.dias + ' días.';
 }
 function cargarRespaldo(archivo){
   var lector = new FileReader();
