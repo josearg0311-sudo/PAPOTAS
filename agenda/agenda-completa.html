@@ -3710,6 +3710,20 @@ body .heroe.esp-heroe .dato::before, body .heroe.esp-heroe .dato::after{ display
 .dlh-txt em{ white-space:nowrap }
 body .w .din-queda.din-total{ border-bottom:0 !important }
 .din-hoy-acc + .din-queda.din-total{ border-top:1px solid var(--regla) !important }
+
+/* ===== Tus espacios: cada uno con sus datos, y cada dato lleva a su sección ===== */
+.eh{ cursor:pointer }
+.eh-cab{ display:flex; align-items:center; gap:8px }
+.eh-cab > .i{ margin-left:auto; width:16px; height:16px; color:var(--tinta-3) }
+.eh-datos{ display:flex; flex-wrap:wrap; gap:6px; margin:2px 0 4px }
+.eh-dato{ display:inline-flex; align-items:baseline; gap:3px; padding:5px 9px; border-radius:99px; font-size:12px; color:var(--tinta-2); white-space:nowrap;
+  background:color-mix(in srgb, var(--ec) 14%, transparent); border:1px solid color-mix(in srgb, var(--ec) 28%, transparent) }
+.eh-dato b{ color:var(--tinta); font-weight:750 }
+.eh-dato.alerta{ background:color-mix(in srgb, var(--debe) 16%, transparent); border-color:color-mix(in srgb, var(--debe) 40%, transparent) }
+.eh-dato.alerta b{ color:var(--debe) }
+.eh-dato:active{ transform:scale(.95) }
+.eh-dato{ max-width:100%; overflow:hidden; text-overflow:ellipsis }
+@media (max-width:420px){ .eh-dato{ font-size:11.5px; padding:4px 8px } }
 </style>
 </head>
 <body>
@@ -5246,20 +5260,66 @@ VISTAS.hoy = function(){
 function espaciosHoy(hoy){
   return '<section class="w w-2 esp-hoy"><header class="w-cab"><b>Tus espacios</b></header><div class="eh-rejilla">' + ESPACIOS.map(function(E){
     var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id; });
+    var pendTodas = ts.filter(function(t){ return !t.hecha; }).length;
     var pend = ts.filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
     var hechas = ts.filter(function(t){ return t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) === hoy; }).length;
     var ag = agendaEsp(E.id, 7), hoyAg = ag.filter(function(a){ return a.d === hoy && a.x.tipo !== 'tarea'; }).length;
     var prox = ag.filter(function(a){ return a.x.tipo !== 'tarea'; })[0] || ag[0];
-    var total = pend + hoyAg, p = hechas + pend ? hechas / (hechas + pend) : (total ? 0 : 1);
+    var total = pend + hoyAg, p = hechas + pendTodas ? hechas / (hechas + pendTodas) : 1;
     var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
-    return '<button type="button" class="eh" data-ir="esp-' + E.id + '" style="--ec:' + E.c + '">' +
-      '<span class="eh-cab"><span class="eh-em">' + E.em + '</span><b>' + E.nom + '</b></span>' +
+    var datos = datosEspacio(E.id, hoy, ts, ag);
+    return '<div role="button" tabindex="0" class="eh" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
+      '<span class="eh-cab"><span class="eh-em">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</span>' +
       '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
       '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
+      (datos.length ? '<span class="eh-datos">' + datos.map(function(d){
+        return '<button type="button" class="eh-dato' + (d.alerta ? ' alerta' : '') + '" data-acc="esp-tab" data-esp="' + E.id + '" data-v="' + d.v + '"><b>' + d.n + '</b>' + d.t + '</button>'; }).join('') + '</span>' : '') +
       '<span class="eh-barra"><i style="width:' + Math.round(p * 100) + '%"></i></span>' +
-      '<span class="eh-pie">' + (hechas ? hechas + ' ' + (hechas === 1 ? 'hecha' : 'hechas') + ' hoy' : pend ? pend + ' ' + (pend === 1 ? 'tarea pendiente' : 'tareas pendientes') : 'Al día ✓') + '</span>' +
-    '</button>';
+      '<span class="eh-pie">' + (pendTodas ? pendTodas + ' ' + (pendTodas === 1 ? 'tarea pendiente' : 'tareas pendientes') + (hechas ? ' · ' + hechas + ' hecha' + (hechas === 1 ? '' : 's') + ' hoy' : '') : hechas ? hechas + ' ' + (hechas === 1 ? 'hecha' : 'hechas') + ' hoy · al día ✓' : 'Al día ✓') + '</span>' +
+    '</div>';
   }).join('') + '</div></section>';
+}
+function monCorto(x){ return MONEDA + ' ' + formNum(Math.round(x)); }
+/* Lo que guarda cada espacio, en pastillas que llevan a su sección */
+function datosEspacio(id, hoy, ts, ag){
+  var out = [], ym = hoy.slice(0, 7);
+  function d(n, t, v, alerta){ if(n !== null && n !== undefined && n !== 0 && n !== '') out.push({ n:n, t:t, v:v, alerta:!!alerta }); }
+  var pend = ts.filter(function(t){ return !t.hecha; }), tarde = pend.filter(function(t){ return t.fecha && t.fecha < hoy; }).length;
+  var gasto = totalesMes(dineroEsp(id).lista, ym);
+  if(id === 'personal'){
+    var rec = vivos('recordatorios').filter(function(r){ return !(r.hecho && (!r.rep || r.rep === 'no')) && espDe(r) === 'personal'; }).length;
+    var evs = ag.filter(function(a){ return a.x.tipo !== 'tarea' && a.x.tipo !== 'rec'; }).length;
+    var notas = vivos('notas').filter(function(n){ return espDe(n) === 'personal'; }).length;
+    d(pend.length, pend.length === 1 ? ' tarea' : ' tareas', 'tareas', tarde);
+    d(rec, rec === 1 ? ' aviso' : ' avisos', 'avisos');
+    d(evs, evs === 1 ? ' evento' : ' eventos', 'eventos');
+    d(notas, notas === 1 ? ' nota' : ' notas', 'notas');
+    d(gasto.sal ? monCorto(gasto.sal) : 0, ' gastado', 'dinero');
+  } else if(id === 'estudios'){
+    var ex = eventosTipo('examen', 60, 'estudios')[0], pg = promedioGeneral();
+    d(pend.length, pend.length === 1 ? ' tarea' : ' tareas', 'semana', tarde);
+    if(ex) d(ex.en === 0 ? 'Hoy' : ex.en + ' d', ' al examen', 'examenes', ex.en <= 3);
+    d(pg != null ? pg.toFixed(1) : 0, ' promedio', 'cursos');
+    d(vivos('cursos').length, vivos('cursos').length === 1 ? ' curso' : ' cursos', 'cursos');
+    d(gasto.sal ? monCorto(gasto.sal) : 0, ' gastado', 'dinero');
+  } else if(id === 'oficina'){
+    var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }), cobV = cob.filter(function(x){ return x.vence && x.vence < hoy; }).length;
+    var porCobrar = cob.reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
+    var reu = ag.filter(function(a){ if(a.x.tipo !== 'evento') return false; var e = buscarId('eventos', a.x.id); return !!e && e.tipo === 'reunion'; }).length;
+    d(pend.length, pend.length === 1 ? ' tarea' : ' tareas', 'trabajo', tarde);
+    d(porCobrar ? monCorto(porCobrar) : 0, ' por cobrar', 'cobros', cobV);
+    d(reu, reu === 1 ? ' reunión' : ' reuniones', 'reuniones');
+    d(gasto.ent ? monCorto(gasto.ent) : 0, ' facturado', 'dinero');
+  } else if(id === 'deporte'){
+    var desde = sumarDias(hoy, -6), ent = vivos('entrenos').filter(function(x){ return x.fecha >= desde && x.fecha <= hoy; }).length;
+    var par = eventosTipo('partido', 30, 'deporte')[0];
+    d(ent, ent === 1 ? ' entreno en 7 días' : ' entrenos en 7 días', 'entrenos');
+    if(par) d(par.en === 0 ? 'Hoy' : par.en + ' d', ' al partido', 'partidos', par.en <= 1);
+    d(vivos('rutinas').length, vivos('rutinas').length === 1 ? ' rutina' : ' rutinas', 'rutinas');
+    d(pend.length, pend.length === 1 ? ' tarea' : ' tareas', 'semana', tarde);
+    d(gasto.sal ? monCorto(gasto.sal) : 0, ' gastado', 'dinero');
+  }
+  return out.slice(0, 4);
 }
 
 /* Lo que toca ahora, en frases, cada una con su botón que te lleva */
