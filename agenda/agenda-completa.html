@@ -396,20 +396,18 @@ body.en-cuentas .fab{ display:none }
   display:inline-flex; align-items:center; height:19px; padding:0 7px; border-radius:6px;
   font-size:11px; font-weight:700; background:var(--regla-2); color:var(--tinta-2);
 }
-.fila.encendida{ animation:enciende 1.2s ease-out }
+
 @keyframes enciende{ from{ background:var(--verde-piso) } }
 
 /* ===== Hoy =============================================================== */
 .saludo{ margin:2px 0 18px }
 .saludo h2{ margin:0; font-size:26px; letter-spacing:-.03em; font-weight:800; line-height:1.15 }
 .saludo p{ margin:4px 0 0; color:var(--tinta-2); font-size:14px }
-.anillo-fila{ display:flex; align-items:center; gap:14px; padding:4px 16px 16px }
+
 .anillo{ width:64px; height:64px; flex:none; transform:rotate(-90deg) }
 .anillo circle{ fill:none; stroke-width:7 }
 .anillo .fondo{ stroke:var(--regla) }
 .anillo .valor{ stroke:var(--haber); stroke-linecap:round; transition:stroke-dashoffset .6s ease }
-.anillo-texto b{ font-size:22px; letter-spacing:-.02em; display:block; line-height:1.1 }
-.anillo-texto span{ font-size:12.5px; color:var(--tinta-2) }
 
 .cifras{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; padding:6px 16px 16px }
 .cifras div{ background:var(--hoja-2); border:1px solid var(--regla-2); border-radius:12px; padding:9px 10px; min-width:0 }
@@ -519,7 +517,7 @@ body.en-cuentas .fab{ display:none }
 .habito .nom b{ display:block; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 .habito .nom small{ color:var(--tinta-3); font-size:12px }
 .racha{ font-family:var(--cifra); font-weight:800; font-size:14px; color:var(--oro); white-space:nowrap }
-.dias-habito{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px }
+
 .dia-h{
   display:flex; flex-direction:column; align-items:center; gap:4px; font-size:10.5px; font-weight:700; color:var(--tinta-3); text-transform:uppercase;
 }
@@ -773,8 +771,7 @@ body{
 .meta-t .nom{ flex:1; min-width:0 }
 .meta-t .nom b{ display:block; font-size:15.5px; overflow-wrap:anywhere }
 .meta-t .nom small{ color:var(--tinta-3); font-size:12px }
-.meta-t .cifra-grande{ font-family:var(--cifra); font-size:22px; font-weight:800; letter-spacing:-.02em; margin:14px 0 8px }
-.meta-t .cifra-grande small{ font-size:13px; color:var(--tinta-3); font-weight:600 }
+
 .meta-t .barra-prog{ height:10px }
 .meta-t .barra-prog i{ background:linear-gradient(90deg, color-mix(in srgb, var(--c) 70%, #fff 0%), var(--c)) }
 .meta-t .acciones{ display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; align-items:center }
@@ -790,7 +787,7 @@ body{
 .fila .em-fila{ font-size:20px; width:26px; text-align:center; flex:none; line-height:1.2 }
 
 /* ===== Diario ============================================================= */
-.animos{ display:flex; gap:8px; justify-content:space-between }
+
 .animo{
   flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:10px 2px 8px; border-radius:14px;
   background:var(--hoja-2); border:1.5px solid var(--regla); font-size:10.5px; font-weight:700; color:var(--tinta-3);
@@ -830,8 +827,7 @@ body{
 /* ===== Progreso =========================================================== */
 .grafica{ width:100%; height:auto; display:block }
 .grafica text{ fill:var(--tinta-3); font-size:10px; font-family:var(--letra) }
-.kpis{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:14px }
-@media (min-width:760px){ .kpis{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
+
 .kpi{ padding:14px }
 .kpi small{ display:block; font-size:11px; font-weight:750; color:var(--tinta-3); text-transform:uppercase; letter-spacing:.06em }
 .kpi b{ display:block; font-size:26px; letter-spacing:-.03em; margin-top:2px }
@@ -856,20 +852,14 @@ body{
 .logo-img{ display:block; flex:none; background:var(--logo) center/contain no-repeat; filter:drop-shadow(0 3px 8px rgba(0,0,0,.3)) }
 
 /* ===== Dinero ============================================================= */
-.dinero-heroe .cifra-heroe{ font-family:var(--cifra); font-size:clamp(30px, 8vw, 44px); letter-spacing:-.04em; margin-top:6px }
-.dinero-heroe .dato{ cursor:default }
+
 .qa{ display:flex; flex-direction:column; gap:12px }
 .qa-tipo{ align-items:center }
 .qa-tipo button{ display:inline-flex; align-items:center; gap:6px }
 .qa-tipo button svg{ width:15px; height:15px }
 .qa-tipo button.gasto[aria-pressed="true"]{ background:var(--debe-piso); border-color:var(--debe); color:var(--debe) }
 .qa-tipo button.ingreso[aria-pressed="true"]{ background:var(--haber-piso); border-color:var(--haber); color:var(--haber) }
-.qa-sep{ width:1px; height:24px; background:var(--regla); margin:0 4px }
-.qa-campos{ display:grid; gap:10px; grid-template-columns:minmax(0,1fr) minmax(0,1fr) }
-.qa-monto input{ font-family:var(--cifra); font-size:20px !important; font-weight:800; height:48px !important }
-.qa-desc{ grid-column:span 1 }
-@media (min-width:760px){ .qa-campos{ grid-template-columns:160px minmax(0,1.6fr) minmax(0,1fr) 160px } }
-@media (max-width:759px){ .qa-monto{ grid-column:1 / -1 } }
+
 .chips-cat{ display:flex; gap:6px; flex-wrap:wrap }
 .chips-cat .ficha{ height:28px; font-size:12px }
 
@@ -927,8 +917,7 @@ body{
 .selector.espacios button[aria-pressed="true"]{ background:color-mix(in srgb, var(--c) 18%, var(--hoja-2)); border-color:var(--c); color:var(--tinta) }
 
 /* Las cuatro fichas de Hoy */
-.espacios-hoy{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-bottom:16px }
-@media (min-width:1000px){ .espacios-hoy{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
+
 .esp-tile{
   position:relative; overflow:hidden; text-align:left; display:flex; flex-direction:column; gap:6px; min-width:0;
   padding:13px 13px 12px; border-radius:18px; border:1px solid color-mix(in srgb, var(--c) 35%, var(--regla));
@@ -998,20 +987,16 @@ body{
 
 /* ===== Diseño 3: movimiento y detalle ===================================== */
 /* Las tarjetas entran en cascada */
-.vista .rejilla > *, .vista .espacios-hoy > *, .vista .proy-rejilla > *, .vista .rev-kpis > *{ animation:entra .45s cubic-bezier(.2,.8,.2,1) both }
-.vista .rejilla > *:nth-child(2), .vista .espacios-hoy > *:nth-child(2), .vista .proy-rejilla > *:nth-child(2), .vista .rev-kpis > *:nth-child(2){ animation-delay:.05s }
-.vista .rejilla > *:nth-child(3), .vista .espacios-hoy > *:nth-child(3), .vista .proy-rejilla > *:nth-child(3), .vista .rev-kpis > *:nth-child(3){ animation-delay:.1s }
-.vista .rejilla > *:nth-child(4), .vista .espacios-hoy > *:nth-child(4), .vista .proy-rejilla > *:nth-child(4), .vista .rev-kpis > *:nth-child(4){ animation-delay:.15s }
-.vista .rejilla > *:nth-child(n+5), .vista .rev-kpis > *:nth-child(n+5){ animation-delay:.2s }
+.vista .rejilla > *, .vista .proy-rejilla > *{ animation:entra .45s cubic-bezier(.2,.8,.2,1) both }
+.vista .rejilla > *:nth-child(2), .vista .proy-rejilla > *:nth-child(2){ animation-delay:.05s }
+.vista .rejilla > *:nth-child(3), .vista .proy-rejilla > *:nth-child(3){ animation-delay:.1s }
+.vista .rejilla > *:nth-child(4), .vista .proy-rejilla > *:nth-child(4){ animation-delay:.15s }
+.vista .rejilla > *:nth-child(n+5){ animation-delay:.2s }
 .tarjeta{ transition:border-color .2s, box-shadow .2s }
 .tarjeta:hover{ border-color:color-mix(in srgb, var(--verde) 28%, var(--regla)) }
 .heroe{ animation:entra .5s cubic-bezier(.2,.8,.2,1) both }
 
 /* Barra del día en el saludo */
-.barra-dia{ margin-top:14px; position:relative; z-index:1 }
-.barra-dia-cab{ display:flex; justify-content:space-between; font-size:11.5px; font-weight:700; opacity:.85; margin-bottom:5px }
-.barra-dia-riel{ height:6px; border-radius:99px; background:rgba(255,255,255,.18); overflow:hidden }
-.barra-dia-riel i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, #fff, rgba(255,255,255,.7)); box-shadow:0 0 12px rgba(255,255,255,.6) }
 
 /* Línea de tiempo del día */
 .linea-tiempo{ position:relative; padding:4px 0 6px }
@@ -1030,18 +1015,12 @@ body{
 @keyframes latirAhora{ 50%{ box-shadow:0 0 0 8px color-mix(in srgb, var(--debe) 0%, transparent) } }
 
 /* Revisión semanal: invitación y cifras */
-.aviso-rev{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; padding:13px 14px; margin-bottom:14px; border-radius:16px;
-  background:linear-gradient(135deg, color-mix(in srgb, var(--oro) 22%, var(--hoja)), var(--hoja)); border:1px solid color-mix(in srgb, var(--oro) 45%, var(--regla)) }
-.aviso-rev > svg:first-child{ width:34px; height:34px; padding:7px; border-radius:11px; background:color-mix(in srgb, var(--oro) 25%, transparent); color:var(--oro); flex:none }
-.aviso-rev span{ flex:1; font-size:12.5px; color:var(--tinta-2) } .aviso-rev b{ display:block; font-size:14.5px; color:var(--tinta) }
-.rev-kpis{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
-@media (min-width:760px){ .rev-kpis{ grid-template-columns:repeat(4,minmax(0,1fr)) } }
-.rev-kpi{ padding:13px 14px; display:flex; flex-direction:column; gap:2px }
-.rev-kpi svg{ width:20px; height:20px; color:var(--verde-sube); margin-bottom:4px }
-.rev-kpi small{ font-size:11px; font-weight:750; letter-spacing:.05em; text-transform:uppercase; color:var(--tinta-3) }
-.rev-kpi b{ font-size:22px; letter-spacing:-.03em } .rev-kpi b small{ font-size:12px; text-transform:none; letter-spacing:0 }
-.rev-kpi em{ font-style:normal; font-size:11.5px; color:var(--tinta-3) }
-.rev-kpi .sube{ color:var(--haber); font-weight:800 } .rev-kpi .baja{ color:var(--debe); font-weight:800 }
+
+ 
+
+ 
+
+ 
 
 /* Semana de cada espacio en su ficha de Hoy */
 .esp-semana{ display:block; height:5px; border-radius:99px; background:color-mix(in srgb, var(--c) 18%, var(--regla-2)); overflow:hidden; position:relative; z-index:1 }
@@ -1098,7 +1077,7 @@ body{ font-family:var(--letra); font-feature-settings:"ss01" 1, "cv11" 1; letter
 *{ scrollbar-width:thin; scrollbar-color:var(--regla) transparent }
 h1, h2, h3, .heroe h2, .tarjeta-cab h2{ font-family:var(--letra); text-wrap:balance }
 .heroe h2{ font-weight:800; letter-spacing:-.035em }
-.cifra, .monto, .hora, .kpi b, .rev-kpi b{ font-variant-numeric:tabular-nums }
+.cifra, .monto, .hora, .kpi b{ font-variant-numeric:tabular-nums }
 
 /* Cabecera: título más presente */
 .cabecera{ height:62px }
@@ -1169,7 +1148,7 @@ h1, h2, h3, .heroe h2, .tarjeta-cab h2{ font-family:var(--letra); text-wrap:bala
 .hor-clase small{ font-size:10.5px; font-weight:700; color:var(--tinta-2); font-variant-numeric:tabular-nums }
 .hor-clase span{ font-size:12.5px; font-weight:750; line-height:1.25 }
 .hor-clase em{ font-style:normal; font-size:10.5px; color:var(--tinta-3) }
-.tono0{ --t:var(--esp-estudios) } .tono1{ --t:var(--esp-personal) } .tono2{ --t:var(--esp-oficina) } .tono3{ --t:var(--esp-deporte) } .tono4{ --t:var(--rosa) }
+    
 
 /* Rutinas y récords */
 .hoy-toca{ padding:0 16px 8px; display:flex; flex-direction:column; gap:6px }
@@ -1212,24 +1191,14 @@ body[data-esp="deporte"] .tarjeta-cab h2{ text-transform:uppercase; font-style:i
 body[data-esp="deporte"] .azulejo{ border-radius:50%; background:var(--esp-deporte); color:#06281A }
 body[data-esp="deporte"] .resumen-dep b{ font-family:var(--cifra); color:var(--esp-deporte) }
 
-.marcador{
-  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin:4px 16px 0; padding:10px;
-  border-radius:14px; background:linear-gradient(180deg, #0B0F0C, #151B17); border:1px solid #2A332D;
-  box-shadow:inset 0 2px 10px rgba(0,0,0,.6);
-}
-.marcador div{ text-align:center; padding:6px 0; border-radius:9px; background:#050706; border:1px solid #1D241F; min-width:0 }
-.marcador b{ display:block; font-family:var(--cifra); font-size:26px; line-height:1.1; font-weight:800; color:#FDE047; text-shadow:0 0 12px rgba(253,224,71,.55) }
-.marcador small{ font-size:10px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#8FA398 }
-.ved{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:10px 16px 6px; font-size:12px; font-weight:700 }
-.ved > span:not(.forma){ padding:4px 9px; border-radius:99px; background:var(--hoja-2); border:1px solid var(--regla) }
-.ved .v{ color:var(--haber) } .ved .d{ color:var(--debe) } .ved .e{ color:var(--tinta-2) }
+  
 .forma{ margin-left:auto; display:flex; gap:4px }
-.forma i, .res-chip{
+.forma i{
   width:24px; height:24px; border-radius:50%; display:grid; place-items:center; flex:none;
   font-style:normal; font-size:11px; font-weight:900; color:#fff; background:var(--tinta-3)
 }
-.res-chip{ width:32px; height:32px; font-size:13px }
-.forma i.v, .res-chip.v{ background:#16A34A } .forma i.e, .res-chip.e{ background:#64748B } .forma i.d, .res-chip.d{ background:#DC2626 }
+
+.forma i.v{ background:#16A34A } .forma i.e{ background:#64748B } .forma i.d{ background:#DC2626 }
 .partido-campos{ display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:14px; background:color-mix(in srgb, var(--esp-deporte) 8%, var(--hoja-2)); border:1px dashed color-mix(in srgb, var(--esp-deporte) 45%, transparent) }
 
 /* ----- Estudios: la pizarra y el cuaderno ------------------------------------ */
@@ -1288,18 +1257,8 @@ body[data-esp="oficina"] .tarjeta-cab h2{ font-size:12.5px; font-weight:800; tex
 body[data-esp="oficina"] .azulejo{ border-radius:7px; width:28px; height:28px }
 body[data-esp="oficina"] .tarjeta-cab .mas{ border-radius:7px }
 body[data-esp="oficina"] .cambia-esp, body[data-esp="oficina"] .captura{ border-radius:12px }
-.cronometro{
-  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:14px;
-  border-radius:12px; background:linear-gradient(135deg, #0F1F38, #1A2E4F); color:#fff; border:1px solid rgba(242,179,75,.25)
-}
-.cronometro small{ display:block; font-size:11px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; color:#AFC0D8 }
-.cronometro b{ display:block; font-family:var(--cifra); font-size:32px; font-weight:800; letter-spacing:-.02em; line-height:1.15; font-variant-numeric:tabular-nums }
-.cronometro.andando b{ color:#F2B34B }
-.cronometro.andando small::before{ content:""; display:inline-block; width:8px; height:8px; border-radius:50%; background:#EF4444; margin-right:6px; animation:parpadeo 1.2s infinite }
+
 @keyframes parpadeo{ 50%{ opacity:.2 } }
-.reloj-form{ display:flex; gap:8px; flex:1 1 240px; min-width:0 }
-.reloj-form .entrada{ flex:1; min-width:0; background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.18); color:#fff }
-.reloj-form .entrada::placeholder{ color:#8FA3C0 }
 
 /* ----- Personal: la casa ---------------------------------------------------- */
 .heroe.tema-personal{
@@ -1320,8 +1279,6 @@ body[data-esp="personal"] .azulejo{ border-radius:50% }
 body[data-esp="personal"] .tarjeta-cab h2{ font-weight:800 }
 body[data-esp="personal"] .captura, body[data-esp="personal"] .cambia-esp{ border-radius:22px }
 
-.bien-fila{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; font-size:13.5px; font-weight:650 }
-.bien-fila b{ font-family:var(--cifra); font-size:13px }
 .vasos{ display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:6px; margin-top:8px }
 .vaso{
   height:44px; border-radius:10px 10px 14px 14px; display:grid; place-items:center;
@@ -1332,17 +1289,7 @@ body[data-esp="personal"] .captura, body[data-esp="personal"] .cambia-esp{ borde
 .vaso.lleno{ background:linear-gradient(180deg, #7DD3FC, #0EA5E9); border-color:#0EA5E9; color:#fff }
 .vaso.lleno svg{ fill:rgba(255,255,255,.5) }
 .vaso:active{ transform:scale(.92) }
-.sueno-sel{ display:flex; gap:4px }
-.sueno-sel button{ padding:5px 9px; border-radius:99px; font-size:12px; font-weight:750; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-2) }
-.sueno-sel button[aria-pressed="true"]{ background:#6366F1; border-color:#6366F1; color:#fff }
-.sueno-semana{ display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; height:74px; margin-top:12px; align-items:end }
-.sueno-dia{ height:100%; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; gap:4px }
-.sueno-dia i{ width:100%; max-width:26px; border-radius:7px 7px 3px 3px; background:color-mix(in srgb, #6366F1 45%, var(--hoja-2)) }
-.sueno-dia i.bien{ background:linear-gradient(180deg, #A5B4FC, #6366F1) }
-.sueno-dia i.poco{ background:linear-gradient(180deg, #FCA5A5, #EF4444) }
-.sueno-dia small{ font-size:10.5px; font-weight:750; color:var(--tinta-3) }
-.sueno-dia.hoy small{ color:var(--tinta) }
-.bien-pie{ display:block; margin-top:8px; font-size:12.5px; color:var(--tinta-3) }
+
 .compras{ display:flex; flex-wrap:wrap; gap:6px; padding:4px 16px 12px }
 .compra{
   padding:7px 12px; border-radius:99px; font-size:13px; font-weight:650; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta);
@@ -1384,24 +1331,12 @@ body[data-esp="deporte"] .esp-tabs{ --ec:var(--esp-deporte) } body[data-esp="dep
 .atajo:hover{ border-color:var(--tinta-3) }
 
 .explica{ margin:0 0 10px; font-size:12.5px; color:var(--tinta-3); line-height:1.45 }
-.sugerencias{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:4px 16px 14px }
-.sugerencias small{ font-size:11.5px; color:var(--tinta-3); font-weight:700 }
-.chip-sug{ padding:5px 10px; border-radius:99px; font-size:12px; font-weight:650; border:1px dashed var(--regla); color:var(--tinta-2) }
-.chip-sug:hover{ border-style:solid; color:var(--tinta) }
 
 /* ----- Personal: la casa ----- */
-.casa-lista{ display:grid; grid-template-columns:minmax(0,1fr); gap:8px; padding:4px 16px 12px }
-@media (min-width:760px){ .casa-lista{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
-.casa-item{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:18px; background:var(--hoja-2); border:1px solid var(--regla) }
-.casa-item .cuerpo{ flex:1; min-width:0; cursor:pointer }
-.casa-item .titulo{ font-weight:700; font-size:14px }
-.casa-em{ width:40px; height:40px; flex:none; display:grid; place-items:center; border-radius:50%; font-size:20px; background:color-mix(in srgb, var(--esp-personal) 16%, transparent) }
-.casa-barra{ height:5px; border-radius:99px; background:var(--regla-2); margin:6px 0 4px; overflow:hidden }
-.casa-barra i{ display:block; height:100%; border-radius:99px; background:var(--haber) }
-.casa-item.ojo .casa-barra i{ background:var(--oro) } .casa-item.mal .casa-barra i{ background:var(--debe) }
-.casa-item .meta .estado{ font-weight:750 }
-.casa-item.ok .estado{ color:var(--haber) } .casa-item.ojo .estado{ color:var(--oro) } .casa-item.mal .estado{ color:var(--debe) }
-.casa-item.mal{ border-color:color-mix(in srgb, var(--debe) 35%, var(--regla)) }
+
+ 
+
+  
 
 /* ----- Personal: menú ----- */
 .menu-nav{ display:flex; align-items:center; gap:10px; padding:0 12px 6px }
@@ -1421,28 +1356,18 @@ body[data-esp="deporte"] .esp-tabs{ --ec:var(--esp-deporte) } body[data-esp="dep
 .menu-celda button{ position:absolute; right:4px; top:50%; transform:translateY(-50%); width:26px; height:26px; border-radius:8px; font-size:14px; opacity:.55 }
 .menu-celda button:hover{ opacity:1; background:var(--regla-2) }
 
-.doc-est{ font-weight:750 } .doc-est.ok{ color:var(--haber) } .doc-est.ojo{ color:var(--oro) } .doc-est.mal{ color:var(--debe) }
-.doc-num{ font-family:var(--cifra); font-size:11.5px; color:var(--tinta-3); font-weight:600 }
+   
 
 /* ----- Estudios: fichas ----- */
-.mazos{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:8px }
-.mazo{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:12px; border-radius:10px; text-align:left; min-width:0;
-  background:var(--hoja-2); border:1px solid var(--regla); box-shadow:3px 3px 0 var(--regla), 6px 6px 0 color-mix(in srgb, var(--regla) 60%, transparent) }
-.mazo b{ font-family:Georgia, "Times New Roman", serif; font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:100% }
-.mazo span{ font-size:12px; color:var(--tinta-3) }
-.mazo em{ font-style:normal; font-size:12px; font-weight:800; color:var(--haber); margin-top:4px }
-.mazo.toca{ border-color:var(--esp-estudios) } .mazo.toca em{ color:var(--esp-estudios) }
-.mazo:disabled{ cursor:default; opacity:.8 }
+
+ 
+
 .cajas{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; height:96px; align-items:end; margin-top:14px }
 .cajas div{ height:100%; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px }
 .cajas i{ width:100%; max-width:40px; border-radius:6px 6px 2px 2px; background:linear-gradient(180deg, color-mix(in srgb, var(--esp-estudios) 60%, #fff), var(--esp-estudios)) }
 .cajas div:last-child i{ background:linear-gradient(180deg, #FDE68A, var(--oro)) }
 .cajas small{ font-size:10.5px; text-align:center; color:var(--tinta-3); line-height:1.2 } .cajas small b{ color:var(--tinta); font-family:var(--cifra) }
-.ficha-form{ display:grid; grid-template-columns:minmax(0,1fr); gap:6px; padding:10px 16px 14px; border-top:1px dashed var(--regla) }
-@media (min-width:760px){ .ficha-form{ grid-template-columns:150px minmax(0,1.2fr) minmax(0,1fr) auto } }
-.ficha-form select, .ficha-form input{ height:40px; padding:0 10px; border-radius:10px; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); min-width:0; font-size:13.5px }
-.todas-fichas summary{ cursor:pointer; padding:10px 16px 12px; font-size:12.5px; font-weight:700; color:var(--tinta-2) }
-.caja-chip{ width:26px; height:26px; flex:none; border-radius:7px; display:grid; place-items:center; font-family:var(--cifra); font-size:12px; font-weight:800; background:color-mix(in srgb, var(--esp-estudios) 18%, transparent); color:var(--esp-estudios) }
+
 .repaso{ display:flex; flex-direction:column; gap:10px; padding:4px 2px 6px }
 .repaso > small{ font-size:12px; color:var(--tinta-3); text-align:center }
 .repaso-prog{ height:6px; border-radius:99px; background:var(--regla-2); overflow:hidden } .repaso-prog i{ display:block; height:100%; background:var(--esp-estudios) }
@@ -1461,14 +1386,13 @@ body[data-esp="deporte"] .esp-tabs{ --ec:var(--esp-deporte) } body[data-esp="dep
 @media (min-width:760px){ .examenes{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
 .examen{ padding:12px; border-radius:12px; background:var(--hoja-2); border:1px solid var(--regla) }
 .examen.urge{ border-color:color-mix(in srgb, var(--debe) 45%, var(--regla)) }
-.examen-cab{ display:flex; align-items:center; gap:10px } .examen-cab .cuerpo{ flex:1; min-width:0; cursor:pointer } .examen-cab .titulo{ font-weight:750 }
+  
 .temas{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px }
 .tema{ padding:5px 10px; border-radius:8px; font-size:12.5px; font-weight:650; background:var(--hoja); border:1px solid var(--regla); color:var(--tinta) }
 .tema[aria-pressed="true"]{ background:color-mix(in srgb, var(--haber) 14%, transparent); border-color:color-mix(in srgb, var(--haber) 40%, transparent); color:var(--haber); text-decoration:line-through }
-.examen-pie{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px }
-.examen-pie small{ font-size:12px; color:var(--tinta-3) } .examen-pie small b{ color:var(--tinta) }
+
+ 
 .tema-form{ margin-left:auto; flex:1 1 140px } .tema-form input{ width:100%; height:32px; padding:0 10px; border-radius:8px; border:1px dashed var(--regla); background:transparent; color:var(--tinta); font-size:12.5px }
-.en-vivo{ display:inline-block; padding:1px 6px; border-radius:5px; font-size:10px; font-weight:900; letter-spacing:.08em; background:#EF4444; color:#fff; vertical-align:2px; animation:parpadeo 1.6s infinite }
 
 /* ----- Oficina: tablero ----- */
 .kanban{ display:grid; grid-template-columns:minmax(0,1fr); gap:10px; padding:4px 12px 14px }
@@ -1476,7 +1400,7 @@ body[data-esp="deporte"] .esp-tabs{ --ec:var(--esp-deporte) } body[data-esp="dep
 .kan-col{ padding:10px; border-radius:10px; background:color-mix(in srgb, var(--hoja-2) 70%, var(--papel)); border:1px solid var(--regla); display:flex; flex-direction:column; gap:8px; min-width:0 }
 .kan-col h4{ display:flex; align-items:center; gap:6px; margin:0 0 2px; font-size:11.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--tinta-2) }
 .kan-col h4 span{ margin-left:auto; min-width:22px; height:22px; padding:0 6px; border-radius:6px; display:grid; place-items:center; background:var(--regla-2); font-family:var(--cifra); font-size:11.5px; color:var(--tinta) }
-.kan-col.k1{ border-top:3px solid var(--esp-oficina) } .kan-col.k2{ border-top:3px solid var(--haber) } .kan-col.k0{ border-top:3px solid var(--tinta-3) }
+ .kan-col.k2{ border-top:3px solid var(--haber) } .kan-col.k0{ border-top:3px solid var(--tinta-3) }
 .kan-tarjeta{ display:flex; gap:6px; align-items:flex-start; padding:10px; border-radius:8px; background:var(--hoja); border:1px solid var(--regla); border-left:3px solid var(--c); box-shadow:0 2px 6px rgba(0,0,0,.08) }
 .kan-tarjeta .cuerpo{ flex:1; min-width:0; cursor:pointer } .kan-tarjeta b{ display:block; font-size:13.5px; font-weight:650; line-height:1.3 }
 .kan-col.k2 .kan-tarjeta b{ text-decoration:line-through; color:var(--tinta-3) }
@@ -1528,11 +1452,9 @@ body[data-esp="deporte"] .esp-tabs{ --ec:var(--esp-deporte) } body[data-esp="dep
 .hiit .btn{ grid-column:1/-1; height:46px; justify-content:center; font-size:15px }
 
 /* ----- Deporte: cardio ----- */
-.cardio-marcador{ margin:0 0 12px }
-.cardio-marcador b{ font-size:21px }
+
 .meta-km{ margin-bottom:12px }
-.meta-km-form{ display:flex; align-items:center; gap:4px }
-.meta-km-form input{ width:52px; height:30px; text-align:center; border-radius:8px; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); font-family:var(--cifra); font-weight:800 }
+
 .barra-prog.grande{ height:12px; margin-top:8px }
 .mapa-act{ display:grid; grid-template-rows:repeat(7,1fr); grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); gap:4px }
 .mapa-act i{ aspect-ratio:1; border-radius:4px; background:var(--regla-2) }
@@ -1555,16 +1477,10 @@ body[data-esp="deporte"] .esp-tabs{ --ec:var(--esp-deporte) } body[data-esp="dep
 .estatura-form input{ width:64px; height:32px; text-align:center; border-radius:8px; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta); font-family:var(--cifra) }
 
 /* ----- Deporte: pichanga ----- */
-.pich-cab b{ display:block; font-size:16px; font-style:italic } .pich-cab small{ font-size:12.5px; color:var(--tinta-3) }
+ 
 .pich-costo input{ width:100%; height:26px; margin-top:2px; padding:0 6px; border-radius:6px; background:var(--hoja); border:1px solid var(--regla); color:var(--tinta); font-family:var(--cifra); font-weight:800; font-size:14px }
-.jugadores{ display:flex; flex-wrap:wrap; gap:6px; margin-top:6px }
-.jugador{ display:inline-flex; align-items:center; border-radius:99px; background:var(--hoja-2); border:1px solid var(--regla); overflow:hidden }
-.jugador button{ padding:6px 4px 6px 11px; font-size:13px; font-weight:650; color:var(--tinta) }
-.jugador .x{ padding:6px 10px 6px 4px; color:var(--tinta-3); font-size:15px; line-height:1 }
-.jugador.pago{ background:color-mix(in srgb, var(--haber) 16%, var(--hoja-2)); border-color:color-mix(in srgb, var(--haber) 45%, transparent) }
-.jugador.pago button:first-child{ color:var(--haber) }
 
-.casa-item .meta, .kan-tarjeta .meta{ display:flex; flex-wrap:wrap; gap:2px 10px; font-size:12px; color:var(--tinta-3); margin-top:3px }
+ .kan-tarjeta .meta{ display:flex; flex-wrap:wrap; gap:2px 10px; font-size:12px; color:var(--tinta-3); margin-top:3px }
 .kan-tarjeta .meta .tarde{ color:var(--debe); font-weight:700 } .kan-tarjeta .meta .hoy{ color:var(--oro); font-weight:700 }
 body[data-esp="estudios"] .tarjeta > :not(.lista-filas):not(.tarjeta-cab):not(.examenes):not(.horario):not(.semana-cols){ padding-left:36px }
 body[data-esp="estudios"] .semana-cols h4{ margin-left:36px }
@@ -1601,22 +1517,21 @@ body{
 :root[data-tema="claro"] .tarjeta{ box-shadow:0 1px 2px rgba(20,24,40,.04), 0 6px 20px rgba(20,24,40,.05) }
 .tarjeta-cab h2, .tarjeta-cab h3{ font-size:15px; font-weight:780 }
 .cab-num{ display:inline-grid; place-items:center; min-width:22px; height:20px; padding:0 6px; border-radius:99px; background:var(--regla-2); font-size:11.5px; font-weight:800; color:var(--tinta-2); font-family:var(--cifra) }
-.ver-mas{ display:block; width:100%; padding:10px; font-size:12.5px; font-weight:700; color:var(--verde-sube); border-top:1px solid var(--regla-2) }
-.ver-mas:hover{ background:var(--hoja-2) }
+
 .rejilla{ gap:16px }
 
 /* ----- Títulos de sección ----- */
 .seccion-t{ display:flex; align-items:center; gap:12px; margin:26px 4px 12px; font-size:12px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--tinta-3) }
 .seccion-t::after{ content:""; flex:1; height:1px; background:linear-gradient(90deg, var(--regla), transparent) }
-.seccion-t > small, .seccion-t > .hora-viva{ order:2; font-size:12px; letter-spacing:.04em; text-transform:none; font-weight:700; color:var(--tinta-2) }
-.hora-viva{ font-family:var(--cifra); padding:2px 8px; border-radius:99px; background:var(--hoja); border:1px solid var(--regla) }
+.seccion-t > small{ order:2; font-size:12px; letter-spacing:.04em; text-transform:none; font-weight:700; color:var(--tinta-2) }
+
 .pie-hoy{ display:flex; justify-content:center; margin-top:26px }
 .pie-hoy .btn{ color:var(--tinta-3) }
 
 /* ----- Saludo de Hoy ----- */
 .heroe-hoy{ padding:24px 22px 18px }
 .heroe-hoy .arriba{ align-items:center }
-.heroe-hoy .saludo-hoy{ min-width:0 }
+
 .heroe-hoy .frase{ color:#fff; opacity:.88 }
 .heroe-hoy h2 .emoji{ display:inline-block; animation:saluda 2.4s ease-in-out 1 }
 @keyframes saluda{ 20%{ transform:rotate(-12deg) } 40%{ transform:rotate(10deg) } 60%{ transform:rotate(-6deg) } }
@@ -1627,29 +1542,18 @@ body{
 .anillo-hoy .anillo .valor{ stroke:#fff; transition:stroke-dashoffset .6s ease }
 .anillo-hoy > span{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; opacity:.9 }
 .anillo-hoy > span b{ font-size:18px; letter-spacing:-.02em; text-transform:none; font-family:var(--cifra) }
-.datos-hoy{
-  display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:18px; position:relative; z-index:1;
-  border-radius:16px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.16);
-  backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); overflow:hidden
-}
-.datos-hoy button{ display:flex; flex-direction:column; align-items:center; gap:0; padding:10px 4px; color:#fff; transition:background .15s }
-.datos-hoy button + button{ border-left:1px solid rgba(255,255,255,.16) }
-.datos-hoy button:hover{ background:rgba(255,255,255,.1) }
-.datos-hoy b{ font-size:22px; font-weight:800; letter-spacing:-.03em; line-height:1.15; font-family:var(--cifra) }
-.datos-hoy span{ font-size:11px; font-weight:700; opacity:.85; white-space:nowrap }
+
 @media (min-width:760px){ .heroe-hoy{ padding:28px 30px 22px } .heroe-hoy h2{ font-size:34px } }
 
 /* ----- Tus espacios ----- */
-.espacios-hoy{ margin-bottom:0 }
+
 .esp-tile{ gap:8px; padding:14px; border-radius:18px; border:1px solid var(--borde-card); background:var(--hoja); text-align:left }
 .esp-tile::before{ content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px; border-radius:0 3px 3px 0; background:var(--c) }
 .esp-prox{ font-size:12.5px; line-height:1.35; color:var(--tinta-2); position:relative; z-index:1; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:34px; white-space:normal; text-overflow:clip }
 .esp-prox em{ font-style:normal; color:var(--c); font-weight:700 }
 
 /* ----- Ahora ----- */
-.rejilla.bloque-ahora{ grid-template-columns:minmax(0,1fr) }
-@media (min-width:900px){ .rejilla.bloque-ahora{ grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr); align-items:start } }
-.col-ahora{ display:flex; flex-direction:column; gap:16px; min-width:0 }
+
 .siguiente{
   position:relative; overflow:hidden; cursor:pointer; padding:18px 18px 16px 22px; display:flex; flex-direction:column; gap:3px;
   background:linear-gradient(120deg, color-mix(in srgb, var(--c) 16%, var(--hoja)), var(--hoja) 70%);
@@ -1668,40 +1572,18 @@ body{
 .semana-mini .pasado{ opacity:.5 }
 
 /* ----- Por hacer ----- */
-.bienestar-hoy h4{ display:flex; justify-content:space-between; align-items:baseline; margin:14px 0 8px; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--tinta-3) }
-.bienestar-hoy h4:first-child{ margin-top:2px }
-.bienestar-hoy h4 span{ font-size:12px; letter-spacing:0; text-transform:none; color:var(--tinta-2); font-family:var(--cifra) }
-.agua-mini{ display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px }
-.agua-mini button{ height:34px; border-radius:9px 9px 12px 12px; display:grid; place-items:center; background:var(--hoja-2); border:1px solid color-mix(in srgb, #38BDF8 35%, var(--regla)); color:color-mix(in srgb, #38BDF8 60%, var(--tinta-3)) }
-.agua-mini button svg{ width:15px; height:15px }
-.agua-mini button.lleno{ background:linear-gradient(180deg, #7DD3FC, #0EA5E9); border-color:#0EA5E9; color:#fff }
-.diario-hoy{ margin:12px 0 0; font-size:13px; font-style:italic; color:var(--tinta-2) }
 
 /* ----- Lo que se viene ----- */
 .regresivas.mini{ display:flex; gap:8px; overflow-x:auto; padding:0 16px 10px; scrollbar-width:none }
 .regresivas.mini .regresiva{ flex:0 0 132px; min-height:0; padding:10px 12px }
 .regresivas.mini .regresiva b{ font-size:24px }
 .regresivas.mini .regresiva span{ font-size:12.5px }
-.metas-hoy{ padding:0 0 6px }
-.cumples-hoy{ border-top:1px dashed var(--regla) }
 
 /* ----- Dinero ----- */
-.libros-hoy{ display:grid; grid-template-columns:minmax(0,1fr); gap:10px; padding:14px }
-@media (min-width:640px){ .libros-hoy{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
-.libro-hoy{ display:flex; flex-direction:column; gap:8px; padding:14px; border-radius:16px; text-align:left; background:var(--hoja-2); border:1px solid var(--regla); transition:border-color .15s }
-.libro-hoy:hover{ border-color:var(--verde) }
-.libro-cab{ display:flex; justify-content:space-between; align-items:baseline; gap:8px }
-.libro-cab b{ font-size:15px } .libro-cab em{ font-style:normal; font-family:var(--cifra); font-size:12.5px; color:var(--tinta-2); white-space:nowrap }
-.libro-num{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; font-family:var(--cifra); font-weight:800; font-size:16px }
-.libro-num small{ display:block; font-family:var(--letra); font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--tinta-3) }
-.libro-num .entra{ color:var(--haber) } .libro-num .sale{ color:var(--debe) }
-.libro-num > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-.libro-barra{ height:6px; border-radius:99px; background:color-mix(in srgb, var(--haber) 25%, var(--regla-2)); overflow:hidden }
-.libro-barra i{ display:block; height:100%; border-radius:99px; background:var(--debe) }
-.libro-pie{ font-size:12px; color:var(--tinta-3) }
-.pagos-hoy{ border-top:1px solid var(--regla-2) }
-.pagos-hoy h4{ display:flex; align-items:center; gap:8px; margin:12px 16px 0; font-size:11px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--debe) }
-.pagos-hoy h4 svg{ width:15px; height:15px }
+
+ 
+
+ 
 
 /* ----- Lateral compacto con grupos plegables ----- */
 .nav-lat{ gap:1px }
@@ -1769,9 +1651,6 @@ body{
 .pap-fila .lado{ gap:4px }
 .pap-fila .lado .btn{ height:34px }
 @media (max-width:480px){ .pap-fila{ flex-wrap:wrap } .pap-fila .lado{ width:100%; justify-content:flex-end; padding-left:40px } }
-.nubes-est{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px }
-.nube-est{ padding:3px 9px; border-radius:99px; font-size:12px; font-weight:700; background:var(--hoja-2); border:1px solid var(--regla); color:var(--tinta-3) }
-.nube-est.ok{ color:var(--haber); border-color:color-mix(in srgb, var(--haber) 40%, transparent) }
 
 /* ----- Revisión móvil: los números del saludo en columnas, cifras que caben ----- */
 @media (max-width:600px){
@@ -1779,7 +1658,7 @@ body{
   .heroe .dato{ flex-direction:column; align-items:flex-start; gap:1px; padding:8px 10px; font-size:11px; line-height:1.25; min-width:0; text-align:left }
   .heroe .dato svg{ display:none }
   .heroe .dato b{ font-size:16px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
-  .dinero-heroe .dato b, .heroe.tema-oficina .dato b{ font-size:13px; letter-spacing:-.03em }
+   .heroe.tema-oficina .dato b{ font-size:13px; letter-spacing:-.03em }
   .heroe.esp-heroe{ padding:16px 16px 14px }
   .heroe.esp-heroe h2{ font-size:24px }
   .cifras{ gap:6px; padding-left:12px; padding-right:12px }
@@ -1787,7 +1666,6 @@ body{
   .cifras b{ font-size:12px; letter-spacing:-.04em }
   .cifras small{ font-size:9.5px }
 }
-@media (max-width:600px){ .dinero-heroe .dato b{ font-size:12px; letter-spacing:-.05em } .dinero-heroe .datos{ gap:5px } .dinero-heroe .dato{ padding:8px 7px } }
 
 /* ==========================================================================
    CALENDARIO 2
@@ -1907,13 +1785,7 @@ body{
     linear-gradient(120deg, color-mix(in srgb, var(--sc) 16%, var(--hoja)), var(--hoja) 75%);
 }
 .cab-sec::after{ content:""; position:absolute; right:-30px; bottom:-40px; width:120px; height:120px; border-radius:50%; border:18px solid color-mix(in srgb, var(--sc) 10%, transparent) }
-.cab-sec-ico{ width:44px; height:44px; flex:none; border-radius:14px; display:grid; place-items:center; color:#fff; background:linear-gradient(135deg, color-mix(in srgb, var(--sc) 80%, #fff), var(--sc)); box-shadow:0 6px 16px color-mix(in srgb, var(--sc) 35%, transparent) }
-.cab-sec-ico svg{ width:22px; height:22px }
-.cab-sec-txt{ flex:1; min-width:0; position:relative; z-index:1 }
-.cab-sec-txt b{ display:block; font-size:19px; font-weight:800; letter-spacing:-.03em }
-.cab-sec-txt small{ display:block; font-size:12.5px; color:var(--tinta-2); line-height:1.4 }
-.cab-sec-txt small em{ font-style:normal; font-weight:750; color:var(--debe) }
-.cab-sec-prog{ position:relative; width:52px; height:52px; flex:none; z-index:1 }
+
 .cab-sec-anillo{ width:52px; height:52px; transform:rotate(-90deg) }
 .cab-sec-anillo circle{ fill:none; stroke-width:5; stroke-linecap:round }
 .cab-sec-anillo .f{ stroke:color-mix(in srgb, var(--sc) 18%, var(--regla-2)) } .cab-sec-anillo .v{ stroke:var(--sc); transition:stroke-dashoffset .6s ease }
@@ -1939,10 +1811,10 @@ body::before{
     radial-gradient(1100px 520px at 70% -220px, color-mix(in srgb, var(--verde) 13%, transparent), transparent 70%),
     radial-gradient(800px 420px at -10% 0%, color-mix(in srgb, var(--azul) 6%, transparent), transparent 70%);
 }
-.heroe .dato, .datos-hoy, .heroe.tema-oficina .dato{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important }
+.heroe .dato, .heroe.tema-oficina .dato{ backdrop-filter:none !important; -webkit-backdrop-filter:none !important }
 .heroe .dato{ background:rgba(255,255,255,.17) }
-.datos-hoy{ background:rgba(255,255,255,.15) }
-.vista .rejilla > *:nth-child(n+5), .vista .espacios-hoy > *:nth-child(n+5){ animation:none }
+
+.vista .rejilla > *:nth-child(n+5){ animation:none }
 .vista > .rejilla ~ .rejilla > .tarjeta,
 .vista > .rejilla > .tarjeta:nth-child(n+4){ content-visibility:auto; contain-intrinsic-size:auto 380px }
 @media (prefers-reduced-motion:reduce){ .burbujas i, .heroe-hoy h2 .emoji{ animation:none !important } }
@@ -2003,8 +1875,7 @@ svg.i.abajo{ transform:rotate(90deg) }
    ELEGIR VARIAS
    ========================================================================== */
 .herr-sel{ display:flex; align-items:center; gap:10px; margin:-2px 0 10px }
-.pista-sel{ font-size:12px; color:var(--tinta-3) }
-@media (min-width:900px){ .pista-sel{ display:none } }
+
 .fila.eligiendo{ cursor:pointer }
 .fila.elegida{ background:color-mix(in srgb, var(--verde) 11%, transparent) }
 .fila.eligiendo .casilla.cuadrada{ border-radius:8px }
@@ -2080,9 +1951,8 @@ body{ background:var(--papel) !important; background-attachment:scroll }
 body::before{ display:none !important }
 
 /* ----- Letra ----- */
-.cabecera h1, .heroe h2, .seccion-t, .seccion-t span, .seccion-tit, .tarjeta-cab h2, .tarjeta-cab h3,
-.cab-sec-txt b, .hoja-flot .cab h3, .adm-grupo-tit, .cal-top h2, .cal-titulo, .mas-grupo h4,
-.siguiente b, .cifra-heroe, .datos-hoy b, .heroe .dato b, .vacio h3, .vacio b, .marca b{
+.cabecera h1, .heroe h2, .seccion-t, .seccion-t span, .seccion-tit, .tarjeta-cab h2, .tarjeta-cab h3, .hoja-flot .cab h3, .adm-grupo-tit, .cal-top h2, .mas-grupo h4,
+.siguiente b, .heroe .dato b, .vacio h3, .vacio b, .marca b{
   font-family:var(--serif) !important; font-optical-sizing:auto;
 }
 .cabecera h1{ font-size:23px !important; font-weight:600 !important; letter-spacing:-.01em !important }
@@ -2094,8 +1964,8 @@ body::before{ display:none !important }
   letter-spacing:-.01em !important; text-transform:none !important; color:var(--tinta) !important;
 }
 .seccion-t::after{ display:none !important }
-.seccion-t > small, .seccion-t > .hora-viva{ margin-left:auto; font-family:var(--letra); font-size:12.5px !important; font-weight:600 !important; letter-spacing:0 !important; color:var(--tinta-3) !important }
-.hora-viva{ background:var(--hoja) !important; border:0 !important; font-family:var(--letra) !important; font-variant-numeric:tabular-nums }
+.seccion-t > small{ margin-left:auto; font-family:var(--letra); font-size:12.5px !important; font-weight:600 !important; letter-spacing:0 !important; color:var(--tinta-3) !important }
+
 .seccion-tit{
   font-size:19px !important; font-weight:560 !important; letter-spacing:-.01em !important; text-transform:none !important;
   color:var(--tinta) !important; margin:24px 2px 10px !important;
@@ -2108,8 +1978,7 @@ body::before{ display:none !important }
 .mas-grupo h4, .adm-grupo-tit{ font-size:17px !important; font-weight:560 !important; letter-spacing:0 !important; text-transform:none !important; color:var(--tinta-2) !important }
 
 /* Etiquetas pequeñas en frase normal, no en mayúsculas */
-.siguiente small, .heroe .fecha, .anillo-hoy > span, .cab-sec-txt small, .dia-mini, .ano-mes h4,
-.cal-rejilla .dias-sem span, .kpi small, .rotulo{
+.siguiente small, .heroe .fecha, .anillo-hoy > span, .dia-mini, .ano-mes h4, .kpi small, .rotulo{
   letter-spacing:.01em !important; text-transform:none !important;
 }
 .heroe .fecha{ font-size:13px !important; font-weight:600 !important; opacity:.8 !important }
@@ -2122,7 +1991,7 @@ body::before{ display:none !important }
 :root[data-tema="claro"] .tarjeta{ box-shadow:0 1px 3px rgba(40,30,20,.05) !important }
 .tarjeta .tarjeta, .tarjeta .hoja-2{ background:var(--hoja-2) !important }
 .lista-filas .fila + .fila, .fila + .fila{ border-top-color:var(--regla-2) !important }
-.ver-mas{ border-top:0 !important; color:var(--verde) !important }
+
 .azulejo{
   border-radius:50% !important; width:34px !important; height:34px !important;
   background:color-mix(in srgb, var(--c, var(--verde)) 18%, transparent) !important; color:var(--c, var(--verde)) !important; box-shadow:none !important;
@@ -2217,27 +2086,24 @@ body::before{ display:none !important }
 .heroe h2{ font-size:31px !important; font-weight:560 !important; letter-spacing:-.02em !important; line-height:1.12 !important; color:var(--tinta) !important }
 .heroe .frase{ color:var(--tinta-2) !important; opacity:1 !important; font-family:var(--serif); font-style:italic; font-size:14.5px !important }
 .heroe .fecha{ color:var(--ec, var(--verde)) !important }
-.heroe .dato, .datos-hoy{
+.heroe .dato{
   background:color-mix(in srgb, var(--tinta) 6%, transparent) !important; border:0 !important; color:var(--tinta) !important;
   backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
 }
-.datos-hoy button{ color:var(--tinta) !important }
-.datos-hoy button + button{ border-left-color:color-mix(in srgb, var(--tinta) 8%, transparent) !important }
-.datos-hoy b, .heroe .dato b{ font-weight:600 !important; letter-spacing:-.01em !important }
-.datos-hoy span{ color:var(--tinta-2) !important; opacity:1 !important }
+
+ .heroe .dato b{ font-weight:600 !important; letter-spacing:-.01em !important }
+
 .heroe .dato svg{ color:var(--ec, var(--verde)) !important; opacity:1 !important }
 .anillo-hoy .anillo .fondo, .heroe .anillo .fondo, .heroe .anillo-mini circle:first-child{ stroke:color-mix(in srgb, var(--tinta) 12%, transparent) !important }
 .anillo-hoy .anillo .valor, .heroe .anillo .valor{ stroke:var(--ec, var(--verde)) !important }
 .anillo-hoy > span, .anillo-hoy > span b{ color:var(--tinta) !important }
 .anillo-hoy > span b{ font-family:var(--serif) !important; font-weight:600 }
 .heroe .anillo-mini text{ fill:var(--tinta) !important }
-.cifra-heroe{ font-weight:560 !important; letter-spacing:-.02em !important }
+
 @media (min-width:760px){ .heroe h2{ font-size:38px !important } }
 
 /* ----- Cabecera de cada sección ----- */
 .cab-sec{ border:0 !important; background:var(--hoja) !important; box-shadow:none !important; border-radius:26px !important }
-.cab-sec-ico{ border-radius:50% !important }
-.cab-sec-txt b{ font-size:21px !important; font-weight:560 !important }
 
 /* ----- Pestañas: subrayado del acento, sin cajas ----- */
 .esp-tabs, .cal-modos{ background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important; gap:4px !important }
@@ -2271,18 +2137,16 @@ body::before{ display:none !important }
 .celda.sel{ box-shadow:inset 0 0 0 2px var(--verde) !important }
 
 /* ----- Números: la misma letra del texto, con cifras parejas ----- */
-.cifra, .dinero, [class*="monto"], .cifra-heroe, .datos-hoy b, .hora-viva, .fila .hora, .hora{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' }
+.cifra, .dinero, [class*="monto"], .fila .hora, .hora{ font-variant-numeric:tabular-nums; font-feature-settings:'tnum' }
 
 /* Nada de etiquetas en MAYÚSCULAS espaciadas: frase normal */
 .acuerdos h4,
 .adm-grupo-tit,
 .ag-fecha small,
 .anillo-hoy > span,
-.bienestar-hoy h4,
 .cifras small,
 .cliente-num small,
 .crono-grande small,
-.cronometro small,
 .dia-h,
 .ej-cab span,
 .heroe .fecha,
@@ -2292,15 +2156,11 @@ body::before{ display:none !important }
 .inf-fila > span,
 .kan-col h4,
 .kpi small,
-.libro-num small,
-.marcador small,
 .mas-grupo h4,
 .menu-cab span,
 .mes-col small,
 .nav-lat .grupo,
-.pagos-hoy h4,
 .resumen-pagos small,
-.rev-kpi small,
 .seccion-t,
 .seccion-tit,
 .sem-cab small,
@@ -2338,12 +2198,7 @@ body[data-esp="oficina"] .tarjeta-cab h2{
 .cab-grande .cg-tit{ margin:0; font-family:var(--serif); font-size:40px; font-weight:560; line-height:1.02; letter-spacing:-.025em }
 .cab-grande .cg-sub{ margin:8px 0 0; font-size:14px; line-height:1.45; color:var(--tinta-2) }
 .cab-grande .cg-sub em{ font-style:normal; color:var(--debe); font-weight:650 }
-.cg-prog{ display:grid; grid-template-columns:1fr auto; align-items:center; gap:4px 10px; margin-top:14px; max-width:420px }
-.cg-prog > i{ display:block; height:4px; border-radius:4px; background:var(--sc); box-shadow:0 0 0 0 transparent; position:relative; grid-column:1; grid-row:1 }
-.cg-prog::before{ content:""; grid-column:1; grid-row:1; height:4px; border-radius:4px; background:var(--regla) }
-.cg-prog > i{ z-index:1; max-width:100% }
-.cg-prog b{ grid-column:2; grid-row:1; font-family:var(--serif); font-size:16px; font-weight:600 }
-.cg-prog span{ grid-column:1 / -1; font-size:12px; color:var(--tinta-3) }
+
 @media (min-width:900px){ .cab-grande .cg-tit{ font-size:48px } }
 
 /* La barra de arriba muestra el título pequeño solo al bajar */
@@ -2351,9 +2206,9 @@ body[data-esp="oficina"] .tarjeta-cab h2{
 body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translateY(6px); pointer-events:none }
 
 /* Bloques abiertos (sin tarjeta) */
-.lista-abierta, .dia-abierto, .dinero-abierto, .rec-bloque{ background:none !important; border:0 !important }
-.lista-abierta > .lista-filas, .rec-lista{ border-top:1px solid var(--regla-2) }
-.lista-abierta .fila, .rec-lista .fila{ padding-left:2px !important; padding-right:2px !important }
+ .rec-bloque{ background:none !important; border:0 !important }
+ .rec-lista{ border-top:1px solid var(--regla-2) }
+ .rec-lista .fila{ padding-left:2px !important; padding-right:2px !important }
 .nada{ margin:0; padding:14px 2px; color:var(--tinta-3); font-size:14px }
 .ver-link{ margin-left:auto; display:inline-flex; align-items:center; gap:2px; font-family:var(--letra); font-size:13px; font-weight:650; color:var(--verde) }
 .ver-link svg{ width:14px; height:14px }
@@ -2362,31 +2217,13 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 
 /* ----- HOY ----- */
 .portada-hoy{ padding:6px 2px 4px; margin-bottom:14px }
-.ph-fecha{ display:flex; align-items:center; gap:14px }
-.ph-num{ font-family:var(--serif); font-size:84px; line-height:.85; font-weight:500; letter-spacing:-.04em; color:var(--verde) }
-.ph-dia{ display:flex; flex-direction:column; line-height:1.15 }
-.ph-dia b{ font-family:var(--serif); font-size:24px; font-weight:560 }
-.ph-dia span{ font-size:13px; color:var(--tinta-3); margin-top:2px }
+
 .ph-anillo{ margin-left:auto; width:70px !important; height:70px !important }
 .ph-anillo .anillo{ width:70px !important; height:70px !important }
 .ph-anillo > span{ font-size:10px !important }
 .ph-anillo > span b{ font-size:17px !important }
 .ph-saludo{ margin:18px 0 0; font-family:var(--serif); font-size:32px; font-weight:560; line-height:1.1; letter-spacing:-.02em }
 .ph-saludo .emoji{ display:inline-block; animation:saluda 2.4s ease-in-out 1 }
-.ph-frase{ margin:8px 0 0; font-family:var(--serif); font-style:italic; font-size:15px; color:var(--tinta-2) }
-.ph-cuentas{
-  display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)); margin-top:18px !important;
-  background:none !important; border:0 !important; border-radius:0 !important; overflow:visible !important;
-  border-top:1px solid var(--regla-2) !important; border-bottom:1px solid var(--regla-2) !important;
-}
-.ph-cuentas button{ padding:12px 2px !important; align-items:flex-start !important; text-align:left }
-.ph-cuentas button + button{ border-left:1px solid var(--regla-2) !important; padding-left:12px !important }
-.ph-cuentas b{ font-family:var(--serif) !important; font-size:28px !important; font-weight:560 !important; line-height:1 !important }
-.ph-cuentas span{ font-size:11.5px !important; margin-top:4px; color:var(--tinta-3) !important }
-.portada-hoy .barra-dia{ margin-top:14px }
-.barra-dia-cab{ color:var(--tinta-3) }
-.barra-dia-riel{ background:var(--regla-2) !important; height:3px !important }
-.barra-dia-riel i{ background:var(--verde) !important }
 
 .franja-semana{
   display:grid !important; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; margin:0 0 18px !important;
@@ -2404,12 +2241,6 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .franja-semana button.pasado{ opacity:.55 }
 .franja-semana .puntos{ display:flex; gap:2px; height:5px }
 .franja-semana .puntos i{ width:4px; height:4px; border-radius:50%; background:var(--verde) }
-.captura-hoy{ margin-bottom:6px }
-
-.bloque-ahora{ display:block !important }
-.bloque-ahora .siguiente{ padding:22px 22px 20px !important }
-.dia-abierto .linea-tiempo{ padding:0 !important }
-.dia-abierto .lt-item .fila{ background:none !important }
 
 .enfoque-grande{ display:flex; flex-direction:column; gap:2px; padding:0 !important }
 .enfoque-grande label{
@@ -2441,16 +2272,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 
 .panel-bienestar{ display:grid; gap:16px; padding:18px; border-radius:26px; background:var(--hoja) }
 @media (min-width:900px){ .panel-bienestar{ grid-template-columns:repeat(3,minmax(0,1fr)) } }
-.pb-bloque h4{ margin:0 0 10px !important; font-family:var(--serif); font-size:17px !important; font-weight:560 !important; color:var(--tinta) !important; display:flex; justify-content:space-between }
-.pb-bloque h4 span{ font-family:var(--letra); font-size:12.5px; color:var(--tinta-3); font-weight:600 }
-.regresivas-grandes{ margin:0 0 14px !important; padding:0 !important }
-.regresivas-grandes .regresiva{ border:0 !important; background:color-mix(in srgb, var(--c) 16%, var(--hoja)) !important; border-radius:22px !important }
-.regresivas-grandes .regresiva b{ font-family:var(--serif); font-size:34px !important; font-weight:500 }
-.viene-rejilla{ gap:22px !important }
-.libros-hoy{ gap:10px !important }
-.libro-hoy{ border:0 !important; background:var(--hoja) !important; border-radius:24px !important; padding:16px !important }
-.libro-saldo{ display:block; font-family:var(--serif); font-size:28px; font-weight:560; margin:4px 0 8px; letter-spacing:-.01em }
-.dinero-abierto .pagos-hoy{ margin-top:18px }
+
 .bienvenida-hoy{ padding:20px; border-radius:26px; background:var(--hoja); margin-bottom:16px }
 .bienvenida-hoy h3{ margin:0 0 6px; font-family:var(--serif); font-size:24px; font-weight:560 }
 .bienvenida-hoy p{ margin:0 0 12px; color:var(--tinta-2); font-size:14px }
@@ -2623,14 +2445,6 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .notas-muro .nota:nth-child(3n){ transform:rotate(-.5deg) }
 
 /* ----- DINERO: la cifra en grande, sin caja ----- */
-.heroe.dinero-heroe{ background:none !important; padding:4px 2px 10px !important; border-radius:0 !important }
-.heroe.dinero-heroe::after{ display:none !important }
-.dinero-heroe .fecha{ color:var(--haber) !important }
-.dinero-heroe .cifra-heroe{ font-size:clamp(44px, 13vw, 64px) !important; line-height:1 !important; margin-top:8px !important }
-.dinero-heroe .datos{ display:grid !important; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0 !important; border-top:1px solid var(--regla-2); border-bottom:1px solid var(--regla-2); margin-top:16px !important }
-.dinero-heroe .dato{ flex-direction:column; align-items:flex-start !important; gap:2px !important; padding:12px 8px 12px 0 !important; background:none !important; border:0 !important; border-radius:0 !important; color:var(--tinta-3) !important }
-.dinero-heroe .dato + .dato{ border-left:1px solid var(--regla-2) !important; padding-left:12px !important }
-.dinero-heroe .dato b{ font-size:17px !important; color:var(--tinta) !important }
 
 /* ----- CALENDARIO: mes sin cajas, puntos en vez de barras ----- */
 .cal-mes-caja{ background:none !important; border:0 !important; padding:0 !important; box-shadow:none !important }
@@ -2650,8 +2464,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .cal-mes .celda .barras i{ width:5px !important; height:5px !important; border-radius:50% !important; background:var(--c) !important; flex:none !important }
 .cal-mes .celda .barras em{ font-size:9px; line-height:6px; color:var(--tinta-3) }
 .cal-mes .celda.pasado .barras i{ opacity:.45 }
-@media (max-width:480px){ .dinero-heroe .dato b{ font-size:14.5px !important; letter-spacing:-.02em !important } .pe-datos .dato b{ font-size:22px !important } }
-
+@media (max-width:480px){  .pe-datos .dato b{ font-size:22px !important } }
 
 /* ==========================================================================
    CARÁCTER
@@ -2662,12 +2475,10 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 :root{ --r-card:16px; --mano:var(--serif) }
 
 /* Todo lo que era serifa pasa a la condensada, firme */
-.cabecera h1, .heroe h2, .seccion-t, .seccion-t span, .seccion-tit, .tarjeta-cab h2, .tarjeta-cab h3,
-.cab-sec-txt b, .hoja-flot .cab h3, .adm-grupo-tit, .mas-grupo h4, .siguiente b, .cifra-heroe, .datos-hoy b,
-.heroe .dato b, .vacio h3, .marca b, .cg-tit, .ph-saludo, .ph-dia b, .ph-num, .pe-nom, .pl-fecha b, .pl-tit,
-.rec-hora b, .lb-nom, .hl-txt h2, .md-nom, .md-pct, .md-cifras b, .notas-muro .nota b, .sub-t, .pb-bloque h4,
-.libro-saldo, .esp-alta .esp-nom, .esp-alta .esp-big, .franja-semana button b, .ph-cuentas b, .pe-datos .dato b,
-.bienvenida-hoy h3, .enfoque-grande .n, .ht-racha b, .cg-prog b, .cal-mes .celda .num, .regresivas-grandes .regresiva b,
+.cabecera h1, .heroe h2, .seccion-t, .seccion-t span, .seccion-tit, .tarjeta-cab h2, .tarjeta-cab h3, .hoja-flot .cab h3, .adm-grupo-tit, .mas-grupo h4, .siguiente b,
+.heroe .dato b, .vacio h3, .marca b, .cg-tit, .ph-saludo, .pe-nom, .pl-fecha b, .pl-tit,
+.rec-hora b, .lb-nom, .hl-txt h2, .md-nom, .md-pct, .md-cifras b, .notas-muro .nota b, .sub-t, .esp-alta .esp-nom, .esp-alta .esp-big, .franja-semana button b, .pe-datos .dato b,
+.bienvenida-hoy h3, .enfoque-grande .n, .ht-racha b, .cal-mes .celda .num,
 .anillo-hoy > span b, .nav-lat .grupo{
   font-family:var(--serif) !important; font-variation-settings:normal !important; font-style:normal !important;
 }
@@ -2677,7 +2488,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .pe-nom{ font-size:58px !important; line-height:.9 !important }
 .ph-saludo{ font-size:40px !important; line-height:.95 !important; margin-top:14px !important }
 .seccion-t{ font-size:25px !important; font-weight:700 !important; text-transform:uppercase !important; letter-spacing:.01em !important }
-.seccion-tit, .pl-tit, .sub-t, .pb-bloque h4, .tarjeta-cab h2, .tarjeta-cab h3, .hoja-flot .cab h3, .md-nom, .lb-nom, .notas-muro .nota b{
+.seccion-tit, .pl-tit, .sub-t, .tarjeta-cab h2, .tarjeta-cab h3, .hoja-flot .cab h3, .md-nom, .lb-nom, .notas-muro .nota b{
   font-weight:700 !important; letter-spacing:.01em !important;
 }
 .seccion-tit{ font-size:21px !important; text-transform:uppercase !important }
@@ -2686,38 +2497,36 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .nav-lat .grupo{ text-transform:uppercase !important; letter-spacing:.08em !important; font-size:13px !important; font-weight:700 !important }
 
 /* Cifras de tablero */
-.ph-num{ font-size:104px !important; font-weight:700 !important; line-height:.8 !important; letter-spacing:-.02em !important }
-.ph-dia b{ font-size:28px !important; font-weight:700 !important; text-transform:uppercase }
+
 .pl-fecha b{ font-size:44px !important; font-weight:700 !important }
 .rec-hora b{ font-size:30px !important; font-weight:700 !important; letter-spacing:0 !important }
 .md-pct{ font-size:50px !important; font-weight:700 !important }
-.cifra-heroe{ font-weight:700 !important; letter-spacing:0 !important }
+
 .franja-semana button b{ font-size:24px !important; font-weight:700 !important }
 .esp-alta .esp-big{ font-size:48px !important; font-weight:700 !important }
-.libro-saldo{ font-size:32px !important; font-weight:700 !important }
-.pe-datos .dato b, .ph-cuentas b{ font-weight:700 !important }
+
+.pe-datos .dato b{ font-weight:700 !important }
 .cal-mes .celda .num{ font-size:21px !important; font-weight:600 !important }
 .enfoque-grande .n{ font-size:40px !important; font-weight:700 !important; transform:none !important; color:var(--verde) !important }
 
 /* Frases: sin cursiva ni letra a mano */
-.ph-frase, .pe-lema, .heroe .frase{ font-family:var(--letra) !important; font-style:normal !important; font-size:14px !important; transform:none !important; color:var(--tinta-2) !important; font-weight:500 }
+ .pe-lema, .heroe .frase{ font-family:var(--letra) !important; font-style:normal !important; font-size:14px !important; transform:none !important; color:var(--tinta-2) !important; font-weight:500 }
 .pe-lema b{ font-family:var(--letra) !important; font-weight:700 }
 .notas-muro .nota p{ font-family:var(--letra) !important; font-size:13.5px !important; line-height:1.5 !important; color:var(--tinta-2) !important }
 .siguiente small{ font-family:var(--letra) !important; font-size:11.5px !important; font-weight:800 !important; letter-spacing:.1em !important; text-transform:uppercase !important }
-.animo-prog{ font-family:var(--serif); font-style:normal; font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--sc) }
 
 /* Nada inclinado */
-.notas-muro .nota, .cg-sticker, .enfoque-grande .n{ transform:none !important }
+.notas-muro .nota, .enfoque-grande .n{ transform:none !important }
 
 /* Esquinas más rectas */
-.tarjeta, .panel-bienestar, .libro-hoy, .esp-alta, .medidor, .bienvenida-hoy, .siguiente, .hab-anillo, .hab-tabla,
-.cab-sec, .hoja-flot, .rejilla-mas button, .menu-lista button, .regresivas-grandes .regresiva, .notas-muro .nota, .libreta{
+.tarjeta, .panel-bienestar, .esp-alta, .medidor, .bienvenida-hoy, .siguiente, .hab-anillo, .hab-tabla,
+.cab-sec, .hoja-flot, .rejilla-mas button, .menu-lista button, .notas-muro .nota, .libreta{
   border-radius:16px !important;
 }
 .btn, .ficha, .selector button, .captura, .entrada, .campo input, .campo select, .campo textarea{ border-radius:10px !important }
 .franja-semana button{ border-radius:12px !important }
 .franja-semana button.hoy{ transform:none; box-shadow:none }
-.lista-abierta .fila, .rec-lista .fila, .pl-cuerpo .fila, .ht-fila, .enfoque-grande label{ border-radius:12px !important }
+ .rec-lista .fila, .pl-cuerpo .fila, .ht-fila, .enfoque-grande label{ border-radius:12px !important }
 .fab{ border-radius:16px !important }
 .casilla{ border-radius:7px !important }
 .ht-c{ border-radius:5px !important }
@@ -2729,17 +2538,11 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .cab-grande .cg-ico svg{ width:22px !important; height:22px !important; stroke-width:2.4 }
 
 /* Números de Hoy como tablero: franja de color arriba */
-.ph-cuentas{ gap:6px !important }
-.ph-cuentas button{ border-radius:12px !important; background:var(--hoja) !important; box-shadow:inset 0 3px 0 var(--bc) !important; padding:14px 4px 10px !important }
-.ph-cuentas b{ font-size:34px !important; line-height:.9 !important }
-.ph-cuentas span{ font-size:11px !important; text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-top:6px }
-.pe-datos .dato, .dinero-heroe .dato{ border-radius:12px !important }
+
+.pe-datos .dato{ border-radius:12px !important }
 .pe-datos .dato{ background:color-mix(in srgb, var(--papel) 60%, transparent) !important; box-shadow:inset 3px 0 0 var(--ec) }
 
 /* Barra de avance recta y gruesa */
-.cg-prog::before, .cg-prog > i{ height:8px !important; border-radius:2px !important }
-.cg-prog > i{ background:var(--sc) !important }
-.cg-prog b{ font-size:22px !important }
 
 /* Fondo: sobrio, apenas una luz del acento arriba */
 body{
@@ -2771,8 +2574,6 @@ body{
 .md-arco path{ stroke-linecap:butt !important; stroke-width:11 !important }
 .medidor.lograda .md-pct{ color:var(--haber) }
 .pe-datos .dato, .pe-datos .dato + .dato{ padding:10px 10px 10px 14px !important }
-.dinero-heroe .dato, .dinero-heroe .dato + .dato{ padding:12px !important }
-.ph-cuentas span{ letter-spacing:.02em !important; font-size:10.5px !important }
 
 /* ==========================================================================
    COMO UNA APP
@@ -2818,9 +2619,7 @@ body{
 .hoja-anadir .captura{ margin-bottom:6px }
 .hoja-anadir #entradaCaptura{ font-size:16px }
 .ha-mas{ margin:16px 0 8px; font-family:var(--serif); font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; color:var(--tinta-2) }
-.ha-rejilla{ grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:8px !important }
-.ha-rejilla button{ padding:12px 4px !important; font-size:11.5px !important; gap:6px !important; min-height:0 !important }
-.ha-rejilla button svg{ width:20px !important; height:20px !important }
+
 .menu-lista .em-menu{ font-size:22px; width:28px; text-align:center }
 .menu-lista button{ align-items:center !important }
 .menu-lista button[aria-current="true"]{ box-shadow:inset 0 0 0 2px var(--verde) }
@@ -2872,33 +2671,23 @@ body{
 .w-hab.ok small{ color:var(--haber) }
 .w-hab:active .em{ transform:translate(-50%, -50%) scale(1.25) }
 
-.w-1{ display:flex; flex-direction:column; gap:4px }
 .w-ico{ font-size:22px }
-.w-big{ font-family:var(--serif); font-size:38px; font-weight:700; line-height:1 }
-.w-big small{ font-size:18px; color:var(--tinta-3) }
+
 .w-dinero{ font-size:26px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
 .w-lbl{ font-size:11.5px; color:var(--tinta-3); font-weight:600 }
 .w-riel{ height:6px; border-radius:2px; background:var(--regla); overflow:hidden; margin:4px 0 8px }
 .w-riel i{ display:block; height:100%; background:var(--verde) }
-.w-agua .w-riel i{ background:var(--azul) }
-.w-1 .btn{ margin-top:auto; justify-content:center }
 
 .w-prio .enfoque-grande label{ background:var(--hoja-2) !important; padding:4px 12px !important }
 .w-prio .enfoque-grande .n{ font-size:28px !important }
 .w-prio .enfoque-grande input{ padding:8px 0 !important; font-size:14.5px !important }
 
-.w-esps{ display:grid !important; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px }
-.w-espb{ display:flex !important; flex-direction:column; align-items:center; gap:2px; padding:12px 4px !important; border-radius:12px !important; min-height:0 !important;
-  background:var(--hoja-2) !important; box-shadow:inset 0 -3px 0 var(--c) !important; text-align:center }
-.w-espb .em{ font-size:24px }
-.w-espb b{ font-size:12.5px }
-.w-espn{ font-size:11px; color:var(--c); font-weight:800 }
 .w-regre{ display:flex; align-items:center; gap:12px; width:100%; padding:10px 12px; margin-bottom:8px; border-radius:12px; background:color-mix(in srgb, var(--c) 14%, var(--hoja-2)); text-align:left }
 .w-regre b{ font-family:var(--serif); font-size:40px; font-weight:700; line-height:1; color:var(--c) }
 .w-regre span{ font-size:12px; color:var(--tinta-3); display:flex; flex-direction:column }
 .w-regre em{ font-style:normal; font-size:15px; font-weight:700; color:var(--tinta) }
 .w-viene .fila .hora{ width:60px }
-.w-animo .animos{ gap:6px }
+
 .w-chips{ display:flex; flex-wrap:wrap; gap:6px }
 .w-chips .ficha svg{ width:13px; height:13px }
 
@@ -2923,11 +2712,11 @@ body{
 .fila.completando .titulo{ text-decoration:line-through; text-decoration-color:var(--haber); color:var(--tinta-3) }
 @keyframes completa{ 0%{ transform:none } 40%{ transform:scale(1.02); background:color-mix(in srgb, var(--haber) 18%, var(--hoja-2)) } 100%{ opacity:0; transform:translateX(40px) } }
 .hoja-flot{ transition:transform .2s ease; will-change:transform }
-.btn:active, .ficha:active, .w-espb:active, .franja-semana button:active, .rejilla-mas button:active, .barra-inf button:active{ transform:scale(.96) }
+.btn:active, .ficha:active, .franja-semana button:active, .rejilla-mas button:active, .barra-inf button:active{ transform:scale(.96) }
 .barra-inf button[aria-current="page"] svg{ animation:salta .3s ease }
 @keyframes salta{ 40%{ transform:translateY(-3px) scale(1.1) } }
 @media (prefers-reduced-motion: reduce){ .vista.entra-der, .vista.entra-izq, .w, .fila.completando{ animation:none !important } }
-.w-espb::before, .w-espb::after{ display:none !important }
+
 @media (min-width:900px){ .panel-hoy .w-tareas{ grid-column:span 2 !important } }
 
 /* ----- Pestañas de cada sección (Tareas·Proyectos, Calendario·Avisos…) ----- */
@@ -2982,8 +2771,8 @@ body{ line-height:1.55 }
 .tarjeta-cuerpo{ padding-left:20px !important; padding-right:20px !important }
 
 /* Filas con más respiro */
-.w .lista-filas, .lista-abierta > .lista-filas, .rec-lista, .pl-cuerpo .lista-filas{ gap:10px !important }
-.w .lista-filas .fila, .lista-abierta .fila, .rec-lista .fila, .pl-cuerpo .fila{ padding:14px 16px !important }
+.w .lista-filas, .rec-lista, .pl-cuerpo .lista-filas{ gap:10px !important }
+.w .lista-filas .fila, .rec-lista .fila, .pl-cuerpo .fila{ padding:14px 16px !important }
 .fila{ min-height:56px }
 .fila .titulo{ font-size:15.5px; line-height:1.35 }
 .fila .meta{ margin-top:4px; gap:6px 10px }
@@ -2999,8 +2788,7 @@ body{ line-height:1.55 }
 .pest-grupo button{ height:42px !important }
 .captura input, .entrada{ min-height:48px }
 .w-hab{ flex-basis:84px !important }
-.w-esps{ gap:10px !important }
-.w-espb{ padding:14px 4px !important }
+
 .enfoque-grande{ gap:10px !important }
 .hab-anillos{ gap:12px !important }
 .ht-fila{ padding:12px 14px !important; margin-bottom:10px !important }
@@ -3028,21 +2816,7 @@ body{ line-height:1.55 }
 .or-botones{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
 .or-botones .btn{ justify-content:center; min-height:48px }
 .or-saltar{ align-self:center }
-.gasto-dia{ display:grid !important; grid-template-columns:1fr; gap:10px; padding:18px 20px !important; box-shadow:inset 3px 0 0 var(--haber) !important }
-.gasto-dia.pasado{ box-shadow:inset 3px 0 0 var(--debe) !important }
-.gd-txt{ display:flex; flex-direction:column; gap:2px }
-.gd-txt small{ font-size:11.5px; text-transform:uppercase; letter-spacing:.08em; font-weight:800; color:var(--haber) }
-.gasto-dia.pasado .gd-txt small{ color:var(--debe) }
-.gd-txt b{ font-family:var(--serif); font-size:40px; font-weight:700; line-height:1 }
-.gd-txt span{ font-size:12.5px; color:var(--tinta-3) }
-.gd-riel{ height:8px; border-radius:2px; background:var(--regla); overflow:hidden }
-.gd-riel i{ display:block; height:100%; background:var(--haber) }
-.gasto-dia.pasado .gd-riel i{ background:var(--debe) }
-.vacio-gd{ grid-template-columns:1fr auto !important; align-items:center; box-shadow:inset 3px 0 0 var(--regla) !important }
-.vacio-gd .gd-txt b{ font-family:var(--letra); font-size:15px }
-.w-plata.pasado .w-dinero{ color:var(--debe) }
-.w-plata .w-riel i{ background:var(--haber) }
-.w-plata.pasado .w-riel i{ background:var(--debe) }
+
 .barra-herr{ flex-wrap:nowrap !important } .barra-herr .btn-filtro{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; justify-content:flex-start } .btn-compartir{ margin-left:auto; flex:none; width:40px !important; height:40px !important; background:var(--hoja) !important; color:var(--verde) }
 
 /* ==========================================================================
@@ -3291,7 +3065,7 @@ body, body *:not(svg):not(use){ text-transform:none !important; font-style:norma
 h1, h2, h3, h4, .cg-tit, .tarjeta-cab h2, .tarjeta-cab h3, .seccion-t, .seccion-tit, .pe-nom, .ph-saludo, .w-cab b, .hoja-flot .cab h3, .md-nom, .ag-cab h2{
   font-family:var(--letra) !important; letter-spacing:-.02em !important; text-transform:none !important; font-style:normal !important;
 }
-.cifra, .w-big, .db-monto, .mov-cifras b, .din-queda b, .din-saldo b, .cifras b, .cierre-nums b, .sem-gasto-num b, .mov-mes b, .cg-prog b, .resumen-dep b, .anillo-hoy b{
+.cifra, .db-monto, .mov-cifras b, .din-queda b, .din-saldo b, .cifras b, .cierre-nums b, .sem-gasto-num b, .mov-mes b, .resumen-dep b, .anillo-hoy b{
   font-family:var(--letra) !important; letter-spacing:-.02em !important; font-variant-numeric:tabular-nums
 }
 small, .meta, .w-lbl, .cifras small, .mov-cifras small, .sem-gasto-num small{ letter-spacing:0 !important }
@@ -3314,9 +3088,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .cab-grande .cg-ico{ display:none !important }
 .cab-grande .cg-tit{ font-size:34px !important; font-weight:800 !important; line-height:1.08 !important }
 .cab-grande .cg-sub{ font-size:14px !important; color:var(--tinta-2) !important; margin-top:4px !important }
-.cg-prog::before, .cg-prog > i{ height:4px !important; border-radius:4px !important }
-.cg-prog > i{ background:var(--verde) !important }
-.cg-prog b{ font-size:15px !important }
+
 .cab-grande .anillo, .cab-grande svg.anillo{ display:none }
 
 /* ---- Pestañas: texto con subrayado, no cajas ---- */
@@ -3375,7 +3147,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
   background:var(--hoja-2) !important; border:0 !important; border-radius:12px !important; box-shadow:none !important; color:var(--tinta) !important
 }
 .captura{ border:0 !important; padding:4px !important }
-.boton-anadir, .btn-anadir, .anadir-pag{ border:0 !important; background:var(--hoja-2) !important; border-radius:12px !important }
+
 .campo > span, .grupo > span{ color:var(--tinta-2) !important; font-weight:650 !important; letter-spacing:0 !important }
 :focus-visible{ outline-color:var(--verde) !important }
 
@@ -3406,16 +3178,13 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .w-sig .siguiente{ padding:0 0 4px !important; border-left:3px solid var(--c, var(--verde)) !important; padding-left:14px !important }
 .siguiente small{ color:var(--verde) !important; font-weight:700 !important }
 .siguiente b{ font-size:22px !important; font-weight:750 !important }
-.w-plata{ display:flex !important; flex-direction:column; gap:4px }
-.w-plata .w-big{ font-size:34px !important; font-weight:800 !important }
+
 .w-riel{ height:4px !important; border-radius:4px !important; background:var(--regla) !important }
-.w-plata .w-riel i{ background:var(--verde) !important }
+
 .w-habs{ gap:8px !important }
 .w-hab{ background:none !important; border:0 !important }
 .w-hab .v{ stroke:var(--verde) !important }
-.w-esps{ gap:8px !important }
-.w-espb{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
-.w-espb::before, .w-espb::after{ display:none !important }
+
 .enfoque-grande label{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:8px 0 !important }
 .enfoque-grande .n{ color:var(--verde) !important; font-family:var(--letra) !important }
 .w-regre{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important }
@@ -3427,7 +3196,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 /* ---- Espacios ---- */
 .portada-esp, .esp-heroe, .heroe{ background:none !important; background-image:none !important; border:0 !important; box-shadow:none !important; padding:6px 0 16px !important; margin-bottom:6px !important }
 .portada-esp::before, .portada-esp::after, .esp-heroe::before, .esp-heroe::after, .heroe::before, .heroe::after{ display:none !important }
-.portada-esp svg.adorno, .esp-adorno, .heroe .adorno{ display:none !important }
+ .esp-adorno{ display:none !important }
 .pe-nom{ font-size:34px !important; font-weight:800 !important }
 .datos{ gap:0 !important; border-top:1px solid var(--regla); border-bottom:1px solid var(--regla); margin-top:14px !important }
 .dato{ background:none !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; padding:12px 10px 12px 0 !important }
@@ -3488,7 +3257,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 /* ---- Notas y listas: menos caja ---- */
 .nota, .notas-muro .nota{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
 .nota::before{ display:none !important }
-.lista-tarjeta, .tarjeta-lista{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
+ .tarjeta-lista{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
 
 /* Menú Más */
 .rejilla-mas button{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
@@ -3515,14 +3284,14 @@ body .barra-h, body .cats-din .barra-h{ padding-left:0 !important; padding-right
 body .presu{ padding:0 0 12px !important }
 body .ideas{ padding-left:18px !important }
 body .ag-sin-hora .fila{ grid-template-columns:auto 1fr auto !important }
-body .esp-picker button, body .pe-esps button, body .esp-sel button{ border-radius:12px !important }
+body .esp-picker button, body .esp-sel button{ border-radius:12px !important }
 body .ordenar-cta{ padding:14px 0 !important; border-bottom:1px solid var(--regla) !important }
-body .hab-tabla, body .seguimiento, body .habitos-hoy .habito, body .hab-card{ box-shadow:none !important }
+body .hab-tabla, body .seguimiento{ box-shadow:none !important }
 body .w .lista-filas .fila, body .panel-hoy .lista-filas .fila{ background:none !important; border-radius:0 !important; padding:13px 0 !important; border-bottom:1px solid var(--regla) !important }
 body .w .lista-filas .fila:last-child{ border-bottom:0 !important }
 body .segmento-fijo, body .esp-tabs{ padding:8px var(--lado, 16px) 0 !important }
 body .esp-tabs{ padding-bottom:0 !important }
-.cal-cab h2, .dia-mini b, .mov-mes b, .pagos-mes b, .pm-mes, .mes-nombre{ text-transform:capitalize !important }
+.cal-cab h2, .dia-mini b, .mov-mes b{ text-transform:capitalize !important }
 body .rec-hora b{ font-size:22px !important; font-weight:750 !important }
 body .rec-hora span{ letter-spacing:0 !important; font-weight:600 !important }
 body .dato b{ font-size:18px !important; white-space:nowrap }
@@ -3749,6 +3518,10 @@ body .w-prio .enfoque-grande label, body .enfoque-grande.enfoque label{ backgrou
 .cal-mes .celda{ min-width:0; overflow:hidden }
 .cal-mes .mini{ display:block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
 @media (min-width:760px){ .cal-mes .celda .barras.solo-movil-p{ display:none !important } }
+/* Metas: −1, +1, Sumar y + a la misma altura */
+.acciones:has(> form[data-acc="meta-cantidad"]){ display:flex; align-items:center; gap:8px; flex-wrap:wrap }
+.acciones:has(> form[data-acc="meta-cantidad"]) .btn, form[data-acc="meta-cantidad"] .entrada{ height:38px !important; min-height:38px; margin:0 }
+form[data-acc="meta-cantidad"]{ align-items:center }
 </style>
 </head>
 <body>
@@ -4018,7 +3791,6 @@ function relativo(s){
   if(n < -1 && n > -7) return 'Hace ' + (-n) + ' días';
   return DIAS3[deISO(s).getDay()] + ' ' + fechaCorta(s);
 }
-function hora12(h){ return h || ''; }
 function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function inicioSemana(s){
   var d = deISO(s), w = d.getDay();
@@ -4945,28 +4717,6 @@ function textoTareasHoy(){
   return '✅ *Mis pendientes de hoy*\n' + (ts.length ? ts.map(function(t){ return '• ' + t.t + (t.hora ? ' (' + t.hora + ')' : ''); }).join('\n') : 'Nada pendiente 🙌');
 }
 
-/* ---------- Cuánto puedes gastar hoy (con tu presupuesto personal) -------- */
-function gastoDiario(){
-  var pres = presupuesto('personal');
-  if(!pres) return null;
-  var hoy = hoyISO(), ym = hoy.slice(0, 7), sal = 0, hoyG = 0;
-  movimientos(CLAVE_LEDGER).forEach(function(t){
-    if(t.type !== 'Gasto' || t.date.slice(0, 7) !== ym) return;
-    var a = Math.abs(+t.amount || 0);
-    if(t.date === hoy) hoyG += a; else sal += a;
-  });
-  var diasMes = new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate(), quedan = diasMes - deISO(hoy).getDate() + 1;
-  var porDia = Math.max(0, (pres - sal) / quedan);
-  return { pres:pres, porDia:porDia, hoy:hoyG, queda:Math.max(0, porDia - hoyG), pasado:hoyG > porDia, restante:pres - sal - hoyG, quedan:quedan };
-}
-function tarjetaGastoDiario(){
-  var g = gastoDiario();
-  if(!g) return '<section class="tarjeta gasto-dia vacio-gd"><div class="gd-txt"><b>¿Cuánto puedes gastar al día?</b><small>Pon tu presupuesto del mes y la agenda te lo calcula.</small></div><button class="btn chico primario" data-acc="presu-ed">Poner presupuesto</button></section>';
-  return '<section class="tarjeta gasto-dia' + (g.pasado ? ' pasado' : '') + '"><div class="gd-txt"><small>' + (g.pasado ? 'Hoy te pasaste' : 'Hoy puedes gastar') + '</small>' +
-    '<b>' + dinero(g.pasado ? g.hoy - g.porDia : g.queda) + '</b>' +
-    '<span>Llevas ' + dinero(g.hoy) + ' hoy · te quedan ' + dinero(Math.max(0, g.restante)) + ' para ' + g.quedan + (g.quedan === 1 ? ' día' : ' días') + '</span></div>' +
-    '<div class="gd-riel"><i style="width:' + Math.min(100, g.porDia ? g.hoy / g.porDia * 100 : 100) + '%"></i></div></section>';
-}
 
 /* ---------- Ordenar pendientes: una tarea a la vez ------------------------ */
 function paraOrdenar(){
@@ -5102,14 +4852,6 @@ function fraseDelDia(){
   return FRASES[Math.floor((d - ini) / 864e5) % FRASES.length];
 }
 
-/* Cuánto del día ya pasó (de 6:00 a 24:00, las horas en que se vive) */
-function barraDelDia(){
-  var d = new Date(), min = d.getHours() * 60 + d.getMinutes();
-  var p = Math.max(0, Math.min(1, (min - 360) / (1440 - 360)));
-  var txt = min < 360 ? 'El día aún no empieza' : p >= 1 ? 'Día terminado' : 'Llevas el ' + Math.round(p * 100) + '% del día';
-  return '<div class="barra-dia" title="' + txt + '"><div class="barra-dia-cab"><span>' + txt + '</span><span>' + horaAhora() + '</span></div>' +
-    '<div class="barra-dia-riel"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
-}
 /* El día en una línea de tiempo: lo pasado se apaga y una marca dice "ahora" */
 function lineaDelDia(items){
   var ya = horaAhora(), puesto = false, h = '<div class="linea-tiempo">';
@@ -5133,7 +4875,6 @@ var SECC_HOY = [
   ['viene', 'Lo que se viene'], ['dinero', 'Dinero'], ['notas', 'Notas fijadas']
 ];
 function hoyVisible(k){ return (pref.hoyOff || []).indexOf(k) < 0; }
-function tituloSecc(t, extra){ return '<h3 class="seccion-t"><span>' + t + '</span>' + (extra || '') + '</h3>'; }
 function minutosHasta(hora){ var p = hora.split(':'), d = new Date(); return (+p[0] * 60 + +p[1]) - (d.getHours() * 60 + d.getMinutes()); }
 function textoFalta(min){ return min <= 0 ? 'ahora' : min < 60 ? 'en ' + min + ' min' : 'en ' + Math.floor(min / 60) + ' h' + (min % 60 ? ' ' + (min % 60) + ' min' : ''); }
 
@@ -5701,15 +5442,6 @@ function tarjetaSinCompras(){
     '<div class="vacio" style="padding-top:4px">Crea tu lista de compras y táchala desde aquí.<br><button class="btn chico primario" style="margin-top:10px" data-acc="crear-compras">' + ico('i-plus') + 'Crear lista de compras</button></div></section>';
 }
 
-/* ---------- Lo propio de cada espacio -------------------------------------- */
-function horasEstudioSemana(){
-  var ini = inicioSemana(hoyISO()), min = 0;
-  for(var i = 0; i < 7; i++){
-    var e = buscarId('enfoque', sumarDias(ini, i));
-    if(e && !e.del && e.pomosEsp && e.pomosEsp.estudios) min += e.pomosEsp.estudios * minutosModo('trabajo');
-  }
-  return min / 60;
-}
 function eventosTipo(tipo, dias, esp){
   var hoy = hoyISO(), out = [];
   vivos('eventos').forEach(function(e){
@@ -5936,25 +5668,6 @@ function editarProyecto(id, preset){
    Cinco minutos el domingo: qué hiciste, qué salió bien, qué mejorar y
    qué es lo importante de la semana que viene. La agenda pone los números.
    ========================================================================== */
-function statsSemana(ini){
-  var fin = sumarDias(ini, 6), enS = function(d){ return d >= ini && d <= fin; };
-  var r = { tareas:0, entrenos:0, minEnt:0, pomos:0, estudio:0, ent:0, sal:0, habT:0, habH:0, animo:0, nAnimo:0, eventos:0 };
-  vivos('tareas').forEach(function(t){
-    if(t.hecha && t.hechaEn && enS(iso(new Date(t.hechaEn)))) r.tareas++;
-    (t.log || []).forEach(function(d){ if(enS(d)) r.tareas++; });
-  });
-  vivos('entrenos').forEach(function(e){ if(enS(e.fecha)){ r.entrenos++; r.minEnt += +e.min || 0; } });
-  for(var i = 0; i < 7; i++){
-    var d = sumarDias(ini, i), e = buscarId('enfoque', d);
-    if(e && !e.del){ r.pomos += e.pomos || 0; r.estudio += (e.pomosEsp && e.pomosEsp.estudios) || 0; }
-    var w = deISO(d).getDay();
-    if(d <= hoyISO()) vivos('habitos').forEach(function(h){ if(!h.dias || h.dias.indexOf(w) >= 0){ r.habT++; if(h.marcas && h.marcas[d]) r.habH++; } });
-    var di = buscarId('diario', d); if(di && !di.del && di.animo){ r.animo += di.animo; r.nAnimo++; }
-    r.eventos += itemsDelDia(d).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
-  }
-  libroDatos('personal').concat(libroDatos('oficina')).forEach(function(t){ if(enS(t.date)){ if(t.type === 'Gasto') r.sal += t.amount; else r.ent += t.amount; } });
-  return r;
-}
 
 /* ==========================================================================
    PRÉSTAMOS: quién te debe y a quién le debes
@@ -6144,17 +5857,6 @@ function cuentasRegresivas(){
   });
   return out.sort(function(a, b){ return a.en - b.en; });
 }
-function tarjetaCuentas(){
-  var cs = cuentasRegresivas();
-  if(!cs.length) return '';
-  return '<section class="tarjeta ancho-2">' + cabTarjeta('i-reloj', 'Cuenta regresiva', 'var(--oro)') +
-    '<div class="regresivas">' + cs.slice(0, 4).map(function(x){
-      var c = x.e.cumple ? 'var(--rosa)' : (x.e.color && x.e.color !== 'esp' ? color(x.e.color) : colorEsp(x.e));
-      return '<button type="button" class="regresiva" style="--c:' + c + '" data-acc="evento-ed" data-id="' + x.e.id + '">' +
-        '<b>' + (x.en === 0 ? '¡Hoy!' : x.en) + '</b><small>' + (x.en === 0 ? '' : x.en === 1 ? 'día' : 'días') + '</small>' +
-        '<span>' + (x.e.cumple ? '🎂 ' : '') + esc(x.e.t) + '</span><em>' + cap(fechaLarga(x.dia)) + '</em></button>';
-    }).join('') + '</div></section>';
-}
 
 /* ==========================================================================
    TEMA AUTOMÁTICO: claro de día, oscuro de noche, según el teléfono
@@ -6170,26 +5872,6 @@ if(mqOscuro && mqOscuro.addEventListener) mqOscuro.addEventListener('change', fu
 /* ---------- Personal: agua, sueño, fechas importantes y la compra --------- */
 var META_AGUA = 8;
 function bienestar(dia){ var b = buscarId('bienestar', dia); return b && !b.del ? b : { id:dia, agua:0, sueno:'' }; }
-function tarjetaBienestar(){
-  var hoy = hoyISO(), b = bienestar(hoy), dias = [];
-  for(var i = 6; i >= 0; i--){ var d = sumarDias(hoy, -i); dias.push({ d:d, b:bienestar(d) }); }
-  var suenos = dias.filter(function(x){ return +x.b.sueno; });
-  var media = suenos.length ? suenos.reduce(function(a, x){ return a + +x.b.sueno; }, 0) / suenos.length : 0;
-  var vasos = '';
-  for(var v = 1; v <= META_AGUA; v++) vasos += '<button type="button" class="vaso' + (v <= b.agua ? ' lleno' : '') + '" data-acc="agua" data-v="' + v + '" aria-label="' + v + ' vasos">' + ico('i-gota') + '</button>';
-  return '<section class="tarjeta">' + cabTarjeta('i-gota', 'Agua y sueño', 'var(--azul)') +
-    '<div class="tarjeta-cuerpo">' +
-      '<div class="bien-fila"><span>💧 Agua hoy</span><b>' + b.agua + ' / ' + META_AGUA + ' vasos</b></div>' +
-      '<div class="vasos">' + vasos + '</div>' +
-      '<div class="bien-fila" style="margin-top:14px"><span>😴 Anoche dormí</span>' +
-        '<div class="sueno-sel">' + [5, 6, 7, 8, 9].map(function(h){ return '<button type="button" data-acc="sueno" data-v="' + h + '" aria-pressed="' + (+b.sueno === h) + '">' + h + ' h</button>'; }).join('') + '</div></div>' +
-      '<div class="sueno-semana">' + dias.map(function(x){
-        var h = +x.b.sueno || 0;
-        return '<div class="sueno-dia' + (x.d === hoy ? ' hoy' : '') + '" title="' + fechaCorta(x.d) + ': ' + (h ? h + ' h' : 'sin dato') + '"><i style="height:' + (h ? Math.min(100, h / 10 * 100) : 4) + '%" class="' + (h && h < 6 ? 'poco' : h >= 7 ? 'bien' : '') + '"></i><small>' + DIAS3[deISO(x.d).getDay()].charAt(0) + '</small></div>';
-      }).join('') + '</div>' +
-      '<small class="bien-pie">' + (media ? 'Duermes ' + media.toFixed(1) + ' h de media esta semana' + (media < 7 ? '. Lo ideal son 7 a 9.' : '. ¡Bien!') : 'Marca cuántas horas dormiste para ver tu semana.') + '</small>' +
-    '</div></section>';
-}
 function tarjetaFechas(){
   var cs = proximosCumples(60);
   var otros = vivos('eventos').filter(function(e){ return !e.cumple && e.rep === 'ano' && espDe(e) === 'personal'; });
@@ -6323,37 +6005,7 @@ function textoFaltas(c){
 /* ---------- Oficina: cronómetro de horas por cliente ------------------------ */
 var CLAVE_RELOJ = 'agenda_reloj';
 var reloj = leerJSON(CLAVE_RELOJ, null);
-function minutosHoras(desde, cliente){
-  return vivos('horas').filter(function(h){ return h.fecha >= desde && (!cliente || h.cliente === cliente); }).reduce(function(a, h){ return a + (+h.min || 0); }, 0);
-}
 function hhmm(min){ min = Math.round(min); return Math.floor(min / 60) + 'h ' + dos(min % 60) + 'm'; }
-function tarjetaHoras(){
-  var hoy = hoyISO(), ini = inicioSemana(hoy), mes = hoy.slice(0, 7) + '-01';
-  var semana = minutosHoras(ini), hoyMin = minutosHoras(hoy) - minutosHoras(sumarDias(hoy, 1));
-  var porCli = {}, tarifas = {};
-  vivos('horas').forEach(function(h){ if(h.fecha >= mes){ var k = h.cliente || 'Sin cliente'; porCli[k] = (porCli[k] || 0) + (+h.min || 0); if(+h.tarifa) tarifas[k] = +h.tarifa; } });
-  var facturable = Object.keys(porCli).reduce(function(a, k){ return a + (tarifas[k] ? porCli[k] / 60 * tarifas[k] : 0); }, 0);
-  var clientes = [];
-  vivos('horas').concat(vivos('cobros')).forEach(function(x){ var n = x.cliente; if(n && clientes.indexOf(n) < 0) clientes.push(n); });
-  var enMarcha = reloj && reloj.inicio;
-  var ult = vivos('horas').sort(function(a, b){ return (b.fecha + b.ini).localeCompare(a.fecha + a.ini); }).slice(0, 4);
-  return '<section class="tarjeta tarjeta-horas">' + cabTarjeta('i-reloj', 'Horas trabajadas', 'var(--esp-oficina)', 'Anotar a mano', 'data-acc="hora-nueva"') +
-    '<div class="tarjeta-cuerpo">' +
-      '<div class="cronometro' + (enMarcha ? ' andando' : '') + '">' +
-        '<div><small>' + (enMarcha ? 'Trabajando en ' + esc(reloj.cliente || 'algo') : 'Cronómetro parado') + '</small><b id="relojOficina">' + (enMarcha ? mmssLargo(Date.now() - reloj.inicio) : '0:00:00') + '</b></div>' +
-        (enMarcha ? '<button class="btn peligro" data-acc="reloj-parar">' + ico('i-pausa') + 'Parar</button>'
-                  : '<form class="reloj-form" data-acc="reloj-empezar" autocomplete="off"><input class="entrada" id="relojCliente" list="listaClientes" placeholder="Cliente o proyecto" maxlength="60"><datalist id="listaClientes">' + clientes.map(function(c){ return '<option value="' + esc(c) + '">'; }).join('') + '</datalist><button class="btn primario" type="submit">' + ico('i-play') + 'Empezar</button></form>') +
-      '</div>' +
-      '<div class="cifras" style="padding:12px 0 0"><div><small>Hoy</small><b>' + hhmm(hoyMin) + '</b></div><div><small>Esta semana</small><b>' + hhmm(semana) + '</b></div><div class="entra"><small>Facturable del mes</small><b>' + dinero(facturable) + '</b></div></div>' +
-      (Object.keys(porCli).length ? '<div style="margin-top:10px">' + Object.keys(porCli).sort(function(a, b){ return porCli[b] - porCli[a]; }).slice(0, 5).map(function(k){
-        var total = Object.keys(porCli).reduce(function(a, x){ return a + porCli[x]; }, 0);
-        return '<div class="barra-h" style="padding:5px 0;grid-template-columns:minmax(0,120px) minmax(0,1fr) 70px"><span>' + esc(k) + '</span><div class="barra-prog"><i style="width:' + (porCli[k] / total * 100).toFixed(1) + '%;background:var(--esp-oficina)"></i></div><b>' + (porCli[k] / 60).toFixed(1) + ' h</b></div>';
-      }).join('') + '</div>' : '') +
-    '</div>' +
-    (ult.length ? '<div class="lista-filas">' + ult.map(function(h){
-      return '<div class="fila"><span class="hora" style="width:52px">' + (h.ini || '') + '</span><div class="cuerpo" data-acc="hora-ed" data-id="' + h.id + '"><div class="titulo">' + esc(h.cliente || 'Sin cliente') + (h.nota ? ' · ' + esc(h.nota) : '') + '</div><div class="meta"><span>' + relativo(h.fecha) + '</span><span>' + hhmm(+h.min || 0) + '</span>' + (+h.tarifa ? '<span>' + dinero(+h.min / 60 * +h.tarifa) + '</span>' : '') + '</div></div></div>';
-    }).join('') + '</div>' : '') + '</section>';
-}
 function mmssLargo(ms){ var s = Math.floor(ms / 1000); return Math.floor(s / 3600) + ':' + dos(Math.floor(s / 60) % 60) + ':' + dos(s % 60); }
 function tarifaDe(cliente){
   var t = 0; vivos('horas').forEach(function(h){ if(h.cliente === cliente && +h.tarifa) t = +h.tarifa; }); return t;
@@ -6385,31 +6037,6 @@ function editarHora(id){
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('horas', h.id, 'Registro borrado'); pintar(); } };
 }
 
-/* ---------- Deporte: tus números en la cancha -------------------------------- */
-function statsFutbol(){
-  var hoy = hoyISO(), r = { pj:0, g:0, a:0, v:0, e:0, d:0, racha:[] };
-  vivos('eventos').filter(function(e){ return e.tipo === 'partido' && e.fecha <= hoy && e.jugado; })
-    .sort(function(a, b){ return a.fecha.localeCompare(b.fecha); }).forEach(function(e){
-      r.pj++; r.g += +e.goles || 0; r.a += +e.asist || 0;
-      if(e.res === 'v') r.v++; else if(e.res === 'e') r.e++; else if(e.res === 'd') r.d++;
-      if(e.res) r.racha.push(e.res);
-    });
-  return r;
-}
-function tarjetaFutbol(){
-  var s = statsFutbol();
-  var ult = vivos('eventos').filter(function(e){ return e.tipo === 'partido' && e.jugado; }).sort(function(a, b){ return b.fecha.localeCompare(a.fecha); }).slice(0, 4);
-  return '<section class="tarjeta marcador-card">' + cabTarjeta('i-balon', 'Tus números en la cancha', 'var(--esp-deporte)', 'Anotar partido', 'data-acc="partido-jugado"') +
-    '<div class="marcador">' +
-      [['PJ', s.pj], ['Goles', s.g], ['Asist.', s.a], ['G/P', s.pj ? (s.g / s.pj).toFixed(1) : '0']].map(function(x){ return '<div><b>' + x[1] + '</b><small>' + x[0] + '</small></div>'; }).join('') +
-    '</div>' +
-    '<div class="ved"><span class="v">' + s.v + ' ganados</span><span class="e">' + s.e + ' empates</span><span class="d">' + s.d + ' perdidos</span>' +
-      '<span class="forma">' + s.racha.slice(-5).map(function(x){ return '<i class="' + x + '">' + { v:'G', e:'E', d:'P' }[x] + '</i>'; }).join('') + '</span></div>' +
-    (ult.length ? '<div class="lista-filas">' + ult.map(function(e){
-      return '<div class="fila"><span class="res-chip ' + (e.res || '') + '">' + ({ v:'G', e:'E', d:'P' }[e.res] || '·') + '</span><div class="cuerpo" data-acc="evento-ed" data-id="' + e.id + '"><div class="titulo">' + esc(e.t) + (e.resultado ? ' · ' + esc(e.resultado) : '') + '</div><div class="meta"><span>' + relativo(e.fecha) + '</span>' +
-        (+e.goles ? '<span>⚽ ' + e.goles + '</span>' : '') + (+e.asist ? '<span>🅰️ ' + e.asist + '</span>' : '') + '</div></div></div>';
-    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Anota tus partidos jugados con tus goles y asistencias.</div>') + '</section>';
-}
 
 /* ==========================================================================
    PESTAÑAS DE CADA ESPACIO
@@ -6496,12 +6123,6 @@ function subpantallas(id){
     { k:'bolso', em:'🎒', c:'#FFD60A', t:'Tu bolso', d:'Que no se te quede nada para el partido', n:bl ? bOk + '/' + bIt.length : '—', nl:bl ? 'listos' : 'ármalo', html:function(){ return tarjetaBolso(eventosTipo('partido', 30)); } },
     { k:'actividad', em:'📈', c:'#BF5AF2', t:'Tus 12 semanas', d:'Tu constancia de un vistazo', n:semanasSeguidas(), nl:'semanas seguidas', html:function(){ return tarjetaMapaActividad(); } },
     { k:'dinero', i:'i-grafica', c:'#94A3B8', t:'Gastos de deporte', d:'Cancha, gym, implementos', n:dinero(tmE.sal), nl:'este mes', html:function(){ return tarjetaDineroEsp('deporte') || '<section class="tarjeta">' + vacio('💰', 'Sin gastos de deporte', 'Anota un gasto con la categoría «Deporte» y saldrá aquí.') + '</section>'; } }];
-}
-function pestanasEsp(id){
-  var act = tabEsp(id);
-  return '<div class="esp-tabs" role="tablist">' + PESTANAS[id].map(function(p){
-    return '<button type="button" role="tab" data-acc="esp-tab" data-esp="' + id + '" data-v="' + p[0] + '" aria-selected="' + (p[0] === act) + '"><span>' + p[2] + '</span>' + p[1] + '</button>';
-  }).join('') + '</div>';
 }
 
 /* Los números del saludo, distintos en cada espacio */
@@ -6611,29 +6232,6 @@ function listaCompras(){ return vivos('listas').find(function(x){ return /compra
 
 /* ---------- La casa: cosas que tocan cada tanto -------------------------- */
 var CASA_SUG = [['Cambiar las sábanas','🛏️',7],['Regar las plantas','🪴',3],['Limpiar la refrigeradora','🧊',30],['Cambiar el cepillo de dientes','🪥',90],['Revisar el balón de gas','🔥',30],['Lavar el auto','🚗',15],['Limpiar el baño a fondo','🚿',7],['Sacar la basura reciclable','♻️',7]];
-function estadoCasa(c){
-  var hoy = hoyISO(), desde = c.ult ? diasEntre(c.ult, hoy) : null;
-  var resta = desde == null ? 0 : (+c.cada || 7) - desde;
-  return { desde:desde, resta:resta, p:desde == null ? 1 : Math.min(1, desde / (+c.cada || 7)) };
-}
-function tarjetaCasa(){
-  var cs = vivos('casa').map(function(c){ return { c:c, s:estadoCasa(c) }; }).sort(function(a, b){ return a.s.resta - b.s.resta; });
-  var usados = cs.map(function(x){ return sinTildes(x.c.t); });
-  var sug = CASA_SUG.filter(function(s){ return usados.indexOf(sinTildes(s[0])) < 0; }).slice(0, 5);
-  return '<section class="tarjeta ancho-2">' + cabTarjeta('i-casa', 'La casa: cada cuánto toca', 'var(--esp-personal)', 'Añadir', 'data-acc="casa-nueva"') +
-    (cs.length ? '<div class="casa-lista">' + cs.map(function(x){
-      var s = x.s, est = s.desde == null ? 'Sin empezar' : s.resta < 0 ? 'Atrasado ' + (-s.resta) + (s.resta === -1 ? ' día' : ' días') : s.resta === 0 ? 'Toca hoy' : 'En ' + s.resta + (s.resta === 1 ? ' día' : ' días');
-      var cls = s.desde == null || s.resta < 0 ? 'mal' : s.resta === 0 ? 'ojo' : 'ok';
-      return '<div class="casa-item ' + cls + '"><span class="casa-em">' + esc(x.c.em || '🧹') + '</span>' +
-        '<div class="cuerpo" data-acc="casa-ed" data-id="' + x.c.id + '"><div class="titulo">' + esc(x.c.t) + '</div>' +
-          '<div class="casa-barra"><i style="width:' + Math.round(s.p * 100) + '%"></i></div>' +
-          '<div class="meta"><span class="estado">' + est + '</span><span>Cada ' + x.c.cada + ' días</span>' + (s.desde != null ? '<span>Última: ' + relativo(x.c.ult).toLowerCase() + '</span>' : '') + '</div></div>' +
-        '<button class="btn chico' + (s.resta <= 0 ? ' primario' : '') + '" data-acc="casa-ok" data-id="' + x.c.id + '">' + ico('i-check') + 'Hecho</button></div>';
-    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Anota lo que toca cada tanto en casa y la agenda te avisa cuándo toca otra vez.</div>') +
-    (sug.length ? '<div class="sugerencias"><small>Ideas:</small>' + sug.map(function(s){
-      return '<button type="button" class="chip-sug" data-acc="casa-sug" data-t="' + esc(s[0]) + '" data-em="' + s[1] + '" data-c="' + s[2] + '">' + s[1] + ' ' + esc(s[0]) + '</button>';
-    }).join('') + '</div>' : '') + '</section>';
-}
 function editarCasa(id){
   var c = id ? JSON.parse(JSON.stringify(buscarId('casa', id))) : { id:nid(), t:'', em:'🧹', cada:7, ult:'' };
   abrirFlotante(cabFlot(id ? 'Cosa de la casa' : 'Nueva cosa de la casa') +
@@ -6683,18 +6281,6 @@ function platosDeLaSemana(ini){ var out = []; for(var i = 0; i < 7; i++){ var m 
 
 /* ---------- Documentos que vencen ---------------------------------------- */
 var DOC_SUG = [['DNI','🪪'],['Pasaporte','🛂'],['Licencia de conducir','🚗'],['SOAT','🛡️'],['Seguro de salud','🏥'],['Tarjeta de crédito','💳']];
-function tarjetaDocs(){
-  var hoy = hoyISO();
-  var ds = vivos('docs').map(function(d){ return { d:d, n:d.vence ? diasEntre(hoy, d.vence) : null }; }).sort(function(a, b){ return (a.n == null ? 1e6 : a.n) - (b.n == null ? 1e6 : b.n); });
-  var usados = ds.map(function(x){ return sinTildes(x.d.t); });
-  var sug = DOC_SUG.filter(function(s){ return usados.indexOf(sinTildes(s[0])) < 0; });
-  return '<section class="tarjeta">' + cabTarjeta('i-candado', 'Documentos y vencimientos', 'var(--esp-personal)', 'Añadir', 'data-acc="doc-nuevo"') +
-    (ds.length ? '<div class="lista-filas">' + ds.map(function(x){
-      var n = x.n, est = n == null ? '<span>Sin fecha</span>' : n < 0 ? '<span class="doc-est mal">Vencido hace ' + (-n) + ' días</span>' : n <= 60 ? '<span class="doc-est ojo">Vence en ' + n + ' días</span>' : '<span class="doc-est ok">Vigente · ' + fechaCorta(x.d.vence) + '</span>';
-      return '<div class="fila"><span class="em-fila">' + esc(x.d.em || '📄') + '</span><div class="cuerpo" data-acc="doc-ed" data-id="' + x.d.id + '"><div class="titulo">' + esc(x.d.t) + (x.d.num ? ' <small class="doc-num">' + esc(x.d.num) + '</small>' : '') + '</div><div class="meta">' + est + '</div></div></div>';
-    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Que no se te pase la renovación del DNI, el pasaporte o el SOAT.</div>') +
-    (sug.length ? '<div class="sugerencias"><small>Añadir:</small>' + sug.map(function(s){ return '<button type="button" class="chip-sug" data-acc="doc-nuevo" data-t="' + s[0] + '" data-em="' + s[1] + '">' + s[1] + ' ' + s[0] + '</button>'; }).join('') + '</div>' : '') + '</section>';
-}
 function editarDoc(id, preset){
   var d = id ? JSON.parse(JSON.stringify(buscarId('docs', id))) : Object.assign({ id:nid(), t:'', em:'📄', num:'', vence:'', notas:'' }, preset || {});
   abrirFlotante(cabFlot(id ? 'Documento' : 'Nuevo documento') +
@@ -6731,32 +6317,6 @@ function fichasParaHoy(curso){
   return vivos('fichas').filter(function(f){ return (!curso || f.curso === curso) && (!f.prox || f.prox <= hoy); });
 }
 function nombreCurso(cid){ var c = cid && buscarId('cursos', cid); return c && !c.del ? c.nombre : 'General'; }
-function tarjetaFichas(){
-  var fs = vivos('fichas'), cursos = vivos('cursos');
-  var grupos = [{ id:'', n:'Todas' }].concat(cursos.map(function(c){ return { id:c.id, n:c.nombre }; }));
-  if(fs.some(function(f){ return !f.curso || !buscarId('cursos', f.curso); })) grupos.push({ id:'_g', n:'General' });
-  var dominadas = fs.filter(function(f){ return (+f.caja || 1) >= 5; }).length;
-  return '<section class="tarjeta ancho-2">' + cabTarjeta('i-estrella', 'Fichas de repaso', 'var(--esp-estudios)') +
-    '<div class="tarjeta-cuerpo"><p class="explica">Escribe una pregunta y su respuesta. Cada ficha vuelve cuando toca: si la sabes, tarda más en volver; si no, vuelve mañana.</p>' +
-      '<div class="mazos">' + grupos.filter(function(g){ return g.id === '' || fs.some(function(f){ return g.id === '_g' ? !buscarId('cursos', f.curso) : f.curso === g.id; }); }).map(function(g){
-        var del = g.id === '' ? fs : fs.filter(function(f){ return g.id === '_g' ? !buscarId('cursos', f.curso) : f.curso === g.id; });
-        var hoyN = del.filter(function(f){ return !f.prox || f.prox <= hoyISO(); }).length;
-        return '<button type="button" class="mazo' + (hoyN ? ' toca' : '') + '" data-acc="repasar" data-v="' + g.id + '"' + (hoyN ? '' : ' disabled') + '><b>' + esc(g.n) + '</b><span>' + del.length + ' fichas</span><em>' + (hoyN ? '▶ Repasar ' + hoyN : 'Al día ✓') + '</em></button>';
-      }).join('') + '</div>' +
-      (fs.length ? '<div class="cajas">' + [1,2,3,4,5].map(function(k){
-        var n = fs.filter(function(f){ return (+f.caja || 1) === k; }).length;
-        return '<div><i style="height:' + (fs.length ? Math.max(4, n / fs.length * 100) : 4) + '%"></i><small>' + (k === 5 ? '🏆' : 'Caja ' + k) + '<br><b>' + n + '</b></small></div>';
-      }).join('') + '</div><small class="bien-pie">' + dominadas + ' de ' + fs.length + ' fichas dominadas</small>' : '') +
-    '</div>' +
-    '<form class="ficha-form" data-acc="ficha-nueva" autocomplete="off">' +
-      '<select id="fichaCurso"><option value="">General</option>' + cursos.map(function(c){ return '<option value="' + c.id + '"' + (ui.fichaCurso === c.id ? ' selected' : '') + '>' + esc(c.nombre) + '</option>'; }).join('') + '</select>' +
-      '<input id="fichaQ" maxlength="200" placeholder="Pregunta · ej. ¿Derivada de sen x?">' +
-      '<input id="fichaA" maxlength="300" placeholder="Respuesta · ej. cos x">' +
-      '<button class="btn primario" type="submit">' + ico('i-plus') + 'Ficha</button></form>' +
-    (fs.length ? '<details class="todas-fichas"><summary>Ver todas las fichas (' + fs.length + ')</summary><div class="lista-filas">' + fs.slice().sort(function(a, b){ return (b.creada || 0) - (a.creada || 0); }).map(function(f){
-      return '<div class="fila"><span class="caja-chip">' + (+f.caja || 1) + '</span><div class="cuerpo" data-acc="ficha-ed" data-id="' + f.id + '"><div class="titulo">' + esc(f.q) + '</div><div class="meta"><span>' + esc(nombreCurso(f.curso)) + '</span><span>' + (!f.prox || f.prox <= hoyISO() ? 'Para hoy' : 'Vuelve ' + relativo(f.prox).toLowerCase()) + '</span></div></div></div>';
-    }).join('') + '</div></details>' : '') + '</section>';
-}
 var repaso = null;
 function empezarRepaso(curso){
   var cola = fichasParaHoy(curso === '_g' ? '' : curso).filter(function(f){ return curso !== '_g' || !buscarId('cursos', f.curso); });
@@ -6807,46 +6367,7 @@ function editarFicha(id){
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('fichas', f.id, 'Ficha borrada'); pintar(); } };
 }
 
-/* ---------- Exámenes con sus temas ---------------------------------------- */
-function tarjetaTemas(){
-  var ex = eventosTipo('examen', 90);
-  return '<section class="tarjeta ancho-2">' + cabTarjeta('i-diana', 'Preparar exámenes', 'var(--debe)', 'Nuevo examen', 'data-acc="nuevo-examen"') +
-    (ex.length ? '<div class="examenes">' + ex.slice(0, 6).map(function(x){
-      var e = x.e, ts = e.temas || [], ok = ts.filter(function(t){ return t.ok; }).length, falta = ts.length - ok;
-      var ritmo = falta && x.en > 0 ? Math.ceil(falta / x.en) : falta;
-      var p = ts.length ? ok / ts.length : 0;
-      return '<div class="examen' + (x.en <= 3 ? ' urge' : '') + '">' +
-        '<div class="examen-cab"><span class="cuenta-atras' + (x.en <= 3 ? ' urge' : '') + '"><b>' + (x.en === 0 ? 'HOY' : x.en) + '</b>' + (x.en ? (x.en === 1 ? 'día' : 'días') : '') + '</span>' +
-          '<div class="cuerpo" data-acc="evento-ed" data-id="' + e.id + '"><div class="titulo">' + esc(e.t) + '</div><div class="meta"><span>' + cap(fechaLarga(x.dia)) + (e.todo ? '' : ' · ' + e.ini) + '</span>' + (e.lugar ? '<span>' + ico('i-lugar') + esc(e.lugar) + '</span>' : '') + '</div></div>' +
-          anilloMini(p, p >= 1 ? 'var(--haber)' : 'var(--esp-estudios)', 42) + '</div>' +
-        (ts.length ? '<div class="temas">' + ts.map(function(t, i){
-          return '<button type="button" class="tema" data-acc="tema-ok" data-id="' + e.id + '" data-i="' + i + '" aria-pressed="' + !!t.ok + '">' + (t.ok ? '✓ ' : '') + esc(t.t) + '</button>';
-        }).join('') + '</div>' : '') +
-        '<div class="examen-pie">' + (ts.length ? '<small>' + (falta ? 'Te faltan ' + falta + ' temas' + (x.en > 0 ? ': unos <b>' + ritmo + ' por día</b>' : '') : '¡Todo repasado! 💪') + '</small>' : '<small>Añade los temas que entran.</small>') +
-          '<form class="tema-form" data-acc="tema-nuevo" data-id="' + e.id + '" autocomplete="off"><input maxlength="80" placeholder="+ Tema (Enter)"></form></div>' +
-      '</div>';
-    }).join('') + '</div>' : vacio('📝', 'Sin exámenes a la vista', 'Crea uno y añade sus temas: te digo cuántos repasar cada día.')) + '</section>';
-}
 
-/* ---------- Clases de hoy y mañana ---------------------------------------- */
-function tarjetaClasesHoy(){
-  var hoy = hoyISO(), items = [];
-  [0, 1].forEach(function(k){
-    var d = sumarDias(hoy, k), w = deISO(d).getDay();
-    vivos('cursos').forEach(function(c){
-      if(c.inicio && d < c.inicio || c.fin && d > c.fin) return;
-      (c.clases || []).forEach(function(cl){ if(+cl.d === w) items.push({ d:d, c:c, k:cl }); });
-    });
-  });
-  items.sort(function(a, b){ return (a.d + a.k.ini).localeCompare(b.d + b.k.ini); });
-  var ahora = new Date(), hm = dos(ahora.getHours()) + ':' + dos(ahora.getMinutes());
-  return '<section class="tarjeta">' + cabTarjeta('i-birrete', 'Clases de hoy y mañana', 'var(--esp-estudios)', 'Horario', 'data-acc="esp-tab" data-esp="estudios" data-v="cursos"') +
-    (items.length ? '<div class="lista-filas">' + items.map(function(x){
-      var ya = x.d === hoy && (x.k.fin || x.k.ini) < hm, ahoraSi = x.d === hoy && x.k.ini <= hm && (x.k.fin || x.k.ini) >= hm;
-      return '<div class="fila' + (ya ? ' hecha' : '') + '"><span class="hora" style="width:56px">' + (x.d === hoy ? '' : 'Mañ ') + x.k.ini + '</span><span class="barrita" style="--c:var(--esp-estudios)"></span>' +
-        '<div class="cuerpo" data-acc="curso-ed" data-id="' + x.c.id + '"><div class="titulo">' + esc(x.c.nombre) + (ahoraSi ? ' <span class="en-vivo">EN CLASE</span>' : '') + '</div><div class="meta"><span>' + x.k.ini + (x.k.fin ? '–' + x.k.fin : '') + '</span>' + (x.c.aula ? '<span>' + ico('i-lugar') + esc(x.c.aula) + '</span>' : '') + textoFaltas(x.c) + '</div></div></div>';
-    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin clases hoy ni mañana. 📖</div>') + '</section>';
-}
 
 /* ==========================================================================
    OFICINA
@@ -6934,32 +6455,6 @@ function editarCliente(id, nombre){
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('clientes', c.id, 'Cliente borrado'); pintar(); } };
 }
 
-/* ---------- Actas de reunión y acuerdos ---------------------------------- */
-function reunionesPasadas(dias){
-  var hoy = hoyISO(), out = [];
-  vivos('eventos').forEach(function(e){
-    if(e.tipo !== 'reunion') return;
-    for(var i = 0; i <= dias; i++){ var d = sumarDias(hoy, -i); if(ocurre(e.fecha, e.rep, d, e.hasta)) out.push({ e:e, dia:d }); }
-  });
-  return out.sort(function(a, b){ return b.dia.localeCompare(a.dia); });
-}
-function tarjetaActas(){
-  var rs = reunionesPasadas(21).slice(0, 6), pend = [];
-  vivos('eventos').forEach(function(e){
-    Object.keys(e.actas || {}).forEach(function(d){ (e.actas[d].acuerdos || []).forEach(function(a, i){ if(!a.ok) pend.push({ e:e, d:d, a:a, i:i }); }); });
-  });
-  return '<section class="tarjeta">' + cabTarjeta('i-notas', 'Actas y acuerdos', 'var(--esp-oficina)') +
-    (pend.length ? '<div class="acuerdos"><h4>Acuerdos pendientes · ' + pend.length + '</h4>' + pend.slice(0, 8).map(function(p){
-      return '<div class="fila">' + casilla('acuerdo-ok', p.e.id, false, 'var(--esp-oficina)', true, ' data-d="' + p.d + '" data-i="' + p.i + '"') +
-        '<div class="cuerpo" data-acc="acta" data-id="' + p.e.id + '" data-d="' + p.d + '"><div class="titulo">' + esc(p.a.t) + '</div><div class="meta"><span>' + (p.a.quien ? '👤 ' + esc(p.a.quien) : 'Sin responsable') + '</span><span>' + esc(p.e.t) + ' · ' + fechaCorta(p.d) + '</span></div></div></div>';
-    }).join('') + '</div>' : '') +
-    (rs.length ? '<div class="lista-filas">' + rs.map(function(r){
-      var acta = (r.e.actas || {})[r.dia];
-      return '<div class="fila"><span class="em-fila">' + (acta ? '📝' : '🤝') + '</span><div class="cuerpo" data-acc="acta" data-id="' + r.e.id + '" data-d="' + r.dia + '"><div class="titulo">' + esc(r.e.t) + '</div><div class="meta"><span>' + cap(relativo(r.dia)) + '</span>' +
-        (acta ? '<span>' + (acta.acuerdos || []).length + ' acuerdos</span>' : '<span class="tarde">Sin acta</span>') + '</div></div>' +
-        '<button class="btn chico" data-acc="acta" data-id="' + r.e.id + '" data-d="' + r.dia + '">' + (acta ? 'Ver' : 'Escribir') + '</button></div>';
-    }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Después de cada reunión, apunta aquí qué se decidió y quién hace qué.</div>') + '</section>';
-}
 function filaAcuerdo(a){
   return '<div class="fila-acuerdo"><input value="' + esc(a.t || '') + '" placeholder="Acuerdo o tarea" maxlength="120"><input value="' + esc(a.quien || '') + '" placeholder="Quién" maxlength="30">' +
     '<label title="Crear tarea para mí"><input type="checkbox"' + (a.tarea ? ' checked disabled' : '') + '>Tarea</label><button type="button" class="btn-icono" data-ed="ac-x" aria-label="Quitar">' + ico('i-x') + '</button></div>';
@@ -7037,66 +6532,7 @@ function tickCrono(){
   $('cronoSig').textContent = sig ? 'Después: ' + sig.n + ' · ' + sig.s + ' s' : 'Último tramo';
 }
 setInterval(tickCrono, 200);
-function tarjetaDescanso(){
-  return '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Descanso entre series', 'var(--esp-deporte)') +
-    '<div class="tarjeta-cuerpo"><div class="descansos">' + [45, 60, 90, 120, 180].map(function(s){
-      return '<button type="button" data-acc="descanso" data-v="' + s + '"><b>' + { 45:'45"', 60:"1'", 90:"1'30", 120:"2'", 180:"3'" }[s] + '</b><small>' + (s <= 60 ? 'Ligero' : s <= 90 ? 'Hipertrofia' : 'Fuerza') + '</small></button>';
-    }).join('') + '</div><small class="bien-pie">Pita 3 veces antes de acabar para que vuelvas a la barra.</small></div></section>';
-}
-function tarjetaIntervalos(){
-  var c = pref.hiit || { t:20, d:10, r:8 };
-  return '<section class="tarjeta">' + cabTarjeta('i-habitos', 'Intervalos (HIIT / Tabata)', 'var(--esp-deporte)') +
-    '<form class="tarjeta-cuerpo hiit" data-acc="hiit" autocomplete="off">' +
-      '<label><small>Trabajo</small><input name="t" inputmode="numeric" value="' + c.t + '"><em>seg</em></label>' +
-      '<label><small>Descanso</small><input name="d" inputmode="numeric" value="' + c.d + '"><em>seg</em></label>' +
-      '<label><small>Rondas</small><input name="r" inputmode="numeric" value="' + c.r + '"><em>×</em></label>' +
-      '<button class="btn primario" type="submit">' + ico('i-play') + 'Empezar</button>' +
-      '<small class="bien-pie" style="grid-column:1/-1">Total: ' + Math.round((c.t + c.d) * c.r / 60 * 10) / 10 + ' min con 10 s para prepararte. Tabata clásico: 20/10 × 8.</small>' +
-    '</form></section>';
-}
 
-/* ---------- Cardio: ritmo y kilómetros -------------------------------- */
-function ritmoTxt(minPorKm){ if(!isFinite(minPorKm) || !minPorKm) return '—'; var m = Math.floor(minPorKm), s = Math.round((minPorKm - m) * 60); if(s === 60){ m++; s = 0; } return m + ':' + dos(s); }
-function statsCardio(){
-  var hoy = hoyISO(), mes = hoy.slice(0, 7), ini = inicioSemana(hoy);
-  var es = vivos('entrenos').filter(function(e){ return +e.km > 0; });
-  var r = { kmMes:0, kmSem:0, corr:[], largo:0, mejor:0 };
-  es.forEach(function(e){
-    var km = +e.km;
-    if(e.fecha.slice(0, 7) === mes) r.kmMes += km;
-    if(e.fecha >= ini) r.kmSem += km;
-    if(e.tipo === 'correr'){ r.corr.push(e); if(km > r.largo) r.largo = km; var p = (+e.min || 0) / km; if(p > 0 && (!r.mejor || p < r.mejor)) r.mejor = p; }
-  });
-  var kmC = r.corr.reduce(function(a, e){ return a + +e.km; }, 0), minC = r.corr.reduce(function(a, e){ return a + (+e.min || 0); }, 0);
-  r.ritmo = kmC ? minC / kmC : 0;
-  r.kmMes = Math.round(r.kmMes * 10) / 10; r.kmSem = Math.round(r.kmSem * 10) / 10;
-  return r;
-}
-function tarjetaCardio(){
-  var s = statsCardio(), meta = +pref.metaKm || 15, p = Math.min(1, s.kmSem / meta);
-  var ult = vivos('entrenos').filter(function(e){ return ['correr','bici','nadar'].indexOf(e.tipo) >= 0; }).sort(function(a, b){ return b.fecha.localeCompare(a.fecha); }).slice(0, 5);
-  /* Kilómetros de las últimas 8 semanas */
-  var sem = [], eti = [], ini = inicioSemana(hoyISO());
-  for(var i = 7; i >= 0; i--){
-    var a = sumarDias(ini, -7 * i), b = sumarDias(a, 6);
-    sem.push(Math.round(vivos('entrenos').reduce(function(t, e){ return t + (e.fecha >= a && e.fecha <= b ? +e.km || 0 : 0); }, 0) * 10) / 10);
-    eti.push(i ? fechaCorta(a).split(' ')[0] : 'Esta');
-  }
-  return '<section class="tarjeta ancho-2">' + cabTarjeta('i-flecha', 'Correr, bici y natación', 'var(--esp-deporte)', 'Anotar', 'data-acc="entreno-rapido" data-v="correr"') +
-    '<div class="tarjeta-cuerpo">' +
-      '<div class="marcador cardio-marcador">' +
-        [['Km del mes', formNum(s.kmMes)], ['Ritmo medio', ritmoTxt(s.ritmo)], ['Mejor ritmo', ritmoTxt(s.mejor)], ['Más largo', s.largo ? formNum(s.largo) + ' km' : '—']].map(function(x){ return '<div><b>' + x[1] + '</b><small>' + x[0] + '</small></div>'; }).join('') +
-      '</div>' +
-      '<div class="meta-km"><div class="bien-fila"><span>🎯 Meta semanal</span><form class="meta-km-form" data-acc="meta-km"><b>' + formNum(s.kmSem) + ' /</b><input id="metaKm" inputmode="decimal" value="' + meta + '"><b>km</b></form></div>' +
-        '<div class="barra-prog grande"><i style="width:' + Math.round(p * 100) + '%;background:var(--esp-deporte)"></i></div>' +
-        '<small class="bien-pie">' + (p >= 1 ? '¡Meta de la semana cumplida! 🏅' : 'Te faltan ' + formNum(Math.round((meta - s.kmSem) * 10) / 10) + ' km esta semana.') + ' El ritmo es minutos por kilómetro corriendo.</small></div>' +
-      barras(sem, eti, 'var(--esp-deporte)', 100) +
-    '</div>' +
-    (ult.length ? '<div class="lista-filas">' + ult.map(function(e){
-      var d = deporteInfo(e.tipo);
-      return '<div class="fila"><span class="em-fila">' + d.em + '</span><div class="cuerpo" data-acc="entreno-ed" data-id="' + e.id + '"><div class="titulo">' + (e.km ? formNum(+e.km) + ' km' : d.n) + ' · ' + e.min + ' min</div><div class="meta"><span>' + relativo(e.fecha) + '</span>' + (e.tipo === 'correr' && +e.km ? '<span>' + ritmoTxt(e.min / e.km) + ' /km</span>' : '') + '</div></div></div>';
-    }).join('') + '</div>' : '') + '</section>';
-}
 
 /* ---------- Mapa de actividad: 12 semanas -------------------------------- */
 function tarjetaMapaActividad(){
@@ -7138,24 +6574,6 @@ function tarjetaCuerpo(){
     '</div></section>';
 }
 
-/* ---------- Armar la pichanga: jugadores y cuota ----------------------- */
-function tarjetaPichanga(){
-  var pa = eventosTipo('partido', 30)[0];
-  if(!pa) return '<section class="tarjeta">' + cabTarjeta('i-balon', 'Armar la pichanga', 'var(--esp-deporte)', 'Nuevo partido', 'data-acc="nuevo-partido"') +
-    '<div class="vacio" style="padding-top:4px">Programa un partido y aquí juntas a los jugadores, la cuota de la cancha y quién ya pagó.</div></section>';
-  var e = pa.e, pi = e.pich || { costo:'', jug:[] }, n = pi.jug.length, cuota = n && +pi.costo ? +pi.costo / n : 0;
-  var pagaron = pi.jug.filter(function(j){ return j.p; }).length;
-  return '<section class="tarjeta">' + cabTarjeta('i-balon', 'Armar la pichanga', 'var(--esp-deporte)', 'Copiar lista', 'data-acc="pich-copiar" data-id="' + e.id + '"') +
-    '<div class="tarjeta-cuerpo"><div class="pich-cab"><b>⚽ ' + esc(e.t) + '</b><small>' + cap(relativo(pa.dia)) + (e.todo ? '' : ' · ' + e.ini) + (e.lugar ? ' · ' + esc(e.lugar) : '') + '</small></div>' +
-      '<div class="cifras" style="padding:10px 0 4px"><div><small>Jugadores</small><b>' + n + '</b></div>' +
-        '<div><small>Cancha</small><form class="pich-costo" data-acc="pich-costo" data-id="' + e.id + '"><input id="pichCosto" inputmode="decimal" value="' + esc(pi.costo) + '" placeholder="' + MONEDA + '"></form></div>' +
-        '<div class="entra"><small>Cuota c/u</small><b>' + (cuota ? dinero(cuota) : '—') + '</b></div></div>' +
-      (n ? '<div class="jugadores">' + pi.jug.map(function(j, i){
-        return '<span class="jugador' + (j.p ? ' pago' : '') + '"><button type="button" data-acc="pich-pago" data-id="' + e.id + '" data-i="' + i + '" title="' + (j.p ? 'Pagó' : 'Marcar que pagó') + '">' + (j.p ? '✓' : (i + 1)) + ' ' + esc(j.n) + '</button><button type="button" class="x" data-acc="pich-x" data-id="' + e.id + '" data-i="' + i + '" aria-label="Quitar">×</button></span>';
-      }).join('') + '</div><small class="bien-pie">' + pagaron + ' de ' + n + ' pagaron' + (cuota ? ' · falta juntar ' + dinero(cuota * (n - pagaron)) : '') + '. Toca un nombre cuando pague.</small>' : '') +
-      '<form class="captura" data-acc="pich-jug" data-id="' + e.id + '" style="margin:10px 0 0;box-shadow:none" autocomplete="off"><input id="pichJug" maxlength="120" placeholder="Nombres, separados por comas…"><button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form>' +
-    '</div></section>';
-}
 
 /* ==========================================================================
    DESHACER Y REHACER
@@ -7744,23 +7162,7 @@ VISTAS.tareas = function(){
    día o de la semana se crea un evento a esa hora. Muestra los feriados de
    Perú y se puede filtrar por espacio y por tipo.
    ========================================================================== */
-/* ---------- Feriados de Perú ---------------------------------------------- */
-function pascua(y){
-  var a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
-  var h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451);
-  var mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
-  return y + '-' + dos(mes) + '-' + dos(dia);
-}
 var cacheFeriados = {};
-function feriadosAno(y){
-  if(cacheFeriados[y]) return cacheFeriados[y];
-  var p = pascua(y), f = {};
-  [['01-01','Año Nuevo'],['05-01','Día del Trabajo'],['06-07','Batalla de Arica y Día de la Bandera'],['06-29','San Pedro y San Pablo'],['07-23','Día de la Fuerza Aérea'],
-   ['07-28','Fiestas Patrias'],['07-29','Fiestas Patrias'],['08-06','Batalla de Junín'],['08-30','Santa Rosa de Lima'],['10-08','Combate de Angamos'],
-   ['11-01','Todos los Santos'],['12-08','Inmaculada Concepción'],['12-09','Batalla de Ayacucho'],['12-25','Navidad']].forEach(function(x){ f[y + '-' + x[0]] = x[1]; });
-  f[sumarDias(p, -3)] = 'Jueves Santo'; f[sumarDias(p, -2)] = 'Viernes Santo';
-  return (cacheFeriados[y] = f);
-}
 function feriado(dia){ return ''; }   // los feriados se quitaron de la agenda
 
 /* ---------- Lo que se ve en el calendario ------------------------------- */
@@ -9194,11 +8596,6 @@ function alternarPago(id, ym, boton){
    Una línea al día basta: cómo te sientes y qué pasó. Con el tiempo es un
    mapa de tus meses.                                                        */
 var ANIMOS = [null, { e:'😢', n:'Mal' }, { e:'😕', n:'Regular' }, { e:'😐', n:'Normal' }, { e:'🙂', n:'Bien' }, { e:'😄', n:'Genial' }];
-function animosHTML(actual, dia){
-  return '<div class="animos">' + [1,2,3,4,5].map(function(i){
-    return '<button type="button" class="animo" data-acc="animo" data-v="' + i + '" data-dia="' + dia + '" aria-pressed="' + (actual === i) + '"><span>' + ANIMOS[i].e + '</span>' + ANIMOS[i].n + '</button>';
-  }).join('') + '</div>';
-}
 function guardarDiario(dia, cambios){
   var e = buscarId('diario', dia);
   e = e ? JSON.parse(JSON.stringify(e)) : { id:dia, animo:0, texto:'' };
@@ -9351,15 +8748,6 @@ function focoPlay(){
   guardarFoco(); pintar(); tictac();
 }
 
-/* ---------- Progreso ---------------------------------------------------------- */
-function hechasPorDia(){
-  var m = {};
-  vivos('tareas').forEach(function(t){
-    if(t.hecha && t.hechaEn){ var d = iso(new Date(t.hechaEn)); m[d] = (m[d] || 0) + 1; }
-    (t.log || []).forEach(function(d){ m[d] = (m[d] || 0) + 1; });
-  });
-  return m;
-}
 function barras(valores, etiquetas, colorB, alto){
   var max = Math.max.apply(null, valores.concat([1]));
   return '<div class="barras-v" style="height:' + (alto || 160) + 'px">' + valores.map(function(v, i){
@@ -10043,13 +9431,6 @@ function cambiarLista(fn){
   poner('listas', l);
 }
 
-/* ---------- Menús ---------------------------------------------------------- */
-function menuNuevo(){
-  var ops = [['tarea','i-tareas','Tarea'],['rec','i-campana','Recordatorio'],['evento','i-cal','Evento'],['nota','i-notas','Nota'],['lista','i-listas','Lista'],['habito','i-habitos','Hábito'],['meta','i-meta','Meta'],['proyecto','i-carpeta','Proyecto'],['curso','i-birrete','Curso'],['deuda','i-cuentas','Préstamo'],['rutina','i-meta','Rutina de gym'],['cobro','i-subir','Cobro pendiente'],['entreno','i-balon','Entrenamiento'],['pago','i-recibo','Pago fijo'],['diario','i-diario','Diario'],['personal','i-cuentas','Gasto personal'],['oficina','i-maletin','Movimiento de oficina']];
-  abrirFlotante(cabFlot('Añadir') + '<div class="rejilla-mas">' + ops.map(function(o){
-    return '<button type="button" data-acc="nuevo" data-tipo="' + o[0] + '">' + ico(o[1]) + o[2] + '</button>';
-  }).join('') + '</div>');
-}
 function menuMas(){
   var k = contadores(), grupos = [], g = null;
   navSecs().forEach(function(sc){
