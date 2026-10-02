@@ -1205,7 +1205,7 @@ html[data-tema="claro"] .ficha::after{opacity:.10}
 /* En el teléfono las plataformas van primero: son con lo que se trabaja.
    Debajo de las cuatro cifras quedaban a dos pantallas de distancia. */
 @media (max-width:860px){
-  #p-negocio .caja-plataformas{order:-1}
+  #p-negocio .caja-plataformas{order:0}
 }
 /* Y la ficha se aprieta: con nueve plataformas, una ficha por pantalla es
    demasiado desplazamiento. El desglose de cobras y cuesta se guarda para
@@ -3690,6 +3690,30 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
 .fs-cifra.aviso b{ color:var(--aviso) } .fs-cifra.mal b{ color:var(--mal) } .fs-cifra.bien b{ color:var(--bien) }
 .fs-cifra.mal{ border-color:color-mix(in srgb, var(--mal) 40%, transparent) }
 @media (hover:hover){ .fs-cifra:hover{ border-color:var(--marca) } }
+.secciones-din button{gap:7px}
+.secciones-din button svg{width:15px;height:15px;flex:0 0 auto}
+.cpp{ display:flex; flex-direction:column; gap:6px }
+.cpp-fila{ display:grid; grid-template-columns:26px minmax(70px, 120px) 1fr auto; align-items:center; gap:10px; padding:6px 4px;
+  background:none; border:0; border-radius:10px; color:var(--txt); font:inherit; cursor:pointer; text-align:left }
+.cpp-nom{ font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cpp-barra{ height:10px; border-radius:99px; background:color-mix(in srgb, var(--txt) 8%, transparent); overflow:hidden }
+.cpp-barra i{ display:block; height:100%; border-radius:inherit; background:var(--tono, var(--bien)) }
+.cpp-monto{ font-size:13px; font-weight:800; text-align:right; white-space:nowrap }
+.cpp-monto small{ display:block; font-size:10.5px; color:var(--txt-3); font-weight:600 }
+@media (hover:hover){ .cpp-fila:hover{ background:var(--capa-alta) } }
+/* Dinero: las cifras más compactas en el celular, para que las pestañas se vean sin bajar. */
+@media (max-width:620px){
+  .dinero-mosaico .azulejo{ padding:11px 12px !important; min-height:0 !important }
+  .dinero-mosaico .azulejo .v{ font-size:21px !important }
+  .dinero-mosaico .azulejo .n{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+}
+.neg-cifras{ grid-template-columns:repeat(5, minmax(0,1fr)); margin-bottom:0 }
+@media (max-width:620px){
+  .neg-cifras{ grid-template-columns:repeat(6, minmax(0,1fr)) }
+  .neg-cifras .fs-cifra{ grid-column:span 2 }
+  .neg-cifras .fs-cifra:nth-child(n+4){ grid-column:span 3 }
+  .neg-cifras .fs-cifra b{ font-size:18px }
+}
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3809,7 +3833,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.7</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.8</span>
     </div>
   </nav>
 
@@ -5951,7 +5975,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.7';
+const VERSION = 'v8.8';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7692,18 +7716,20 @@ function hojaRaiz(){
   }
 
   return '<div class="pila">' +
-    '<div class="azulejos cinco">' +
-      azulejo('Plataformas', nombres.length, 'info', ICONO.tele,
-        {pie: servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas')}) +
-      azulejo('Clientes', clientes.length, deben ? 'aviso' : 'bien', ICONO.gente,
-        {pie: deben ? deben + ' por cobrar' : 'todos al día', attr:'data-qh-ver="@clientes"'}) +
-      azulejo('Perfiles libres', libres, libres ? 'bien' : 'mal', ICONO.mascliente,
-        {pie: 'de ' + tope + ' · ' + (tope - libres) + ' ocupados', attr:'data-qh-ver="@libres"'}) +
-      azulejo('Te cuestan', dinero(costo), 'mal', ICONO.caja,
-        {pie:'al ciclo', attr:'data-qh-ver="@dinero:h2:Qué te deja cada plataforma"'}) +
-      azulejo('Te dejan', dinero(cobra - costo), cobra - costo >= 0 ? 'bien' : 'mal', ICONO.billete,
-        {pie: 'cobras ' + dinero(cobra), attr:'data-qh-ver="@dinero:h2:Qué te deja cada plataforma"'}) +
-    '</div>' +
+    /* Las cifras del negocio arriba y compactas: se tocan y llevan a su sitio. */
+    (function(){
+      const c = function(tono, k, v, n, attr){
+        return '<button class="fs-cifra ' + tono + '" ' + (attr || 'data-vraiz="plataformas"') + '><span class="fs-ck">' + esc(k) + '</span>' +
+          '<b class="cifra">' + esc(String(v)) + '</b><span class="fs-cn">' + esc(n) + '</span></button>';
+      };
+      return '<div class="fs-cifras neg-cifras">' +
+        c('info', 'Plataformas', nombres.length, servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas'), 'data-vraiz="plataformas"') +
+        c(deben ? 'aviso' : 'bien', 'Clientes', clientes.length, deben ? deben + ' por cobrar' : 'todos al día', 'data-vraiz="clientes"') +
+        c(libres ? 'bien' : 'mal', 'Libres', libres, 'de ' + tope + ' perfiles', 'data-vraiz="libres"') +
+        c('mal', 'Te cuestan', dinero(costo), 'al ciclo', 'data-qh-ver="@dinero:h2:Qué te deja cada plataforma"') +
+        c(cobra - costo >= 0 ? 'bien' : 'mal', 'Te dejan', dinero(cobra - costo), 'cobras ' + dinero(cobra), 'data-qh-ver="@dinero:h2:Qué te deja cada plataforma"') +
+      '</div>';
+    })() +
     '<div class="tarjeta caja-plataformas">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono rosa">' + ICONO.capas + '</span>' +
@@ -8484,6 +8510,12 @@ function hojaCliente(c){
 /* --- DINERO ------------------------------------------------------------- */
 let mesDinero = '';
 
+let vistaDinero = 'resumen';
+try{ vistaDinero = localStorage.getItem('pap_vista_dinero') || 'resumen'; }catch(_){}
+/* A qué pestaña de Dinero pertenece cada sección, para los atajos que llevan a ella. */
+const SECCION_DINERO = {'Meta del mes':'resumen','Los últimos doce meses':'resumen','Qué te deja cada plataforma':'plataformas',
+  'Cuentas que no se pagan solas':'plataformas','Cobros sin cuenta viva':'plataformas','Tus mejores clientes':'clientes',
+  'Los que más te deben':'clientes','Últimos cobros':'movimientos','Gastos del mes':'movimientos'};
 function pintaDinero(){
   if(!mesDinero) mesDinero = hoyISO().slice(0,7);
   const eco = economia();
@@ -8525,7 +8557,7 @@ function pintaDinero(){
   }).sort(function(a,b){ return b.r.margen - a.r.margen; });
   const maxMargen = porCuenta.reduce(function(a,x){ return Math.max(a, Math.abs(x.r.margen)); }, 1);
 
-  const ultimas = ventasPlat.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).slice(0,12);
+  const ultimas = ventasPlat.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).slice(0,40);
 
   $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? '' : plataformaActiva + ' · ') +
     mesBonito(mesDinero);
@@ -8557,7 +8589,7 @@ function pintaDinero(){
 
     /* Las cifras del mes en mosaicos, como en Hoy: cada uno te lleva a
        la parte de abajo que lo explica. */
-    '<div class="azulejos dinero-mosaico' + (mesDinero === hoyISO().slice(0,7) ? ' cinco' : '') + '">' +
+    '<div class="azulejos dinero-mosaico">' +
       azulejo('Cobrado', esc(dinero(cobrado)), 'bien', ICONO.subir,
         {pie: ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') + (function(){
             /* Contra el mes anterior: lo primero que uno se pregunta. */
@@ -8599,11 +8631,38 @@ function pintaDinero(){
           {pie: pend.length + ' ' + plural(pend.length,'cobro','cobros') + ' hasta fin de mes',
            attr:'data-fhoy-pendientes="1"', tit:'Ver a quién cobrar en Hoy'});
       })() : '') +
-      azulejo('Cobro medio', esc(dinero(ticket)), 'info', ICONO.diana,
-        {pie:'por venta',
-         attr:'data-qh-ver="h2:Qué te deja cada plataforma"', tit:'Ver qué te deja cada plataforma'}) +
     '</div>' +
 
+    /* Cuatro pestañas en vez de un rollo: el resumen del mes, qué deja
+       cada plataforma, los movimientos y la gente. */
+    '<nav class="segmentos secciones-din" aria-label="Partes de Dinero">' +
+      [['resumen','Resumen',ICONO.barras,0],['plataformas','Por plataforma',ICONO.tele,susCuentas.length],
+       ['movimientos','Movimientos',ICONO.cobrar,ventasMes.length + gastosMes.length],['clientes','Clientes',ICONO.gente,0]]
+      .map(function(t){
+        return '<button data-vdin="' + t[0] + '" aria-selected="' + (vistaDinero===t[0]?'true':'false') + '">' + t[2] + t[1] +
+          (t[3] ? '<span class="cuenta">' + t[3] + '</span>' : '') + '</button>';
+      }).join('') +
+    '</nav>' +
+
+    (vistaDinero === 'resumen' ? (
+    /* Lo cobrado este mes, plataforma por plataforma. */
+    (function(){
+      const g = {};
+      ventasMes.forEach(function(v){ const k = clavePlat(v.servicio) || 'SIN PLATAFORMA'; g[k] = (g[k]||0) + (Number(v.monto)||0); });
+      const filas = Object.keys(g).sort(function(a,b){ return g[b] - g[a]; });
+      const max = filas.reduce(function(a,k){ return Math.max(a, g[k]); }, 1);
+      return '<div class="tarjeta">' +
+        '<div class="tarjeta-cabeza"><span class="cabeza-icono verde">' + ICONO.tele + '</span>' +
+        '<div class="crece"><h2>Cobrado por plataforma</h2><p>' + esc(mesBonito(mesDinero)) + ' · cobro medio ' + esc(dinero(ticket)) + ' por venta. Toca una para verla sola.</p></div></div>' +
+        '<div class="tarjeta-cuerpo">' + (filas.length ? '<div class="cpp">' + filas.map(function(k){
+          const pct = cobrado ? Math.round(g[k] / cobrado * 100) : 0;
+          return '<button class="cpp-fila" data-plat="' + esc(k) + '" style="' + tonoDe(k) + '">' + logoPlataforma(k, 26) +
+            '<span class="cpp-nom">' + esc(k) + '</span>' +
+            '<span class="cpp-barra"><i style="width:' + Math.max(3, Math.round(g[k] / max * 100)) + '%"></i></span>' +
+            '<span class="cpp-monto cifra">' + esc(dinero(g[k])) + '<small>' + pct + '%</small></span></button>';
+        }).join('') + '</div>' : vacio('Sin cobros este mes', 'Cuando cobres, aquí verás de qué plataforma entra.')) + '</div>' +
+      '</div>';
+    })() +
     /* La meta del mes. Solo aparece si la has puesto: una barra en blanco
        con un cero grande no dice nada y ocupa lo mismo. */
     (function(){
@@ -8674,8 +8733,10 @@ function pintaDinero(){
             '</button>';
           }).join('') +
         '</div></div></div>';
-    })() +
+    })()
+    ) : '') +
 
+    (vistaDinero === 'plataformas' ? (
     '<div class="tarjeta">' +
       '<div class="tarjeta-cabeza">' +
         '<span class="cabeza-icono verde">' + ICONO.barras + '</span>' +
@@ -8758,8 +8819,10 @@ function pintaDinero(){
               }).join('') +
           '</div></div>' +
         '</div>'
-      : '') +
+      : '')
+    ) : '') +
 
+    (vistaDinero === 'clientes' ? (
     (function(){
       /* Quién sostiene el negocio y quién se está quedando atrás. Cada
          nombre abre su ficha. */
@@ -8802,8 +8865,10 @@ function pintaDinero(){
           '</div></div>' +
         '</div>' +
       '</div>';
-    })() +
+    })()
+    ) : '') +
 
+    (vistaDinero === 'movimientos' ? (
     '<div class="rejilla r2">' +
       '<div class="tarjeta">' +
         '<div class="tarjeta-cabeza">' +
@@ -8838,7 +8903,9 @@ function pintaDinero(){
           }).join('') : vacio('Sin gastos este mes', 'Los gastos que registres aparecerán aquí.')) +
         '</div></div>' +
       '</div>' +
-    '</div>' +
+    '</div>'
+    ) : '') +
+
   '</div>';
 }
 
@@ -8988,24 +9055,24 @@ function pintaAjustes(){
   $('#p-ajustes').innerHTML =
   '<div class="pila">' +
 
-    /* El estado del negocio, arriba del todo y sin tener que buscarlo. */
-    '<div class="azulejos cinco">' +
-      azulejo('Clientes', clientes.length, '', ICONO.gente,
-        {attr:'data-qh-ver="@negocio"', pie: servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + ' en ' +
-              new Set(servicios.map(function(m){ return String(m.nombre||'').trim().toUpperCase(); })).size + ' plataformas'}) +
-      azulejo('Perfiles libres', libres, libres ? 'bien' : 'mal', ICONO.mascliente,
-        {attr:'data-qh-ver="@negocio"', pie: libres ? 'sitio para ' + libres + ' ' + plural(libres,'cliente más','clientes más') : 'todo lleno'}) +
-      azulejo('Revisión', casos.length, graves ? 'mal' : casos.length ? 'aviso' : 'bien', ICONO.alerta,
-        {attr:'data-vaj="datos"', pie: casos.length ? (graves ? graves + ' ' + plural(graves,'urgente','urgentes') : 'nada urgente') : 'todo cuadra'}) +
-      azulejo('La nube', conectado ? 'Sí' : 'No', conectado ? 'bien' : '', ICONO.nube,
-        {attr:'data-vaj="nube"', pie: conectado ? 'los aparatos van sincronizados' : 'solo en este aparato'}) +
-      (clavesDanadas.length
-        ? azulejo('Datos ilegibles', clavesDanadas.length, 'mal', ICONO.alerta,
-            {attr:'data-vaj="datos"', pie:'míralo en Recuperar, abajo'})
-        : azulejo('Último respaldo', ajustes.ultimoRespaldo ? fechaBonita(ajustes.ultimoRespaldo) : 'Nunca',
-            ajustes.ultimoRespaldo ? '' : 'aviso', ICONO.subir,
-            {attr:'data-vaj="datos"', pie: ajustes.ultimoRespaldo ? 'archivo bajado a tu disco' : 'baja uno, por si acaso'})) +
-    '</div>' +
+    /* El estado del negocio, arriba del todo, compacto y tocable. */
+    (function(){
+      const c = function(tono, k, v, n, attr){
+        return '<button class="fs-cifra ' + tono + '" ' + attr + '><span class="fs-ck">' + esc(k) + '</span>' +
+          '<b class="cifra">' + esc(String(v)) + '</b><span class="fs-cn">' + esc(n) + '</span></button>';
+      };
+      return '<div class="fs-cifras neg-cifras">' +
+        c('', 'Clientes', clientes.length, servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas'), 'data-qh-ver="@clientes"') +
+        c(libres ? 'bien' : 'mal', 'Libres', libres, libres ? 'perfiles para vender' : 'todo lleno', 'data-qh-ver="@libres"') +
+        c(graves ? 'mal' : casos.length ? 'aviso' : 'bien', 'Revisión', casos.length,
+          casos.length ? (graves ? graves + ' ' + plural(graves,'urgente','urgentes') : 'nada urgente') : 'todo cuadra', 'data-vaj="datos"') +
+        c(conectado ? 'bien' : '', 'La nube', conectado ? 'Sí' : 'No', conectado ? 'sincronizado' : 'solo este aparato', 'data-vaj="nube"') +
+        (clavesDanadas.length
+          ? c('mal', 'Ilegibles', clavesDanadas.length, 'míralo en Recuperar', 'data-vaj="datos"')
+          : c(ajustes.ultimoRespaldo ? '' : 'aviso', 'Respaldo', ajustes.ultimoRespaldo ? fechaBonita(ajustes.ultimoRespaldo) : 'Nunca',
+              ajustes.ultimoRespaldo ? 'el último' : 'baja uno', 'data-vaj="datos"')) +
+      '</div>';
+    })() +
 
     '<nav class="segmentos secciones-aj" aria-label="Secciones de los ajustes">' +
       secciones.map(function(s){
@@ -9363,6 +9430,11 @@ function queHacerAhoraPap(x){
 /* Lleva a una sección de la pantalla de ahora: «h2:Título» o un selector. */
 function irASeccion(que){
   let dest = null;
+  if(que.indexOf('h2:') === 0 && pantalla === 'dinero' && SECCION_DINERO[que.slice(3)] && SECCION_DINERO[que.slice(3)] !== vistaDinero){
+    vistaDinero = SECCION_DINERO[que.slice(3)];
+    try{ localStorage.setItem('pap_vista_dinero', vistaDinero); }catch(_){}
+    pintar();
+  }
   if(que.indexOf('h2:') === 0){
     const quiero = que.slice(3);
     const h = Array.prototype.find.call(document.querySelectorAll('#p-' + pantalla + ' h2'),
@@ -12776,7 +12848,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
@@ -13224,6 +13296,12 @@ document.addEventListener('click', function(ev){
   }
   if(d.qhVer && d.qhVer.indexOf('h2:') === 0){ irASeccion(d.qhVer); return; }
   if(d.qhVer){ const dest = $('#p-hoy ' + d.qhVer); if(dest) dest.scrollIntoView({block:'start', behavior:suave()}); return; }
+  if(d.vdin){
+    vistaDinero = d.vdin;
+    try{ localStorage.setItem('pap_vista_dinero', vistaDinero); }catch(_){}
+    volverElFoco('[data-vdin="' + CSS.escape(d.vdin) + '"]');
+    pintar(); return;
+  }
   if(d.fhoyCerrar){ verFiltroHoy = false; filtroHoy = 'pendientes'; pintar(); return; }
   if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 20; verFiltroHoy = true; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
