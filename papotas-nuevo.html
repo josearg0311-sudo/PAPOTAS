@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#17171c">
+<meta name="theme-color" content="#0d1526">
 <meta name="pap-sitio" content="0">
 <title>PAPOTAS</title>
 <!-- El icono va METIDO EN EL ARCHIVO, no enlazado.
@@ -3493,10 +3493,10 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 :root:not([data-tema="claro"]), html[data-tema="oscuro"]:not([data-fondo="pizarra"]){
   /* Grafito, no negro: oscuro pero con cuerpo, y las tarjetas un punto
      más claras que el fondo para que se separen solas. */
-  --fondo:#17171c; --capa:#22222a; --capa-alta:#2c2c35;
-  --linea:rgba(255,255,255,.10); --linea-fuerte:rgba(255,255,255,.18);
-  --txt:#f5f5f7; --txt-2:#d0ced2; --txt-3:#a9a7ae; --txt-4:#8f8d95;
-  --marco-fondo:#1f1f26; --marco-borde:rgba(255,255,255,.10);
+  --fondo:#0d1526; --capa:#16213a; --capa-alta:#1f2c4a;
+  --linea:rgba(160,185,235,.13); --linea-fuerte:rgba(170,195,245,.24);
+  --txt:#f3f6fc; --txt-2:#cfd8ea; --txt-3:#9fadc8; --txt-4:#8291b0;
+  --marco-fondo:#121c31; --marco-borde:rgba(160,185,235,.14);
 }
 :root{ --brillo-marca:color-mix(in srgb, var(--marca) 22%, transparent) }
 body, #app, #principal, #lienzo{ background:var(--fondo) }
@@ -3732,6 +3732,54 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
 /* La pestaña que acabas de tocar no necesita un recuadro rojo encima. */
 .segmentos button:focus{ outline:none; box-shadow:none }
 .segmentos button:focus-visible{ outline:1px solid var(--linea-fuerte); outline-offset:-1px }
+/* ===== Cobros en tarjetas ===== */
+.cobros{ display:flex; flex-direction:column; gap:10px; padding:10px 12px 12px }
+.cc-grupo{ display:flex; align-items:center; gap:10px; padding:4px 2px 0 }
+.cc-grupo .tg-marca{ display:inline-flex; align-items:center; gap:7px; padding:4px 10px 4px 4px; border-radius:99px;
+  background:var(--tono-suave); border:1px solid var(--tono-linea) }
+.cc-grupo .tg-marca b{ font-size:12px; font-weight:800 }
+.cc-grupo .tg-cuantos{ font-size:12px; color:var(--txt-3) }
+.cc-gsuma{ font-size:14px; font-weight:800 }
+.cc-rejilla{ display:grid; gap:8px; grid-template-columns:repeat(auto-fill, minmax(255px, 1fr)) }
+.cc{ position:relative; display:grid; grid-template-columns:1fr auto; grid-template-areas:"id monto" "estado acc";
+  gap:8px 10px; align-items:center; padding:11px 12px 11px 14px; border-radius:16px;
+  background:var(--capa); border:1px solid var(--linea); overflow:hidden }
+.cc::before{ content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:0 3px 3px 0; background:var(--linea-fuerte) }
+.cc.mal::before{ background:var(--mal) } .cc.aviso::before{ background:var(--aviso) } .cc.bien::before{ background:var(--bien) }
+.cc-id{ grid-area:id; display:flex; align-items:center; gap:10px; min-width:0; background:none; border:0; padding:0; color:var(--txt); font:inherit; cursor:pointer; text-align:left }
+.cc-txt{ display:flex; flex-direction:column; min-width:0 }
+.cc-txt b{ font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cc-txt small{ font-size:11.5px; color:var(--txt-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.cc-cuando{ display:none }
+.cc.mal .cc-cuando{ color:var(--mal) } .cc.aviso .cc-cuando{ color:var(--aviso) }
+.cc-estado{ grid-area:estado; min-width:0 }
+.cc-monto{ grid-area:monto; text-align:right; font-size:15px; font-weight:800; white-space:nowrap }
+.cc-monto em{ display:block; font-style:normal; font-size:10.5px; font-weight:700; color:var(--mal) }
+.cc-acc{ grid-area:acc; display:flex; gap:6px; justify-content:flex-end }
+.cc-acc .btn{ width:36px; height:36px; min-width:36px; padding:0 }
+@media (hover:hover){ .cc{ transition:border-color .15s, transform .15s } .cc:hover{ border-color:var(--tono-linea, var(--linea-fuerte)); transform:translateY(-1px) } }
+/* Celular: cada tarjeta es un renglón apretado */
+@media (max-width:620px){
+  .cobros{ padding:8px 10px 10px; gap:8px }
+  .cc-rejilla{ grid-template-columns:1fr; gap:6px }
+  .cc{ grid-template-columns:1fr auto auto; grid-template-areas:"id monto acc"; padding:9px 8px 9px 12px; border-radius:14px }
+  .cc-estado{ display:none }
+  .cc-cuando{ display:block }
+  .cc-txt small:not(.cc-cuando){ display:none }
+  .cc-monto em{ display:none }
+}
+.ph-tabla{ margin:0 -12px; border-top:1px solid var(--linea) }
+.cc-gsuma{ white-space:nowrap }
+.cc-grupo .tg-cuantos{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+#hoy-filtrado > .tarjeta-cabeza{ flex-wrap:nowrap !important }
+@media (max-width:620px){
+  .cc-grupo{ gap:6px }
+  .cc-grupo .tg-cuantos{ font-size:11px; flex:1 1 auto }
+  .cc-grupo .crece{ display:none }
+  .cc-grupo .btn{ width:34px; height:34px; min-width:34px; padding:0 }
+  #hoy-filtrado [data-fhoy-cerrar] .et{ display:none }
+  #hoy-filtrado [data-fhoy-cerrar]{ width:36px; height:36px; padding:0; justify-content:center }
+}
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3851,7 +3899,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.9</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.0</span>
     </div>
   </nav>
 
@@ -5993,7 +6041,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.9';
+const VERSION = 'v9.0';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6588,10 +6636,54 @@ function cabeceraGrupo(plat, gente){
   '</tr>';
 }
 
+/* Los cobros, en tarjetas compactas en cuadrícula: en la laptop entran
+   tres o cuatro por renglón en vez de una fila larga de punta a punta, y
+   en el celular cada una es un renglón apretado. */
+function tarjetaCobro(c){
+  const est = estadoDe(c);
+  const clase = est==='vencido' ? 'mal' : est==='por_vencer' ? 'aviso' : est==='activo' ? 'bien' : '';
+  const m = masterDe(c), plat = platDe(c), tel = telefonoDe(c);
+  const k = cuotasPendientes(c);
+  return '<div class="cc ' + clase + '" data-cid="' + esc(c.id) + '" style="' + tonoDe(plat) + '">' +
+    '<button class="cc-id" data-ficha="' + esc(c.id) + '" title="Ver la ficha de ' + esc(c.nombre||'') + '">' +
+      logoPlataforma(plat, 30) +
+      '<span class="cc-txt"><b>' + esc(c.nombre || 'Sin nombre') + '</b>' +
+        '<small>' + esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + (perfilBonito(c) ? ' · ' + esc(perfilBonito(c)) : '') + '</small>' +
+        '<small class="cc-cuando">' + esc(enPausa(c) ? 'En pausa' : textoDiasCorto(c.vencimiento)) + (k > 1 ? ' · ' + k + ' cuotas' : '') + '</small>' +
+      '</span>' +
+    '</button>' +
+    '<span class="cc-estado">' + pastillaEstado(c, 'ficha') + '</span>' +
+    '<span class="cc-monto cifra">' + esc(dinero(k > 1 ? deudaDe(c) : cobroDe(c))) +
+      (k > 1 ? '<em>' + k + ' cuotas</em>' : '') + '</span>' +
+    '<span class="cc-acc">' +
+      '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '"' +
+        ' title="Cobrar ' + esc(dinero(cobroDe(c))) + ' a ' + esc(c.nombre||'') + '"' +
+        ' aria-label="Cobrar a ' + esc(c.nombre||'') + '">' + ICONO.cobrar + '</button>' +
+      (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '"' +
+        ' title="Escribir a ' + esc(c.nombre||'') + '"' +
+        ' aria-label="Escribir a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>'
+        : '<span class="f-sin-tel" aria-hidden="true">' + ICONO.wa + '</span>') +
+    '</span>' +
+  '</div>';
+}
+function grupoCobro(plat, gente){
+  const suma = gente.reduce(function(a,c){ return a + aCobrarDe(c); }, 0);
+  const vencidos = gente.filter(function(c){ const d=diasHasta(c.vencimiento); return d!==null && d<0; }).length;
+  const conTel = gente.filter(function(c){ return telefonoDe(c); }).length;
+  return '<div class="cc-grupo" data-grupo="' + esc(plat) + '" style="' + tonoDe(plat) + '">' +
+    '<span class="tg-marca">' + logoPlataforma(plat, 20) + '<b>' + esc(plat) + '</b></span>' +
+    '<span class="tg-cuantos">' + gente.length + ' ' + plural(gente.length,'persona','personas') +
+      (vencidos ? ' · <i class="tg-mal">' + vencidos + ' ' + plural(vencidos,'vencido','vencidos') + '</i>' : '') + '</span>' +
+    '<span class="crece"></span>' +
+    '<b class="cc-gsuma cifra">' + esc(dinero(suma)) + '</b>' +
+    (conTel ? '<button class="btn mini icono bien" data-escribir-a="' + esc(plat) + '"' +
+      ' title="Escribirles a los ' + conTel + ' de ' + esc(plat) + '" aria-label="Escribir a los de ' + esc(plat) + '">' + ICONO.wa + '</button>' : '') +
+    '<button class="btn mini icono" data-clientes-de="' + esc(plat) + '" title="Ver a los de ' + esc(plat) + ' juntos"' +
+      ' aria-label="Ver los de ' + esc(plat) + '">' + ICONO.flecha + '</button>' +
+  '</div>';
+}
 function tablaCobro(lista, tope){
   const filas = lista.slice(0, tope || 20);
-  /* Agrupado, los grupos salen por urgencia: primero la plataforma cuyo
-     cliente más urgente lo es más. Dentro, el orden que ya traía. */
   let cuerpo;
   if(agrupaHoy){
     const g = new Map();
@@ -6601,23 +6693,12 @@ function tablaCobro(lista, tope){
       g.get(k).push(c);
     });
     cuerpo = Array.from(g.keys()).map(function(k){
-      return cabeceraGrupo(k, g.get(k)) + g.get(k).map(filaCobro).join('');
+      return grupoCobro(k, g.get(k)) + '<div class="cc-rejilla">' + g.get(k).map(tarjetaCobro).join('') + '</div>';
     }).join('');
   } else {
-    cuerpo = filas.map(filaCobro).join('');
+    cuerpo = '<div class="cc-rejilla">' + filas.map(tarjetaCobro).join('') + '</div>';
   }
-  return '<div class="tabla-envoltura"><table class="tabla' + (agrupaHoy ? ' agrupada' : '') + '">' +
-    '<colgroup>' +
-      '<col class="c-quien"><col class="c-cuenta"><col class="c-vence">' +
-      '<col class="c-monto"><col class="c-hacer">' +
-    '</colgroup>' +
-    '<thead><tr>' +
-      '<th class="t-quien">Quién</th>' +
-      '<th class="t-cuenta">Dónde</th>' +
-      '<th class="t-vence">Vence</th>' +
-      '<th class="t-monto">Cobras</th>' +
-      '<th class="t-hacer"><span class="solo-lectores">Acciones</span></th>' +
-    '</tr></thead><tbody>' + cuerpo + '</tbody></table></div>';
+  return '<div class="cobros">' + cuerpo + '</div>';
 }
 
 /* ---------- LA MISMA PERSONA, EN VARIAS FICHAS --------------------------
