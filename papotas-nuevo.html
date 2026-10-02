@@ -3579,6 +3579,25 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
 .rk-n{ width:20px; flex:0 0 20px; text-align:center; font-size:12px; font-weight:800; color:var(--txt-3); font-variant-numeric:tabular-nums }
 .rk-fila:first-child .rk-n{ color:var(--aviso) }
 @media (hover:hover){ .rk-fila:hover, .f[data-ficha]:hover{ background:var(--capa-alta) } }
+/* Meta del mes en la franja de Hoy */
+.fs-meta, .fs-meta-poner{ display:flex; align-items:center; gap:10px; width:100%; margin-top:10px; padding:10px 12px;
+  border-radius:14px; border:1px solid var(--linea); background:var(--capa-alta); color:var(--txt); font:inherit; cursor:pointer; text-align:left }
+.fs-meta-poner{ justify-content:center; color:var(--txt-3); font-size:12.5px; font-weight:600; border-style:dashed; background:transparent }
+.fs-meta-poner svg{ width:15px; height:15px }
+.fs-meta-txt{ display:flex; flex-direction:column; min-width:0; flex:0 1 auto }
+.fs-meta-txt b{ font-size:12.5px }
+.fs-meta-txt span{ font-size:11px; color:var(--txt-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.fs-meta-barra{ flex:1 1 60px; height:8px; border-radius:99px; background:color-mix(in srgb, var(--txt) 10%, transparent); overflow:hidden }
+.fs-meta-barra i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg, var(--marca), color-mix(in srgb, var(--marca) 60%, #ff9a9a)) }
+.fs-meta.llena .fs-meta-barra i{ background:var(--bien) }
+.fs-meta-pct{ font-size:13px; font-weight:800; font-variant-numeric:tabular-nums }
+.fs-meta{ display:grid; grid-template-columns:1fr auto; row-gap:8px }
+.fs-meta .fs-meta-txt{ grid-column:1; grid-row:1 }
+.fs-meta .fs-meta-pct{ grid-column:2; grid-row:1; align-self:center }
+.fs-meta .fs-meta-barra{ grid-column:1 / -1; grid-row:2 }
+.fs-meta-txt span{ white-space:normal }
+.comp.sube{ color:var(--bien); font-weight:700 }
+.comp.baja{ color:var(--mal); font-weight:700 }
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3698,7 +3717,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.6</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.7</span>
     </div>
   </nav>
 
@@ -5840,7 +5859,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.6';
+const VERSION = 'v8.7';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7163,7 +7182,7 @@ function pintaHoy(){
     '</div>' +
     avisoDeDonde() +
     panelMudanza() +
-    franjaSemanaPap(suyos, vencidos) +
+    franjaSemanaPap(suyos, vencidos, {meta:meta, cobrado:cobradoMes}) +
     '<div class="hoy-dos">' +
     queHacerAhoraPap({ vencidos:vencidos, deHoy:deHoy, semana:semana, colgados:colgados, porCaer:porCaer,
       mastersVencidos:mastersVencidos, libres:libres, aviso:aviso }) +
@@ -8503,6 +8522,21 @@ function pintaDinero(){
     '<div class="azulejos dinero-mosaico' + (mesDinero === hoyISO().slice(0,7) ? ' cinco' : '') + '">' +
       azulejo('Cobrado', esc(dinero(cobrado)), 'bien', ICONO.subir,
         {pie: ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') + (function(){
+            /* Contra el mes anterior: lo primero que uno se pregunta. */
+            const p = mesDinero.split('-'); const d = new Date(+p[0], +p[1] - 2, 1);
+            const antes = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            /* Si el mes está en curso, se compara con los mismos días del
+               anterior: el 2 de octubre contra el mes de septiembre entero
+               siempre sale a la baja y no dice nada. */
+            const enCurso = mesDinero === hoyISO().slice(0,7);
+            const tope = enCurso ? antes + '-' + hoyISO().slice(8,10) : antes + '-31';
+            const prev = ventasPlat.filter(function(v){ const f = String(v.fecha||''); return f.indexOf(antes) === 0 && f <= tope; })
+              .reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
+            if(!prev) return '';
+            const dif = Math.round((cobrado - prev) / prev * 100);
+            return ' · <span class="comp ' + (dif > 0 ? 'sube' : dif < 0 ? 'baja' : '') + '">' + (dif === 0 ? '= igual que ' : (dif > 0 ? '▲ ' : '▼ ') + Math.abs(dif) + '% vs ') +
+              esc(NOMBREMES[d.getMonth()].slice(0,3).toLowerCase()) + (enCurso ? ' a la fecha' : '') + '</span>';
+          })() + (function(){
             const vivos = new Set(clientes.map(function(c){ return String(c.id); }));
             const idos = ventasMes.filter(function(v){
               return v.clienteId && !vivos.has(String(v.clienteId)); });
@@ -9269,6 +9303,13 @@ function queHacerAhoraPap(x){
   if(x.deHoy.length) fila('aviso', ICONO.reloj, '<b>' + x.deHoy.length + ' ' + plural(x.deHoy.length, 'vence', 'vencen') + ' hoy</b>: ' + esc(dinero(suma(x.deHoy, aCobrarDe))), 'Avisar', 'data-fhoy-hoy="1"');
   if(x.colgados.length) fila('mal', ICONO.billete, '<b>' + x.colgados.length + '</b> te ' + plural(x.colgados.length, 'debe', 'deben') + ' varias cuotas', 'Ver', 'data-fhoy-colgados="1"');
   if(x.semana.length) fila('bien', ICONO.calendario, '<b>' + x.semana.length + '</b> ' + plural(x.semana.length, 'vence', 'vencen') + ' en los próximos ' + x.aviso + ' días: recuérdales', 'Ver', 'data-fhoy-semana="1"');
+  if(clientes.length && !Nube.hayCredenciales()){
+    const hace = ajustes.ultimoRespaldo ? -diasHasta(ajustes.ultimoRespaldo) : null;
+    if(hace === null || hace >= 7) fila('aviso', ICONO.subir,
+      hace === null ? '<b>Nunca has bajado un respaldo</b>: si se borra el navegador, lo pierdes todo'
+                    : '<b>Llevas ' + hace + ' días sin respaldo</b>: baja uno, tarda un segundo',
+      'Bajar', 'data-qh-ver="@respaldo"');
+  }
   if(x.libres > 0) fila('info', ICONO.capas, 'Tienes <b>' + x.libres + ' ' + plural(x.libres, 'perfil libre', 'perfiles libres') + '</b> para vender', 'Ver', 'data-qh-ver="@negocio"');
   return '<div class="tarjeta qh-pap">' +
     '<div class="tarjeta-cabeza"><span class="cabeza-icono rosa">' + ICONO.rayo + '</span>' +
@@ -9339,7 +9380,7 @@ function resumenDelDia(){
         window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); }}]);
 }
 
-function franjaSemanaPap(lista, vencidos){
+function franjaSemanaPap(lista, vencidos, mes){
   const hoy = hoyISO();
   const DIAS = ['dom','lun','mar','mié','jue','vie','sáb'];
   const porDia = {};
@@ -9370,6 +9411,19 @@ function franjaSemanaPap(lista, vencidos){
     '<div class="fs-cab"><b>Esta semana</b><span>' + cuantos + ' ' + plural(cuantos,'cobro','cobros') +
       ' · ' + esc(dinero(total)) + '</span></div>' +
     '<div class="fs-dias">' + html + '</div>' +
+    (function(){
+      /* La meta del mes, a la vista sin ir a Dinero. Sin meta, se ofrece. */
+      if(!mes) return '';
+      if(!(mes.meta > 0)) return '<button class="fs-meta-poner" data-vaj="negocio" title="Se pone en Ajustes · Tu negocio">' +
+        ICONO.diana + 'Ponte una meta para el mes</button>';
+      const pct = Math.min(100, Math.round(mes.cobrado / mes.meta * 100));
+      const falta = Math.max(0, mes.meta - mes.cobrado);
+      return '<button class="fs-meta' + (falta ? '' : ' llena') + '" data-qh-ver="@dinero:h2:Meta del mes" title="Ver la meta en Dinero">' +
+        '<span class="fs-meta-txt"><b>Meta del mes</b><span>' + esc(dinero(mes.cobrado)) + ' de ' + esc(dinero(mes.meta)) +
+          (falta ? ' · faltan ' + esc(dinero(falta)) : ' · ¡cumplida!') + '</span></span>' +
+        '<span class="fs-meta-barra"><i style="width:' + pct + '%"></i></span>' +
+        '<span class="fs-meta-pct">' + pct + '%</span></button>';
+    })() +
   '</div>';
 }
 
@@ -12972,6 +13026,7 @@ document.addEventListener('click', function(ev){
     vistaRaiz = d.qhVer.slice(1); guardarVistas(); irNegocio(true); return;
   }
   if(d.qhVer === '@resumen'){ resumenDelDia(); return; }
+  if(d.qhVer === '@respaldo'){ exportarRespaldo(); avisar('Respaldo bajado a tu disco', 'bien'); pintar(); return; }
   if(d.qhVer && d.qhVer.indexOf('@') === 0){
     /* «@dinero:h2:Últimos cobros»: otra pantalla y, dentro, esa sección. */
     const partes = d.qhVer.slice(1).split(':'), destino = partes.shift(), resto = partes.join(':');
