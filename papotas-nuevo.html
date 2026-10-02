@@ -3542,6 +3542,19 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
   .tabla td.t-hacer{ white-space:nowrap; padding-left:2px !important; padding-right:8px !important }
   .tabla td.t-hacer .btn, .tabla td.t-hacer button{ min-width:40px !important; width:40px; height:40px; min-height:40px !important; padding:0 !important }
 }
+/* Qué hacer ahora */
+.qh-pap .tarjeta-cabeza{ flex-wrap:nowrap !important }
+.qh-pap .tarjeta-cabeza > .crece{ flex:1 1 auto }
+.qh-cuerpo{ display:flex; flex-direction:column; padding-top:4px !important }
+.qh-fila{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--linea) }
+.qh-fila:last-child{ border-bottom:0 }
+.qh-ico{ width:36px; height:36px; flex:none; display:grid; place-items:center; border-radius:11px; background:color-mix(in srgb, var(--qc, var(--info)) 18%, transparent); color:var(--qc, var(--info)) }
+.qh-ico svg{ width:18px; height:18px }
+.qh-fila.mal{ --qc:var(--mal) } .qh-fila.aviso{ --qc:var(--aviso) } .qh-fila.bien{ --qc:var(--bien) } .qh-fila.info{ --qc:var(--info) }
+.qh-txt{ flex:1; min-width:0; font-size:14px; line-height:1.35; color:var(--txt-2) }
+.qh-txt b{ color:var(--txt) }
+.qh-btn{ flex:none }
+.qh-fila:first-child .qh-btn{ background:var(--marca) !important; color:#fff !important; border-color:transparent !important }
 /* Botones principales: rojo lleno, como siempre */
 html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important; border-color:color-mix(in srgb, var(--marca) 70%, #fff 0%) !important; color:#fff !important }
 /* Dinero: «Últimos cobros» y «Gastos del mes», uno debajo del otro en el celular */
@@ -3612,7 +3625,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.3</span>
     </div>
   </nav>
 
@@ -5754,7 +5767,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.2';
+const VERSION = 'v8.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6084,9 +6097,10 @@ const abiertos = new Set();
    cuál sin leer la etiqueta. */
 function azulejo(etq, valor, tono, icono, extra){
   const t = tono || '';
-  const hay = extra && extra.ir;
+  const hay = extra && (extra.ir || extra.attr);
   return '<' + (hay ? 'button' : 'div') + ' class="azulejo ' + t + '"' +
-    (hay ? ' data-' + extra.ir + '="1"' : '') +
+    (extra && extra.ir ? ' data-' + extra.ir + '="1"' : '') +
+    (extra && extra.attr ? ' ' + extra.attr : '') +
     (extra && extra.tit ? ' title="' + esc(extra.tit) + '"' : '') + '>' +
     '<span class="k">' + esc(etq) + '</span>' +
     '<span class="v cifra">' + valor + '</span>' +
@@ -7064,6 +7078,8 @@ function pintaHoy(){
       '<div class="crece"></div>' +
       '<button class="btn fantasma" data-ir-clientes="1">' + ICONO.gente + 'Ver todos los clientes</button>' +
     '</div>' +
+    queHacerAhoraPap({ vencidos:vencidos, deHoy:deHoy, semana:semana, colgados:colgados, porCaer:porCaer,
+      mastersVencidos:mastersVencidos, libres:libres, aviso:aviso }) +
 
     /* ---- Las cifras, cada una con su color y su icono ---- */
     /* Lo primero de todo: si lo que escribe no se va a guardar, da igual
@@ -8394,13 +8410,11 @@ function pintaDinero(){
       '</div>';
     })() +
 
-    '<div class="rejilla r5">' +
-      '<div class="metrica mayor bien"><span class="k">Cobrado</span><span class="v cifra">' + esc(dinero(cobrado)) + '</span>' +
-        '<span class="n">' + ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') +
-          ' · queda ' + esc(dinero(cobrado-gastado)) + ' limpio' +
-          /* Lo que te pagó alguien que luego borraste ya está en tu bolsillo
-             y cuenta igual: se dice aquí para que no parezca que falta. */
-          (function(){
+    /* Las cifras del mes en mosaicos, como en Hoy: cada uno te lleva a
+       la parte de abajo que lo explica. */
+    '<div class="azulejos dinero-mosaico">' +
+      azulejo('Cobrado', esc(dinero(cobrado)), 'bien', ICONO.subir,
+        {pie: ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') + (function(){
             const vivos = new Set(clientes.map(function(c){ return String(c.id); }));
             const idos = ventasMes.filter(function(v){
               return v.clienteId && !vivos.has(String(v.clienteId)); });
@@ -8408,15 +8422,17 @@ function pintaDinero(){
             const cuanto = idos.reduce(function(a,v){ return a + (Number(v.monto)||0); }, 0);
             return '<br><i class="de-idos">' + esc(dinero(cuanto)) + ' de ' + idos.length + ' ' +
               plural(idos.length,'cobro','cobros') + ' de fichas que ya borraste · cuentan igual</i>';
-          })() +
-        '</span></div>' +
-      '<div class="metrica mal"><span class="k">Gastado</span><span class="v cifra">' + esc(dinero(gastado)) + '</span>' +
-        '<span class="n">' + gastosMes.length + ' ' + plural(gastosMes.length,'gasto','gastos') + '</span></div>' +
-      '<div class="metrica ' + (cobrado-gastado>=0?'bien':'mal') + '"><span class="k">Queda limpio</span>' +
-        '<span class="v cifra">' + esc(dinero(cobrado-gastado)) + '</span>' +
-        '<span class="n">' + (cobrado ? Math.round((cobrado-gastado)/cobrado*100) : 0) + '% de lo cobrado</span></div>' +
-      '<div class="metrica"><span class="k">Cobro medio</span><span class="v cifra">' + esc(dinero(ticket)) + '</span>' +
-        '<span class="n">por venta</span></div>' +
+          })() ,
+         attr:'data-qh-ver="h2:Últimos cobros"', tit:'Ver los últimos cobros'}) +
+      azulejo('Gastado', esc(dinero(gastado)), 'mal', ICONO.caja,
+        {pie: gastosMes.length + ' ' + plural(gastosMes.length,'gasto','gastos'),
+         attr:'data-qh-ver="h2:Gastos del mes"', tit:'Ver los gastos del mes'}) +
+      azulejo('Queda limpio', esc(dinero(cobrado-gastado)), cobrado-gastado >= 0 ? 'bien' : 'mal', ICONO.billete,
+        {pie: (cobrado ? Math.round((cobrado-gastado)/cobrado*100) : 0) + '% de lo cobrado',
+         attr:'data-qh-ver="h2:Los últimos doce meses"', tit:'Ver los últimos doce meses'}) +
+      azulejo('Cobro medio', esc(dinero(ticket)), 'info', ICONO.diana,
+        {pie:'por venta',
+         attr:'data-qh-ver="h2:Qué te deja cada plataforma"', tit:'Ver qué te deja cada plataforma'}) +
     '</div>' +
 
     /* La meta del mes. Solo aparece si la has puesto: una barra en blanco
@@ -8760,20 +8776,20 @@ function pintaAjustes(){
     /* El estado del negocio, arriba del todo y sin tener que buscarlo. */
     '<div class="azulejos cinco">' +
       azulejo('Clientes', clientes.length, '', ICONO.gente,
-        {pie: servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + ' en ' +
+        {attr:'data-qh-ver="@negocio"', pie: servicios.length + ' ' + plural(servicios.length,'cuenta','cuentas') + ' en ' +
               new Set(servicios.map(function(m){ return String(m.nombre||'').trim().toUpperCase(); })).size + ' plataformas'}) +
       azulejo('Perfiles libres', libres, libres ? 'bien' : 'mal', ICONO.mascliente,
-        {pie: libres ? 'sitio para ' + libres + ' ' + plural(libres,'cliente más','clientes más') : 'todo lleno'}) +
+        {attr:'data-qh-ver="@negocio"', pie: libres ? 'sitio para ' + libres + ' ' + plural(libres,'cliente más','clientes más') : 'todo lleno'}) +
       azulejo('Revisión', casos.length, graves ? 'mal' : casos.length ? 'aviso' : 'bien', ICONO.alerta,
-        {pie: casos.length ? (graves ? graves + ' ' + plural(graves,'urgente','urgentes') : 'nada urgente') : 'todo cuadra'}) +
+        {attr:'data-vaj="datos"', pie: casos.length ? (graves ? graves + ' ' + plural(graves,'urgente','urgentes') : 'nada urgente') : 'todo cuadra'}) +
       azulejo('La nube', conectado ? 'Sí' : 'No', conectado ? 'bien' : '', ICONO.nube,
-        {pie: conectado ? 'los aparatos van sincronizados' : 'solo en este aparato'}) +
+        {attr:'data-vaj="nube"', pie: conectado ? 'los aparatos van sincronizados' : 'solo en este aparato'}) +
       (clavesDanadas.length
         ? azulejo('Datos ilegibles', clavesDanadas.length, 'mal', ICONO.alerta,
-            {pie:'míralo en Recuperar, abajo'})
+            {attr:'data-vaj="datos"', pie:'míralo en Recuperar, abajo'})
         : azulejo('Último respaldo', ajustes.ultimoRespaldo ? fechaBonita(ajustes.ultimoRespaldo) : 'Nunca',
             ajustes.ultimoRespaldo ? '' : 'aviso', ICONO.subir,
-            {pie: ajustes.ultimoRespaldo ? 'archivo bajado a tu disco' : 'baja uno, por si acaso'})) +
+            {attr:'data-vaj="datos"', pie: ajustes.ultimoRespaldo ? 'archivo bajado a tu disco' : 'baja uno, por si acaso'})) +
     '</div>' +
 
     '<nav class="segmentos secciones-aj" aria-label="Secciones de los ajustes">' +
@@ -9094,6 +9110,31 @@ function pintaAjustes(){
 /* El aviso ANTES de que se caiga. Va primero de todo: no hay nada más
    urgente en esta pantalla, porque una master que se cae se lleva a todos
    sus clientes de una vez y encima te los deja escribiendo. */
+/* QUÉ HACER AHORA
+   Lo urgente del día en frases cortas, cada una con su botón que te lleva
+   al sitio donde se hace: renovar, cobrar, avisar o vender. */
+function queHacerAhoraPap(x){
+  const filas = [];
+  const suma = function(l, f){ return l.reduce(function(a, c){ return a + f(c); }, 0); };
+  function fila(tono, icono, txt, btn, attr){
+    filas.push('<div class="qh-fila ' + tono + '"><span class="qh-ico">' + icono + '</span><span class="qh-txt">' + txt + '</span>' +
+      '<button class="btn mini qh-btn" ' + attr + '>' + btn + '</button></div>');
+  }
+  if(x.porCaer.length) fila('aviso', ICONO.reloj, '<b>' + x.porCaer.length + ' ' + plural(x.porCaer.length, 'cuenta', 'cuentas') + '</b> a punto de caerse: renuévalas antes de que se queden sin servicio', 'Renovar', 'data-qh-ver=".panel-mando.urgente"');
+  if(x.mastersVencidos.length) fila('mal', ICONO.alerta, '<b>' + x.mastersVencidos.length + ' ' + plural(x.mastersVencidos.length, 'cuenta master vencida', 'cuentas master vencidas') + '</b>', 'Ver', 'data-qh-ver=".panel-mando.peligro"');
+  if(x.vencidos.length) fila('mal', ICONO.cobrar, '<b>' + x.vencidos.length + ' ' + plural(x.vencidos.length, 'vencido', 'vencidos') + '</b> te ' + plural(x.vencidos.length, 'debe', 'deben') + ' <b>' + esc(dinero(suma(x.vencidos, aCobrarDe))) + '</b>', 'Cobrar', 'data-fhoy-vencidos="1"');
+  if(x.deHoy.length) fila('aviso', ICONO.reloj, '<b>' + x.deHoy.length + ' ' + plural(x.deHoy.length, 'vence', 'vencen') + ' hoy</b>: ' + esc(dinero(suma(x.deHoy, aCobrarDe))), 'Avisar', 'data-fhoy-hoy="1"');
+  if(x.colgados.length) fila('mal', ICONO.billete, '<b>' + x.colgados.length + '</b> te ' + plural(x.colgados.length, 'debe', 'deben') + ' varias cuotas', 'Ver', 'data-fhoy-colgados="1"');
+  if(x.semana.length) fila('bien', ICONO.calendario, '<b>' + x.semana.length + '</b> ' + plural(x.semana.length, 'vence', 'vencen') + ' en los próximos ' + x.aviso + ' días: recuérdales', 'Ver', 'data-fhoy-semana="1"');
+  if(x.libres > 0) fila('info', ICONO.capas, 'Tienes <b>' + x.libres + ' ' + plural(x.libres, 'perfil libre', 'perfiles libres') + '</b> para vender', 'Ver', 'data-qh-ver="@negocio"');
+  return '<div class="tarjeta qh-pap">' +
+    '<div class="tarjeta-cabeza"><span class="cabeza-icono rosa">' + ICONO.rayo + '</span>' +
+      '<div class="crece"><h2>Qué hacer ahora</h2><p>' + (filas.length ? 'Lo más urgente primero. Toca y te lleva.' : 'Todo al día por aquí. 👌') + '</p></div>' +
+      (filas.length ? '<span class="insignia">' + filas.length + '</span>' : '') + '</div>' +
+    (filas.length ? '<div class="tarjeta-cuerpo qh-cuerpo">' + filas.join('') + '</div>' : '') +
+  '</div>';
+}
+
 function panelPorCaer(lista, dentro){
   if(!lista.length) return '';
   const cuanto = lista.reduce(function(a,m){ return a + costoDe(m); }, 0);
@@ -12272,7 +12313,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
@@ -12688,6 +12729,15 @@ document.addEventListener('click', function(ev){
     try{ localStorage.setItem('pap_ver_hoy', verHoy); }catch(_){}
     pintar(); return;
   }
+  if(d.qhVer === '@negocio'){ volverA('raiz'); irNegocio(true); return; }
+  if(d.qhVer && d.qhVer.indexOf('h2:') === 0){
+    const quiero = d.qhVer.slice(3);
+    const h = [...document.querySelectorAll('#p-' + pantalla + ' h2')].find(function(x){ return x.textContent.trim().indexOf(quiero) === 0; });
+    const dest = h && (h.closest('.tarjeta') || h);
+    if(dest) dest.scrollIntoView({block:'start', behavior:suave()});
+    return;
+  }
+  if(d.qhVer){ const dest = $('#p-hoy ' + d.qhVer); if(dest) dest.scrollIntoView({block:'start', behavior:suave()}); return; }
   if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 20; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
   if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana || d.fhoyColgados || d.fhoyPerdidos){
