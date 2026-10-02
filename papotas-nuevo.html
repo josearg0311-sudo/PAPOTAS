@@ -3810,6 +3810,25 @@ html:not([data-tema="claro"]) .tarjeta, html:not([data-tema="claro"]) .franja-se
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 16px 40px -22px rgba(0,0,0,.85) !important }
 html:not([data-tema="claro"]) .franja-sem{ background:var(--marco-fondo) }
 @media (prefers-reduced-motion:reduce){ html #app::before, html #app::after{ animation:none !important } }
+/* ===== Plataformas: fichas compactas ===== */
+#p-negocio .ficha{ display:grid !important; grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"alto pie" "perf perf" "marcas marcas" "mando mando"; gap:9px 12px; padding:12px 14px !important }
+#p-negocio .ficha-alto{ grid-area:alto }
+#p-negocio .ficha-perfiles{ grid-area:perf }
+#p-negocio .ficha-marcas{ grid-area:marcas }
+#p-negocio .ficha-mando{ grid-area:mando; padding-top:9px }
+#p-negocio .ficha-pie{ grid-area:pie; border-top:0 !important; padding-top:0 !important; margin:0 !important; align-self:center; text-align:right }
+#p-negocio .ficha-nums{ display:none }
+#p-negocio .ficha-deja b{ font-size:17px }
+#p-negocio .ficha-deja small{ font-size:9.5px }
+#p-negocio .ficha .f-marca{ width:36px !important; height:36px !important }
+#p-negocio .ficha-marcas .insignia{ min-height:24px; font-size:11px; padding:0 8px }
+#p-negocio .ficha-mando .btn{ height:36px; min-height:36px }
+/* ===== Ajustes: la ayuda de cada campo aparece al tocarlo ===== */
+@media (max-width:860px){
+  #p-ajustes .campo > .pista{ display:none }
+  #p-ajustes .campo:focus-within > .pista{ display:block; animation:pap-entra .25s ease both }
+}
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3929,7 +3948,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.3</span>
     </div>
   </nav>
 
@@ -6071,7 +6090,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v9.2';
+const VERSION = 'v9.3';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6331,6 +6350,33 @@ const PANTALLAS = {
 let pantalla = 'hoy';
 let busqueda = '';
 
+/* Las cifras grandes suben desde cero al entrar en una pantalla: se ve de
+   un vistazo que están vivas. Respeta el formato que ya traen (S/, comas,
+   decimales) y no se mueve si el aparato pide menos movimiento. */
+function contarCifras(raiz){
+  if(!raiz) return;
+  try{ if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return; }catch(_){}
+  raiz.querySelectorAll('.fs-cifra b, .azulejo .v, .cc-gsuma').forEach(function(el){
+    const txt = el.textContent, m = txt.match(/-?[\d][\d,]*(\.\d+)?/);
+    if(!m) return;
+    const crudo = m[0], valor = parseFloat(crudo.replace(/,/g, ''));
+    if(!isFinite(valor) || valor === 0) return;
+    const dec = m[1] ? m[1].length - 1 : 0, comas = crudo.indexOf(',') >= 0;
+    const formato = function(v){
+      let t = Math.abs(v).toFixed(dec);
+      if(comas){ const p = t.split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); t = p.join('.'); }
+      return (v < 0 ? '-' : '') + t;
+    };
+    const antes = txt.slice(0, m.index), despues = txt.slice(m.index + crudo.length);
+    const t0 = performance.now(), dura = 650;
+    (function paso(ahora){
+      const k = Math.min(1, (ahora - t0) / dura), e = 1 - Math.pow(1 - k, 3);
+      if(!el.isConnected) return;
+      el.textContent = antes + formato(valor * e) + despues;
+      if(k < 1) requestAnimationFrame(paso); else el.textContent = txt;
+    })(t0);
+  });
+}
 function ir(destino){
   if(!PANTALLAS[destino]) destino = 'hoy';
   pantalla = destino;
@@ -6348,6 +6394,7 @@ function ir(destino){
   try{ history.replaceState(null, '', '#' + destino); }catch(_){}
   pintar();
   const pag = $('#p-' + destino);
+  contarCifras(pag);
   if(pag){ pag.classList.remove('entrando'); void pag.offsetWidth; pag.classList.add('entrando');
     clearTimeout(pag._entra); pag._entra = setTimeout(function(){ pag.classList.remove('entrando'); }, 900); }
 }
@@ -7407,8 +7454,9 @@ function pintaHoy(){
   const pct  = base > 0 ? (cobradoMes / base) * 100 : 0;
 
   const fecha = new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long'});
-  $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? '' : plataformaActiva + ' · ') +
-    fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+  $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? saludo + ' · ' : plataformaActiva + ' · ') + fecha;
 
   /* La lista filtrada (vencidos, hoy, próximos…) solo sale cuando la
      pides: lo normal es mirar Hoy plataforma por plataforma. */
