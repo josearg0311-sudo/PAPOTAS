@@ -1311,7 +1311,6 @@ button.azulejo:hover{border-color:var(--t-linea);border-left-color:var(--t-vivo)
      clientes" ya está en la barra de abajo. */
   .acciones-rapidas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--e2)}
   .acciones-rapidas .btn{min-width:0}
-  .acciones-rapidas .btn[data-escribir-a]{grid-column:1 / -1}
   .acciones-rapidas .btn[data-ir-clientes]{display:none}
 }
 @media (max-width:420px){
@@ -3542,6 +3541,42 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
   .tabla td.t-hacer{ white-space:nowrap; padding-left:2px !important; padding-right:8px !important }
   .tabla td.t-hacer .btn, .tabla td.t-hacer button{ min-width:40px !important; width:40px; height:40px; min-height:40px !important; padding:0 !important }
 }
+/* Esta semana */
+.franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
+.fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
+.fs-cab b{ font-size:15px; font-weight:700; letter-spacing:-.02em }
+.fs-cab span{ font-size:12.5px; color:var(--txt-3); font-weight:600 }
+.fs-dias{ display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; scroll-snap-type:x proximity }
+.fs-dias::-webkit-scrollbar{ display:none }
+.fs-dia{ flex:1 0 64px; scroll-snap-align:start; display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:9px 4px 8px; border-radius:14px; border:1px solid var(--linea); background:var(--capa-alta);
+  color:var(--txt-2); font:inherit; cursor:pointer; transition:transform .15s, border-color .15s }
+.fs-dia:active{ transform:scale(.96) }
+.fs-nom{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--txt-3) }
+.fs-num{ font-size:20px; font-weight:800; letter-spacing:-.03em; color:var(--txt); font-variant-numeric:tabular-nums }
+.fs-monto{ font-size:10.5px; font-weight:600; color:var(--txt-3); white-space:nowrap }
+.fs-dia.con .fs-monto{ color:var(--bien) }
+.fs-dia.hoy{ border-color:var(--marca); background:color-mix(in srgb, var(--marca) 16%, var(--capa-alta)) }
+.fs-dia.hoy .fs-nom{ color:var(--marca) }
+.fs-dia.atras{ border-color:color-mix(in srgb, var(--mal) 55%, transparent); background:color-mix(in srgb, var(--mal) 12%, var(--capa-alta)) }
+.fs-dia.atras .fs-nom, .fs-dia.atras .fs-num, .fs-dia.atras .fs-monto{ color:var(--mal) }
+.fs-dia:not(.con):not(.atras):not(.hoy){ opacity:.6 }
+/* En laptop, lo que hay que hacer y lo que se cae van lado a lado. */
+.hoy-dos{ display:grid; gap:var(--e4, 16px) }
+.hoy-dos:empty{ display:none }
+@media (min-width:1100px){
+  .hoy-dos{ grid-template-columns:repeat(2, minmax(0,1fr)); align-items:start }
+  .hoy-dos > :only-child{ grid-column:1 / -1 }
+}
+/* Las filas de grupo en el celular: el nombre y «N personas» en una línea. */
+@media (max-width:620px){
+  .t-grupo td:first-child{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+}
+/* Cinco mosaicos en dos columnas: el que sobra ocupa todo el renglón
+   en vez de quedarse cojo. */
+@media (max-width:860px){
+  .azulejos.cinco > :last-child:nth-child(odd){ grid-column:1 / -1 }
+}
 /* Qué hacer ahora */
 .qh-pap .tarjeta-cabeza{ flex-wrap:nowrap !important }
 .qh-pap .tarjeta-cabeza > .crece{ flex:1 1 auto }
@@ -3625,7 +3660,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.3</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.4</span>
     </div>
   </nav>
 
@@ -5767,7 +5802,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.3';
+const VERSION = 'v8.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7078,19 +7113,22 @@ function pintaHoy(){
       '<div class="crece"></div>' +
       '<button class="btn fantasma" data-ir-clientes="1">' + ICONO.gente + 'Ver todos los clientes</button>' +
     '</div>' +
+    avisoDeDonde() +
+    panelMudanza() +
+    franjaSemanaPap(suyos, vencidos) +
+    '<div class="hoy-dos">' +
     queHacerAhoraPap({ vencidos:vencidos, deHoy:deHoy, semana:semana, colgados:colgados, porCaer:porCaer,
       mastersVencidos:mastersVencidos, libres:libres, aviso:aviso }) +
 
     /* ---- Las cifras, cada una con su color y su icono ---- */
     /* Lo primero de todo: si lo que escribe no se va a guardar, da igual
        todo lo demás de esta pantalla. */
-    avisoDeDonde() +
-    panelMudanza() +
 
     /* Esto va ANTES que las cifras, y a propósito. Una cuenta a punto de
        caerse no es un dato para mirar: es algo que hay que hacer HOY, y si
        queda debajo de «gastado este mes» no lo ves hasta que es tarde. */
     panelPorCaer(porCaer, enRiesgo) +
+    '</div>' +
 
     '<div class="azulejos">' +
       azulejo('Por cobrar', esc(dinero(total)), 'aviso', ICONO.cobrar,
@@ -7115,7 +7153,7 @@ function pintaHoy(){
         {pie: esc(dinero(deHoy.reduce(function(a,c){return a+aCobrarDe(c);},0))), ir:'fhoy-hoy'}) +
       azulejo('Próximos ' + aviso + ' días', semana.length, 'bien', ICONO.calendario,
         {pie: esc(dinero(semana.reduce(function(a,c){return a+cobroDe(c);},0))), ir:'fhoy-semana'}) +
-      azulejo('Cobrado en ' + esc(NOMBREMES[Number(mes.slice(5,7))-1]), esc(dinero(cobradoMes)), 'bien', ICONO.subir,
+      azulejo('Cobrado ' + esc(NOMBREMES[Number(mes.slice(5,7))-1].slice(0,3).toLowerCase()), esc(dinero(cobradoMes)), 'bien', ICONO.subir,
         {pie: ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas') +
               (meta > 0 ? ' · ' + Math.round(pct) + '% de la meta' : '')}) +
       azulejo('Gastado', esc(dinero(gastadoMes)), 'mal', ICONO.caja,
@@ -7855,7 +7893,7 @@ function fichaPlataforma(n, g){
         '<i>cuesta ' + esc(dinero(g.costo)) + '</i></span>' +
     '</span>' +
     '<span class="ficha-mando">' +
-      '<a class="btn mini principal crece" href="' + esc(casaDe(n)) + '" target="_blank" rel="noopener"' +
+      '<a class="btn mini crece entrar-web" href="' + esc(casaDe(n)) + '" target="_blank" rel="noopener"' +
         ' title="' + esc(casaConocida(n) ? 'Entrar a la web de ' + n : 'Buscar ' + n + ' en internet') + '">' +
         ICONO.salir + '<span class="et">Entrar</span></a>' +
       '<button class="btn mini icono" data-nueva-en="' + esc(n) + '"' +
@@ -9135,6 +9173,42 @@ function queHacerAhoraPap(x){
   '</div>';
 }
 
+/* La semana de un vistazo, como en la agenda: siete días con cuántos
+   cobran y cuánto entra. Tocar un día abre quién cobra ese día. */
+function franjaSemanaPap(lista, vencidos){
+  const hoy = hoyISO();
+  const DIAS = ['dom','lun','mar','mié','jue','vie','sáb'];
+  const porDia = {};
+  lista.forEach(function(c){
+    const v = String(c.vencimiento||''); if(!v) return;
+    if(!porDia[v]) porDia[v] = {n:0, suma:0};
+    porDia[v].n++; porDia[v].suma += cobroDe(c);
+  });
+  let total = 0, cuantos = 0, html = '';
+  if(vencidos && vencidos.length){
+    const deuda = vencidos.reduce(function(a,c){ return a + aCobrarDe(c); }, 0);
+    html += '<button class="fs-dia atras" data-fhoy-vencidos="1" title="Ver los vencidos">' +
+      '<span class="fs-nom">atrás</span><span class="fs-num">' + vencidos.length + '</span>' +
+      '<span class="fs-monto">' + esc(dinero(deuda)) + '</span></button>';
+  }
+  for(let i = 0; i < 7; i++){
+    const iso = sumarDias(hoy, i), p = iso.split('-');
+    const fecha = new Date(+p[0], +p[1]-1, +p[2]);
+    const x = porDia[iso] || {n:0, suma:0};
+    total += x.suma; cuantos += x.n;
+    html += '<button class="fs-dia' + (i === 0 ? ' hoy' : '') + (x.n ? ' con' : '') + '" data-dia="' + iso + '"' +
+      ' title="' + esc(fechaBonita(iso)) + '">' +
+      '<span class="fs-nom">' + (i === 0 ? 'hoy' : DIAS[fecha.getDay()]) + '</span>' +
+      '<span class="fs-num">' + fecha.getDate() + '</span>' +
+      '<span class="fs-monto">' + (x.n ? x.n + ' · ' + esc(dinero(x.suma)) : '—') + '</span></button>';
+  }
+  return '<div class="franja-sem">' +
+    '<div class="fs-cab"><b>Esta semana</b><span>' + cuantos + ' ' + plural(cuantos,'cobro','cobros') +
+      ' · ' + esc(dinero(total)) + '</span></div>' +
+    '<div class="fs-dias">' + html + '</div>' +
+  '</div>';
+}
+
 function panelPorCaer(lista, dentro){
   if(!lista.length) return '';
   const cuanto = lista.reduce(function(a,m){ return a + costoDe(m); }, 0);
@@ -9189,7 +9263,7 @@ function panelMastersVencidos(lista, eco){
         '<p>Esto no es que te deban: es que se cae. Si no las renuevas, ' +
           dentro + ' ' + plural(dentro,'cliente se queda','clientes se quedan') + ' sin servicio.</p></div>' +
       '<button class="btn mini principal" data-renovar-todas="1">' + ICONO.renovar +
-        '<span class="et">Renové las ' + lista.length + '</span></button>' +
+        '<span class="et">' + (lista.length === 1 ? 'Ya la renové' : 'Renové las ' + lista.length) + '</span></button>' +
     '</div>' +
     '<div class="pm-cifras">' +
       '<div class="pmc mal"><dt>Vencidas</dt><dd class="cifra">' + lista.length + '</dd>' +
