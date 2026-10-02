@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0d1526">
+<meta name="theme-color" content="#090c13">
 <meta name="pap-sitio" content="0">
 <title>PAPOTAS</title>
 <!-- El icono va METIDO EN EL ARCHIVO, no enlazado.
@@ -3493,10 +3493,10 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 :root:not([data-tema="claro"]), html[data-tema="oscuro"]:not([data-fondo="pizarra"]){
   /* Grafito, no negro: oscuro pero con cuerpo, y las tarjetas un punto
      más claras que el fondo para que se separen solas. */
-  --fondo:#0d1526; --capa:#16213a; --capa-alta:#1f2c4a;
-  --linea:rgba(160,185,235,.13); --linea-fuerte:rgba(170,195,245,.24);
-  --txt:#f3f6fc; --txt-2:#cfd8ea; --txt-3:#9fadc8; --txt-4:#8291b0;
-  --marco-fondo:#121c31; --marco-borde:rgba(160,185,235,.14);
+  --fondo:#090c13; --capa:#131925; --capa-alta:#1b2231;
+  --linea:rgba(170,190,230,.11); --linea-fuerte:rgba(180,200,240,.21);
+  --txt:#f3f5fa; --txt-2:#cdd3e0; --txt-3:#9ba4b8; --txt-4:#7f889d;
+  --marco-fondo:#0f141e; --marco-borde:rgba(170,190,230,.12);
 }
 :root{ --brillo-marca:color-mix(in srgb, var(--marca) 22%, transparent) }
 body, #app, #principal, #lienzo{ background:var(--fondo) }
@@ -3899,7 +3899,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.0</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.1</span>
     </div>
   </nav>
 
@@ -6041,7 +6041,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v9.0';
+const VERSION = 'v9.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
