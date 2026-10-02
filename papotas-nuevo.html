@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1e1c1a">
+<meta name="theme-color" content="#17171c">
 <meta name="pap-sitio" content="0">
 <title>PAPOTAS</title>
 <!-- El icono va METIDO EN EL ARCHIVO, no enlazado.
@@ -3491,13 +3491,17 @@ html[data-tema="claro"] .hoja::after{opacity:.09}
 :root{ --fuente:'Jakarta',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; --cifra:'Jakarta',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif }
 .cifra, .azulejo .v, [class*="cifra"]{ font-variant-numeric:tabular-nums; letter-spacing:-.02em }
 :root:not([data-tema="claro"]), html[data-tema="oscuro"]:not([data-fondo="pizarra"]){
-  --fondo:#000; --capa:#0d0d0e; --capa-alta:#17171a;
-  --linea:rgba(255,255,255,.085); --linea-fuerte:rgba(255,255,255,.16);
-  --txt:#f5f5f7; --txt-2:#c9c7c5; --txt-3:#a8a6a4; --txt-4:#92908e;
-  --marco-fondo:color-mix(in srgb, #fff 3.2%, #000); --marco-borde:rgba(255,255,255,.09);
+  /* Grafito, no negro: oscuro pero con cuerpo, y las tarjetas un punto
+     más claras que el fondo para que se separen solas. */
+  --fondo:#17171c; --capa:#22222a; --capa-alta:#2c2c35;
+  --linea:rgba(255,255,255,.10); --linea-fuerte:rgba(255,255,255,.18);
+  --txt:#f5f5f7; --txt-2:#d0ced2; --txt-3:#a9a7ae; --txt-4:#8f8d95;
+  --marco-fondo:#1f1f26; --marco-borde:rgba(255,255,255,.10);
 }
 :root{ --brillo-marca:color-mix(in srgb, var(--marca) 22%, transparent) }
 body, #app, #principal, #lienzo{ background:var(--fondo) }
+/* Un velo de color muy suave arriba, para que el fondo no sea plano. */
+html:not([data-tema="claro"]) #lienzo{ background:radial-gradient(900px 420px at 15% -120px, color-mix(in srgb, var(--marca) 9%, transparent), transparent 70%), var(--fondo) }
 /* Cabecera limpia: negro con un filo rojo apenas */
 html:not([data-tema="claro"]) #cabecera{ background:var(--fondo) !important; border-bottom:1px solid var(--linea) }
 /* Recuadros (tarjetas): brillo rojo arriba a la izquierda, borde fino, sombra */
@@ -3714,6 +3718,20 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
   .neg-cifras .fs-cifra:nth-child(n+4){ grid-column:span 3 }
   .neg-cifras .fs-cifra b{ font-size:18px }
 }
+/* Ver más / ver menos */
+.qh-mas, .ph-ver-mas{ display:flex; align-items:center; justify-content:center; gap:6px; width:100%; padding:11px; margin:0;
+  background:none; border:0; border-top:1px solid var(--linea); color:color-mix(in srgb, var(--marca) 55%, #fff); font:inherit; font-size:12.5px; font-weight:700; cursor:pointer }
+.ph-ver-mas svg{ width:14px; height:14px }
+.qh-mas{ border-top:0; padding-bottom:2px }
+@media (hover:hover){ .qh-mas:hover, .ph-ver-mas:hover{ text-decoration:underline } }
+.grupo-plat > summary{ list-style:none; cursor:pointer }
+.grupo-plat > summary::-webkit-details-marker{ display:none }
+.grupo-plat > summary .tramo{ position:relative; padding-right:36px }
+.grupo-plat > summary .tramo::after{ content:"›"; position:absolute; right:14px; top:50%; transform:translateY(-50%); font-size:18px; color:var(--txt-3); transition:transform .2s }
+.grupo-plat[open] > summary .tramo::after{ transform:translateY(-50%) rotate(90deg) }
+/* La pestaña que acabas de tocar no necesita un recuadro rojo encima. */
+.segmentos button:focus{ outline:none; box-shadow:none }
+.segmentos button:focus-visible{ outline:1px solid var(--linea-fuerte); outline-offset:-1px }
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3833,7 +3851,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.8</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.9</span>
     </div>
   </nav>
 
@@ -5975,7 +5993,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.8';
+const VERSION = 'v8.9';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7207,7 +7225,7 @@ let verFiltroHoy = false;
 const phAbiertas = {};
 /* Cuántos de la cola se enseñan. Veinte para no ahogar la pantalla, pero
    con un botón para verlos todos aquí en vez de mandarte a otro sitio. */
-let topeHoy = 20;
+let topeHoy = 8;
 /* Cómo se agrupa "A quién le toca": por plataforma (lo normal, porque es
    como se lleva el negocio) o por urgencia. Se recuerda. */
 let verHoy = 'plataforma';
@@ -8511,6 +8529,7 @@ function hojaCliente(c){
 let mesDinero = '';
 
 let vistaDinero = 'resumen';
+let movTodo = false;
 try{ vistaDinero = localStorage.getItem('pap_vista_dinero') || 'resumen'; }catch(_){}
 /* A qué pestaña de Dinero pertenece cada sección, para los atajos que llevan a ella. */
 const SECCION_DINERO = {'Meta del mes':'resumen','Los últimos doce meses':'resumen','Qué te deja cada plataforma':'plataformas',
@@ -8744,8 +8763,9 @@ function pintaDinero(){
         '<h2>Qué te deja cada plataforma</h2>' +
         '<p>Lo que cobras al ciclo menos lo que te cuestan sus cuentas.</p></div></div>' +
       '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-        (porCuenta.length ? porPlataforma(porCuenta).map(function(x){
-          if(x.cabeza) return x.cabeza;
+        (porCuenta.length ? porPlataforma(porCuenta).map(function(x, i, todo){
+          /* Una fila por plataforma; sus cuentas se ven al tocarla. */
+          if(x.cabeza) return (i ? '</div></details>' : '') + '<details class="grupo-plat"><summary>' + x.cabeza + '</summary><div>';
           const ancho = Math.round(Math.abs(x.r.margen)/maxMargen*100);
           return '<div class="f ' + (x.r.margen>=0?'bien':'mal') + '" style="cursor:default">' +
             logoPlataforma(x.m.nombre) +
@@ -8759,7 +8779,7 @@ function pintaDinero(){
               (x.r.margen>=0?'+':'') + esc(dinero(x.r.margen)) + '</span>' +
               '<span class="f-cuando">al ciclo</span></span>' +
           '</div>';
-        }).join('') : vacio('Sin cuentas', 'Registra tus cuentas master para ver qué te deja cada una.')) +
+        }).join('') + '</div></details>' : vacio('Sin cuentas', 'Registra tus cuentas master para ver qué te deja cada una.')) +
       '</div></div>' +
     '</div>' +
 
@@ -8875,7 +8895,7 @@ function pintaDinero(){
         '<span class="cabeza-icono verde">' + ICONO.cobrar + '</span>' +
         '<div class="crece"><h2>Últimos cobros</h2><p>Lo más reciente primero.</p></div></div>' +
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-          (ultimas.length ? ultimas.map(function(v){
+          (ultimas.length ? ultimas.slice(0, movTodo ? 40 : 6).map(function(v){
             const vivo = v.clienteId && buscarCliente(v.clienteId);
             return '<div class="f bien"' + (vivo ? ' data-ficha="' + esc(v.clienteId) + '" role="button" tabindex="0" title="Ver la ficha de ' + esc(v.cliente||'') + '"' : '') +
               ' style="cursor:' + (vivo ? 'pointer' : 'default') + ';padding-top:9px;padding-bottom:9px">' +
@@ -8883,7 +8903,8 @@ function pintaDinero(){
               '<span class="f-sub">' + esc(v.servicio || '') + ' · ' + esc(v.metodo || '') + '</span></span>' +
               '<span class="f-der"><span class="f-monto cifra">' + esc(dinero(v.monto)) + '</span>' +
               '<span class="f-cuando">' + esc(fechaBonita(v.fecha)) + '</span></span></div>';
-          }).join('') : vacio('Sin cobros todavía', 'Cuando cobres a alguien aparecerá aquí.')) +
+          }).join('') + (ultimas.length > 6 ? '<button class="ph-ver-mas" data-mov-mas="1">' + (movTodo ? 'Ver menos' : 'Ver ' + (ultimas.length - 6) + ' cobros más') + '</button>' : '')
+            : vacio('Sin cobros todavía', 'Cuando cobres a alguien aparecerá aquí.')) +
         '</div></div>' +
       '</div>' +
       '<div class="tarjeta">' +
@@ -8891,7 +8912,7 @@ function pintaDinero(){
         '<span class="cabeza-icono ambar">' + ICONO.caja + '</span>' +
         '<div class="crece"><h2>Gastos del mes</h2><p>Compras de cuentas y todo lo que sale.</p></div></div>' +
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
-          (gastosMes.length ? gastosMes.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).map(function(i){
+          (gastosMes.length ? gastosMes.slice().sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); }).slice(0, movTodo ? 500 : 6).map(function(i){
             return '<div class="f mal" style="cursor:default;padding-top:9px;padding-bottom:9px">' +
               '<span class="f-txt"><span class="f-nom">' + esc(i.concepto || i.plataforma || 'Gasto') + '</span>' +
               '<span class="f-sub">' + esc(i.concepto && i.plataforma && i.concepto.indexOf(i.plataforma) < 0
@@ -9395,6 +9416,7 @@ function pintaAjustes(){
 /* QUÉ HACER AHORA
    Lo urgente del día en frases cortas, cada una con su botón que te lleva
    al sitio donde se hace: renovar, cobrar, avisar o vender. */
+let qhTodo = false;
 function queHacerAhoraPap(x){
   const filas = [];
   const suma = function(l, f){ return l.reduce(function(a, c){ return a + f(c); }, 0); };
@@ -9417,11 +9439,14 @@ function queHacerAhoraPap(x){
       'Bajar', 'data-qh-ver="@respaldo"');
   }
   if(x.libres > 0) fila('info', ICONO.capas, 'Tienes <b>' + x.libres + ' ' + plural(x.libres, 'perfil libre', 'perfiles libres') + '</b> para vender', 'Ver', 'data-qh-ver="@negocio"');
+  const total = filas.length;
+  const visibles = (qhTodo || total <= 4) ? filas : filas.slice(0, 3);
+  const masBtn = total > 4 ? '<button class="qh-mas" data-qh-mas="1">' + (qhTodo ? 'Ver menos' : 'Ver ' + (total - 3) + ' más') + '</button>' : '';
   return '<div class="tarjeta qh-pap">' +
     '<div class="tarjeta-cabeza"><span class="cabeza-icono rosa">' + ICONO.rayo + '</span>' +
       '<div class="crece"><h2>Qué hacer ahora</h2><p>' + (filas.length ? 'Lo más urgente primero. Toca y te lleva.' : 'Todo al día por aquí. 👌') + '</p></div>' +
       '<button class="btn mini" data-qh-ver="@resumen" title="El parte del día, para copiar o mandarte por WhatsApp">' + ICONO.wa + '<span class="et">Resumen</span></button>' + '</div>' +
-    (filas.length ? '<div class="tarjeta-cuerpo qh-cuerpo">' + filas.join('') + '</div>' : '') +
+    (filas.length ? '<div class="tarjeta-cuerpo qh-cuerpo">' + visibles.join('') + masBtn + '</div>' : '') +
   '</div>';
 }
 
@@ -9531,7 +9556,7 @@ function seccionesPlataformasHoy(aviso){
     '<div class="ph-panel-cab"><div><h2>' + (sola ? esc(plataformaActiva) + ' hoy' : 'Por plataforma') + '</h2><p>' +
       (sola ? 'Solo esta plataforma. ' : datos.length + ' ' + plural(datos.length,'plataforma','plataformas') + ' · ' +
         (alDia === datos.length ? 'todas al día 👌' : (datos.length - alDia) + ' con cobros pendientes') + '. ') +
-      'Toca una para abrirla o cerrarla.</p></div>' +
+      'Toca una para ver su detalle.</p></div>' +
       (sola ? '<button class="btn mini fantasma" data-plat="TODAS">' + ICONO.volver + 'Ver todas</button>' : '') +
     '</div>' +
     '<div class="ph-lista">' + datos.map(function(x){ return seccionPlataformaHoy(x, aviso, sola); }).join('') + '</div>' +
@@ -9539,7 +9564,7 @@ function seccionesPlataformasHoy(aviso){
 }
 function seccionPlataformaHoy(x, aviso, sola){
   const cuentaMal = x.cuentas.some(function(m){ const d = diasHasta(m.vencimiento); return d !== null && d <= Math.min(3, aviso); });
-  const porDefecto = sola || x.venc.length > 0 || x.deHoy.length > 0 || cuentaMal;
+  const porDefecto = sola;
   const abierta = sola ? true : (x.n in phAbiertas ? phAbiertas[x.n] : porDefecto);
   const estado = x.venc.length ? ['mal', 'Te deben ' + dinero(x.deuda)]
               : x.deHoy.length ? ['aviso', x.deHoy.length + ' ' + plural(x.deHoy.length,'cobra','cobran') + ' hoy']
@@ -9554,7 +9579,9 @@ function seccionPlataformaHoy(x, aviso, sola){
     return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
   /* La tabla de cobros de siempre, sin agrupar: aquí ya está agrupada. */
   const antes = agrupaHoy; agrupaHoy = false;
-  const tabla = pendientes.length ? tablaCobro(pendientes, 60) : '';
+  const tabla = pendientes.length ? tablaCobro(pendientes, 4) : '';
+  const masGente = pendientes.length > 4
+    ? '<button class="ph-ver-mas" data-hoy-plat="' + esc(x.n) + '" data-hoy-filtro="pendientes">Ver los ' + pendientes.length + ' por cobrar ' + ICONO.flecha + '</button>' : '';
   agrupaHoy = antes;
   const cuentas = x.cuentas.map(function(m){
     const d = diasHasta(m.vencimiento), dentro = clientesDe(m.id).length, tope = Math.max(0, Number(m.perfiles) || 0);
@@ -9569,7 +9596,7 @@ function seccionPlataformaHoy(x, aviso, sola){
         : '') +
     '</div>';
   }).join('');
-  return '<details class="ph-sec ph-' + estado[0] + '" data-ph="' + esc(x.n) + '" style="' + tonoDe(x.n) + '"' + (abierta ? ' open' : '') + '>' +
+  return '<details class="ph-sec ph-' + estado[0] + '" name="ph-hoy" data-ph="' + esc(x.n) + '" style="' + tonoDe(x.n) + '"' + (abierta ? ' open' : '') + '>' +
     '<summary class="ph-cab">' +
       logoPlataforma(x.n, 34) +
       '<span class="ph-id"><b>' + esc(x.n) + '</b><small>' + x.gente.length + ' ' + plural(x.gente.length,'cliente','clientes') +
@@ -9585,7 +9612,7 @@ function seccionPlataformaHoy(x, aviso, sola){
         num('info', x.libres, plural(x.libres,'libre','libres'), 'data-plat-libres="' + esc(x.n) + '"') +
       '</div>' +
       (cuentas ? '<div class="ph-ctas">' + cuentas + '</div>' : '') +
-      (tabla ? '<div class="ph-tabla">' + tabla + '</div>'
+      (tabla ? '<div class="ph-tabla">' + tabla + masGente + '</div>'
              : '<p class="ph-vacio">Nadie pendiente en ' + esc(x.n) + ' para los próximos ' + aviso + ' días. 👌</p>') +
       '<div class="ph-acc">' +
         '<button class="btn mini bien" data-ronda-plat="' + esc(x.n) + '"' + (pendientes.length ? '' : ' disabled') + '>' + ICONO.wa +
@@ -9599,14 +9626,17 @@ function seccionPlataformaHoy(x, aviso, sola){
 /* Abrir o cerrar una plataforma en Hoy se recuerda mientras dure la visita. */
 document.addEventListener('toggle', function(ev){
   const t = ev.target;
-  if(t && t.classList && t.classList.contains('ph-sec') && t.dataset.ph) phAbiertas[t.dataset.ph] = t.open;
+  if(t && t.classList && t.classList.contains('ph-sec') && t.dataset.ph){
+    phAbiertas[t.dataset.ph] = t.open;
+    if(t.open) document.querySelectorAll('.ph-sec[open]').forEach(function(o){ if(o !== t){ o.open = false; phAbiertas[o.dataset.ph] = false; } });
+  }
 }, true);
 
 /* Las cuentas master de un vistazo, de la que vence antes a la que más tarda. */
 function cuentasMasterHoy(lista){
   if(!lista.length) return vacio('Sin cuentas', 'Pulsa «Nueva cuenta» para registrar la primera.');
   return '<div class="lista">' + lista.slice().sort(function(a,b){
-      return String(a.vencimiento||'9999').localeCompare(String(b.vencimiento||'9999')); }).slice(0, 8).map(function(m){
+      return String(a.vencimiento||'9999').localeCompare(String(b.vencimiento||'9999')); }).slice(0, 4).map(function(m){
     const d = diasHasta(m.vencimiento), dentro = clientesDe(m.id).length, tope = Math.max(0, Number(m.perfiles) || 0);
     const tono = d === null ? '' : d < 0 ? 'mal' : d <= 3 ? 'aviso' : 'bien';
     return '<div class="f ' + tono + ' rk-fila" data-ver-cuenta="' + esc(m.id) + '" role="button" tabindex="0">' +
@@ -9616,7 +9646,8 @@ function cuentasMasterHoy(lista){
       '<span class="f-der"><span class="f-cuando ' + tono + '">' + (d === null ? 'sin fecha' : d < 0 ? 'vencida hace ' + (-d) + ' d'
         : d === 0 ? 'vence hoy' : 'en ' + d + ' ' + plural(d,'día','días')) + '</span>' +
       '<span class="f-cuando">' + esc(m.vencimiento ? fechaBonita(m.vencimiento) : '') + '</span></span></div>';
-  }).join('') + '</div>';
+  }).join('') + '</div>' +
+    (lista.length > 4 ? '<button class="ph-ver-mas" data-qh-ver="@cuentas">Ver las ' + lista.length + ' cuentas ' + ICONO.flecha + '</button>' : '');
 }
 
 function franjaSemanaPap(lista, vencidos, mes){
@@ -12848,7 +12879,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin],[data-qh-mas],[data-mov-mas]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
@@ -13265,7 +13296,7 @@ document.addEventListener('click', function(ev){
     pintar(); return;
   }
   if(d.hoyPlat){
-    ponerPlataforma(d.hoyPlat); filtroHoy = d.hoyFiltro || 'pendientes'; verFiltroHoy = true; topeHoy = 20;
+    ponerPlataforma(d.hoyPlat); filtroHoy = d.hoyFiltro || 'pendientes'; verFiltroHoy = true; topeHoy = 8;
     busqueda = ''; $('#buscar').value = '';
     if(pantalla !== 'hoy') ir('hoy'); else pintar();
     setTimeout(function(){ const t = $('#hoy-filtrado'); if(t) t.scrollIntoView({block:'start', behavior:suave()}); }, 40);
@@ -13282,7 +13313,7 @@ document.addEventListener('click', function(ev){
   if(d.entrarPlat){ abrirPlataforma(d.entrarPlat); return; }
   if(d.platLibres){ vistaPlat = 'libres'; abrirPlataforma(d.platLibres); return; }
   if(d.qhVer === '@negocio'){ volverA('raiz'); irNegocio(true); return; }
-  if(d.qhVer === '@clientes' || d.qhVer === '@libres'){
+  if(d.qhVer === '@clientes' || d.qhVer === '@libres' || d.qhVer === '@cuentas'){
     vistaRaiz = d.qhVer.slice(1); guardarVistas(); irNegocio(true); return;
   }
   if(d.qhVer === '@resumen'){ resumenDelDia(); return; }
@@ -13296,6 +13327,8 @@ document.addEventListener('click', function(ev){
   }
   if(d.qhVer && d.qhVer.indexOf('h2:') === 0){ irASeccion(d.qhVer); return; }
   if(d.qhVer){ const dest = $('#p-hoy ' + d.qhVer); if(dest) dest.scrollIntoView({block:'start', behavior:suave()}); return; }
+  if(d.qhMas){ qhTodo = !qhTodo; pintar(); return; }
+  if(d.movMas){ movTodo = !movTodo; pintar(); return; }
   if(d.vdin){
     vistaDinero = d.vdin;
     try{ localStorage.setItem('pap_vista_dinero', vistaDinero); }catch(_){}
@@ -13303,13 +13336,13 @@ document.addEventListener('click', function(ev){
     pintar(); return;
   }
   if(d.fhoyCerrar){ verFiltroHoy = false; filtroHoy = 'pendientes'; pintar(); return; }
-  if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 20; verFiltroHoy = true; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
+  if(d.fhoy){ filtroHoy = d.fhoy; topeHoy = 8; verFiltroHoy = true; volverElFoco('[data-fhoy="' + CSS.escape(d.fhoy) + '"]'); pintar(); return; }
   /* Los azulejos llevan a su grupo de la cola de abajo. */
   if(d.fhoyPendientes || d.fhoyVencidos || d.fhoyHoy || d.fhoySemana || d.fhoyColgados || d.fhoyPerdidos){
     filtroHoy = d.fhoyPendientes ? 'pendientes' : d.fhoyVencidos ? 'vencidos'
               : d.fhoyHoy ? 'hoy' : d.fhoyColgados ? 'colgados'
               : d.fhoyPerdidos ? 'perdidos' : 'semana';
-    verFiltroHoy = true; topeHoy = 20;
+    verFiltroHoy = true; topeHoy = 8;
     if(pantalla !== 'hoy') ir('hoy'); else pintar();
     setTimeout(function(){ const t = $('#hoy-filtrado'); if(t) t.scrollIntoView({block:'start', behavior:suave()}); }, 40);
     return;
