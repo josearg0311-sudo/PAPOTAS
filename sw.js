@@ -15,7 +15,10 @@
    Ojo: esto NO guarda tus datos. Tus datos viven en el propio navegador y, si
    configuras la nube, en Supabase. Esto solo guarda el programa. */
 
-const CACHE = 'papotas-v67';
+const CACHE = 'papotas-v68';
+/* Los logos de las plataformas van en su propia caja, que no se vacía al
+   cambiar de versión: así salen al momento y también sin internet. */
+const LOGOS = 'papotas-logos';
 const BASICOS = ['./', './index.html', './papotas-nuevo.html', './manifest.webmanifest',
   './icono.svg', './icon-192.png', './icon-512.png',
   './icon-maskable-192.png', './icon-maskable-512.png', './apple-touch-icon.png'];
@@ -33,7 +36,7 @@ self.addEventListener('install', (ev) => {
 self.addEventListener('activate', (ev) => {
   ev.waitUntil(
     caches.keys()
-      .then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((ks) => Promise.all(ks.filter((k) => k !== CACHE && k !== LOGOS).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -54,6 +57,19 @@ self.addEventListener('fetch', (ev) => {
 
   const url = new URL(req.url);
   const mismoOrigen = url.origin === self.location.origin;
+
+  /* Logos: primero la copia guardada; si no hay, se piden y se guardan. */
+  if (!mismoOrigen && (/(^|\.)google\.com$/.test(url.hostname) && url.pathname.indexOf('/s2/favicons') === 0 ||
+                       /(^|\.)gstatic\.com$/.test(url.hostname) && /favicon/i.test(url.pathname) ||
+                       url.hostname === 'icons.duckduckgo.com')) {
+    ev.respondWith(
+      caches.open(LOGOS).then((c) => c.match(req).then((hit) => hit || fetch(req).then((res) => {
+        if (res && (res.ok || res.type === 'opaque')) c.put(req, res.clone()).catch(() => {});
+        return res;
+      })))
+    );
+    return;
+  }
 
   /* A Supabase nunca se le contesta con una copia guardada: los datos han de
      ser los de verdad. */

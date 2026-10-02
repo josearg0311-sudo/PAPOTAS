@@ -3796,7 +3796,7 @@ html:not([data-tema="claro"]) #app::before{ left:-20vmax; top:-28vmax;
   background:radial-gradient(circle, color-mix(in srgb, var(--marca) 34%, transparent) 0%, transparent 62%);
   animation:pap-aurora-a 28s ease-in-out infinite alternate }
 html:not([data-tema="claro"]) #app::after{ right:-30vmax; bottom:-36vmax;
-  background:radial-gradient(circle, rgba(64,110,255,.30) 0%, transparent 62%);
+  background:radial-gradient(circle, rgba(150,30,70,.30) 0%, transparent 62%);
   animation:pap-aurora-b 34s ease-in-out infinite alternate }
 @keyframes pap-aurora-a{ 0%{ transform:translate(0,0) scale(1) } 50%{ transform:translate(14vw,8vh) scale(1.12) } 100%{ transform:translate(26vw,18vh) scale(.95) } }
 @keyframes pap-aurora-b{ 0%{ transform:translate(0,0) scale(1) } 50%{ transform:translate(-12vw,-10vh) scale(1.1) } 100%{ transform:translate(-22vw,-4vh) scale(1.05) } }
@@ -3829,6 +3829,43 @@ html:not([data-tema="claro"]) .franja-sem{ background:var(--marco-fondo) }
   #p-ajustes .campo > .pista{ display:none }
   #p-ajustes .campo:focus-within > .pista{ display:block; animation:pap-entra .25s ease both }
 }
+/* ===== Atajos ===== */
+#atajos-fab{ position:fixed; right:16px; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); z-index:60;
+  display:flex; align-items:center; gap:7px; height:46px; padding:0 16px 0 14px; border-radius:99px; border:1px solid color-mix(in srgb, var(--marca) 60%, transparent);
+  background:linear-gradient(180deg, color-mix(in srgb, var(--marca) 92%, #fff), var(--marca)); color:#fff; font:inherit; font-size:13.5px; font-weight:800; cursor:pointer;
+  box-shadow:0 10px 30px -8px color-mix(in srgb, var(--marca) 70%, transparent), inset 0 1px 0 rgba(255,255,255,.25) }
+#atajos-fab svg{ width:18px; height:18px }
+#atajos-fab:active{ transform:scale(.95) }
+@media (min-width:861px){ #atajos-fab{ bottom:24px; right:24px } }
+.atajos h3{ margin:16px 0 8px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--txt-3) }
+.at-buscar{ display:flex; align-items:center; gap:10px; padding:0 14px; height:48px; border-radius:14px; border:1px solid var(--linea-fuerte); background:var(--capa-alta) }
+.at-buscar svg{ width:18px; height:18px; color:var(--txt-3); flex:0 0 auto }
+.at-buscar input{ flex:1; min-width:0; background:none; border:0; outline:none; color:var(--txt); font:inherit; font-size:15px; height:100% }
+.at-plats{ display:grid; grid-template-columns:repeat(auto-fill, minmax(82px, 1fr)); gap:8px }
+.at-plat{ position:relative; display:flex; flex-direction:column; align-items:center; gap:7px; padding:12px 6px 10px; border-radius:16px;
+  border:1px solid var(--tono-linea, var(--linea)); background:radial-gradient(120% 90% at 50% 0%, var(--tono-suave, transparent), transparent 70%), var(--capa);
+  color:var(--txt); font:inherit; cursor:pointer }
+.at-plat .f-marca{ border-radius:13px; box-shadow:0 6px 16px -6px var(--tono) }
+.at-plat b{ font-size:11px; font-weight:800; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.at-plat i{ position:absolute; top:6px; right:6px; min-width:18px; height:18px; padding:0 5px; border-radius:99px; background:var(--mal); color:#fff;
+  font-style:normal; font-size:10.5px; font-weight:800; display:grid; place-items:center }
+.at-rejilla{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:8px }
+.at-bt{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:14px; border:1px solid var(--linea); background:var(--capa);
+  color:var(--txt); font:inherit; font-size:13px; font-weight:700; cursor:pointer; text-align:left; min-height:48px }
+.at-ico{ flex:0 0 auto; width:30px; height:30px; border-radius:10px; display:grid; place-items:center;
+  background:color-mix(in srgb, var(--marca) 16%, transparent); color:color-mix(in srgb, var(--marca) 55%, #fff) }
+.at-ico svg{ width:16px; height:16px }
+@media (hover:hover){ .at-bt:hover, .at-plat:hover{ border-color:var(--tono-linea, var(--linea-fuerte)); transform:translateY(-1px) } }
+.at-cli{ cursor:default }
+.at-cli-id{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; background:none; border:0; padding:0; color:var(--txt); font:inherit; cursor:pointer; text-align:left }
+.at-tecla, .at-nada{ margin:16px 0 2px; font-size:12px; color:var(--txt-3) }
+@media (max-width:860px){ .at-tecla{ display:none } }
+/* ===== Logos ===== */
+.f-marca.con-logo{ background:#fff !important }
+.f-marca img.propio{ object-fit:contain; background:#fff }
+.logo-fila .f-txt{ gap:2px }
+.logo-web{ margin-top:6px; width:100%; max-width:260px; height:34px; padding:0 10px; border-radius:10px; border:1px solid var(--linea); background:var(--capa-alta);
+  color:var(--txt); font:inherit; font-size:12.5px }
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3948,7 +3985,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.3</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.4</span>
     </div>
   </nav>
 
@@ -5239,17 +5276,86 @@ function fondoLegible(color){
   return c;
 }
 function logoPlataforma(nombre, tam){
+  const clave = String(nombre||'').trim().toUpperCase();
   const m = buscarMarca(nombre);
   const color = fondoLegible(colorPlataforma(nombre));
   const px = tam || 32;
   const estilo = 'background:' + color + ';color:' + textoSobre(color) +
                  ';width:' + px + 'px;height:' + px + 'px;font-size:' + Math.round(px*0.42) + 'px';
+  /* 1) El logo que subiste tú manda sobre todo. */
+  const propio = ajustes.logosPropios && ajustes.logosPropios[clave];
+  if(propio) return '<span class="f-marca con-logo" style="' + estilo + '"><img class="cargado propio" src="' + esc(propio) + '" alt=""></span>';
+  /* 2) Si no, el de su web (la que escribiste o la de la tabla). Se pide en
+     grande para que se vea nítido; si Google no lo tiene, se prueba con otro
+     servicio, y si tampoco, queda la inicial. El celular los guarda para
+     que salgan aunque no haya internet. */
+  const dominio = (ajustes.websPropias && ajustes.websPropias[clave]) || (m && m[0]) || '';
   return '<span class="f-marca" style="' + estilo + '">' + esc(inicial(nombre)) +
-         (m ? '<img src="https://www.google.com/s2/favicons?domain=' + esc(m[0]) +
-              '&sz=64" alt="" loading="lazy" decoding="async"' +
-              ' onload="this.classList.add(\'cargado\')" onerror="this.remove()">' : '') +
+         (dominio ? '<img src="https://www.google.com/s2/favicons?domain=' + esc(dominio) +
+              '&sz=128" alt="" loading="lazy" decoding="async" data-dom="' + esc(dominio) + '"' +
+              ' onload="if(this.naturalWidth&lt;20&amp;&amp;!this.dataset.otro){this.onerror()}else{this.classList.add(\'cargado\')}"' +
+              ' onerror="if(!this.dataset.otro){this.dataset.otro=1;this.src=\'https://icons.duckduckgo.com/ip3/\'+this.dataset.dom+\'.ico\'}else{this.remove()}">' : '') +
          '</span>';
 }
+/* Tus logos: uno por plataforma, subido por ti o sacado de su web. */
+function panelLogos(){
+  const lista = resumenPlataformas().map(function(r){ return r.n; });
+  if(!lista.length) return '';
+  const props = ajustes.logosPropios || {}, webs = ajustes.websPropias || {};
+  return '<div class="tarjeta">' +
+    '<div class="tarjeta-cabeza"><span class="cabeza-icono rosa">' + ICONO.capas + '</span>' +
+      '<div class="crece"><h2>Logos de tus plataformas</h2>' +
+      '<p>Si alguna sale solo con su letra, sube su logo o escribe su web y se busca solo.</p></div></div>' +
+    '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+      lista.map(function(n){
+        const m = buscarMarca(n);
+        const estado = props[n] ? 'Logo tuyo' : webs[n] ? 'Sacado de ' + webs[n] : m ? 'Sacado de ' + m[0] : 'Sin logo: sale su letra';
+        return '<div class="f logo-fila" style="cursor:default">' + logoPlataforma(n, 42) +
+          '<span class="f-txt"><span class="f-nom">' + esc(n) + '</span><span class="f-sub">' + esc(estado) + '</span>' +
+            '<input class="logo-web" data-logo-web="' + esc(n) + '" placeholder="su web, p. ej. netflix.com" value="' + esc(webs[n] || '') + '"' +
+              ' autocomplete="off" spellcheck="false" aria-label="Web de ' + esc(n) + '"></span>' +
+          '<span class="f-acciones">' +
+            '<button class="btn mini" data-logo-subir="' + esc(n) + '">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>' + '<span class="et">Subir logo</span></button>' +
+            (props[n] ? '<button class="btn mini icono" data-logo-quitar="' + esc(n) + '" title="Quitar tu logo" aria-label="Quitar el logo de ' + esc(n) + '">' + ICONO.basura + '</button>' : '') +
+          '</span></div>';
+      }).join('') +
+    '</div></div></div>';
+}
+function elegirLogo(plat){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.addEventListener('change', function(){
+    const f = inp.files && inp.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = function(){
+      const img = new Image();
+      img.onload = function(){
+        /* Se guarda a 128 px: nítido en cualquier sitio y ligero para la nube. */
+        const L = 128, c = document.createElement('canvas'); c.width = L; c.height = L;
+        const g = c.getContext('2d'), k = Math.min(L / img.width, L / img.height);
+        const w = img.width * k, h = img.height * k;
+        g.drawImage(img, (L - w) / 2, (L - h) / 2, w, h);
+        let url; try{ url = c.toDataURL('image/png'); }catch(_){ avisar('No se pudo leer esa imagen', 'mal'); return; }
+        ajustes.logosPropios = ajustes.logosPropios || {};
+        ajustes.logosPropios[plat] = url;
+        guardar(); pintar(); avisar('Logo de ' + plat + ' guardado', 'bien');
+      };
+      img.onerror = function(){ avisar('Esa imagen no se pudo abrir', 'mal'); };
+      img.src = r.result;
+    };
+    r.readAsDataURL(f);
+  });
+  inp.click();
+}
+document.addEventListener('change', function(ev){
+  const t = ev.target;
+  if(!t || !t.dataset || !t.dataset.logoWeb) return;
+  const dom = String(t.value || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').split(/[\/?#\s]/)[0];
+  ajustes.websPropias = ajustes.websPropias || {};
+  if(dom) ajustes.websPropias[t.dataset.logoWeb] = dom; else delete ajustes.websPropias[t.dataset.logoWeb];
+  guardar(); pintar();
+  avisar(dom ? 'Buscando el logo de ' + t.dataset.logoWeb + ' en ' + dom : 'Web quitada');
+});
 
 /* El color de la marca, rebajado, para teñir su ficha y su cabecera. Todo
    lo que se pinta en pantalla sale de aquí, así que se limpia el color antes
@@ -6090,7 +6196,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v9.3';
+const VERSION = 'v9.4';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6275,6 +6381,16 @@ document.addEventListener('keydown', function(ev){
   }
 });
 
+/* Ctrl+K (o Cmd+K) abre los atajos aunque estés escribiendo. */
+document.addEventListener('keydown', function(ev){
+  if((ev.ctrlKey || ev.metaKey) && !ev.altKey && String(ev.key).toLowerCase() === 'k'){ ev.preventDefault(); abrirAtajos(); }
+});
+/* El botón de atajos, siempre a mano. */
+document.addEventListener('DOMContentLoaded', function(){
+  if(document.getElementById('atajos-fab')) return;
+  document.body.insertAdjacentHTML('beforeend',
+    '<button id="atajos-fab" data-atajos="1" title="Atajos (K)" aria-label="Abrir los atajos">' + ICONO.rayo + '<span>Atajos</span></button>');
+});
 /* Las filas que hacen de botón se pulsan también con Intro o espacio. */
 document.addEventListener('keydown', function(ev){
   if(ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -9362,7 +9478,7 @@ function pintaAjustes(){
         '<button class="btn" id="btn-tema-2">' + (ajustes.modoClaro ? 'Cambiar a oscuro' : 'Cambiar a claro') + '</button>' +
         '<a class="btn fantasma" href="index.html">Volver al programa anterior</a>' +
       '</div></div>' +
-    '</div>'
+    '</div>' + panelLogos()
      : '') +
     (cual === 'precios' ? panelPreciosTodos() : '') +
 
@@ -9807,6 +9923,86 @@ function cuentasMasterHoy(lista){
       '<span class="f-cuando">' + esc(m.vencimiento ? fechaBonita(m.vencimiento) : '') + '</span></span></div>';
   }).join('') + '</div>' +
     (lista.length > 4 ? '<button class="ph-ver-mas" data-qh-ver="@cuentas">Ver las ' + lista.length + ' cuentas ' + ICONO.flecha + '</button>' : '');
+}
+
+/* ---------- Atajos: todo a dos toques, desde cualquier pantalla ---------- */
+function abrirAtajos(){
+  const boton = function(x){
+    return '<button class="at-bt" ' + x[2] + '><span class="at-ico">' + x[1] + '</span><span>' + esc(x[0]) + '</span></button>';
+  };
+  const hacer = [
+    ['Nuevo cliente', ICONO.mascliente, 'data-nuevo-cliente="1"'],
+    ['Cobrar vencidos', ICONO.cobrar, 'data-fhoy-vencidos="1"'],
+    ['Vencen hoy', ICONO.reloj, 'data-fhoy-hoy="1"'],
+    ['Ronda de WhatsApp', ICONO.wa, 'data-qh-ver="@ronda"'],
+    ['Nueva cuenta', ICONO.tele, 'data-nueva-cuenta="1"'],
+    ['Registrar gasto', ICONO.caja, 'data-nuevo-gasto="1"'],
+    ['Resumen del día', ICONO.chat, 'data-qh-ver="@resumen"'],
+    ['Bajar respaldo', ICONO.bajar, 'data-qh-ver="@respaldo"']
+  ];
+  const ira = [
+    ['Hoy', ICONO.pulso, 'data-ir-a="hoy"'],
+    ['Plataformas', ICONO.capas, 'data-qh-ver="@negocio"'],
+    ['Clientes', ICONO.gente, 'data-qh-ver="@clientes"'],
+    ['Sitios libres', ICONO.mascliente, 'data-qh-ver="@libres"'],
+    ['Cuentas master', ICONO.tele, 'data-qh-ver="@cuentas"'],
+    ['Dinero del mes', ICONO.barras, 'data-qh-ver="@dinero:h2:Cobrado por plataforma"'],
+    ['Movimientos', ICONO.billete, 'data-qh-ver="@dinero:h2:Últimos cobros"'],
+    ['Quién me debe', ICONO.alerta, 'data-qh-ver="@dinero:h2:Los que más te deben"'],
+    ['Precios', ICONO.etiqueta, 'data-vaj="precios"'],
+    ['Mensajes', ICONO.chat, 'data-qh-ver="@ajustes:h2:Mensaje de WhatsApp"'],
+    ['Logos', ICONO.pincel, 'data-qh-ver="@ajustes:h2:Logos de tus plataformas"'],
+    ['Respaldo y datos', ICONO.nube, 'data-vaj="datos"']
+  ];
+  const plats = resumenPlataformas();
+  abrirModal('Atajos',
+    '<div class="atajos">' +
+      '<label class="at-buscar">' + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>' + '<input id="atajos-q" type="search" placeholder="Busca un cliente, una plataforma o una acción…" autocomplete="off" spellcheck="false"></label>' +
+      '<div id="atajos-res"></div>' +
+      '<div id="atajos-base">' +
+        (plats.length ? '<h3>Tus plataformas</h3><div class="at-plats">' + plats.map(function(x){
+          return '<button class="at-plat" data-ir-plat="' + esc(x.n) + '" style="' + tonoDe(x.n) + '" title="Ver ' + esc(x.n) + ' en Hoy">' +
+            logoPlataforma(x.n, 44) + '<b>' + esc(x.n) + '</b>' + (x.deben ? '<i>' + x.deben + '</i>' : '') + '</button>';
+        }).join('') + '</div>' : '') +
+        '<h3>Hacer</h3><div class="at-rejilla">' + hacer.map(boton).join('') + '</div>' +
+        '<h3>Ir a</h3><div class="at-rejilla">' + ira.map(boton).join('') + '</div>' +
+        '<p class="at-tecla">En la laptop: <b>Ctrl + K</b> o la tecla <b>K</b> abren esto.</p>' +
+      '</div>' +
+    '</div>', [],
+    function(cuerpo){
+      const q = cuerpo.querySelector('#atajos-q'), res = cuerpo.querySelector('#atajos-res'), base = cuerpo.querySelector('#atajos-base');
+      const todas = hacer.concat(ira);
+      q.addEventListener('input', function(){
+        const v = sinTildes(q.value.trim().toLowerCase());
+        if(!v){ res.innerHTML = ''; base.style.display = ''; return; }
+        base.style.display = 'none';
+        const acc = todas.filter(function(x){ return sinTildes(x[0].toLowerCase()).indexOf(v) >= 0; }).slice(0, 6);
+        const pl = plats.filter(function(x){ return sinTildes(x.n.toLowerCase()).indexOf(v) >= 0; }).slice(0, 4);
+        const digitos = v.replace(/\D/g, '');
+        const gente = clientes.filter(function(c){
+          const nom = sinTildes(String(c.nombre||'').toLowerCase());
+          return nom.indexOf(v) >= 0 || (digitos.length >= 3 && String(c.telefono||'').replace(/\D/g, '').indexOf(digitos) >= 0);
+        }).slice(0, 8);
+        res.innerHTML =
+          (gente.length ? '<h3>Clientes</h3><div class="lista">' + gente.map(function(c){
+            const tel = telefonoDe(c);
+            return '<div class="f at-cli">' +
+              '<button class="at-cli-id" data-ficha="' + esc(c.id) + '">' + logoPlataforma(platDe(c), 30) +
+                '<span class="f-txt"><span class="f-nom">' + esc(c.nombre || 'Sin nombre') + '</span>' +
+                '<span class="f-sub">' + esc(platDe(c)) + ' · ' + esc(textoDiasCorto(c.vencimiento)) + '</span></span></button>' +
+              '<span class="f-acciones">' +
+                '<button class="btn mini icono" data-cobrar="' + esc(c.id) + '" aria-label="Cobrar a ' + esc(c.nombre||'') + '">' + ICONO.cobrar + '</button>' +
+                (tel ? '<button class="btn mini icono bien" data-wa="' + esc(c.id) + '" aria-label="Escribir a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>' : '') +
+              '</span></div>';
+          }).join('') + '</div>' : '') +
+          (pl.length ? '<h3>Plataformas</h3><div class="at-plats">' + pl.map(function(x){
+            return '<button class="at-plat" data-ir-plat="' + esc(x.n) + '" style="' + tonoDe(x.n) + '">' + logoPlataforma(x.n, 44) + '<b>' + esc(x.n) + '</b></button>';
+          }).join('') + '</div>' : '') +
+          (acc.length ? '<h3>Acciones</h3><div class="at-rejilla">' + acc.map(boton).join('') + '</div>' : '') +
+          (!gente.length && !pl.length && !acc.length ? '<p class="at-nada">Nada con «' + esc(q.value) + '».</p>' : '');
+      });
+      if(window.innerWidth > 860) setTimeout(function(){ q.focus(); }, 80);
+    });
 }
 
 function franjaSemanaPap(lista, vencidos, mes){
@@ -13038,8 +13234,10 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin],[data-qh-mas],[data-mov-mas]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin],[data-qh-mas],[data-mov-mas],[data-logo-subir],[data-logo-quitar],[data-ir-a],[data-ir-plat],[data-atajos]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
+  /* Desde el panel de atajos: se cierra y se hace lo pedido. */
+  if(t.closest('.atajos') && cerrarModalActual) cerrarModal();
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
   const deslizada = t.closest && t.closest('.tc[data-hubodeslice]');
@@ -13476,6 +13674,20 @@ document.addEventListener('click', function(ev){
     vistaRaiz = d.qhVer.slice(1); guardarVistas(); irNegocio(true); return;
   }
   if(d.qhVer === '@resumen'){ resumenDelDia(); return; }
+  if(d.qhVer === '@ronda'){
+    if(pantalla !== 'hoy') ir('hoy');
+    const b = $('#p-hoy [data-escribir-a="hoy-visible"]');
+    if(b && !b.disabled) b.click(); else avisar('Hoy no hay a quién escribir');
+    return;
+  }
+  if(d.qhVer && d.qhVer.indexOf('@ajustes:') === 0){
+    vistaAjustes = 'negocio';
+    try{ localStorage.setItem('pap_vista_ajustes', vistaAjustes); }catch(_){}
+    if(pantalla !== 'ajustes') ir('ajustes'); else pintar();
+    const seccion = d.qhVer.slice('@ajustes:'.length);
+    setTimeout(function(){ irASeccion(seccion); }, 60);
+    return;
+  }
   if(d.qhVer === '@respaldo'){ exportarRespaldo(); avisar('Respaldo bajado a tu disco', 'bien'); pintar(); return; }
   if(d.qhVer && d.qhVer.indexOf('@') === 0){
     /* «@dinero:h2:Últimos cobros»: otra pantalla y, dentro, esa sección. */
@@ -13486,6 +13698,16 @@ document.addEventListener('click', function(ev){
   }
   if(d.qhVer && d.qhVer.indexOf('h2:') === 0){ irASeccion(d.qhVer); return; }
   if(d.qhVer){ const dest = $('#p-hoy ' + d.qhVer); if(dest) dest.scrollIntoView({block:'start', behavior:suave()}); return; }
+  if(d.atajos){ abrirAtajos(); return; }
+  if(d.logoSubir){ elegirLogo(d.logoSubir); return; }
+  if(d.logoQuitar){ if(ajustes.logosPropios) delete ajustes.logosPropios[d.logoQuitar]; guardar(); pintar(); avisar('Logo de ' + d.logoQuitar + ' quitado'); return; }
+  if(d.irA){ ir(d.irA); return; }
+  if(d.irPlat){
+    ponerPlataforma(d.irPlat); verFiltroHoy = false; filtroHoy = 'pendientes';
+    busqueda = ''; $('#buscar').value = '';
+    if(pantalla !== 'hoy') ir('hoy'); else { pintar(); arriba(); }
+    return;
+  }
   if(d.qhMas){ qhTodo = !qhTodo; pintar(); return; }
   if(d.movMas){ movTodo = !movTodo; pintar(); return; }
   if(d.vdin){
@@ -13761,6 +13983,7 @@ document.addEventListener('keydown', function(ev){
 
 /* ---------- La chuleta de atajos, con «?» -------------------------------- */
 const ATAJOS = [
+  ['K  o  Ctrl+K', 'abrir los atajos: buscar, cobrar, ir a cualquier sitio'],
   ['1 … 9', 'ir a esa plataforma'],
   ['0', 'ver todas las plataformas'],
   ['←  →', 'plataforma anterior o siguiente'],
@@ -13857,6 +14080,7 @@ document.addEventListener('keydown', function(ev){
     avisar(modoElegir ? 'Elige a los que quieras y actúa sobre todos' : 'Fuera del modo elegir');
     return;
   }
+  if(String(ev.key).toLowerCase() === 'k'){ ev.preventDefault(); abrirAtajos(); return; }
   const saltos = {h:'hoy', c:'negocio', u:'negocio', p:'negocio', d:'dinero', a:'ajustes'};
   const destino = saltos[String(ev.key).toLowerCase()];
   if(destino){ ir(destino); }
