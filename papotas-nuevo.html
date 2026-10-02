@@ -3565,6 +3565,20 @@ html:not([data-tema="claro"]) .btn:not(.principal):not(.bien):not(.mal):not(.mar
   border-radius:14px; padding:14px; margin:0; max-height:55vh; overflow:auto; color:var(--txt) }
 .qh-pap .tarjeta-cabeza .btn.mini{ flex:0 0 auto }
 @media (min-width:1100px){ .dinero-mosaico.cinco{ grid-template-columns:repeat(5, minmax(0,1fr)) !important } }
+/* El título recibe el foco al cambiar de pantalla (para los lectores de
+   pantalla), pero no tiene por qué pintarse un recuadro encima. */
+#titulo:focus, #modal-titulo:focus{ outline:none; box-shadow:none }
+/* En celulares muy estrechos el botón de arriba se queda en su icono y el
+   título respira. */
+@media (max-width:360px){
+  #btn-accion-txt{ display:none }
+  #btn-accion{ padding:0 12px; min-width:44px }
+}
+/* Ránking de clientes en Dinero */
+.rk-fila{ cursor:pointer; padding-top:9px !important; padding-bottom:9px !important }
+.rk-n{ width:20px; flex:0 0 20px; text-align:center; font-size:12px; font-weight:800; color:var(--txt-3); font-variant-numeric:tabular-nums }
+.rk-fila:first-child .rk-n{ color:var(--aviso) }
+@media (hover:hover){ .rk-fila:hover, .f[data-ficha]:hover{ background:var(--capa-alta) } }
 /* Esta semana */
 .franja-sem{ border:1px solid var(--linea); border-radius:20px; background:var(--capa); padding:12px 12px 12px }
 .fs-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:0 4px 10px }
@@ -3684,7 +3698,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.5</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v8.6</span>
     </div>
   </nav>
 
@@ -5826,7 +5840,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v8.5';
+const VERSION = 'v8.6';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6009,6 +6023,13 @@ document.addEventListener('keydown', function(ev){
     ev.stopImmediatePropagation();
     cerrarModalActual();
   }
+});
+
+/* Las filas que hacen de botón se pulsan también con Intro o espacio. */
+document.addEventListener('keydown', function(ev){
+  if(ev.key !== 'Enter' && ev.key !== ' ') return;
+  const t = ev.target;
+  if(t && t.getAttribute && t.getAttribute('role') === 'button' && t.tagName !== 'BUTTON'){ ev.preventDefault(); t.click(); }
 });
 
 function confirmar(titulo, texto, textoBoton, hacer, peligroso){
@@ -7133,8 +7154,8 @@ function pintaHoy(){
     '<div class="acciones-rapidas">' +
       '<button class="btn" data-nueva-cuenta="1">' + ICONO.tele + 'Nueva cuenta</button>' +
       '<button class="btn" data-nuevo-gasto="1">' + ICONO.caja + 'Registrar gasto</button>' +
-      '<button class="btn bien" data-escribir-a="hoy-visible">' + ICONO.wa +
-        'Empezar la ronda<span class="btn-n">' + (conTel || cola.length) + '</span></button>' +
+      '<button class="btn bien" data-escribir-a="hoy-visible"' + ((conTel || cola.length) ? '' : ' disabled title="Hoy no hay a quién escribir"') + '>' + ICONO.wa +
+        'Empezar la ronda' + ((conTel || cola.length) ? '<span class="btn-n">' + (conTel || cola.length) + '</span>' : '') + '</button>' +
       '<button class="btn" data-todos-wa="hoy-visible" title="Manda uno detrás de otro sin volver a buscar nada">' +
         ICONO.rayo + 'Mandarles a todos</button>' +
       '<div class="crece"></div>' +
@@ -8667,6 +8688,50 @@ function pintaDinero(){
         '</div>'
       : '') +
 
+    (function(){
+      /* Quién sostiene el negocio y quién se está quedando atrás. Cada
+         nombre abre su ficha. */
+      const total = {};
+      ventasPlat.forEach(function(v){ if(v.clienteId) total[v.clienteId] = (total[v.clienteId]||0) + (Number(v.monto)||0); });
+      const gente = clientes.filter(enPlataformaActiva);
+      const mejores = gente.filter(function(c){ return total[c.id] > 0; })
+        .sort(function(a,b){ return total[b.id] - total[a.id]; }).slice(0, 5);
+      const atrasados = gente.filter(function(c){ return !enPausa(c) && deudaDe(c) > 0; })
+        .sort(function(a,b){ return deudaDe(b) - deudaDe(a) || String(a.vencimiento).localeCompare(String(b.vencimiento)); }).slice(0, 5);
+      if(!mejores.length && !atrasados.length) return '';
+      const fila = function(c, monto, sub, tono, i){
+        return '<div class="f ' + tono + ' rk-fila" data-ficha="' + esc(c.id) + '" role="button" tabindex="0">' +
+          '<span class="rk-n">' + (i + 1) + '</span>' +
+          logoPlataforma(platDe(c), 28) +
+          '<span class="f-txt"><span class="f-nom">' + esc(c.nombre || 'Sin nombre') + '</span>' +
+          '<span class="f-sub">' + sub + '</span></span>' +
+          '<span class="f-der"><span class="f-monto cifra"' + (tono === 'mal' ? ' style="color:var(--mal)"' : '') + '>' + esc(dinero(monto)) + '</span></span></div>';
+      };
+      return '<div class="rejilla r2">' +
+        '<div class="tarjeta">' +
+          '<div class="tarjeta-cabeza"><span class="cabeza-icono verde">' + ICONO.diana + '</span>' +
+          '<div class="crece"><h2>Tus mejores clientes</h2><p>Los que más te han pagado. Toca uno para ver su ficha.</p></div></div>' +
+          '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+            (mejores.length ? mejores.map(function(c, i){
+              const n = ventasPlat.filter(function(v){ return String(v.clienteId) === String(c.id); }).length;
+              return fila(c, total[c.id], esc(platDe(c)) + ' · ' + n + ' ' + plural(n,'pago','pagos'), 'bien', i);
+            }).join('') : vacio('Aún no hay pagos', 'Cuando cobres, aquí verás quién te deja más.')) +
+          '</div></div>' +
+        '</div>' +
+        '<div class="tarjeta">' +
+          '<div class="tarjeta-cabeza"><span class="cabeza-icono rojo">' + ICONO.alerta + '</span>' +
+          '<div class="crece"><h2>Los que más te deben</h2><p>De la deuda más grande a la más chica.</p></div></div>' +
+          '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
+            (atrasados.length ? atrasados.map(function(c, i){
+              const k = cuotasPendientes(c), d = diasHasta(c.vencimiento);
+              return fila(c, deudaDe(c), esc(platDe(c)) + ' · ' + k + ' ' + plural(k,'cuota','cuotas') +
+                (d !== null && d < 0 ? ' · hace ' + (-d) + ' ' + plural(-d,'día','días') : d === 0 ? ' · vence hoy' : ''), 'mal', i);
+            }).join('') : vacio('Nadie te debe', 'Todo el mundo está al día. 👌')) +
+          '</div></div>' +
+        '</div>' +
+      '</div>';
+    })() +
+
     '<div class="rejilla r2">' +
       '<div class="tarjeta">' +
         '<div class="tarjeta-cabeza">' +
@@ -8674,7 +8739,9 @@ function pintaDinero(){
         '<div class="crece"><h2>Últimos cobros</h2><p>Lo más reciente primero.</p></div></div>' +
         '<div class="tarjeta-cuerpo pegado"><div class="lista">' +
           (ultimas.length ? ultimas.map(function(v){
-            return '<div class="f bien" style="cursor:default;padding-top:9px;padding-bottom:9px">' +
+            const vivo = v.clienteId && buscarCliente(v.clienteId);
+            return '<div class="f bien"' + (vivo ? ' data-ficha="' + esc(v.clienteId) + '" role="button" tabindex="0" title="Ver la ficha de ' + esc(v.cliente||'') + '"' : '') +
+              ' style="cursor:' + (vivo ? 'pointer' : 'default') + ';padding-top:9px;padding-bottom:9px">' +
               '<span class="f-txt"><span class="f-nom">' + esc(v.cliente || 'Cliente') + '</span>' +
               '<span class="f-sub">' + esc(v.servicio || '') + ' · ' + esc(v.metodo || '') + '</span></span>' +
               '<span class="f-der"><span class="f-monto cifra">' + esc(dinero(v.monto)) + '</span>' +
