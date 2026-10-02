@@ -3860,6 +3860,11 @@ html:not([data-tema="claro"]) .franja-sem{ background:var(--marco-fondo) }
 .at-cli-id{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; background:none; border:0; padding:0; color:var(--txt); font:inherit; cursor:pointer; text-align:left }
 .at-tecla, .at-nada{ margin:16px 0 2px; font-size:12px; color:var(--txt-3) }
 @media (max-width:860px){ .at-tecla{ display:none } }
+#atajos-fab{ transition:padding .2s ease, gap .2s ease, transform .15s ease, opacity .2s ease }
+#atajos-fab span{ max-width:80px; overflow:hidden; white-space:nowrap; transition:max-width .2s ease, opacity .2s ease }
+#atajos-fab.mini{ padding:0 14px; gap:0 }
+#atajos-fab.mini span{ max-width:0; opacity:0 }
+body:has(#telon.abierto) #atajos-fab{ opacity:0; pointer-events:none }
 /* ===== Logos ===== */
 .f-marca.con-logo{ background:#fff !important }
 .f-marca img.propio{ object-fit:contain; background:#fff }
@@ -3985,7 +3990,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.4</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.5</span>
     </div>
   </nav>
 
@@ -4502,6 +4507,8 @@ function almacenVivo(){
 }
 
 function avisoDeDonde(){
+  /* La vista previa con datos de ejemplo no es para guardar: sin avisos. */
+  if(window.__PAP_VISTA_PREVIA) return '';
   const suelto = abiertoSuelto(), guarda = almacenVivo();
   if(!suelto && guarda) return '';
   return '<div class="panel-mando peligro">' +
@@ -6196,7 +6203,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v9.4';
+const VERSION = 'v9.5';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6391,6 +6398,18 @@ document.addEventListener('DOMContentLoaded', function(){
   document.body.insertAdjacentHTML('beforeend',
     '<button id="atajos-fab" data-atajos="1" title="Atajos (K)" aria-label="Abrir los atajos">' + ICONO.rayo + '<span>Atajos</span></button>');
 });
+/* Al bajar por la pantalla el botón de atajos se queda en su rayo, para no
+   tapar; al subir vuelve a decir «Atajos». */
+(function(){
+  let ultimo = 0;
+  document.addEventListener('scroll', function(ev){
+    const l = ev.target; if(!l || l.id !== 'lienzo') return;
+    const fab = document.getElementById('atajos-fab'); if(!fab) return;
+    const y = l.scrollTop;
+    fab.classList.toggle('mini', y > 140 && y > ultimo);
+    ultimo = y;
+  }, true);
+})();
 /* Las filas que hacen de botón se pulsan también con Intro o espacio. */
 document.addEventListener('keydown', function(ev){
   if(ev.key !== 'Enter' && ev.key !== ' ') return;
