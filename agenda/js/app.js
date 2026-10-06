@@ -23,6 +23,8 @@ import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
 import { vistaMas, vistaSeccion } from './vistas/mas.js';
 import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
+import { vistaFinanzas, acciones as accFin } from './vistas/finanzas.js';
+import { vistaNotasSeccion, acciones as accNotas, alEscribirNotas, alCambiarNotas } from './vistas/notas.js';
 import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
 import { vistaDatos, acciones as accDatos, alEscribir } from './vistas/datos.js';
 import { vistaPapelera, acciones as accPapelera } from './vistas/papelera.js';
@@ -45,7 +47,7 @@ function leerRuta() {
   const h = decodeURIComponent((location.hash || '').slice(1));
   const [sec, param, sub] = h.split('/');
   if (sec === 'areas' && param && AREAS.some((a) => a.id === param)) return { sec, param, sub: sub || '' };
-  if (sec === 'seguimiento' && param === 'revision') return { sec, param };
+  if ((sec === 'seguimiento' && param === 'revision') || (sec === 'finanzas' && param === 'oficina') || (sec === 'notas' && param === 'diario')) return { sec, param };
   if (TITULOS[sec]) return { sec, param: '' };
   return null;
 }
@@ -82,6 +84,8 @@ function contenido() {
     case 'datos': return vistaDatos();
     case 'papelera': return vistaPapelera();
     case 'seguimiento': return vistaSeguimiento(ruta.param);
+    case 'finanzas': return vistaFinanzas(ruta.param);
+    case 'notas': return vistaNotasSeccion(ruta.param);
     default: return vistaSeccion(ruta.sec);
   }
 }
@@ -125,7 +129,7 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, {
   agregar() { abrirAgregar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },
@@ -145,8 +149,8 @@ document.addEventListener('submit', (ev) => {
   const f = ev.target;
   if (f.dataset.form) { ev.preventDefault(); alEnviarRec(f, pintar); }
 });
-document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target)) return; if (alCambiarPrioridad(ev.target) || alCambiarCampo(ev.target)) pintar(); });
-document.addEventListener('input', (ev) => { if (!alEscribirRec(ev.target)) alEscribir(ev.target, pintar); });
+document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target) || alCambiarNotas(ev.target)) return; if (alCambiarPrioridad(ev.target) || alCambiarCampo(ev.target)) pintar(); });
+document.addEventListener('input', (ev) => { if (!alEscribirRec(ev.target) && !alEscribirNotas(ev.target, pintar)) alEscribir(ev.target, pintar); });
 /* En «Nuevo recordatorio», Enter guarda (Shift+Enter, otra línea) */
 document.addEventListener('keydown', (ev) => {
   if (ev.key === 'Enter' && !ev.shiftKey && ev.target.id === 'nuevoRec') { ev.preventDefault(); ev.target.form.requestSubmit(); }

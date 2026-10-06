@@ -57,7 +57,7 @@ function resumen(a) {
   return pulso + '<div class="columnas"><div>' +
     tarjeta({ eti: 'SEÑALES', titulo: 'Lo importante ahora', n: s.length || null, clase: 'area-' + a.id,
       guia: 'Lo que pide tu atención en ' + a.nombre + ': vencimientos, avisos y avances. Toca uno para ir a su herramienta.',
-      cuerpo: s.length ? '<div class="senales">' + s.slice(0, 8).map((x) => '<a class="senal ' + x.nivel + '" href="#areas/' + a.id + '/' + x.ir + '"><span aria-hidden="true">' + icoNivel(x.nivel) + '</span><span>' + esc(x.txt) + '</span>' + ico('i-der') + '</a>').join('') + '</div>' : vacio('Todo en calma', 'No hay nada urgente en ' + a.nombre + '.') }) +
+      cuerpo: s.length ? '<div class="senales">' + s.slice(0, 8).map((x) => '<a class="senal ' + x.nivel + '" href="' + (x.link || '#areas/' + a.id + '/' + x.ir) + '"><span aria-hidden="true">' + icoNivel(x.nivel) + '</span><span>' + esc(x.txt) + '</span>' + ico('i-der') + '</a>').join('') + '</div>' : vacio('Todo en calma', 'No hay nada urgente en ' + a.nombre + '.') }) +
     tarjeta({ eti: 'RECORDATORIOS', titulo: 'Pendientes de ' + a.nombre, n: p.length, clase: 'area-' + a.id,
       cuerpo: p.length ? '<div class="pends">' + p.slice(0, 6).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' + (p.length > 6 ? '<p class="pie-ajuste">Y ' + (p.length - 6) + ' más en <a href="#recordatorios">Recordatorios</a>.</p>' : '') : vacio('Nada pendiente', 'Lo que agregues en ' + a.nombre + ' aparecerá aquí.') }) +
     '</div><div>' +

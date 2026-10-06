@@ -17,6 +17,8 @@ import { textoICS, enlaceGoogle } from '../js/util/ics.js';
 import { diaDePago } from '../js/datos/calendario.js';
 import * as HR from '../js/datos/herramientas.js';
 import * as SG from '../js/datos/seguimiento.js';
+import * as FI from '../js/datos/finanzas.js';
+import { sumarDias as SD } from '../js/util/fechas.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -353,6 +355,34 @@ tareas.push(prueba('Semana a revisar y áreas descuidadas', () => {
   igual(SG.semanaARevisar('2026-10-11', '2026-10-05'), '2026-10-05');   // domingo → esta semana
   igual(SG.semanaARevisar('2026-10-06', '2026-10-05'), '2026-09-28');   // martes → la anterior
   igual(SG.descuidadas({ personal: { min: 60 }, deporte: { min: 0, foco: 0, hechos: 0, habitosHechos: 0 } }), ['deporte']);
+}));
+
+/* ---------- Fase 7: finanzas y notas ---------- */
+const mov = (f, monto, ingreso, cat, area = 'personal', libro = 'personal') => it({ tipo: 'movimiento', area, monto, fechas: { inicio: f }, extra: { libro, ingreso, categoria: cat } });
+tareas.push(prueba('Finanzas: resumen del mes en céntimos (ingresos, gastos, saldo, por categoría y área)', () => {
+  const l = [mov('2026-10-01', 350000, true, 'Sueldo'), mov('2026-10-03', 120000, false, 'Casa'), mov('2026-10-05', 4550, false, 'Comida'), mov('2026-10-06', 25000, false, 'Estudios', 'estudios'), mov('2026-09-30', 9999, false, 'Comida')];
+  const r = FI.resumenMes(l, '2026-10');
+  igual([r.ingresos, r.gastos, r.saldo, r.n], [350000, 149550, 200450, 4]);
+  igual(r.porCategoria.map((c) => c.cat), ['Casa', 'Estudios', 'Comida']);
+  igual(r.porArea, { personal: 124550, estudios: 25000 });
+}));
+tareas.push(prueba('Finanzas: los dos libros no se mezclan y los meses cruzan el año', () => {
+  igual([FI.esDelLibro(mov('2026-10-01', 1, false, 'x', 'oficina', 'oficina'), 'personal'), FI.esDelLibro(it({ tipo: 'movimiento', extra: {} }), 'personal')], [false, true]);
+  igual(FI.mesesAtras('2026-02', 4), ['2025-11', '2025-12', '2026-01', '2026-02']);
+  igual(FI.areaDeCategoria('Matrícula'), 'estudios'); igual(FI.areaDeCategoria('Cancha'), 'deporte'); igual(FI.areaDeCategoria('Comida'), 'personal');
+}));
+tareas.push(prueba('Finanzas: presupuesto (aviso al 85 %, rojo al pasarse) y CSV para Excel', () => {
+  igual(FI.estadoPresupuesto(200000, 240000).nivel, 'ok'); igual(FI.estadoPresupuesto(210000, 240000).nivel, 'pronto'); igual(FI.estadoPresupuesto(250000, 240000).nivel, 'vencido'); igual(FI.estadoPresupuesto(1, 0), null);
+  const c = FI.csv([Object.assign(mov('2026-10-03', 125000, false, 'Casa'), { titulo: 'Alquiler "octubre", depa' })]);
+  if (!c.includes('"2026-10-03","Gasto","Alquiler ""octubre"", depa","Casa","personal","-1250.00"')) throw new Error(c);
+}));
+tareas.push(prueba('Notas: casillas «[ ]» que se marcan sin tocar el resto del texto; racha del diario', () => {
+  const t = 'Compras:\n- [ ] Leche\n[x] Pan\nNota suelta';
+  igual(FI.lineasNota(t).map((l) => l.casilla ? (l.ok ? 'x' : 'o') + l.t : l.t), ['Compras:', 'oLeche', 'xPan', 'Nota suelta']);
+  igual(FI.alternarCasilla(t, 1), 'Compras:\n- [x] Leche\n[x] Pan\nNota suelta');
+  igual(FI.alternarCasilla(t, 0), t);
+  igual(FI.rachaDiario(['2026-10-05', '2026-10-04', '2026-10-02'], '2026-10-06', SD), 2);
+  igual(FI.rachaDiario(['2026-10-06', '2026-10-05'], '2026-10-06', SD), 2);
 }));
 
 Promise.all(tareas).then(() => {

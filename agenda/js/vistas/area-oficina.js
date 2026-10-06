@@ -17,6 +17,7 @@ import { editarPendiente } from '../piezas/pendientes-ui.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
 import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
+import { avisoPresupuesto } from './finanzas.js';
 import { irALista } from './recordatorios.js';
 
 const hora = (h) => fmtHora(h, preferencias().formatoHora);
@@ -236,6 +237,7 @@ export function senales() {
   if (sin.length) s.push({ nivel: 'ok', txt: 'Reunión sin acta: ' + sin[0].e.titulo + ' (' + fmtCorta(sin[0].d) + ')', ir: 'actas' });
   if (reloj()) s.push({ nivel: 'ok', txt: '⏱ Cronómetro de trabajo en marcha', ir: 'horas' });
   s.push(...senalesConstancia('oficina'));
+  const po = avisoPresupuesto('oficina'); if (po) s.push(Object.assign(po, { ir: 'cobros', link: '#finanzas/oficina' }));
   return s;
 }
 

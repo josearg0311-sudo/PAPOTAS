@@ -11,6 +11,8 @@ import { editar } from '../piezas/formulario.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
 import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
+import { vistaDiario } from './notas.js';
+import { avisoPresupuesto } from './finanzas.js';
 
 const ui = { semana: 0 };
 const AVISO_DOC = 30;   // los documentos avisan con un mes de anticipación
@@ -159,6 +161,7 @@ export const HERRAMIENTAS = [
   { id: 'documentos', nombre: 'Documentos', vista: vistaDocs },
   { id: 'cumpleanos', nombre: 'Cumpleaños', vista: vistaCumples },
   { id: 'prestamos', nombre: 'Préstamos', vista: vistaPrestamos },
+  { id: 'diario', nombre: 'Diario', vista: () => vistaDiario(true) },
   { id: 'constancia', nombre: TEMAS.personal.tab, vista: () => vistaConstancia('personal') }
 ];
 export function senales() {
@@ -169,6 +172,7 @@ export function senales() {
   const r = resumenPrestamos(prestamos());
   if (r.meDeben) s.push({ nivel: 'ok', txt: 'Te deben ' + fmtSoles(r.meDeben), ir: 'prestamos' });
   s.push(...senalesConstancia('personal'));
+  const pp = avisoPresupuesto('personal'); if (pp) s.push(Object.assign(pp, { ir: 'prestamos', link: '#finanzas' }));
   return s;
 }
 
