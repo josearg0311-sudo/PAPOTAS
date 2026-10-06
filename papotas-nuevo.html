@@ -3829,6 +3829,95 @@ html:not([data-tema="claro"]) .franja-sem{ background:var(--marco-fondo) }
   #p-ajustes .campo > .pista{ display:none }
   #p-ajustes .campo:focus-within > .pista{ display:block; animation:pap-entra .25s ease both }
 }
+/* ===== Inicio estilo streaming ===== */
+.hero-hoy{ position:relative; overflow:hidden; display:flex; flex-direction:column; gap:14px; padding:20px 18px 16px; border-radius:24px;
+  border:1px solid color-mix(in srgb, var(--marca) 35%, var(--linea));
+  background:radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--marca) 34%, transparent), transparent 55%),
+             radial-gradient(90% 120% at 100% 100%, rgba(150,30,70,.22), transparent 60%), var(--marco-fondo);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 24px 50px -28px color-mix(in srgb, var(--marca) 70%, transparent) }
+.hh-arriba{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap }
+.hh-txt{ display:flex; flex-direction:column; min-width:0 }
+.hh-saludo{ font-size:13px; font-weight:700; color:var(--marca); margin-bottom:8px }
+html:not([data-tema="claro"]) .hh-saludo{ color:color-mix(in srgb, var(--marca) 45%, #fff) }
+.hh-etq{ font-size:11px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--txt-3) }
+.hh-cifra{ font-size:clamp(34px, 9vw, 52px); font-weight:800; letter-spacing:-.045em; line-height:1.05; color:var(--txt) }
+.hh-sub{ font-size:12.5px; color:var(--txt-3); margin-top:4px }
+.hh-cobrado{ display:flex; flex-direction:column; align-items:flex-end; gap:2px; padding:10px 14px; border-radius:16px; cursor:pointer;
+  border:1px solid color-mix(in srgb, var(--bien) 40%, transparent); background:color-mix(in srgb, var(--bien) 10%, transparent); color:var(--txt); font:inherit }
+.hh-cobrado span{ font-size:11px; color:var(--txt-3); font-weight:600 }
+.hh-cobrado b{ font-size:18px; font-weight:800; color:var(--bien) }
+.hh-chips{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px }
+.hh-chip{ display:flex; flex-direction:column; align-items:flex-start; gap:1px; padding:9px 12px; border-radius:14px; border:1px solid var(--linea);
+  background:color-mix(in srgb, var(--capa) 70%, transparent); color:var(--txt-2); font:inherit; cursor:pointer; text-align:left; min-width:0 }
+.hh-chip b{ font-size:22px; font-weight:800; letter-spacing:-.03em; line-height:1.1 }
+.hh-chip span{ font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
+.hh-chip.mal b{ color:var(--mal) } .hh-chip.aviso b{ color:var(--aviso) } .hh-chip.bien b{ color:var(--bien) }
+.hh-chip.mal{ border-color:color-mix(in srgb, var(--mal) 45%, transparent) }
+.hh-acc{ display:flex; gap:8px; flex-wrap:wrap }
+.hh-acc .btn.bien{ flex:1 1 180px }
+@media (max-width:620px){ .hh-acc .btn:not(.bien) .et{ display:none } .hh-acc .btn:not(.bien){ width:46px; padding:0; justify-content:center } .hh-acc{ flex-wrap:nowrap } }
+/* Las portadas */
+.pos-cab{ display:flex; align-items:flex-end; justify-content:space-between; gap:10px; padding:4px 4px 12px }
+.pos-cab h2{ margin:0; font-size:21px; font-weight:800; letter-spacing:-.035em }
+.pos-cab p{ margin:3px 0 0; font-size:12.5px; color:var(--txt-3) }
+.pos-rejilla{ display:grid; gap:12px; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)) }
+@media (max-width:620px){ .pos-rejilla{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px } }
+.poster{ position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:center; text-align:center; gap:6px;
+  padding:22px 12px 14px; min-height:200px; border-radius:22px; cursor:pointer; color:#fff; font:inherit;
+  border:1px solid color-mix(in srgb, var(--tono, var(--marca)) 55%, transparent);
+  background:radial-gradient(130% 90% at 50% 0%, color-mix(in srgb, var(--tono, var(--marca)) 62%, transparent) 0%, transparent 70%),
+             linear-gradient(180deg, color-mix(in srgb, var(--tono, var(--marca)) 30%, #0b0e15) 0%, #0b0e15 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12), 0 18px 40px -24px var(--tono, var(--marca));
+  transition:transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s }
+.poster::after{ content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg, transparent 30%, rgba(255,255,255,.10) 45%, transparent 60%); transform:translateX(-100%); transition:transform .6s ease }
+@media (hover:hover){ .poster:hover{ transform:translateY(-4px) scale(1.015); box-shadow:inset 0 1px 0 rgba(255,255,255,.14), 0 26px 50px -22px var(--tono, var(--marca)) }
+  .poster:hover::after{ transform:translateX(100%) } }
+.poster:active{ transform:scale(.97) }
+.pos-logo{ display:grid; place-items:center; width:76px; height:76px; border-radius:22px; margin-bottom:6px;
+  background:rgba(255,255,255,.08); box-shadow:0 12px 30px -10px rgba(0,0,0,.6) }
+.pos-logo .f-marca{ border-radius:18px !important; box-shadow:0 8px 22px -8px var(--tono, #000), 0 0 0 1px rgba(255,255,255,.18) }
+.pos-logo > svg{ width:30px; height:30px; color:var(--txt-2) }
+.pos-nom{ font-size:15px; font-weight:800; letter-spacing:-.01em; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.pos-info{ font-size:11.5px; color:rgba(255,255,255,.65) }
+.pos-estado{ margin-top:4px; font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:99px; background:rgba(0,0,0,.35); border:1px solid currentColor }
+.pos-estado.mal{ color:#ff7a8a } .pos-estado.aviso{ color:var(--aviso) } .pos-estado.bien{ color:var(--bien) }
+.pos-n{ position:absolute; top:10px; right:10px; min-width:24px; height:24px; padding:0 7px; border-radius:99px; display:grid; place-items:center;
+  background:var(--mal); color:#fff; font-size:12px; font-weight:800; box-shadow:0 0 0 3px rgba(0,0,0,.35) }
+.pos-barra{ position:absolute; left:14px; right:14px; bottom:8px; height:4px; border-radius:99px; background:rgba(255,255,255,.12); overflow:hidden }
+.pos-barra i{ display:block; height:100%; border-radius:inherit; background:var(--tono, var(--marca)) }
+.poster.pos-nuevo{ --tono:rgba(255,255,255,.35); border-style:dashed; background:transparent; box-shadow:none; justify-content:center }
+.poster.pos-nuevo .pos-info{ color:var(--txt-3) }
+/* Dentro de una plataforma: su banner */
+.banner-plat{ position:relative; overflow:hidden; display:flex; flex-direction:column; gap:14px; padding:14px 16px 16px; border-radius:24px;
+  border:1px solid color-mix(in srgb, var(--tono) 55%, transparent);
+  background:radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--tono) 55%, transparent), transparent 60%),
+             linear-gradient(180deg, color-mix(in srgb, var(--tono) 22%, #0b0e15), #0b0e15);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 24px 50px -26px var(--tono) }
+.bp-arriba{ display:flex; justify-content:space-between; gap:10px }
+.bp-volver, .bp-web{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 12px; border-radius:99px; font:inherit; font-size:12.5px; font-weight:700;
+  color:#fff; background:rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.16); cursor:pointer; text-decoration:none }
+.bp-volver svg, .bp-web svg{ width:15px; height:15px }
+.bp-id{ display:flex; align-items:center; gap:14px; min-width:0 }
+.bp-id .f-marca{ border-radius:22px !important; flex:0 0 auto; box-shadow:0 12px 30px -10px var(--tono), 0 0 0 1px rgba(255,255,255,.2) }
+.bp-id h2{ margin:0; font-size:clamp(24px, 6vw, 34px); font-weight:800; letter-spacing:-.04em; color:#fff }
+.bp-id p{ margin:4px 0 0; font-size:12.5px; color:rgba(255,255,255,.7) }
+.bp-id p b{ color:var(--bien) }
+.bp-nums{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px }
+.bp-num{ display:flex; flex-direction:column; align-items:center; padding:9px 4px; border-radius:14px; border:1px solid rgba(255,255,255,.12);
+  background:rgba(0,0,0,.28); color:rgba(255,255,255,.7); font:inherit; cursor:pointer }
+.bp-num b{ font-size:22px; font-weight:800; color:#fff } .bp-num span{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em }
+.bp-num.mal:not(.cero) b{ color:#ff7a8a } .bp-num.aviso:not(.cero) b{ color:var(--aviso) } .bp-num.bien:not(.cero) b{ color:var(--bien) } .bp-num.info:not(.cero) b{ color:#8fb4ff }
+.bp-num.cero{ opacity:.5; cursor:default }
+.bp-acc{ display:flex; gap:8px } .bp-acc .btn.bien{ flex:1 }
+@media (max-width:620px){ .bp-acc .btn:not(.bien) .et{ display:none } .bp-acc .btn:not(.bien){ width:46px; padding:0; justify-content:center } }
+/* El detalle bajo el banner: sin repetir cabecera ni números */
+.vista-plat .ph-panel-cab, .vista-plat .ph-sec > summary, .vista-plat .ph-nums{ display:none !important }
+.vista-plat .ph-sec{ border:0; background:none; box-shadow:none !important }
+.vista-plat .ph-sec::before{ display:none }
+.vista-plat .ph-cuerpo{ padding:0 }
+.vista-plat .ph-tabla{ margin:0; border:0 }
+.vista-plat .ph-cuerpo .ph-acc{ display:none }
 /* ===== Atajos ===== */
 #atajos-fab{ position:fixed; right:16px; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); z-index:60;
   display:flex; align-items:center; gap:7px; height:46px; padding:0 16px 0 14px; border-radius:99px; border:1px solid color-mix(in srgb, var(--marca) 60%, transparent);
@@ -3990,7 +4079,7 @@ html:not([data-tema="claro"]) .btn.principal{ background:var(--marca) !important
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v9.5</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v10</span>
     </div>
   </nav>
 
@@ -6203,7 +6292,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v9.5';
+const VERSION = 'v10';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7591,7 +7680,7 @@ function pintaHoy(){
   const fecha = new Date().toLocaleDateString('es-PE', {weekday:'long', day:'numeric', month:'long'});
   const hora = new Date().getHours();
   const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
-  $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? saludo + ' · ' : plataformaActiva + ' · ') + fecha;
+  $('#subtitulo').textContent = (plataformaActiva === 'TODAS' ? '' : plataformaActiva + ' · ') + fecha.charAt(0).toUpperCase() + fecha.slice(1);
 
   /* La lista filtrada (vencidos, hoy, próximos…) solo sale cuando la
      pides: lo normal es mirar Hoy plataforma por plataforma. */
@@ -7600,34 +7689,24 @@ function pintaHoy(){
 
   $('#p-hoy').innerHTML =
   '<div class="pila">' +
-    barraPlataformas() +
+    (plataformaActiva === 'TODAS'
+      /* ---- Inicio: el saludo con lo que hay por cobrar y las plataformas como portadas ---- */
+      ? heroHoy({saludo:saludo, total:total, porCobrar:porCobrar, vencidos:vencidos, deHoy:deHoy, semana:semana,
+                 cobradoMes:cobradoMes, mes:mes, conTel:conTel, cola:cola}) +
+        avisoDeDonde() + panelMudanza() +
+        posteresPlataformas(aviso)
+      /* ---- Dentro de una plataforma: su banner y todo lo suyo ---- */
+      : barraPlataformas() + avisoDeDonde() + panelMudanza() +
+        bannerPlataforma(aviso, {conTel:conTel, cola:cola}) +
+        /* justo debajo del banner, sus cuentas y su gente */
+        '<div class="vista-plat">' + seccionesPlataformasHoy(aviso) + '</div>') +
 
-    /* ---- Lo que se hace a diario, de primeras ---- */
-    '<div class="acciones-rapidas">' +
-      '<button class="btn" data-nueva-cuenta="1">' + ICONO.tele + 'Nueva cuenta</button>' +
-      '<button class="btn" data-nuevo-gasto="1">' + ICONO.caja + 'Registrar gasto</button>' +
-      '<button class="btn bien" data-escribir-a="hoy-visible"' + ((conTel || cola.length) ? '' : ' disabled title="Hoy no hay a quién escribir"') + '>' + ICONO.wa +
-        'Empezar la ronda' + ((conTel || cola.length) ? '<span class="btn-n">' + (conTel || cola.length) + '</span>' : '') + '</button>' +
-      '<button class="btn" data-todos-wa="hoy-visible" title="Manda uno detrás de otro sin volver a buscar nada">' +
-        ICONO.rayo + 'Mandarles a todos</button>' +
-      '<div class="crece"></div>' +
-      '<button class="btn fantasma" data-ir-clientes="1">' + ICONO.gente + 'Ver todos los clientes</button>' +
-    '</div>' +
-    avisoDeDonde() +
-    panelMudanza() +
-
-    /* ---- 1. El día en cifras, la semana y la meta ---- */
-    franjaSemanaPap(suyos, vencidos, {meta:meta, cobrado:cobradoMes, cifras:[
-      ['aviso', 'Por cobrar', dinero(total), porCobrar.length + ' ' + plural(porCobrar.length,'persona','personas'), 'data-fhoy-pendientes="1"'],
-      ['mal', 'Vencidos', vencidos.length, dinero(vencidos.reduce(function(a,c){ return a + aCobrarDe(c); }, 0)), 'data-fhoy-vencidos="1"'],
-      ['aviso', 'Hoy', deHoy.length, dinero(deHoy.reduce(function(a,c){ return a + aCobrarDe(c); }, 0)), 'data-fhoy-hoy="1"'],
-      ['bien', 'Cobrado ' + NOMBREMES[Number(mes.slice(5,7))-1].slice(0,3).toLowerCase(), dinero(cobradoMes),
-        ventasMes.length + ' ' + plural(ventasMes.length,'venta','ventas'), 'data-qh-ver="@dinero:h2:Últimos cobros"']
-    ]}) +
-
-    /* ---- 2. Lo urgente, de todas las plataformas ---- */
-    queHacerAhoraPap({ vencidos:vencidos, deHoy:deHoy, semana:semana, colgados:colgados, porCaer:porCaer,
-      mastersVencidos:mastersVencidos, libres:libres, aviso:aviso, seFueron:seFueron }) +
+    /* ---- Lo urgente y la semana (en el inicio) ---- */
+    (plataformaActiva === 'TODAS'
+      ? queHacerAhoraPap({ vencidos:vencidos, deHoy:deHoy, semana:semana, colgados:colgados, porCaer:porCaer,
+          mastersVencidos:mastersVencidos, libres:libres, aviso:aviso, seFueron:seFueron }) +
+        franjaSemanaPap(suyos, vencidos, {meta:meta, cobrado:cobradoMes})
+      : '') +
 
     /* ---- 3. La lista que pediste (solo si pediste una) ---- */
     (verFiltroHoy ?
@@ -7654,8 +7733,8 @@ function pintaHoy(){
         : '<div class="tarjeta-cuerpo">' + vacio('Nada en este grupo', 'No hay nadie aquí. Buen día.') + '</div>') +
     '</div>' : '') +
 
-    /* ---- 4. El corazón de Hoy: plataforma por plataforma ---- */
-    seccionesPlataformasHoy(aviso) +
+    /* ---- Dentro de una plataforma: sus cuentas y su gente ---- */
+
 
     /* ---- 5. Para mirar con calma: el mes y las cuentas ---- */
     '<div class="rejilla dos-tercios">' +
@@ -9834,6 +9913,105 @@ function datosPlataformaHoy(n, aviso){
     master: cuentas[0] || null, masterDias: cuentas[0] ? diasHasta(cuentas[0].vencimiento) : null
   };
 }
+/* ===== Inicio estilo streaming ===== */
+function heroHoy(x){
+  const sumaHoy = x.deHoy.reduce(function(a,c){ return a + aCobrarDe(c); }, 0);
+  const sumaVenc = x.vencidos.reduce(function(a,c){ return a + aCobrarDe(c); }, 0);
+  const chip = function(tono, n, txt, attr){
+    return '<button class="hh-chip ' + tono + '" ' + attr + '><b>' + n + '</b><span>' + txt + '</span></button>';
+  };
+  const n = x.conTel || x.cola.length;
+  return '<section class="hero-hoy">' +
+    '<div class="hh-arriba">' +
+      '<div class="hh-txt">' +
+        '<span class="hh-saludo">' + esc(x.saludo) + '</span>' +
+        '<span class="hh-etq">Por cobrar</span>' +
+        '<b class="hh-cifra cifra">' + esc(dinero(x.total)) + '</b>' +
+        '<span class="hh-sub">' + x.porCobrar.length + ' ' + plural(x.porCobrar.length,'persona','personas') + ' entre vencidos, hoy y los próximos días</span>' +
+      '</div>' +
+      '<button class="hh-cobrado" data-qh-ver="@dinero:h2:Últimos cobros" title="Ver los cobros en Dinero">' +
+        '<span>Cobrado en ' + esc(NOMBREMES[Number(x.mes.slice(5,7))-1]) + '</span><b class="cifra">' + esc(dinero(x.cobradoMes)) + '</b></button>' +
+    '</div>' +
+    '<div class="hh-chips">' +
+      chip('mal', x.vencidos.length, x.vencidos.length ? plural(x.vencidos.length,'vencido','vencidos') + ' · ' + dinero(sumaVenc) : 'vencidos', 'data-fhoy-vencidos="1"') +
+      chip('aviso', x.deHoy.length, x.deHoy.length ? 'hoy · ' + dinero(sumaHoy) : 'hoy', 'data-fhoy-hoy="1"') +
+      chip('bien', x.semana.length, 'esta semana', 'data-fhoy-semana="1"') +
+    '</div>' +
+    '<div class="hh-acc">' +
+      '<button class="btn bien" data-escribir-a="hoy-visible"' + (n ? '' : ' disabled title="Hoy no hay a quién escribir"') + '>' + ICONO.wa +
+        'Empezar la ronda' + (n ? '<span class="btn-n">' + n + '</span>' : '') + '</button>' +
+      '<button class="btn" data-todos-wa="hoy-visible" title="Manda uno detrás de otro">' + ICONO.rayo + '<span class="et">A todos</span></button>' +
+      '<button class="btn" data-nueva-cuenta="1">' + ICONO.tele + '<span class="et">Cuenta</span></button>' +
+      '<button class="btn" data-nuevo-gasto="1">' + ICONO.caja + '<span class="et">Gasto</span></button>' +
+    '</div>' +
+  '</section>';
+}
+function posteresPlataformas(aviso){
+  const nombres = resumenPlataformas().map(function(r){ return r.n; });
+  if(!nombres.length) return '<section class="posteres"><div class="pos-cab"><div><h2>Tus plataformas</h2><p>Todavía no hay ninguna.</p></div></div>' +
+    '<button class="poster pos-nuevo" data-nueva-cuenta="1"><span class="pos-logo">' + ICONO.mas + '</span><b class="pos-nom">Añadir la primera cuenta</b></button></section>';
+  const datos = nombres.map(function(n){ return datosPlataformaHoy(n, aviso); });
+  datos.sort(function(a,b){
+    return (b.venc.length ? 1 : 0) - (a.venc.length ? 1 : 0) || b.deuda - a.deuda ||
+           b.deHoy.length - a.deHoy.length || b.prox.length - a.prox.length || a.n.localeCompare(b.n, 'es');
+  });
+  return '<section class="posteres">' +
+    '<div class="pos-cab"><div><h2>Tus plataformas</h2><p>Toca una para entrar: su gente, sus cuentas, cobrar y WhatsApp.</p></div>' +
+      '<button class="btn mini fantasma" data-qh-ver="@negocio">' + ICONO.capas + '<span class="et">Gestionar</span></button></div>' +
+    '<div class="pos-rejilla">' + datos.map(function(x){
+      const tope = x.cuentas.reduce(function(a,m){ return a + Math.max(0, Number(m.perfiles)||0); }, 0);
+      const usados = Math.max(0, tope - x.libres);
+      const md = x.masterDias;
+      const estado = x.venc.length ? ['mal', 'Te deben ' + dinero(x.deuda)]
+                  : x.deHoy.length ? ['aviso', x.deHoy.length + ' ' + plural(x.deHoy.length,'cobra','cobran') + ' hoy']
+                  : (md !== null && md <= 3) ? ['aviso', md < 0 ? 'Cuenta vencida' : 'Renueva la cuenta']
+                  : x.prox.length ? ['bien', x.prox.length + ' ' + plural(x.prox.length,'cobro','cobros') + ' pronto']
+                  : ['bien', 'Al día'];
+      const alerta = x.venc.length + x.deHoy.length;
+      return '<button class="poster" data-plat="' + esc(x.n) + '" style="' + tonoDe(x.n) + '" title="Entrar a ' + esc(x.n) + '">' +
+        (alerta ? '<span class="pos-n">' + alerta + '</span>' : '') +
+        '<span class="pos-logo">' + logoPlataforma(x.n, 64) + '</span>' +
+        '<b class="pos-nom">' + esc(x.n) + '</b>' +
+        '<span class="pos-info">' + x.gente.length + ' ' + plural(x.gente.length,'cliente','clientes') + ' · ' +
+          x.cuentas.length + ' ' + plural(x.cuentas.length,'cuenta','cuentas') + '</span>' +
+        '<span class="pos-estado ' + estado[0] + '">' + esc(estado[1]) + '</span>' +
+        (tope ? '<span class="pos-barra" title="' + usados + ' de ' + tope + ' perfiles ocupados"><i style="width:' + Math.round(usados / tope * 100) + '%"></i></span>' : '') +
+      '</button>';
+    }).join('') +
+    '<button class="poster pos-nuevo" data-nueva-cuenta="1" title="Añadir una cuenta nueva"><span class="pos-logo">' + ICONO.mas + '</span>' +
+      '<b class="pos-nom">Nueva cuenta</b><span class="pos-info">de una plataforma nueva o de las tuyas</span></button>' +
+    '</div>' +
+  '</section>';
+}
+function bannerPlataforma(aviso, x2){
+  const x = datosPlataformaHoy(plataformaActiva, aviso);
+  const deja = x.cuentas.reduce(function(a,m){ return a + (Number(m.costo)||0); }, 0);
+  const n = x2.conTel || x2.cola.length;
+  const num = function(tono, valor, txt, attr){
+    return '<button class="bp-num ' + tono + (valor ? '' : ' cero') + '" ' + attr + (valor ? '' : ' disabled') + '><b>' + valor + '</b><span>' + txt + '</span></button>';
+  };
+  return '<section class="banner-plat" style="' + tonoDe(x.n) + '">' +
+    '<div class="bp-arriba">' +
+      '<button class="bp-volver" data-plat="TODAS">' + ICONO.volver + 'Todas</button>' +
+      '<a class="bp-web" href="' + esc(casaDe(x.n)) + '" target="_blank" rel="noopener">' + ICONO.salir + 'Entrar a la web</a>' +
+    '</div>' +
+    '<div class="bp-id">' + logoPlataforma(x.n, 76) +
+      '<div><h2>' + esc(x.n) + '</h2>' +
+      '<p>' + x.gente.length + ' ' + plural(x.gente.length,'cliente','clientes') + ' · ' + x.cuentas.length + ' ' + plural(x.cuentas.length,'cuenta','cuentas') +
+        ' · cobras ' + esc(dinero(x.cobra)) + ' · te deja <b>' + esc(dinero(x.cobra - deja)) + '</b> al ciclo</p></div></div>' +
+    '<div class="bp-nums">' +
+      num('mal', x.venc.length, plural(x.venc.length,'vencido','vencidos'), 'data-hoy-plat="' + esc(x.n) + '" data-hoy-filtro="vencidos"') +
+      num('aviso', x.deHoy.length, 'hoy', 'data-hoy-plat="' + esc(x.n) + '" data-hoy-filtro="hoy"') +
+      num('bien', x.prox.length, 'próximos', 'data-hoy-plat="' + esc(x.n) + '" data-hoy-filtro="semana"') +
+      num('info', x.libres, plural(x.libres,'libre','libres'), 'data-plat-libres="' + esc(x.n) + '"') +
+    '</div>' +
+    '<div class="bp-acc">' +
+      '<button class="btn bien" data-escribir-a="hoy-visible"' + (n ? '' : ' disabled') + '>' + ICONO.wa + 'Escribirles' + (n ? '<span class="btn-n">' + n + '</span>' : '') + '</button>' +
+      '<button class="btn" data-nueva-en="' + esc(x.n) + '">' + ICONO.mas + '<span class="et">Cuenta</span></button>' +
+      '<button class="btn" data-entrar-plat="' + esc(x.n) + '">' + ICONO.capas + '<span class="et">En tu negocio</span></button>' +
+    '</div>' +
+  '</section>';
+}
 function seccionesPlataformasHoy(aviso){
   const nombres = resumenPlataformas().map(function(r){ return r.n; });
   if(!nombres.length) return '';
@@ -9873,8 +10051,9 @@ function seccionPlataformaHoy(x, aviso, sola){
     return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
   /* La tabla de cobros de siempre, sin agrupar: aquí ya está agrupada. */
   const antes = agrupaHoy; agrupaHoy = false;
-  const tabla = pendientes.length ? tablaCobro(pendientes, 4) : '';
-  const masGente = pendientes.length > 4
+  const cuantos = sola ? 12 : 4;
+  const tabla = pendientes.length ? tablaCobro(pendientes, cuantos) : '';
+  const masGente = pendientes.length > cuantos
     ? '<button class="ph-ver-mas" data-hoy-plat="' + esc(x.n) + '" data-hoy-filtro="pendientes">Ver los ' + pendientes.length + ' por cobrar ' + ICONO.flecha + '</button>' : '';
   agrupaHoy = antes;
   const cuentas = x.cuentas.map(function(m){
