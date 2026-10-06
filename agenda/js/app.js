@@ -275,7 +275,7 @@ let migrando = false;
 if (!yaHabia) {
   if (resumenAntiguo().hay) {
     migrando = true;
-    despuesDeAbrir(() => mostrarMigracion().then((ok) => { migrando = false; if (ok) { ruta = { sec: 'datos', param: '' }; try { history.replaceState(null, '', '#datos'); } catch (e) { /* nada */ } } pintar(); arrancarRecorrido(); }));
+    despuesDeAbrir(() => mostrarMigracion().then((ok) => { migrando = false; if (ok) { const sec = preferencias().completo ? 'datos' : 'hoy'; ruta = { sec, param: '' }; try { history.replaceState(null, '', '#' + sec); } catch (e) { /* nada */ } } pintar(); arrancarRecorrido(); }));
   } else { empezarVacio(); pintar(); }
 }
 document.getElementById('portada')?.remove();
