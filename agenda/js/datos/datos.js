@@ -85,8 +85,11 @@ export function borrarDefinitivo(id) {
 /* Pasados 30 días, lo de la papelera se borra solo */
 export function purgarPapelera() {
   if (!doc) return 0;
-  const limite = Date.now() - DIAS_PAPELERA * 864e5, antes = doc.items.length;
-  doc.items = doc.items.filter((x) => !x.borrado || x.borrado >= limite);
+  const ahora = Date.now(), limite = ahora - DIAS_PAPELERA * 864e5, antes = doc.items.length;
+  doc.purgados = doc.purgados || {};
+  doc.items = doc.items.filter((x) => { const sale = x.borrado && x.borrado < limite; if (sale) doc.purgados[x.id] = ahora; return !sale; });
+  /* La lista de purgados se olvida a los 180 días */
+  Object.keys(doc.purgados).forEach((k) => { if (doc.purgados[k] < ahora - 180 * 864e5) delete doc.purgados[k]; });
   const n = antes - doc.items.length;
   if (n) escribir(CLAVES.datos, doc);
   return n;
@@ -143,3 +146,12 @@ export function conteoPorTipo() {
   elementos().forEach((x) => { c[x.tipo] = (c[x.tipo] || 0) + 1; });
   return c;
 }
+
+/* Cambios del perfil (presupuesto, áreas…) con su fecha, para la nube */
+export function cambiarPerfil(cambios) {
+  if (!doc) return;
+  doc.perfil = Object.assign({}, doc.perfil, cambios, { actualizado: Date.now() });
+  guardar();
+}
+/* La nube trae un documento: se junta con el de aquí y se guarda */
+export function reemplazarDocumento(nuevo) { doc = nuevo; guardar(); }

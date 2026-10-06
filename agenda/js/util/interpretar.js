@@ -90,7 +90,10 @@ export function interpretar(texto, opciones = {}) {
     const [hh, mm] = hora.split(':').map(Number);
     fecha = hh * 60 + mm > ahoraMin ? hoy : sumarDias(hoy, 1);
   }
-  let titulo = orig.replace(/\s+/g, ' ').trim().replace(/\s+(el|la|a|para|de|en|y|con|las)$/i, '').replace(/^(el|la|para)\s+/i, '').trim();
+  /* Conectores sueltos («… mañana a», «el … lunes») solo se quitan si quedaron
+     pegados a algo que se recortó (eso deja 2+ espacios); si son parte real
+     del texto («aparato A», «La reunión») se respetan */
+  let titulo = orig.replace(/\s(el|la|a|para|de|en|y|con|las)\s{2,}$/i, ' ').replace(/^\s{2,}(el|la|para)\s/i, ' ').replace(/^\s(el|la|para)\s{2,}/i, ' ').replace(/\s+/g, ' ').trim();
   if (titulo) titulo = titulo.charAt(0).toUpperCase() + titulo.slice(1);
   return { titulo, fecha, hora, prioridad, area, etiquetas, plazoLegal, algunDia };
 }

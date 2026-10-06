@@ -10,7 +10,8 @@ export const CLAVES = {
   datos: 'agenda5_datos',
   respaldoUlt: 'agenda5_respaldo_ult',
   pinEspera: 'agenda5_pin_espera',
-  errores: 'agenda5_errores'
+  errores: 'agenda5_errores',
+  nube: 'agenda5_nube'
 };
 
 /* Claves de la v4.5 (solo lectura, salvo el PIN) */
@@ -21,7 +22,11 @@ export const ANTIGUAS = {
   pin: 'agenda_pin',
   libroPersonal: 'ledger_finanzas_simple_v1',
   libroOficina: 'ledger_oficina_v1',
-  nube: 'agenda_nube_cfg'
+  nube: 'agenda_nube_cfg',
+  nubeLibroPersonal: 'libro_cuentas_db_cfg',
+  nubeLibroOficina: 'oficina_cuentas_db_cfg',
+  libroPersonalBase: 'ledger_finanzas_simple_v1_base',
+  libroOficinaBase: 'ledger_oficina_v1_base'
 };
 
 export function leer(clave, porDefecto = null) {

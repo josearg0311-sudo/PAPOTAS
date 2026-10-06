@@ -2,7 +2,7 @@
    temática y su color: el PERSONAL (con lo de Estudios y Deporte, cada uno
    en su área) y el de la OFICINA. Nunca se mezclan.
    Direcciones: #finanzas (personal) y #finanzas/oficina */
-import { elementos, buscarElemento, documento, guardar } from '../datos/datos.js';
+import { elementos, buscarElemento, documento, cambiarPerfil } from '../datos/datos.js';
 import { AREAS, area } from '../datos/areas.js';
 import { LIBROS, CATEGORIAS, areaDeCategoria, esDelLibro, esIngreso, delMes, resumenMes, historial, estadoPresupuesto, csv } from '../datos/finanzas.js';
 import { diaDePago, pagado } from '../datos/calendario.js';
@@ -142,7 +142,7 @@ function editarPresupuesto(libro, repintar) {
   editar({ titulo: 'Presupuesto mensual · ' + (libro === 'oficina' ? 'oficina' : 'personal'), textoGuardar: 'Guardar', campos: [
     { n: 'monto', t: 'monto', etq: 'Cuánto quieres gastar como máximo al mes (S/)', v: presupuestoDe(libro) || null, ayuda: 'Te aviso al llegar al 85 %. Déjalo vacío para no usar presupuesto.' }],
   alGuardar: (v) => {
-    const d = documento(); d.perfil.presupuesto = Object.assign({}, d.perfil.presupuesto, { [libro]: v.monto || 0 }); guardar();
+    cambiarPerfil({ presupuesto: Object.assign({}, documento().perfil.presupuesto, { [libro]: v.monto || 0 }) });
     repintar(); aviso(v.monto ? 'Presupuesto: ' + fmtSoles(v.monto) + ' al mes' : 'Sin presupuesto');
   } });
 }

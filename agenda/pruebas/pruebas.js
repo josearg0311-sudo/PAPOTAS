@@ -18,6 +18,7 @@ import { diaDePago } from '../js/datos/calendario.js';
 import * as HR from '../js/datos/herramientas.js';
 import * as SG from '../js/datos/seguimiento.js';
 import * as FI from '../js/datos/finanzas.js';
+import * as NU from '../js/datos/nube.js';
 import { sumarDias as SD } from '../js/util/fechas.js';
 
 const resultados = [];
@@ -383,6 +384,53 @@ tareas.push(prueba('Notas: casillas «[ ]» que se marcan sin tocar el resto del
   igual(FI.alternarCasilla(t, 0), t);
   igual(FI.rachaDiario(['2026-10-05', '2026-10-04', '2026-10-02'], '2026-10-06', SD), 2);
   igual(FI.rachaDiario(['2026-10-06', '2026-10-05'], '2026-10-06', SD), 2);
+}));
+
+/* ---------- Fase 8: nube y varios aparatos ---------- */
+const docDe = (items, extra = {}) => Object.assign({ v: 1, creado: 1, perfil: { nombre: '', presupuesto: {}, antiguo: null }, items, migracion: null, purgados: {} }, extra);
+const el = (id, act, o = {}) => Object.assign(it({ id, titulo: id }), { actualizado: act }, o);
+tareas.push(prueba('Nube: paquete comprimido de ida y vuelta, idéntico (con tildes y emojis)', async () => {
+  const d = docDe([el('a', 5, { titulo: 'Señal 📝 «ñandú»', notas: 'x'.repeat(5000) }), el('b', 7)]);
+  const p = await NU.empaquetar(d, 'ap_1');
+  if (p.app !== 'agenda5' || p.n !== 2) throw new Error('cabecera');
+  if (p.enc === 'gz64' && p.datos.length > 3000) throw new Error('no comprimió: ' + p.datos.length);
+  const v = await NU.desempaquetar({ record: p });
+  igual(v.items.map((x) => [x.id, x.titulo, x.notas.length]), [['a', 'Señal 📝 «ñandú»', 5000], ['b', 'b', 0]]);
+  igual(await NU.desempaquetar({ record: { tareas: [] } }), null);   // un bin de la v4.5 NO se toma como de la v5
+}));
+tareas.push(prueba('Nube: código para otro aparato (y rechaza códigos rotos o de la v4.5)', () => {
+  const c = NU.codigoDe({ key: '$2a$10$abc', bin: '66f0' });
+  igual(c.startsWith('AGENDA5:'), true); igual(NU.leerCodigo('  ' + c + '\n'), { key: '$2a$10$abc', bin: '66f0' });
+  igual([NU.leerCodigo('AGENDA2:' + btoa('{"k":"x","b":"y"}')), NU.leerCodigo('AGENDA5:@@@'), NU.leerCodigo('')], [null, null, null]);
+}));
+tareas.push(prueba('Nube: nunca sube datos rotos ni algo que borre la mitad de lo que hay arriba', () => {
+  const muchos = (n) => docDe(Array.from({ length: n }, (_, i) => el('x' + i, i)));
+  igual(NU.revisarAntesDeSubir(muchos(30), muchos(30)), null);
+  igual(typeof NU.revisarAntesDeSubir(muchos(10), muchos(30)), 'string');
+  igual(typeof NU.revisarAntesDeSubir({ items: null }, null), 'string');
+  igual(typeof NU.revisarAntesDeSubir(docDe([Object.assign(el('a', 1), { id: '' })]), null), 'string');
+}));
+tareas.push(prueba('Varios aparatos: gana el cambio más reciente, el borrado no revive y la papelera vaciada no vuelve', () => {
+  const a = docDe([el('a', 10, { titulo: 'viejo' }), el('b', 5), el('c', 5)], { purgados: { z: 100 } });
+  const b = docDe([el('a', 20, { titulo: 'nuevo' }), el('b', 9, { borrado: 9 }), el('z', 50), el('n', 1)]);
+  const r = NU.firma(a) === NU.firma(b);
+  const j = fusionar(a, b).doc, m = Object.fromEntries(j.items.map((x) => [x.id, x]));
+  igual([m.a.titulo, !!m.b.borrado, !!m.z, !!m.n, r], ['nuevo', true, false, true, false]);
+  igual(fusionar(b, a).doc.items.some((x) => x.id === 'z'), false);
+  /* si se vuelve a crear después de vaciarlo, sí queda */
+  igual(fusionar(a, docDe([el('z', 200)])).doc.items.some((x) => x.id === 'z'), true);
+}));
+tareas.push(prueba('Varios aparatos: el perfil (presupuesto, áreas) gana el cambio más reciente', () => {
+  const a = docDe([], { perfil: { nombre: 'Jose', presupuesto: { personal: 1 }, actualizado: 5 } }), b = docDe([], { perfil: { nombre: 'Jose', presupuesto: { personal: 2 }, actualizado: 9 } });
+  igual(fusionar(a, b).doc.perfil.presupuesto.personal, 2); igual(fusionar(b, a).doc.perfil.presupuesto.personal, 2);
+}));
+
+tareas.push(prueba('Entender texto: respeta palabras reales al final o al inicio («aparato A», «La reunión»)', () => {
+  igual(I('Creado en el aparato A').titulo, 'Creado en el aparato A');
+  igual(I('La reunión con Ana mañana').titulo, 'La reunión con Ana');
+  igual(I('Plan de').titulo, 'Plan de');
+  igual(I('Llamar al banco mañana a las 5').titulo, 'Llamar al banco');
+  igual(I('Pagar luz el lunes').titulo, 'Pagar luz');
 }));
 
 Promise.all(tareas).then(() => {

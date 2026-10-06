@@ -1,6 +1,5 @@
-/* AJUSTES. En la Fase 1: preferencias, seguridad (PIN y bloqueo automático),
-   ayuda y el estado de tus datos. Áreas, etiquetas, respaldo, papelera y
-   nube se suman en sus fases. */
+/* AJUSTES: preferencias, avisos, seguridad, nube, tus áreas, etiquetas y
+   categorías, ayuda y tus datos (respaldo, copias, papelera, migración). */
 import { preferencias, cambiarPref, PANTALLAS_INICIO, OPCIONES_BLOQUEO } from '../datos/preferencias.js';
 import { hayPIN, configurarPIN, quitarPIN } from '../piezas/candado.js';
 import { resumenAntiguo, leer, CLAVES } from '../datos/almacen.js';
@@ -16,6 +15,7 @@ import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
 import { encabezado } from './comun.js';
 import { VERSION } from '../version.js';
+import { grupoNube, grupoAreas, grupoEtiquetas } from './admin.js';
 
 function selector(acc, opciones, actual, etiqueta) {
   return '<div class="selector" role="group" aria-label="' + etiqueta + '">' + opciones.map((o) =>
@@ -30,7 +30,7 @@ function grupo(titulo, html) { return '<h2 class="grupo-ajustes">' + titulo + '<
 export function vistaAjustes() {
   const p = preferencias(), ant = resumenAntiguo(), pin = hayPIN(), errores = leer(CLAVES.errores, []);
   const hora = fmtHora('14:30', p.formatoHora);
-  let html = encabezado('Ajustes', 'Preferencias, seguridad y tus datos');
+  let html = encabezado('Ajustes', 'Preferencias, seguridad, nube, áreas y tus datos');
 
   html += grupo('Preferencias',
     ajuste('Tema', 'Oscuro, claro o según tu celular.', selector('pref-tema', [['oscuro', 'Oscuro'], ['claro', 'Claro'], ['auto', 'Automático']], p.tema, 'Tema')) +
@@ -58,6 +58,10 @@ export function vistaAjustes() {
       '<select class="entrada" data-pref-bloqueo="1" aria-label="Bloqueo automático"' + (pin ? '' : ' disabled') + '>' + OPCIONES_BLOQUEO.map((o) => '<option value="' + o[0] + '"' + (o[0] === p.bloqueoMin ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select>') +
     '<p class="pie-ajuste">' + ico('i-info') + 'El PIN tapa la pantalla, pero no cifra tus datos. Si lo olvidas, no se puede recuperar.</p>');
 
+  html += '<div id="nube"></div>' + grupo('Nube', grupoNube());
+  html += grupo('Tus áreas', grupoAreas());
+  html += grupo('Etiquetas y categorías', grupoEtiquetas());
+
   html += grupo('Ayuda',
     ajuste('Modo guía', 'Muestra una explicación corta en cada bloque.', '<button type="button" class="btn" data-acc="guia" aria-pressed="' + p.guia + '">' + ico('i-guia') + (p.guia ? 'Apagar' : 'Activar') + '</button>') +
     ajuste('Recorrido de bienvenida', 'Te muestra en 5 pasos cómo se usa la app.', '<button type="button" class="btn" data-acc="recorrido">' + ico('i-play') + 'Ver recorrido</button>'));
@@ -78,7 +82,7 @@ export function vistaAjustes() {
       '<button type="button" class="btn" data-acc="mig-informe">Ver informe</button>') : '') +
     (ant.hay ? ajuste('Tu versión anterior', 'Sigue intacta en este aparato (' + ant.total + ' cosas y ' + (ant.libros.personal + ant.libros.oficina) + ' movimientos). La nueva nunca la modifica. Si seguiste usándola, puedes traer sus cambios: se juntan sin duplicar.',
       '<button type="button" class="btn" data-acc="mig-otra-vez">' + ico('i-subir') + 'Traer de nuevo</button>') : '') +
-    (ant.nube ? '<p class="pie-ajuste">' + ico('i-nube') + 'La versión anterior tiene la nube conectada en este aparato. La nueva no se conectará sin tu permiso (Fase 8): por ahora lo que cambies aquí queda solo en este aparato.</p>' : ''));
+    '');
 
   html += grupo('Acerca de',
     ajuste('Versión', 'Agenda ' + VERSION + ' · hora de Lima (America/Lima) · soles', '') +

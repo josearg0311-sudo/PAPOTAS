@@ -295,3 +295,26 @@ label.btn { cursor: pointer; }
 .vista-previa { padding: 10px 12px; border-radius: var(--radio-chico); background: var(--acento-suave); font-size: 13.5px; min-height: 44px; }
 .vista-previa b { color: var(--tinta); }
 body.con-hoja .avisos { bottom: auto; top: calc(12px + env(safe-area-inset-top, 0px)); }
+
+/* Fase 8 · Nube y administración */
+#btnNube.nube-ok { color: var(--verde); }
+#btnNube.nube-ocupada { color: var(--acento-txt); animation: latirNube 1.2s ease-in-out infinite; }
+#btnNube.nube-error { color: var(--rojo); }
+@keyframes latirNube { 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { #btnNube.nube-ocupada { animation: none; } }
+.estado-nube { font-weight: 700; }
+.estado-nube.ok { color: var(--verde); }
+.estado-nube.ocupada { color: var(--acento-txt); }
+.estado-nube.error { color: var(--rojo); }
+.estado-nube.apagada { color: var(--tinta-3); }
+.lista-pasos { margin: 0; padding-left: 22px; display: grid; gap: 6px; font-size: 14px; color: var(--tinta-2); }
+.lista-pasos b { color: var(--tinta); }
+.codigo-nube { min-height: 110px; font-size: 12px; word-break: break-all; }
+.punto-area { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--a); margin-right: 6px; vertical-align: middle; }
+.ajuste.columna { display: grid; gap: 8px; }
+.chips-admin { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-admin { min-height: 40px; padding: 0 12px; border-radius: 99px; border: 1px solid var(--borde); background: var(--superficie-2); color: var(--tinta); font-size: 13.5px; }
+.chip-admin .mono { font-size: 11px; color: var(--tinta-3); margin-left: 4px; }
+.muestra-color { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+[data-sel="icono"] button { min-width: 44px; display: inline-grid; place-items: center; }
+[data-sel="icono"] button .i { width: 20px; height: 20px; }

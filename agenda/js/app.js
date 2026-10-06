@@ -25,6 +25,10 @@ import { vistaMas, vistaSeccion } from './vistas/mas.js';
 import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
 import { vistaFinanzas, acciones as accFin } from './vistas/finanzas.js';
 import { vistaNotasSeccion, acciones as accNotas, alEscribirNotas, alCambiarNotas } from './vistas/notas.js';
+import { acciones as accAdmin } from './vistas/admin.js';
+import { iniciarNube, config as nubeConfig, estadoNube } from './datos/nube.js';
+import { aplicarAreas } from './datos/areas.js';
+import { documento } from './datos/datos.js';
 import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
 import { vistaDatos, acciones as accDatos, alEscribir } from './vistas/datos.js';
 import { vistaPapelera, acciones as accPapelera } from './vistas/papelera.js';
@@ -53,6 +57,18 @@ function leerRuta() {
 }
 let ruta = leerRuta() || { sec: preferencias().inicio, param: '' };
 function padre(sec) { return ['seguimiento', 'finanzas', 'notas', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
+
+/* ---------- Indicador de la nube (solo si la conectaste) ---------- */
+function pintarNube() {
+  const b = $('btnNube'); if (!b) return;
+  const c = nubeConfig(), e = estadoNube();
+  b.hidden = !c;
+  if (!c) return;
+  const est = e.ocupado ? 'ocupada' : e.ok ? 'ok' : 'error';
+  b.className = 'icono-btn nube-' + est;
+  b.setAttribute('aria-label', 'Nube: ' + (est === 'ok' ? 'sincronizada' : est === 'ocupada' ? 'sincronizando' : 'con problema') + '. Abrir ajustes de la nube');
+}
+window.addEventListener('agenda:nube', pintarNube);
 
 /* ---------- Pintar ---------- */
 function pintarNav() {
@@ -92,6 +108,8 @@ function contenido() {
 
 export function pintar() {
   try {
+    const d = documento(); aplicarAreas(d && d.perfil && d.perfil.areas);
+    pintarNube();
     pintarNav(); pintarCab();
     document.title = ruta.sec === 'hoy' ? 'Agenda' : $('cabTitulo').textContent + ' · Agenda';
     document.body.dataset.seccion = ruta.sec;
@@ -129,7 +147,7 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, accAdmin, {
   agregar() { abrirAgregar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },
@@ -212,6 +230,9 @@ setInterval(() => { if (hoy() !== dia) { dia = hoy(); pintar(); } }, 60000);
 /* Primera vez: el recorrido de bienvenida */
 function arrancarRecorrido() { if (!preferencias().tourVisto) setTimeout(iniciarRecorrido, 400); }
 despuesDeAbrir(() => { if (!migrando) arrancarRecorrido(); });
+/* La nube: solo si tú la conectaste en Ajustes (nunca sola) */
+despuesDeAbrir(() => iniciarNube());
+$('btnNube').addEventListener('click', () => { ir('ajustes'); setTimeout(() => { const n = document.getElementById('nube'); if (n) n.scrollIntoView({ block: 'start' }); }, 60); });
 
 /* Para instalarla y abrirla sin internet. Solo en https o en el servidor local. */
 const hospedado = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);

@@ -86,20 +86,29 @@ export function normalizarDoc(d) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.items)) return null;
   const vistos = new Set(), items = [];
   d.items.forEach((x) => { const it = normalizarElemento(x); if (it && !vistos.has(it.id)) { vistos.add(it.id); items.push(it); } });
-  return { v: 1, creado: +d.creado || Date.now(), perfil: Object.assign({ nombre: '', presupuesto: {}, antiguo: null }, d.perfil || {}), items, migracion: d.migracion || null };
+  const purgados = {};
+  if (d.purgados && typeof d.purgados === 'object') Object.keys(d.purgados).forEach((k) => { if (+d.purgados[k] > 0) purgados[k] = +d.purgados[k]; });
+  return { v: 1, creado: +d.creado || Date.now(), perfil: Object.assign({ nombre: '', presupuesto: {}, antiguo: null }, d.perfil || {}), items, migracion: d.migracion || null, purgados };
 }
 
 /* Junta dos documentos elemento por elemento: gana el cambio más reciente.
    Un borrado es un cambio más (no resucita lo que se borró después). */
 export function fusionar(a, b) {
   const m = new Map();
-  a.items.forEach((x) => m.set(x.id, x));
+  /* Lo que la papelera ya borró del todo (pasados 30 días) no vuelve, salvo
+     que se haya vuelto a crear después */
+  const purgados = Object.assign({}, a.purgados || {});
+  Object.entries(b.purgados || {}).forEach(([k, t]) => { purgados[k] = Math.max(purgados[k] || 0, +t || 0); });
+  const vivo = (x) => !purgados[x.id] || (x.actualizado || 0) > purgados[x.id];
+  a.items.filter(vivo).forEach((x) => m.set(x.id, x));
   let nuevos = 0, actualizados = 0;
-  b.items.forEach((x) => {
+  b.items.filter(vivo).forEach((x) => {
     const y = m.get(x.id);
     if (!y) { m.set(x.id, x); nuevos++; }
     else if ((x.actualizado || 0) > (y.actualizado || 0) || ((x.borrado || 0) > (y.borrado || 0) && (x.actualizado || 0) >= (y.actualizado || 0))) { m.set(x.id, x); actualizados++; }
   });
-  const perfil = a.perfil && (a.perfil.nombre || a.perfil.antiguo) ? a.perfil : b.perfil;
-  return { doc: Object.assign({}, a, { perfil, items: [...m.values()] }), nuevos, actualizados };
+  /* El perfil (presupuesto, áreas…) gana el cambio más reciente */
+  const pa = a.perfil || {}, pb = b.perfil || {};
+  const perfil = (pa.actualizado || pb.actualizado) ? ((pb.actualizado || 0) > (pa.actualizado || 0) ? pb : pa) : (pa.nombre || pa.antiguo ? pa : pb);
+  return { doc: Object.assign({}, a, { perfil, items: [...m.values()], purgados }), nuevos, actualizados };
 }
