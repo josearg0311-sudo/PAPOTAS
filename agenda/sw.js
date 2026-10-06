@@ -10,7 +10,7 @@
 
    Cada vez que se publica: subir CACHE (y VERSION en js/version.js). */
 
-const CACHE = 'agenda-v39';
+const CACHE = 'agenda-v40';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/tokens.css', './css/base.css', './css/componentes.css', './css/vistas.css',

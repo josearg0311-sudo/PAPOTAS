@@ -10,6 +10,7 @@ import { poner, aPapelera } from '../datos/datos.js';
 import { modeloVacio, nuevoId, LISTA_RECORDATORIOS } from '../datos/modelo.js';
 import { interpretar } from '../util/interpretar.js';
 import { leerMonto, fmtSoles } from '../util/dinero.js';
+import { categoriaDe } from '../datos/finanzas.js';
 import { hoy, fmtCorta, fmtHora, sumarDias } from '../util/fechas.js';
 import { preferencias } from '../datos/preferencias.js';
 import { puedeDictar, dictar, separarMonto } from './dictado.js';
@@ -98,7 +99,7 @@ function guardar() {
   if (t === 'gasto') {
     const m = leerMonto(document.getElementById('qaMonto').value);
     if (m == null || m <= 0) { aviso('Falta el monto (ej. 25.50).'); document.getElementById('qaMonto').focus(); return; }
-    nuevo = poner(Object.assign(base(), { id: nuevoId('mov'), tipo: 'movimiento', titulo: v || 'Gasto', estado: 'hecho', monto: m, fechas: Object.assign(modeloVacio().fechas, { inicio: hoy() }), extra: { libro: ar === 'oficina' ? 'oficina' : 'personal', ingreso: false, categoria: '' } }));
+    nuevo = poner(Object.assign(base(), { id: nuevoId('mov'), tipo: 'movimiento', titulo: v || 'Gasto', estado: 'hecho', monto: m, fechas: Object.assign(modeloVacio().fechas, { inicio: hoy() }), extra: { libro: ar === 'oficina' ? 'oficina' : 'personal', ingreso: false, categoria: categoriaDe(v, ar === 'oficina' ? 'oficina' : 'personal') } }));
     msj = '💸 ' + fmtSoles(m) + (v ? ' · ' + v : '');
   } else {
     if (!v) { aviso('Escribe algo primero.'); txt.focus(); return; }

@@ -160,7 +160,7 @@ function vistaDinero(a) {
   return tarjeta({ eti: 'DINERO', titulo: 'Tu dinero en ' + esc(a.nombre), n: fmtSoles(g) + ' gastado', clase: 'area-' + a.id,
     cuerpo: (l.length ? '<div class="hfs">' + l.slice(0, 30).map((x) => '<div class="hf"><button type="button" class="hf-txt" data-acc="fin-editar" data-id="' + esc(x.id) + '"><b>' + esc(x.titulo || 'Movimiento') + '</b><small>' + fmtCorta(x.fechas.inicio) + (x.extra.categoria ? ' · ' + esc(x.extra.categoria) : '') + '</small></button><span class="hf-fin"><b class="mono monto ' + (esIngreso(x) ? 'ingreso' : 'gasto') + '">' + (esIngreso(x) ? '+' : '−') + fmtSoles(Math.abs(+x.monto || 0)) + '</b></span></div>').join('') + '</div>'
       : vacio('Sin movimientos este mes', 'Lo que gastes en ' + esc(a.nombre) + ' aparecerá aquí.')) +
-      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Gasto</button><a class="btn" href="#finanzas' + (libro === 'oficina' ? '/oficina' : '') + '">' + ico('i-grafica') + 'Ver el libro ' + libro + '</a></div>' });
+      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="fin-nuevo" data-libro="' + libro + '" data-area="' + a.id + '" data-ing="0">' + ico('i-plus') + 'Gasto</button><a class="btn" href="#finanzas' + (libro === 'oficina' ? '/oficina' : '') + '">' + ico('i-grafica') + 'Ver el libro ' + libro + '</a></div>' });
 }
 function vistaSemana(a) {
   const l = proximos(hoy(), 7, a.id), fh = (x) => fmtHora(x, preferencias().formatoHora);

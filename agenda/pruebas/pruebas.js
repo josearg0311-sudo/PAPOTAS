@@ -525,6 +525,12 @@ tareas.push(prueba('Áreas: IMC con talla, gasto dictado y WhatsApp con número 
   igual(enlaceWhatsApp('x', '+51 987654321'), 'https://wa.me/51987654321?text=x');
 }));
 
+tareas.push(prueba('Dinero: la categoría se deduce de la descripción, por libro', () => {
+  igual([FI.categoriaDe('Almuerzo con Ana'), FI.categoriaDe('taxi a casa'), FI.categoriaDe('Recibo de luz'), FI.categoriaDe('Matrícula del ciclo'), FI.categoriaDe('cancha pichanga'), FI.categoriaDe('algo raro')], ['Comida', 'Transporte', 'Servicios', 'Estudios', 'Deporte', 'Otros']);
+  igual([FI.categoriaDe('Sueldo de octubre', 'personal', true), FI.categoriaDe('Tinta para la impresora', 'oficina'), FI.categoriaDe('Pago a SUNAT', 'oficina'), FI.categoriaDe('Honorarios caso López', 'oficina', true)], ['Sueldo', 'Insumos', 'Impuestos', 'Honorarios']);
+  igual(FI.areaDeCategoria(FI.categoriaDe('Matrícula del ciclo')), 'estudios');
+}));
+
 Promise.all(tareas).then(() => {
   const ok = resultados.filter((r) => r[1]).length;
   const el = document.getElementById('resultado');

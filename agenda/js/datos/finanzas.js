@@ -15,6 +15,34 @@ export function areaDeCategoria(cat) {
   return 'personal';
 }
 
+/* Categoría deducida de la descripción («almuerzo» → Comida, «taxi» →
+   Transporte…), para no tener que escribirla. Si no se reconoce: Otros. */
+const PALABRAS = {
+  personal: {
+    gasto: [['Comida', /almuerz|desayun|cena|men[uú]\b|comida|super|mercado|plaza|bodega|pollo|chifa|restaur|caf[eé]|pan\b|fruta|delivery|rappi|pedidosya/],
+      ['Transporte', /taxi|uber|didi|cabify|bus|combi|micro|metro|pasaje|gasolin|grifo|peaje|estaciona|indriver/],
+      ['Servicios', /\bluz\b|agua|internet|tel[eé]fono|celular|recarga|cable|\bgas\b|netflix|spotify|claro|movistar|entel|bitel|sedapal|enel|luz del sur|calidda/],
+      ['Casa', /alquiler|casa|limpieza|ferreter|mueble|arreglo|lavander/],
+      ['Salud', /farmacia|botica|m[eé]dic|doctor|cl[ií]nica|pastilla|dentista|consulta|an[aá]lisis|inkafarma|mifarma/],
+      ['Estudios', /curso|universidad|matr[ií]cula|pensi[oó]n|libro|copias|cuaderno|[uú]tiles|instituto|clase/],
+      ['Deporte', /gym|gimnas|cancha|pichanga|f[uú]tbol|zapatillas de|nataci|deporte|prote[ií]na/],
+      ['Ropa', /ropa|polo|camisa|pantal[oó]n|zapat|vestido|casaca/],
+      ['Ocio', /cine|salida|cerveza|trago|fiesta|juego|concierto|viaje|regalo/]],
+    ingreso: [['Sueldo', /sueldo|quincena|planilla|haberes|salario|gratificaci|cts/], ['Préstamos', /pr[eé]stamo|me pag[oó] |devolvi/], ['Regalo', /regalo/], ['Extra', /extra|venta|cachuelo|bono/]]
+  },
+  oficina: {
+    gasto: [['Insumos', /papel|tinta|t[oó]ner|impres|[uú]tiles|folder|archivador|lapicer|insumo/], ['Alquiler', /alquiler|local|oficina/],
+      ['Servicios', /\bluz\b|agua|internet|tel[eé]fono|celular|software|hosting|dominio|licencia/], ['Impuestos', /sunat|impuesto|igv|renta|tributo|municipal|arbitrio/],
+      ['Personal', /sueldo|planilla|practicante|asistente|honorarios de/], ['Transporte', /taxi|uber|pasaje|gasolin|movilidad|courier|env[ií]o/]],
+    ingreso: [['Honorarios', /honorario|asesor[ií]a|consulta|caso|audiencia|cliente/], ['Ventas', /venta|factura/]]
+  }
+};
+export function categoriaDe(texto, libro = 'personal', ingreso = false) {
+  const t = String(texto || '').toLowerCase(), l = PALABRAS[libro === 'oficina' ? 'oficina' : 'personal'][ingreso ? 'ingreso' : 'gasto'];
+  const r = l.find(([, re]) => re.test(t));
+  return r ? r[0] : 'Otros';
+}
+
 export const esDelLibro = (x, libro) => x.tipo === 'movimiento' && ((x.extra && x.extra.libro) || 'personal') === libro;
 export const esIngreso = (x) => !!(x.extra && x.extra.ingreso);
 export const delMes = (x, ym) => esFecha(x.fechas && x.fechas.inicio) && x.fechas.inicio.startsWith(ym);

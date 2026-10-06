@@ -4,7 +4,7 @@
    Direcciones: #finanzas (personal) y #finanzas/oficina */
 import { elementos, buscarElemento, documento, cambiarPerfil, aPapelera } from '../datos/datos.js';
 import { AREAS, area } from '../datos/areas.js';
-import { LIBROS, CATEGORIAS, areaDeCategoria, esDelLibro, esIngreso, delMes, resumenMes, historial, estadoPresupuesto, csv, analisisMes, repetidos } from '../datos/finanzas.js';
+import { LIBROS, areaDeCategoria, categoriaDe, esDelLibro, esIngreso, delMes, resumenMes, historial, estadoPresupuesto, csv, analisisMes, repetidos } from '../datos/finanzas.js';
 import { diaDePago, pagado } from '../datos/calendario.js';
 import { val, resumenPrestamos } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtFecha, MESES, diasEntre, inicioSemana } from '../util/fechas.js';
@@ -26,7 +26,6 @@ const sumarMes = (ym, n) => { let [y, m] = ym.split('-').map(Number); m += n; wh
 const movs = (libro) => elementos((x) => esDelLibro(x, libro));
 const libroDePago = (p) => (p.area === 'oficina' ? 'oficina' : 'personal');
 const presupuestoDe = (libro) => { const d = documento(); return d && d.perfil && d.perfil.presupuesto ? +d.perfil.presupuesto[libro] || 0 : 0; };
-const categoriasUsadas = (libro, ingreso) => [...new Set(CATEGORIAS[libro][ingreso ? 'ingreso' : 'gasto'].concat(movs(libro).filter((x) => esIngreso(x) === ingreso).map((x) => x.extra.categoria).filter(Boolean)))];
 
 function pestanas(libro) {
   return '<nav class="fichas pestanas libros" aria-label="Libros de cuentas">' + Object.keys(LIBROS).map((l) =>
@@ -159,40 +158,39 @@ function enlaceTematico(libro) {
 }
 
 /* ---------- Editores ---------- */
+/* Gasto o ingreso: solo monto, descripción, día y de qué libro (personal u
+   oficina). La categoría y el espacio se deducen de la descripción. */
 function editarMov(id, repintar, pre = {}) {
-  const x = id ? buscarElemento(id) : null, libro = x ? (x.extra.libro || 'personal') : pre.libro, ing = x ? esIngreso(x) : !!pre.ingreso;
-  const areasLibro = libro === 'oficina' ? [['oficina', 'Oficina']] : AREAS.filter((a) => a.id !== 'oficina').map((a) => [a.id, a.nombre]);
-  const h = editar({ titulo: (x ? 'Editar ' : 'Nuevo ') + (ing ? 'ingreso' : 'gasto') + ' · ' + (libro === 'oficina' ? 'oficina' : 'personal'), campos: [
-    { n: 'tipo', t: 'botones', etq: 'Tipo', v: ing ? 'ing' : 'gas', ops: [['gas', '💸 Gasto'], ['ing', '💰 Ingreso']] },
-    { n: 'monto', t: 'monto', etq: 'Monto (S/)', v: x ? Math.abs(+x.monto || 0) : null, req: true, mitad: true },
-    { n: 'fecha', t: 'fecha', etq: 'Día', v: x ? x.fechas.inicio : hoy(), mitad: true },
-    { n: 'titulo', t: 'texto', etq: 'Descripción', v: x ? x.titulo : '', max: 120, ph: ing ? 'Ej. Sueldo de octubre' : 'Ej. Supermercado' },
-    { n: 'cat', t: 'texto', etq: 'Categoría', v: x ? x.extra.categoria : '', max: 40, ph: 'Ej. Comida' },
-    ...(libro === 'oficina' ? [] : [{ n: 'area', t: 'botones', etq: 'De qué área', v: x ? x.area : 'personal', ops: areasLibro, ayuda: 'Lo de Estudios o Deporte se suma en su área.' }]),
-    { n: 'notas', t: 'largo', etq: 'Notas', v: x ? x.notas : '', max: 1000 }],
-  despues: '<datalist id="dlCats">' + categoriasUsadas(libro, ing).concat(categoriasUsadas(libro, !ing)).map((c) => '<option value="' + esc(c) + '">').join('') + '</datalist>',
+  const x = id ? buscarElemento(id) : null, ing = x ? esIngreso(x) : !!pre.ingreso;
+  const libro0 = x ? (x.extra.libro || 'personal') : pre.libro || 'personal';
+  const h = editar({ titulo: (x ? 'Editar ' : 'Nuevo ') + (ing ? 'ingreso' : 'gasto'), campos: [
+    { n: 'monto', t: 'monto', etq: 'Monto (S/)', v: x ? Math.abs(+x.monto || 0) : null, req: true },
+    { n: 'titulo', t: 'texto', etq: 'Descripción', v: x ? x.titulo : '', max: 120, ph: ing ? 'Ej. Sueldo de octubre' : 'Ej. Almuerzo, taxi, luz' },
+    { n: 'fecha', t: 'fecha', etq: 'Día', v: x ? x.fechas.inicio : hoy() },
+    { n: 'libro', t: 'botones', etq: '¿De qué libro?', v: libro0, ops: [['personal', '🏠 Personal'], ['oficina', '💼 Oficina']] }],
   alGuardar: (v) => {
     if (!(v.monto > 0)) { aviso('Escribe el monto (ej. 25.50 o 1,250)'); return false; }
-    const ingreso = v.tipo === 'ing', area = libro === 'oficina' ? 'oficina' : (v.area || areaDeCategoria(v.cat));
-    const fechas = Object.assign({}, x ? x.fechas : {}, { inicio: v.fecha || hoy() }), titulo = v.titulo || v.cat || (ingreso ? 'Ingreso' : 'Gasto');
-    if (x) cambiarExtra(id, { libro, ingreso, categoria: v.cat }, { titulo, monto: v.monto, fechas, area, notas: v.notas });
-    else nuevo('movimiento', area, { titulo, monto: v.monto, estado: 'hecho', notas: v.notas, fechas, extra: { libro, ingreso, categoria: v.cat } });
-    repintar(); aviso((ingreso ? '💰 +' : '💸 −') + fmtSoles(v.monto) + ' · ' + (libro === 'oficina' ? 'oficina' : 'personal'));
+    const libro = v.libro === 'oficina' ? 'oficina' : 'personal', titulo = (v.titulo || '').trim() || (ing ? 'Ingreso' : 'Gasto');
+    /* la categoría se deduce; si ya tenía una y no cambió la descripción ni el libro, se respeta */
+    const igual = x && x.titulo === titulo && (x.extra.libro || 'personal') === libro;
+    const categoria = igual && x.extra.categoria ? x.extra.categoria : categoriaDe(titulo, libro, ing);
+    const area = libro === 'oficina' ? 'oficina' : x && igual && x.area !== 'oficina' ? x.area : pre.area && pre.area !== 'oficina' ? pre.area : areaDeCategoria(categoria);
+    const fechas = Object.assign({}, x ? x.fechas : {}, { inicio: v.fecha || hoy() });
+    if (x) cambiarExtra(id, { libro, ingreso: ing, categoria }, { titulo, monto: v.monto, fechas, area });
+    else nuevo('movimiento', area, { titulo, monto: v.monto, estado: 'hecho', fechas, extra: { libro, ingreso: ing, categoria } });
+    repintar(); aviso((ing ? '💰 +' : '💸 −') + fmtSoles(v.monto) + ' · libro ' + (libro === 'oficina' ? 'de la oficina' : 'personal'));
   }, alBorrar: x ? () => borrar(id, repintar) : null });
-  const c = h.querySelector('[name="cat"]'); if (c) c.setAttribute('list', 'dlCats');
   /* Anotar otra vez hoy (el mismo gasto o ingreso) */
   if (x) {
     const fb = h.querySelector('.fila-botones'), otra = document.createElement('button');
     otra.type = 'button'; otra.className = 'btn'; otra.innerHTML = ico('i-repetir') + 'Anotar otra vez hoy';
     otra.addEventListener('click', () => {
-      const n = nuevo('movimiento', x.area, { titulo: x.titulo, monto: Math.abs(+x.monto || 0), estado: 'hecho', notas: x.notas, fechas: { inicio: hoy() }, extra: { libro, ingreso: ing, categoria: x.extra.categoria } });
+      const n = nuevo('movimiento', x.area, { titulo: x.titulo, monto: Math.abs(+x.monto || 0), estado: 'hecho', notas: x.notas, fechas: { inicio: hoy() }, extra: { libro: libro0, ingreso: ing, categoria: x.extra.categoria } });
       cerrarHoja(); repintar();
       aviso((ing ? '💰 +' : '💸 −') + fmtSoles(Math.abs(+x.monto || 0)) + ' anotado hoy', () => { aPapelera(n.id); repintar(); });
     });
     fb.insertBefore(otra, fb.firstChild);
   }
-  /* Categoría de Estudios o Deporte → sugiere su área */
-  if (c && libro !== 'oficina') c.addEventListener('change', () => { const ar = areaDeCategoria(c.value); if (ar !== 'personal') { const b = h.querySelector('[data-sel="area"] [data-v="' + ar + '"]'); if (b) b.click(); } });
 }
 function editarPago(id, repintar, libro, pre = {}) {
   const p = id ? buscarElemento(id) : null;
@@ -234,7 +232,7 @@ export const acciones = {
   'fin-ir-mes'(b) { ui.mes = b.dataset.v === hoy().slice(0, 7) ? '' : b.dataset.v; ui.cat = ''; return true; },
   'fin-cat'(b) { ui.cat = ui.cat === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-mas'() { ui.ver += 30; return true; },
-  'fin-nuevo'(b, ev, rp) { editarMov(null, rp, { libro: b.dataset.libro, ingreso: b.dataset.ing === '1' }); },
+  'fin-nuevo'(b, ev, rp) { editarMov(null, rp, { libro: b.dataset.libro, ingreso: b.dataset.ing === '1', area: b.dataset.area || '' }); },
   'fin-editar'(b, ev, rp) { editarMov(b.dataset.id, rp); },
   'fin-presupuesto'(b, ev, rp) { editarPresupuesto(b.dataset.libro, rp); },
   'fin-csv'(b) { const l = b.dataset.libro; guardarArchivo(csv(movs(l)), 'libro_' + l + '_' + hoy() + '.csv', 'text/csv'); aviso('Se bajó el libro ' + l + '. Ábrelo con Excel o Google Sheets.'); },
