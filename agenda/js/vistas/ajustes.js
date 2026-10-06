@@ -15,6 +15,7 @@ import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
 import { encabezado } from './comun.js';
 import { VERSION } from '../version.js';
+import { abrirNovedades } from '../piezas/novedades.js';
 import { grupoNube, grupoAreas, grupoEtiquetas, grupoTeclado } from './admin.js';
 
 function selector(acc, opciones, actual, etiqueta) {
@@ -65,7 +66,8 @@ export function vistaAjustes() {
 
   html += grupo('Ayuda',
     ajuste('Modo guía', 'Muestra una explicación corta en cada bloque.', '<button type="button" class="btn" data-acc="guia" aria-pressed="' + p.guia + '">' + ico('i-guia') + (p.guia ? 'Apagar' : 'Activar') + '</button>') +
-    ajuste('Recorrido de bienvenida', 'Te muestra en 5 pasos cómo se usa la app.', '<button type="button" class="btn" data-acc="recorrido">' + ico('i-play') + 'Ver recorrido</button>'));
+    ajuste('Recorrido de bienvenida', 'Te muestra en 5 pasos cómo se usa la app.', '<button type="button" class="btn" data-acc="recorrido">' + ico('i-play') + 'Ver recorrido</button>') +
+    ajuste('Novedades', 'Lo que trae la versión ' + VERSION + ', cada cosa en su sección.', '<button type="button" class="btn" data-acc="novedades">' + ico('i-info') + 'Ver novedades</button>'));
 
   const doc = documento(), mig = doc && doc.migracion, rs = diasSinRespaldo(), total = doc ? elementos((x) => !(x.extra && x.extra.sistema)).length : 0;
   const nPap = enPapelera().length;
@@ -165,6 +167,7 @@ export const acciones = {
   'pin-quitar'(b, ev, repintar) { quitarPIN(() => { aviso('PIN quitado.'); repintar(); }); },
   guia() { alternarGuia(); return true; },
   recorrido() { iniciarRecorrido(); },
+  novedades() { abrirNovedades(); },
   errores() {
     const l = leer(CLAVES.errores, []);
     const txt = l.map((x) => new Date(x.t).toLocaleString('es-PE', { timeZone: 'America/Lima' }) + ' · ' + x.donde + '\n' + x.msj + '\n' + x.pila).join('\n\n');

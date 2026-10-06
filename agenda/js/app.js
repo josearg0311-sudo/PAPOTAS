@@ -30,6 +30,7 @@ import { iniciarNube, config as nubeConfig, estadoNube } from './datos/nube.js';
 import { aplicarAreas } from './datos/areas.js';
 import { iniciarTeclado } from './piezas/teclado.js';
 import { abrirBuscar } from './piezas/buscar.js';
+import { revisarNovedades } from './piezas/novedades.js';
 import { acciones as accHoyExtra } from './vistas/hoy-extra.js';
 import { documento } from './datos/datos.js';
 import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
@@ -251,6 +252,8 @@ setInterval(() => { if (hoy() !== dia) { dia = hoy(); pintar(); } }, 60000);
 /* Primera vez: el recorrido de bienvenida */
 function arrancarRecorrido() { if (!preferencias().tourVisto) setTimeout(iniciarRecorrido, 400); }
 despuesDeAbrir(() => { if (!migrando) arrancarRecorrido(); });
+/* Al actualizar desde otra 5.x: novedades una vez (no tapa el recorrido, la migración ni un atajo) */
+despuesDeAbrir(() => revisarNovedades(migrando || !preferencias().tourVisto || !!atajoInicial));
 /* El atajo del ícono, una vez abierta la app (después del PIN) */
 if (atajoInicial) despuesDeAbrir(() => setTimeout(() => {
   if (migrando) return;
