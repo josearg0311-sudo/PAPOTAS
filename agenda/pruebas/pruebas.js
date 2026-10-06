@@ -462,6 +462,12 @@ tareas.push(prueba('Corrector: preguntas con tilde, abrir ¿ ¡ y siguiente pala
   igual(CO.vecinas('o', 'i'), true); igual(CO.vecinas('a', 'p'), false); igual(CO.fonema('hacer'), CO.fonema('aser'));
 }));
 
+tareas.push(prueba('Fechas: recordar el último segundo no mezcla instantes ni deja cambiar el resultado', () => {
+  const a = new Date(Date.UTC(2026, 9, 6, 4, 59, 59)), b = new Date(Date.UTC(2026, 9, 6, 5, 0, 0));
+  igual([F.hoy(a), F.hoy(a), F.hoy(b), F.horaAhora(b)], ['2026-10-05', '2026-10-05', '2026-10-06', '00:00']);
+  const p = F.partesLima(b); p.y = 1990; igual(F.partesLima(b).y, 2026);
+}));
+
 Promise.all(tareas).then(() => {
   const ok = resultados.filter((r) => r[1]).length;
   const el = document.getElementById('resultado');

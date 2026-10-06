@@ -31,7 +31,7 @@ function descargarTextos(textos) {
 
 export function mostrarMigracion() {
   return new Promise((listo) => {
-    capa('<span class="eti-mig">Fase 2 · tus datos</span><h2 id="migTit">Pasando tus datos a la Agenda nueva</h2>' +
+    capa('<span class="eti-mig">Tus datos</span><h2 id="migTit">Pasando tus datos a la Agenda nueva</h2>' +
       '<p>Encontré tu agenda anterior en este aparato. La paso al formato nuevo <b>sin borrar la anterior</b>.</p>' + pasos({ copia: 'en' }));
     setTimeout(async () => {
       const r = await migrarDesdeV45();

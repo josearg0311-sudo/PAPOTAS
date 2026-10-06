@@ -14,7 +14,8 @@ import { editar } from '../piezas/formulario.js';
 import { irALista } from './recordatorios.js';
 import { aviso } from '../piezas/aviso.js';
 
-const ui = { area: '', q: '' };
+const ui = { area: '', q: '', ver: {} };
+const TANDA_NOTAS = 24;   // con cientos de notas se muestran por tandas en cada área
 const sinTildes = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 /* ---------- Notas ---------- */
@@ -39,7 +40,8 @@ function vistaNotas() {
       '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="nota-nueva" data-area="' + (ui.area || 'personal') + '">' + ico('i-plus') + 'Nueva nota' + (ui.area ? ' de ' + area(ui.area).nombre : '') + '</button>' +
       '<a class="btn" href="#notas/diario">' + ico('i-nota') + 'Diario</a></div></section>' +
     (todas.length ? AREAS.filter((a) => todas.some((n) => n.area === a.id)).map((a) => { const de = todas.filter((n) => n.area === a.id);
-      return '<section class="grupo-notas area-' + a.id + '"><h2 class="grupo-notas-tit"><a href="#areas/' + a.id + '">' + a.nombre + '</a><span class="mono">' + de.length + '</span></h2><div class="notas">' + de.map(tarjetaNota).join('') + '</div></section>'; }).join('')
+      return '<section class="grupo-notas area-' + a.id + '"><h2 class="grupo-notas-tit"><a href="#areas/' + a.id + '">' + a.nombre + '</a><span class="mono">' + de.length + '</span></h2><div class="notas">' + de.slice(0, ui.ver[a.id] || TANDA_NOTAS).map(tarjetaNota).join('') + '</div>' +
+        (de.length > (ui.ver[a.id] || TANDA_NOTAS) ? '<div class="fila-botones izq"><button type="button" class="btn chico" data-acc="notas-mas" data-v="' + a.id + '">Ver más notas de ' + esc(a.nombre) + ' <span class="mono">(' + (ui.ver[a.id] || TANDA_NOTAS) + ' de ' + de.length + ')</span></button></div>' : '') + '</section>'; }).join('')
       : tarjeta({ cuerpo: vacio(q ? 'Nada con «' + esc(ui.q) + '»' : 'Sin notas', q ? 'Prueba otra palabra.' : 'Crea una nota para guardar datos, ideas o listas.') })) +
     (checks.length ? tarjeta({ eti: 'LISTAS', titulo: 'Listas para marcar', n: checks.length, guia: 'Tus listas de compras y checklists viven en Recordatorios.',
       cuerpo: '<div class="herr-botones">' + checks.map((l) => { const p = pendientesDe(l.id), ok = p.filter((x) => x.estado === 'hecho').length;
@@ -109,6 +111,7 @@ export function alCambiarNotas(t) {
 
 export const acciones = {
   'notas-area'(b) { ui.area = b.dataset.v; return true; },
+  'notas-mas'(b) { ui.ver[b.dataset.v] = (ui.ver[b.dataset.v] || TANDA_NOTAS) + 48; return true; },
   'nota-nueva'(b, ev, rp) { editarNota(null, b.dataset.area, rp); },
   'nota-editar'(b, ev, rp) { editarNota(b.dataset.id, null, rp); },
   'nota-check'(b) { const n = buscarElemento(b.dataset.id); cambiarExtra(n.id, {}, { notas: alternarCasilla(n.notas, +b.dataset.i) }); return true; },

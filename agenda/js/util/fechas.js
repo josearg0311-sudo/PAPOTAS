@@ -20,11 +20,15 @@ try {
 
 /* Las partes de un instante en la hora de Lima. Sin soporte de zonas
    (navegadores muy viejos) se usa la del aparato. */
+let ultima = { t: NaN, p: null };   // formatToParts es lento: se recuerda el último segundo
 export function partesLima(instante = new Date()) {
   if (lector) {
+    const t = Math.floor(instante.getTime() / 1000);
+    if (t === ultima.t) return Object.assign({}, ultima.p);
     const p = {};
     lector.formatToParts(instante).forEach((x) => { p[x.type] = x.value; });
-    return { y: +p.year, m: +p.month, d: +p.day, h: +p.hour % 24, mi: +p.minute, s: +p.second };
+    ultima = { t, p: { y: +p.year, m: +p.month, d: +p.day, h: +p.hour % 24, mi: +p.minute, s: +p.second } };
+    return Object.assign({}, ultima.p);
   }
   const d = instante;
   return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate(), h: d.getHours(), mi: d.getMinutes(), s: d.getSeconds() };

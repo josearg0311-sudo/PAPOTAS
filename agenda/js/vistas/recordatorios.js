@@ -12,10 +12,18 @@ import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
 import { modeloVacio, nuevoId } from '../datos/modelo.js';
 
-const ui = { lista: '', verHechos: 8 };
+/* Con muchos pendientes se muestran por tandas (pintar mil filas traba el celular) */
+const TANDA = { hecho: 8, otro: 40 };
+const ui = { lista: '', ver: {} };
+const cuantos = (k) => ui.ver[k] || (k === 'hecho' ? TANDA.hecho : TANDA.otro);
 const VACIOS = { hoy: 'Nada pendiente para hoy. 👌', tarde: 'Lo que pases a «Más tarde» aparece aquí.', manana: 'Mañana lo tienes libre.', prox: 'Nada programado para los próximos días.', algun: 'Ideas sin fecha: guárdalas aquí para no olvidarlas.', hecho: 'Lo que marques como hecho baja aquí.' };
 
 export function irALista(id) { ui.lista = id || ''; }
+
+function masBoton(k, total, vistos) {
+  if (total <= vistos) return '';
+  return '<div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-mas" data-v="' + k + '">Ver ' + Math.min(k === 'hecho' ? 30 : 100, total - vistos) + ' más <span class="mono">(' + vistos + ' de ' + total + ')</span></button></div>';
+}
 
 export function vistaRecordatorios() {
   const h = hoy(), l = ui.lista ? buscarElemento(ui.lista) : null;
@@ -48,8 +56,8 @@ export function vistaRecordatorios() {
   if (check) {
     const p = todos.filter((x) => x.estado !== 'hecho').sort((a, b) => (a.origen && b.origen ? a.origen.indice - b.origen.indice : a.creado - b.creado));
     const hechos = todos.filter((x) => x.estado === 'hecho');
-    html += '<section class="tarjeta grupo"><div class="grupo-tit"><span>Por marcar</span><span class="linea"></span><span class="mono">' + p.length + '</span></div>' + (p.length ? '<div class="pends">' + p.map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' : vacio('', '¡Todo marcado! 🎉')) + '</section>' +
-      '<section class="tarjeta grupo"><div class="grupo-tit"><span>Hecho</span><span class="linea"></span><span class="mono">' + hechos.length + '</span></div>' + (hechos.length ? '<div class="pends">' + hechos.map((x) => filaPendiente(x, { acciones: false })).join('') + '</div><div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-desmarcar-todo">' + ico('i-deshacer') + 'Desmarcar todo para volver a usarla</button></div>' : vacio('', VACIOS.hecho)) + '</section>';
+    html += '<section class="tarjeta grupo"><div class="grupo-tit"><span>Por marcar</span><span class="linea"></span><span class="mono">' + p.length + '</span></div>' + (p.length ? '<div class="pends">' + p.slice(0, cuantos('marcar')).map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' + masBoton('marcar', p.length, Math.min(p.length, cuantos('marcar'))) : vacio('', '¡Todo marcado! 🎉')) + '</section>' +
+      '<section class="tarjeta grupo"><div class="grupo-tit"><span>Hecho</span><span class="linea"></span><span class="mono">' + hechos.length + '</span></div>' + (hechos.length ? '<div class="pends">' + hechos.slice(0, cuantos('hecho')).map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' + masBoton('hecho', hechos.length, Math.min(hechos.length, cuantos('hecho'))) + '<div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-desmarcar-todo">' + ico('i-deshacer') + 'Desmarcar todo para volver a usarla</button></div>' : vacio('', VACIOS.hecho)) + '</section>';
     return html;
   }
 
@@ -57,11 +65,11 @@ export function vistaRecordatorios() {
     let g = todos.filter((x) => grupo(x) === k);
     if (k === 'hecho') g.sort((a, b) => hechoEn(b) - hechoEn(a)); else g.sort(ordenar);
     const total = g.length;
-    if (k === 'hecho') g = g.slice(0, ui.verHechos);
+    g = g.slice(0, cuantos(k));
     const sub = k === 'hoy' ? ' · ' + fmtCorta(h) : k === 'manana' ? ' · ' + fmtCorta(sumarDias(h, 1)) : '';
     html += '<section class="tarjeta grupo" id="g-' + k + '"><div class="grupo-tit' + (k === 'hoy' && vencidos ? ' rojo' : '') + '"><span>' + nom + sub + '</span><span class="linea"></span><span class="mono">' + total + '</span></div>' +
       (g.length ? '<div class="pends">' + g.map((x) => filaPendiente(x, { verLista: !ui.lista })).join('') + '</div>' : vacio('', VACIOS[k])) +
-      (k === 'hecho' && total > g.length ? '<div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-mas-hechos">Ver ' + Math.min(30, total - g.length) + ' más</button></div>' : '') + '</section>';
+      masBoton(k, total, g.length) + '</section>';
   });
   html += '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button></div>';
   return html;
@@ -69,10 +77,10 @@ export function vistaRecordatorios() {
 
 export const acciones = {
   saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
-  'r-lista'(b) { ui.lista = b.dataset.v; ui.verHechos = 8; return true; },
+  'r-lista'(b) { ui.lista = b.dataset.v; ui.ver = {}; return true; },
   'r-nueva-lista'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; }); },
   'r-editar-lista'(b, ev, repintar) { editarLista(ui.lista, repintar, (id) => { ui.lista = id; }); },
-  'r-mas-hechos'() { ui.verHechos += 30; return true; },
+  'r-mas'(b) { const k = b.dataset.v; ui.ver[k] = cuantos(k) + (k === 'hecho' ? 30 : 100); return true; },
   'r-desmarcar-todo'(b, ev, repintar) {
     import('../datos/datos.js').then(({ poner }) => {
       pendientesDe(ui.lista).filter((x) => x.estado === 'hecho').forEach((x) => { const y = JSON.parse(JSON.stringify(x)); y.estado = 'pendiente'; y.extra.hechoEn = 0; poner(y); });

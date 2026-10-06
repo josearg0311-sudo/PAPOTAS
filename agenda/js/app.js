@@ -21,7 +21,7 @@ import { marcar } from './datos/pendientes.js';
 import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
-import { vistaMas, vistaSeccion } from './vistas/mas.js';
+import { vistaMas } from './vistas/mas.js';
 import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
 import { vistaFinanzas, acciones as accFin } from './vistas/finanzas.js';
 import { vistaNotasSeccion, acciones as accNotas, alEscribirNotas, alCambiarNotas } from './vistas/notas.js';
@@ -56,6 +56,11 @@ function leerRuta() {
   if (TITULOS[sec]) return { sec, param: '' };
   return null;
 }
+/* Atajos del ícono instalado de la v4.5 (mantener pulsado el ícono):
+   #gasto, #ingreso, #anadir siguen funcionando en la versión nueva */
+const ATAJO_V45 = { gasto: 'gasto', ingreso: 'ingreso', anadir: 'recordatorio', tarea: 'recordatorio' };
+const atajoInicial = ATAJO_V45[(location.hash || '').slice(1)] || '';
+if (atajoInicial) { try { history.replaceState(null, '', atajoInicial === 'ingreso' ? '#finanzas' : '#hoy'); } catch (e) { /* nada */ } }
 let ruta = leerRuta() || { sec: preferencias().inicio, param: '' };
 function padre(sec) { return ['seguimiento', 'finanzas', 'notas', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
 
@@ -103,7 +108,7 @@ function contenido() {
     case 'seguimiento': return vistaSeguimiento(ruta.param);
     case 'finanzas': return vistaFinanzas(ruta.param);
     case 'notas': return vistaNotasSeccion(ruta.param);
-    default: return vistaSeccion(ruta.sec);
+    default: return vistaMas();
   }
 }
 
@@ -152,7 +157,6 @@ const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjuste
   agregar() { abrirAgregar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },
-  fase(b) { aviso('Esto llega en la Fase ' + b.dataset.n + '.'); },
   'ir-dia'(b) { irADia(b.dataset.dia); ir('agenda'); }
 });
 
@@ -231,6 +235,12 @@ setInterval(() => { if (hoy() !== dia) { dia = hoy(); pintar(); } }, 60000);
 /* Primera vez: el recorrido de bienvenida */
 function arrancarRecorrido() { if (!preferencias().tourVisto) setTimeout(iniciarRecorrido, 400); }
 despuesDeAbrir(() => { if (!migrando) arrancarRecorrido(); });
+/* El atajo del ícono, una vez abierta la app (después del PIN) */
+if (atajoInicial) despuesDeAbrir(() => setTimeout(() => {
+  if (migrando) return;
+  if (atajoInicial === 'ingreso') { const b = document.querySelector('[data-acc="fin-nuevo"][data-ing="1"]'); if (b) b.click(); }
+  else abrirAgregar(atajoInicial);
+}, 300));
 /* La nube: solo si tú la conectaste en Ajustes (nunca sola) */
 despuesDeAbrir(() => iniciarNube());
 /* El teclado propio (solo en pantallas táctiles) */

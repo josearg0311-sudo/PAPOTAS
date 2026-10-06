@@ -9,11 +9,6 @@ export function tarjeta({ eti = '', titulo, n = null, cuerpo = '', guia = '', cl
     (guia ? explica(guia) : '') + cuerpo + '</section>';
 }
 
-/* Aviso de qué llega en qué fase (desaparece cuando la fase esté hecha) */
-export function enFase(n, texto) {
-  return '<div class="nota-fase">' + ico('i-info') + '<span><b>Fase ' + n + ':</b> ' + texto + '</span></div>';
-}
-
 export function encabezado(titulo, sub) {
   return '<header class="encabezado"><h1>' + titulo + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</header>';
 }

@@ -213,7 +213,7 @@ button.hf-txt { cursor: pointer; }
 .hf-txt b { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
 .hf-txt small { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; color: var(--tinta-2); font-size: 12.5px; line-height: 1.4; }
 .hf-fin { flex: none; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-.hf-fin .mini-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; text-decoration: none; color: var(--tinta); }
+.hf-fin .mini-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; text-decoration: none; color: var(--tinta); }
 .hf-fin .mini-btn .i { width: 14px; height: 14px; }
 .hf.toca { box-shadow: inset 3px 0 0 var(--a); }
 .hf.hecha .hf-txt b { text-decoration: line-through; color: var(--tinta-3); }
@@ -357,7 +357,7 @@ button.hf-txt { cursor: pointer; }
 .hf-txt small .progreso { display: inline-block; width: 72px; height: 6px; }
 .ideas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 16px 4px; border-top: 1px dashed var(--borde); }
 .ideas small { width: 100%; color: var(--tinta-3); font-size: 12px; }
-.ideas .mini-btn { min-height: 40px; }
+.ideas .mini-btn { min-height: 44px; }
 
 /* Pulso de cada área */
 .tarjeta.pulso .cifras { padding-bottom: 14px; }
@@ -366,7 +366,7 @@ button.hf-txt { cursor: pointer; }
 
 /* Hábitos de hoy (en Hoy y en el Resumen de cada área) */
 .habs-area { padding: 0 16px 10px; }
-.habs-area-tit { display: inline-block; margin-bottom: 6px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--at); text-decoration: none; }
+.habs-area-tit { display: inline-flex; align-items: center; min-height: 44px; margin-bottom: 0; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--at); text-decoration: none; }
 .habs-hoy { display: flex; flex-wrap: wrap; gap: 8px; }
 .tarjeta > .habs-hoy { padding: 0 16px 12px; }
 .hab-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 10px; border-radius: 99px; border: 1.5px solid color-mix(in srgb, var(--a) 45%, var(--borde)); background: var(--superficie-2); color: var(--tinta); font-size: 14px; font-weight: 600; text-align: left; }
@@ -450,23 +450,23 @@ button.hf-txt { cursor: pointer; }
 .mini-barra { display: inline-block; width: 34px; height: 6px; margin-right: 6px; border-radius: 99px; background: var(--superficie-3); overflow: hidden; vertical-align: middle; }
 .mini-barra i { display: block; height: 100%; background: var(--a); }
 @media (max-width: 420px) { .mini-barra { display: none; } }
-.enlace { border: 0; background: none; padding: 6px 0; min-height: 36px; color: var(--acento-txt); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.enlace { border: 0; background: none; padding: 6px 0; min-height: 44px; min-width: 44px; color: var(--acento-txt); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
 .columnas > div > .nota-fase { margin: 0; }
 
 /* Notas */
 .grupo-notas { display: grid; gap: 10px; }
 .grupo-notas-tit { display: flex; align-items: center; gap: 8px; font-size: 13px; font-family: var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
-.grupo-notas-tit a { color: var(--at); text-decoration: none; }
+.grupo-notas-tit a { display: inline-flex; align-items: center; min-height: 44px; color: var(--at); text-decoration: none; }
 .grupo-notas-tit .mono { color: var(--tinta-3); font-size: 11px; }
 .notas { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
 .nota { display: grid; align-content: start; gap: 6px; padding: 12px 14px 10px; border-radius: var(--radio-chico); background: var(--superficie); border: 1px solid var(--borde); border-top: 3px solid var(--a); min-width: 0; }
 .nota.fija { box-shadow: 0 0 0 1px color-mix(in srgb, var(--a) 35%, transparent); }
-.nota-tit { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 40px; border: 0; background: none; padding: 0; color: var(--tinta); text-align: left; font: inherit; }
+.nota-tit { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; border: 0; background: none; padding: 0; color: var(--tinta); text-align: left; font: inherit; }
 .nota-tit b { font-size: 15px; overflow-wrap: anywhere; }
 .nota-tit .i { width: 15px; height: 15px; color: var(--tinta-3); flex: none; }
 .nota-cuerpo { display: grid; gap: 2px; font-size: 14px; color: var(--tinta-2); }
 .nota-cuerpo p { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
-.nota-check { display: flex; align-items: center; gap: 2px; min-height: 40px; border: 0; background: none; padding: 0; color: var(--tinta); text-align: left; font: inherit; font-size: 14px; }
+.nota-check { display: flex; align-items: center; gap: 2px; min-height: 44px; border: 0; background: none; padding: 0; color: var(--tinta); text-align: left; font: inherit; font-size: 14px; }
 .nota-check[aria-checked="true"] { color: var(--tinta-3); text-decoration: line-through; }
 .nota-check[aria-checked="true"] .casilla span { background: var(--a); }
 .nota-check[aria-checked="true"] .casilla span::after { content: ""; width: 9px; height: 5px; margin-top: -3px; border-left: 2.5px solid var(--fondo); border-bottom: 2.5px solid var(--fondo); transform: rotate(-45deg); }
