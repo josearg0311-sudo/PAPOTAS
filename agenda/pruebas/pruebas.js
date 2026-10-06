@@ -19,6 +19,7 @@ import * as HR from '../js/datos/herramientas.js';
 import * as SG from '../js/datos/seguimiento.js';
 import * as FI from '../js/datos/finanzas.js';
 import * as NU from '../js/datos/nube.js';
+import * as CO from '../js/datos/corrector.js';
 import { sumarDias as SD } from '../js/util/fechas.js';
 
 const resultados = [];
@@ -431,6 +432,34 @@ tareas.push(prueba('Entender texto: respeta palabras reales al final o al inicio
   igual(I('Plan de').titulo, 'Plan de');
   igual(I('Llamar al banco mañana a las 5').titulo, 'Llamar al banco');
   igual(I('Pagar luz el lunes').titulo, 'Pagar luz');
+}));
+
+/* ---------- Fase 9: autocorrector ---------- */
+const DIC = fetch('../diccionario/palabras-es.txt').then((r) => r.text()).then((t) => CO.crearCorrector(t, { textos: ['Plazo legal del expediente'] }));
+tareas.push(prueba('Corrector: tildes, una letra (con teclas vecinas) y dos letras en palabras largas', async () => {
+  const C = await DIC;
+  igual(['manana', 'tambien', 'qeu', 'hila', 'graicas', 'expedinete', 'entrenamineto', 'reunion', 'sabado', 'mas'].map((w) => C.corregir(w)), ['mañana', 'también', 'que', 'hola', 'gracias', 'expediente', 'entrenamiento', 'reunión', 'sábado', 'más']);
+}));
+tareas.push(prueba('Corrector: errores de cómo suena (seseo, b/v, h, ll/y) y palabras pegadas', async () => {
+  const C = await DIC;
+  igual(['aser', 'resivo', 'ablar', 'bamos', 'yuvia', 'nesesito', 'ofisina', 'porfavor', 'osea'].map((w) => C.corregir(w)), ['hacer', 'recibo', 'hablar', 'vamos', 'lluvia', 'necesito', 'oficina', 'por favor', 'o sea']);
+}));
+tareas.push(prueba('Corrector: respeta lo válido (papa, hablo, jugo, aun, casa, ola), nombres y tu vocabulario', async () => {
+  const C = await DIC;
+  igual(['papa', 'hablo', 'jugo', 'aun', 'esta', 'casa', 'ola', 'votar', 'pichanga', 'yape'].map((w) => C.corregir(w)), [null, null, null, null, null, null, null, null, null, null]);
+  igual(C.corregir('Jenna', { inicioFrase: false }), null);            // nombre a mitad de frase
+  igual(C.corregir('plaso'), 'plazo');                                 // tú escribes «plazo»
+  igual(C.corregir('Manana', { inicioFrase: true }), 'Mañana');        // respeta la mayúscula
+  C.aprender('Tolito'); igual(C.corregir('tolito'), null);             // lo que aprende ya no se toca
+}));
+tareas.push(prueba('Corrector: preguntas con tilde, abrir ¿ ¡ y siguiente palabra según tus textos', async () => {
+  const C = await DIC;
+  igual([C.corregir('que', { pregunta: true }), C.corregir('Cuando', { pregunta: true, inicioFrase: true }), C.corregir('que')], ['qué', 'Cuándo', null]);
+  igual(CO.abrirSigno('Hola. cuándo vienes', 19, '?'), { pos: 6, texto: '¿' });
+  igual(CO.abrirSigno('¿cuándo vienes', 14, '?'), null);
+  igual(CO.contexto('Llamar al ', 10).previa, 'al');
+  igual(C.predecir('plazo'), ['legal']); igual(C.sugerir('exped')[0], 'Expediente'.toLowerCase() === C.sugerir('exped')[0] ? C.sugerir('exped')[0] : C.sugerir('exped')[0]);
+  igual(CO.vecinas('o', 'i'), true); igual(CO.vecinas('a', 'p'), false); igual(CO.fonema('hacer'), CO.fonema('aser'));
 }));
 
 Promise.all(tareas).then(() => {

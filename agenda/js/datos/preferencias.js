@@ -19,6 +19,7 @@ const BASE = {
   sonido: true,
   feriados: true,
   deporte: { meta: 3, avisoDias: 3 },   // entrenos por semana y días sin entrenar antes de avisar
+  teclado: { activo: true, corrector: true, signos: true, grande: false, vibrar: true },   // teclado propio (Fase 9)
   tourVisto: false
 };
 
@@ -47,6 +48,9 @@ export function normalizarPref(x) {
   p.bloqueoMin = +p.bloqueoMin;
   p.guia = !!p.guia; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
   const dp = p.deporte && typeof p.deporte === 'object' ? p.deporte : {};
+  /* Teclado: si no estaba, se toma lo que tenías en la v4.5 (teclado y autocorrector) */
+  const tk = x && x.teclado && typeof x.teclado === 'object' ? x.teclado : (() => { const v = leer(ANTIGUAS.pref, {}) || {}; return { activo: v.teclado !== false, corrector: v.autocorr !== false }; })();
+  p.teclado = { activo: tk.activo !== false, corrector: tk.corrector !== false, signos: tk.signos !== false, grande: !!tk.grande, vibrar: tk.vibrar !== false };
   p.deporte = { meta: Math.min(7, Math.max(1, +dp.meta || 3)), avisoDias: [0, 2, 3, 4, 5, 7].includes(+dp.avisoDias) ? +dp.avisoDias : 3 };
   return p;
 }

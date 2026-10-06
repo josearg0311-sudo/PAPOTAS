@@ -10,6 +10,8 @@ import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { confirmar } from '../piezas/confirmar.js';
 import { editar } from '../piezas/formulario.js';
 import { aviso } from '../piezas/aviso.js';
+import { cambiarPref } from '../datos/preferencias.js';
+import { tecladoDisponible, palabrasAprendidas, olvidarPalabra, agregarPalabra } from '../piezas/teclado.js';
 
 function ajuste(titulo, texto, control) {
   return '<div class="ajuste"><div class="ajuste-txt"><b>' + titulo + '</b>' + (texto ? '<small>' + texto + '</small>' : '') + '</div><div class="ajuste-ctl">' + control + '</div></div>';
@@ -65,6 +67,26 @@ function hojaUnir(repintar) {
     try { const r = await unirNube(f.codigo.value); cerrarHoja(); repintar(); aviso('☁️ Unido' + (r && r.bajados ? ': llegaron ' + plural(r.bajados, 'cosa', 'cosas') : '') + '.'); }
     catch (e) { b.disabled = false; b.textContent = 'Unir y juntar'; aviso(mensajeError(e)); }
   });
+}
+
+/* ---------- Teclado ---------- */
+const siNo = (acc, k, v) => '<div class="selector" role="group"><button type="button" data-acc="' + acc + '" data-k="' + k + '" data-v="1" aria-pressed="' + !!v + '">Sí</button><button type="button" data-acc="' + acc + '" data-k="' + k + '" data-v="0" aria-pressed="' + !v + '">No</button></div>';
+export function grupoTeclado() {
+  const t = preferencias().teclado, n = Object.values(palabrasAprendidas()).filter((x) => x > 0).length;
+  return (tecladoDisponible() ? '' : '<p class="pie-ajuste">' + ico('i-info') + 'El teclado propio aparece en el celular y la tablet. En la computadora usas tu teclado de siempre; estos ajustes viajan contigo.</p>') +
+    ajuste('Teclado de la Agenda', 'Con ñ, tildes manteniendo la vocal, sugerencias, emojis y calculadora para montos. Desactívalo para usar el del celular.', siNo('tk-pref', 'activo', t.activo)) +
+    ajuste('Autocorrector', 'Corrige al poner espacio: tildes («manana» → mañana), errores de una o dos letras, s/z/c, b/v, h. Si borras justo después, vuelve tu palabra y la aprende.', siNo('tk-pref', 'corrector', t.corrector)) +
+    ajuste('Abrir ¿ y ¡ solos', 'Al terminar una pregunta con «?», pone el «¿» al inicio.', siNo('tk-pref', 'signos', t.signos)) +
+    ajuste('Teclas grandes', 'Más altas y con letra más grande.', siNo('tk-pref', 'grande', t.grande)) +
+    ajuste('Vibrar al tocar', '', siNo('tk-pref', 'vibrar', t.vibrar)) +
+    ajuste('Mis palabras', plural(n, 'palabra aprendida', 'palabras aprendidas') + ' (nombres, lugares y términos tuyos que el corrector no debe tocar). Incluye las que aprendió la versión anterior.', '<button type="button" class="btn" data-acc="tk-palabras">Ver y editar</button>');
+}
+function hojaPalabras(repintar) {
+  const m = palabrasAprendidas(), l = Object.keys(m).filter((w) => m[w] > 0).sort((a, b) => a.localeCompare(b, 'es'));
+  const h = abrirHoja('Mis palabras', '<form class="form" id="formPalabra" autocomplete="off"><div class="anadir-palabra"><input class="entrada" name="w" maxlength="30" placeholder="Agregar una palabra (ej. Tolito)" spellcheck="false" autocorrect="off"><button type="submit" class="btn pri">Agregar</button></div></form>' +
+    (l.length ? '<div class="chips-admin palabras">' + l.map((w) => '<button type="button" class="chip-admin" data-olvidar="' + esc(w) + '" aria-label="Olvidar ' + esc(w) + '">' + esc(w) + ' ✕</button>').join('') + '</div><p class="ayuda">Toca una palabra para olvidarla.</p>' : '<p class="ayuda">Aún no aprendió ninguna. Cuando el corrector cambie algo que escribiste bien, borra justo después: vuelve tu palabra y la aprende.</p>'));
+  h.querySelector('#formPalabra').addEventListener('submit', (ev) => { ev.preventDefault(); const v = ev.target.w.value; if (agregarPalabra(v)) { aviso('Aprendida: ' + v.trim()); hojaPalabras(repintar); } else aviso('Escribe una sola palabra, solo con letras.'); });
+  h.querySelectorAll('[data-olvidar]').forEach((b) => b.addEventListener('click', () => { olvidarPalabra(b.dataset.olvidar); aviso('Olvidada: ' + b.dataset.olvidar); hojaPalabras(repintar); }));
 }
 
 /* ---------- Tus áreas ---------- */
@@ -138,6 +160,8 @@ function editarCategoria(c, libro, repintar) {
 }
 
 export const acciones = {
+  'tk-pref'(b) { cambiarPref({ teclado: Object.assign({}, preferencias().teclado, { [b.dataset.k]: b.dataset.v === '1' }) }); return true; },
+  'tk-palabras'(b, ev, rp) { hojaPalabras(rp); },
   'nube-crear'(b, ev, rp) { hojaCrear(rp); },
   'nube-unir'(b, ev, rp) { hojaUnir(rp); },
   async 'nube-ahora'(b, ev, rp) { b.disabled = true; try { const r = await sincronizar('a mano'); aviso('☁️ Sincronizada' + (r && r.bajados ? ' · llegaron ' + plural(r.bajados, 'cambio', 'cambios') : '')); } catch (e) { aviso(mensajeError(e)); } rp(); },

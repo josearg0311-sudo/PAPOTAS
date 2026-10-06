@@ -1,0 +1,5 @@
+palabras-es.txt: ~39 000 palabras del español ordenadas por uso (la más común primero),
+separadas por un espacio. Base: el diccionario de la v4.5 (20 000 palabras) limpio de
+palabras en inglés y nombres de películas, más palabras de la lista pública de frecuencias
+FrequencyWords (hermitdave, licencia MIT/CC-BY-SA) y vocabulario peruano y de la app
+(trámites, términos legales, distritos de Lima, jerga). Lo usa js/datos/corrector.js.

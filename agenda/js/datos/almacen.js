@@ -26,7 +26,8 @@ export const ANTIGUAS = {
   nubeLibroPersonal: 'libro_cuentas_db_cfg',
   nubeLibroOficina: 'oficina_cuentas_db_cfg',
   libroPersonalBase: 'ledger_finanzas_simple_v1_base',
-  libroOficinaBase: 'ledger_oficina_v1_base'
+  libroOficinaBase: 'ledger_oficina_v1_base',
+  palabras: 'agenda_palabras'
 };
 
 export function leer(clave, porDefecto = null) {

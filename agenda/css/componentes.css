@@ -318,3 +318,60 @@ body.con-hoja .avisos { bottom: auto; top: calc(12px + env(safe-area-inset-top, 
 .muestra-color { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
 [data-sel="icono"] button { min-width: 44px; display: inline-grid; place-items: center; }
 [data-sel="icono"] button .i { width: 20px; height: 20px; }
+
+/* ===================== Fase 9 · Teclado propio ===================== */
+.tkb { position: fixed; left: 0; right: 0; bottom: 0; z-index: 70; padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--superficie) 88%, var(--fondo)); border-top: 1px solid var(--borde);
+  user-select: none; -webkit-user-select: none; touch-action: none; animation: tkSube .14s ease-out; }
+.tkb.oculto { display: none; }
+@keyframes tkSube { from { transform: translateY(25%); opacity: .5; } }
+@media (prefers-reduced-motion: reduce) { .tkb { animation: none; } }
+.tk-cab { display: flex; align-items: center; gap: 6px; margin: 0 2px 6px; min-height: 38px; }
+.tk-barra { flex: 1; min-width: 0; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; align-items: center; }
+.tk-barra::-webkit-scrollbar { display: none; }
+.tk-sugs { gap: 4px; }
+.tk-sug { flex: 1 1 0; min-width: 0; height: 38px; padding: 0 8px; border: 0; border-radius: 10px; background: transparent; color: var(--tinta); font: inherit; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tk-sug + .tk-sug { border-left: 1px solid var(--borde); border-radius: 0; }
+.tk-sug.tk-mejor { font-weight: 700; color: var(--acento-txt); }
+.tk-sug.tk-tal { color: var(--tinta-2); font-style: italic; }
+.tk-sug.tk-pred { color: var(--tinta-2); }
+.tk-atajo { flex: none; height: 36px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--superficie-2); color: var(--acento-txt); font: inherit; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.tk-acento { color: var(--tinta); min-width: 38px; padding: 0 8px; font-size: 17px; }
+.tk-calc { padding: 0 10px; font-family: var(--f-mono); }
+.tk-res { font-size: 18px; font-weight: 700; color: var(--verde); }
+.tk-ayuda { font-size: 12px; color: var(--tinta-3); }
+.tk-cab-acc { display: flex; gap: 4px; flex: none; }
+.tk-mini { width: 40px; height: 38px; border: 0; border-radius: 10px; display: grid; place-items: center; background: var(--superficie-2); color: var(--tinta-2); font-size: 17px; }
+.tk-teclas { display: flex; flex-direction: column; gap: 8px; }
+.tk-fila { display: flex; gap: 5px; justify-content: center; }
+.tk { flex: 1 1 0; min-width: 0; height: 46px; padding: 0; border: 0; border-radius: 9px; display: grid; place-items: center;
+  background: var(--superficie-3); color: var(--tinta); font-family: var(--f-texto); font-size: 21px; font-weight: 500;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .45); }
+:root[data-tema="claro"] .tk { background: #FFFFFF; box-shadow: 0 1px 0 rgba(0, 0, 0, .18); }
+.tk-fn { background: var(--superficie-2); color: var(--tinta-2); font-size: 15px; font-weight: 700; flex: 1.4 1 0; }
+:root[data-tema="claro"] .tk-fn { background: #D9DBE1; }
+.tk-esp { flex: 4.5 1 0; font-size: 13px; color: var(--tinta-3); }
+.tk-ok { background: var(--acento); color: var(--sobre-acento); }
+:root[data-tema="claro"] .tk-ok { background: var(--acento); }
+.tk-on { background: var(--tinta); color: var(--fondo); }
+.tk-pulsada { transform: scale(.94); filter: brightness(1.25); }
+.tk-numpad .tk { height: 52px; font-size: 24px; }
+.tk-numpad .tk-fn { flex: 1 1 0; }
+.tk-emo .tk { font-size: 24px; }
+.tkb.grande .tk { height: 54px; font-size: 24px; }
+.tkb.grande .tk-numpad .tk { height: 60px; }
+.tk-burbuja { position: absolute; transform: translate(-50%, -100%); margin-top: -6px; min-width: 46px; height: 58px; padding: 0 8px; border-radius: 12px;
+  display: grid; place-items: center; background: var(--superficie-3); color: var(--tinta); font-size: 30px; font-weight: 600; pointer-events: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .45); border: 1px solid var(--borde); }
+:root[data-tema="claro"] .tk-burbuja { background: #FFFFFF; }
+.tk-pop { position: absolute; display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: var(--superficie); border: 1px solid var(--borde); box-shadow: 0 10px 30px rgba(0, 0, 0, .5); }
+.tk-pop button { width: 44px; height: 48px; border: 0; border-radius: 9px; background: var(--superficie-3); color: var(--tinta); font-size: 22px; }
+.tk-pop button.tk-sobre { background: var(--acento); color: var(--sobre-acento); }
+/* Con el teclado abierto: la pantalla y las hojas suben, la barra de abajo se esconde */
+body.con-teclado .barra, body.con-teclado .fab { display: none; }
+body.con-teclado .pantalla { padding-bottom: calc(var(--kb, 0px) + 24px); }
+body.con-teclado .velo { bottom: var(--kb, 0px); }
+body.con-teclado .hoja { max-height: calc(100dvh - var(--kb, 0px) - 12px); }
+body.con-teclado .avisos { bottom: calc(var(--kb, 0px) + 12px); }
+.anadir-palabra { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.chips-admin.palabras { max-height: 50vh; overflow-y: auto; }

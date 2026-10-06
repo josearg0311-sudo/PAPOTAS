@@ -15,7 +15,7 @@ import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
 import { encabezado } from './comun.js';
 import { VERSION } from '../version.js';
-import { grupoNube, grupoAreas, grupoEtiquetas } from './admin.js';
+import { grupoNube, grupoAreas, grupoEtiquetas, grupoTeclado } from './admin.js';
 
 function selector(acc, opciones, actual, etiqueta) {
   return '<div class="selector" role="group" aria-label="' + etiqueta + '">' + opciones.map((o) =>
@@ -59,6 +59,7 @@ export function vistaAjustes() {
     '<p class="pie-ajuste">' + ico('i-info') + 'El PIN tapa la pantalla, pero no cifra tus datos. Si lo olvidas, no se puede recuperar.</p>');
 
   html += '<div id="nube"></div>' + grupo('Nube', grupoNube());
+  html += grupo('Teclado', grupoTeclado());
   html += grupo('Tus áreas', grupoAreas());
   html += grupo('Etiquetas y categorías', grupoEtiquetas());
 

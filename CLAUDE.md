@@ -51,6 +51,7 @@ js/
           calendario.js (ocurre, bloquesDelDia, todoElDia, minutosPorArea, vencenEl, delDia, resumenDia, pagos fijos)
           feriados.js (feriados nacionales del Perú, Semana Santa calculada) · preferencias.js (incl. deporte {meta, avisoDias}) · areas.js
           nube.js (jsonbin: bin NUEVO «agenda5», nunca escribe los 3 bins de la v4.5; empaquetar gzip+base64, revisarAntesDeSubir, firma, código AGENDA5:, crear/unir/sincronizar/desconectar, traerNubeAntigua SOLO LEE; config en agenda5_nube, estado en agenda5_nube_estado; agenda5_nube_api solo para pruebas; window.__SIN_NUBE__ la apaga en la vista previa)
+          corrector.js (puro: crearCorrector(texto,{propias,textos}) → corregir/sugerir/predecir/aprender/olvidar; tildes, teclas vecinas, seseo s/z/c b/v h ll/y por fonema(), 2 errores en palabras largas, JUNTAS «porfavor», SIN_TOCAR «papa/aun…», tildes tras ¿¡, abrirSigno, tildeInterrogativo; tu vocabulario manda)
           finanzas.js (puro: LIBROS, CATEGORIAS, areaDeCategoria, resumenMes, historial, estadoPresupuesto 85 %, csv; notas: lineasNota/alternarCasilla «[ ]», rachaDiario)
           seguimiento.js (puro: racha y % de hábitos, semana día a día, avance y ritmo de metas, metas que bajan, semana a revisar, áreas descuidadas)
           herramientas.js (cálculos puros de las áreas: val() lee extra y si no datos; casa, cumpleaños, préstamos, promedio vigesimal 10.5, faltas, planSesiones, Leitner 1-2-4-8-16, horas×tarifa, racha de entrenos, récords, partidos, pichanga, peso)
@@ -58,6 +59,7 @@ js/
           agregar-rapido.js (2 toques: tipo → área → texto con vista previa; guarda recordatorio, evento, gasto, nota, hábito, meta)
           pendientes-ui.js (fila con casilla, Más tarde/Mañana/Día…, deslizar, editor, listas) · pomodoro.js (agenda5_foco)
           eventos-ui.js (crear/editar eventos, .ics, Google, marcar pago fijo → gasto en el libro; preset tipoEvento)
+          teclado.js (teclado propio solo en pantallas táctiles: capas abc/num/sim/emo/calculadora, tildes manteniendo, burbuja, barra de sugerencias/siguiente palabra/atajos, autocorrección con ⌫ que devuelve y aprende, ¿¡ automáticos, doble espacio = punto, espacio = cursor, ⌫ mantenido borra palabras, emojis recientes agenda5_emojis, palabras agenda5_palabras {w:n} + agenda_palabras de la v4.5 solo lectura; diccionario en diccionario/palabras-es.txt que se baja la primera vez; Enter primero se le pasa a la app)
           formulario.js (formulario genérico en hoja: campos + «filas» repetibles; editar({titulo, campos, alGuardar, alBorrar}))
           avisos.js (recordatorios a la hora y eventos «X min antes», sonido, notificaciones; agenda5_avisados) · migracion-ui.js · confirmar.js
   vistas/ hoy · recordatorios · agenda · areas (resumen con señales + pestañas) · area-comun (filas, cifras, cambiarExtra, anotarMovimiento)
@@ -68,7 +70,7 @@ js/
           admin (en Ajustes: grupoNube con confirmaciones, grupoAreas (nombre/lema/color/ícono en perfil.areas), grupoEtiquetas (renombrar/quitar etiquetas, renombrar categorías))
           notas (#notas por área con casillas · #notas/diario = también Personal → Diario; ids diario_<fecha>, bienestar_<fecha>)
           mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
-fuentes/ iconos/ pruebas/
+fuentes/ iconos/ pruebas/ diccionario/ (palabras-es.txt ~39 000 palabras por uso + LEEME)
 ```
 - Las acciones se declaran con `data-acc="nombre"`; cada vista exporta `acciones` y `app.js` las junta. Si una acción devuelve `true`, se repinta.
 - Todo texto del usuario pasa por `esc()` antes de ir al HTML.
@@ -118,5 +120,5 @@ Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 
 7. ✅ **Finanzas y Notas**: dos libros que nunca se mezclan (personal en azul, oficina en gris), cada uno con mes, ingresos/gastos/saldo, presupuesto (aviso al 85 %, rojo al pasarse; también como señal en su área), pagos fijos del libro con casilla, gastos por categoría (tocar filtra), en el personal «cada área con sus gastos» (Estudios/Deporte cuentan en su área; la categoría sugiere el área), movimientos editables, informe de meses (tabla) y «Bajar el libro (Excel)» en CSV. Cobros y préstamos se anotan solos desde su área. Notas agrupadas por área, fijadas primero, búsqueda, casillas «[ ]» que se marcan tocándolas, enlaces a las listas para marcar. Diario (Personal): ánimo 1–5, texto, agua y sueño, racha y tira de 2 semanas. SW `agenda-v33`. 80 pruebas.
 8. ✅ **Ajustes completos + nube**: Nube en Ajustes (estado, sincronizar ahora, código para otro aparato, desconectar, traer de la nube anterior solo leyendo); se crea solo con la llave y marcando «Entiendo»; se sincroniza sola (cambio con 2,5 s de espera, cada minuto mientras se usa, al abrir, al volver internet); indicador de nube en la cabecera. Mezcla entre aparatos: gana `actualizado`, borrado no revive, `doc.purgados` evita que vuelva lo vaciado de la papelera (180 días), perfil con `actualizado`. Áreas editables (9 colores con contraste revisado, 12 íconos, «volver a como era»). Etiquetas y categorías renombrables. Claves de nube y `_base` de la v4.5 agregadas a las protegidas. Corregido: el intérprete se comía palabras reales al final («aparato A»). Probado con una nube de mentira (scratchpad/nube-falsa.js) y dos aparatos. SW `agenda-v34`. 86 pruebas.
    ⚠️ **La nube real del usuario aún NO se conectó**: lo hará él desde Ajustes → Nube cuando lo decida (no publicar sin avisarle).
-9. Teclado propio mejorado + autocorrector (el usuario pidió mantenerlo y mejorarlo mucho).
+9. ✅ **Teclado propio y autocorrector** (todo lo de la v4.5 + mucho más): diccionario limpio de inglés y nombres de películas, ampliado a ~39 000 palabras con vocabulario peruano, legal y de la app; corrector con teclas vecinas, seseo/b-v/h/ll-y, dos errores en palabras largas, palabras pegadas, «papa» respetada, tildes en preguntas y ¿¡ automáticos; aprende de tus textos y de lo que repites; siguiente palabra; burbuja, espacio-cursor, ⌫ por palabras, doble espacio, emojis recientes, calculadora × ÷ con resultado en vivo; Ajustes → Teclado (activar, corrector, ¿¡, teclas grandes, vibrar, Mis palabras). Preferencias en `preferencias().teclado` (toma teclado/autocorr de la v4.5 la primera vez). SW `agenda-v35`. 90 pruebas.
 10. Pulido, accesibilidad, rendimiento y publicación.
