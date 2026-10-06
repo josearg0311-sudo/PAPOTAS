@@ -3825,3 +3825,111 @@ header.hoy-cab .hc-txt{ flex:1; min-width:0 }
 .portada-esp .esp-pildoras .esp-pil .ep-nom{ display:inline !important }
 .portada-esp .esp-pildoras .esp-pil, .portada-esp .esp-pildoras .esp-pil .ep-nom{ font-size:13px !important; line-height:1 !important }
 .portada-esp .esp-pildoras .esp-pil .ep-em{ font-size:16px !important }
+
+/* =====================================================================
+   FIRMA DE CADA SECCIÓN: un dibujo de fondo propio en su banda y su icono
+   grande como marca de agua. Todo se dibuja con el color de la sección.
+   ===================================================================== */
+.banda, .banda-panel, .portada-esp, header.portada-hoy{ isolation:isolate }
+.banda-fondo{ position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.55;
+  -webkit-mask-image:linear-gradient(100deg, transparent 18%, #000 75%); mask-image:linear-gradient(100deg, transparent 18%, #000 75%) }
+.banda-marca{ position:absolute; z-index:-1; right:-14px; bottom:-26px; pointer-events:none; color:var(--sc, var(--ec)); opacity:.13; transform:rotate(-12deg) }
+.banda-marca svg{ width:150px !important; height:150px !important; stroke-width:1.4 }
+.banda-marca.esp-marca{ font-size:130px; line-height:1; opacity:.16; filter:saturate(1.2) }
+.banda > *:not(.banda-fondo):not(.banda-marca), .banda-panel > *:not(.banda-fondo):not(.banda-marca),
+.portada-esp > *:not(.banda-fondo):not(.banda-marca){ position:relative; z-index:1 }
+@media (max-width:420px){ .banda-marca svg{ width:118px !important; height:118px !important } .banda-marca.esp-marca{ font-size:104px } }
+
+/* El color del dibujo */
+.banda-fondo{ --l:color-mix(in srgb, var(--sc, var(--ec)) 42%, transparent) }
+
+/* Mi día: la regla de las horas */
+[data-sec="agenda"] .banda-fondo{ background:repeating-linear-gradient(90deg, var(--l) 0 1px, transparent 1px 28px), linear-gradient(transparent 62%, var(--l) 62% calc(62% + 1px), transparent 0);
+  -webkit-mask-image:linear-gradient(transparent 30%, #000); mask-image:linear-gradient(100deg, transparent 20%, #000 80%) }
+/* Calendario: la cuadrícula del mes */
+[data-sec="calendario"] .banda-fondo{ background:linear-gradient(var(--l) 1px, transparent 1px) 0 0/34px 26px, linear-gradient(90deg, var(--l) 1px, transparent 1px) 0 0/34px 26px }
+/* Tareas: casillas en fila */
+[data-sec="tareas"] .banda-fondo{ background:
+  radial-gradient(circle at 12px 13px, transparent 6px, var(--l) 6px 7.5px, transparent 8px) 0 0/100% 28px,
+  linear-gradient(transparent 13px, var(--l) 13px 14px, transparent 14px) 30px 0/100% 28px no-repeat;
+  background-repeat:repeat-y, repeat-y; background-position:62% 0, 66% 0 }
+/* Avisos: ondas de campana */
+[data-sec="recordatorios"] .banda-fondo{ background:repeating-radial-gradient(circle at 92% 30%, transparent 0 14px, var(--l) 14px 15.5px) }
+/* Proyectos: columnas de tablero */
+[data-sec="proyectos"] .banda-fondo{ background:
+  linear-gradient(var(--l), var(--l)) 58% 18%/16% 14% no-repeat, linear-gradient(var(--l), var(--l)) 58% 42%/16% 14% no-repeat,
+  linear-gradient(var(--l), var(--l)) 77% 18%/16% 14% no-repeat, linear-gradient(var(--l), var(--l)) 96% 18%/16% 14% no-repeat,
+  linear-gradient(var(--l), var(--l)) 96% 42%/16% 14% no-repeat, linear-gradient(var(--l), var(--l)) 96% 66%/16% 14% no-repeat; opacity:.42 }
+/* Notas: hoja rayada con su margen */
+[data-sec="notas"] .banda-fondo{ background:linear-gradient(90deg, transparent 58%, color-mix(in srgb, var(--debe) 55%, transparent) 58% calc(58% + 2px), transparent 0),
+  repeating-linear-gradient(transparent 0 21px, var(--l) 21px 22px) }
+/* Listas: viñetas */
+[data-sec="listas"] .banda-fondo{ background:radial-gradient(circle, var(--l) 3px, transparent 3.5px) 0 0/30px 22px,
+  linear-gradient(transparent 10px, var(--l) 10px 11px, transparent 11px) 14px 0/100% 22px; opacity:.5 }
+/* Hábitos: la cadena de días hechos */
+[data-sec="habitos"] .banda-fondo{ background:radial-gradient(circle, var(--l) 5px, transparent 5.5px) 0 0/20px 20px }
+/* Metas: la diana */
+[data-sec="metas"] .banda-fondo{ background:repeating-radial-gradient(circle at 88% 55%, var(--l) 0 9px, transparent 9px 18px);
+  -webkit-mask-image:radial-gradient(circle at 88% 55%, #000 0 90px, transparent 120px); mask-image:radial-gradient(circle at 88% 55%, #000 0 90px, transparent 120px) }
+/* Diario: papel de cuaderno */
+[data-sec="diario"] .banda-fondo{ background:repeating-linear-gradient(transparent 0 25px, var(--l) 25px 26px), radial-gradient(circle at 54% 30%, var(--l) 4px, transparent 5px), radial-gradient(circle at 54% 70%, var(--l) 4px, transparent 5px) }
+/* Dinero: filigrana de billete */
+[data-sec="dinero"] .banda-fondo, [data-sec="panel-dinero"] .banda-fondo{ background:repeating-radial-gradient(ellipse at 100% 100%, transparent 0 7px, var(--l) 7px 8px), repeating-linear-gradient(45deg, transparent 0 9px, color-mix(in srgb, var(--sc) 14%, transparent) 9px 10px) }
+/* Movimientos: flechas que suben y bajan */
+[data-sec="movimientos"] .banda-fondo{ background:repeating-linear-gradient(135deg, transparent 0 14px, var(--l) 14px 15px), repeating-linear-gradient(45deg, transparent 0 14px, color-mix(in srgb, var(--sc) 20%, transparent) 14px 15px) }
+/* Pagos fijos: el borde dentado del recibo */
+[data-sec="pagos"] .banda-fondo{ background:repeating-linear-gradient(transparent 0 15px, var(--l) 15px 16px) 64% 0/26% 100% no-repeat,
+  conic-gradient(from -45deg at 50% 100%, var(--l) 90deg, transparent 0) 0 100%/16px 10px repeat-x }
+/* Informes: barras */
+[data-sec="informes"] .banda-fondo{ background:
+  linear-gradient(var(--l), var(--l)) 62% 100%/7% 40% no-repeat, linear-gradient(var(--l), var(--l)) 71% 100%/7% 65% no-repeat,
+  linear-gradient(var(--l), var(--l)) 80% 100%/7% 48% no-repeat, linear-gradient(var(--l), var(--l)) 89% 100%/7% 82% no-repeat,
+  linear-gradient(var(--l), var(--l)) 98% 100%/7% 60% no-repeat }
+/* Ajustes: puntos de tablero de control */
+[data-sec="ajustes"] .banda-fondo, [data-sec="secciones"] .banda-fondo, [data-sec="papelera"] .banda-fondo{ background:radial-gradient(circle, var(--l) 1.5px, transparent 2px) 0 0/14px 14px }
+/* Paneles */
+[data-sec="panel-agenda"] .banda-fondo{ background:linear-gradient(var(--l) 1px, transparent 1px) 0 0/30px 24px, linear-gradient(90deg, var(--l) 1px, transparent 1px) 0 0/30px 24px }
+[data-sec="panel-notas"] .banda-fondo{ background:repeating-linear-gradient(transparent 0 21px, var(--l) 21px 22px) }
+[data-sec="panel-mas"] .banda-fondo{ background:radial-gradient(circle, var(--l) 3px, transparent 3.5px) 0 0/22px 22px }
+
+/* Espacios: cada uno con su mundo */
+.portada-esp .banda-fondo{ --l:color-mix(in srgb, var(--ec) 45%, transparent) }
+[data-sec="esp-personal"] .banda-fondo{ background:
+  linear-gradient(135deg, transparent 50%, var(--l) 50% calc(50% + 1.5px), transparent 0) 0 0/36px 36px,
+  linear-gradient(225deg, transparent 50%, var(--l) 50% calc(50% + 1.5px), transparent 0) 0 0/36px 36px }
+[data-sec="esp-estudios"] .banda-fondo{ background:linear-gradient(var(--l) 1px, transparent 1px) 0 0/12px 12px, linear-gradient(90deg, var(--l) 1px, transparent 1px) 0 0/12px 12px; opacity:.4 }
+[data-sec="esp-oficina"] .banda-fondo{ background:
+  linear-gradient(var(--l) 1px, transparent 1px) 0 0/48px 48px, linear-gradient(90deg, var(--l) 1px, transparent 1px) 0 0/48px 48px,
+  linear-gradient(color-mix(in srgb, var(--ec) 18%, transparent) 1px, transparent 1px) 0 0/12px 12px,
+  linear-gradient(90deg, color-mix(in srgb, var(--ec) 18%, transparent) 1px, transparent 1px) 0 0/12px 12px }
+[data-sec="esp-deporte"] .banda-fondo{ background:
+  radial-gradient(circle at 78% 50%, transparent 46px, var(--l) 46px 48px, transparent 49px),
+  linear-gradient(90deg, transparent calc(78% - 1px), var(--l) calc(78% - 1px) calc(78% + 1px), transparent 0),
+  repeating-linear-gradient(90deg, color-mix(in srgb, var(--ec) 9%, transparent) 0 30px, transparent 30px 60px); opacity:.7 }
+
+/* Hoy: el cielo cambia con la hora del día */
+header.portada-hoy{ position:relative }
+header.portada-hoy .banda-fondo{ opacity:1; -webkit-mask-image:none; mask-image:none }
+header.portada-hoy[data-momento="manana"] .banda-fondo{ background:radial-gradient(120% 90% at 100% 0%, rgba(255,176,77,.32), transparent 60%) }
+header.portada-hoy[data-momento="tarde"] .banda-fondo{ background:radial-gradient(120% 90% at 100% 0%, rgba(255,120,80,.24), transparent 55%), radial-gradient(90% 90% at 0% 100%, rgba(90,169,255,.18), transparent 60%) }
+header.portada-hoy[data-momento="noche"] .banda-fondo{ background:
+  radial-gradient(1.5px 1.5px at 72% 22%, #fff, transparent), radial-gradient(1px 1px at 84% 48%, #fff, transparent),
+  radial-gradient(1.5px 1.5px at 92% 16%, #fff, transparent), radial-gradient(1px 1px at 64% 60%, #fff, transparent),
+  radial-gradient(1px 1px at 96% 70%, #fff, transparent), radial-gradient(120% 90% at 100% 0%, rgba(120,90,255,.30), transparent 60%) }
+.hoy-astro{ position:absolute; z-index:-1; pointer-events:none; right:22px; top:16px; width:58px; height:58px; border-radius:50% }
+header.portada-hoy[data-momento="manana"] .hoy-astro{ background:radial-gradient(circle, #FFD27A 0 45%, rgba(255,190,90,.35) 46% 60%, transparent 62%); box-shadow:0 0 50px 10px rgba(255,190,90,.25) }
+header.portada-hoy[data-momento="tarde"] .hoy-astro{ background:radial-gradient(circle, #FF9E6B 0 45%, rgba(255,140,90,.3) 46% 60%, transparent 62%); box-shadow:0 0 50px 10px rgba(255,130,80,.2) }
+header.portada-hoy[data-momento="noche"] .hoy-astro{ background:radial-gradient(circle at 36% 40%, transparent 0 34%, #E9E4FF 35% 45%, transparent 46%); box-shadow:none; opacity:.9 }
+header.portada-hoy .hoy-astro{ right:96px; top:10px }
+header.portada-hoy > *:not(.banda-fondo):not(.hoy-astro){ position:relative; z-index:1 }
+
+/* En claro el dibujo es más suave */
+:root[data-tema="claro"] .banda-fondo{ opacity:.35 }
+:root[data-tema="claro"] header.portada-hoy[data-momento="noche"] .banda-fondo{ opacity:.6 }
+@media (prefers-reduced-motion:no-preference){ .banda-marca{ transition:transform .4s ease } .banda:hover .banda-marca, .banda-panel:hover .banda-marca, .portada-esp:hover .banda-marca{ transform:rotate(-6deg) scale(1.05) } }
+/* Tareas: casillas vacías en rejilla */
+[data-sec="tareas"] .banda-fondo{ background:
+  linear-gradient(transparent 5px, var(--l) 5px 7px, transparent 7px 19px, var(--l) 19px 21px, transparent 21px) 0 0/30px 30px,
+  linear-gradient(90deg, transparent 5px, var(--l) 5px 7px, transparent 7px 19px, var(--l) 19px 21px, transparent 21px) 0 0/30px 30px !important }
+[data-sec="habitos"] .banda-fondo{ opacity:.32 }
+header.portada-hoy .hoy-astro{ right:-18px !important; top:-18px !important; width:88px; height:88px; opacity:.85 }

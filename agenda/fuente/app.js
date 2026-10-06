@@ -1327,7 +1327,9 @@ VISTAS.hoy = function(){
     '<button type="button" class="btn chico" data-acc="resumen-dia">' + ico('i-notas') + 'Resumen del día</button>' +
     '<button type="button" class="btn chico" data-acc="plan-manana">' + ico('i-cal') + 'Mañana</button>' +
     '<button type="button" class="btn chico" data-acc="cal-ir-dia-hoy" data-dia="' + hoy + '">' + ico('i-reloj') + 'Por horas</button></div>';
-  var html = '<header class="hoy-cab portada-hoy heroe-hoy">' +
+  var momento = h < 6 ? 'noche' : h < 12 ? 'manana' : h < 19 ? 'tarde' : 'noche';
+  var html = '<header class="hoy-cab portada-hoy heroe-hoy" data-momento="' + momento + '">' +
+    '<span class="banda-fondo" aria-hidden="true"></span><span class="hoy-astro" aria-hidden="true"></span>' +
     '<div class="hc-txt"><small>' + cap(DIAS[ahora.getDay()]) + ' ' + ahora.getDate() + ' de ' + MESES[ahora.getMonth()] + '</small>' +
       '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre.split(' ')[0]) : '') + '</h2>' +
       '<p class="hc-frase">' + esc(fraseDelDia()) + '</p></div>' +
@@ -1896,7 +1898,8 @@ VISTAS.espacio = function(id){
   /* Portada del espacio: una franja de su color a todo lo ancho, el
      nombre en grande y los otros espacios como círculos para saltar */
   var prox = ag7.filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
-  var html = '<header class="portada-esp esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' +
+  var html = '<header class="portada-esp esp-heroe tema-' + id + '" data-sec="esp-' + id + '" style="--ec:' + E.c + '">' +
+    '<span class="banda-fondo" aria-hidden="true"></span><span class="banda-marca esp-marca" aria-hidden="true">' + E.em + '</span>' +
     '<nav class="pe-cambia cambia-esp esp-pildoras" aria-label="Espacios">' + ESPACIOS.map(function(e){
       var n = pendientesEsp(e.id);
       return '<button type="button" class="esp-pil" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '">' +
@@ -3588,7 +3591,8 @@ function cabSeccion(v){
   var acc = (ACC_SECCION[v] || []).map(function(a, i){
     return '<button type="button" class="btn' + (i ? '' : ' primario') + '" ' + accAttr + ' data-tipo="' + a[1] + '">' + ico('i-plus') + a[0] + '</button>';
   }).join('');
-  return '<header class="cab-grande cab-compacta cab-sec banda" style="--sc:' + d.c + '">' +
+  return '<header class="cab-grande cab-compacta cab-sec banda" data-sec="' + v + '" style="--sc:' + d.c + '">' +
+    '<span class="banda-fondo" aria-hidden="true"></span><span class="banda-marca" aria-hidden="true">' + ico(d.i) + '</span>' +
     '<div class="banda-fila"><span class="cg-ico banda-ico">' + ico(d.i) + '</span>' +
       '<div class="cg-txt"><h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p></div>' +
       (d.p != null ? '<div class="cg-anillo" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') +
@@ -4706,7 +4710,8 @@ var COLOR_PANEL = { Agenda:['#2E6BFF','i-cal'], Dinero:['#30D158','i-grafica'], 
 function cabPanel(t, sub, acciones){
   var cp = COLOR_PANEL[t] || ['var(--verde)','i-hoy'];
   scVista = cp[0];
-  return '<header class="panel-cab banda-panel" style="--sc:' + cp[0] + '">' +
+  return '<header class="panel-cab banda-panel" data-sec="panel-' + sinTildes(t).toLowerCase() + '" style="--sc:' + cp[0] + '">' +
+      '<span class="banda-fondo" aria-hidden="true"></span><span class="banda-marca" aria-hidden="true">' + ico(cp[1]) + '</span>' +
       '<span class="bp-ico">' + ico(cp[1]) + '</span>' +
       '<div class="bp-txt"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' +
       (acciones ? '<div class="panel-acciones">' + acciones + '</div>' : '') +
