@@ -20,7 +20,7 @@ import { revisarAvisos } from './piezas/avisos.js';
 import { marcar } from './datos/pendientes.js';
 import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
-import { vistaAreas, vistaArea } from './vistas/areas.js';
+import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
 import { vistaMas, vistaSeccion } from './vistas/mas.js';
 import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
 import { vistaDatos, acciones as accDatos, alEscribir } from './vistas/datos.js';
@@ -42,8 +42,8 @@ const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', recordatorios: 'Recordatorios'
 
 function leerRuta() {
   const h = decodeURIComponent((location.hash || '').slice(1));
-  const [sec, param] = h.split('/');
-  if (sec === 'areas' && param && AREAS.some((a) => a.id === param)) return { sec, param };
+  const [sec, param, sub] = h.split('/');
+  if (sec === 'areas' && param && AREAS.some((a) => a.id === param)) return { sec, param, sub: sub || '' };
   if (TITULOS[sec]) return { sec, param: '' };
   return null;
 }
@@ -74,7 +74,7 @@ function contenido() {
     case 'hoy': return vistaHoy();
     case 'recordatorios': return vistaRecordatorios();
     case 'agenda': return vistaAgenda();
-    case 'areas': return ruta.param ? vistaArea(ruta.param) : vistaAreas();
+    case 'areas': return ruta.param ? vistaArea(ruta.param, ruta.sub) : vistaAreas();
     case 'mas': return vistaMas();
     case 'ajustes': return vistaAjustes();
     case 'datos': return vistaDatos();
@@ -114,11 +114,15 @@ window.addEventListener('popstate', () => {
 });
 window.addEventListener('hashchange', () => {
   const r = leerRuta();
-  if (r && (r.sec !== ruta.sec || r.param !== ruta.param)) { ruta = r; cerrarHoja(true); pintar(); window.scrollTo(0, 0); }
+  if (r && (r.sec !== ruta.sec || r.param !== ruta.param || (r.sub || '') !== (ruta.sub || ''))) {
+    const mismaArea = r.sec === 'areas' && r.sec === ruta.sec && r.param === ruta.param;
+    ruta = r; cerrarHoja(true); pintar();
+    if (!mismaArea) window.scrollTo(0, 0);
+  }
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, {
   agregar() { abrirAgregar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },

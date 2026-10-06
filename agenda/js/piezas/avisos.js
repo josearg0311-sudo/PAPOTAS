@@ -12,6 +12,7 @@ import { preferencias } from '../datos/preferencias.js';
 import { hoy, minutosAhora, sumarDias } from '../util/fechas.js';
 import { ocurre } from '../datos/calendario.js';
 import { aviso } from './aviso.js';
+import { avisoDeporte } from '../vistas/area-deporte.js';
 
 const CLAVE = 'agenda5_avisados', MARGEN_MIN = 120;
 let avisados = leer(CLAVE, {}) || {};
@@ -60,6 +61,10 @@ export function revisarAvisos(alPulsar) {
       sonaron.push(Object.assign({}, e, { esEvento: true }));
     });
   });
+  /* Deporte: si pasan días sin entrenar, un aviso al día desde las 6 p. m. */
+  const kd = 'deporte@' + h, ad = ahora >= 18 * 60 && !avisados[kd] ? avisoDeporte() : null;
+  if (ahora >= 18 * 60 && !avisados[kd]) avisados[kd] = Date.now();
+  if (ad) { escribir(CLAVE, avisados); aviso('🔥 ' + ad); notificar('🔥 ' + ad, 'Un entreno corto también cuenta. Anótalo en Deporte.', 'areas/deporte/entrenos', 'deporte'); }
   if (!Object.keys(avisados).length) return sonaron;
   const limite = Date.now() - 7 * 864e5;
   Object.keys(avisados).forEach((k) => { if (avisados[k] < limite) delete avisados[k]; });

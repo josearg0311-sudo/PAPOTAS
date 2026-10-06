@@ -16,6 +16,7 @@ import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
 import { feriado } from '../datos/feriados.js';
+import { avisoDeporte } from './area-deporte.js';
 
 export const SOBRECARGA = 0.85;
 const C38 = 2 * Math.PI * 38, C46 = 2 * Math.PI * 46;
@@ -99,6 +100,7 @@ export function vistaHoy() {
       '<p class="explica"><b>Tu avance del día.</b> El anillo se llena con cada recordatorio que marcas. Toca un día de la franja para verlo en la Agenda.</p>' +
     '</section>' +
     (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
+    (avisoDeporte() ? '<a class="nota-fase aviso-carga" href="#areas/deporte/entrenos">' + ico('i-fuego') + '<span><b>Deporte:</b> ' + esc(avisoDeporte()) + '. Un entreno corto también cuenta: toca para anotarlo.</span></a>' : '') +
     (carga > SOBRECARGA ? '<div class="nota-fase aviso-carga">' + ico('i-info') + '<span><b>Día sobrecargado:</b> tienes ' + hh(mins.total) + ' planificadas de ' + hh(vig) + ' despierto (' + Math.round(carga * 100) + ' %). Considera mover algo a mañana.</span></div>' : '') +
     tarjeta({ eti: '01', titulo: 'Urgente', n: urg.length, guia: '<b>Lo que no puede esperar.</b> Primero el <b>plazo legal</b>, luego lo vencido 🔴 y lo que vence en 3 días o menos ⚠️.',
       cuerpo: urg.length ? '<div class="pends">' + urg.slice(0, 6).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' + (urg.length > 6 ? '<p class="pie-ajuste">Y ' + (urg.length - 6) + ' más en Recordatorios.</p>' : '') : vacio('Nada urgente', 'Cuando algo venza pronto o tenga plazo legal, aparecerá aquí primero.') }) +

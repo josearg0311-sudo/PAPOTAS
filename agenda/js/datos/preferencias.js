@@ -18,6 +18,7 @@ const BASE = {
   guia: false,
   sonido: true,
   feriados: true,
+  deporte: { meta: 3, avisoDias: 3 },   // entrenos por semana y días sin entrenar antes de avisar
   tourVisto: false
 };
 
@@ -45,6 +46,8 @@ export function normalizarPref(x) {
   if (!OPCIONES_BLOQUEO.some((o) => o[0] === +p.bloqueoMin)) p.bloqueoMin = 1;
   p.bloqueoMin = +p.bloqueoMin;
   p.guia = !!p.guia; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
+  const dp = p.deporte && typeof p.deporte === 'object' ? p.deporte : {};
+  p.deporte = { meta: Math.min(7, Math.max(1, +dp.meta || 3)), avisoDias: [0, 2, 3, 4, 5, 7].includes(+dp.avisoDias) ? +dp.avisoDias : 3 };
   return p;
 }
 

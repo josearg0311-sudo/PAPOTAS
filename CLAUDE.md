@@ -23,7 +23,7 @@ Este repositorio contiene DOS cosas distintas:
 
 ## Cómo se publica y se prueba
 - Sin compilación: módulos JavaScript nativos (`<script type="module">`). Se publica arrastrando **la carpeta `agenda/`** a Netlify (sitio fijo `agendaaaapersonal.netlify.app`, que hoy sirve la v4.5).
-- ⚠️ **Aún no publicar `agenda/` en Netlify** (reemplazaría la v4.5 en el sitio real). Con la Fase 2 la v5 ya migra y muestra los datos, pero todavía no permite crear/editar (Fase 3) ni sincroniza con la nube (Fase 8). Decidir con el usuario cuándo publicar.
+- ⚠️ **Aún no publicar `agenda/` en Netlify** (reemplazaría la v4.5 en el sitio real). La v5 ya migra, muestra y edita todo, pero todavía no sincroniza con la nube (Fase 8). Decidir con el usuario cuándo publicar.
 - Vista previa privada para el usuario (artifact multi-archivo, almacenamiento propio, sin service worker ni descargas): se arma copiando `agenda/` a una carpeta temporal y quitando `<!DOCTYPE>/<html>/<head>/<body>` del index. El usuario puede probar la migración real cargando su respaldo de la v4.5 en Ajustes → Respaldo → Cargar.
 - Servidor local: `python3 -m http.server 8770` desde la raíz del repo → `http://localhost:8770/agenda/`. Los módulos **no** funcionan abriendo el archivo con doble clic.
 - Pruebas automáticas: `http://localhost:8770/agenda/pruebas/` (deben pasar todas; cada fase suma las suyas y nunca se borra una prueba).
@@ -48,17 +48,23 @@ js/
           copias.js (copias automáticas en IndexedDB «agenda5») · respaldo.js (exportar/importar v5 y v4.5)
           pendientes.js (grupos hoy/más tarde/mañana/próximos/algún día/hecho, orden, repetir, urgentes, cerrar el día)
           calendario.js (ocurre, bloquesDelDia, todoElDia, minutosPorArea, vencenEl, delDia, resumenDia, pagos fijos)
-          feriados.js (feriados nacionales del Perú, Semana Santa calculada) · preferencias.js · areas.js
+          feriados.js (feriados nacionales del Perú, Semana Santa calculada) · preferencias.js (incl. deporte {meta, avisoDias}) · areas.js
+          herramientas.js (cálculos puros de las áreas: val() lee extra y si no datos; casa, cumpleaños, préstamos, promedio vigesimal 10.5, faltas, planSesiones, Leitner 1-2-4-8-16, horas×tarifa, racha de entrenos, récords, partidos, pichanga, peso)
   piezas/ candado.js (PIN) · hoja.js · aviso.js · tema.js · guia.js (modo guía y recorrido)
           agregar-rapido.js (2 toques: tipo → área → texto con vista previa; guarda recordatorio, evento, gasto, nota, hábito, meta)
           pendientes-ui.js (fila con casilla, Más tarde/Mañana/Día…, deslizar, editor, listas) · pomodoro.js (agenda5_foco)
-          eventos-ui.js (crear/editar eventos, .ics, Google, marcar pago fijo → gasto en el libro)
+          eventos-ui.js (crear/editar eventos, .ics, Google, marcar pago fijo → gasto en el libro; preset tipoEvento)
+          formulario.js (formulario genérico en hoja: campos + «filas» repetibles; editar({titulo, campos, alGuardar, alBorrar}))
           avisos.js (recordatorios a la hora y eventos «X min antes», sonido, notificaciones; agenda5_avisados) · migracion-ui.js · confirmar.js
-  vistas/ hoy · recordatorios · agenda · areas · mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
+  vistas/ hoy · recordatorios · agenda · areas (resumen con señales + pestañas) · area-comun (filas, cifras, cambiarExtra, anotarMovimiento)
+          area-personal · area-estudios · area-oficina · area-deporte (cada una exporta HERRAMIENTAS, senales(), acciones)
+          mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
 fuentes/ iconos/ pruebas/
 ```
 - Las acciones se declaran con `data-acc="nombre"`; cada vista exporta `acciones` y `app.js` las junta. Si una acción devuelve `true`, se repinta.
 - Todo texto del usuario pasa por `esc()` antes de ir al HTML.
+- Áreas: dirección `#areas/<area>/<herramienta>` (sin herramienta = Resumen). Lo que se edita de un elemento migrado va a `extra` (con `cambiarExtra`); `datos` nunca se toca. Movimientos automáticos con id fijo: `mov_pago_<id>_<ym>`, `mov_cobro_<id>`, `mov_prestamo_<id>`. Cronómetro de trabajo en `agenda5_reloj`. Sesiones de estudio = pendientes con `extra.examen`. Partido jugado puede crear el entreno `entreno_partido_<id>`.
+- Con una hoja abierta, los avisos flotantes suben arriba (para no tapar «Guardar»).
 - Navegación: celular = barra inferior **Hoy · Recordatorios · Agenda · Áreas · Más** + botón `+`; laptop (≥980 px) = barra lateral.
 
 ## Sistema de diseño «Señal»
@@ -98,7 +104,7 @@ Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 
 2. ✅ **Datos**: modelo v5, migración automática con copia (IndexedDB) y verificación exacta, explorador «Tus datos», respaldo exportar/importar (v5 y v4.5, junta sin duplicar), copias automáticas descargables, papelera 30 días, aviso de respaldo >7 días, áreas con conteos reales. SW `agenda-v28`. 42 pruebas (incl. ejemplos v4.5 y datos «raros» en `pruebas/datos/`).
 3. ✅ **Hoy + Recordatorios**: Hoy con avance, urgente (plazo legal primero, 🔴/⚠️), recordatorios de hoy, 3 prioridades (escribir o elegir), día en bloques (eventos con repetición, clases, pendientes con hora), Pomodoro vinculado (suma minutos al pendiente y al área; modo prueba), balance y aviso de sobrecarga (>85 %). Recordatorios con listas (recordatorios / para marcar), grupos por cuándo, crear varios por líneas entendiendo fechas, editor completo, deslizar, cerrar el día con deshacer. Agregar rápido guarda. Avisos a la hora (Ajustes → Avisos). SW `agenda-v29`. 54 pruebas.
 4. ✅ **Agenda**: Día (línea de tiempo con carriles solo donde algo se pisa; tocar una hora crea evento), Semana y Mes (puntos por área, 🔴/⚖️), filtro por área, «Vence este día» (pagos fijos con casilla que anota el gasto, cobros, documentos; plazo legal primero), feriados del Perú (se pueden ocultar), crear/editar eventos (tipo, área, varios días, repetir, aviso), avisos de eventos, pasar al calendario del teléfono (.ics y Google). SW `agenda-v30`. 59 pruebas.
-5. Áreas: 4 paneles y sus herramientas (sesiones de estudio para exámenes, entrenos como hábito con racha y aviso).
+5. ✅ **Áreas**: cada área con Resumen (señales ordenadas: plazo legal, 🔴, ⚠️) y pestañas. Personal: casa (cada N días, «Hecho»), menú semanal, documentos (aviso 30 días), cumpleaños (edad), préstamos (saldar → libro). Estudios: cursos (horario, notas con peso, promedio, faltas con alerta), exámenes (temas, plan de sesiones que se reparte hasta la víspera, Pomodoro ligado), fichas Leitner con repaso. Oficina: plazos legales, tablero (por hacer/en curso/hecho) y proyectos, cobros (→ ingreso oficina), horas con cronómetro y tarifa, clientes (llamar/WhatsApp/correo), actas (acuerdos → recordatorios). Deporte: entrenos como hábito (meta semanal, racha de semanas, aviso en Hoy y notificación desde las 6 p. m. si pasan N días), rutinas («Hacer hoy») y récords, partidos (resultado, cuenta como entreno, pichanga con cuota y quién pagó), peso con gráfico. SW `agenda-v31`. 72 pruebas.
 6. Seguimiento: hábitos, metas, rachas, revisión semanal, balance y sobrecarga.
 7. Finanzas y Notas (libros integrados, informes).
 8. Ajustes/Administración completo (áreas, etiquetas, respaldo con aviso a los 7 días, papelera, estado de nube) + nube (con permiso del usuario).

@@ -294,3 +294,4 @@ label.btn { cursor: pointer; }
 .opcion-fila small { display: block; color: var(--tinta-3); font-size: 11.5px; font-family: var(--f-mono); }
 .vista-previa { padding: 10px 12px; border-radius: var(--radio-chico); background: var(--acento-suave); font-size: 13.5px; min-height: 44px; }
 .vista-previa b { color: var(--tinta); }
+body.con-hoja .avisos { bottom: auto; top: calc(12px + env(safe-area-inset-top, 0px)); }

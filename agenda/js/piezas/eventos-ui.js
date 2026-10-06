@@ -19,7 +19,8 @@ const sel = (n, ops, v) => '<select class="entrada" name="' + n + '">' + ops.map
 const selector = (n, ops, v) => '<div class="selector envuelve" data-sel="' + n + '">' + ops.map(([a, t]) => '<button type="button" data-v="' + a + '" aria-pressed="' + (a === v) + '">' + t + '</button>').join('') + '</div>';
 
 export function nuevoEvento(repintar, preset = {}) {
-  const base = Object.assign(modeloVacio(), { id: '', tipo: 'evento', area: preset.area || 'personal', fechas: Object.assign(modeloVacio().fechas, { inicio: preset.fecha || hoy(), hora: preset.hora || null, horaFin: preset.horaFin || null }), todoElDia: !preset.hora, aviso: preset.hora ? 15 : null, extra: { tipoEvento: 'evento', lugar: '' } });
+  const base = Object.assign(modeloVacio(), { id: '', tipo: 'evento', area: preset.area || 'personal', fechas: Object.assign(modeloVacio().fechas, { inicio: preset.fecha || hoy(), hora: preset.hora || null, horaFin: preset.horaFin || null }), todoElDia: !preset.hora, aviso: preset.hora ? 15 : null, extra: { tipoEvento: preset.tipoEvento || 'evento', lugar: '' } });
+  if (preset.tipoEvento === 'cumple') Object.assign(base, { todoElDia: true, repetir: 'ano', aviso: 1440 });
   editarEvento(null, repintar, base);
 }
 
@@ -27,7 +28,8 @@ export function editarEvento(id, repintar, base = null) {
   const x = id ? JSON.parse(JSON.stringify(buscarElemento(id))) : base;
   if (!x) return;
   const f = x.fechas, te = x.extra.tipoEvento || 'evento';
-  const hoja = abrirHoja(id ? 'Editar evento' : 'Nuevo evento', '<form id="formEv" class="form" autocomplete="off">' +
+  const NUEVO = { reunion: 'Nueva reunión', cita: 'Nueva cita', examen: 'Nuevo examen', partido: 'Nuevo partido', cumple: 'Nuevo cumpleaños' };
+  const hoja = abrirHoja(id ? 'Editar' : NUEVO[te] || 'Nuevo evento', '<form id="formEv" class="form" autocomplete="off">' +
     '<label class="campo"><span>Título</span><input class="entrada" name="titulo" required maxlength="200" value="' + esc(x.titulo) + '" placeholder="Ej. Audiencia, parcial de Estadística, pichanga"></label>' +
     '<div class="campo"><span>Tipo</span>' + selector('tipoEvento', TIPOS_EVENTO, te) + '</div>' +
     '<div class="campo"><span>Área</span>' + selector('area', AREAS.map((a) => [a.id, a.nombre]), x.area) + '</div>' +

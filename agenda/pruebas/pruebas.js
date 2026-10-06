@@ -15,6 +15,7 @@ import { modeloVacio } from '../js/datos/modelo.js';
 import { feriado, pascua } from '../js/datos/feriados.js';
 import { textoICS, enlaceGoogle } from '../js/util/ics.js';
 import { diaDePago } from '../js/datos/calendario.js';
+import * as HR from '../js/datos/herramientas.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -252,6 +253,75 @@ tareas.push(prueba('Archivo .ics: evento de todo el día termina al día siguien
 tareas.push(prueba('Enlace a Google Calendar con fecha, hora y zona de Lima', () => {
   const u = new URL(enlaceGoogle(EV));
   igual([u.searchParams.get('dates'), u.searchParams.get('ctz'), u.searchParams.get('recur')], ['20261007T090000/20261007T110000', 'America/Lima', 'RRULE:FREQ=WEEKLY']);
+}));
+
+/* ---------- Fase 5: herramientas de las áreas ---------- */
+const it = (o) => Object.assign(modeloVacio(), o, { fechas: Object.assign(modeloVacio().fechas, o.fechas || {}) });
+tareas.push(prueba('Lo editado en la v5 (extra) gana a lo de la v4.5 (datos), sin borrarlo', () => {
+  const x = it({ datos: { cada: 7, ult: '2026-10-01' }, extra: { ult: '2026-10-05' } });
+  igual([HR.val(x, 'cada'), HR.val(x, 'ult'), HR.val(x, 'nada', 'x'), x.datos.ult], [7, '2026-10-05', 'x', '2026-10-01']);
+}));
+tareas.push(prueba('Casa: cuándo toca (vencido, hoy, pronto)', () => {
+  igual(HR.casaEstado(it({ datos: { cada: 7, ult: '2026-09-28' } }), '2026-10-06').nivel, 'vencido');
+  igual(HR.casaEstado(it({ datos: { cada: 3, ult: '2026-10-05' } }), '2026-10-06').prox, '2026-10-08');
+  igual(HR.casaEstado(it({ datos: { cada: 3, ult: '2026-10-03' } }), '2026-10-06').nivel, 'hoy');
+  igual(HR.casaEstado(it({ datos: {} }), '2026-10-06').nivel, 'hoy');
+}));
+tareas.push(prueba('Cumpleaños: próxima fecha y edad (29 de febrero en año normal → 28)', () => {
+  igual(HR.proximoCumple(it({ fechas: { inicio: '1968-10-15' }, datos: { nacio: 1968 } }), '2026-10-06'), { fecha: '2026-10-15', dias: 9, edad: 58 });
+  igual(HR.proximoCumple(it({ fechas: { inicio: '1990-03-02' } }), '2026-10-06').fecha, '2027-03-02');
+  igual(HR.proximoCumple(it({ fechas: { inicio: '2000-02-29' } }), '2026-10-06').fecha, '2027-02-28');
+}));
+tareas.push(prueba('Préstamos: lo que te deben y lo que debes (sin los saldados)', () => {
+  igual(HR.resumenPrestamos([it({ monto: 12000, extra: { meDeben: true } }), it({ monto: 3500 }), it({ monto: 999, estado: 'hecho' })]), { meDeben: 12000, debo: 3500, nMe: 1, nYo: 1 });
+}));
+tareas.push(prueba('Promedio vigesimal con pesos (y sin pesos si falta alguno)', () => {
+  igual(HR.promedio([{ v: 16, p: 20 }, { v: 14, p: 20 }, { v: '', p: 30 }]), 15);
+  igual(Math.round(HR.promedio([{ v: 9, p: '' }, { v: 12, p: '' }]) * 10) / 10, 10.5);
+  igual(HR.promedio([]), null);
+}));
+tareas.push(prueba('Faltas: aviso cuando queda 1 y alerta al llegar al máximo', () => {
+  igual(HR.faltas(it({ datos: { faltas: 4, maxFaltas: 5 } })).nivel, 'pronto');
+  igual(HR.faltas(it({ datos: { faltas: 5, maxFaltas: 5 } })).nivel, 'vencido');
+  igual(HR.faltas(it({ datos: { faltas: 1 } })).nivel, 'ok');
+}));
+tareas.push(prueba('Sesiones de estudio: reparte los temas y deja la víspera para repasar', () => {
+  const p = HR.planSesiones({ desde: '2026-10-06', examen: '2026-10-12', temas: ['Cadena', 'Partes', 'Sustitución'] });
+  igual(p.map((x) => x.fecha), ['2026-10-06', '2026-10-08', '2026-10-10', '2026-10-11']);
+  igual(p[p.length - 1].repaso, true); igual(p.flatMap((x) => x.temas), ['Cadena', 'Partes', 'Sustitución']);
+  igual(HR.planSesiones({ desde: '2026-10-06', examen: '2026-10-07', temas: ['A', 'B'] }).map((x) => [x.fecha, x.temas]), [['2026-10-06', ['A', 'B']]]);
+  igual(HR.planSesiones({ desde: '2026-10-12', examen: '2026-10-12', temas: ['A'] }), []);
+}));
+tareas.push(prueba('Fichas (Leitner): acierto sube de caja, error vuelve a la 1', () => {
+  igual(HR.responderFicha(it({ datos: { caja: 2 } }), true, '2026-10-06'), { caja: 3, prox: '2026-10-10' });
+  igual(HR.responderFicha(it({ datos: { caja: 5 } }), true, '2026-10-06'), { caja: 5, prox: '2026-10-22' });
+  igual(HR.responderFicha(it({ datos: { caja: 4 } }), false, '2026-10-06'), { caja: 1, prox: '2026-10-07' });
+}));
+tareas.push(prueba('Horas: tarifa de la v4.5 en soles pasa a céntimos y suma por cliente', () => {
+  const r = HR.resumenHoras([it({ fechas: { inicio: '2026-10-06' }, extra: { minutos: 90 }, datos: { tarifa: 60, cliente: 'ABC' } }), it({ fechas: { inicio: '2026-10-05' }, extra: { minutos: 30, tarifa: 4500, cliente: 'Juan' } }), it({ fechas: { inicio: '2026-09-30' }, extra: { minutos: 60 }, datos: { tarifa: 60 } })], '2026-10');
+  igual([r.min, r.monto, r.porCliente.ABC.monto, r.porCliente.Juan.monto], [120, 11250, 9000, 2250]);
+}));
+tareas.push(prueba('Entrenos como hábito: racha de semanas que cumplen la meta y días sin entrenar', () => {
+  const f = ['2026-10-05', '2026-10-03', '2026-10-01', '2026-09-30', '2026-09-27', '2026-09-24', '2026-09-22', '2026-09-15'];
+  const r = HR.rachaEntrenos(f, '2026-10-06', { meta: 3 });
+  igual([r.semanas, r.estaSemana, r.diasSin], [2, 1, 1]);
+  igual(HR.rachaEntrenos(f, '2026-10-06', { meta: 1 }).semanas, 4);
+  igual(HR.avisoEntreno(HR.rachaEntrenos(['2026-10-01'], '2026-10-06')), 'Llevas 5 días sin entrenar');
+  igual(HR.avisoEntreno(HR.rachaEntrenos([], '2026-10-06')), null);
+}));
+tareas.push(prueba('Récords: el mayor peso por ejercicio (sin importar mayúsculas)', () => {
+  const r = HR.records([it({ fechas: { inicio: '2026-10-01' }, datos: { ejs: [{ n: 'Press banca', p: 57.5, r: 10 }] } }), it({ fechas: { inicio: '2026-10-05' }, extra: { ejercicios: [{ n: 'press banca', p: 60, r: 8 }, { n: 'Fondos', p: '' }] } })]);
+  igual(r, [{ n: 'press banca', p: 60, fecha: '2026-10-05', reps: 8 }]);
+}));
+tareas.push(prueba('Partidos y pichanga: récord, goles y cuota por jugador', () => {
+  igual(HR.resumenPartidos([it({ datos: { jugado: true, res: 'v', goles: 2, asist: 1 } }), it({ datos: { jugado: true, res: 'd' } }), it({ datos: {} })]), { v: 1, e: 0, d: 1, goles: 2, asist: 1, jugados: 2 });
+  const p = HR.pichanga(it({ datos: { pich: { costo: 120, jug: [{ n: 'A', p: true }, { n: 'B', p: false }, { n: 'C', p: false }] } } }));
+  igual([p.costo, p.cuota, p.pagaron, p.falta], [12000, 4000, 1, 8000]);
+}));
+tareas.push(prueba('Peso: último y cambio en 30 días', () => {
+  const m = [['2026-09-08', 76.4], ['2026-09-15', 75.9], ['2026-10-06', 74.8]].map(([f, p]) => it({ fechas: { inicio: f }, datos: { peso: p } }));
+  const t = HR.tendenciaPeso(m, '2026-10-06');
+  igual([t.ultimo, t.cambio30, t.puntos.length], [74.8, -1.6, 3]);
 }));
 
 Promise.all(tareas).then(() => {
