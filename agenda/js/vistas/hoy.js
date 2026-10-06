@@ -4,10 +4,14 @@
 import { hoy, sumarDias, inicioSemana, diaSemana, DIAS3, fmtLarga, saludo, horaAhora, minutosAhora, fmtHora } from '../util/fechas.js';
 import { vacio, ico, esc } from '../util/dom.js';
 import { preferencias, minutosVigilia } from '../datos/preferencias.js';
-import { leer, ANTIGUAS, resumenAntiguo } from '../datos/almacen.js';
+import { leer, ANTIGUAS } from '../datos/almacen.js';
+import { documento, elementos } from '../datos/datos.js';
+import { tocaRespaldar, diasSinRespaldo } from '../datos/respaldo.js';
 import { tarjeta, enFase } from './comun.js';
 
 function nombre() {
+  const doc = documento();
+  if (doc && doc.perfil && doc.perfil.nombre) return String(doc.perfil.nombre).trim().split(/\s+/)[0];
   const d = leer(ANTIGUAS.datos, null);
   const n = d && d.perfil && typeof d.perfil.nombre === 'string' ? d.perfil.nombre.trim() : '';
   return n ? n.split(/\s+/)[0] : '';
@@ -38,16 +42,18 @@ function lineaVigilia() {
 }
 
 export function vistaHoy() {
-  const p = preferencias(), n = nombre(), ant = resumenAntiguo(), C = 2 * Math.PI * 38;
+  const p = preferencias(), n = nombre(), doc = documento(), C = 2 * Math.PI * 38;
+  const total = elementos((x) => !(x.extra && x.extra.sistema)).length, rs = diasSinRespaldo();
   const vig = minutosVigilia(p), hv = Math.floor(vig / 60), mv = vig % 60;
   return '<div class="columnas"><div>' +
     '<section class="tarjeta heroe">' +
       '<div class="heroe-fila"><div class="anillo" role="img" aria-label="0 de 0 hechos hoy"><svg viewBox="0 0 92 92"><circle class="fondo" cx="46" cy="46" r="38"/><circle class="valor" cx="46" cy="46" r="38" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + C.toFixed(1) + '"/></svg><div><b>0/0</b><small>de hoy</small></div></div>' +
-      '<div><small class="fecha-larga">' + fmtLarga(hoy()) + '</small><h2>' + saludo() + (n ? ', ' + esc(n) : '') + '</h2><p>Esta es la base de tu nueva Agenda. Todavía no muestra tus datos.</p></div></div>' +
+      '<div><small class="fecha-larga">' + fmtLarga(hoy()) + '</small><h2>' + saludo() + (n ? ', ' + esc(n) : '') + '</h2><p>' + (total ? 'Tienes ' + total + ' cosas guardadas. Tu día con ellas llega en la Fase 3.' : 'Tu Agenda nueva está lista para empezar.') + '</p></div></div>' +
       franjaSemana() +
       '<p class="explica"><b>Tu avance del día.</b> El anillo se llenará con cada recordatorio que marques como hecho. Toca un día de la franja para verlo en la Agenda.</p>' +
     '</section>' +
-    (ant.hay ? '<div class="nota-fase segura">' + ico('i-escudo') + '<span><b>Tus datos están a salvo.</b> Encontré ' + ant.total + ' cosas de tu agenda anterior' + (ant.libros.personal + ant.libros.oficina ? ' y ' + (ant.libros.personal + ant.libros.oficina) + ' movimientos de dinero' : '') + ' en este aparato. Siguen intactas; aparecerán aquí al migrarlas en la Fase 2.</span></div>' : '') +
+    (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
+    (doc && doc.migracion && doc.migracion.verificacion && doc.migracion.verificacion.ok && Date.now() - doc.migracion.fecha < 3 * 864e5 ? '<a class="nota-fase segura" href="#datos">' + ico('i-escudo') + '<span><b>Tus datos de la versión anterior ya están aquí,</b> verificados uno por uno. Toca para verlos.</span></a>' : '') +
     tarjeta({ eti: '01', titulo: 'Urgente', n: 0, guia: '<b>Lo que no puede esperar.</b> Primero el <b>plazo legal</b>, luego lo vencido 🔴 y lo que vence en 3 días o menos ⚠️.',
       cuerpo: vacio('Nada urgente', 'Cuando algo venza pronto, aparecerá aquí primero.') }) +
     tarjeta({ eti: '02', titulo: 'Recordatorios de hoy', n: 0, guia: '<b>Marca lo que ya hiciste</b> con la casilla, o pásalo a <b>Más tarde</b> o a <b>Mañana</b>.',

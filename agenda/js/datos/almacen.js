@@ -7,6 +7,8 @@
 
 export const CLAVES = {
   pref: 'agenda5_pref',
+  datos: 'agenda5_datos',
+  respaldoUlt: 'agenda5_respaldo_ult',
   pinEspera: 'agenda5_pin_espera',
   errores: 'agenda5_errores'
 };

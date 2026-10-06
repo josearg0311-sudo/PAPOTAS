@@ -5,10 +5,15 @@ import { preferencias, cambiarPref, PANTALLAS_INICIO, OPCIONES_BLOQUEO } from '.
 import { hayPIN, configurarPIN, quitarPIN } from '../piezas/candado.js';
 import { resumenAntiguo, leer, CLAVES } from '../datos/almacen.js';
 import { ico, esc, plural } from '../util/dom.js';
-import { fmtHora } from '../util/fechas.js';
+import { fmtHora, fmtFecha, hoy } from '../util/fechas.js';
+import { documento, elementos, enPapelera, DIAS_PAPELERA, migrarDesdeV45 } from '../datos/datos.js';
+import { descargarRespaldo, diasSinRespaldo, tocaRespaldar, DIAS_AVISO_RESPALDO, analizarArchivo, importar, guardarArchivo } from '../datos/respaldo.js';
+import { listarCopias, leerCopia } from '../datos/copias.js';
+import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
+import { confirmar } from '../piezas/confirmar.js';
 import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
-import { encabezado, enFase } from './comun.js';
+import { encabezado } from './comun.js';
 import { VERSION } from '../version.js';
 
 function selector(acc, opciones, actual, etiqueta) {
@@ -20,7 +25,6 @@ function ajuste(titulo, texto, control, id = '') {
 }
 function grupo(titulo, html) { return '<h2 class="grupo-ajustes">' + titulo + '</h2><section class="tarjeta lista-ajustes">' + html + '</section>'; }
 
-const NOMBRES_COL = { tareas: 'tareas', eventos: 'eventos', recordatorios: 'recordatorios', notas: 'notas', listas: 'listas', habitos: 'hábitos', metas: 'metas', pagos: 'pagos fijos', diario: 'días de diario', cursos: 'cursos', entrenos: 'entrenamientos', proyectos: 'proyectos', cobros: 'cobros', deudas: 'préstamos', clientes: 'clientes', horas: 'registros de horas', rutinas: 'rutinas', medidas: 'medidas', bienestar: 'días de bienestar', casa: 'tareas de casa', menu: 'menús', docs: 'documentos', fichas: 'fichas', enfoque: 'días de enfoque', revisiones: 'revisiones' };
 
 export function vistaAjustes() {
   const p = preferencias(), ant = resumenAntiguo(), pin = hayPIN(), errores = leer(CLAVES.errores, []);
@@ -48,16 +52,23 @@ export function vistaAjustes() {
     ajuste('Modo guía', 'Muestra una explicación corta en cada bloque.', '<button type="button" class="btn" data-acc="guia" aria-pressed="' + p.guia + '">' + ico('i-guia') + (p.guia ? 'Apagar' : 'Activar') + '</button>') +
     ajuste('Recorrido de bienvenida', 'Te muestra en 5 pasos cómo se usa la app.', '<button type="button" class="btn" data-acc="recorrido">' + ico('i-play') + 'Ver recorrido</button>'));
 
-  const cols = Object.keys(ant.colecciones).sort((a, b) => ant.colecciones[b] - ant.colecciones[a]);
+  const doc = documento(), mig = doc && doc.migracion, rs = diasSinRespaldo(), total = doc ? elementos((x) => !(x.extra && x.extra.sistema)).length : 0;
+  const nPap = enPapelera().length;
   html += grupo('Tus datos',
-    (ant.hay
-      ? '<div class="datos-antiguos"><p><b>Tu agenda anterior (v4.5) sigue intacta en este aparato.</b> La versión nueva todavía no la toca: solo la cuenta.</p><ul>' +
-        cols.map((c) => '<li><span class="mono">' + ant.colecciones[c] + '</span> ' + esc(NOMBRES_COL[c] || c) + '</li>').join('') +
-        (ant.libros.personal ? '<li><span class="mono">' + ant.libros.personal + '</span> movimientos del libro personal</li>' : '') +
-        (ant.libros.oficina ? '<li><span class="mono">' + ant.libros.oficina + '</span> movimientos del libro de la oficina</li>' : '') +
-        '</ul>' + (ant.nube ? '<p class="pie-ajuste">' + ico('i-nube') + 'Este aparato tiene la nube conectada en la versión anterior. La nueva no se conectará sin tu permiso.</p>' : '') + '</div>'
-      : '<div class="datos-antiguos"><p>No encontré datos de la versión anterior en este aparato. Si tu agenda está en otro celular o en otra dirección web, en la Fase 2 podrás traerla con un respaldo.</p></div>') +
-    enFase(2, 'migrar todo esto al formato nuevo (con una copia del formato antiguo guardada antes), exportar e importar respaldos —también los antiguos— y el aviso si pasan más de 7 días sin respaldar.'));
+    ajuste('Ver tus datos', doc ? 'Tienes <b>' + total + '</b> cosas guardadas. Busca, filtra y abre cada una con todos sus campos.' : 'Todavía no hay datos.',
+      '<a class="btn" href="#datos">' + ico('i-buscar') + 'Ver</a>') +
+    ajuste('Respaldo', (rs.nunca ? 'Aún no guardaste ninguno.' : 'El último fue ' + (rs.dias === 0 ? 'hoy' : rs.dias === 1 ? 'ayer' : 'hace ' + rs.dias + ' días') + '.') +
+      (tocaRespaldar() ? ' <b class="txt-aviso">Han pasado más de ' + DIAS_AVISO_RESPALDO + ' días: guarda uno.</b>' : '') +
+      ' Un solo archivo con todo. Para cargar acepta también respaldos de la versión anterior, y <b>junta</b> en vez de reemplazar.',
+      '<button type="button" class="btn pri" data-acc="respaldo-bajar">' + ico('i-bajar') + 'Descargar</button>' +
+      '<label class="btn" for="archivoRespaldo">' + ico('i-subir') + 'Cargar</label><input type="file" id="archivoRespaldo" accept=".json,application/json" class="solo-lector">', 'ajusteRespaldo') +
+    ajuste('Copias automáticas', 'Se guardan solas en este aparato antes de migrar y antes de cargar un respaldo.', '<div id="copiasLista" class="copias-lista"><span class="mono">Cargando…</span></div>') +
+    ajuste('Papelera', 'Lo que borras queda ' + DIAS_PAPELERA + ' días y puedes devolverlo.', '<a class="btn" href="#papelera">' + ico('i-basura') + 'Abrir' + (nPap ? ' (' + nPap + ')' : '') + '</a>') +
+    (mig ? ajuste('Migración desde la versión anterior', 'Hecha el ' + fmtFecha(hoy(new Date(mig.fecha))) + (mig.verificacion && mig.verificacion.ok ? ' · <span class="txt-ok">verificada sin pérdidas</span>' : '') + (mig.ultimaReimportacion ? ' · traída de nuevo el ' + fmtFecha(hoy(new Date(mig.ultimaReimportacion))) : '') + '.',
+      '<button type="button" class="btn" data-acc="mig-informe">Ver informe</button>') : '') +
+    (ant.hay ? ajuste('Tu versión anterior', 'Sigue intacta en este aparato (' + ant.total + ' cosas y ' + (ant.libros.personal + ant.libros.oficina) + ' movimientos). La nueva nunca la modifica. Si seguiste usándola, puedes traer sus cambios: se juntan sin duplicar.',
+      '<button type="button" class="btn" data-acc="mig-otra-vez">' + ico('i-subir') + 'Traer de nuevo</button>') : '') +
+    (ant.nube ? '<p class="pie-ajuste">' + ico('i-nube') + 'La versión anterior tiene la nube conectada en este aparato. La nueva no se conectará sin tu permiso (Fase 8): por ahora lo que cambies aquí queda solo en este aparato.</p>' : ''));
 
   html += grupo('Acerca de',
     ajuste('Versión', 'Agenda ' + VERSION + ' · hora de Lima (America/Lima) · soles', '') +
@@ -65,7 +76,66 @@ export function vistaAjustes() {
   return html;
 }
 
+const TIPO_COPIA = { 'antes-de-migrar': 'Antes de migrar (versión anterior, tal cual)', 'antes-de-importar': 'Antes de cargar un respaldo' };
+/* La lista de copias se llena después de pintar (IndexedDB responde aparte) */
+export function despuesDePintar() {
+  const el = document.getElementById('copiasLista');
+  if (!el) return;
+  listarCopias().then((l) => {
+    el.innerHTML = l.length ? l.map((c) => '<div class="copia"><span><b>' + esc(TIPO_COPIA[c.tipo] || c.tipo) + '</b><small class="mono">' + fmtFecha(hoy(new Date(c.fecha))) + ' · ' + fmtHora(new Date(c.fecha).toLocaleTimeString('en-GB', { timeZone: 'America/Lima', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }), preferencias().formatoHora) + ' · ' + Math.max(1, Math.round(c.tamano / 1024)) + ' KB</small></span>' +
+      '<button type="button" class="btn chico" data-acc="copia-bajar" data-id="' + esc(c.id) + '">' + ico('i-bajar') + 'Descargar</button></div>').join('') : '<small>Aún no hay copias.</small>';
+  }).catch((e) => { el.innerHTML = '<small>Este navegador no permite copias automáticas (' + esc(e.message || e) + '). Usa «Descargar» respaldo.</small>'; });
+}
+
+function informeMigracion() {
+  const m = documento() && documento().migracion, v = m && m.verificacion;
+  if (!v) return;
+  const filas = Object.keys(v.porCol).filter((c) => v.porCol[c].antes || v.porCol[c].despues);
+  abrirHoja('Informe de la migración', '<p class="ayuda">Cada cosa de la versión anterior se reconstruyó desde el formato nuevo y se comparó campo por campo con la original.</p>' +
+    '<div class="mig-tabla"><div class="mig-fila cab"><span>Qué</span><span>Antes</span><span>Ahora</span><span></span></div>' +
+    filas.map((c) => '<div class="mig-fila"><span>' + esc(c) + '</span><span class="mono">' + v.porCol[c].antes + '</span><span class="mono">' + v.porCol[c].despues + '</span><span class="' + (v.porCol[c].ok ? 'ok' : 'mal') + '">' + ico(v.porCol[c].ok ? 'i-check' : 'i-x') + '</span></div>').join('') + '</div>' +
+    (m.informe && (m.informe.ignorados.vacios || m.informe.ignorados.purgados) ? '<p class="ayuda">No se pasaron ' + (m.informe.ignorados.vacios + m.informe.ignorados.purgados) + ' marcas vacías o de cosas ya borradas para siempre en la versión anterior (no tenían contenido).</p>' : '') +
+    '<div class="fila-botones"><button type="button" class="btn pri" data-cerrar-hoja="1">Listo</button></div>');
+}
+
+function previaImportar(an) {
+  if (!an.ok) {
+    abrirHoja('No se pudo cargar', '<p class="ayuda">' + esc(an.error) + '</p>' + (an.problemas ? '<details class="mig-detalle"><summary>Detalle</summary><pre>' + esc(an.problemas.slice(0, 8).join('\n')) + '</pre></details>' : '') +
+      '<div class="fila-botones"><button type="button" class="btn pri" data-cerrar-hoja="1">Entendido</button></div>');
+    return;
+  }
+  const h = abrirHoja('Cargar respaldo', '<p class="ayuda"><b>' + esc(an.tipo) + '</b>' + (an.fecha ? ' · del ' + fmtFecha(String(an.fecha).slice(0, 10)) : '') + '</p>' +
+    '<ul class="lista-conteo">' + an.conteo.map(([n, c]) => '<li><span class="mono">' + c + '</span> ' + esc(n) + '</li>').join('') + '</ul>' +
+    '<p class="ayuda">Se <b>junta</b> con lo que ya tienes: lo que no tengas se agrega y, si algo existe en los dos, queda el cambio más reciente. Antes se guarda una copia automática de lo actual.</p>' +
+    '<div class="fila-botones"><button type="button" class="btn" data-cerrar-hoja="1">Cancelar</button><button type="button" class="btn pri" id="btnImportar">' + ico('i-subir') + 'Cargar y juntar</button></div>');
+  h.querySelector('#btnImportar').onclick = async () => {
+    const r = await importar(an);
+    cerrarHoja();
+    aviso(r.ok ? 'Respaldo cargado: ' + r.nuevos + ' nuevas y ' + r.actualizados + ' actualizadas.' : r.error);
+    window.dispatchEvent(new Event('agenda:repintar'));
+  };
+}
+
+export function alElegirArchivo(t) {
+  if (t.id !== 'archivoRespaldo' || !t.files || !t.files[0]) return false;
+  const f = t.files[0], lector = new FileReader();
+  lector.onload = () => previaImportar(analizarArchivo(String(lector.result), f.name));
+  lector.onerror = () => aviso('No se pudo leer el archivo.');
+  lector.readAsText(f);
+  t.value = '';
+  return true;
+}
+
 export const acciones = {
+  'respaldo-bajar'() { descargarRespaldo(); aviso('Respaldo descargado. Guárdalo en Drive o en tu correo.'); return true; },
+  async 'copia-bajar'(b) { const c = await leerCopia(b.dataset.id); if (c) guardarArchivo(c.texto, 'agenda_copia_' + c.tipo + '_' + hoy(new Date(c.fecha)) + '.json'); },
+  'mig-informe'() { informeMigracion(); },
+  async 'mig-otra-vez'(b, ev, repintar) {
+    if (!(await confirmar({ titulo: '¿Traer de nuevo la versión anterior?', texto: 'Se guarda otra copia exacta, se convierte y se verifica igual que la primera vez. Lo que ya tienes se junta: no se duplica nada y gana el cambio más reciente.', si: 'Traer y juntar' }))) return;
+    const r = await migrarDesdeV45();
+    aviso(r.ok ? 'Listo: se trajo y verificó sin pérdidas.' : 'No se trajo nada: ' + (r.paso === 'verificacion' ? 'la verificación encontró diferencias' : (r.error && r.error.message) || r.paso));
+    repintar();
+  },
   'pref-tema'(b) { cambiarPref({ tema: b.dataset.v }); return true; },
   'pref-hora'(b) { cambiarPref({ formatoHora: b.dataset.v }); return true; },
   'pref-semana'(b) { cambiarPref({ semanaLunes: b.dataset.v === '1' }); return true; },

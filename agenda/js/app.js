@@ -17,7 +17,12 @@ import { vistaRecordatorios, acciones as accRec } from './vistas/recordatorios.j
 import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea } from './vistas/areas.js';
 import { vistaMas, vistaSeccion } from './vistas/mas.js';
-import { vistaAjustes, acciones as accAjustes, alCambiarCampo } from './vistas/ajustes.js';
+import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
+import { vistaDatos, acciones as accDatos, alEscribir } from './vistas/datos.js';
+import { vistaPapelera, acciones as accPapelera } from './vistas/papelera.js';
+import { cargar, empezarVacio } from './datos/datos.js';
+import { resumenAntiguo } from './datos/almacen.js';
+import { mostrarMigracion } from './piezas/migracion-ui.js';
 
 /* ---------- Secciones ---------- */
 const PRINCIPALES = [
@@ -28,7 +33,7 @@ const PRINCIPALES = [
   ['mas', 'Más', 'i-mas']
 ];
 const EN_MAS = [['seguimiento', 'Seguimiento', 'i-seg'], ['finanzas', 'Finanzas', 'i-dinero'], ['notas', 'Notas', 'i-nota'], ['ajustes', 'Ajustes', 'i-ajustes']];
-const TITULOS = { hoy: 'Hoy', recordatorios: 'Recordatorios', agenda: 'Agenda', areas: 'Áreas', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Finanzas', notas: 'Notas', papelera: 'Papelera' };
+const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', recordatorios: 'Recordatorios', agenda: 'Agenda', areas: 'Áreas', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Finanzas', notas: 'Notas', papelera: 'Papelera' };
 
 function leerRuta() {
   const h = decodeURIComponent((location.hash || '').slice(1));
@@ -38,7 +43,7 @@ function leerRuta() {
   return null;
 }
 let ruta = leerRuta() || { sec: preferencias().inicio, param: '' };
-function padre(sec) { return ['seguimiento', 'finanzas', 'notas', 'ajustes', 'papelera'].includes(sec) ? 'mas' : sec; }
+function padre(sec) { return ['seguimiento', 'finanzas', 'notas', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
 
 /* ---------- Pintar ---------- */
 function pintarNav() {
@@ -67,6 +72,8 @@ function contenido() {
     case 'areas': return ruta.param ? vistaArea(ruta.param) : vistaAreas();
     case 'mas': return vistaMas();
     case 'ajustes': return vistaAjustes();
+    case 'datos': return vistaDatos();
+    case 'papelera': return vistaPapelera();
     default: return vistaSeccion(ruta.sec);
   }
 }
@@ -77,6 +84,7 @@ export function pintar() {
     document.title = ruta.sec === 'hoy' ? 'Agenda' : $('cabTitulo').textContent + ' · Agenda';
     document.body.dataset.seccion = ruta.sec;
     $('pantalla').innerHTML = contenido();
+    if (ruta.sec === 'ajustes') despuesDePintar();
   } catch (e) {
     anotarError(e, 'pintar ' + ruta.sec);
     $('pantalla').innerHTML = '<section class="tarjeta"><div class="vacio"><b>Algo falló al mostrar esta sección</b><span>Tus datos están bien. Prueba otra vez o vuelve a Hoy.</span>' +
@@ -105,7 +113,7 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accRec, accAgenda, accAjustes, {
+const ACCIONES = Object.assign({}, accRec, accAgenda, accAjustes, accDatos, accPapelera, {
   agregar() { abrirAgregar(); },
   reintentar() { return true; },
   fase(b) { aviso('Esto llega en la Fase ' + b.dataset.n + '.'); },
@@ -117,17 +125,19 @@ document.addEventListener('click', (ev) => {
   if (!b || b.tagName === 'FORM') return;
   const f = ACCIONES[b.dataset.acc];
   if (!f) return;
-  try { if (f(b, ev, pintar) === true) pintar(); }
+  try { const r = f(b, ev, pintar); if (r === true) pintar(); else if (r && r.catch) r.catch((e) => { anotarError(e, 'acción ' + b.dataset.acc); aviso('Algo falló. Quedó anotado en Ajustes.'); }); }
   catch (e) { anotarError(e, 'acción ' + b.dataset.acc); aviso('Algo falló. Quedó anotado en Ajustes.'); }
 });
 document.addEventListener('submit', (ev) => {
   const f = ev.target;
   if (f.dataset.acc === 'fase-form') { ev.preventDefault(); aviso('Guardar recordatorios llega en la Fase 3.'); }
 });
-document.addEventListener('change', (ev) => { if (alCambiarCampo(ev.target)) pintar(); });
+document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target)) return; if (alCambiarCampo(ev.target)) pintar(); });
+document.addEventListener('input', (ev) => { alEscribir(ev.target, pintar); });
+window.addEventListener('agenda:repintar', () => pintar());
 document.addEventListener('keydown', (ev) => {
   const enCampo = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName || '') || ev.target.isContentEditable;
-  if (enCampo || ev.ctrlKey || ev.metaKey || ev.altKey || document.body.classList.contains('con-candado') || document.body.classList.contains('con-hoja') || document.body.classList.contains('en-tour')) return;
+  if (enCampo || document.getElementById('capaMigracion') || ev.ctrlKey || ev.metaKey || ev.altKey || document.body.classList.contains('con-candado') || document.body.classList.contains('con-hoja') || document.body.classList.contains('en-tour')) return;
   if (ev.key === 'n' || ev.key === '+') { ev.preventDefault(); abrirAgregar(); }
   else if (/^[1-5]$/.test(ev.key)) ir(PRINCIPALES[+ev.key - 1][0]);
   else if (ev.key === '?') alternarGuia();
@@ -149,8 +159,18 @@ $('btnTema').addEventListener('click', () => {
 $('fab').addEventListener('click', abrirAgregar);
 
 if (!location.hash) { try { history.replaceState(null, '', '#' + ruta.sec); } catch (e) { /* nada */ } }
+/* Tus datos: si ya existen los de la v5 se cargan; si no, y hay de la v4.5,
+   se migran (después del PIN, para que nadie vea nada sin escribirlo). */
+const yaHabia = cargar();
 pintar();
 iniciarCandado();
+let migrando = false;
+if (!yaHabia) {
+  if (resumenAntiguo().hay) {
+    migrando = true;
+    despuesDeAbrir(() => mostrarMigracion().then((ok) => { migrando = false; if (ok) { ruta = { sec: 'datos', param: '' }; try { history.replaceState(null, '', '#datos'); } catch (e) { /* nada */ } } pintar(); arrancarRecorrido(); }));
+  } else { empezarVacio(); pintar(); }
+}
 document.getElementById('portada')?.remove();
 setInterval(() => { pintarCab(); }, 15000);
 
@@ -159,7 +179,8 @@ let dia = hoy();
 setInterval(() => { if (hoy() !== dia) { dia = hoy(); pintar(); } }, 60000);
 
 /* Primera vez: el recorrido de bienvenida */
-despuesDeAbrir(() => { if (!preferencias().tourVisto) setTimeout(iniciarRecorrido, 400); });
+function arrancarRecorrido() { if (!preferencias().tourVisto) setTimeout(iniciarRecorrido, 400); }
+despuesDeAbrir(() => { if (!migrando) arrancarRecorrido(); });
 
 /* Para instalarla y abrirla sin internet. Solo en https o en el servidor local. */
 const hospedado = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);

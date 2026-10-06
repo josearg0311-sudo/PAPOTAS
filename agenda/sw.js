@@ -10,15 +10,16 @@
 
    Cada vez que se publica: subir CACHE (y VERSION en js/version.js). */
 
-const CACHE = 'agenda-v27';
+const CACHE = 'agenda-v28';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/tokens.css', './css/base.css', './css/componentes.css', './css/vistas.css',
   './js/app.js', './js/version.js',
   './js/util/fechas.js', './js/util/dinero.js', './js/util/dom.js',
   './js/datos/almacen.js', './js/datos/preferencias.js', './js/datos/areas.js',
-  './js/piezas/aviso.js', './js/piezas/hoja.js', './js/piezas/tema.js', './js/piezas/candado.js', './js/piezas/guia.js', './js/piezas/agregar-rapido.js',
-  './js/vistas/comun.js', './js/vistas/hoy.js', './js/vistas/recordatorios.js', './js/vistas/agenda.js', './js/vistas/areas.js', './js/vistas/mas.js', './js/vistas/ajustes.js',
+  './js/datos/modelo.js', './js/datos/migracion.js', './js/datos/datos.js', './js/datos/copias.js', './js/datos/respaldo.js',
+  './js/piezas/aviso.js', './js/piezas/hoja.js', './js/piezas/tema.js', './js/piezas/candado.js', './js/piezas/guia.js', './js/piezas/agregar-rapido.js', './js/piezas/migracion-ui.js', './js/piezas/confirmar.js',
+  './js/vistas/comun.js', './js/vistas/hoy.js', './js/vistas/recordatorios.js', './js/vistas/agenda.js', './js/vistas/areas.js', './js/vistas/mas.js', './js/vistas/ajustes.js', './js/vistas/datos.js', './js/vistas/papelera.js',
   './fuentes/plus-jakarta.woff2', './fuentes/martian-mono.woff2',
   './iconos/icono.svg', './iconos/icon-192.png', './iconos/icon-512.png', './iconos/icon-maskable-192.png', './iconos/icon-maskable-512.png', './iconos/apple-touch-icon.png'
 ];

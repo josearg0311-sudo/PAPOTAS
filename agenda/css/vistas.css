@@ -117,8 +117,8 @@
 .lista-ajustes { display: grid; }
 .ajuste { display: grid; gap: 10px; padding: 14px 16px; border-top: 1px solid var(--borde); }
 .ajuste:first-child { border-top: 0; }
-@media (min-width: 720px) { .ajuste { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } }
-.ajuste-txt b { display: block; font-size: 15px; }
+@media (min-width: 720px) { .ajuste { grid-template-columns: minmax(0, 1fr) auto; align-items: center; } #ajusteRespaldo, .ajuste:has(.copias-lista) { grid-template-columns: 1fr; } }
+.ajuste-txt > b { display: block; font-size: 15px; }
 .ajuste-txt small { display: block; color: var(--tinta-2); font-size: 13px; margin-top: 2px; }
 .ajuste-ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .ajuste-ctl:empty { display: none; }

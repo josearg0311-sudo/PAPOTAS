@@ -23,7 +23,8 @@ Este repositorio contiene DOS cosas distintas:
 
 ## Cómo se publica y se prueba
 - Sin compilación: módulos JavaScript nativos (`<script type="module">`). Se publica arrastrando **la carpeta `agenda/`** a Netlify (sitio fijo `agendaaaapersonal.netlify.app`, que hoy sirve la v4.5).
-- ⚠️ **No publicar `agenda/` en Netlify hasta terminar la Fase 2 (migración)**: antes de eso la app nueva no muestra los datos del usuario (siguen intactos en el navegador, pero no se verían).
+- ⚠️ **Aún no publicar `agenda/` en Netlify** (reemplazaría la v4.5 en el sitio real). Con la Fase 2 la v5 ya migra y muestra los datos, pero todavía no permite crear/editar (Fase 3) ni sincroniza con la nube (Fase 8). Decidir con el usuario cuándo publicar.
+- Vista previa privada para el usuario (artifact multi-archivo, almacenamiento propio, sin service worker ni descargas): se arma copiando `agenda/` a una carpeta temporal y quitando `<!DOCTYPE>/<html>/<head>/<body>` del index. El usuario puede probar la migración real cargando su respaldo de la v4.5 en Ajustes → Respaldo → Cargar.
 - Servidor local: `python3 -m http.server 8770` desde la raíz del repo → `http://localhost:8770/agenda/`. Los módulos **no** funcionan abriendo el archivo con doble clic.
 - Pruebas automáticas: `http://localhost:8770/agenda/pruebas/` (deben pasar todas; cada fase suma las suyas y nunca se borra una prueba).
 - Para probar con datos reales de la v4.5 en el mismo origen: abrir `http://localhost:8770/agenda-v4.5-original/index.html` → «Ver con ejemplos», y luego `/agenda/`.
@@ -40,10 +41,13 @@ js/
   version.js          versión visible en Ajustes
   util/   fechas.js (Lima) · dinero.js (soles, céntimos, leerMonto) · dom.js (esc, ico, vacio)
   datos/  almacen.js (localStorage seguro, claves agenda5_*, solo lectura de v4.5)
+          modelo.js (formato v5, normalizar, fusionar) · migracion.js (puro: migrar/verificar/reconstruir)
+          datos.js (ÚNICO que lee/cambia «agenda5_datos»; papelera; migrarDesdeV45)
+          copias.js (copias automáticas en IndexedDB «agenda5») · respaldo.js (exportar/importar v5 y v4.5)
           preferencias.js · areas.js
   piezas/ candado.js (PIN) · hoja.js · aviso.js · tema.js · guia.js (modo guía y recorrido)
-          agregar-rapido.js (2 toques: tipo → área)
-  vistas/ hoy · recordatorios · agenda · areas · mas (Seguimiento/Finanzas/Notas/Papelera) · ajustes · comun
+          agregar-rapido.js (2 toques: tipo → área) · migracion-ui.js · confirmar.js
+  vistas/ hoy · recordatorios · agenda · areas · mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
 fuentes/ iconos/ pruebas/
 ```
 - Las acciones se declaran con `data-acc="nombre"`; cada vista exporta `acciones` y `app.js` las junta. Si una acción devuelve `true`, se repinta.
@@ -66,17 +70,23 @@ Colecciones de la agenda (todas con `id`, `upd`, `del/delEn`, y casi todas `esp`
 Nube v4.5: **jsonbin.io** (no Supabase), 3 bins (agenda + 2 libros), mezcla por elemento según `upd`.
 Fallos conocidos de la v4.5 que la v5 corrige: PIN nunca se releía al abrir (y no había botón); Pomodoro inaccesible; «1,250» se guardaba como 1.25; respaldo reemplazaba los libros; borrados olvidados a los 60 días podían revivir.
 
-## Modelo de datos nuevo (se implementa en la Fase 2)
-Cada elemento: `{ id, tipo, area, titulo, prioridad: 'alta'|'media'|'baja', estado: 'pendiente'|'en_curso'|'hecho'|'cancelado', fechas: { inicio, fin, vence, hora }, etiquetas: [], plazoLegal, repetir, aviso, lista, notas, creado, actualizado, borrado, datos: {…propio del tipo…}, origen: { coleccion, id } }`.
+## Modelo de datos v5 (implementado en la Fase 2)
+Se guarda en `agenda5_datos`: `{ v, creado, perfil:{nombre, presupuesto(céntimos), antiguo}, items:[…], migracion:{fecha, informe, verificacion, copia} }`.
+Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 'alta'|'media'|'baja', estado: 'pendiente'|'en_curso'|'hecho'|'cancelado', fechas: { inicio, fin, vence, hora, horaFin }, todoElDia, etiquetas: [], plazoLegal, repetir, aviso, lista, notas, monto (céntimos), extra: {…valores del tipo ya en formato nuevo…}, creado, actualizado, borrado, datos: {…lo original de la v4.5 que el modelo no usa, INTACTO…}, origen: { coleccion, id, indice, quitados } }`.
+- Tipos: pendiente, lista (extra.clase: recordatorios | checklist | proyecto), evento, nota, habito, meta, pago, movimiento (extra.libro, extra.ingreso, extra.categoria), diario, enfoque, curso, entreno, rutina, medida, bienestar, cobro, prestamo, horas, cliente, casa, menu, documento, ficha, revision, otro (colecciones desconocidas).
+- Ids nuevos deterministas: `<coleccion>_<idViejo>` (p. ej. `tareas_abc`, `mov_personal_xyz`, `listas_l1_i1`), así migrar o importar dos veces no duplica. Listas del sistema: `lista_recordatorios`, `lista_tareas` (actualizado 0).
+- Lo nuevo es la fuente de verdad; `datos` es histórico (no se mantiene sincronizado al editar).
 - **Tareas y recordatorios se unen en «pendientes»**, agrupados en **listas** (Recordatorios) y vistos en el calendario (Agenda). Las listas antiguas (Compras…) se vuelven listas con sus ítems como pendientes; los recordatorios sueltos van a la lista «Recordatorios».
 - Áreas = lista editable (nombre, color, ícono). `esp` → `area`; la etiqueta libre `area` → `etiquetas`. Prioridad 3→Alta, 2→Media, 1 y 0→Baja (se guarda la original).
 - Movimientos de los dos libros entran al mismo almacén (céntimos).
-- Migración: 1) copia literal de todas las claves antiguas + descarga ofrecida (obligatoria si no cabe); 2) conversión sin perder campos (lo no usado va a `datos`); 3) verificación de conteos e ids por tipo, si no cuadra se cancela; 4) las claves antiguas no se borran.
+- Migración (automática al abrir, después del PIN): 1) copia literal de todas las claves antiguas en IndexedDB, releída para comprobarla (si no se puede, se exige descargarla antes); 2) conversión; 3) verificación: `reconstruir(item)` debe dar EXACTO cada objeto original (orden, conteos, ids, campos desconocidos incluidos) — si uno falla, se cancela y no se guarda nada; 4) se guarda y se relee; 5) las claves antiguas no se borran nunca. «Traer de nuevo» (Ajustes) repite el proceso y junta.
+- Respaldo: exporta `{app:'agenda', formato:'agenda5', version:1, exportadoEn, datos}`. Importa v5, respaldo completo v4.5 (`{app:'agenda', version:2, agenda, cuentas, oficina}`), agenda sola y libro suelto (nombre con «oficina» → libro de oficina). Siempre JUNTA (gana `actualizado` mayor) tras guardar copia automática. Aviso si pasan más de 7 días sin respaldo.
+- Papelera: `borrado` = fecha; 30 días; borrar una lista se lleva sus elementos (extra.conLista) y restaurarlos los devuelve; se purga sola al cargar.
 - Nube: la v5 usará **bins nuevos** y nunca escribirá los antiguos (solo los lee una vez para migrar).
 
 ## Fases
-1. ✅ **Cimientos**: carpetas, diseño Señal, navegación, formato Lima/soles, PIN arreglado y compatible, bloqueo automático, Ajustes (preferencias, seguridad, ayuda, datos), modo guía y recorrido, SW `agenda-v27`, manifiesto, 24 pruebas.
-2. Datos: modelo, migración con copia y verificación, respaldo (acepta formato antiguo), papelera 30 días.
+1. ✅ **Cimientos**: carpetas, diseño Señal, navegación, formato Lima/soles, PIN arreglado y compatible, bloqueo automático, Ajustes (preferencias, seguridad, ayuda), modo guía y recorrido, manifiesto.
+2. ✅ **Datos**: modelo v5, migración automática con copia (IndexedDB) y verificación exacta, explorador «Tus datos», respaldo exportar/importar (v5 y v4.5, junta sin duplicar), copias automáticas descargables, papelera 30 días, aviso de respaldo >7 días, áreas con conteos reales. SW `agenda-v28`. 42 pruebas (incl. ejemplos v4.5 y datos «raros» en `pruebas/datos/`).
 3. Hoy + Recordatorios (listas, casillas, más tarde/mañana/día, deslizar, cerrar el día) + agregar rápido + Pomodoro vinculado.
 4. Agenda: día/semana/mes con datos, plazos, plazo legal primero, cierre del día.
 5. Áreas: 4 paneles y sus herramientas (sesiones de estudio para exámenes, entrenos como hábito con racha y aviso).

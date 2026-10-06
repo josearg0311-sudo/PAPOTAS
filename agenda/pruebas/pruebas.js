@@ -5,6 +5,9 @@ import * as D from '../js/util/dinero.js';
 import { escribir, CLAVES, ANTIGUAS, resumenAntiguo } from '../js/datos/almacen.js';
 import { normalizarPref, minutosVigilia } from '../js/datos/preferencias.js';
 import { hashPIN } from '../js/piezas/candado.js';
+import { migrar, verificar, reconstruir, antiguoDesdeTextos, igualProfundo } from '../js/datos/migracion.js';
+import { fusionar, normalizarDoc } from '../js/datos/modelo.js';
+import { analizarArchivo } from '../js/datos/respaldo.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -77,6 +80,105 @@ tareas.push(prueba('Horas despierto (también si cruza la medianoche)', () => {
 /* ---------- PIN compatible con la v4.5 ---------- */
 tareas.push(prueba('El PIN se tritura igual que en la v4.5 (SHA-256 de «sal:pin»)', () =>
   hashPIN('4821', 'sal123').then((h) => igual(h, '07af83a66a2f07b515eb119a71a312028e64e913c82114455afe4f17bbcf08bc'))));
+
+/* ---------- FASE 2 · Migración v4.5 → v5 ---------- */
+const cargarFix = (n) => fetch('datos/' + n + '.json', { cache: 'no-store' }).then((r) => r.json());
+tareas.push(cargarFix('v45-ejemplos').then((fx) => Promise.all([
+  prueba('Ejemplos v4.5: la migración se verifica sin un solo problema', () => {
+    const a = antiguoDesdeTextos(fx), d = migrar(a, 1), v = verificar(a, d);
+    if (!v.ok) throw new Error(v.problemas.slice(0, 5).join(' | '));
+  }),
+  prueba('Ejemplos v4.5: mismo número de cosas por colección (y 44 movimientos)', () => {
+    const a = antiguoDesdeTextos(fx), d = migrar(a, 1), v = verificar(a, d);
+    Object.keys(a.datos).forEach((c) => { if (Array.isArray(a.datos[c])) { const n = a.datos[c].filter((x) => x && !x.purga).length; if (!v.porCol[c] || v.porCol[c].despues !== n) throw new Error(c); } });
+    igual(d.items.filter((x) => x.tipo === 'movimiento').length, 44);
+  }),
+  prueba('Ejemplos v4.5: tareas y recordatorios pasan a pendientes con su área y prioridad', () => {
+    const a = antiguoDesdeTextos(fx), d = migrar(a, 1);
+    const t = a.datos.tareas[0], it = d.items.find((x) => x.origen && x.origen.coleccion === 'tareas' && x.origen.id === t.id);
+    igual([it.tipo, it.titulo, it.area, it.prioridad, it.fechas.inicio], ['pendiente', t.t, t.esp, 'alta', t.fecha]);
+    const r = d.items.filter((x) => x.origen && x.origen.coleccion === 'recordatorios');
+    if (!r.every((x) => x.tipo === 'pendiente' && x.lista === 'lista_recordatorios' && x.aviso === true)) throw new Error('recordatorios');
+  }),
+  prueba('Ejemplos v4.5: las listas antiguas son listas y sus ítems, pendientes marcables', () => {
+    const a = antiguoDesdeTextos(fx), d = migrar(a, 1), l = a.datos.listas[0];
+    const nueva = d.items.find((x) => x.tipo === 'lista' && x.origen && x.origen.id === l.id);
+    const hijos = d.items.filter((x) => x.lista === nueva.id);
+    igual(hijos.length, l.items.length);
+    igual(hijos.map((x) => x.estado === 'hecho'), l.items.map((x) => !!x.ok));
+  }),
+  prueba('Ejemplos v4.5: montos en céntimos exactos', () => {
+    const a = antiguoDesdeTextos(fx), d = migrar(a, 1);
+    const p = d.items.find((x) => x.tipo === 'pago' && x.titulo === 'Luz'); igual(p.monto, 9550);
+    const m = d.items.find((x) => x.tipo === 'movimiento' && x.titulo === 'Sueldo'); igual([m.monto, m.extra.ingreso], [350000, true]);
+  }),
+  prueba('Migrar dos veces y juntar no duplica nada', () => {
+    const a = antiguoDesdeTextos(fx), d1 = migrar(a, 1), d2 = migrar(a, 2);
+    const r = fusionar(d1, d2); igual(r.doc.items.length, d1.items.length); igual(r.nuevos, 0);
+  }),
+  prueba('Volver a traer lo mismo no cambia nada (0 nuevas, 0 actualizadas)', () => {
+    const a = antiguoDesdeTextos(fx), r = fusionar(migrar(a, 1), migrar(a, 999));
+    igual([r.nuevos, r.actualizados], [0, 0]);
+  }),
+  prueba('Importar el respaldo antiguo (formato de la v4.5) da lo mismo que migrar', () => {
+    const viejo = { app: 'agenda', version: 2, exportadoEn: '2026-10-01T00:00:00Z', agenda: JSON.parse(fx.agenda_datos_v1), cuentas: JSON.parse(fx.ledger_finanzas_simple_v1), oficina: JSON.parse(fx.ledger_oficina_v1) };
+    const an = analizarArchivo(JSON.stringify(viejo));
+    if (!an.ok) throw new Error(an.error);
+    const d = migrar(antiguoDesdeTextos(fx), 1);
+    igual(an.doc.items.map((x) => x.id).sort(), d.items.map((x) => x.id).sort());
+  }),
+  prueba('Respaldo v5: exportar → importar devuelve exactamente lo mismo', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1);
+    const an = analizarArchivo(JSON.stringify({ app: 'agenda', formato: 'agenda5', version: 1, datos: d }));
+    if (!an.ok) throw new Error(an.error);
+    if (!igualProfundo(an.doc.items, normalizarDoc(d).items)) throw new Error('no es igual');
+  })
+])));
+tareas.push(cargarFix('v45-raros').then((fx) => Promise.all([
+  prueba('Datos raros: se verifica sin pérdidas (ids repetidos, sin id, nulos, montos como texto…)', () => {
+    const a = antiguoDesdeTextos(fx), d = migrar(a, 1), v = verificar(a, d);
+    if (!v.ok) throw new Error(v.problemas.slice(0, 6).join(' | '));
+  }),
+  prueba('Datos raros: ids únicos aunque el original los repita', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1), ids = d.items.map((x) => x.id);
+    igual(new Set(ids).size, ids.length);
+  }),
+  prueba('Datos raros: lo vacío y lo ya purgado se cuenta como ignorado', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1);
+    igual(d.migracion.informe.ignorados.purgados, 1);
+    if (d.migracion.informe.ignorados.vacios < 2) throw new Error('vacíos ' + d.migracion.informe.ignorados.vacios);
+  }),
+  prueba('Datos raros: «1,250» se migra como S/ 1,250.00 y «12.5» como S/ 12.50', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1);
+    igual(d.items.find((x) => x.tipo === 'pago' && x.titulo === 'Alquiler').monto, 125000);
+    igual(d.items.find((x) => x.tipo === 'movimiento' && x.titulo === 'Taxi').monto, 1250);
+  }),
+  prueba('Datos raros: campos desconocidos y colecciones inventadas se conservan', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1);
+    const t = d.items.find((x) => x.origen && x.origen.id === 't5');
+    igual(t.datos.campoFuturo, { a: [1, 2, { b: null }] });
+    igual(t.estado, 'en_curso');
+    const z = d.items.find((x) => x.origen && x.origen.coleccion === 'coleccionInventada');
+    if (!igualProfundo(reconstruir(z), { id: 'z1', loQueSea: true, upd: 129 })) throw new Error('no se reconstruye');
+  }),
+  prueba('Datos raros: área inválida se deduce (gym → Deporte) y lo borrado va a la papelera', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1);
+    igual(d.items.find((x) => x.origen && x.origen.id === 't2').area, 'deporte');
+    if (!d.items.find((x) => x.origen && x.origen.id === 't3').borrado) throw new Error('t3 sin borrar');
+  }),
+  prueba('Datos raros: el recordatorio pospuesto suena a su nueva hora', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1), r = d.items.find((x) => x.origen && x.origen.id === 'r1');
+    igual([r.fechas.inicio, r.fechas.hora], ['2026-10-05', '18:30']);
+  }),
+  prueba('Datos raros: fechas y horas imposibles no se inventan (quedan vacías en el formato nuevo)', () => {
+    const d = migrar(antiguoDesdeTextos(fx), 1), t = d.items.find((x) => x.origen && x.origen.id === 't1');
+    igual([t.fechas.inicio, t.fechas.hora, t.datos.fecha], [null, null, '2026-13-45']);
+  }),
+  prueba('Datos dañados (texto que no es JSON): no se rompe nada', () => {
+    const a = antiguoDesdeTextos({ agenda_datos_v1: '{roto', ledger_finanzas_simple_v1: null }), d = migrar(a, 1);
+    igual(d.migracion.informe.ignorados.roto, true);
+  })
+])));
 
 Promise.all(tareas).then(() => {
   const ok = resultados.filter((r) => r[1]).length;
