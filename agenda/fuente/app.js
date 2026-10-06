@@ -1857,7 +1857,7 @@ VISTAS.espacio = function(id){
     '<span class="pe-em">' + E.em + '</span>' +
     '<h2 class="pe-nom">' + E.nom + '</h2>' +
     '<p class="pe-lema">' + (prox ? 'Lo próximo: <b>' + esc(prox.x.t) + '</b> · ' + relativo(prox.d).toLowerCase() + (prox.x.hora ? ' ' + prox.x.hora : '') : E.lema) + '</p>' +
-    '<div class="pe-datos datos">' + datosHeroe(id) + '</div></header>';
+    '</header>';
 
   var tab = tabEsp(id), subs = subpantallas(id);
   if(tab === 'inicio'){
@@ -4268,12 +4268,7 @@ function accesoInformes(){
 VISTAS.informes = function(){
   var n = movsDe('personal').length, o = movsDe('oficina').length;
   return tarjetaInformes() +
-    '<section class="tarjeta inf-ayuda">' + cabTarjeta('i-diana', 'Qué trae cada archivo', 'var(--oro)') +
-      '<div class="tarjeta-cuerpo"><ul class="inf-lista">' +
-        '<li><b>Excel</b>: todos los movimientos del periodo con sus fórmulas, un resumen por mes y otro por categoría. Se abre en Excel, Google Sheets o Numbers.</li>' +
-        '<li><b>PDF</b>: un informe ordenado con totales, listo para imprimir o mandar por WhatsApp o correo.</li>' +
-        '<li><b>Los dos libros</b>: se descargan dos archivos, uno del personal y otro de la oficina.</li>' +
-      '</ul><p class="inf-cuenta">Tienes <b>' + n + '</b> movimientos en el libro personal y <b>' + o + '</b> en el de la oficina.</p></div></section>';
+    '<p class="inf-cuenta" style="margin:10px 4px 0">Tienes <b>' + n + '</b> movimientos en el libro personal y <b>' + o + '</b> en el de la oficina.</p>';
 };
 function tarjetaInformes(){
   var I = ui.inf || (ui.inf = { libro:ui.dinLibro === 'oficina' ? 'oficina' : ui.dinLibro === 'personal' ? 'personal' : 'ambos', periodo:'mes', desde:'', hasta:'' });
@@ -4476,11 +4471,7 @@ VISTAS.dinero = function(){
         '<div class="barra-prog"><i style="width:' + (p * 100).toFixed(1) + '%;background:var(--c)"></i></div><b>' + dinero(porCat[c]) + '</b></button>';
     }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin gastos este mes todavía.</div>') + '</section>';
 
-  /* Últimos movimientos: se tocan para editarlos, ↻ los repite hoy */
-  var ult = lista.slice().sort(function(x, y){ return y.date.localeCompare(x.date) || String(y.id).localeCompare(String(x.id)); }).slice(0, 5);
-  html += '<section class="tarjeta">' + cabTarjeta('i-reloj', 'Últimos movimientos', 'var(--verde)', 'Ver todos', 'data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '"') +
-    (ult.length ? '<div class="lista-filas">' + ult.map(function(t){ return filaMov(t, sel === 'todo', false); }).join('') + '</div>' : '<div class="vacio">Aún no hay movimientos.</div>') + '</section>';
-
+  /* Los últimos movimientos ya están en su pestaña: aquí no se repiten */
   /* Últimos 6 meses */
   var meses = [], maxV = 1;
   for(var i = 5; i >= 0; i--){ var y = mesAntes(ym, i), tt = totalesMes(lista, y); meses.push({ ym:y, t:tt }); maxV = Math.max(maxV, tt.ent, tt.sal); }
