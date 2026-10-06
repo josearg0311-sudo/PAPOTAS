@@ -375,3 +375,18 @@ body.con-teclado .hoja { max-height: calc(100dvh - var(--kb, 0px) - 12px); }
 body.con-teclado .avisos { bottom: calc(var(--kb, 0px) + 12px); }
 .anadir-palabra { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .chips-admin.palabras { max-height: 50vh; overflow-y: auto; }
+
+/* ---------- Fase 11: buscador global ---------- */
+.hoja .buscador { margin: 0 0 12px; }
+.bus-grupo { display: flex; flex-direction: column; margin-bottom: 14px; }
+.bus-grupo > small, .bus-recientes > small { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-3); padding: 4px 2px 6px; }
+.bus-fila { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 8px 4px; border: 0; border-bottom: 1px solid var(--borde); background: none; color: var(--tinta); text-align: left; text-decoration: none; font: inherit; width: 100%; }
+.bus-fila > span:not(.bus-ico) { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bus-fila b { font-weight: 600; overflow-wrap: anywhere; }
+.bus-fila small { color: var(--tinta-3); font-size: 12.5px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bus-fila > .i { width: 16px; height: 16px; color: var(--tinta-3); flex: none; }
+.bus-ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--superficie-2); color: var(--acento-txt); }
+.bus-ico .i { width: 18px; height: 18px; }
+.bus-ico .punto { width: 10px; height: 10px; border-radius: 3px; background: var(--a, var(--acento)); }
+.bus-recientes { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.bus-recientes > small { width: 100%; }

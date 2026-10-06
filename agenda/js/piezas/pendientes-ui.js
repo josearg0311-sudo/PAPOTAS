@@ -2,7 +2,7 @@
    Áreas): casilla para marcar, «Más tarde», «Mañana», «Día…», deslizar con el
    dedo (derecha = hecho, izquierda = mañana) y su editor completo. */
 import { buscarElemento, poner, aPapelera, restaurar } from '../datos/datos.js';
-import { grupo, marcar, mover, masTarde, restaurarVersion, nivelPlazo, listas, esChecklist, REPETIR, cerrarDia, paraCerrarDia, crearLista } from '../datos/pendientes.js';
+import { grupo, marcar, mover, masTarde, restaurarVersion, nivelPlazo, listas, esChecklist, REPETIR, cerrarDia, paraCerrarDia, crearLista, pendientesVisibles } from '../datos/pendientes.js';
 import { AREAS, chipArea, area } from '../datos/areas.js';
 import { preferencias } from '../datos/preferencias.js';
 import { hoy, sumarDias, diaSemana, fmtCorta, fmtHora, relativo } from '../util/fechas.js';
@@ -192,3 +192,33 @@ export function iniciarDeslizar(repintar) {
   document.addEventListener('pointerup', soltar);
   document.addEventListener('pointercancel', () => { if (fila) { fila.style.transform = ''; fila = null; } });
 }
+
+/* ---------- Ordenar lo atrasado, uno por uno (de la v4.5) ---------- */
+export function atrasados() {
+  const h = hoy();
+  return pendientesVisibles().filter((x) => x.estado !== 'hecho' && x.fechas.inicio && x.fechas.inicio < h).sort((a, b) => a.fechas.inicio.localeCompare(b.fechas.inicio));
+}
+export function ordenarPendientes(repintar) {
+  let hechos = 0;
+  const hoja = abrirHoja('Ordenar lo atrasado', '<div id="ordCuerpo"></div>', { alCerrar: () => repintar() });
+  const cuerpo = hoja.querySelector('#ordCuerpo');
+  function paso() {
+    const l = atrasados();
+    if (!l.length) { cuerpo.innerHTML = '<div class="vacio"><b>¡Todo en orden! 🙌</b><span>' + (hechos ? 'Ordenaste ' + hechos + (hechos === 1 ? ' pendiente.' : ' pendientes.') : 'No tienes nada atrasado.') + '</span><button type="button" class="btn pri" data-cerrar-hoja="1">Listo</button></div>'; return; }
+    const x = l[0], h = hoy(), lun = sumarDias(h, ((1 - diaSemana(h) + 7) % 7) || 7);
+    cuerpo.innerHTML = '<p class="ayuda">Quedan <b>' + l.length + '</b>. Decide qué hacer con cada uno: sin culpa.</p>' +
+      '<div class="ord-tarjeta area-' + area(x.area).id + '"><span class="pend-meta">' + chipArea(x.area) + '<span class="pill venc">🔴 desde ' + fmtCorta(x.fechas.inicio) + '</span></span><b>' + esc(x.titulo) + '</b>' + (x.notas ? '<small>' + esc(x.notas.slice(0, 140)) + '</small>' : '') + '</div>' +
+      '<div class="ord-botones">' + [[h, 'Hoy'], [sumarDias(h, 1), 'Mañana'], [lun, 'El lunes'], ['', 'Algún día']].map(([f, n]) => '<button type="button" class="btn' + (n === 'Hoy' ? ' pri' : '') + '" data-ord="mover" data-f="' + f + '">' + n + '</button>').join('') +
+      '<button type="button" class="btn" data-ord="hecho">' + ico('i-check') + 'Ya lo hice</button><button type="button" class="btn peligro" data-ord="borrar">' + ico('i-basura') + 'Papelera</button></div>' +
+      '<div class="fila-botones"><button type="button" class="btn chico" data-cerrar-hoja="1">Terminar por ahora</button></div>';
+    cuerpo.querySelectorAll('[data-ord]').forEach((b) => b.addEventListener('click', () => {
+      const o = b.dataset.ord;
+      if (o === 'mover') mover(x.id, b.dataset.f || null, b.dataset.f ? x.fechas.hora : undefined);
+      else if (o === 'hecho') marcar(x.id);
+      else aPapelera(x.id);
+      hechos++; vibrar(8); paso();
+    }));
+  }
+  paso();
+}
+acciones.ordenar = (b, ev, repintar) => { ordenarPendientes(repintar); };

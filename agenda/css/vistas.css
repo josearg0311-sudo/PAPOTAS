@@ -493,3 +493,51 @@ button.hf-txt { cursor: pointer; }
 .animo-tira span { display: grid; justify-items: center; gap: 2px; }
 .animo-tira b { font-size: 17px; font-weight: 400; color: var(--tinta-3); }
 .animo-tira small { font-family: var(--f-mono); font-size: 9.5px; color: var(--tinta-3); }
+
+/* ---------- Fase 11: Hoy (de la v4.5) ---------- */
+.qh-lista { display: flex; flex-direction: column; padding: 0 16px 8px; }
+.qh-fila { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 0; border-bottom: 1px solid var(--borde); }
+.qh-fila:last-child { border-bottom: 0; }
+.qh-punto { width: 8px; height: 8px; border-radius: 50%; background: var(--a, var(--acento-txt)); flex: none; }
+.qh-fila.venc .qh-punto { background: var(--rojo); }
+.qh-txt { flex: 1; min-width: 0; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.qh-txt small { color: var(--tinta-3); }
+.qh-x { flex: none; }
+.qh-ok { margin: 0; padding: 4px 16px 14px; color: var(--tinta-2); }
+.siguiente { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; padding: 16px 18px; text-align: left; border-left: 4px solid var(--a, var(--acento)); color: var(--tinta); font: inherit; cursor: pointer; }
+.siguiente .eti { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; color: var(--at, var(--acento-txt)); }
+.siguiente b { font-size: 19px; font-weight: 800; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.siguiente .sig-cuando { font-weight: 700; color: var(--tinta); }
+.siguiente.en-curso .eti { color: var(--rojo); }
+.man-res { margin: 0; padding: 0 16px 8px; color: var(--tinta-2); }
+.man-areas { display: grid; gap: 10px; padding: 0 16px 6px; }
+.man-area { border-left: 3px solid var(--a); padding-left: 10px; }
+.man-tit { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-weight: 700; color: var(--at); text-decoration: none; }
+.man-area ul { margin: 0; padding: 0 0 4px 0; list-style: none; display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
+.man-area li.tenue { color: var(--tinta-3); }
+.num-dia { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 8px; padding: 0 16px 8px; }
+.num-dia > div { border: 1px solid var(--borde); border-radius: 12px; padding: 10px; background: var(--superficie-2); min-width: 0; }
+.num-dia > div[class*="area-"] { border-color: var(--a); }
+.num-dia b { display: block; font-family: var(--f-mono); font-size: 18px; white-space: nowrap; }
+.num-dia small { color: var(--tinta-3); font-size: 12px; }
+/* Ordenar y elegir varios */
+.ordenar-cta { display: flex; align-items: center; gap: 10px; justify-content: space-between; margin: 0 16px 8px; padding: 8px 12px; border-radius: 12px; background: var(--rojo-suave); font-size: 14px; }
+.ord-tarjeta { display: flex; flex-direction: column; gap: 6px; padding: 16px; margin-bottom: 12px; border-radius: 14px; background: var(--superficie-2); border-left: 4px solid var(--a); }
+.ord-tarjeta b { font-size: 20px; font-weight: 800; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.ord-tarjeta small { color: var(--tinta-2); }
+.ord-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.sel-fila { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.sel-fila.elegida { background: var(--acento-suave, var(--superficie-2)); }
+.sel-fila .casilla { pointer-events: none; }
+.sel-fila[aria-checked="true"] .casilla span { opacity: 1; }
+.barra-sel { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--alto-barra, 64px) + 12px + env(safe-area-inset-bottom)); z-index: 40; width: min(560px, calc(100% - 20px)); padding: 10px; border-radius: 18px; background: var(--superficie); border: 1px solid var(--borde); box-shadow: 0 14px 40px rgba(0,0,0,.4); }
+.barra-sel-cab { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.barra-sel-cab b { flex: 1; }
+.barra-sel-acc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.barra-sel-acc .btn { flex-direction: column; gap: 2px; padding: 6px 2px; font-size: 12px; min-height: 52px; }
+body[data-seccion="recordatorios"] .pantalla { padding-bottom: 200px; }
+@media (min-width: 980px) { .barra-sel { bottom: 20px; left: calc(50% + 130px); } }
+.sel-fila { border: 0; border-bottom: 1px solid var(--borde); border-radius: 0; }
+.sel-fila[aria-checked="true"] .casilla span { background: var(--a, var(--acento)); border-color: var(--a, var(--acento)); }
+.sel-fila[aria-checked="true"] .casilla span::after { content: ""; width: 11px; height: 6px; margin-top: -3px; border-left: 2.5px solid var(--fondo); border-bottom: 2.5px solid var(--fondo); transform: rotate(-45deg); }
+@media (max-width: 420px) { .cab-tit h1 { font-size: 22px; } }

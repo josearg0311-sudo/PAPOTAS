@@ -1,6 +1,7 @@
 /* Pruebas automáticas de la Agenda. Se abren en pruebas/index.html (o las
    corre Playwright). Cada fase suma las suyas; nunca se borra una prueba. */
 import * as F from '../js/util/fechas.js';
+import * as BUS from '../js/datos/buscador.js';
 import * as D from '../js/util/dinero.js';
 import { escribir, CLAVES, ANTIGUAS, resumenAntiguo } from '../js/datos/almacen.js';
 import { normalizarPref, minutosVigilia } from '../js/datos/preferencias.js';
@@ -466,6 +467,13 @@ tareas.push(prueba('Fechas: recordar el último segundo no mezcla instantes ni d
   const a = new Date(Date.UTC(2026, 9, 6, 4, 59, 59)), b = new Date(Date.UTC(2026, 9, 6, 5, 0, 0));
   igual([F.hoy(a), F.hoy(a), F.hoy(b), F.horaAhora(b)], ['2026-10-05', '2026-10-05', '2026-10-06', '00:00']);
   const p = F.partesLima(b); p.y = 1990; igual(F.partesLima(b).y, 2026);
+}));
+
+tareas.push(prueba('Buscar: sin tildes, todas las palabras, plurales y lo del título primero', () => {
+  igual([BUS.coincide('Pagar el recibo de Luz', 'luz'), BUS.coincide('Examen de Matemática', 'examen mate'), BUS.coincide('Cumpleaños de Ana', 'cumpleanos'), BUS.coincide('Pagar luz', 'agua'), BUS.coincide('Clase de inglés', 'clases')], [true, true, true, false, true]);
+  const it = [{ id: 'a', tipo: 'nota', titulo: 'Wifi', notas: 'luz del router', actualizado: 2 }, { id: 'b', tipo: 'pendiente', titulo: 'Pagar la luz', notas: '', actualizado: 1 }, { id: 'c', tipo: 'pendiente', titulo: 'Luz', borrado: 5 }];
+  igual(BUS.buscarElementos(it, 'luz').map((x) => x.id), ['b', 'a']);
+  igual(BUS.buscarElementos(it, 'l'), []);
 }));
 
 Promise.all(tareas).then(() => {

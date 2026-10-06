@@ -2,7 +2,7 @@
    días), clases de los cursos y pendientes con hora. Lo usan Hoy (tu día en
    bloques y el balance) y, en la Fase 4, el calendario. */
 import { elementos } from './datos.js';
-import { diaSemana, esFecha, esHora, plazo } from '../util/fechas.js';
+import { diaSemana, esFecha, esHora, plazo, sumarDias } from '../util/fechas.js';
 
 const minDe = (h) => { const [a, b] = h.split(':').map(Number); return a * 60 + b; };
 const aHora = (m) => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
@@ -107,4 +107,16 @@ export function resumenDia(dia, area = '', hoy = '') {
   const total = d.bloques.length + d.todoDia.length + d.sinHora.filter((x) => x.estado !== 'hecho').length + d.vencen.filter((v) => !v.hecho).length;
   const alerta = d.vencen.some((v) => !v.hecho && (v.plazoLegal || (hoy && plazo(dia, hoy).nivel !== 'ok')));
   return { areas: [...areas], total, alerta, legal: d.vencen.some((v) => v.plazoLegal && !v.hecho) };
+}
+
+/* Lo siguiente: el bloque en curso o el próximo de hoy; si no hay, el primero
+   de los próximos 7 días. { b, dia, enCurso, faltan (min, solo hoy) } */
+export function proximoBloque(hoy, ahoraMin) {
+  const deHoy = bloquesDelDia(hoy).filter((b) => b.fin > ahoraMin);
+  if (deHoy.length) { const b = deHoy[0]; return { b, dia: hoy, enCurso: b.ini <= ahoraMin, faltan: Math.max(0, b.ini - ahoraMin) }; }
+  for (let i = 1; i <= 7; i++) {
+    const d = sumarDias(hoy, i), l = bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente');
+    if (l.length) return { b: l[0], dia: d, enCurso: false, faltan: null };
+  }
+  return null;
 }

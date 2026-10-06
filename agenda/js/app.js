@@ -29,6 +29,8 @@ import { acciones as accAdmin } from './vistas/admin.js';
 import { iniciarNube, config as nubeConfig, estadoNube } from './datos/nube.js';
 import { aplicarAreas } from './datos/areas.js';
 import { iniciarTeclado } from './piezas/teclado.js';
+import { abrirBuscar } from './piezas/buscar.js';
+import { acciones as accHoyExtra } from './vistas/hoy-extra.js';
 import { documento } from './datos/datos.js';
 import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
 import { vistaDatos, acciones as accDatos, alEscribir } from './vistas/datos.js';
@@ -153,8 +155,9 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, accAdmin, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accHoyExtra, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, accAdmin, {
   agregar() { abrirAgregar(); },
+  buscar() { abrirBuscar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },
   'ir-dia'(b) { irADia(b.dataset.dia); ir('agenda'); }
@@ -186,6 +189,7 @@ document.addEventListener('keydown', (ev) => {
   if (ev.key === 'n' || ev.key === '+') { ev.preventDefault(); abrirAgregar(); }
   else if (/^[1-5]$/.test(ev.key)) ir(PRINCIPALES[+ev.key - 1][0]);
   else if (ev.key === '?') alternarGuia();
+  else if (ev.key === '/') { ev.preventDefault(); abrirBuscar(); }
 });
 
 /* ---------- Arranque ---------- */
@@ -202,6 +206,7 @@ $('btnTema').addEventListener('click', () => {
   import('./datos/preferencias.js').then((m) => { m.cambiarPref({ tema: ahora === 'claro' ? 'oscuro' : 'claro' }); if (ruta.sec === 'ajustes') pintar(); });
 });
 $('fab').addEventListener('click', () => abrirAgregar());
+$('btnBuscar').addEventListener('click', () => abrirBuscar());
 
 if (!location.hash) { try { history.replaceState(null, '', '#' + ruta.sec); } catch (e) { /* nada */ } }
 /* Tus datos: si ya existen los de la v5 se cargan; si no, y hay de la v4.5,
