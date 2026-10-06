@@ -38,7 +38,9 @@ export function agregarPalabra(w) { const l = String(w || '').trim().toLowerCase
 export function cargarCorrector() {
   if (C) return Promise.resolve(C);
   if (cargando) return cargando;
-  cargando = fetch('diccionario/palabras-es.txt').then((r) => (r.ok ? r.text() : '')).catch(() => '').then((t) => {
+  /* En la versión de un solo archivo el diccionario viene adentro del index.html */
+  const incluido = document.getElementById('diccionario-incluido');
+  cargando = (incluido ? Promise.resolve(incluido.textContent) : fetch('diccionario/palabras-es.txt').then((r) => (r.ok ? r.text() : '')).catch(() => '')).then((t) => {
     const propias = palabrasAprendidas();
     Object.keys(propias).forEach((k) => { if (!propias[k]) delete propias[k]; });
     const textos = elementos((x) => x.titulo || x.notas).slice(-4000).flatMap((x) => [x.titulo, String(x.notas || '').slice(0, 400)]);

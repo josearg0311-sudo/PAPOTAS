@@ -269,7 +269,9 @@ $('btnNube').addEventListener('click', () => { ir('ajustes'); setTimeout(() => {
 /* Para instalarla y abrirla sin internet. Solo en https o en el servidor local. */
 const hospedado = location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname);
 if (hospedado && 'serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch((e) => anotarError(e, 'sw'));
+  /* Si se subió solo el index.html (sin sw.js), no se intenta: la app funciona igual */
+  fetch('sw.js', { method: 'HEAD', cache: 'no-store' }).then((r) => r.ok, () => true)
+    .then((hay) => { if (hay) navigator.serviceWorker.register('sw.js').catch((e) => anotarError(e, 'sw')); });
   navigator.serviceWorker.addEventListener('message', (ev) => {
     if (ev.data && ev.data.nuevaVersion) aviso('Hay una versión nueva de la Agenda.', () => location.reload(), 'Actualizar');
   });
