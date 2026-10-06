@@ -102,6 +102,28 @@
 <div id="capaTour"></div>
 
 <div class="portada" id="portada" aria-hidden="true"><i class="logo"></i></div>
+<script>
+/* Si el programa no llegó completo (p. ej. se subió solo index.html, sin las
+   carpetas css/ y js/), en vez de una página rota se explica qué pasó.
+   Tus datos no se tocan: viven en este aparato. */
+(function () {
+  function falta(que) {
+    if (document.getElementById('faltaPrograma')) return;
+    var d = document.createElement('div'); d.id = 'faltaPrograma';
+    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#000;color:#F5F5F7;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
+    d.innerHTML = '<div style="max-width:520px;margin:0 auto"><h1 style="font-size:24px;margin:0 0 12px">La Agenda no se cargó completa</h1>' +
+      '<p>Faltan archivos del programa (' + que + '). <b>Tus datos están a salvo</b> en este aparato: no se tocaron.</p>' +
+      '<p><b>Si acabas de publicar:</b> en Netlify arrastra la <b>carpeta completa</b> (la que tiene dentro <code>index.html</code>, <code>css</code>, <code>js</code>, <code>fuentes</code>, <code>iconos</code> y <code>diccionario</code>), no solo el archivo index.html.</p>' +
+      '<p>Para volver a la versión anterior: Netlify → Deploys → la publicación anterior → «Publish deploy».</p>' +
+      '<p><button type="button" onclick="location.reload()" style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#1D45C4;color:#fff;font:600 15px system-ui">Intentar de nuevo</button></p></div>';
+    document.body.appendChild(d);
+  }
+  window.addEventListener('load', function () {
+    if (!getComputedStyle(document.documentElement).getPropertyValue('--fondo')) falta('los estilos');
+  });
+  setTimeout(function () { if (document.getElementById('portada') && !document.getElementById('capaMigracion')) falta('el programa'); }, 9000);
+})();
+</script>
 
 <div class="candado" id="candado" role="dialog" aria-modal="true" aria-labelledby="candadoTitulo" hidden>
   <i class="logo" aria-hidden="true"></i>
