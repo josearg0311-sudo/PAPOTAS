@@ -1058,6 +1058,38 @@ function dictar(idCampo, boton){
   new ResizeObserver(function(){ document.documentElement.style.setProperty('--avisos-h', Math.ceil(caja.getBoundingClientRect().height) + 'px'); }).observe(caja);
 })();
 
+/* ---------- Resumen de un día, para leer, copiar o mandar ----------------- */
+function textoDia(dia){
+  var its = itemsDelDia(dia).slice().sort(function(a, b){ return (a.hora || '99').localeCompare(b.hora || '99'); });
+  var hoy = hoyISO(), l = [];
+  l.push('*' + cap(fechaLarga(dia)) + '*');
+  var ev = its.filter(function(x){ return x.tipo !== 'tarea'; }), ta = its.filter(function(x){ return x.tipo === 'tarea'; });
+  if(dia === hoy){
+    var atras = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoy; });
+    if(atras.length) ta = atras.map(function(t){ return { tipo:'tarea', t:t.t, hora:t.hora || '', hecho:false, esp:espDe(t), tarde:true }; }).concat(ta);
+  }
+  l.push('');
+  l.push('📅 Agenda: ' + (ev.length ? ev.length : 'nada'));
+  ev.forEach(function(x){ l.push((x.hecho ? '   ✅ ' : '   • ') + (x.hora ? x.hora + ' ' : '') + x.t); });
+  l.push('');
+  l.push('✔️ Tareas: ' + (ta.length ? (function(n){ return n + (n === 1 ? ' pendiente' : ' pendientes'); })(ta.filter(function(x){ return !x.hecho; }).length) : 'ninguna'));
+  ta.forEach(function(x){ l.push((x.hecho ? '   ✅ ' : x.tarde ? '   ⚠️ ' : '   ☐ ') + x.t + (x.hora ? ' · ' + x.hora : '') + (x.tarde ? ' (atrasada)' : '')); });
+  if(dia === hoy){
+    var wd = new Date().getDay(), hs = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+    if(hs.length){ var ok = hs.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length; l.push(''); l.push('🔥 Hábitos: ' + ok + ' de ' + hs.length); }
+    var gasto = 0; ['personal', 'oficina'].forEach(function(lb){ libroDatos(lb).forEach(function(t){ if(t.date === hoy && t.type === 'Gasto') gasto += t.amount; }); });
+    if(gasto) l.push('💸 Gastado hoy: ' + dinero(gasto));
+  }
+  return l.join('\n');
+}
+function verDia(dia, titulo){
+  var t = textoDia(dia);
+  abrirFlotante(cabFlot(titulo) + '<pre class="resumen-dia">' + esc(t) + '</pre>' +
+    '<div class="botones"><button type="button" class="btn" data-acc="resumen-copiar">' + ico('i-notas') + 'Copiar</button>' +
+    '<button type="button" class="btn primario" data-acc="resumen-mandar">' + ico('i-subir') + 'Mandar</button></div>');
+  ui.resumenTxt = t; ui.resumenTit = titulo;
+}
+
 /* ---------- Compartir (WhatsApp o lo que tenga el celular) ---------------- */
 function compartir(titulo, texto){
   if(navigator.share){ navigator.share({ title:titulo, text:texto }).catch(function(){}); return; }
@@ -1291,6 +1323,10 @@ VISTAS.hoy = function(){
   }
 
   /* ---- Cabecera corta: saludo y avance del día ---- */
+  var accHoy = '<div class="hoy-acc">' +
+    '<button type="button" class="btn chico" data-acc="resumen-dia">' + ico('i-notas') + 'Resumen del día</button>' +
+    '<button type="button" class="btn chico" data-acc="plan-manana">' + ico('i-cal') + 'Mañana</button>' +
+    '<button type="button" class="btn chico" data-acc="cal-ir-dia-hoy" data-dia="' + hoy + '">' + ico('i-reloj') + 'Por horas</button></div>';
   var html = '<header class="hoy-cab portada-hoy heroe-hoy">' +
     '<div class="hc-txt"><small>' + cap(DIAS[ahora.getDay()]) + ' ' + ahora.getDate() + ' de ' + MESES[ahora.getMonth()] + '</small>' +
       '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre.split(' ')[0]) : '') + '</h2>' +
@@ -1298,6 +1334,7 @@ VISTAS.hoy = function(){
     '<div class="anillo-hoy ph-anillo"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
       '<circle class="valor" cx="36" cy="36" r="30" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
       '<span><b>' + hechas + '/' + tareasHoy.length + '</b>hechas</span></div>' +
+    accHoy +
   '</header>';
 
   /* Franja de la semana */
@@ -1433,7 +1470,7 @@ function espaciosHoy(hoy){
     var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
     var datos = datosEspacio(E.id, hoy, ts, ag);
     return '<div role="button" tabindex="0" class="eh" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
-      '<span class="eh-cab"><span class="eh-em">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</span>' +
+      '<span class="eh-cab"><span class="eh-em eh-em-caja">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</span>' +
       '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
       '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
       (datos.length ? '<span class="eh-datos">' + datos.map(function(d){
@@ -1590,6 +1627,15 @@ var ESPACIOS = [
   { id:'oficina',  nom:'Oficina',  em:'💼', ico:'i-maletin', c:'var(--esp-oficina)',  lema:'Trabajo, reuniones y cuentas de la oficina' },
   { id:'deporte',  nom:'Deporte',  em:'⚽', ico:'i-balon',   c:'var(--esp-deporte)',  lema:'Fútbol, gym y todo lo que te mueve' }
 ];
+/* Lo que tiene un espacio para hoy (tareas vencidas o de hoy y eventos de hoy) */
+function pendientesEsp(id){
+  try{
+    var hoy = hoyISO();
+    var t = vivos('tareas').filter(function(x){ return espDe(x) === id && !x.hecha && x.fecha && x.fecha <= hoy; }).length;
+    var a = agendaEsp(id, 1).filter(function(x){ return x.d === hoy && x.x.tipo !== 'tarea' && !x.x.hecho; }).length;
+    return t + a;
+  }catch(e){ return 0; }
+}
 function espInfo(id){ return ESPACIOS.find(function(e){ return e.id === id; }) || ESPACIOS[0]; }
 
 /* De qué espacio es una cosa. Lo viejo, sin espacio, se deduce de su área */
@@ -1851,8 +1897,10 @@ VISTAS.espacio = function(id){
      nombre en grande y los otros espacios como círculos para saltar */
   var prox = ag7.filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
   var html = '<header class="portada-esp esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' +
-    '<nav class="pe-cambia cambia-esp" aria-label="Espacios">' + ESPACIOS.map(function(e){
-      return '<button type="button" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '" aria-label="' + e.nom + '"><span>' + e.em + '</span></button>';
+    '<nav class="pe-cambia cambia-esp esp-pildoras" aria-label="Espacios">' + ESPACIOS.map(function(e){
+      var n = pendientesEsp(e.id);
+      return '<button type="button" class="esp-pil" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '">' +
+        '<span class="ep-em">' + e.em + '</span><span class="ep-nom">' + e.nom + '</span>' + (n ? '<em>' + n + '</em>' : '') + '</button>';
     }).join('') + '</nav>' +
     '<span class="pe-em">' + E.em + '</span>' +
     '<h2 class="pe-nom">' + E.nom + '</h2>' +
@@ -7428,6 +7476,12 @@ document.addEventListener('click', function(ev){
 
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
+    case 'resumen-dia': verDia(hoyISO(), 'Resumen del día'); break;
+    case 'plan-manana': verDia(sumarDias(hoyISO(), 1), 'Mañana'); break;
+    case 'resumen-copiar':
+      try{ navigator.clipboard.writeText(ui.resumenTxt || '').then(function(){ aviso('📋 Copiado', 'Pégalo donde quieras.'); }, function(){ prompt('Copia el resumen:', ui.resumenTxt || ''); }); }catch(e){ prompt('Copia el resumen:', ui.resumenTxt || ''); }
+      break;
+    case 'resumen-mandar': compartir(ui.resumenTit || 'Resumen', ui.resumenTxt || ''); break;
     case 'hoy-libro': pref.hoyLibro = b.dataset.v; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'pers-todo': pref.persSolo = b.dataset.v === '1'; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;

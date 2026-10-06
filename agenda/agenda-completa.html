@@ -3827,6 +3827,71 @@ header.hoy-cab.portada-hoy.heroe-hoy{ position:relative; padding:18px 16px 14px 
 body header.portada-esp.esp-heroe{ padding:14px 18px 18px !important }
 @media (max-width:420px){ body header.portada-esp.esp-heroe{ padding:12px 14px 16px !important } }
 body button.ordenar-cta{ padding:14px 16px !important }
+
+/* =====================================================================
+   COLOR: azul noche en vez de negro puro, con un velo de luz detrás
+   ===================================================================== */
+:root[data-paleta="negro"]:not([data-tema="claro"]){
+  --papel:#080B12; --hoja:#111622; --hoja-2:#18202F; --regla:#232C3D; --regla-2:#1A2130;
+  --tinta-2:#A9B1C2; --tinta-3:#7A8397;
+}
+:root:not([data-tema="claro"]){ --esp-oficina:#B794F6 }
+:root[data-tema="claro"]{ --esp-oficina:#7C3AED }
+:root:not([data-tema="claro"]) body{
+  background:
+    radial-gradient(900px 520px at 8% -10%, color-mix(in srgb, var(--verde) 22%, transparent), transparent 70%),
+    radial-gradient(800px 520px at 100% 110%, color-mix(in srgb, var(--rosa) 13%, transparent), transparent 70%),
+    var(--papel) !important;
+  background-attachment:fixed !important;
+}
+:root:not([data-tema="claro"]) .tarjeta, :root:not([data-tema="claro"]) .w{ background-color:color-mix(in srgb, var(--hoja) 92%, transparent) }
+:root[data-tema="claro"] body{
+  background:radial-gradient(900px 520px at 8% -10%, color-mix(in srgb, var(--verde) 10%, transparent), transparent 70%), var(--papel) !important;
+  background-attachment:fixed !important;
+}
+
+/* =====================================================================
+   BOTONES DE LOS ESPACIOS: píldoras con su emoji, su nombre y lo de hoy
+   ===================================================================== */
+.portada-esp .esp-pildoras{ display:flex !important; flex-wrap:nowrap; gap:6px !important; overflow-x:auto; scrollbar-width:none; margin:0 0 14px !important }
+.esp-pildoras::-webkit-scrollbar{ display:none }
+.portada-esp .esp-pildoras .esp-pil{ position:relative; flex:none; width:auto !important; height:40px !important; display:inline-flex !important; align-items:center; gap:7px;
+  padding:0 14px 0 6px !important; border-radius:99px !important; font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+  color:var(--tinta-2); background:color-mix(in srgb, var(--c) 10%, var(--hoja-2)) !important;
+  border:1px solid color-mix(in srgb, var(--c) 28%, var(--regla)) !important; box-shadow:none !important; transition:transform .15s, background .15s }
+.esp-pil .ep-em{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:16px; line-height:1;
+  background:color-mix(in srgb, var(--c) 26%, transparent) }
+.esp-pil em{ font-style:normal; min-width:20px; height:20px; padding:0 6px; border-radius:99px; display:grid; place-items:center;
+  font-size:11px; font-weight:800; background:var(--c); color:#0B0F18 }
+.portada-esp .esp-pildoras .esp-pil[aria-pressed="true"]{ color:#fff; background:linear-gradient(135deg, color-mix(in srgb, var(--c) 72%, #000), color-mix(in srgb, var(--c) 40%, #000)) !important;
+  border-color:var(--c) !important; box-shadow:0 8px 22px -10px var(--c) !important }
+.portada-esp .esp-pildoras .esp-pil[aria-pressed="true"] .ep-em{ background:rgba(255,255,255,.18) }
+.portada-esp .esp-pildoras .esp-pil[aria-pressed="true"] em{ background:#fff; color:#111 }
+:root[data-tema="claro"] .portada-esp .esp-pildoras .esp-pil[aria-pressed="true"]{ background:var(--c) !important }
+.esp-pil:active{ transform:scale(.95) }
+@media (hover:hover){ .esp-pil:not([aria-pressed="true"]):hover{ color:var(--tinta); border-color:var(--c) !important } }
+@media (max-width:420px){ .portada-esp .esp-pildoras .esp-pil{ padding:0 10px 0 5px !important; font-size:12px } }
+
+/* Tarjetas de los espacios en Hoy: emoji en su caja de color y la tarjeta teñida */
+.eh{ border:1px solid color-mix(in srgb, var(--ec) 38%, var(--regla)) !important;
+  background:radial-gradient(130% 110% at 0% 0%, color-mix(in srgb, var(--ec) 28%, transparent), transparent 62%), var(--hoja) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 14px 32px -22px var(--ec) !important; transition:transform .15s, box-shadow .2s }
+.eh-em-caja{ width:38px; height:38px; border-radius:12px; display:grid !important; place-items:center; font-size:21px !important;
+  background:color-mix(in srgb, var(--ec) 24%, transparent); border:1px solid color-mix(in srgb, var(--ec) 45%, transparent) }
+.eh-cab b{ font-size:16px }
+@media (hover:hover){ .eh:hover{ transform:translateY(-2px); box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 20px 40px -20px var(--ec) !important } }
+
+/* Hoy: los botones del día bajo el saludo, y el resumen */
+.hoy-acc{ grid-column:1 / -1; display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; width:100% }
+.hoy-acc .btn{ flex:1 1 auto; justify-content:center; background:color-mix(in srgb, var(--hoja-2) 80%, transparent) !important }
+.resumen-dia{ white-space:pre-wrap; font:500 13.5px/1.6 var(--letra); background:var(--hoja-2); border:1px solid var(--regla);
+  border-radius:14px; padding:14px; margin:4px 0 12px; max-height:55vh; overflow:auto; color:var(--tinta) }
+header.hoy-cab.portada-hoy.heroe-hoy{ flex-wrap:wrap !important }
+header.hoy-cab .hc-txt{ flex:1; min-width:0 }
+.portada-esp .esp-pildoras .esp-pil{ flex-direction:row !important; opacity:1 !important; white-space:nowrap }
+.portada-esp .esp-pildoras .esp-pil .ep-nom{ display:inline !important }
+.portada-esp .esp-pildoras .esp-pil, .portada-esp .esp-pildoras .esp-pil .ep-nom{ font-size:13px !important; line-height:1 !important }
+.portada-esp .esp-pildoras .esp-pil .ep-em{ font-size:16px !important }
 </style>
 </head>
 <body>
@@ -5018,6 +5083,38 @@ function dictar(idCampo, boton){
   new ResizeObserver(function(){ document.documentElement.style.setProperty('--avisos-h', Math.ceil(caja.getBoundingClientRect().height) + 'px'); }).observe(caja);
 })();
 
+/* ---------- Resumen de un día, para leer, copiar o mandar ----------------- */
+function textoDia(dia){
+  var its = itemsDelDia(dia).slice().sort(function(a, b){ return (a.hora || '99').localeCompare(b.hora || '99'); });
+  var hoy = hoyISO(), l = [];
+  l.push('*' + cap(fechaLarga(dia)) + '*');
+  var ev = its.filter(function(x){ return x.tipo !== 'tarea'; }), ta = its.filter(function(x){ return x.tipo === 'tarea'; });
+  if(dia === hoy){
+    var atras = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoy; });
+    if(atras.length) ta = atras.map(function(t){ return { tipo:'tarea', t:t.t, hora:t.hora || '', hecho:false, esp:espDe(t), tarde:true }; }).concat(ta);
+  }
+  l.push('');
+  l.push('📅 Agenda: ' + (ev.length ? ev.length : 'nada'));
+  ev.forEach(function(x){ l.push((x.hecho ? '   ✅ ' : '   • ') + (x.hora ? x.hora + ' ' : '') + x.t); });
+  l.push('');
+  l.push('✔️ Tareas: ' + (ta.length ? (function(n){ return n + (n === 1 ? ' pendiente' : ' pendientes'); })(ta.filter(function(x){ return !x.hecho; }).length) : 'ninguna'));
+  ta.forEach(function(x){ l.push((x.hecho ? '   ✅ ' : x.tarde ? '   ⚠️ ' : '   ☐ ') + x.t + (x.hora ? ' · ' + x.hora : '') + (x.tarde ? ' (atrasada)' : '')); });
+  if(dia === hoy){
+    var wd = new Date().getDay(), hs = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+    if(hs.length){ var ok = hs.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length; l.push(''); l.push('🔥 Hábitos: ' + ok + ' de ' + hs.length); }
+    var gasto = 0; ['personal', 'oficina'].forEach(function(lb){ libroDatos(lb).forEach(function(t){ if(t.date === hoy && t.type === 'Gasto') gasto += t.amount; }); });
+    if(gasto) l.push('💸 Gastado hoy: ' + dinero(gasto));
+  }
+  return l.join('\n');
+}
+function verDia(dia, titulo){
+  var t = textoDia(dia);
+  abrirFlotante(cabFlot(titulo) + '<pre class="resumen-dia">' + esc(t) + '</pre>' +
+    '<div class="botones"><button type="button" class="btn" data-acc="resumen-copiar">' + ico('i-notas') + 'Copiar</button>' +
+    '<button type="button" class="btn primario" data-acc="resumen-mandar">' + ico('i-subir') + 'Mandar</button></div>');
+  ui.resumenTxt = t; ui.resumenTit = titulo;
+}
+
 /* ---------- Compartir (WhatsApp o lo que tenga el celular) ---------------- */
 function compartir(titulo, texto){
   if(navigator.share){ navigator.share({ title:titulo, text:texto }).catch(function(){}); return; }
@@ -5251,6 +5348,10 @@ VISTAS.hoy = function(){
   }
 
   /* ---- Cabecera corta: saludo y avance del día ---- */
+  var accHoy = '<div class="hoy-acc">' +
+    '<button type="button" class="btn chico" data-acc="resumen-dia">' + ico('i-notas') + 'Resumen del día</button>' +
+    '<button type="button" class="btn chico" data-acc="plan-manana">' + ico('i-cal') + 'Mañana</button>' +
+    '<button type="button" class="btn chico" data-acc="cal-ir-dia-hoy" data-dia="' + hoy + '">' + ico('i-reloj') + 'Por horas</button></div>';
   var html = '<header class="hoy-cab portada-hoy heroe-hoy">' +
     '<div class="hc-txt"><small>' + cap(DIAS[ahora.getDay()]) + ' ' + ahora.getDate() + ' de ' + MESES[ahora.getMonth()] + '</small>' +
       '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre.split(' ')[0]) : '') + '</h2>' +
@@ -5258,6 +5359,7 @@ VISTAS.hoy = function(){
     '<div class="anillo-hoy ph-anillo"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
       '<circle class="valor" cx="36" cy="36" r="30" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
       '<span><b>' + hechas + '/' + tareasHoy.length + '</b>hechas</span></div>' +
+    accHoy +
   '</header>';
 
   /* Franja de la semana */
@@ -5393,7 +5495,7 @@ function espaciosHoy(hoy){
     var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
     var datos = datosEspacio(E.id, hoy, ts, ag);
     return '<div role="button" tabindex="0" class="eh" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
-      '<span class="eh-cab"><span class="eh-em">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</span>' +
+      '<span class="eh-cab"><span class="eh-em eh-em-caja">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</span>' +
       '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
       '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
       (datos.length ? '<span class="eh-datos">' + datos.map(function(d){
@@ -5550,6 +5652,15 @@ var ESPACIOS = [
   { id:'oficina',  nom:'Oficina',  em:'💼', ico:'i-maletin', c:'var(--esp-oficina)',  lema:'Trabajo, reuniones y cuentas de la oficina' },
   { id:'deporte',  nom:'Deporte',  em:'⚽', ico:'i-balon',   c:'var(--esp-deporte)',  lema:'Fútbol, gym y todo lo que te mueve' }
 ];
+/* Lo que tiene un espacio para hoy (tareas vencidas o de hoy y eventos de hoy) */
+function pendientesEsp(id){
+  try{
+    var hoy = hoyISO();
+    var t = vivos('tareas').filter(function(x){ return espDe(x) === id && !x.hecha && x.fecha && x.fecha <= hoy; }).length;
+    var a = agendaEsp(id, 1).filter(function(x){ return x.d === hoy && x.x.tipo !== 'tarea' && !x.x.hecho; }).length;
+    return t + a;
+  }catch(e){ return 0; }
+}
 function espInfo(id){ return ESPACIOS.find(function(e){ return e.id === id; }) || ESPACIOS[0]; }
 
 /* De qué espacio es una cosa. Lo viejo, sin espacio, se deduce de su área */
@@ -5811,8 +5922,10 @@ VISTAS.espacio = function(id){
      nombre en grande y los otros espacios como círculos para saltar */
   var prox = ag7.filter(function(a){ return a.x.tipo !== 'tarea'; })[0];
   var html = '<header class="portada-esp esp-heroe tema-' + id + '" style="--ec:' + E.c + '">' +
-    '<nav class="pe-cambia cambia-esp" aria-label="Espacios">' + ESPACIOS.map(function(e){
-      return '<button type="button" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '" aria-label="' + e.nom + '"><span>' + e.em + '</span></button>';
+    '<nav class="pe-cambia cambia-esp esp-pildoras" aria-label="Espacios">' + ESPACIOS.map(function(e){
+      var n = pendientesEsp(e.id);
+      return '<button type="button" class="esp-pil" data-ir="esp-' + e.id + '" style="--c:' + e.c + '" aria-pressed="' + (e.id === id) + '" title="' + e.nom + '">' +
+        '<span class="ep-em">' + e.em + '</span><span class="ep-nom">' + e.nom + '</span>' + (n ? '<em>' + n + '</em>' : '') + '</button>';
     }).join('') + '</nav>' +
     '<span class="pe-em">' + E.em + '</span>' +
     '<h2 class="pe-nom">' + E.nom + '</h2>' +
@@ -11388,6 +11501,12 @@ document.addEventListener('click', function(ev){
 
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
+    case 'resumen-dia': verDia(hoyISO(), 'Resumen del día'); break;
+    case 'plan-manana': verDia(sumarDias(hoyISO(), 1), 'Mañana'); break;
+    case 'resumen-copiar':
+      try{ navigator.clipboard.writeText(ui.resumenTxt || '').then(function(){ aviso('📋 Copiado', 'Pégalo donde quieras.'); }, function(){ prompt('Copia el resumen:', ui.resumenTxt || ''); }); }catch(e){ prompt('Copia el resumen:', ui.resumenTxt || ''); }
+      break;
+    case 'resumen-mandar': compartir(ui.resumenTit || 'Resumen', ui.resumenTxt || ''); break;
     case 'hoy-libro': pref.hoyLibro = b.dataset.v; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'pers-todo': pref.persSolo = b.dataset.v === '1'; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;

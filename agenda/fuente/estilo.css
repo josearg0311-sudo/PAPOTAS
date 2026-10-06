@@ -3760,3 +3760,68 @@ header.hoy-cab.portada-hoy.heroe-hoy{ position:relative; padding:18px 16px 14px 
 body header.portada-esp.esp-heroe{ padding:14px 18px 18px !important }
 @media (max-width:420px){ body header.portada-esp.esp-heroe{ padding:12px 14px 16px !important } }
 body button.ordenar-cta{ padding:14px 16px !important }
+
+/* =====================================================================
+   COLOR: azul noche en vez de negro puro, con un velo de luz detrás
+   ===================================================================== */
+:root[data-paleta="negro"]:not([data-tema="claro"]){
+  --papel:#080B12; --hoja:#111622; --hoja-2:#18202F; --regla:#232C3D; --regla-2:#1A2130;
+  --tinta-2:#A9B1C2; --tinta-3:#7A8397;
+}
+:root:not([data-tema="claro"]){ --esp-oficina:#B794F6 }
+:root[data-tema="claro"]{ --esp-oficina:#7C3AED }
+:root:not([data-tema="claro"]) body{
+  background:
+    radial-gradient(900px 520px at 8% -10%, color-mix(in srgb, var(--verde) 22%, transparent), transparent 70%),
+    radial-gradient(800px 520px at 100% 110%, color-mix(in srgb, var(--rosa) 13%, transparent), transparent 70%),
+    var(--papel) !important;
+  background-attachment:fixed !important;
+}
+:root:not([data-tema="claro"]) .tarjeta, :root:not([data-tema="claro"]) .w{ background-color:color-mix(in srgb, var(--hoja) 92%, transparent) }
+:root[data-tema="claro"] body{
+  background:radial-gradient(900px 520px at 8% -10%, color-mix(in srgb, var(--verde) 10%, transparent), transparent 70%), var(--papel) !important;
+  background-attachment:fixed !important;
+}
+
+/* =====================================================================
+   BOTONES DE LOS ESPACIOS: píldoras con su emoji, su nombre y lo de hoy
+   ===================================================================== */
+.portada-esp .esp-pildoras{ display:flex !important; flex-wrap:nowrap; gap:6px !important; overflow-x:auto; scrollbar-width:none; margin:0 0 14px !important }
+.esp-pildoras::-webkit-scrollbar{ display:none }
+.portada-esp .esp-pildoras .esp-pil{ position:relative; flex:none; width:auto !important; height:40px !important; display:inline-flex !important; align-items:center; gap:7px;
+  padding:0 14px 0 6px !important; border-radius:99px !important; font:inherit; font-size:13px; font-weight:700; cursor:pointer;
+  color:var(--tinta-2); background:color-mix(in srgb, var(--c) 10%, var(--hoja-2)) !important;
+  border:1px solid color-mix(in srgb, var(--c) 28%, var(--regla)) !important; box-shadow:none !important; transition:transform .15s, background .15s }
+.esp-pil .ep-em{ width:30px; height:30px; border-radius:50%; display:grid; place-items:center; font-size:16px; line-height:1;
+  background:color-mix(in srgb, var(--c) 26%, transparent) }
+.esp-pil em{ font-style:normal; min-width:20px; height:20px; padding:0 6px; border-radius:99px; display:grid; place-items:center;
+  font-size:11px; font-weight:800; background:var(--c); color:#0B0F18 }
+.portada-esp .esp-pildoras .esp-pil[aria-pressed="true"]{ color:#fff; background:linear-gradient(135deg, color-mix(in srgb, var(--c) 72%, #000), color-mix(in srgb, var(--c) 40%, #000)) !important;
+  border-color:var(--c) !important; box-shadow:0 8px 22px -10px var(--c) !important }
+.portada-esp .esp-pildoras .esp-pil[aria-pressed="true"] .ep-em{ background:rgba(255,255,255,.18) }
+.portada-esp .esp-pildoras .esp-pil[aria-pressed="true"] em{ background:#fff; color:#111 }
+:root[data-tema="claro"] .portada-esp .esp-pildoras .esp-pil[aria-pressed="true"]{ background:var(--c) !important }
+.esp-pil:active{ transform:scale(.95) }
+@media (hover:hover){ .esp-pil:not([aria-pressed="true"]):hover{ color:var(--tinta); border-color:var(--c) !important } }
+@media (max-width:420px){ .portada-esp .esp-pildoras .esp-pil{ padding:0 10px 0 5px !important; font-size:12px } }
+
+/* Tarjetas de los espacios en Hoy: emoji en su caja de color y la tarjeta teñida */
+.eh{ border:1px solid color-mix(in srgb, var(--ec) 38%, var(--regla)) !important;
+  background:radial-gradient(130% 110% at 0% 0%, color-mix(in srgb, var(--ec) 28%, transparent), transparent 62%), var(--hoja) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05), 0 14px 32px -22px var(--ec) !important; transition:transform .15s, box-shadow .2s }
+.eh-em-caja{ width:38px; height:38px; border-radius:12px; display:grid !important; place-items:center; font-size:21px !important;
+  background:color-mix(in srgb, var(--ec) 24%, transparent); border:1px solid color-mix(in srgb, var(--ec) 45%, transparent) }
+.eh-cab b{ font-size:16px }
+@media (hover:hover){ .eh:hover{ transform:translateY(-2px); box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 20px 40px -20px var(--ec) !important } }
+
+/* Hoy: los botones del día bajo el saludo, y el resumen */
+.hoy-acc{ grid-column:1 / -1; display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; width:100% }
+.hoy-acc .btn{ flex:1 1 auto; justify-content:center; background:color-mix(in srgb, var(--hoja-2) 80%, transparent) !important }
+.resumen-dia{ white-space:pre-wrap; font:500 13.5px/1.6 var(--letra); background:var(--hoja-2); border:1px solid var(--regla);
+  border-radius:14px; padding:14px; margin:4px 0 12px; max-height:55vh; overflow:auto; color:var(--tinta) }
+header.hoy-cab.portada-hoy.heroe-hoy{ flex-wrap:wrap !important }
+header.hoy-cab .hc-txt{ flex:1; min-width:0 }
+.portada-esp .esp-pildoras .esp-pil{ flex-direction:row !important; opacity:1 !important; white-space:nowrap }
+.portada-esp .esp-pildoras .esp-pil .ep-nom{ display:inline !important }
+.portada-esp .esp-pildoras .esp-pil, .portada-esp .esp-pildoras .esp-pil .ep-nom{ font-size:13px !important; line-height:1 !important }
+.portada-esp .esp-pildoras .esp-pil .ep-em{ font-size:16px !important }
