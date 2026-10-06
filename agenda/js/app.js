@@ -22,6 +22,7 @@ import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
 import { vistaMas, vistaSeccion } from './vistas/mas.js';
+import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
 import { vistaAjustes, acciones as accAjustes, alCambiarCampo, alElegirArchivo, despuesDePintar } from './vistas/ajustes.js';
 import { vistaDatos, acciones as accDatos, alEscribir } from './vistas/datos.js';
 import { vistaPapelera, acciones as accPapelera } from './vistas/papelera.js';
@@ -44,6 +45,7 @@ function leerRuta() {
   const h = decodeURIComponent((location.hash || '').slice(1));
   const [sec, param, sub] = h.split('/');
   if (sec === 'areas' && param && AREAS.some((a) => a.id === param)) return { sec, param, sub: sub || '' };
+  if (sec === 'seguimiento' && param === 'revision') return { sec, param };
   if (TITULOS[sec]) return { sec, param: '' };
   return null;
 }
@@ -79,6 +81,7 @@ function contenido() {
     case 'ajustes': return vistaAjustes();
     case 'datos': return vistaDatos();
     case 'papelera': return vistaPapelera();
+    case 'seguimiento': return vistaSeguimiento(ruta.param);
     default: return vistaSeccion(ruta.sec);
   }
 }
@@ -122,7 +125,7 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, {
   agregar() { abrirAgregar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },

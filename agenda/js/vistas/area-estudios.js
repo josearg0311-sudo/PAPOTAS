@@ -12,6 +12,7 @@ import { editar } from '../piezas/formulario.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { aviso } from '../piezas/aviso.js';
+import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 import { vincular, alternar, corriendo } from '../piezas/pomodoro.js';
 
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -210,7 +211,8 @@ function pintarRepaso(hoja) {
 export const HERRAMIENTAS = [
   { id: 'cursos', nombre: 'Cursos y notas', vista: vistaCursos },
   { id: 'examenes', nombre: 'Exámenes', vista: vistaExamenes },
-  { id: 'fichas', nombre: 'Fichas', vista: vistaFichas }
+  { id: 'fichas', nombre: 'Fichas', vista: vistaFichas },
+  { id: 'constancia', nombre: TEMAS.estudios.tab, vista: () => vistaConstancia('estudios') }
 ];
 export function senales() {
   const s = [], h = hoy();
@@ -222,7 +224,28 @@ export function senales() {
     const p = promedio(evalsDe(c)); if (p != null && p < APRUEBA) s.push({ nivel: 'pronto', txt: c.titulo + ': promedio ' + p.toFixed(1), ir: 'cursos' }); });
   const toca = fichas().filter((f) => fichaToca(f, h)).length;
   if (toca) s.push({ nivel: 'ok', txt: plural(toca, 'ficha', 'fichas') + ' para repasar hoy', ir: 'fichas' });
+  s.push(...senalesConstancia('estudios'));
   return s;
+}
+
+/* El pulso de Estudios: próximo examen, promedio, fichas y foco de la semana */
+export function pulso() {
+  const ex = examenes(true)[0], ps = cursos().map((c) => promedio(evalsDe(c))).filter((p) => p != null), pg = ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : null;
+  const toca = fichas().filter((f) => fichaToca(f, hoy())).length, d = ex ? diasEntre(hoy(), ex.fechas.inicio) : null;
+  return cifras([cifra(ex ? '📝 ' + (d === 0 ? 'hoy' : d + ' d') : '—', ex ? ex.titulo : 'sin exámenes próximos', ex && d <= 3 ? 'aviso' : ''),
+    cifra(pg == null ? '—' : pg.toFixed(1), 'promedio general', pg == null ? '' : pg >= APRUEBA ? 'ok' : 'aviso'),
+    cifra('🃏 ' + toca, 'fichas para hoy', toca ? 'aviso' : 'ok')]);
+}
+
+/* Su semana, para la revisión semanal */
+export function semana(ini, fin) {
+  const ses = elementos((x) => x.tipo === 'pendiente' && x.extra.examen && x.fechas.inicio >= ini && x.fechas.inicio <= fin), ok = ses.filter((x) => x.estado === 'hecho').length;
+  const foco = elementos((x) => x.tipo === 'enfoque' && x.fechas.inicio >= ini && x.fechas.inicio <= fin).reduce((s, e) => s + ((e.extra.minutosArea && e.extra.minutosArea.estudios) || (!e.extra.minutosArea && e.datos && e.datos.pomosEsp && e.datos.pomosEsp.estudios * 25) || 0), 0);
+  const prox = examenes(true).filter((e) => diasEntre(fin, e.fechas.inicio) <= 14);
+  return { pregunta: '¿Qué temas avanzaste y cuáles todavía te cuestan?',
+    cifras: [[ok + '/' + ses.length, 'sesiones de estudio hechas', ses.length && ok < ses.length ? 'aviso' : 'ok'], [Math.round(foco / 6) / 10 + ' h', 'de foco en Estudios', '']],
+    notas: prox.map((e) => '📝 ' + e.titulo + ' · ' + fmtCorta(e.fechas.inicio) + ' (' + temasDe(e).filter((t) => !t.ok).length + ' temas por estudiar)')
+      .concat(cursos().filter((c) => faltas(c).nivel !== 'ok').map((c) => '⚠️ ' + c.titulo + ': ' + faltas(c).f + ' de ' + faltas(c).max + ' faltas')) };
 }
 
 export const acciones = {

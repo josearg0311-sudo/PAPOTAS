@@ -16,6 +16,7 @@ import { feriado, pascua } from '../js/datos/feriados.js';
 import { textoICS, enlaceGoogle } from '../js/util/ics.js';
 import { diaDePago } from '../js/datos/calendario.js';
 import * as HR from '../js/datos/herramientas.js';
+import * as SG from '../js/datos/seguimiento.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -322,6 +323,36 @@ tareas.push(prueba('Peso: último y cambio en 30 días', () => {
   const m = [['2026-09-08', 76.4], ['2026-09-15', 75.9], ['2026-10-06', 74.8]].map(([f, p]) => it({ fechas: { inicio: f }, datos: { peso: p } }));
   const t = HR.tendenciaPeso(m, '2026-10-06');
   igual([t.ultimo, t.cambio30, t.puntos.length], [74.8, -1.6, 3]);
+}));
+
+/* ---------- Fase 6: seguimiento ---------- */
+const hab = (dias, marcas) => it({ tipo: 'habito', extra: { dias, marcas } });
+tareas.push(prueba('Hábito: racha de días seguidos (hoy no la rompe si aún no lo haces)', () => {
+  const m = { '2026-10-05': 1, '2026-10-04': 1, '2026-10-03': 1, '2026-10-01': 1 };
+  igual(SG.rachaHabito(hab([0, 1, 2, 3, 4, 5, 6], m), '2026-10-06'), 3);
+  igual(SG.rachaHabito(hab([0, 1, 2, 3, 4, 5, 6], Object.assign({ '2026-10-06': 1 }, m)), '2026-10-06'), 4);
+  /* solo lunes a viernes: el fin de semana no rompe la racha */
+  igual(SG.rachaHabito(hab([1, 2, 3, 4, 5], { '2026-10-05': 1, '2026-10-02': 1, '2026-10-01': 1 }), '2026-10-06'), 3);
+}));
+tareas.push(prueba('Hábito: cumplimiento en % y la semana día por día', () => {
+  const h = hab([1, 3, 5], { '2026-10-05': 1, '2026-09-30': 1 });
+  igual(SG.cumplimiento(h, '2026-10-06', 14, '2026-09-23'), 33);
+  igual(SG.semanaHabito(h, '2026-10-05', '2026-10-06'), ['si', 'libre', 'futuro', 'libre', 'futuro', 'libre', 'libre']);
+  igual(SG.cumplimiento(hab([], {}), '2026-10-06', 7, '2026-10-06'), null);
+}));
+tareas.push(prueba('Metas: avance, metas que bajan (peso) y ritmo por semana', () => {
+  igual(SG.progresoMeta({ actual: 650, objetivo: 2000 }).pct, 33);
+  igual(SG.progresoMeta({ actual: 74, objetivo: 72, inicial: 76, baja: true }).pct, 50);
+  igual(SG.progresoMeta({ actual: 71.5, objetivo: 72, inicial: 76, baja: true }).logrado, true);
+  const r = SG.ritmoMeta(SG.progresoMeta({ actual: 20, objetivo: 100 }), '2026-11-03', '2026-10-06');
+  igual([r.falta, r.porSemana], [80, 20]);
+  igual(SG.sumaDesde([{ fecha: '2026-10-01', valor: 5 }, { fecha: '2026-09-30', valor: 7 }, { fecha: 'x', valor: 9 }], '2026-10-01'), 5);
+}));
+tareas.push(prueba('Semana a revisar y áreas descuidadas', () => {
+  igual(SG.semanaARevisar('2026-10-09', '2026-10-05'), '2026-10-05');   // viernes → esta semana
+  igual(SG.semanaARevisar('2026-10-11', '2026-10-05'), '2026-10-05');   // domingo → esta semana
+  igual(SG.semanaARevisar('2026-10-06', '2026-10-05'), '2026-09-28');   // martes → la anterior
+  igual(SG.descuidadas({ personal: { min: 60 }, deporte: { min: 0, foco: 0, hechos: 0, habitosHechos: 0 } }), ['deporte']);
 }));
 
 Promise.all(tareas).then(() => {

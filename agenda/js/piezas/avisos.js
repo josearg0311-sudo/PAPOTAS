@@ -13,6 +13,9 @@ import { hoy, minutosAhora, sumarDias } from '../util/fechas.js';
 import { ocurre } from '../datos/calendario.js';
 import { aviso } from './aviso.js';
 import { avisoDeporte } from '../vistas/area-deporte.js';
+import { tocaHabito, marcasHabito, semanaARevisar } from '../datos/seguimiento.js';
+import { preferencias as prefs } from '../datos/preferencias.js';
+import { inicioSemana, diaSemana } from '../util/fechas.js';
 
 const CLAVE = 'agenda5_avisados', MARGEN_MIN = 120;
 let avisados = leer(CLAVE, {}) || {};
@@ -61,6 +64,20 @@ export function revisarAvisos(alPulsar) {
       sonaron.push(Object.assign({}, e, { esEvento: true }));
     });
   });
+  /* Hábitos con hora: un aviso si a esa hora aún no lo marcaste */
+  elementos((x) => x.tipo === 'habito' && x.fechas.hora && tocaHabito(x, h) && !marcasHabito(x)[h]).forEach((x) => {
+    const [a, b] = x.fechas.hora.split(':').map(Number), m = a * 60 + b, k = 'hab:' + x.id + '@' + h;
+    if (m > ahora || avisados[k]) return;
+    avisados[k] = Date.now();
+    if (ahora - m <= MARGEN_MIN) { sonar(); aviso('⭐ Hábito: ' + x.titulo); notificar('⭐ ' + x.titulo, 'Tu hábito de hoy. Márcalo cuando lo hagas.', 'areas/' + x.area + '/constancia', x.id); }
+  });
+  /* Revisión semanal: el último día de la semana desde las 6 p. m., si falta */
+  const lun = prefs().semanaLunes, ultimo = lun ? 0 : 6, kr = 'revision@' + h;
+  if (diaSemana(h) === ultimo && ahora >= 18 * 60 && !avisados[kr]) {
+    avisados[kr] = Date.now();
+    const ini = semanaARevisar(h, inicioSemana(h, lun), lun), rev = elementos((x) => x.tipo === 'revision' && x.fechas.inicio === ini)[0];
+    if (!(rev && rev.extra && rev.extra.hecha)) { aviso('🗓️ Toca tu revisión semanal (5 minutos)'); notificar('🗓️ Revisión semanal', 'Mira tu semana área por área y elige tus 3 prioridades.', 'seguimiento/revision', 'revision'); }
+  }
   /* Deporte: si pasan días sin entrenar, un aviso al día desde las 6 p. m. */
   const kd = 'deporte@' + h, ad = ahora >= 18 * 60 && !avisados[kd] ? avisoDeporte() : null;
   if (ahora >= 18 * 60 && !avisados[kd]) avisados[kd] = Date.now();

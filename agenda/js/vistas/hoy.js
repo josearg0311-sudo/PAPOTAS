@@ -17,6 +17,8 @@ import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
 import { feriado } from '../datos/feriados.js';
 import { avisoDeporte } from './area-deporte.js';
+import { habitosDeHoy } from './area-constancia.js';
+import { marcasHabito, rachaHabito } from '../datos/seguimiento.js';
 
 export const SOBRECARGA = 0.85;
 const C38 = 2 * Math.PI * 38, C46 = 2 * Math.PI * 46;
@@ -81,6 +83,17 @@ export function pomoHTML() {
     '<small>Hoy: <span class="mono">' + esc(hoyTxt) + '</span></small></div></div>';
 }
 
+/* Hábitos de hoy, cada uno en su área (con su color) */
+function tarjetaHabitos() {
+  const h = hoy(), l = habitosDeHoy();
+  if (!l.length) return '';
+  const ok = l.filter((x) => marcasHabito(x)[h]).length;
+  return tarjeta({ eti: 'HÁBITOS', titulo: 'Hábitos de hoy', n: ok + '/' + l.length, guia: '<b>Cada hábito vive en su área</b> y lleva su color. Tócalo cuando lo cumplas: suma a su racha 🔥.',
+    cuerpo: AREAS.map((a) => { const de = l.filter((x) => x.area === a.id); if (!de.length) return '';
+      return '<div class="habs-area area-' + a.id + '"><a class="habs-area-tit" href="#areas/' + a.id + '/constancia">' + a.nombre + '</a><div class="habs-hoy">' + de.map((x) => { const hecho = !!marcasHabito(x)[h], r = rachaHabito(x, h);
+        return '<button type="button" class="hab-chip area-' + a.id + '" role="checkbox" aria-checked="' + hecho + '" data-acc="hab-marcar" data-id="' + esc(x.id) + '"><span class="em">' + esc((x.extra && x.extra.em) || (x.datos && x.datos.em) || '⭐') + '</span><span>' + esc(x.titulo) + '</span>' + (r ? '<small>🔥 ' + r + '</small>' : '') + '</button>'; }).join('') + '</div></div>'; }).join('') });
+}
+
 export function vistaHoy() {
   const p = preferencias(), h = hoy(), n = nombre(), doc = documento(), rs = diasSinRespaldo();
   const delDiaL = delDia(h).sort(ordenar), hechos = hechosHoy(h), urg = urgentes(h);
@@ -113,6 +126,7 @@ export function vistaHoy() {
         '<button type="button" class="casilla" role="checkbox" aria-checked="' + !!x.ok + '" data-acc="prio-ok" data-i="' + i + '" aria-label="Marcar prioridad ' + (i + 1) + '"' + (x.t ? '' : ' disabled') + '><span></span></button></div>').join('') + '</div>' +
         '<div class="pie-tarjeta"><button type="button" class="btn chico" data-acc="prio-elegir">' + ico('i-rec') + 'Elegir de mis recordatorios</button></div>' }) +
   '</div><div>' +
+    tarjetaHabitos() +
     tarjeta({ eti: '04', titulo: 'Tu día en bloques', n: bloques.length, guia: '<b>Tu día como una línea de tiempo.</b> Eventos, clases de tus cursos y recordatorios con hora, con el color de su área. La línea brillante es la hora actual en Lima.',
       cuerpo: lineaDia(bloques) }) +
     tarjeta({ eti: '05', titulo: 'Pomodoro', id: 'tarjetaPomo', guia: '<b>25 minutos de foco y 5 de descanso</b> (cada 4, uno de 15). Elige en qué te concentras: al terminar, los minutos se suman a ese recordatorio y a su área.',

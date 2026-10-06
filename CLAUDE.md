@@ -12,6 +12,7 @@ Este repositorio contiene DOS cosas distintas:
 - Responsive real (primero celular, cómodo en laptop). Accesible: buen contraste y botones de 44 px mínimo.
 - Trabajar **por fases**. Al terminar cada una: qué cambió, cómo probarlo, y esperar su OK. En cada fase verificar: sin errores en consola, datos migrados visibles, PIN y respaldo funcionando.
 - Si algo no conviene o choca con la app, decirlo y proponer alternativa.
+- **Cada sección conserva su temática** (pedido del usuario en la Fase 6): lo de Estudios se ve y se usa dentro de Estudios, lo de Deporte dentro de Deporte, etc. Las vistas que juntan cosas (Hoy, Seguimiento) las muestran **separadas por área**, con su color, sus propios indicadores y un enlace de vuelta a su área. Nada de listas genéricas mezcladas.
 - Mantener este archivo actualizado al cerrar cada fase.
 
 ## Formato (toda la app)
@@ -49,6 +50,7 @@ js/
           pendientes.js (grupos hoy/más tarde/mañana/próximos/algún día/hecho, orden, repetir, urgentes, cerrar el día)
           calendario.js (ocurre, bloquesDelDia, todoElDia, minutosPorArea, vencenEl, delDia, resumenDia, pagos fijos)
           feriados.js (feriados nacionales del Perú, Semana Santa calculada) · preferencias.js (incl. deporte {meta, avisoDias}) · areas.js
+          seguimiento.js (puro: racha y % de hábitos, semana día a día, avance y ritmo de metas, metas que bajan, semana a revisar, áreas descuidadas)
           herramientas.js (cálculos puros de las áreas: val() lee extra y si no datos; casa, cumpleaños, préstamos, promedio vigesimal 10.5, faltas, planSesiones, Leitner 1-2-4-8-16, horas×tarifa, racha de entrenos, récords, partidos, pichanga, peso)
   piezas/ candado.js (PIN) · hoja.js · aviso.js · tema.js · guia.js (modo guía y recorrido)
           agregar-rapido.js (2 toques: tipo → área → texto con vista previa; guarda recordatorio, evento, gasto, nota, hábito, meta)
@@ -57,7 +59,9 @@ js/
           formulario.js (formulario genérico en hoja: campos + «filas» repetibles; editar({titulo, campos, alGuardar, alBorrar}))
           avisos.js (recordatorios a la hora y eventos «X min antes», sonido, notificaciones; agenda5_avisados) · migracion-ui.js · confirmar.js
   vistas/ hoy · recordatorios · agenda · areas (resumen con señales + pestañas) · area-comun (filas, cifras, cambiarExtra, anotarMovimiento)
-          area-personal · area-estudios · area-oficina · area-deporte (cada una exporta HERRAMIENTAS, senales(), acciones)
+          area-personal · area-estudios · area-oficina · area-deporte (cada una exporta HERRAMIENTAS, senales(), pulso(), semana(ini, fin), acciones)
+          area-constancia (hábitos y metas por área: TEMAS con nombre, ideas y metas automáticas propias de cada área)
+          seguimiento (#seguimiento panorama por área · #seguimiento/revision revisión guiada)
           mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
 fuentes/ iconos/ pruebas/
 ```
@@ -105,7 +109,7 @@ Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 
 3. ✅ **Hoy + Recordatorios**: Hoy con avance, urgente (plazo legal primero, 🔴/⚠️), recordatorios de hoy, 3 prioridades (escribir o elegir), día en bloques (eventos con repetición, clases, pendientes con hora), Pomodoro vinculado (suma minutos al pendiente y al área; modo prueba), balance y aviso de sobrecarga (>85 %). Recordatorios con listas (recordatorios / para marcar), grupos por cuándo, crear varios por líneas entendiendo fechas, editor completo, deslizar, cerrar el día con deshacer. Agregar rápido guarda. Avisos a la hora (Ajustes → Avisos). SW `agenda-v29`. 54 pruebas.
 4. ✅ **Agenda**: Día (línea de tiempo con carriles solo donde algo se pisa; tocar una hora crea evento), Semana y Mes (puntos por área, 🔴/⚖️), filtro por área, «Vence este día» (pagos fijos con casilla que anota el gasto, cobros, documentos; plazo legal primero), feriados del Perú (se pueden ocultar), crear/editar eventos (tipo, área, varios días, repetir, aviso), avisos de eventos, pasar al calendario del teléfono (.ics y Google). SW `agenda-v30`. 59 pruebas.
 5. ✅ **Áreas**: cada área con Resumen (señales ordenadas: plazo legal, 🔴, ⚠️) y pestañas. Personal: casa (cada N días, «Hecho»), menú semanal, documentos (aviso 30 días), cumpleaños (edad), préstamos (saldar → libro). Estudios: cursos (horario, notas con peso, promedio, faltas con alerta), exámenes (temas, plan de sesiones que se reparte hasta la víspera, Pomodoro ligado), fichas Leitner con repaso. Oficina: plazos legales, tablero (por hacer/en curso/hecho) y proyectos, cobros (→ ingreso oficina), horas con cronómetro y tarifa, clientes (llamar/WhatsApp/correo), actas (acuerdos → recordatorios). Deporte: entrenos como hábito (meta semanal, racha de semanas, aviso en Hoy y notificación desde las 6 p. m. si pasan N días), rutinas («Hacer hoy») y récords, partidos (resultado, cuenta como entreno, pichanga con cuota y quién pagó), peso con gráfico. SW `agenda-v31`. 72 pruebas.
-6. Seguimiento: hábitos, metas, rachas, revisión semanal, balance y sobrecarga.
+6. ✅ **Seguimiento** (con temática por área): Resumen de cada área con su **pulso** propio (Personal: casa, cumpleaños, te deben, documentos; Estudios: próximo examen, promedio, fichas; Oficina: plazos legales, por cobrar, horas del mes; Deporte: racha, semana, último entreno, peso). Pestaña de hábitos y metas en cada área con nombre e ideas propias; metas que se llenan solas con datos del área (`extra.auto`: km, entrenos, peso (baja), estudio (Pomodoro), promedio, cobrado, horas; `extra.desde`). Hábitos: marcas como la v4.5, racha, % 30 días, semana en puntos, aviso a su hora. Hoy: «Hábitos de hoy» agrupados por área. Seguimiento: tiempo por área (agenda + foco), hábitos %, área descuidada, días sobrecargados, una tarjeta por área. Revisión semanal: Semana → Personal → Estudios → Oficina → Deporte → Cierre (cada paso con datos y pregunta propios, pasar pendientes al lunes, 3 prioridades que se crean en su área); se guarda como `revision_<lunes>` (`extra.respuestas`, `prioridades`, `hecha`); aviso el último día de la semana desde las 6 p. m. SW `agenda-v32`. 76 pruebas.
 7. Finanzas y Notas (libros integrados, informes).
 8. Ajustes/Administración completo (áreas, etiquetas, respaldo con aviso a los 7 días, papelera, estado de nube) + nube (con permiso del usuario).
 9. Teclado propio mejorado + autocorrector (el usuario pidió mantenerlo y mejorarlo mucho).

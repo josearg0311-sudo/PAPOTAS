@@ -4,7 +4,7 @@ import { ico, vacio, explica } from '../util/dom.js';
 import { tarjeta, enFase } from './comun.js';
 
 export const SECCIONES_MAS = [
-  ['seguimiento', 'Seguimiento', 'i-seg', 'Hábitos, metas, rachas, revisión semanal y balance por área.', 6],
+  ['seguimiento', 'Seguimiento', 'i-seg', 'Tu semana área por área, hábitos, metas y la revisión semanal.', 0],
   ['finanzas', 'Finanzas', 'i-dinero', 'Pagos fijos, movimientos personales y de oficina, cobros y préstamos.', 7],
   ['notas', 'Notas', 'i-nota', 'Notas, listas de compras y diario.', 7],
   ['ajustes', 'Ajustes', 'i-ajustes', 'Preferencias, seguridad, áreas, respaldo, nube y papelera.', 0],

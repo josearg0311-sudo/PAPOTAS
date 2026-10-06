@@ -10,6 +10,7 @@ import { fila, filas, emoji, casilla, mini, pildora, pildoraFecha, cifra, cifras
 import { editar } from '../piezas/formulario.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
+import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 
 const ui = { semana: 0 };
 const AVISO_DOC = 30;   // los documentos avisan con un mes de anticipación
@@ -157,7 +158,8 @@ export const HERRAMIENTAS = [
   { id: 'menu', nombre: 'Menú', vista: vistaMenu },
   { id: 'documentos', nombre: 'Documentos', vista: vistaDocs },
   { id: 'cumpleanos', nombre: 'Cumpleaños', vista: vistaCumples },
-  { id: 'prestamos', nombre: 'Préstamos', vista: vistaPrestamos }
+  { id: 'prestamos', nombre: 'Préstamos', vista: vistaPrestamos },
+  { id: 'constancia', nombre: TEMAS.personal.tab, vista: () => vistaConstancia('personal') }
 ];
 export function senales() {
   const s = [], c = casas().filter((x) => x.e.nivel === 'vencido' || x.e.nivel === 'hoy');
@@ -166,7 +168,27 @@ export function senales() {
   cumples().filter((x) => x.p.dias <= 7).forEach((x) => s.push({ nivel: x.p.dias <= 1 ? 'pronto' : 'ok', txt: '🎂 ' + x.e.titulo + ' · ' + (x.p.dias === 0 ? 'hoy' : relativo(x.p.fecha).toLowerCase()), ir: 'cumpleanos' }));
   const r = resumenPrestamos(prestamos());
   if (r.meDeben) s.push({ nivel: 'ok', txt: 'Te deben ' + fmtSoles(r.meDeben), ir: 'prestamos' });
+  s.push(...senalesConstancia('personal'));
   return s;
+}
+
+/* El pulso de Personal: tu casa, tu gente y tus cuentas con otros */
+export function pulso() {
+  const c = casas(), toca = c.filter((x) => x.e.nivel === 'vencido' || x.e.nivel === 'hoy').length, cu = cumples()[0], r = resumenPrestamos(prestamos());
+  const d = docs().filter((x) => nivelDoc(x.fechas.vence) !== 'ok').length;
+  return cifras([cifra(toca ? '🧹 ' + toca : '✓', toca ? 'en casa por hacer' : 'casa al día', toca ? 'aviso' : 'ok'),
+    cifra(cu ? '🎂 ' + (cu.p.dias === 0 ? 'hoy' : cu.p.dias + ' d') : '—', cu ? 'cumple ' + cu.e.titulo : 'sin cumpleaños'),
+    cifra(fmtSoles(r.meDeben), 'te deben', r.meDeben ? 'ok' : ''), cifra(d ? '📄 ' + d : '✓', d ? 'documentos por renovar' : 'documentos al día', d ? 'aviso' : 'ok')]);
+}
+
+/* Su semana, para la revisión semanal */
+export function semana(ini, fin) {
+  const casaHecha = elementos((x) => x.tipo === 'casa').filter((c) => { const u = val(c, 'ult', ''); return u >= ini && u <= fin; }).length;
+  const toca = casas().filter((x) => x.e.nivel === 'vencido').length, prox = sumarDias(fin, 7);
+  const cu = cumples().filter((x) => x.p.fecha > fin && x.p.fecha <= prox), dv = docs().filter((d) => nivelDoc(d.fechas.vence) !== 'ok');
+  return { pregunta: '¿Cómo estuvo tu casa y tu gente esta semana? ¿A quién deberías llamar?',
+    cifras: [[casaHecha, casaHecha === 1 ? 'cosa de la casa hecha' : 'cosas de la casa hechas', 'ok'], [toca, 'atrasadas en casa', toca ? 'aviso' : 'ok'], [fmtSoles(resumenPrestamos(prestamos()).meDeben), 'te deben', '']],
+    notas: cu.map((x) => '🎂 La próxima semana: ' + x.e.titulo + ' (' + fmtCorta(x.p.fecha) + ')').concat(dv.map((d) => '📄 ' + d.titulo + ': ' + (diasEntre(hoy(), d.fechas.vence) < 0 ? 'vencido' : 'vence ' + fmtCorta(d.fechas.vence)))) };
 }
 
 export const acciones = {

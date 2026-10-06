@@ -16,6 +16,7 @@ import { editar } from '../piezas/formulario.js';
 import { editarPendiente } from '../piezas/pendientes-ui.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
+import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 import { irALista } from './recordatorios.js';
 
 const hora = (h) => fmtHora(h, preferencias().formatoHora);
@@ -222,7 +223,8 @@ export const HERRAMIENTAS = [
   { id: 'cobros', nombre: 'Cobros', vista: vistaCobros },
   { id: 'horas', nombre: 'Horas', vista: vistaHoras },
   { id: 'clientes', nombre: 'Clientes', vista: vistaClientes },
-  { id: 'actas', nombre: 'Actas', vista: vistaActas }
+  { id: 'actas', nombre: 'Actas', vista: vistaActas },
+  { id: 'constancia', nombre: TEMAS.oficina.tab, vista: () => vistaConstancia('oficina') }
 ];
 export function senales() {
   const s = [], h = hoy();
@@ -233,7 +235,30 @@ export function senales() {
   const sin = reunionesRecientes().filter((x) => !x.acta && x.d <= h && x.d >= sumarDias(h, -3));
   if (sin.length) s.push({ nivel: 'ok', txt: 'Reunión sin acta: ' + sin[0].e.titulo + ' (' + fmtCorta(sin[0].d) + ')', ir: 'actas' });
   if (reloj()) s.push({ nivel: 'ok', txt: '⏱ Cronómetro de trabajo en marcha', ir: 'horas' });
+  s.push(...senalesConstancia('oficina'));
   return s;
+}
+
+/* El pulso de Oficina: plazos legales, lo que te deben y las horas del mes */
+export function pulso() {
+  const legales = conPlazo().filter((x) => x.plazoLegal), prox = legales[0], venc = legales.filter((x) => x.fechas.vence && x.fechas.vence < hoy()).length;
+  const porCobrar = cobros().filter((x) => x.estado !== 'hecho').reduce((s, x) => s + (+x.monto || 0), 0), r = resumenHoras(horas(), hoy().slice(0, 7));
+  return cifras([cifra('⚖️ ' + legales.length, venc ? plural(venc, 'plazo vencido', 'plazos vencidos') : prox && prox.fechas.vence ? 'próximo: ' + fmtCorta(prox.fechas.vence) : 'plazos legales', venc ? 'aviso' : ''),
+    cifra(fmtSoles(porCobrar), 'por cobrar'), cifra(durTxt(r.min), 'trabajadas este mes')]);
+}
+
+/* Su semana, para la revisión semanal */
+const fechaMs = (ms) => (+ms > 0 ? hoy(new Date(+ms)) : '');
+export function semana(ini, fin) {
+  const legal = elementos((x) => x.tipo === 'pendiente' && x.plazoLegal), cumplidos = legal.filter((x) => x.estado === 'hecho' && fechaMs(hechoEn(x)) >= ini && fechaMs(hechoEn(x)) <= fin).length;
+  const vencidos = legal.filter((x) => x.estado !== 'hecho' && x.fechas.vence && x.fechas.vence <= fin).length;
+  const cobrado = cobros().filter((x) => x.estado === 'hecho').filter((x) => { const f = fechaMs(val(x, 'cobradoEn', 0) || (x.datos && x.datos.cobrado)); return f >= ini && f <= fin; }).reduce((s, x) => s + (+x.monto || 0), 0);
+  const min = horas().filter((h) => h.fechas.inicio >= ini && h.fechas.inicio <= fin).reduce((s, h) => s + (+val(h, 'minutos', 0) || 0), 0);
+  const sinActa = reunionesRecientes().filter((x) => !x.acta && x.d >= ini && x.d <= fin && x.d <= hoy());
+  const proxLegal = legal.filter((x) => x.estado !== 'hecho' && x.fechas.vence > fin && x.fechas.vence <= sumarDias(fin, 7));
+  return { pregunta: '¿Qué quedó pendiente con tus clientes o tus plazos?',
+    cifras: [[cumplidos, 'plazos legales cumplidos', 'ok'], [vencidos, 'plazos vencidos', vencidos ? 'aviso' : 'ok'], [fmtSoles(cobrado), 'cobrado', ''], [durTxt(min), 'trabajadas', '']],
+    notas: proxLegal.map((x) => '⚖️ La próxima semana vence: ' + x.titulo + ' (' + fmtCorta(x.fechas.vence) + ')').concat(sinActa.map((x) => '📝 Sin acta: ' + x.e.titulo + ' del ' + fmtCorta(x.d))) };
 }
 
 export const acciones = {

@@ -341,3 +341,82 @@ button.hf-txt { cursor: pointer; }
 .fila-rep input[type="time"] { padding: 0 4px; font-size: 15px; text-align: center; }
 .fila-rep input[type="time"]::-webkit-calendar-picker-indicator { display: none; }
 .fila-rep select.entrada { padding: 0 2px 0 6px; }
+
+/* ===================== Fase 6 · Seguimiento ===================== */
+.pill.racha { background: var(--ambar-suave); color: var(--ambar); }
+.pill.auto { background: var(--as); color: var(--at); }
+.puntos-sem { display: inline-flex; gap: 3px; margin-left: 4px; vertical-align: middle; }
+.puntos-sem i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--borde); }
+.puntos-sem i.si { background: var(--a); border-color: var(--a); }
+.puntos-sem i.no { border-color: color-mix(in srgb, var(--rojo) 60%, transparent); }
+.puntos-sem i.hoy { border-color: var(--at); }
+.puntos-sem i.libre { opacity: .3; border-style: dotted; }
+.puntos-sem i.futuro { border-style: dashed; }
+.hf.hecho-hoy .hf-txt b { color: var(--tinta-2); }
+.hf.lograda { background: color-mix(in srgb, var(--verde) 6%, transparent); }
+.hf-txt small .progreso { display: inline-block; width: 72px; height: 6px; }
+.ideas { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 10px 16px 4px; border-top: 1px dashed var(--borde); }
+.ideas small { width: 100%; color: var(--tinta-3); font-size: 12px; }
+.ideas .mini-btn { min-height: 40px; }
+
+/* Pulso de cada área */
+.tarjeta.pulso .cifras { padding-bottom: 14px; }
+.tarjeta.pulso { background: linear-gradient(135deg, var(--as), var(--superficie) 60%); }
+.cifra small { overflow-wrap: anywhere; }
+
+/* Hábitos de hoy (en Hoy y en el Resumen de cada área) */
+.habs-area { padding: 0 16px 10px; }
+.habs-area-tit { display: inline-block; margin-bottom: 6px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--at); text-decoration: none; }
+.habs-hoy { display: flex; flex-wrap: wrap; gap: 8px; }
+.tarjeta > .habs-hoy { padding: 0 16px 12px; }
+.hab-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 10px; border-radius: 99px; border: 1.5px solid color-mix(in srgb, var(--a) 45%, var(--borde)); background: var(--superficie-2); color: var(--tinta); font-size: 14px; font-weight: 600; text-align: left; }
+.hab-chip .em { font-size: 18px; }
+.hab-chip small { font-family: var(--f-mono); font-size: 11px; color: var(--ambar); }
+.hab-chip[aria-checked="true"] { background: var(--a); border-color: var(--a); color: var(--fondo); }
+.hab-chip[aria-checked="true"] small { color: var(--fondo); }
+.hab-chip[aria-checked="true"]::after { content: "✓"; font-weight: 800; }
+
+/* Balance de la semana por área */
+.cal-nav b small { display: block; font-family: var(--f-mono); font-size: 10.5px; font-weight: 500; color: var(--tinta-3); }
+.balance-semana { display: grid; gap: 4px; padding: 0 16px 10px; }
+.bs-fila { display: grid; grid-template-columns: 78px 1fr; gap: 2px 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--borde); color: var(--tinta); text-decoration: none; }
+.bs-fila:first-child { border-top: 0; }
+.bs-fila b { font-size: 14px; color: var(--at); }
+.bs-fila small { grid-column: 2; color: var(--tinta-2); font-size: 12px; }
+.bs-fila > small:only-of-type { grid-column: 2; }
+.bs-barra { display: flex; gap: 2px; height: 10px; border-radius: 99px; background: var(--superficie-3); overflow: hidden; }
+.bs-barra i { display: block; height: 100%; border-radius: 99px; }
+.bs-barra .plan, .leyenda-bs .plan { background: var(--a, var(--tinta-2)); }
+.bs-barra .foco, .leyenda-bs .foco { background: repeating-linear-gradient(45deg, var(--a, var(--tinta-2)) 0 3px, transparent 3px 6px); border: 1px solid var(--a, var(--tinta-2)); }
+.leyenda-bs { display: flex; flex-wrap: wrap; gap: 4px 14px; padding: 0 16px 12px; color: var(--tinta-3); font-size: 11.5px; }
+.leyenda-bs span { display: inline-flex; align-items: center; gap: 6px; }
+.leyenda-bs i { display: inline-block; width: 14px; height: 8px; border-radius: 99px; --a: var(--tinta-2); }
+.tarjeta .nota-fase { margin: 0 16px 12px; }
+.areas-seg { display: grid; gap: 14px; }
+@media (min-width: 980px) { .areas-seg { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.seg-mini { display: grid; gap: 8px; padding: 0 16px 12px; font-size: 13.5px; color: var(--tinta-2); }
+.seg-mini b { color: var(--tinta); }
+.tenue { color: var(--tinta-3); }
+.meta-mini { display: grid; grid-template-columns: minmax(0, 1fr) 70px 42px; gap: 8px; align-items: center; }
+.meta-mini span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--tinta); }
+.meta-mini .mono { font-size: 11.5px; text-align: right; }
+.revision-cta.pendiente { border-color: color-mix(in srgb, var(--acento-txt) 55%, var(--borde)); }
+
+/* Revisión guiada */
+.pasos-rev { list-style: none; margin: 0; padding: 0 12px 12px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+.pasos-rev button { width: 100%; min-height: 44px; padding: 0 2px; border-radius: 10px; border: 1px solid var(--borde); background: var(--superficie-2); color: var(--tinta-3); font-size: 11.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pasos-rev li[class*="area-"] button { border-bottom: 3px solid var(--a); }
+.pasos-rev li.hecho button { color: var(--tinta-2); }
+.pasos-rev li.actual button { background: var(--as, var(--acento-suave)); color: var(--at, var(--acento-txt)); border-color: var(--a, var(--acento-txt)); }
+.rev-notas { margin: 0; padding: 0 16px 12px 34px; display: grid; gap: 6px; font-size: 14px; color: var(--tinta-2); }
+.rev-form { padding: 4px 16px 16px; }
+.prio-rev { display: grid; grid-template-columns: minmax(0, 1fr) 118px; gap: 6px; }
+.rev-nav { padding: 2px 0 8px; }
+.rev-nav .btn .i { width: 16px; height: 16px; }
+.cifras { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+.cifra b { font-size: clamp(15px, 4.4vw, 18px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 560px) { .pasos-rev { grid-template-columns: repeat(3, minmax(0, 1fr)); } .pasos-rev button { font-size: 12.5px; } }
+.rev-nav { justify-content: space-between; margin-bottom: 76px; }
+.rev-nav .btn.pri:only-child { margin-left: auto; }
+@media (min-width: 980px) { .rev-nav { margin-bottom: 8px; } }
+.cifra b { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: normal; word-break: keep-all; line-height: 1.2; }

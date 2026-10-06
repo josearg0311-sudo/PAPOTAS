@@ -12,6 +12,9 @@ import * as personal from './area-personal.js';
 import * as estudios from './area-estudios.js';
 import * as oficina from './area-oficina.js';
 import * as deporte from './area-deporte.js';
+import * as constancia from './area-constancia.js';
+import { marcasHabito, tocaHabito, rachaHabito } from '../datos/seguimiento.js';
+import { hoy } from '../util/fechas.js';
 
 const PANELES = { personal, estudios, oficina, deporte };
 const pendientesDe = (id) => elementos((x) => x.area === id && x.tipo === 'pendiente' && x.estado !== 'hecho' && x.estado !== 'cancelado');
@@ -44,7 +47,14 @@ function pestanas(a, sub) {
 function resumen(a) {
   const s = senalesDe(a.id), p = pendientesDe(a.id).sort(ordenar), hs = PANELES[a.id].HERRAMIENTAS;
   const bloque = (eti, titulo, filtro, siVacio) => { const l = elementos((x) => x.area === a.id && filtro(x)); return tarjeta({ eti, titulo, n: l.length, clase: 'area-' + a.id, cuerpo: l.length ? '<div class="filas-datos">' + l.slice(0, 6).map(filaElemento).join('') + '</div>' : siVacio }); };
-  return '<div class="columnas"><div>' +
+  const pulso = tarjeta({ eti: 'PULSO', titulo: constancia.TEMAS[a.id].pulso, clase: 'area-' + a.id + ' pulso', cuerpo: PANELES[a.id].pulso() });
+  const h = hoy(), habs = constancia.habitosDe(a.id).filter((x) => tocaHabito(x, h)), tema = constancia.TEMAS[a.id];
+  const habHoy = tarjeta({ eti: 'HOY', titulo: tema.titulo, n: habs.length ? habs.filter((x) => marcasHabito(x)[h]).length + '/' + habs.length : null, clase: 'area-' + a.id,
+    cuerpo: (habs.length ? '<div class="habs-hoy">' + habs.map((x) => { const ok = !!marcasHabito(x)[h], r = rachaHabito(x, h);
+      return '<button type="button" class="hab-chip area-' + x.area + '" role="checkbox" aria-checked="' + ok + '" data-acc="hab-marcar" data-id="' + esc(x.id) + '"><span class="em">' + esc((x.extra && x.extra.em) || (x.datos && x.datos.em) || '⭐') + '</span><span>' + esc(x.titulo) + '</span>' + (r ? '<small>🔥 ' + r + '</small>' : '') + '</button>'; }).join('') + '</div>'
+      : vacio('', 'Hoy no toca ningún hábito de ' + a.nombre + '.')) +
+      '<div class="pie-tarjeta"><a class="btn" href="#areas/' + a.id + '/constancia">' + ico('i-meta') + tema.tab + '</a></div>' });
+  return pulso + '<div class="columnas"><div>' +
     tarjeta({ eti: 'SEÑALES', titulo: 'Lo importante ahora', n: s.length || null, clase: 'area-' + a.id,
       guia: 'Lo que pide tu atención en ' + a.nombre + ': vencimientos, avisos y avances. Toca uno para ir a su herramienta.',
       cuerpo: s.length ? '<div class="senales">' + s.slice(0, 8).map((x) => '<a class="senal ' + x.nivel + '" href="#areas/' + a.id + '/' + x.ir + '"><span aria-hidden="true">' + icoNivel(x.nivel) + '</span><span>' + esc(x.txt) + '</span>' + ico('i-der') + '</a>').join('') + '</div>' : vacio('Todo en calma', 'No hay nada urgente en ' + a.nombre + '.') }) +
@@ -53,7 +63,7 @@ function resumen(a) {
     '</div><div>' +
     tarjeta({ eti: 'HERRAMIENTAS', titulo: 'Solo de ' + a.nombre, clase: 'area-' + a.id,
       cuerpo: '<div class="herr-botones">' + hs.map((h) => '<a class="herr-btn" href="#areas/' + a.id + '/' + h.id + '"><b>' + h.nombre + '</b>' + ico('i-der') + '</a>').join('') + '</div>' }) +
-    bloque('METAS Y HÁBITOS', 'Constancia', (x) => x.tipo === 'meta' || x.tipo === 'habito', vacio('Sin metas ni hábitos aún', 'En la Fase 6 tendrás aquí tus hábitos y metas con rachas.')) +
+    habHoy +
     bloque('NOTAS', 'Notas de ' + a.nombre, (x) => x.tipo === 'nota', vacio('Sin notas', 'Las notas de esta área aparecerán aquí.')) +
     '</div></div>';
 }
@@ -66,5 +76,5 @@ export function vistaArea(id, sub = '') {
     (h ? '<div class="herramienta">' + h.vista() + '</div>' : resumen(a));
 }
 
-export const acciones = Object.assign({}, personal.acciones, estudios.acciones, oficina.acciones, deporte.acciones);
+export const acciones = Object.assign({}, personal.acciones, estudios.acciones, oficina.acciones, deporte.acciones, constancia.acciones);
 export { PANELES };

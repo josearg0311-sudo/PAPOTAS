@@ -11,6 +11,7 @@ import { fila, filas, emoji, mini, pildora, cifra, cifras, cambiarExtra, nuevo, 
 import { editar } from '../piezas/formulario.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
+import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 
 export const DEPORTES = [['gym', '🏋️', 'Gym'], ['correr', '🏃', 'Correr'], ['futbol', '⚽', 'Fútbol'], ['bici', '🚴', 'Bici'], ['nadar', '🏊', 'Nadar'], ['otro', '💪', 'Otro']];
 const INTENS = [['1', 'Suave'], ['2', 'Medio'], ['3', 'Duro']];
@@ -193,7 +194,8 @@ export const HERRAMIENTAS = [
   { id: 'entrenos', nombre: 'Entrenos y racha', vista: vistaEntrenos },
   { id: 'rutinas', nombre: 'Rutinas y récords', vista: vistaRutinas },
   { id: 'partidos', nombre: 'Partidos', vista: vistaPartidos },
-  { id: 'peso', nombre: 'Peso', vista: vistaPeso }
+  { id: 'peso', nombre: 'Peso', vista: vistaPeso },
+  { id: 'constancia', nombre: TEMAS.deporte.tab, vista: () => vistaConstancia('deporte') }
 ];
 export function senales() {
   const s = [], r = estadoEntrenos(), av = avisoDeporte(), h = hoy();
@@ -201,7 +203,28 @@ export function senales() {
   s.push({ nivel: 'ok', txt: 'Esta semana: ' + r.estaSemana + '/' + r.meta + ' entrenos' + (r.semanas ? ' · racha de ' + plural(r.semanas, 'semana', 'semanas') : ''), ir: 'entrenos' });
   partidos().filter((x) => x.fechas.inicio >= h && diasEntre(h, x.fechas.inicio) <= 3 && !val(x, 'jugado', false)).forEach((x) => { const p = pichanga(x);
     s.push({ nivel: 'ok', txt: '⚽ ' + x.titulo + ' · ' + (x.fechas.inicio === h ? 'hoy' : fmtCorta(x.fechas.inicio)) + (p && p.falta ? ' · faltan pagar ' + fmtSoles(p.falta) : ''), ir: 'partidos' }); });
+  s.push(...senalesConstancia('deporte'));
   return s;
+}
+
+/* El pulso de Deporte: racha, semana, último entreno y peso */
+export function pulso() {
+  const r = estadoEntrenos(), t = tendenciaPeso(medidas(), hoy());
+  return cifras([cifra('🔥 ' + r.semanas, r.semanas === 1 ? 'semana de racha' : 'semanas de racha', r.semanas ? 'ok' : ''),
+    cifra(r.estaSemana + '/' + r.meta, 'entrenos esta semana', r.estaSemana >= r.meta ? 'ok' : ''),
+    cifra(r.diasSin == null ? '—' : r.diasSin === 0 ? 'hoy' : 'hace ' + r.diasSin + ' d', 'último entreno', avisoDeporte() ? 'aviso' : ''),
+    cifra(t ? t.ultimo + ' kg' : '—', 'peso')]);
+}
+
+/* Su semana, para la revisión semanal */
+export function semana(ini, fin) {
+  const es = entrenos().filter((e) => e.fechas.inicio >= ini && e.fechas.inicio <= fin), meta = preferencias().deporte.meta;
+  const min = es.reduce((s, e) => s + (+val(e, 'minutos', 0) || 0), 0), km = es.reduce((s, e) => s + (+String(val(e, 'km', 0) || 0).replace(',', '.') || 0), 0);
+  const pj = partidos().filter((x) => val(x, 'jugado', false) && x.fechas.inicio >= ini && x.fechas.inicio <= fin), t = tendenciaPeso(medidas(), fin);
+  return { pregunta: '¿Cómo respondió tu cuerpo? ¿Descansaste lo suficiente?',
+    cifras: [[es.length + '/' + meta, 'entrenos (tu meta)', es.length >= meta ? 'ok' : 'aviso'], [Math.round(min / 6) / 10 + ' h', 'entrenando', ''], [Math.round(km * 10) / 10 + ' km', 'recorridos', '']],
+    notas: (es.length >= meta ? ['🔥 ¡Cumpliste tu meta de la semana!'] : ['Te faltaron ' + plural(meta - es.length, 'entreno', 'entrenos') + ' para tu meta.'])
+      .concat(pj.map((x) => '⚽ ' + x.titulo + (val(x, 'resultado', '') ? ' · ' + val(x, 'resultado', '') : ''))).concat(t && t.cambio30 != null ? ['⚖️ Peso: ' + t.ultimo + ' kg (' + (t.cambio30 > 0 ? '+' : '') + t.cambio30 + ' kg en 30 días)'] : []) };
 }
 
 export const acciones = {
