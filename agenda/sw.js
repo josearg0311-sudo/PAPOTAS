@@ -10,7 +10,7 @@
 
    Cada vez que se publica: subir CACHE (y VERSION en js/version.js). */
 
-const CACHE = 'agenda-v36';
+const CACHE = 'agenda-v37';
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest',
   './css/tokens.css', './css/base.css', './css/componentes.css', './css/vistas.css',
@@ -21,6 +21,7 @@ const ARCHIVOS = [
   './js/piezas/aviso.js', './js/piezas/hoja.js', './js/piezas/tema.js', './js/piezas/candado.js', './js/piezas/guia.js', './js/piezas/agregar-rapido.js', './js/piezas/migracion-ui.js', './js/piezas/confirmar.js', './js/piezas/pendientes-ui.js', './js/piezas/pomodoro.js', './js/piezas/avisos.js', './js/piezas/eventos-ui.js',
   './js/vistas/comun.js', './js/vistas/hoy.js', './js/vistas/recordatorios.js', './js/vistas/agenda.js', './js/vistas/areas.js', './js/vistas/mas.js', './js/vistas/ajustes.js', './js/vistas/datos.js', './js/vistas/papelera.js',
   './js/vistas/area-comun.js', './js/vistas/area-personal.js', './js/vistas/area-estudios.js', './js/vistas/area-oficina.js', './js/vistas/area-deporte.js', './js/vistas/area-constancia.js', './js/vistas/seguimiento.js', './js/vistas/finanzas.js', './js/vistas/notas.js', './js/datos/finanzas.js', './js/datos/nube.js', './js/vistas/admin.js', './js/datos/corrector.js', './js/piezas/teclado.js', './diccionario/palabras-es.txt', './js/datos/seguimiento.js', './js/datos/herramientas.js', './js/piezas/formulario.js',
+  './js/datos/buscador.js', './js/piezas/buscar.js', './js/vistas/hoy-extra.js', './js/piezas/compartir.js', './js/piezas/descanso.js', './js/piezas/dictado.js',
   './fuentes/plus-jakarta.woff2', './fuentes/martian-mono.woff2',
   './iconos/icono.svg', './iconos/icon-192.png', './iconos/icon-512.png', './iconos/icon-maskable-192.png', './iconos/icon-maskable-512.png', './iconos/apple-touch-icon.png'
 ];

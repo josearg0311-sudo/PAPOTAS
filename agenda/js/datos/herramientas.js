@@ -161,3 +161,10 @@ export function tendenciaPeso(medidas, hoy) {
 /* Día de la semana de una clase en el orden del usuario */
 export function ordenDias(lunes = true) { return lunes ? [1, 2, 3, 4, 5, 6, 0] : [0, 1, 2, 3, 4, 5, 6]; }
 export { diaSemana };
+
+/* IMC = peso / talla² (talla en metros). Clasificación de la OMS para adultos */
+export function imc(peso, tallaCm) {
+  if (!(+peso > 0) || !(+tallaCm >= 100)) return null;
+  const v = Math.round(peso / Math.pow(tallaCm / 100, 2) * 10) / 10;
+  return { valor: v, texto: v < 18.5 ? 'bajo peso' : v < 25 ? 'normal' : v < 30 ? 'sobrepeso' : 'obesidad', nivel: v < 18.5 || v >= 30 ? 'aviso' : v < 25 ? 'ok' : '' };
+}

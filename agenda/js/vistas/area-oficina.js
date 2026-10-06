@@ -7,7 +7,7 @@ import { modeloVacio, LISTA_TAREAS } from '../datos/modelo.js';
 import { val, tarifa, montoHoras, resumenHoras } from '../datos/herramientas.js';
 import { ocurre } from '../datos/calendario.js';
 import { marcar, hechoEn, esChecklist } from '../datos/pendientes.js';
-import { hoy, fmtCorta, fmtHora, horaAhora, sumarDias, plazo, MESES } from '../util/fechas.js';
+import { hoy, fmtCorta, fmtFecha, fmtHora, horaAhora, sumarDias, plazo, MESES } from '../util/fechas.js';
 import { fmtSoles } from '../util/dinero.js';
 import { esc, ico, vacio, plural } from '../util/dom.js';
 import { tarjeta } from './comun.js';
@@ -16,6 +16,7 @@ import { editar } from '../piezas/formulario.js';
 import { editarPendiente } from '../piezas/pendientes-ui.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
+import { enlaceWhatsApp } from '../piezas/compartir.js';
 import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 import { avisoPresupuesto } from './finanzas.js';
 import { irALista } from './recordatorios.js';
@@ -58,7 +59,7 @@ function vistaClientes() {
       const tel = val(c, 'tel', ''), mail = val(c, 'email', '');
       return fila({ titulo: c.titulo, acc: 'cli-editar', id: c.id,
         meta: [val(c, 'contacto', ''), val(c, 'ruc', '') ? 'RUC ' + val(c, 'ruc', '') : ''].filter(Boolean).map(esc).join(' · ') + (debe ? ' <span class="pill pronto">te debe ' + fmtSoles(debe) + '</span>' : '') + (h ? ' <span class="pill">' + durTxt(h.min) + ' este mes</span>' : ''),
-        final: (tel ? '<a class="mini-btn" href="tel:' + esc(soloDigitos(tel)) + '" aria-label="Llamar a ' + esc(c.titulo) + '">Llamar</a><a class="mini-btn" href="https://wa.me/' + esc(soloDigitos(tel)) + '" target="_blank" rel="noopener" aria-label="WhatsApp a ' + esc(c.titulo) + '">WhatsApp</a>' : '') + (mail ? '<a class="mini-btn" href="mailto:' + esc(mail) + '">Correo</a>' : '') });
+        final: (tel ? '<a class="mini-btn" href="tel:' + esc(soloDigitos(tel)) + '" aria-label="Llamar a ' + esc(c.titulo) + '">Llamar</a><a class="mini-btn" href="' + esc(enlaceWhatsApp('', tel)) + '" target="_blank" rel="noopener" aria-label="WhatsApp a ' + esc(c.titulo) + '">WhatsApp</a>' : '') + (mail ? '<a class="mini-btn" href="mailto:' + esc(mail) + '">Correo</a>' : '') });
     })) : vacio('Sin clientes', 'Agrega a tus clientes para ligar cobros y horas.')) + pie(boton('Nuevo cliente', 'cli-nuevo')) });
 }
 function editarCliente(id, repintar) {
@@ -78,12 +79,19 @@ function editarCliente(id, repintar) {
 }
 
 /* ---------- Cobros ---------- */
+/* Mensaje amable para recordar un pago, al WhatsApp del cliente si lo tienes */
+function recordatorioCobro(x) {
+  const nom = clienteDeCobro(x), c = elementos((y) => y.tipo === 'cliente' && y.titulo === nom)[0], conc = val(x, 'concepto', '');
+  const venc = x.fechas.vence ? (x.fechas.vence < hoy() ? ', que venció el ' : ', que vence el ') + fmtFecha(x.fechas.vence) : '';
+  return enlaceWhatsApp('Hola, ' + nom + '. Te escribo para recordarte el pago pendiente de ' + fmtSoles(x.monto || 0) + (conc ? ' por ' + conc : '') + venc + '. ¡Muchas gracias!', c ? val(c, 'tel', '') : '');
+}
 function vistaCobros() {
   const l = cobros().sort((a, b) => (a.estado === 'hecho') - (b.estado === 'hecho') || (a.fechas.vence || '9999').localeCompare(b.fechas.vence || '9999'));
   const act = l.filter((x) => x.estado !== 'hecho'), h = hoy();
   const total = act.reduce((s, x) => s + (+x.monto || 0), 0), venc = act.filter((x) => x.fechas.vence && x.fechas.vence < h).reduce((s, x) => s + (+x.monto || 0), 0);
   const f = (x) => fila({ inicio: casilla(x.estado === 'hecho', 'cobro-cobrar', x.id, 'Cobrado: ' + x.titulo), titulo: x.titulo, acc: 'cobro-editar', id: x.id,
-    meta: '<b class="mono">' + fmtSoles(x.monto || 0) + '</b> ' + (x.estado === 'hecho' ? '<span class="pill">cobrado</span>' : pildoraFecha(x.fechas.vence)), clase: x.estado === 'hecho' ? 'hecha' : '' });
+    meta: '<b class="mono">' + fmtSoles(x.monto || 0) + '</b> ' + (x.estado === 'hecho' ? '<span class="pill">cobrado</span>' : pildoraFecha(x.fechas.vence)), clase: x.estado === 'hecho' ? 'hecha' : '',
+    final: x.estado !== 'hecho' && +x.monto > 0 ? '<a class="mini-btn" href="' + esc(recordatorioCobro(x)) + '" target="_blank" rel="noopener" aria-label="Recordar el pago a ' + esc(clienteDeCobro(x)) + ' por WhatsApp">Recordar</a>' : '' });
   return tarjeta({ eti: 'COBROS', titulo: 'Cobros', clase: 'area-oficina',
     guia: 'Lo que te deben tus clientes. Al marcarlo cobrado se anota como ingreso en el libro de la oficina.',
     cuerpo: cifras([cifra(fmtSoles(total), 'por cobrar'), cifra(fmtSoles(venc), 'vencido', venc ? 'aviso' : '')]) +

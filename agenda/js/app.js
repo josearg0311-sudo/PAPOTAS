@@ -17,7 +17,7 @@ import { vistaRecordatorios, acciones as accRec, alEscribir as alEscribirRec, al
 import { acciones as accPend, iniciarDeslizar } from './piezas/pendientes-ui.js';
 import { tic as ticPomo } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
-import { marcar } from './datos/pendientes.js';
+import { marcar, delDia as pendientesDeHoy } from './datos/pendientes.js';
 import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, irADia, alElegirIcs, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
@@ -114,6 +114,16 @@ function contenido() {
   }
 }
 
+/* Número en el ícono de la app instalada: lo que te queda para hoy (y lo atrasado) */
+let insignia = -1;
+function pintarInsignia() {
+  if (!('setAppBadge' in navigator) || !documento()) return;
+  const n = pendientesDeHoy().length;
+  if (n === insignia) return;
+  insignia = n;
+  (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => { /* no disponible */ });
+}
+
 export function pintar() {
   try {
     const d = documento(); aplicarAreas(d && d.perfil && d.perfil.areas);
@@ -123,6 +133,7 @@ export function pintar() {
     document.body.dataset.seccion = ruta.sec;
     $('pantalla').innerHTML = contenido();
     if (ruta.sec === 'ajustes') despuesDePintar();
+    pintarInsignia();
   } catch (e) {
     anotarError(e, 'pintar ' + ruta.sec);
     $('pantalla').innerHTML = '<section class="tarjeta"><div class="vacio"><b>Algo falló al mostrar esta sección</b><span>Tus datos están bien. Prueba otra vez o vuelve a Hoy.</span>' +

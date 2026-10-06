@@ -12,6 +12,7 @@ import { interpretar } from '../util/interpretar.js';
 import { leerMonto, fmtSoles } from '../util/dinero.js';
 import { hoy, fmtCorta, fmtHora, sumarDias } from '../util/fechas.js';
 import { preferencias } from '../datos/preferencias.js';
+import { puedeDictar, dictar, separarMonto } from './dictado.js';
 
 export const TIPOS = [
   ['recordatorio', 'Recordatorio', 'i-rec', 'Algo que hacer, con o sin hora'],
@@ -60,6 +61,7 @@ function pintar() {
   } else {
     const t = TIPOS.find((x) => x[0] === estado.tipo);
     html += '<p class="ayuda">' + t[1] + ' en ' + chipArea(estado.area) + '</p>' + campos() +
+      (puedeDictar() ? '<div class="fila-botones izq"><button type="button" class="btn" id="qaDictar" aria-pressed="false">🎤 Dictar</button></div>' : '') +
       '<div class="vista-previa" id="qaPrevia" aria-live="polite">Escribe y verás aquí cómo se guardará.</div>' +
       '<div class="fila-botones"><button type="button" class="btn" data-qa-atras="1">' + ico('i-izq') + 'Atrás</button><button type="button" class="btn pri" data-qa-guardar="1">' + ico('i-check') + 'Guardar</button></div>';
   }
@@ -141,6 +143,22 @@ document.addEventListener('click', (ev) => {
   else if (t.dataset.qaArea) { estado.area = t.dataset.qaArea; estado.paso = 3; pintar(); }
   else if (t.dataset.qaAtras) { estado.paso = Math.max(1, estado.paso - 1); pintar(); }
   else if (t.dataset.qaGuardar) guardar();
+});
+/* Dictado: toca 🎤, habla y se escribe; en un gasto, el número va al monto */
+let pararDictado = null;
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest && ev.target.closest('#qaDictar'); if (!b) return;
+  if (pararDictado) { pararDictado(); return; }
+  const txt = document.getElementById('qaTexto'); if (!txt) return;
+  b.setAttribute('aria-pressed', 'true'); b.textContent = '⏺ Escuchando… (toca para parar)';
+  pararDictado = dictar(txt, {
+    alCambiar: (v, final) => {
+      const m = document.getElementById('qaMonto');
+      if (final && m && estado.tipo === 'gasto' && !m.value) { const r = separarMonto(v); if (r.monto) { m.value = r.monto; txt.value = r.texto; } }
+      previa();
+    },
+    alTerminar: (error) => { pararDictado = null; const x = document.getElementById('qaDictar'); if (x) { x.setAttribute('aria-pressed', 'false'); x.textContent = '🎤 Dictar'; } if (error) aviso(error); }
+  });
 });
 document.addEventListener('input', (ev) => { if (ev.target.id === 'qaTexto' || ev.target.id === 'qaMonto') previa(); });
 document.addEventListener('keydown', (ev) => {

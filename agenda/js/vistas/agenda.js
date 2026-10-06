@@ -81,7 +81,7 @@ function huecosHTML(d, bloques) {
   const l = huecosLibres(bloques, ini, fin, 30);
   if (!l.length) return '<p class="huecos"><small>Libre</small><span class="sd-libre">Sin huecos libres de 30 min o más</span></p>';
   const dur = (x) => { const n = x.fin - x.ini; return n >= 60 ? Math.floor(n / 60) + ' h' + (n % 60 ? ' ' + n % 60 : '') : n + ' min'; };
-  return '<div class="huecos"><small>Libre</small>' + l.slice(0, 6).map((x) => '<button type="button" class="chip" data-acc="cal-hueco" data-h="' + x.hIni + '" data-hf="' + (x.fin - x.ini > 60 ? '' : x.hFin) + '" aria-label="Crear evento de ' + fmtHora(x.hIni, p.formatoHora) + ' a ' + fmtHora(x.hFin, p.formatoHora) + '"><span class="mono">' + fmtHora(x.hIni, p.formatoHora) + '–' + fmtHora(x.hFin, p.formatoHora) + '</span> · ' + dur(x) + '</button>').join('') + '</div>';
+  return '<div class="huecos"><small>Libre</small>' + l.slice(0, 6).map((x) => '<button type="button" class="chip" data-acc="cal-libre" data-h="' + x.hIni + '" data-hf="' + (x.fin - x.ini > 60 ? '' : x.hFin) + '" aria-label="Crear evento de ' + fmtHora(x.hIni, p.formatoHora) + ' a ' + fmtHora(x.hFin, p.formatoHora) + '"><span class="mono">' + fmtHora(x.hIni, p.formatoHora) + '–' + fmtHora(x.hFin, p.formatoHora) + '</span> · ' + dur(x) + '</button>').join('') + '</div>';
 }
 
 function panelDia(d, conLinea) {
@@ -237,6 +237,7 @@ export const acciones = {
     return true;
   },
   'cal-hueco'(b, ev, repintar) { const [hh, mm] = b.dataset.h.split(':'); nuevoEvento(repintar, { fecha: ui.dia || hoy(), hora: b.dataset.h, horaFin: b.dataset.hf || String((+hh + 1) % 24).padStart(2, '0') + ':' + mm, area: ui.area || 'personal' }); },
+  'cal-libre'(b, ev, repintar) { acciones['cal-hueco'](b, ev, repintar); },
   'cal-ir-mes'(b) { ui.dia = b.dataset.v + '-01'; ui.modo = 'mes'; return true; },
   'cal-nuevo'(b, ev, repintar) { nuevoEvento(repintar, { fecha: b.dataset.d, area: ui.area || 'personal' }); },
   'ev-editar'(b, ev, repintar) { editarEvento(b.dataset.id, repintar); },

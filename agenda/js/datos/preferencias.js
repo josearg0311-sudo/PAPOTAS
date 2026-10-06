@@ -51,7 +51,7 @@ export function normalizarPref(x) {
   /* Teclado: si no estaba, se toma lo que tenías en la v4.5 (teclado y autocorrector) */
   const tk = x && x.teclado && typeof x.teclado === 'object' ? x.teclado : (() => { const v = leer(ANTIGUAS.pref, {}) || {}; return { activo: v.teclado !== false, corrector: v.autocorr !== false }; })();
   p.teclado = { activo: tk.activo !== false, corrector: tk.corrector !== false, signos: tk.signos !== false, grande: !!tk.grande, vibrar: tk.vibrar !== false };
-  p.deporte = { meta: Math.min(7, Math.max(1, +dp.meta || 3)), avisoDias: [0, 2, 3, 4, 5, 7].includes(+dp.avisoDias) ? +dp.avisoDias : 3 };
+  p.deporte = { meta: Math.min(7, Math.max(1, +dp.meta || 3)), avisoDias: [0, 2, 3, 4, 5, 7].includes(+dp.avisoDias) ? +dp.avisoDias : 3, talla: +dp.talla >= 100 && +dp.talla <= 230 ? +dp.talla : 0 };
   return p;
 }
 

@@ -21,6 +21,8 @@ import * as SG from '../js/datos/seguimiento.js';
 import * as FI from '../js/datos/finanzas.js';
 import * as NU from '../js/datos/nube.js';
 import * as CO from '../js/datos/corrector.js';
+import { separarMonto } from '../js/piezas/dictado.js';
+import { enlaceWhatsApp } from '../js/piezas/compartir.js';
 import { sumarDias as SD } from '../js/util/fechas.js';
 
 const resultados = [];
@@ -511,6 +513,16 @@ tareas.push(prueba('Finanzas: mes pasado al mismo día, proyección sin multipli
   igual(FI.repetidos(movs, '2026-10').map((x) => x.titulo + ':' + x.meses), ['netflix :2', 'Menú:2']);
   igual(FI.repetidos(movs, '2026-10', ['Netflix']).map((x) => x.titulo), ['Menú']);
   igual(FI.diasDelMes('2028-02'), 29);
+}));
+
+tareas.push(prueba('Áreas: IMC con talla, gasto dictado y WhatsApp con número peruano', () => {
+  igual(HR.imc(72, 172), { valor: 24.3, texto: 'normal', nivel: 'ok' });
+  igual([HR.imc(90, 170).texto, HR.imc(50, 180).texto, HR.imc(72, 0), HR.imc(0, 170)], ['obesidad', 'bajo peso', null, null]);
+  igual(separarMonto('almuerzo 15 soles'), { monto: '15', texto: 'almuerzo' });
+  igual(separarMonto('taxi de 12,50'), { monto: '12.50', texto: 'taxi' });
+  igual(separarMonto('pan'), { monto: '', texto: 'pan' });
+  igual(enlaceWhatsApp('Hola, Ana', '987 654 321'), 'https://wa.me/51987654321?text=Hola%2C%20Ana');
+  igual(enlaceWhatsApp('x', '+51 987654321'), 'https://wa.me/51987654321?text=x');
 }));
 
 Promise.all(tareas).then(() => {

@@ -4,12 +4,15 @@ import { preferencias } from '../datos/preferencias.js';
 import { val, casaEstado, proximoCumple, resumenPrestamos } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtFecha, sumarDias, inicioSemana, diasEntre, relativo } from '../util/fechas.js';
 import { fmtSoles } from '../util/dinero.js';
-import { esc, vacio, plural } from '../util/dom.js';
+import { esc, ico, vacio, plural } from '../util/dom.js';
 import { tarjeta } from './comun.js';
 import { fila, filas, emoji, casilla, mini, pildora, pildoraFecha, cifra, cifras, cambiarExtra, nuevo, borrar, boton, pie, anotarMovimiento, quitarMovimiento } from './area-comun.js';
 import { editar } from '../piezas/formulario.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
+import { compartir } from '../piezas/compartir.js';
+import { poner } from '../datos/datos.js';
+import { modeloVacio, LISTA_RECORDATORIOS } from '../datos/modelo.js';
 import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 import { vistaDiario } from './notas.js';
 import { avisoPresupuesto } from './finanzas.js';
@@ -50,6 +53,12 @@ function editarCasa(id, repintar) {
 
 /* ---------- Menú de la semana ---------- */
 const idMenu = (f) => 'menu_' + f;
+/* Ideas peruanas para cuando no sabes qué cocinar (🎲) */
+export const IDEAS_MENU = {
+  alm: ['Ají de gallina', 'Lomo saltado', 'Arroz con pollo', 'Seco de res con frejoles', 'Ceviche', 'Tallarines verdes con bistec', 'Estofado de pollo', 'Arroz chaufa', 'Causa limeña', 'Carapulcra', 'Pollo al horno con papas', 'Olluquito con charqui', 'Tacu tacu con huevo', 'Pescado a lo macho', 'Adobo de cerdo', 'Lentejas con arroz y pescado frito', 'Ajiaco de papas', 'Escabeche de pollo', 'Tallarines rojos', 'Papa a la huancaína y pollo a la plancha', 'Arroz tapado', 'Cau cau', 'Sudado de pescado', 'Pallares con seco'],
+  cena: ['Sopa criolla', 'Caldo de gallina', 'Pan con palta y huevo', 'Ensalada de quinua', 'Triple de palta, huevo y tomate', 'Sánguche de pollo', 'Aguadito', 'Tortilla de verduras', 'Quinua con leche', 'Crema de zapallo', 'Choclo con queso', 'Pan con chicharrón', 'Ensalada de pollo', 'Saltado de verduras', 'Avena con manzana', 'Sopa de verduras']
+};
+const azar = (l, evitar = []) => { const ok = l.filter((x) => !evitar.includes(x)); const de = ok.length ? ok : l; return de[Math.floor(Math.random() * de.length)]; };
 function menuDe(f) { return elementos((x) => x.tipo === 'menu' && x.fechas.inicio === f)[0] || null; }
 function vistaMenu() {
   const ini = sumarDias(inicioSemana(hoy(), preferencias().semanaLunes), ui.semana * 7), h = hoy();
@@ -59,18 +68,28 @@ function vistaMenu() {
     cuerpo: '<div class="cal-nav chica"><button type="button" class="icono-btn" data-acc="menu-semana" data-n="-1" aria-label="Semana anterior">‹</button><b>' + fmtCorta(dias[0]) + ' – ' + fmtCorta(dias[6]) + '</b><button type="button" class="icono-btn" data-acc="menu-semana" data-n="1" aria-label="Semana siguiente">›</button></div>' +
       filas(dias.map((d) => { const m = menuDe(d), alm = m ? val(m, 'alm', '') : '', cena = m ? val(m, 'cena', '') : '';
         return fila({ inicio: '<span class="hf-dia' + (d === h ? ' es-hoy' : '') + '">' + fmtCorta(d).split(' ').slice(0, 2).join(' ') + '</span>', titulo: alm || (cena ? '—' : 'Sin planificar'), acc: 'menu-editar', id: d,
-          meta: cena ? 'Cena: ' + esc(cena) : '', clase: alm || cena ? '' : 'apagada' }); })) });
+          meta: cena ? 'Cena: ' + esc(cena) : '', clase: alm || cena ? '' : 'apagada' }); })) +
+      pie('<button type="button" class="btn" data-acc="menu-llenar">🎲 Llenar los días vacíos</button><button type="button" class="btn" data-acc="menu-repetir">' + ico('i-repetir') + 'Repetir la semana pasada</button>') });
+}
+const diasMenu = () => { const ini = sumarDias(inicioSemana(hoy(), preferencias().semanaLunes), ui.semana * 7); return Array.from({ length: 7 }, (_, i) => sumarDias(ini, i)); };
+/* Pone el menú de varios días y devuelve cómo estaban, para deshacer */
+function ponerMenus(cambios) {
+  const antes = cambios.map(([f]) => [f, menuDe(f) ? JSON.parse(JSON.stringify(menuDe(f))) : null]);
+  cambios.forEach(([f, alm, cena]) => { const m = menuDe(f); if (m) cambiarExtra(m.id, { alm, cena }); else nuevo('menu', 'personal', { id: idMenu(f), titulo: 'Menú', fechas: { inicio: f }, extra: { alm, cena } }); });
+  return () => antes.forEach(([f, x]) => { if (x) poner(x); else { const m = menuDe(f); if (m) cambiarExtra(m.id, { alm: '', cena: '' }); } });
 }
 function editarMenu(f, repintar) {
   const m = menuDe(f);
   editar({ titulo: 'Menú · ' + fmtCorta(f), campos: [
     { n: 'alm', t: 'texto', etq: 'Almuerzo', v: m ? val(m, 'alm', '') : '', max: 80, ph: 'Ej. Ají de gallina' },
     { n: 'cena', t: 'texto', etq: 'Cena', v: m ? val(m, 'cena', '') : '', max: 80, ph: 'Ej. Sopa criolla' }],
+  despues: '<div class="fila-botones izq"><button type="button" class="btn" data-idea="alm">🎲 Idea de almuerzo</button><button type="button" class="btn" data-idea="cena">🎲 Idea de cena</button></div>',
   alGuardar: (v) => {
     if (m) cambiarExtra(m.id, { alm: v.alm, cena: v.cena });
     else if (v.alm || v.cena) nuevo('menu', 'personal', { id: idMenu(f), titulo: 'Menú', fechas: { inicio: f }, extra: { alm: v.alm, cena: v.cena } });
     repintar();
   } });
+  document.querySelectorAll('#formHerr [data-idea]').forEach((b) => b.addEventListener('click', () => { const i = document.querySelector('#formHerr [name="' + b.dataset.idea + '"]'); i.value = azar(IDEAS_MENU[b.dataset.idea], [i.value]); }));
 }
 
 /* ---------- Documentos ---------- */
@@ -112,7 +131,8 @@ function vistaCumples() {
   return tarjeta({ eti: 'CUMPLEAÑOS', titulo: 'Cumpleaños', n: l.length, clase: 'area-personal',
     guia: 'Si pones el año en que nació, te dice cuántos cumple. Te avisa un día antes.',
     cuerpo: (l.length ? filas(l.map(({ e, p }) => fila({ inicio: emoji('🎂'), titulo: e.titulo, acc: 'ev-editar', id: e.id,
-      meta: (p.dias === 0 ? pildora('hoy', '¡hoy!') : p.dias <= 7 ? pildora('pronto', relativo(p.fecha).toLowerCase() === 'mañana' ? 'mañana' : 'en ' + p.dias + ' días') : '<span class="pill">' + fmtCorta(p.fecha) + '</span>') + (p.edad ? ' cumple ' + p.edad : ''), clase: p.dias <= 7 ? 'toca' : '' }))) : vacio('Sin cumpleaños', 'Agrega los de tu familia y amigos para no olvidarlos.')) +
+      meta: (p.dias === 0 ? pildora('hoy', '¡hoy!') : p.dias <= 7 ? pildora('pronto', relativo(p.fecha).toLowerCase() === 'mañana' ? 'mañana' : 'en ' + p.dias + ' días') : '<span class="pill">' + fmtCorta(p.fecha) + '</span>') + (p.edad ? ' cumple ' + p.edad : ''), clase: p.dias <= 7 ? 'toca' : '',
+      final: p.dias === 0 ? mini('🎉 Saludar', 'cumple-saludar', e.id, '', 'Saludar a ' + e.titulo) : p.dias <= 30 ? mini('🎁 Regalo', 'cumple-regalo', e.id, ' data-f="' + p.fecha + '"', 'Recordarme el regalo de ' + e.titulo) : '' }))) : vacio('Sin cumpleaños', 'Agrega los de tu familia y amigos para no olvidarlos.')) +
       pie(boton('Nuevo cumpleaños', 'cumple-nuevo')) });
 }
 
@@ -207,6 +227,26 @@ export const acciones = {
   'menu-editar'(b, ev, rp) { editarMenu(b.dataset.id, rp); },
   'doc-nuevo'(b, ev, rp) { editarDoc(null, rp); },
   'doc-editar'(b, ev, rp) { editarDoc(b.dataset.id, rp); },
+  'menu-llenar'(b, ev, rp) {
+    const dias = diasMenu(), usados = dias.map((d) => menuDe(d)).filter(Boolean).flatMap((m) => [val(m, 'alm', ''), val(m, 'cena', '')]), c = [];
+    dias.forEach((d) => { const m = menuDe(d); if (m && (val(m, 'alm', '') || val(m, 'cena', ''))) return;
+      const a = azar(IDEAS_MENU.alm, usados), k = azar(IDEAS_MENU.cena, usados); usados.push(a, k); c.push([d, a, k]); });
+    if (!c.length) { aviso('Esta semana ya está completa'); return; }
+    const deshacer = ponerMenus(c); rp(); aviso('🎲 ' + c.length + (c.length === 1 ? ' día llenado' : ' días llenados') + '. Toca un día para cambiarlo.', () => { deshacer(); rp(); });
+  },
+  'menu-repetir'(b, ev, rp) {
+    const c = diasMenu().map((d) => { const m = menuDe(sumarDias(d, -7)), y = menuDe(d); return m && !(y && (val(y, 'alm', '') || val(y, 'cena', ''))) && (val(m, 'alm', '') || val(m, 'cena', '')) ? [d, val(m, 'alm', ''), val(m, 'cena', '')] : null; }).filter(Boolean);
+    if (!c.length) { aviso('No hay nada que copiar a los días vacíos'); return; }
+    const deshacer = ponerMenus(c); rp(); aviso('Se copió la semana pasada en ' + plural(c.length, 'día', 'días'), () => { deshacer(); rp(); });
+  },
+  'cumple-saludar'(b) { const e = buscarElemento(b.dataset.id); compartir({ titulo: 'Feliz cumpleaños', texto: '¡Feliz cumpleaños, ' + e.titulo.replace(/^(cumple(años)?( de)?\s*)/i, '') + '! 🎂🎉 Que pases un día increíble.' }); },
+  'cumple-regalo'(b, ev, rp) {
+    const e = buscarElemento(b.dataset.id), f = b.dataset.f, cuando = sumarDias(f, -3) > hoy() ? sumarDias(f, -3) : hoy(), nom = e.titulo.replace(/^(cumple(años)?( de)?\s*)/i, '');
+    const id = 'regalo_' + e.id + '_' + f.slice(0, 4);
+    if (buscarElemento(id) && !buscarElemento(id).borrado) { aviso('Ya tienes el recordatorio del regalo'); return; }
+    poner(Object.assign(modeloVacio(), { id, tipo: 'pendiente', titulo: '🎁 Regalo para ' + nom, area: 'personal', lista: LISTA_RECORDATORIOS, borrado: null, fechas: Object.assign(modeloVacio().fechas, { inicio: cuando, vence: f }) }));
+    rp(); aviso('🎁 Te lo recuerdo el ' + fmtCorta(cuando));
+  },
   'cumple-nuevo'(b, ev, rp) { nuevoEvento(rp, { fecha: hoy(), tipoEvento: 'cumple', area: 'personal' }); },
   'prest-nuevo'(b, ev, rp) { editarPrestamo(null, rp); },
   'prest-editar'(b, ev, rp) { editarPrestamo(b.dataset.id, rp); },

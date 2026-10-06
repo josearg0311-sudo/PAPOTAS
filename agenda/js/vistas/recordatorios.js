@@ -16,6 +16,8 @@ import { interpretar } from '../util/interpretar.js';
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
 import { modeloVacio, nuevoId } from '../datos/modelo.js';
+import { crearLista } from '../datos/pendientes.js';
+import { compartir } from '../piezas/compartir.js';
 
 /* Con muchos pendientes se muestran por tandas (pintar mil filas traba el celular) */
 const TANDA = { hecho: 8, otro: 40 };
@@ -82,7 +84,8 @@ export function vistaRecordatorios() {
     const p = todos.filter((x) => x.estado !== 'hecho').sort((a, b) => (a.origen && b.origen ? a.origen.indice - b.origen.indice : a.creado - b.creado));
     const hechos = todos.filter((x) => x.estado === 'hecho');
     html += '<section class="tarjeta grupo"><div class="grupo-tit"><span>Por marcar</span><span class="linea"></span><span class="mono">' + p.length + '</span></div>' + (p.length ? '<div class="pends">' + p.slice(0, cuantos('marcar')).map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' + masBoton('marcar', p.length, Math.min(p.length, cuantos('marcar'))) : vacio('', '¡Todo marcado! 🎉')) + '</section>' +
-      '<section class="tarjeta grupo"><div class="grupo-tit"><span>Hecho</span><span class="linea"></span><span class="mono">' + hechos.length + '</span></div>' + (hechos.length ? '<div class="pends">' + hechos.slice(0, cuantos('hecho')).map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' + masBoton('hecho', hechos.length, Math.min(hechos.length, cuantos('hecho'))) + '<div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-desmarcar-todo">' + ico('i-deshacer') + 'Desmarcar todo para volver a usarla</button></div>' : vacio('', VACIOS.hecho)) + '</section>';
+      '<section class="tarjeta grupo"><div class="grupo-tit"><span>Hecho</span><span class="linea"></span><span class="mono">' + hechos.length + '</span></div>' + (hechos.length ? '<div class="pends">' + hechos.slice(0, cuantos('hecho')).map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' + masBoton('hecho', hechos.length, Math.min(hechos.length, cuantos('hecho'))) + '<div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-desmarcar-todo">' + ico('i-deshacer') + 'Desmarcar todo para volver a usarla</button></div>' : vacio('', VACIOS.hecho)) + '</section>' +
+      '<div class="fila-botones izq"><button type="button" class="btn" data-acc="r-compartir">' + ico('i-subir') + 'Compartir la lista</button><button type="button" class="btn" data-acc="r-duplicar">' + ico('i-repetir') + 'Duplicar (ej. otra maleta)</button></div>';
     return html;
   }
 
@@ -98,7 +101,8 @@ export function vistaRecordatorios() {
       masBoton(k, total, g.length) + '</section>';
   });
   html += '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button>' +
-    '<button type="button" class="btn" data-acc="r-sel-ini">' + ico('i-check') + 'Elegir varios</button></div>';
+    '<button type="button" class="btn" data-acc="r-sel-ini">' + ico('i-check') + 'Elegir varios</button>' +
+    (l && ui.lista ? '<button type="button" class="btn" data-acc="r-compartir">' + ico('i-subir') + 'Compartir la lista</button>' : '') + '</div>';
   if (ui.sel) html += barraSel();
   return html;
 }
@@ -127,6 +131,19 @@ export const acciones = {
   'r-nueva-lista'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; }); },
   'r-editar-lista'(b, ev, repintar) { editarLista(ui.lista, repintar, (id) => { ui.lista = id; }); },
   'r-mas'(b) { const k = b.dataset.v; ui.ver[k] = cuantos(k) + (k === 'hecho' ? 30 : 100); return true; },
+  'r-compartir'() {
+    const l = buscarElemento(ui.lista); if (!l) return;
+    const p = pendientesDe(l.id), check = esChecklist(l);
+    const linea = (x) => (x.estado === 'hecho' ? '☑ ' : '☐ ') + x.titulo + (!check && x.fechas.inicio ? ' (' + fmtCorta(x.fechas.inicio) + ')' : '');
+    compartir({ titulo: l.titulo, texto: l.titulo + '\n' + p.filter((x) => x.estado !== 'hecho').concat(check ? p.filter((x) => x.estado === 'hecho') : []).map(linea).join('\n') });
+  },
+  'r-duplicar'(b, ev, repintar) {
+    const l = buscarElemento(ui.lista); if (!l) return;
+    const n = crearLista({ titulo: l.titulo + ' (copia)', area: l.area, clase: l.extra.clase || 'checklist' }), t0 = Date.now();
+    pendientesDe(l.id).sort((a, c) => (a.origen && c.origen ? a.origen.indice - c.origen.indice : a.creado - c.creado)).forEach((x, i) => poner(Object.assign(modeloVacio(), { id: nuevoId('pend'), tipo: 'pendiente', titulo: x.titulo, area: x.area, prioridad: x.prioridad, notas: x.notas, etiquetas: (x.etiquetas || []).slice(), lista: n.id, fechas: Object.assign(modeloVacio().fechas, { inicio: null }), creado: t0 + i })));
+    ui.lista = n.id; ui.ver = {}; repintar();
+    aviso('Lista duplicada, todo sin marcar', () => { aPapelera(n.id); ui.lista = l.id; repintar(); });
+  },
   'r-desmarcar-todo'(b, ev, repintar) {
     import('../datos/datos.js').then(({ poner }) => {
       pendientesDe(ui.lista).filter((x) => x.estado === 'hecho').forEach((x) => { const y = JSON.parse(JSON.stringify(x)); y.estado = 'pendiente'; y.extra.hechoEn = 0; poner(y); });

@@ -265,7 +265,10 @@ label.btn { cursor: pointer; }
 .bloque .b { display: grid; gap: 2px; text-align: left; border: 0; border-left: 3px solid var(--a); border-radius: 10px; padding: 8px 12px; background: var(--as); color: var(--at); min-width: 0; }
 .bloque .b b { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
 .bloque .b small { font-family: var(--f-mono); font-size: 11px; opacity: .9; }
-.bloque.pasado { opacity: .55; }
+.bloque.pasado { background: transparent; }
+.bloque.pasado b, .bloque.pasado small, .bloque.pasado .h { color: var(--tinta-3); }
+.bloque.pasado b { font-weight: 500; }
+.bloque.pasado small { opacity: 1; }
 .bloques .ahora { grid-template-columns: 70px 1fr; }
 .todo-dia { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .nota-fase.aviso-carga { border-style: solid; border-color: color-mix(in srgb, var(--ambar) 50%, transparent); background: var(--ambar-suave); }

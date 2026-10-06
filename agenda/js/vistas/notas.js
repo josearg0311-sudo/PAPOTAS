@@ -1,10 +1,11 @@
 /* NOTAS (separadas por área, cada una con su color) y DIARIO (de Personal:
    ánimo del día, unas líneas, agua y sueño, como en la v4.5).
    Direcciones: #notas y #notas/diario (también en Personal → Diario). */
-import { elementos, buscarElemento } from '../datos/datos.js';
+import { elementos, buscarElemento, poner } from '../datos/datos.js';
+import { modeloVacio, nuevoId } from '../datos/modelo.js';
 import { AREAS, area } from '../datos/areas.js';
 import { lineasNota, alternarCasilla, rachaDiario } from '../datos/finanzas.js';
-import { listas, esChecklist, pendientesDe } from '../datos/pendientes.js';
+import { listas, esChecklist, pendientesDe, crearLista } from '../datos/pendientes.js';
 import { val } from '../datos/herramientas.js';
 import { hoy, sumarDias, fmtCorta, fmtLarga } from '../util/fechas.js';
 import { esc, ico, vacio, explica } from '../util/dom.js';
@@ -13,6 +14,8 @@ import { cambiarExtra, nuevo, borrar } from './area-comun.js';
 import { editar } from '../piezas/formulario.js';
 import { irALista } from './recordatorios.js';
 import { aviso } from '../piezas/aviso.js';
+import { cerrarHoja } from '../piezas/hoja.js';
+import { compartir } from '../piezas/compartir.js';
 
 const ui = { area: '', q: '', ver: {} };
 const TANDA_NOTAS = 24;   // con cientos de notas se muestran por tandas en cada área
@@ -61,6 +64,26 @@ function editarNota(id, idArea, repintar) {
     repintar(); aviso('Nota guardada en ' + area(v.area).nombre);
   }, alBorrar: n ? () => borrar(id, repintar) : null });
   const t = document.querySelector('#formHerr [name="cuerpo"]'); if (t) t.rows = 10;
+  if (!n) return;
+  /* Compartir la nota o volverla una lista para marcar (la nota se queda) */
+  const fb = document.querySelector('#formHerr .fila-botones'), tit = document.querySelector('#formHerr [name="titulo"]');
+  const extra = document.createElement('div'); extra.className = 'fila-botones izq';
+  extra.innerHTML = '<button type="button" class="btn" id="notaCompartir">' + ico('i-subir') + 'Compartir</button><button type="button" class="btn" id="notaALista">' + ico('i-check') + 'Pasar a lista para marcar</button>';
+  fb.parentNode.insertBefore(extra, fb);
+  extra.querySelector('#notaCompartir').addEventListener('click', () => compartir({ titulo: tit.value, texto: (tit.value ? tit.value + '\n\n' : '') + t.value }));
+  extra.querySelector('#notaALista').addEventListener('click', () => {
+    const ls = notaALineas(t.value);
+    if (!ls.length) { aviso('La nota no tiene líneas para la lista'); return; }
+    const l = crearLista({ titulo: tit.value.trim() || 'Lista', area: n.area, clase: 'checklist' });
+    const t0 = Date.now();
+    ls.forEach((x, i) => poner(Object.assign(modeloVacio(), { id: nuevoId('pend'), tipo: 'pendiente', titulo: x.t, area: n.area, lista: l.id, estado: x.ok ? 'hecho' : 'pendiente', fechas: Object.assign(modeloVacio().fechas, { inicio: null }), extra: x.ok ? { hechoEn: Date.now() } : {}, creado: t0 + i })));
+    cerrarHoja(true); irALista(l.id); location.hash = '#recordatorios';
+    aviso('Lista «' + (tit.value.trim() || 'Lista') + '» con ' + ls.length + (ls.length === 1 ? ' cosa' : ' cosas') + '. Tu nota sigue igual.');
+  });
+}
+/* Cada línea con texto es una cosa de la lista («- », «• », «1. » y «[ ]» se quitan) */
+export function notaALineas(texto) {
+  return lineasNota(texto).map((l) => ({ ok: !!(l.casilla && l.ok), t: l.t.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, '').trim() })).filter((l) => l.t).slice(0, 300);
 }
 
 /* ---------- Diario (Personal) ---------- */
@@ -68,6 +91,18 @@ const ANIMOS = [[1, '😞', 'Mal'], [2, '🙁', 'Regular'], [3, '😐', 'Normal'
 const diarioDe = (d) => buscarElemento('diario_' + d) && !buscarElemento('diario_' + d).borrado ? buscarElemento('diario_' + d) : elementos((x) => x.tipo === 'diario' && x.fechas.inicio === d)[0] || null;
 const bienestarDe = (d) => buscarElemento('bienestar_' + d) && !buscarElemento('bienestar_' + d).borrado ? buscarElemento('bienestar_' + d) : elementos((x) => x.tipo === 'bienestar' && x.fechas.inicio === d)[0] || null;
 const animoDe = (x) => +val(x, 'animo', 0) || 0;
+/* Una pregunta guía distinta cada día, por si no sabes qué escribir */
+const PREGUNTAS = ['¿Qué fue lo mejor de hoy?', '¿Qué agradeces hoy?', '¿Qué aprendiste hoy?', '¿Qué te preocupó y qué puedes hacer al respecto?', '¿A quién ayudaste o quién te ayudó?', '¿Qué harías distinto mañana?',
+  '¿Qué te hizo reír hoy?', '¿Qué lograste hoy, aunque sea pequeño?', '¿Cómo cuidaste tu cuerpo hoy?', '¿Qué te dio energía y qué te la quitó?', '¿Qué conversación recuerdas de hoy?', '¿De qué estás orgulloso esta semana?', '¿Qué quieres recordar de este día dentro de un año?', '¿Qué te gustaría que pase mañana?'];
+export const preguntaDelDia = (d) => PREGUNTAS[Math.floor(Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8)) / 864e5) % PREGUNTAS.length];
+/* «Un día como hoy»: lo que escribiste hace un mes y el mismo día de años anteriores */
+export function diasComoHoy(h) {
+  const [y, m] = h.split('-').map(Number), out = [];
+  const mesAnt = (m === 1 ? y - 1 : y) + '-' + String(m === 1 ? 12 : m - 1).padStart(2, '0') + h.slice(7);
+  out.push([mesAnt, 'Hace un mes']);
+  for (let k = 1; k <= 5; k++) out.push([(y - k) + h.slice(4), k === 1 ? 'Hace un año' : 'Hace ' + k + ' años']);
+  return out;
+}
 function ponerDiario(d, cambios, otros = {}) {
   const x = diarioDe(d);
   if (x) return cambiarExtra(x.id, cambios, otros);
@@ -86,13 +121,21 @@ export function vistaDiario(dentroDeArea = false) {
   return (dentroDeArea ? '' : '<a class="btn volver" href="#notas">' + ico('i-izq') + 'Notas</a>' + explica('<b>Tu diario es parte de Personal.</b> Cómo te sentiste, unas líneas, y cuánta agua y sueño. Solo para ti.')) +
     tarjeta({ eti: 'HOY', titulo: fmtLarga(h).replace(/^./, (c) => c.toUpperCase()), n: racha ? '🔥 ' + racha + (racha === 1 ? ' día' : ' días') : null, clase: 'area-personal diario',
       cuerpo: '<div class="animos" role="radiogroup" aria-label="¿Cómo te sientes hoy?">' + ANIMOS.map(([v, e, t]) => '<button type="button" role="radio" aria-checked="' + (an === v) + '" data-acc="dia-animo" data-v="' + v + '"><span>' + e + '</span><small>' + t + '</small></button>').join('') + '</div>' +
-        '<div class="form diario-form"><label class="campo"><span>Unas líneas de tu día</span><textarea class="entrada" id="diarioTxt" maxlength="4000" placeholder="¿Qué pasó hoy? ¿Qué agradeces?">' + esc(x ? x.notas : '') + '</textarea></label>' +
+        '<div class="form diario-form"><label class="campo"><span>Unas líneas de tu día · <i class="pregunta">💡 ' + esc(preguntaDelDia(h)) + '</i></span><textarea class="entrada" id="diarioTxt" maxlength="4000" placeholder="' + esc(preguntaDelDia(h)) + '">' + esc(x ? x.notas : '') + '</textarea></label>' +
         '<div class="fila-botones"><button type="button" class="btn pri" data-acc="dia-guardar">' + ico('i-check') + 'Guardar</button></div></div>' +
         '<div class="bienestar"><div class="agua"><span>💧 Agua</span><button type="button" class="icono-btn" data-acc="dia-agua" data-n="-1" aria-label="Un vaso menos">−</button><b class="mono">' + agua + '/8</b><button type="button" class="icono-btn" data-acc="dia-agua" data-n="1" aria-label="Un vaso más">+</button></div>' +
         '<label class="sueno"><span>😴 Dormí</span><input class="entrada" id="diarioSueno" inputmode="decimal" maxlength="4" value="' + esc(sueno) + '" placeholder="h"><small>horas</small></label></div>' }) +
+    tarjetaComoHoy(h) +
     tarjeta({ eti: 'ÁNIMO', titulo: 'Tus últimas 2 semanas', clase: 'area-personal',
       cuerpo: '<div class="animo-tira">' + ult.map((d) => { const y = diarioDe(d), a = y ? animoDe(y) : 0; return '<span title="' + fmtCorta(d) + (a ? ': ' + ANIMOS[a - 1][2] : '') + '"><b>' + (a ? ANIMOS[a - 1][1] : '·') + '</b><small>' + +d.slice(8) + '</small></span>'; }).join('') + '</div>' +
         (pasadas.length ? '<div class="hfs">' + pasadas.map((y) => '<div class="hf"><span class="hf-em">' + (animoDe(y) ? ANIMOS[animoDe(y) - 1][1] : '📝') + '</span><div class="hf-txt"><b>' + fmtCorta(y.fechas.inicio).replace(/^./, (c) => c.toUpperCase()) + '</b><small>' + esc((y.notas || '').slice(0, 160) || 'Sin texto') + '</small></div></div>').join('') + '</div>' : vacio('', 'Aquí verás tus días anteriores.')) });
+}
+
+function tarjetaComoHoy(h) {
+  const l = diasComoHoy(h).map(([d, t]) => [diarioDe(d), t, d]).filter(([y]) => y && (animoDe(y) || (y.notas || '').trim()));
+  if (!l.length) return '';
+  return tarjeta({ eti: 'RECUERDOS', titulo: 'Un día como hoy', clase: 'area-personal',
+    cuerpo: '<div class="hfs">' + l.map(([y, t, d]) => '<div class="hf"><span class="hf-em">' + (animoDe(y) ? ANIMOS[animoDe(y) - 1][1] : '📝') + '</span><div class="hf-txt"><b>' + t + ' · ' + fmtCorta(d, true) + '</b><small>' + esc((y.notas || '').slice(0, 400) || 'Sin texto') + '</small></div></div>').join('') + '</div>' });
 }
 
 export function vistaNotasSeccion(param) { return param === 'diario' ? vistaDiario() : vistaNotas(); }

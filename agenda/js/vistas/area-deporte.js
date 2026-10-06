@@ -2,7 +2,7 @@
    días sin entrenar), rutinas y récords, partidos (y la pichanga), y peso */
 import { elementos, buscarElemento, aPapelera } from '../datos/datos.js';
 import { preferencias, cambiarPref } from '../datos/preferencias.js';
-import { val, lista, rachaEntrenos, avisoEntreno, records, resumenPartidos, pichanga, tendenciaPeso, ordenDias } from '../datos/herramientas.js';
+import { val, lista, rachaEntrenos, avisoEntreno, records, resumenPartidos, pichanga, tendenciaPeso, ordenDias, imc } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtHora, sumarDias, inicioSemana, diasEntre, DIAS3 } from '../util/fechas.js';
 import { fmtSoles } from '../util/dinero.js';
 import { esc, ico, vacio, plural } from '../util/dom.js';
@@ -11,6 +11,7 @@ import { fila, filas, emoji, mini, pildora, cifra, cifras, cambiarExtra, nuevo, 
 import { editar } from '../piezas/formulario.js';
 import { nuevoEvento } from '../piezas/eventos-ui.js';
 import { aviso } from '../piezas/aviso.js';
+import { abrirDescanso } from '../piezas/descanso.js';
 import { vistaConstancia, senalesConstancia, TEMAS } from './area-constancia.js';
 
 export const DEPORTES = [['gym', '🏋️', 'Gym'], ['correr', '🏃', 'Correr'], ['futbol', '⚽', 'Fútbol'], ['bici', '🚴', 'Bici'], ['nadar', '🏊', 'Nadar'], ['otro', '💪', 'Otro']];
@@ -72,7 +73,7 @@ function editarMeta(repintar) {
   editar({ titulo: 'Tu meta de entrenamiento', campos: [
     { n: 'meta', t: 'botones', etq: 'Veces por semana', v: String(p.meta), ops: [1, 2, 3, 4, 5, 6, 7].map((n) => [String(n), String(n)]) },
     { n: 'aviso', t: 'botones', etq: 'Avisarme si pasan sin entrenar', v: String(p.avisoDias), ops: [['2', '2 días'], ['3', '3 días'], ['4', '4 días'], ['5', '5 días'], ['7', '1 semana'], ['0', 'No avisar']] }],
-  alGuardar: (v) => { cambiarPref({ deporte: { meta: +v.meta || 3, avisoDias: +v.aviso } }); repintar(); aviso('Meta guardada'); } });
+  alGuardar: (v) => { cambiarPref({ deporte: Object.assign({}, p, { meta: +v.meta || 3, avisoDias: +v.aviso }) }); repintar(); aviso('Meta guardada'); } });
 }
 
 /* ---------- Rutinas y récords ---------- */
@@ -86,7 +87,7 @@ function vistaRutinas() {
       return fila({ titulo: r.titulo, acc: 'rut-editar', id: r.id, clase: ds.includes(hoyD) ? 'toca' : '',
         meta: (ds.length ? orden.filter((d) => ds.includes(d)).map((d) => DIAS3[d]).join(', ') : 'cualquier día') + ' · ' + plural(ej.length, 'ejercicio', 'ejercicios') + (ds.includes(hoyD) ? ' <span class="pill pronto">toca hoy</span>' : ''),
         final: mini(ico('i-play') + 'Hacer hoy', 'rut-hoy', r.id) }); })) : vacio('Sin rutinas', 'Crea una rutina con sus ejercicios, series, repeticiones y kilos.')) +
-      pie(boton('Nueva rutina', 'rut-nueva')) }) +
+      pie(boton('Nueva rutina', 'rut-nueva'), '<button type="button" class="btn" data-acc="descanso">⏱️ Descanso entre series</button>') }) +
     tarjeta({ eti: 'RÉCORDS', titulo: 'Tus récords', n: rec.length, clase: 'area-deporte',
       guia: 'El mayor peso que levantaste en cada ejercicio, sacado de tus entrenos.',
       cuerpo: rec.length ? filas(rec.map((x) => fila({ inicio: emoji('🏆'), titulo: x.n, meta: '<b class="mono">' + x.p + ' kg</b>' + (x.reps ? ' × ' + x.reps : '') + ' · ' + fmtCorta(x.fecha) }))) : vacio('', 'Anota los kilos en tus entrenos y aquí verás tus récords.') });
@@ -165,12 +166,12 @@ function grafico(t) {
     '<text class="gp-txt" x="' + (X(ps.length - 1) + 10).toFixed(1) + '" y="' + (Y(u.p) + 4).toFixed(1) + '">' + u.p + ' kg</text></svg>';
 }
 function vistaPeso() {
-  const l = medidas().sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '')), t = tendenciaPeso(l, hoy());
+  const l = medidas().sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '')), t = tendenciaPeso(l, hoy()), talla = preferencias().deporte.talla, i = t ? imc(t.ultimo, talla) : null;
   return tarjeta({ eti: 'PESO', titulo: 'Peso y medidas', n: l.length, clase: 'area-deporte',
     guia: 'Pésate una vez por semana, a la misma hora, y mira la tendencia más que el número del día.',
-    cuerpo: (t ? cifras([cifra(t.ultimo + ' kg', 'último · ' + fmtCorta(t.fecha)), cifra(t.cambio30 == null ? '—' : (t.cambio30 > 0 ? '+' : '') + t.cambio30 + ' kg', 'en 30 días')]) + grafico(t) +
+    cuerpo: (t ? cifras([cifra(t.ultimo + ' kg', 'último · ' + fmtCorta(t.fecha)), cifra(t.cambio30 == null ? '—' : (t.cambio30 > 0 ? '+' : '') + t.cambio30 + ' kg', 'en 30 días')].concat(i ? [cifra(String(i.valor), 'IMC · ' + i.texto, i.nivel)] : [])) + grafico(t) +
       filas(l.slice(0, 8).map((m) => fila({ titulo: (+val(m, 'peso', 0) || '—') + ' kg', acc: 'peso-editar', id: m.id, meta: cap(fmtCorta(m.fechas.inicio)) + (val(m, 'cintura', '') ? ' · cintura ' + val(m, 'cintura', '') + ' cm' : '') })))
-      : vacio('Sin registros', 'Anota tu peso para ver cómo va.')) + pie(boton('Anotar peso', 'peso-nuevo')) });
+      : vacio('Sin registros', 'Anota tu peso para ver cómo va.')) + pie(boton('Anotar peso', 'peso-nuevo'), '<button type="button" class="btn" data-acc="peso-talla">📏 ' + (talla ? 'Talla: ' + talla + ' cm' : 'Pon tu talla para ver el IMC') + '</button>') });
 }
 function editarPeso(id, repintar) {
   const m = id ? buscarElemento(id) : null;
@@ -228,6 +229,12 @@ export function semana(ini, fin) {
 }
 
 export const acciones = {
+  descanso() { abrirDescanso(); },
+  'peso-talla'(b, ev, rp) {
+    const p = preferencias().deporte;
+    editar({ titulo: 'Tu talla', campos: [{ n: 'talla', t: 'num', etq: 'Talla en centímetros', v: p.talla || '', ph: 'Ej. 172', ayuda: 'Solo se usa para calcular tu IMC (índice de masa corporal).' }],
+      alGuardar: (v) => { const t = +v.talla; if (v.talla && !(t >= 100 && t <= 230)) { aviso('Escribe tu talla en cm (ej. 172)'); return false; } cambiarPref({ deporte: Object.assign({}, p, { talla: t || 0 }) }); rp(); aviso(t ? 'Talla guardada' : 'Talla borrada'); } });
+  },
   'ent-nuevo'(b, ev, rp) { const k = b.dataset.v; editarEntreno(null, rp, { deporte: k, minutos: k === 'futbol' ? 90 : k === 'correr' ? 30 : 60 }); },
   'ent-editar'(b, ev, rp) { editarEntreno(b.dataset.id, rp); },
   'ent-meta'(b, ev, rp) { editarMeta(rp); },
