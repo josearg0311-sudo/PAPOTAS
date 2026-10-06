@@ -3823,6 +3823,10 @@ header.hoy-cab.portada-hoy.heroe-hoy{ position:relative; padding:18px 16px 14px 
 .portada-esp .pe-lema{ grid-area:lema; margin:3px 0 0 !important; font-size:13px !important; white-space:normal !important; overflow:visible !important; color:var(--tinta-2) }
 .portada-esp .pe-datos{ display:none !important }
 @media (max-width:420px){ .portada-esp .pe-nom{ font-size:32px !important } .portada-esp .pe-em{ font-size:38px !important } }
+/* Gana a la regla vieja «body .portada-esp» que dejaba la banda sin margen a los lados */
+body header.portada-esp.esp-heroe{ padding:14px 18px 18px !important }
+@media (max-width:420px){ body header.portada-esp.esp-heroe{ padding:12px 14px 16px !important } }
+body button.ordenar-cta{ padding:14px 16px !important }
 </style>
 </head>
 <body>
