@@ -14,8 +14,12 @@ export const SECCIONES_MAS = [
   ['datos', 'Tus datos', 'i-buscar', 'Todo lo que tienes guardado, también lo migrado.', 0]
 ];
 
+import { preferencias } from '../datos/preferencias.js';
+
+/* En modo simple: solo lo de todos los días */
+const SIMPLE = ['recordatorios', 'areas', 'habitos', 'finanzas', 'notas', 'ajustes'];
 export function vistaMas() {
-  return '<div class="mas">' + SECCIONES_MAS.map((s) =>
+  return '<div class="mas">' + SECCIONES_MAS.filter((s) => preferencias().completo || SIMPLE.includes(s[0])).map((s) =>
       '<a class="mas-btn" href="#' + s[0] + '"><span class="ic">' + ico(s[2]) + '</span><b>' + s[1] + '</b><small>' + s[3] + '</small>' +
       '</a>').join('') + '</div>';
 }

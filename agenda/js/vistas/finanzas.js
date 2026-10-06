@@ -19,6 +19,7 @@ import { aviso } from '../piezas/aviso.js';
 import { cerrarHoja } from '../piezas/hoja.js';
 
 const ui = { mes: '', cat: '', ver: 30 };
+const completo = () => preferencias().completo;   // modo simple: solo lo esencial
 const COLOR = { personal: 'personal', oficina: 'oficina' };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const nombreMes = (ym) => cap(MESES[+ym.slice(5) - 1]) + ' ' + ym.slice(0, 4);
@@ -70,7 +71,7 @@ function vistaLibro(libro) {
       '<div class="din-queda"><span>' + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda ' + (ym === h ? 'este mes' : 'de ese mes')) + '</span><b class="' + (r.saldo < 0 ? 'txt-aviso' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b></div>' +
       (pres ? '<div class="presupuesto ' + pres.nivel + '"><div class="pr-txt"><b>Presupuesto: ' + pres.pct + ' %</b><small>' + fmtSoles(r.gastos) + ' de ' + fmtSoles(presupuestoDe(libro)) + (pres.queda >= 0 ? ' · te quedan ' + fmtSoles(pres.queda) : ' · te pasaste por ' + fmtSoles(-pres.queda)) + '</small></div><span class="progreso"><i style="width:' + Math.min(100, pres.pct) + '%"></i></span></div>' : '') +
       '<div class="pie-tarjeta"><button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-meta') + (pres ? 'Presupuesto' : 'Poner presupuesto') + '</button></div>' +
-    '</section>' + tarjetaComoVas(libro, todos, ym, r) +
+    '</section>' + (completo() ? tarjetaComoVas(libro, todos, ym, r) : '') +
     '<div class="columnas"><div>' +
     tarjeta({ eti: 'PAGOS FIJOS', titulo: 'Pagos fijos de ' + MESES[+ym.slice(5) - 1], n: pagos.filter((x) => x.ok).length + '/' + pagos.length, clase: 'area-' + a,
       guia: 'Lo que pagas cada mes. Al marcarlo pagado se anota el gasto en este libro.',
@@ -81,19 +82,19 @@ function vistaLibro(libro) {
     tarjeta({ eti: 'EN QUÉ SE VA', titulo: 'Gastos por categoría', clase: 'area-' + a,
       guia: 'Toca una categoría para ver solo sus movimientos.',
       cuerpo: r.porCategoria.length ? barras(r.porCategoria, r.porCategoria[0].monto, 'fin-cat') + (ui.cat ? '<div class="pie-tarjeta"><button type="button" class="btn chico" data-acc="fin-cat" data-v="">Ver todas</button></div>' : '') : vacio('', 'Sin gastos este mes.') }) +
-    (libro === 'personal' && Object.keys(r.porArea).length > 1 ? tarjeta({ eti: 'POR ÁREA', titulo: 'Cada área con sus gastos', clase: 'area-personal',
+    (completo() && libro === 'personal' && Object.keys(r.porArea).length > 1 ? tarjeta({ eti: 'POR ÁREA', titulo: 'Cada área con sus gastos', clase: 'area-personal',
       guia: 'Lo de Estudios y Deporte se cuenta en su área, aunque salga de tu libro personal.',
       cuerpo: '<div class="barras">' + AREAS.filter((ar) => r.porArea[ar.id]).map((ar) => '<a class="barra-fila area-' + ar.id + '" href="#areas/' + ar.id + '"><span class="bf-nom">' + ar.nombre + '</span><span class="bf-barra" aria-hidden="true"><i style="width:' + (r.porArea[ar.id] / r.gastos * 100).toFixed(1) + '%"></i></span><span class="bf-val mono">' + fmtSoles(r.porArea[ar.id]) + '</span></a>').join('') + '</div>' }) : '') +
-    tarjetaRepetidos(libro, todos, ym) + enlaceTematico(libro) +
+    (completo() ? tarjetaRepetidos(libro, todos, ym) + enlaceTematico(libro) : '') +
     '</div><div>' +
     tarjeta({ eti: 'MOVIMIENTOS', titulo: ui.cat ? esc(ui.cat) : 'Movimientos de ' + MESES[+ym.slice(5) - 1], n: delM.length, clase: 'area-' + a,
       cuerpo: (delM.length ? filas(delM.slice(0, ui.ver).map(filaMov)) + (delM.length > ui.ver ? '<div class="pie-tarjeta"><button type="button" class="btn" data-acc="fin-mas">Ver más (' + (delM.length - ui.ver) + ')</button></div>' : '') : vacio('Sin movimientos', 'Anota un gasto o un ingreso con los botones de arriba.')) +
         pie('<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar el libro (Excel)</button>') }) +
-    tarjeta({ eti: 'INFORME', titulo: hist.length > 1 ? 'Últimos ' + hist.length + ' meses' : 'Este mes', clase: 'area-' + a,
+    (!completo() ? '' : tarjeta({ eti: 'INFORME', titulo: hist.length > 1 ? 'Últimos ' + hist.length + ' meses' : 'Este mes', clase: 'area-' + a,
       cuerpo: '<table class="informe"><thead><tr><th scope="col">Mes</th><th scope="col">Ingresos</th><th scope="col">Gastos</th><th scope="col">Saldo</th></tr></thead><tbody>' +
         hist.map((h) => '<tr' + (h.ym === ym ? ' class="actual"' : '') + '><th scope="row"><button type="button" class="enlace" data-acc="fin-ir-mes" data-v="' + h.ym + '">' + cap(MESES[+h.ym.slice(5) - 1]).slice(0, 3) + (h.ym.slice(0, 4) !== hoy().slice(0, 4) ? ' ' + h.ym.slice(2, 4) : '') + '</button></th>' +
           '<td class="mono">' + fmtSoles(h.ingresos) + '</td><td class="mono"><span class="mini-barra" aria-hidden="true"><i style="width:' + (h.gastos / maxH * 100).toFixed(0) + '%"></i></span>' + fmtSoles(h.gastos) + '</td><td class="mono ' + (h.saldo < 0 ? 'txt-aviso' : 'txt-ok') + '">' + (h.saldo < 0 ? '−' : '+') + fmtSoles(Math.abs(h.saldo)) + '</td></tr>').join('') + '</tbody></table>' +
-        pie('<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-bajar') + 'Imprimir o guardar en PDF</button>') }) +
+        pie('<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-bajar') + 'Imprimir o guardar en PDF</button>') })) +
     '</div></div>';
 }
 /* Cómo vas: comparado con el mes pasado al mismo día, mayor gasto, proyección,

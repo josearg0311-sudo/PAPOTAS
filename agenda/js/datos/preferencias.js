@@ -16,6 +16,7 @@ const BASE = {
   inicio: 'hoy',
   bloqueoMin: 1,           // minutos de inactividad antes de pedir el PIN
   guia: false,
+  completo: false,         // false = modo simple (solo lo esencial); true = todo
   sonido: true,
   feriados: true,
   deporte: { meta: 3, avisoDias: 3 },   // entrenos por semana y días sin entrenar antes de avisar
@@ -46,7 +47,7 @@ export function normalizarPref(x) {
   if (!PANTALLAS_INICIO.some((o) => o[0] === p.inicio)) p.inicio = 'hoy';
   if (!OPCIONES_BLOQUEO.some((o) => o[0] === +p.bloqueoMin)) p.bloqueoMin = 1;
   p.bloqueoMin = +p.bloqueoMin;
-  p.guia = !!p.guia; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
+  p.guia = !!p.guia; p.completo = !!p.completo; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
   const dp = p.deporte && typeof p.deporte === 'object' ? p.deporte : {};
   /* Teclado: si no estaba, se toma lo que tenías en la v4.5 (teclado y autocorrector) */
   const tk = x && x.teclado && typeof x.teclado === 'object' ? x.teclado : (() => { const v = leer(ANTIGUAS.pref, {}) || {}; return { activo: v.teclado !== false, corrector: v.autocorr !== false }; })();

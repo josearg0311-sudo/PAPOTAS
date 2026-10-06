@@ -37,6 +37,6 @@ export function vistaHabitos() {
             '<span class="ht-cuad" role="img" aria-label="Últimos 14 días: ' + dias.filter((d) => m[d]).length + ' hechos">' + dias.map((d) => '<i class="' + (m[d] ? 'si' : tocaHabito(x, d) ? 'no' : 'libre') + (d === h ? ' hoy' : '') + '"></i>').join('') + '</span>' +
             '<b class="ht-racha">' + r + '</b></div>'; }).join('') + '</section>'; }).join('') +
     '<div class="fila-botones izq">' + AREAS.map((a) => '<button type="button" class="btn area-' + a.id + '" data-acc="hab-nuevo" data-area="' + a.id + '">' + ico('i-plus') + 'Hábito en ' + esc(a.nombre) + '</button>').join('') + '</div>' +
-    '<h2 class="seccion-t">Metas</h2><div class="herr-botones">' + AREAS.map((a) => '<a class="herr-btn area-' + a.id + '" href="#areas/' + a.id + '/constancia"><b>' + esc(a.emoji) + ' ' + esc(TEMAS[a.id].tab) + '</b>' + ico('i-der') + '</a>').join('') + '</div>';
+    (!preferencias().completo ? '' : '<h2 class="seccion-t">Metas</h2><div class="herr-botones">' + AREAS.map((a) => '<a class="herr-btn area-' + a.id + '" href="#areas/' + a.id + '/constancia"><b>' + esc(a.emoji) + ' ' + esc(TEMAS[a.id].tab) + '</b>' + ico('i-der') + '</a>').join('') + '</div>');
 }
 export const acciones = {};

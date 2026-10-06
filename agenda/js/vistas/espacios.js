@@ -53,7 +53,7 @@ export function tarjetaEspacios() {
       '<span class="eh-cab"><span class="eh-em" aria-hidden="true">' + esc(a.emoji) + '</span><b>' + esc(a.nombre) + '</b>' + ico('i-der') + '</span>' +
       '<span class="eh-num"><strong>' + i.n + '</strong><em>' + (i.n === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
       '<span class="eh-prox"><i>' + (p ? 'Próximo' : 'Libre') + '</i>' + (p ? esc(p.titulo) + ' · ' + esc(p.cuando) : esc(a.lema)) + '</span>' +
-      (r.chips.length ? '<span class="eh-datos">' + r.chips.slice(0, 4).map((c) => '<span class="eh-dato' + (c[3] === 'vencido' ? ' rojo' : '') + '"><b>' + esc(String(c[0])) + '</b> ' + esc(c[1]) + '</span>').join('') + '</span>' : '') +
+      (r.chips.length ? '<span class="eh-datos">' + r.chips.slice(0, preferencias().completo ? 4 : 2).map((c) => '<span class="eh-dato' + (c[3] === 'vencido' ? ' rojo' : '') + '"><b>' + esc(String(c[0])) + '</b> ' + esc(c[1]) + '</span>').join('') + '</span>' : '') +
       '<span class="eh-barra" aria-hidden="true"><i style="width:' + i.pct + '%"></i></span>' +
       '<span class="eh-pie">' + (i.tareas ? i.tareas + (i.tareas === 1 ? ' tarea pendiente' : ' tareas pendientes') : 'Al día ✓') + '</span></a>';
   }).join('') + '</div></section>';
@@ -125,7 +125,7 @@ export function portadaEspacio(a, herramientas, senales) {
     '<div class="pe-datos">' + r.datos.map((d) => '<a class="dato' + (d[3] === 'aviso' ? ' aviso' : '') + '" href="#areas/' + a.id + '/' + d[2] + '"><b>' + esc(String(d[0])) + '</b><span>' + esc(d[1]) + '</span></a>').join('') + '</div></header>' +
     '<button type="button" class="anadir-rapido" data-acc="esp-anadir" data-area="' + a.id + '">' + ico('i-plus') + '<span>Añadir en ' + esc(a.nombre) + '…</span></button>' +
     (senales || '') +
-    '<div class="mosaicos area-' + a.id + '">' + mosaicoSemana(a) + GENERICAS.filter((g) => g.id !== 'semana').concat(herramientas).map((h) => mosaico(a, h)).join('') + '</div>';
+    '<div class="mosaicos area-' + a.id + '">' + mosaicoSemana(a) + GENERICAS.filter((g) => g.id !== 'semana' && (preferencias().completo || g.id !== 'notas')).concat(herramientas.filter((h) => preferencias().completo || h.id !== 'constancia')).map((h) => mosaico(a, h)).join('') + '</div>';
 }
 
 /* ---------- Las herramientas comunes ---------- */

@@ -13,7 +13,6 @@ import { confirmar } from '../piezas/confirmar.js';
 import { permisoAvisos, pedirPermiso, notificar, sonar } from '../piezas/avisos.js';
 import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
-import { encabezado } from './comun.js';
 import { VERSION } from '../version.js';
 import { abrirNovedades } from '../piezas/novedades.js';
 import { grupoNube, grupoAreas, grupoEtiquetas, grupoTeclado } from './admin.js';
@@ -31,15 +30,18 @@ function grupo(titulo, html) { return '<h2 class="grupo-ajustes">' + titulo + '<
 export function vistaAjustes() {
   const p = preferencias(), ant = resumenAntiguo(), pin = hayPIN(), errores = leer(CLAVES.errores, []);
   const hora = fmtHora('14:30', p.formatoHora);
-  let html = encabezado('Ajustes', 'Preferencias, seguridad, nube, áreas y tus datos');
+  const todo = p.completo;
+  let html = grupo('Cómo se ve la agenda',
+    ajuste('Modo', todo ? 'Ves <b>todo</b>: prioridades, Pomodoro, balance, metas, informes y más.' : '<b>Modo simple</b>: solo lo esencial. Nada se borra: con «Mostrar todo» vuelve lo demás.',
+      selector('pref-completo', [['0', 'Simple'], ['1', 'Mostrar todo']], todo ? '1' : '0', 'Modo')));
 
   html += grupo('Preferencias',
     ajuste('Tema', 'Oscuro, claro o según tu celular.', selector('pref-tema', [['oscuro', 'Oscuro'], ['claro', 'Claro'], ['auto', 'Automático']], p.tema, 'Tema')) +
     ajuste('Formato de hora', 'Así se verá: <b class="mono">' + hora + '</b>', selector('pref-hora', [['24', '24 h'], ['12', '12 h']], p.formatoHora, 'Formato de hora')) +
     ajuste('La semana empieza', '', selector('pref-semana', [['1', 'Lunes'], ['0', 'Domingo']], p.semanaLunes ? '1' : '0', 'Inicio de semana')) +
-    ajuste('Horario despierto', 'Sirve para calcular si un día está sobrecargado.',
+    (!todo ? '' : ajuste('Horario despierto', 'Sirve para calcular si un día está sobrecargado.',
       '<div class="horas-par"><label><span>Desde</span><input type="time" class="entrada" data-pref-vigilia="ini" value="' + p.vigilia.ini + '"></label>' +
-      '<label><span>Hasta</span><input type="time" class="entrada" data-pref-vigilia="fin" value="' + p.vigilia.fin + '"></label></div>') +
+      '<label><span>Hasta</span><input type="time" class="entrada" data-pref-vigilia="fin" value="' + p.vigilia.fin + '"></label></div>')) +
     ajuste('Feriados del Perú', 'Mostrarlos en Hoy y en la Agenda.', selector('pref-feriados', [['1', 'Mostrar'], ['0', 'Ocultar']], p.feriados ? '1' : '0', 'Feriados')) +
     ajuste('Pantalla de inicio', 'Lo primero que ves al abrir la app.', selector('pref-inicio', PANTALLAS_INICIO, p.inicio, 'Pantalla de inicio')));
 
@@ -62,7 +64,7 @@ export function vistaAjustes() {
   html += '<div id="nube"></div>' + grupo('Nube', grupoNube());
   html += grupo('Teclado', grupoTeclado());
   html += grupo('Tus áreas', grupoAreas());
-  html += grupo('Etiquetas y categorías', grupoEtiquetas());
+  if (todo) html += grupo('Etiquetas y categorías', grupoEtiquetas());
 
   html += grupo('Ayuda',
     ajuste('Modo guía', 'Muestra una explicación corta en cada bloque.', '<button type="button" class="btn" data-acc="guia" aria-pressed="' + p.guia + '">' + ico('i-guia') + (p.guia ? 'Apagar' : 'Activar') + '</button>') +
@@ -144,6 +146,7 @@ export function alElegirArchivo(t) {
 }
 
 export const acciones = {
+  'pref-completo'(b) { cambiarPref({ completo: b.dataset.v === '1' }); aviso(b.dataset.v === '1' ? 'Ahora ves todo.' : 'Modo simple: solo lo esencial.'); return true; },
   'pref-feriados'(b) { cambiarPref({ feriados: b.dataset.v === '1' }); return true; },
   'ics-todo'() { import('../piezas/eventos-ui.js').then((m) => { const n = m.exportarTodo(); aviso(n ? 'Archivo con ' + n + ' cosas. Ábrelo para agregarlas a tu calendario.' : 'No hay nada próximo para pasar.'); }); },
   'pref-sonido'(b) { cambiarPref({ sonido: b.dataset.v === '1' }); return true; },

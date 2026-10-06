@@ -111,7 +111,7 @@ function pintarNav() {
     grupo('espacios', 'Espacios') + '<div class="nav-grupo"' + (plegado('espacios') ? ' hidden' : '') + '>' +
     AREAS.map((a) => '<a href="#areas/' + a.id + '" class="nav-esp area-' + a.id + '"' + actual('areas', a.id) + '>' + ico(a.icono) + '<span>' + esc(a.nombre) + '</span>' + cuentaHtml(porArea(a.id)) + '</a>').join('') + '</div>' +
     grupo('organizar', 'Organizar') + '<div class="nav-grupo"' + (plegado('organizar') ? ' hidden' : '') + '>' +
-    ORGANIZAR.map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' +
+    ORGANIZAR.filter((x) => preferencias().completo || ['agenda', 'notas', 'habitos', 'finanzas'].includes(x[0])).map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' +
       (x[0] === 'agenda' ? cuentaHtml(enAgenda) : x[0] === 'recordatorios' ? cuentaHtml(pend.length, atras > 0) : '') + '</a>').join('') + '</div>' +
     '</nav>' +
     '<div class="pie"><a class="perfil" href="#ajustes"' + actual('ajustes') + '><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span>' +

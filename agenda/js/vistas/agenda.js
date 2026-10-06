@@ -91,7 +91,7 @@ function panelDia(d, conLinea) {
   if (fer) html += '<p class="feriado">' + ico('i-bandera') + 'Feriado nacional: <b>' + esc(fer) + '</b></p>';
   if (x.todoDia.length) html += '<div class="todo-dia">' + x.todoDia.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</div>';
   if (x.vencen.length) html += '<div class="grupo-tit"><span>Vence este día</span><span class="linea"></span><span class="mono">' + x.vencen.length + '</span></div><div class="vencen">' + x.vencen.map((v) => filaVence(v, d)).join('') + '</div>';
-  if (conLinea) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div>' + huecosHTML(d, x.bloques) + lineaTiempo(d, x.bloques);
+  if (conLinea) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div>' + (preferencias().completo ? huecosHTML(d, x.bloques) : '') + lineaTiempo(d, x.bloques);
   else if (x.bloques.length) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div><div class="mini-bloques">' + x.bloques.map((b) => '<button type="button" class="mini-bloque area-' + area(b.area).id + '" data-acc="' + (b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '"><span class="mono">' + fmtHora(b.hIni, preferencias().formatoHora) + '</span><b>' + esc(b.titulo) + '</b></button>').join('') + '</div>';
   html += '<div class="grupo-tit"><span>Recordatorios sin hora</span><span class="linea"></span><span class="mono">' + sinHora.length + '</span></div>' +
     (sinHora.length ? '<div class="pends">' + sinHora.map((p) => filaPendiente(p, { verLista: true })).join('') + '</div>' : vacio('', 'Nada sin hora este día.'));
@@ -213,13 +213,14 @@ function previaIcs(texto, nombre) {
 
 export function vistaAgenda() {
   const d = ui.dia || hoy();
+  if (!preferencias().completo && (ui.modo === 'ano' || ui.modo === 'lista')) ui.modo = 'mes';
   const cuerpo = ui.modo === 'semana' ? vistaSemana(d) : ui.modo === 'mes' ? vistaMes(d) : ui.modo === 'ano' ? vistaAno(d) : ui.modo === 'lista' ? vistaLista() : vistaDia(d);
   return tarjeta({ titulo: 'Tu tiempo', clase: 'agenda',
     guia: '<b>Agenda = tu tiempo.</b> Eventos, clases, recordatorios y vencimientos (pagos, cobros, documentos y plazos) en vista de día, semana o mes. En la vista Día, <b>toca una hora vacía</b> para crear un evento ahí. Filtra por área con los botones de colores. <b>Año</b> muestra cumpleaños y plazos legales de cada mes; <b>Lista</b>, todo lo de los próximos 60 días.',
-    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['ano', 'Año'], ['lista', 'Lista']].map((o) =>
+    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['ano', 'Año'], ['lista', 'Lista']].filter((o) => preferencias().completo || o[0] === 'dia' || o[0] === 'semana' || o[0] === 'mes').map((o) =>
       '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + filtroAreas() + cuerpo }) +
-    '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
-    '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>';
+    (!preferencias().completo ? '' : '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
+    '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>');
 }
 
 export const acciones = {

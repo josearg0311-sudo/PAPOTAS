@@ -52,7 +52,7 @@ function pintar() {
   let html = pasos();
   if (estado.paso === 1) {
     html += '<p class="ayuda">' + (estado.fija ? '¿Qué quieres agregar en <b>' + esc(area(estado.fija).nombre) + '</b>?' : '<b>Paso 1 de 2 ·</b> ¿Qué quieres agregar?') + '</p><div class="opciones">' +
-      TIPOS.map((t) => '<button type="button" class="opcion" data-qa-tipo="' + t[0] + '">' + ico(t[2]) + '<b>' + t[1] + '</b><small>' + t[3] + '</small></button>').join('') + '</div>';
+      TIPOS.filter((t) => preferencias().completo || !['habito', 'meta'].includes(t[0])).map((t) => '<button type="button" class="opcion" data-qa-tipo="' + t[0] + '">' + ico(t[2]) + '<b>' + t[1] + '</b><small>' + t[3] + '</small></button>').join('') + '</div>';
   } else if (estado.paso === 2) {
     const ult = leer(CLAVE_ULT, '');
     const t = TIPOS.find((x) => x[0] === estado.tipo);
