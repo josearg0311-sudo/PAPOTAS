@@ -4,6 +4,8 @@ import { ico, vacio, explica } from '../util/dom.js';
 import { tarjeta, enFase } from './comun.js';
 import { elementos } from '../datos/datos.js';
 import { filaElemento } from './datos.js';
+import { filaPendiente } from '../piezas/pendientes-ui.js';
+import { ordenar } from '../datos/pendientes.js';
 
 const pendientesDe = (id) => elementos((x) => x.area === id && x.tipo === 'pendiente' && x.estado !== 'hecho' && x.estado !== 'cancelado');
 const deArea = (id) => elementos((x) => x.area === id && !(x.extra && x.extra.sistema));
@@ -35,7 +37,7 @@ export function vistaArea(id) {
   return '<a class="btn volver" href="#areas">' + ico('i-izq') + 'Todas las áreas</a>' +
     '<div class="area-cab area-' + a.id + '"><span class="ic">' + ico(a.icono) + '</span><div><h2>' + a.nombre + '</h2><p>' + a.lema + '</p></div></div>' +
     '<div class="columnas"><div>' +
-    tarjeta({ eti: 'RECORDATORIOS', titulo: 'Pendientes de ' + a.nombre, n: pendientesDe(a.id).length, clase: 'area-' + a.id, cuerpo: pendientesDe(a.id).length ? '<div class="filas-datos">' + pendientesDe(a.id).slice(0, 8).map(filaElemento).join('') + '</div>' + (pendientesDe(a.id).length > 8 ? '<p class="pie-ajuste">Y ' + (pendientesDe(a.id).length - 8) + ' más. La pantalla completa llega en la Fase 3.</p>' : '') : vacio('Nada pendiente', 'Lo que agregues en ' + a.nombre + ' aparecerá aquí.') }) +
+    tarjeta({ eti: 'RECORDATORIOS', titulo: 'Pendientes de ' + a.nombre, n: pendientesDe(a.id).length, clase: 'area-' + a.id, cuerpo: pendientesDe(a.id).length ? '<div class="pends">' + pendientesDe(a.id).sort(ordenar).slice(0, 8).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' + (pendientesDe(a.id).length > 8 ? '<p class="pie-ajuste">Y ' + (pendientesDe(a.id).length - 8) + ' más en <a href="#recordatorios">Recordatorios</a>.</p>' : '') : vacio('Nada pendiente', 'Lo que agregues en ' + a.nombre + ' aparecerá aquí.') }) +
     bloque('METAS Y HÁBITOS', 'Constancia', a, (x) => x.tipo === 'meta' || x.tipo === 'habito', vacio('Sin metas ni hábitos aún', a.id === 'deporte' ? 'Tus entrenamientos contarán como hábito, con racha y aviso si pasan días sin entrenar.' : 'Ponte una meta o un hábito para esta área.')) +
     '</div><div>' +
     tarjeta({ eti: 'HERRAMIENTAS', titulo: 'Solo de ' + a.nombre, clase: 'area-' + a.id,

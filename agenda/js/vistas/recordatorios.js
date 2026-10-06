@@ -1,39 +1,112 @@
-/* RECORDATORIOS: listas con casillas, ordenadas por cuándo.
-   Grupos: Para hoy · Más tarde · Mañana · Próximos días · Algún día · Hecho. */
+/* RECORDATORIOS: tus listas con casillas, ordenadas por CUÁNDO.
+   Grupos: Para hoy · Más tarde · Mañana · Próximos días · Algún día · Hecho.
+   Las listas «para marcar» (compras, maleta) se ven como checklist simple. */
 import { hoy, sumarDias, fmtCorta } from '../util/fechas.js';
-import { vacio, ico } from '../util/dom.js';
-import { tarjeta, enFase } from './comun.js';
+import { vacio, ico, esc, explica } from '../util/dom.js';
+import { buscarElemento } from '../datos/datos.js';
+import { GRUPOS, grupo, ordenar, listas, pendientesVisibles, pendientesDe, esChecklist, crearDesdeTexto, hechoEn, atrasado } from '../datos/pendientes.js';
+import { LISTA_RECORDATORIOS } from '../datos/modelo.js';
+import { filaPendiente, editarLista, editarPendiente } from '../piezas/pendientes-ui.js';
+import { interpretar } from '../util/interpretar.js';
+import { aviso } from '../piezas/aviso.js';
+import { tarjeta } from './comun.js';
+import { modeloVacio, nuevoId } from '../datos/modelo.js';
 
-export const GRUPOS = [
-  ['hoy', 'Para hoy', 'Nada pendiente para hoy.'],
-  ['tarde', 'Más tarde', 'Lo que pases a «Más tarde» aparece aquí.'],
-  ['manana', 'Mañana', 'Mañana lo tienes libre.'],
-  ['prox', 'Próximos días', 'Nada programado para los próximos días.'],
-  ['algun', 'Algún día', 'Ideas sin fecha: guárdalas aquí para no olvidarlas.'],
-  ['hecho', 'Hecho', 'Lo que marques como hecho baja aquí.']
-];
+const ui = { lista: '', verHechos: 8 };
+const VACIOS = { hoy: 'Nada pendiente para hoy. 👌', tarde: 'Lo que pases a «Más tarde» aparece aquí.', manana: 'Mañana lo tienes libre.', prox: 'Nada programado para los próximos días.', algun: 'Ideas sin fecha: guárdalas aquí para no olvidarlas.', hecho: 'Lo que marques como hecho baja aquí.' };
+
+export function irALista(id) { ui.lista = id || ''; }
 
 export function vistaRecordatorios() {
-  const h = hoy();
+  const h = hoy(), l = ui.lista ? buscarElemento(ui.lista) : null;
+  if (ui.lista && (!l || l.borrado)) ui.lista = '';
+  const lsts = listas(), check = esChecklist(l);
+  const todos = pendientesVisibles(ui.lista);
+  const pend = (id) => (id ? pendientesDe(id) : pendientesVisibles()).filter((x) => x.estado !== 'hecho').length;
+
   let html = '<div class="listas" role="group" aria-label="Tus listas">' +
-    '<button type="button" class="lista-btn" aria-pressed="true">Todos <span class="n">0</span></button>' +
-    '<button type="button" class="lista-btn nueva" data-acc="fase" data-n="3">' + ico('i-plus') + 'Nueva lista</button></div>' +
-    tarjeta({ eti: 'TODAS LAS LISTAS', titulo: 'Todos mis recordatorios',
-      guia: '<b>Cómo funciona:</b> cada lista (Trámites, Llamadas, Exp. 04521…) ordena sus recordatorios por <b>cuándo</b>. Toca la casilla cuando lo hagas. Si hoy no da, usa <b>Más tarde</b>, <b>Mañana</b> o <b>Día…</b>. Al final del día, <b>Cerrar el día</b> pasa lo pendiente a mañana.',
-      cuerpo: '<div class="medidor" role="group" aria-label="Resumen por momento">' + GRUPOS.map((g) =>
-        '<a class="medidor-btn" href="#recordatorios" data-acc="saltar" data-v="' + g[0] + '"><b>0</b><small>' + g[1] + '</small></a>').join('') + '</div>' +
-        '<form class="anadir" data-acc="fase-form"><label for="nuevoRec" class="solo-lector">Nuevo recordatorio</label>' +
-        '<textarea id="nuevoRec" rows="1" placeholder="Nuevo… ej. «llamar al notario mañana 10am». Pega varias líneas para crear varios."></textarea>' +
-        '<button type="submit" class="btn pri" aria-label="Agregar">' + ico('i-plus') + '</button></form>' +
-        enFase(3, 'crear listas, marcar, pasar a más tarde o mañana, deslizar con el dedo y cerrar el día. En la Fase 2 se migran tus recordatorios, tareas y listas actuales.') });
-  GRUPOS.forEach((g) => {
-    const sub = g[0] === 'hoy' ? ' · ' + fmtCorta(h) : g[0] === 'manana' ? ' · ' + fmtCorta(sumarDias(h, 1)) : '';
-    html += '<section class="tarjeta grupo" id="g-' + g[0] + '"><div class="grupo-tit"><span>' + g[1] + sub + '</span><span class="linea"></span><span class="mono">0</span></div>' + vacio('', g[2]) + '</section>';
+    '<button type="button" class="lista-btn" data-acc="r-lista" data-v="" aria-pressed="' + !ui.lista + '">Todos <span class="n">' + pend('') + '</span></button>' +
+    lsts.map((x) => '<button type="button" class="lista-btn area-' + x.area + (esChecklist(x) ? ' check' : '') + '" data-acc="r-lista" data-v="' + esc(x.id) + '" aria-pressed="' + (ui.lista === x.id) + '"><i aria-hidden="true"></i>' + esc(x.titulo) + ' <span class="n">' + pend(x.id) + '</span></button>').join('') +
+    '<button type="button" class="lista-btn nueva" data-acc="r-nueva-lista">' + ico('i-plus') + 'Nueva lista</button></div>';
+
+  const cuenta = {}; GRUPOS.forEach((g) => { cuenta[g[0]] = 0; });
+  todos.forEach((x) => { cuenta[grupo(x)]++; });
+  const vencidos = todos.filter((x) => atrasado(x)).length;
+
+  html += tarjeta({
+    eti: l ? (check ? 'LISTA PARA MARCAR' : 'LISTA') : 'TODAS LAS LISTAS',
+    titulo: l ? esc(l.titulo) + (l.extra.sistema ? '' : ' <button type="button" class="icono-btn mini" data-acc="r-editar-lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button>') : 'Todos mis recordatorios',
+    clase: l ? 'area-' + l.area : '',
+    guia: check ? '<b>Lista para marcar:</b> toca la casilla de lo que ya tienes o ya hiciste. No usa días.' : '<b>Cómo funciona:</b> toca la casilla cuando lo hagas. Si hoy no da, usa <b>Más tarde</b>, <b>Mañana</b> o <b>Día…</b>, o desliza con el dedo: a la derecha lo marcas, a la izquierda pasa a mañana. Al final del día, <b>Cerrar el día</b> pasa lo pendiente a mañana.',
+    cuerpo: (check ? '' : '<div class="medidor" role="group" aria-label="Cuántos hay en cada momento">' + GRUPOS.map((g) =>
+        '<a class="medidor-btn' + (g[0] === 'hoy' && vencidos ? ' rojo' : g[0] === 'hecho' ? ' verde' : '') + '" href="#recordatorios" data-acc="saltar" data-v="' + g[0] + '"><b>' + cuenta[g[0]] + '</b><small>' + g[1] + '</small></a>').join('') + '</div>') +
+      '<form class="anadir" data-form="r-anadir"><label for="nuevoRec" class="solo-lector">Nuevo recordatorio</label>' +
+      '<textarea id="nuevoRec" rows="1" placeholder="' + (check ? 'Agregar… (una cosa por línea)' : 'Nuevo… ej. «llamar al notario mañana 10am». Pega varias líneas para crear varios.') + '" enterkeyhint="done"></textarea>' +
+      '<button type="submit" class="btn pri" aria-label="Agregar">' + ico('i-plus') + '</button></form><p class="pista" id="pistaRec" aria-live="polite"></p>'
   });
-  html += '<div class="fila-botones izq"><button type="button" class="btn" data-acc="fase" data-n="3">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button></div>';
+
+  if (check) {
+    const p = todos.filter((x) => x.estado !== 'hecho').sort((a, b) => (a.origen && b.origen ? a.origen.indice - b.origen.indice : a.creado - b.creado));
+    const hechos = todos.filter((x) => x.estado === 'hecho');
+    html += '<section class="tarjeta grupo"><div class="grupo-tit"><span>Por marcar</span><span class="linea"></span><span class="mono">' + p.length + '</span></div>' + (p.length ? '<div class="pends">' + p.map((x) => filaPendiente(x, { acciones: false })).join('') + '</div>' : vacio('', '¡Todo marcado! 🎉')) + '</section>' +
+      '<section class="tarjeta grupo"><div class="grupo-tit"><span>Hecho</span><span class="linea"></span><span class="mono">' + hechos.length + '</span></div>' + (hechos.length ? '<div class="pends">' + hechos.map((x) => filaPendiente(x, { acciones: false })).join('') + '</div><div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-desmarcar-todo">' + ico('i-deshacer') + 'Desmarcar todo para volver a usarla</button></div>' : vacio('', VACIOS.hecho)) + '</section>';
+    return html;
+  }
+
+  GRUPOS.forEach(([k, nom]) => {
+    let g = todos.filter((x) => grupo(x) === k);
+    if (k === 'hecho') g.sort((a, b) => hechoEn(b) - hechoEn(a)); else g.sort(ordenar);
+    const total = g.length;
+    if (k === 'hecho') g = g.slice(0, ui.verHechos);
+    const sub = k === 'hoy' ? ' · ' + fmtCorta(h) : k === 'manana' ? ' · ' + fmtCorta(sumarDias(h, 1)) : '';
+    html += '<section class="tarjeta grupo" id="g-' + k + '"><div class="grupo-tit' + (k === 'hoy' && vencidos ? ' rojo' : '') + '"><span>' + nom + sub + '</span><span class="linea"></span><span class="mono">' + total + '</span></div>' +
+      (g.length ? '<div class="pends">' + g.map((x) => filaPendiente(x, { verLista: !ui.lista })).join('') + '</div>' : vacio('', VACIOS[k])) +
+      (k === 'hecho' && total > g.length ? '<div class="fila-botones izq pie-grupo"><button type="button" class="btn chico" data-acc="r-mas-hechos">Ver ' + Math.min(30, total - g.length) + ' más</button></div>' : '') + '</section>';
+  });
+  html += '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button></div>';
   return html;
 }
 
 export const acciones = {
-  saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); }
+  saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
+  'r-lista'(b) { ui.lista = b.dataset.v; ui.verHechos = 8; return true; },
+  'r-nueva-lista'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; }); },
+  'r-editar-lista'(b, ev, repintar) { editarLista(ui.lista, repintar, (id) => { ui.lista = id; }); },
+  'r-mas-hechos'() { ui.verHechos += 30; return true; },
+  'r-desmarcar-todo'(b, ev, repintar) {
+    import('../datos/datos.js').then(({ poner }) => {
+      pendientesDe(ui.lista).filter((x) => x.estado === 'hecho').forEach((x) => { const y = JSON.parse(JSON.stringify(x)); y.estado = 'pendiente'; y.extra.hechoEn = 0; poner(y); });
+      repintar(); aviso('Lista lista para usar de nuevo');
+    });
+  }
 };
+
+/* Escribir: vista previa de lo que se entiende; Enter guarda (Shift+Enter, otra línea) */
+export function alEscribir(t) {
+  if (t.id !== 'nuevoRec') return false;
+  const p = document.getElementById('pistaRec'), v = t.value.trim();
+  if (!p) return true;
+  const lineas = v.split('\n').filter((s) => s.trim());
+  if (!v) { p.textContent = ''; return true; }
+  if (lineas.length > 1) { p.textContent = 'Se crearán ' + lineas.length + ' recordatorios (uno por línea).'; return true; }
+  const r = interpretar(v), bits = [];
+  if (r.fecha) bits.push(fmtCorta(r.fecha)); if (r.algunDia) bits.push('algún día'); if (r.hora) bits.push(r.hora);
+  if (r.prioridad) bits.push('prioridad ' + r.prioridad); if (r.area) bits.push(r.area); if (r.plazoLegal) bits.push('plazo legal'); r.etiquetas.forEach((e) => bits.push('#' + e));
+  p.innerHTML = bits.length ? 'Se guardará: <b>' + esc(r.titulo || '…') + '</b> · ' + esc(bits.join(' · ')) : '';
+  return true;
+}
+export function alEnviar(f, repintar) {
+  if (f.dataset.form !== 'r-anadir') return false;
+  const t = document.getElementById('nuevoRec'), v = t.value.trim();
+  if (!v) { t.focus(); return true; }
+  const l = ui.lista ? buscarElemento(ui.lista) : buscarElemento(LISTA_RECORDATORIOS);
+  const c = crearDesdeTexto(v, { lista: l ? l.id : LISTA_RECORDATORIOS });
+  repintar();
+  aviso(c.length === 1 ? 'Agregado: ' + c[0].titulo : c.length + ' recordatorios agregados');
+  const n = document.getElementById('nuevoRec'); if (n) n.focus();
+  return true;
+}
+export function nuevoConEditor(repintar) {
+  const l = ui.lista ? buscarElemento(ui.lista) : null;
+  editarPendiente(null, repintar, Object.assign(modeloVacio(), { id: nuevoId('pend'), tipo: 'pendiente', area: l ? l.area : 'personal', lista: l ? l.id : LISTA_RECORDATORIOS, fechas: Object.assign(modeloVacio().fechas, { inicio: hoy() }) }));
+}

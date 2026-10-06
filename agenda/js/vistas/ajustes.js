@@ -11,6 +11,7 @@ import { descargarRespaldo, diasSinRespaldo, tocaRespaldar, DIAS_AVISO_RESPALDO,
 import { listarCopias, leerCopia } from '../datos/copias.js';
 import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { confirmar } from '../piezas/confirmar.js';
+import { permisoAvisos, pedirPermiso, notificar, sonar } from '../piezas/avisos.js';
 import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
 import { encabezado } from './comun.js';
@@ -39,6 +40,13 @@ export function vistaAjustes() {
       '<div class="horas-par"><label><span>Desde</span><input type="time" class="entrada" data-pref-vigilia="ini" value="' + p.vigilia.ini + '"></label>' +
       '<label><span>Hasta</span><input type="time" class="entrada" data-pref-vigilia="fin" value="' + p.vigilia.fin + '"></label></div>') +
     ajuste('Pantalla de inicio', 'Lo primero que ves al abrir la app.', selector('pref-inicio', PANTALLAS_INICIO, p.inicio, 'Pantalla de inicio')));
+
+  const perm = permisoAvisos();
+  html += grupo('Avisos',
+    ajuste('Avisos del sistema', perm === 'granted' ? 'Activados: los recordatorios con hora te avisan aunque estés en otra app (mientras el navegador la mantenga viva).' : perm === 'denied' ? 'Bloqueados. Actívalos desde el candado de la barra de direcciones → Notificaciones.' : perm === 'no' ? 'Este navegador no los tiene: sonarán dentro de la app.' : 'Aún sin activar. Sin ellos, los avisos solo suenan con la app abierta.',
+      (perm === 'default' ? '<button type="button" class="btn pri" data-acc="avisos-permiso">' + ico('i-campana') + 'Activar</button>' : '') + '<button type="button" class="btn" data-acc="avisos-probar">Probar</button>') +
+    ajuste('Sonido al avisar', '', selector('pref-sonido', [['1', 'Con sonido'], ['0', 'Silencio']], p.sonido ? '1' : '0', 'Sonido')) +
+    '<p class="pie-ajuste">' + ico('i-info') + 'Una página web solo puede avisar mientras está abierta o en segundo plano reciente. Para lo que no puede fallar (citas, audiencias), en la Fase 4 podrás pasarlo al calendario de tu teléfono.</p>');
 
   html += grupo('Seguridad',
     ajuste('PIN', pin ? 'Activado. Se pide al abrir la app y tras el tiempo que elijas abajo.' : 'Sin PIN: cualquiera que tome tu celular puede ver tu agenda.',
@@ -127,6 +135,9 @@ export function alElegirArchivo(t) {
 }
 
 export const acciones = {
+  'pref-sonido'(b) { cambiarPref({ sonido: b.dataset.v === '1' }); return true; },
+  'avisos-permiso'() { pedirPermiso().then((r) => { aviso(r === 'granted' ? 'Avisos activados.' : 'Avisos sin activar.'); window.dispatchEvent(new Event('agenda:repintar')); }); },
+  'avisos-probar'() { sonar(); aviso('⏰ Así suena un aviso'); notificar('⏰ Prueba de aviso', 'Así te avisará la Agenda.', 'ajustes', 'prueba'); },
   'respaldo-bajar'() { descargarRespaldo(); aviso('Respaldo descargado. Guárdalo en Drive o en tu correo.'); return true; },
   async 'copia-bajar'(b) { const c = await leerCopia(b.dataset.id); if (c) guardarArchivo(c.texto, 'agenda_copia_' + c.tipo + '_' + hoy(new Date(c.fecha)) + '.json'); },
   'mig-informe'() { informeMigracion(); },

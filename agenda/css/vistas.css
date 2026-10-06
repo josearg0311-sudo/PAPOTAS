@@ -19,6 +19,9 @@
 .franja button { display: grid; justify-items: center; gap: 2px; min-height: 60px; padding: 6px 0; border-radius: 14px; border: 1px solid transparent; background: transparent; }
 .franja small { font-size: 11px; color: var(--tinta-3); }
 .franja b { font-size: 21px; font-weight: 800; }
+.franja .pts { display: flex; gap: 2px; min-height: 5px; }
+.franja .pts i { width: 5px; height: 5px; border-radius: 50%; background: var(--acento-txt); }
+.franja [aria-pressed="true"] .pts i { background: var(--sobre-acento); }
 .franja .es-hoy b { color: var(--acento-txt); }
 .franja [aria-pressed="true"] { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); }
 .franja [aria-pressed="true"] small, .franja [aria-pressed="true"] b { color: inherit; }

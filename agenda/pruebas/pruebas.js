@@ -8,6 +8,10 @@ import { hashPIN } from '../js/piezas/candado.js';
 import { migrar, verificar, reconstruir, antiguoDesdeTextos, igualProfundo } from '../js/datos/migracion.js';
 import { fusionar, normalizarDoc } from '../js/datos/modelo.js';
 import { analizarArchivo } from '../js/datos/respaldo.js';
+import { interpretar } from '../js/util/interpretar.js';
+import { grupo, siguiente, ordenar } from '../js/datos/pendientes.js';
+import { ocurre, minutosPorArea } from '../js/datos/calendario.js';
+import { modeloVacio } from '../js/datos/modelo.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -179,6 +183,47 @@ tareas.push(cargarFix('v45-raros').then((fx) => Promise.all([
     igual(d.migracion.informe.ignorados.roto, true);
   })
 ])));
+
+/* ---------- FASE 3 · Entender lo que escribes, grupos y repeticiones ---------- */
+const H = '2026-10-06'; /* martes */
+const I = (t, m = 600) => interpretar(t, { hoy: H, ahoraMin: m });
+tareas.push(prueba('«llamar al notario mañana 10am»', () => { const r = I('llamar al notario mañana 10am'); igual([r.titulo, r.fecha, r.hora], ['Llamar al notario', '2026-10-07', '10:00']); }));
+tareas.push(prueba('«pagar la luz el viernes a las 6 !!» (las 6 es de la tarde)', () => { const r = I('pagar la luz el viernes a las 6 !!'); igual([r.titulo, r.fecha, r.hora, r.prioridad], ['Pagar la luz', '2026-10-09', '18:00', 'media']); }));
+tareas.push(prueba('«a las 7 de la mañana» y «9:15 p. m.»', () => { igual(I('correr a las 7 de la mañana').hora, '07:00'); igual(I('cena 9:15 p. m.').hora, '21:15'); }));
+tareas.push(prueba('Fechas: 15/10, «20 de diciembre», «en 3 días», «pasado mañana»', () => {
+  igual(I('dentista 15/10').fecha, '2026-10-15'); igual(I('regalo 20 de diciembre').fecha, '2026-12-20');
+  igual(I('revisar en 3 días').fecha, '2026-10-09'); igual(I('pasado mañana partido').fecha, '2026-10-08');
+  igual(I('renovar 5/1').fecha, '2027-01-05');
+}));
+tareas.push(prueba('Plazo legal, área y etiquetas con #', () => { const r = I('Escrito de apelación plazo legal #oficina #exp4521 el 15/10'); igual([r.titulo, r.plazoLegal, r.area, r.etiquetas, r.fecha], ['Escrito de apelación', true, 'oficina', ['exp4521'], '2026-10-15']); }));
+tareas.push(prueba('«algún día» queda sin fecha; solo la hora: hoy o mañana según si ya pasó', () => {
+  igual(I('leer sobre bayes algún día').algunDia, true);
+  igual(I('llamar a las 9am', 600).fecha, '2026-10-07'); igual(I('llamar a las 11am', 600).fecha, '2026-10-06');
+}));
+tareas.push(prueba('Tildes y mayúsculas se conservan', () => igual(I('Llamar a José Ñique mañana').titulo, 'Llamar a José Ñique')));
+const P = (inicio, hora, estado = 'pendiente') => Object.assign(modeloVacio(), { titulo: 'x', estado, fechas: Object.assign(modeloVacio().fechas, { inicio, hora }) });
+tareas.push(prueba('Grupos: hoy, más tarde, mañana, próximos, algún día, hecho, atrasado', () => {
+  igual(grupo(P(H, null), H, 600), 'hoy'); igual(grupo(P(H, '09:00'), H, 600), 'hoy'); igual(grupo(P(H, '15:00'), H, 600), 'tarde');
+  igual(grupo(P('2026-10-07', null), H, 600), 'manana'); igual(grupo(P('2026-10-10', null), H, 600), 'prox');
+  igual(grupo(P(null, null), H, 600), 'algun'); igual(grupo(P(H, null, 'hecho'), H, 600), 'hecho'); igual(grupo(P('2026-10-01', null), H, 600), 'hoy');
+}));
+tareas.push(prueba('Repeticiones: diaria, laborables (salta el fin de semana), mensual del 31, anual del 29 de febrero', () => {
+  igual(siguiente('2026-10-06', 'dia'), '2026-10-07'); igual(siguiente('2026-10-09', 'lab'), '2026-10-12');
+  igual(siguiente('2026-01-31', 'mes'), '2026-02-28'); igual(siguiente('2028-02-29', 'ano'), '2029-02-28'); igual(siguiente('2026-12-15', 'mes'), '2027-01-15');
+}));
+tareas.push(prueba('Orden: el plazo legal siempre primero, luego por fecha y prioridad', () => {
+  const a = Object.assign(P('2026-10-01', null), { titulo: 'a', prioridad: 'baja' }), b = Object.assign(P('2026-10-09', null), { titulo: 'b', plazoLegal: true }), c = Object.assign(P('2026-10-01', null), { titulo: 'c', prioridad: 'alta' });
+  igual([a, b, c].sort(ordenar).map((x) => x.titulo), ['b', 'c', 'a']);
+}));
+tareas.push(prueba('Eventos que se repiten o duran varios días', () => {
+  igual(ocurre('2026-10-05', 'sem', '2026-10-12'), true); igual(ocurre('2026-10-05', 'sem', '2026-10-13'), false);
+  igual(ocurre('2026-10-05', null, '2026-10-07', '2026-10-08'), true); igual(ocurre('2026-10-05', 'lab', '2026-10-10'), false);
+  igual(ocurre('1968-10-15', 'ano', '2026-10-15'), true);
+}));
+tareas.push(prueba('Balance: los bloques que se pisan no se cuentan dos veces', () => {
+  const r = minutosPorArea([{ ini: 540, fin: 600, area: 'oficina' }, { ini: 570, fin: 630, area: 'estudios' }, { ini: 700, fin: 730, area: 'oficina' }]);
+  igual([r.total, r.oficina, r.estudios], [120, 90, 30]);
+}));
 
 Promise.all(tareas).then(() => {
   const ok = resultados.filter((r) => r[1]).length;

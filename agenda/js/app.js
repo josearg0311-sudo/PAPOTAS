@@ -11,9 +11,13 @@ import { iniciarCandado, despuesDeAbrir } from './piezas/candado.js';
 import { aviso } from './piezas/aviso.js';
 import { cerrarHoja, atrasEsDeHoja } from './piezas/hoja.js';
 import { aplicarGuia, alternarGuia, iniciarRecorrido } from './piezas/guia.js';
-import { abrirAgregar } from './piezas/agregar-rapido.js';
-import { vistaHoy } from './vistas/hoy.js';
-import { vistaRecordatorios, acciones as accRec } from './vistas/recordatorios.js';
+import { abrirAgregar, cuandoSeGuarde } from './piezas/agregar-rapido.js';
+import { vistaHoy, acciones as accHoy, alCambiarPrioridad, actualizarPomo } from './vistas/hoy.js';
+import { vistaRecordatorios, acciones as accRec, alEscribir as alEscribirRec, alEnviar as alEnviarRec } from './vistas/recordatorios.js';
+import { acciones as accPend, iniciarDeslizar } from './piezas/pendientes-ui.js';
+import { tic as ticPomo } from './piezas/pomodoro.js';
+import { revisarAvisos } from './piezas/avisos.js';
+import { marcar } from './datos/pendientes.js';
 import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea } from './vistas/areas.js';
 import { vistaMas, vistaSeccion } from './vistas/mas.js';
@@ -113,7 +117,7 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accRec, accAgenda, accAjustes, accDatos, accPapelera, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, {
   agregar() { abrirAgregar(); },
   reintentar() { return true; },
   fase(b) { aviso('Esto llega en la Fase ' + b.dataset.n + '.'); },
@@ -130,10 +134,15 @@ document.addEventListener('click', (ev) => {
 });
 document.addEventListener('submit', (ev) => {
   const f = ev.target;
-  if (f.dataset.acc === 'fase-form') { ev.preventDefault(); aviso('Guardar recordatorios llega en la Fase 3.'); }
+  if (f.dataset.form) { ev.preventDefault(); alEnviarRec(f, pintar); }
 });
-document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target)) return; if (alCambiarCampo(ev.target)) pintar(); });
-document.addEventListener('input', (ev) => { alEscribir(ev.target, pintar); });
+document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target)) return; if (alCambiarPrioridad(ev.target) || alCambiarCampo(ev.target)) pintar(); });
+document.addEventListener('input', (ev) => { if (!alEscribirRec(ev.target)) alEscribir(ev.target, pintar); });
+/* En «Nuevo recordatorio», Enter guarda (Shift+Enter, otra línea) */
+document.addEventListener('keydown', (ev) => {
+  if (ev.key === 'Enter' && !ev.shiftKey && ev.target.id === 'nuevoRec') { ev.preventDefault(); ev.target.form.requestSubmit(); }
+  if (ev.key === 'Enter' && ev.target.dataset && ev.target.dataset.prio != null) { ev.preventDefault(); ev.target.blur(); }
+});
 window.addEventListener('agenda:repintar', () => pintar());
 document.addEventListener('keydown', (ev) => {
   const enCampo = /INPUT|TEXTAREA|SELECT/.test(ev.target.tagName || '') || ev.target.isContentEditable;
@@ -156,7 +165,7 @@ $('btnTema').addEventListener('click', () => {
   const ahora = document.documentElement.getAttribute('data-tema');
   import('./datos/preferencias.js').then((m) => { m.cambiarPref({ tema: ahora === 'claro' ? 'oscuro' : 'claro' }); if (ruta.sec === 'ajustes') pintar(); });
 });
-$('fab').addEventListener('click', abrirAgregar);
+$('fab').addEventListener('click', () => abrirAgregar());
 
 if (!location.hash) { try { history.replaceState(null, '', '#' + ruta.sec); } catch (e) { /* nada */ } }
 /* Tus datos: si ya existen los de la v5 se cargan; si no, y hay de la v4.5,
@@ -173,6 +182,15 @@ if (!yaHabia) {
 }
 document.getElementById('portada')?.remove();
 setInterval(() => { pintarCab(); }, 15000);
+/* Cada segundo: el reloj del Pomodoro (sin repintar) */
+setInterval(() => { if (ticPomo()) pintar(); else actualizarPomo(); }, 1000);
+/* Cada 30 s: ¿toca algún recordatorio? (Hecho desde el aviso lo marca) */
+const alPulsarAviso = (x) => { marcar(x.id); pintar(); };
+setInterval(() => { if (revisarAvisos(alPulsarAviso).length) pintar(); }, 30000);
+despuesDeAbrir(() => { if (revisarAvisos(alPulsarAviso).length) pintar(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (revisarAvisos(alPulsarAviso).length || ticPomo()) pintar(); } });
+iniciarDeslizar(pintar);
+cuandoSeGuarde(() => pintar());
 
 /* A medianoche (hora de Lima) cambia el día: todo se repinta */
 let dia = hoy();

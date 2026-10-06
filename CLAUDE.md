@@ -40,13 +40,17 @@ js/
   app.js              arranque, rutas por dirección (#hoy, #areas/estudios…), acciones
   version.js          versión visible en Ajustes
   util/   fechas.js (Lima) · dinero.js (soles, céntimos, leerMonto) · dom.js (esc, ico, vacio)
+          interpretar.js («llamar mañana 10am !! #oficina plazo legal» → título, fecha, hora, prioridad, área, etiquetas)
   datos/  almacen.js (localStorage seguro, claves agenda5_*, solo lectura de v4.5)
           modelo.js (formato v5, normalizar, fusionar) · migracion.js (puro: migrar/verificar/reconstruir)
           datos.js (ÚNICO que lee/cambia «agenda5_datos»; papelera; migrarDesdeV45)
           copias.js (copias automáticas en IndexedDB «agenda5») · respaldo.js (exportar/importar v5 y v4.5)
-          preferencias.js · areas.js
+          pendientes.js (grupos hoy/más tarde/mañana/próximos/algún día/hecho, orden, repetir, urgentes, cerrar el día)
+          calendario.js (ocurre, bloquesDelDia, todoElDia, minutosPorArea) · preferencias.js · areas.js
   piezas/ candado.js (PIN) · hoja.js · aviso.js · tema.js · guia.js (modo guía y recorrido)
-          agregar-rapido.js (2 toques: tipo → área) · migracion-ui.js · confirmar.js
+          agregar-rapido.js (2 toques: tipo → área → texto con vista previa; guarda recordatorio, evento, gasto, nota, hábito, meta)
+          pendientes-ui.js (fila con casilla, Más tarde/Mañana/Día…, deslizar, editor, listas) · pomodoro.js (agenda5_foco)
+          avisos.js (recordatorios a la hora, sonido, notificaciones; agenda5_avisados) · migracion-ui.js · confirmar.js
   vistas/ hoy · recordatorios · agenda · areas · mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
 fuentes/ iconos/ pruebas/
 ```
@@ -75,6 +79,8 @@ Se guarda en `agenda5_datos`: `{ v, creado, perfil:{nombre, presupuesto(céntimo
 Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 'alta'|'media'|'baja', estado: 'pendiente'|'en_curso'|'hecho'|'cancelado', fechas: { inicio, fin, vence, hora, horaFin }, todoElDia, etiquetas: [], plazoLegal, repetir, aviso, lista, notas, monto (céntimos), extra: {…valores del tipo ya en formato nuevo…}, creado, actualizado, borrado, datos: {…lo original de la v4.5 que el modelo no usa, INTACTO…}, origen: { coleccion, id, indice, quitados } }`.
 - Tipos: pendiente, lista (extra.clase: recordatorios | checklist | proyecto), evento, nota, habito, meta, pago, movimiento (extra.libro, extra.ingreso, extra.categoria), diario, enfoque, curso, entreno, rutina, medida, bienestar, cobro, prestamo, horas, cliente, casa, menu, documento, ficha, revision, otro (colecciones desconocidas).
 - Ids nuevos deterministas: `<coleccion>_<idViejo>` (p. ej. `tareas_abc`, `mov_personal_xyz`, `listas_l1_i1`), así migrar o importar dos veces no duplica. Listas del sistema: `lista_recordatorios`, `lista_tareas` (actualizado 0).
+- Pendientes: `fechas.inicio` = día en que se hace (vacío = algún día), `fechas.hora` (si es más tarde que ahora → grupo «Más tarde»), `fechas.vence` = plazo; `extra.hechoEn`, `extra.historial` (fechas en que se hizo uno que se repite), `extra.subtareas`, `extra.minutos` (foco). Lista «para marcar» = `extra.clase:'checklist'` (no entra en «Todos» salvo que tenga fecha).
+- Enfoque del día: id `enfoque_AAAA-MM-DD`, `extra.prioridades [{t,ok,ref}]`, `extra.minutosArea`, `extra.pomos` (lo de la v4.5 queda en `datos.items/pomos/pomosEsp` y se lee si no hay lo nuevo).
 - Lo nuevo es la fuente de verdad; `datos` es histórico (no se mantiene sincronizado al editar).
 - **Tareas y recordatorios se unen en «pendientes»**, agrupados en **listas** (Recordatorios) y vistos en el calendario (Agenda). Las listas antiguas (Compras…) se vuelven listas con sus ítems como pendientes; los recordatorios sueltos van a la lista «Recordatorios».
 - Áreas = lista editable (nombre, color, ícono). `esp` → `area`; la etiqueta libre `area` → `etiquetas`. Prioridad 3→Alta, 2→Media, 1 y 0→Baja (se guarda la original).
@@ -87,7 +93,7 @@ Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 
 ## Fases
 1. ✅ **Cimientos**: carpetas, diseño Señal, navegación, formato Lima/soles, PIN arreglado y compatible, bloqueo automático, Ajustes (preferencias, seguridad, ayuda), modo guía y recorrido, manifiesto.
 2. ✅ **Datos**: modelo v5, migración automática con copia (IndexedDB) y verificación exacta, explorador «Tus datos», respaldo exportar/importar (v5 y v4.5, junta sin duplicar), copias automáticas descargables, papelera 30 días, aviso de respaldo >7 días, áreas con conteos reales. SW `agenda-v28`. 42 pruebas (incl. ejemplos v4.5 y datos «raros» en `pruebas/datos/`).
-3. Hoy + Recordatorios (listas, casillas, más tarde/mañana/día, deslizar, cerrar el día) + agregar rápido + Pomodoro vinculado.
+3. ✅ **Hoy + Recordatorios**: Hoy con avance, urgente (plazo legal primero, 🔴/⚠️), recordatorios de hoy, 3 prioridades (escribir o elegir), día en bloques (eventos con repetición, clases, pendientes con hora), Pomodoro vinculado (suma minutos al pendiente y al área; modo prueba), balance y aviso de sobrecarga (>85 %). Recordatorios con listas (recordatorios / para marcar), grupos por cuándo, crear varios por líneas entendiendo fechas, editor completo, deslizar, cerrar el día con deshacer. Agregar rápido guarda. Avisos a la hora (Ajustes → Avisos). SW `agenda-v29`. 54 pruebas.
 4. Agenda: día/semana/mes con datos, plazos, plazo legal primero, cierre del día.
 5. Áreas: 4 paneles y sus herramientas (sesiones de estudio para exámenes, entrenos como hábito con racha y aviso).
 6. Seguimiento: hábitos, metas, rachas, revisión semanal, balance y sobrecarga.
