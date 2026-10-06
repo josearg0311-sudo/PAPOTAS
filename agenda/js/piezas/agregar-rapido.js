@@ -50,7 +50,7 @@ function campos() {
 function pintar() {
   let html = pasos();
   if (estado.paso === 1) {
-    html += '<p class="ayuda"><b>Paso 1 de 2 ·</b> ¿Qué quieres agregar?</p><div class="opciones">' +
+    html += '<p class="ayuda">' + (estado.fija ? '¿Qué quieres agregar en <b>' + esc(area(estado.fija).nombre) + '</b>?' : '<b>Paso 1 de 2 ·</b> ¿Qué quieres agregar?') + '</p><div class="opciones">' +
       TIPOS.map((t) => '<button type="button" class="opcion" data-qa-tipo="' + t[0] + '">' + ico(t[2]) + '<b>' + t[1] + '</b><small>' + t[3] + '</small></button>').join('') + '</div>';
   } else if (estado.paso === 2) {
     const ult = leer(CLAVE_ULT, '');
@@ -131,17 +131,18 @@ function guardar() {
   aviso(msj, () => { aPapelera(id); alGuardar(null); }, 'Deshacer');
 }
 
-export function abrirAgregar(tipo) {
-  estado = { paso: tipo ? 2 : 1, tipo: tipo || '', area: '' };
+/* «Añadir en Personal…»: con el espacio ya elegido, solo se pregunta qué es */
+export function abrirAgregar(tipo, areaFija = '') {
+  estado = { paso: tipo ? (areaFija ? 3 : 2) : 1, tipo: tipo || '', area: areaFija || '', fija: areaFija || '' };
   pintar();
 }
 
 document.addEventListener('click', (ev) => {
   const t = ev.target.closest && ev.target.closest('[data-qa-tipo],[data-qa-area],[data-qa-atras],[data-qa-guardar]');
   if (!t) return;
-  if (t.dataset.qaTipo) { estado.tipo = t.dataset.qaTipo; estado.paso = 2; pintar(); }
+  if (t.dataset.qaTipo) { estado.tipo = t.dataset.qaTipo; estado.paso = estado.fija ? 3 : 2; pintar(); }
   else if (t.dataset.qaArea) { estado.area = t.dataset.qaArea; estado.paso = 3; pintar(); }
-  else if (t.dataset.qaAtras) { estado.paso = Math.max(1, estado.paso - 1); pintar(); }
+  else if (t.dataset.qaAtras) { estado.paso = estado.fija && estado.paso === 3 ? 1 : Math.max(1, estado.paso - 1); pintar(); }
   else if (t.dataset.qaGuardar) guardar();
 });
 /* Dictado: toca 🎤, habla y se escribe; en un gasto, el número va al monto */

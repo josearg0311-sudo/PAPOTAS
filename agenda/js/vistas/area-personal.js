@@ -3,7 +3,9 @@ import { elementos, buscarElemento } from '../datos/datos.js';
 import { preferencias } from '../datos/preferencias.js';
 import { val, casaEstado, proximoCumple, resumenPrestamos } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtFecha, sumarDias, inicioSemana, diasEntre, relativo } from '../util/fechas.js';
-import { fmtSoles } from '../util/dinero.js';
+import { fmtSoles, solesCorto } from '../util/dinero.js';
+import { listas, esChecklist } from '../datos/pendientes.js';
+import { tareasDe } from './espacio-comun.js';
 import { esc, ico, vacio, plural } from '../util/dom.js';
 import { tarjeta } from './comun.js';
 import { fila, filas, emoji, casilla, mini, pildora, pildoraFecha, cifra, cifras, cambiarExtra, nuevo, borrar, boton, pie, anotarMovimiento, quitarMovimiento } from './area-comun.js';
@@ -252,3 +254,15 @@ export const acciones = {
   'prest-editar'(b, ev, rp) { editarPrestamo(b.dataset.id, rp); },
   'prest-saldar'(b, ev, rp) { saldar(b.dataset.id, rp); }
 };
+
+/* Resumen para «Tus espacios» y la portada del espacio (como la v4.5) */
+export function resumen() {
+  const cu = cumples()[0], r = resumenPrestamos(prestamos()), tareas = tareasDe('personal');
+  const ids = new Set(listas().filter((l) => esChecklist(l) && l.area === 'personal').map((l) => l.id));
+  const porComprar = elementos((x) => x.tipo === 'pendiente' && ids.has(x.lista) && x.estado !== 'hecho').length;
+  const toca = casas().filter((x) => x.e.nivel === 'vencido' || x.e.nivel === 'hoy').length;
+  return {
+    datos: [[porComprar, 'por comprar', 'notas'], cu ? [cu.p.dias === 0 ? '🎂' : cu.p.dias, cu.p.dias === 0 ? 'cumple hoy ' + cu.e.titulo : 'días al próximo cumple', 'cumpleanos'] : ['—', 'sin cumpleaños cerca', 'cumpleanos'], [solesCorto(r.meDeben), 'te deben', 'prestamos']],
+    chips: [[tareas, tareas === 1 ? 'tarea' : 'tareas', 'pendientes'], toca ? [toca, 'en casa', 'casa', 'aviso'] : null, cu ? [cu.p.dias === 0 ? 'hoy' : cu.p.dias + ' d', 'al cumple', 'cumpleanos'] : null, r.meDeben ? [solesCorto(r.meDeben), 'te deben', 'prestamos'] : null].filter(Boolean)
+  };
+}

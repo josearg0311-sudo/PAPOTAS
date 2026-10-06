@@ -4,10 +4,10 @@
    clase CSS «area-<id>», que define --a (color), --as (fondo) y --at (texto). */
 
 export const AREAS = [
-  { id: 'personal', nombre: 'Personal', icono: 'i-casa', lema: 'Tu casa, tu gente y tus cosas' },
-  { id: 'estudios', nombre: 'Estudios', icono: 'i-birrete', lema: 'Cursos, clases y exámenes' },
-  { id: 'oficina', nombre: 'Oficina', icono: 'i-maletin', lema: 'Trabajo, plazos y clientes' },
-  { id: 'deporte', nombre: 'Deporte', icono: 'i-pesa', lema: 'Entrenos, rachas y partidos' }
+  { id: 'personal', nombre: 'Personal', icono: 'i-casa', emoji: '🏠', lema: 'Tu casa, tu gente y tus cosas' },
+  { id: 'estudios', nombre: 'Estudios', icono: 'i-birrete', emoji: '🎓', lema: 'Cursos, clases y exámenes' },
+  { id: 'oficina', nombre: 'Oficina', icono: 'i-maletin', emoji: '💼', lema: 'Trabajo, reuniones y cuentas de la oficina' },
+  { id: 'deporte', nombre: 'Deporte', icono: 'i-balon', emoji: '⚽', lema: 'Fútbol, gym y todo lo que te mueve' }
 ];
 
 export function area(id) { return AREAS.find((a) => a.id === id) || AREAS[0]; }
@@ -29,7 +29,7 @@ export const COLORES = {
   rojo: ['Rojo', ['#F87171', '#2E1010', '#FCB4B4'], ['#C2302E', '#FBE3E3', '#902220']]
 };
 export const COLOR_ORIGINAL = { personal: 'azul', estudios: 'turquesa', oficina: 'pizarra', deporte: 'verde' };
-export const ICONOS = [['i-casa', 'Casa'], ['i-birrete', 'Birrete'], ['i-maletin', 'Maletín'], ['i-pesa', 'Pesa'], ['i-nota', 'Nota'], ['i-fuego', 'Fuego'], ['i-meta', 'Meta'], ['i-dinero', 'Dinero'], ['i-agenda', 'Calendario'], ['i-bandera', 'Bandera'], ['i-campana', 'Campana'], ['i-escudo', 'Escudo']];
+export const ICONOS = [['i-casa', 'Casa'], ['i-birrete', 'Birrete'], ['i-maletin', 'Maletín'], ['i-balon', 'Balón'], ['i-pesa', 'Pesa'], ['i-nota', 'Nota'], ['i-fuego', 'Fuego'], ['i-meta', 'Meta'], ['i-dinero', 'Dinero'], ['i-agenda', 'Calendario'], ['i-bandera', 'Bandera'], ['i-campana', 'Campana'], ['i-escudo', 'Escudo']];
 const ORIGINAL = AREAS.map((a) => Object.assign({}, a));
 
 /* Aplica lo que elegiste (nombres en la app y colores en la hoja de estilos) */
@@ -40,7 +40,7 @@ export function aplicarAreas(conf) {
   firmaAplicada = f;
   AREAS.forEach((a, i) => {
     const o = ORIGINAL[i], x = c[a.id] || {};
-    a.nombre = String(x.nombre || o.nombre).slice(0, 24); a.lema = String(x.lema || o.lema).slice(0, 60);
+    a.nombre = String(x.nombre || o.nombre).slice(0, 24); a.lema = String(x.lema || o.lema).slice(0, 60); a.emoji = String(x.emoji || o.emoji).slice(0, 8);
     a.icono = ICONOS.some((k) => k[0] === x.icono) ? x.icono : o.icono;
     a.color = COLORES[x.color] ? x.color : COLOR_ORIGINAL[a.id];
   });

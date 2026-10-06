@@ -7,11 +7,10 @@
    Regla: todo color sale de estos tokens. Nada de colores sueltos.
    ========================================================================== */
 @font-face { font-family: 'Plus Jakarta Sans'; src: url('../fuentes/plus-jakarta.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
-@font-face { font-family: 'Martian Mono'; src: url('../fuentes/martian-mono.woff2') format('woff2'); font-weight: 400 600; font-display: swap; }
 
 :root {
   --f-texto: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --f-mono: var(--f-texto);   /* como la v4.5: las cifras también en Plus Jakarta (con números parejos) */
   --radio: 20px; --radio-chico: 12px; --radio-btn: 12px;
   --toque: 44px;                       /* tamaño mínimo para el dedo */
   --ancho-lateral: 248px;

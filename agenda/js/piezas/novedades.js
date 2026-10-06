@@ -8,6 +8,8 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
+  ['Se ve como tu Agenda de siempre', '🏠', 'Barra lateral con tus espacios, «Tus espacios» en Hoy, cada espacio con sus emojis, cifras y mosaicos, y Hábitos y Dinero como antes.', '#hoy'],
+  ['Hábitos', '🔥', 'Tus hábitos de hoy en anillos y los últimos 14 días, separados por espacio.', '#habitos'],
   ['Buscar', '🔎', 'Toca la lupa (o la tecla /) y escribe lo que buscas o lo que quieres hacer.', 'buscar'],
   ['Hoy', '☀️', '«Qué hacer ahora» por área, lo siguiente de tu día, cómo viene mañana y tus números al final del día.', '#hoy'],
   ['Recordatorios', '✅', 'Ordena los atrasados uno por uno, elige varios a la vez, comparte y duplica listas.', '#recordatorios'],

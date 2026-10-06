@@ -93,19 +93,20 @@ function hojaPalabras(repintar) {
 export function grupoAreas() {
   return AREAS.map((a) => ajuste('<span class="punto-area area-' + a.id + '" aria-hidden="true"></span>' + esc(a.nombre), esc(a.lema) + ' · ' + COLORES[a.color || COLOR_ORIGINAL[a.id]][0].toLowerCase(),
     '<button type="button" class="btn" data-acc="area-editar" data-id="' + a.id + '">' + ico('i-lapiz') + 'Editar</button>')).join('') +
-    '<p class="pie-ajuste">' + ico('i-info') + 'Son tus 4 áreas de vida, cada una con sus herramientas propias. Puedes cambiarles nombre, lema, color e ícono; lo que guardaste en cada una se queda donde está.</p>';
+    '<p class="pie-ajuste">' + ico('i-info') + 'Son tus 4 áreas de vida, cada una con sus herramientas propias. Puedes cambiarles nombre, lema, emoji, color e ícono; lo que guardaste en cada una se queda donde está.</p>';
 }
 function editarArea(id, repintar) {
   const a = AREAS.find((x) => x.id === id), conf = (documento().perfil.areas || {});
   editar({ titulo: 'Área · ' + a.nombre, campos: [
     { n: 'nombre', t: 'texto', etq: 'Nombre', v: a.nombre, req: true, max: 24 },
     { n: 'lema', t: 'texto', etq: 'Lema', v: a.lema, max: 60 },
+    { n: 'emoji', t: 'texto', etq: 'Emoji (como en tu versión anterior)', v: a.emoji, max: 4, ph: '🏠' },
     { n: 'color', t: 'botones', etq: 'Color', v: a.color || COLOR_ORIGINAL[id], ops: Object.entries(COLORES).map(([k, c]) => [k, c[0]]) },
     { n: 'icono', t: 'botones', etq: 'Ícono', v: a.icono, ops: ICONOS }],
   antes: '<p class="ayuda">Todo lo de ' + esc(a.nombre) + ' (recordatorios, herramientas, hábitos…) sigue en su sitio: solo cambia cómo se ve.</p>',
   despues: '<div class="fila-botones izq"><button type="button" class="btn chico" id="areaOriginal">Volver a como era</button></div>',
   alGuardar: (v) => {
-    cambiarPerfil({ areas: Object.assign({}, conf, { [id]: { nombre: v.nombre.trim(), lema: v.lema.trim(), color: v.color, icono: v.icono } }) });
+    cambiarPerfil({ areas: Object.assign({}, conf, { [id]: { nombre: v.nombre.trim(), lema: v.lema.trim(), emoji: (v.emoji || '').trim(), color: v.color, icono: v.icono } }) });
     repintar(); aviso('Área guardada');
   } });
   const b = document.getElementById('areaOriginal');

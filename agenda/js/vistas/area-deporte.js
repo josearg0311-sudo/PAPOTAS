@@ -5,6 +5,7 @@ import { preferencias, cambiarPref } from '../datos/preferencias.js';
 import { val, lista, rachaEntrenos, avisoEntreno, records, resumenPartidos, pichanga, tendenciaPeso, ordenDias, imc } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtHora, sumarDias, inicioSemana, diasEntre, DIAS3 } from '../util/fechas.js';
 import { fmtSoles } from '../util/dinero.js';
+import { tareasDe } from './espacio-comun.js';
 import { esc, ico, vacio, plural } from '../util/dom.js';
 import { tarjeta } from './comun.js';
 import { fila, filas, emoji, mini, pildora, cifra, cifras, cambiarExtra, nuevo, borrar, boton, pie } from './area-comun.js';
@@ -252,3 +253,14 @@ export const acciones = {
   'peso-nuevo'(b, ev, rp) { editarPeso(null, rp); },
   'peso-editar'(b, ev, rp) { editarPeso(b.dataset.id, rp); }
 };
+
+/* Resumen para «Tus espacios» y la portada del espacio (como la v4.5) */
+export function resumen() {
+  const r = estadoEntrenos(), h = hoy(), ini = sumarDias(h, -6), en7 = entrenos().filter((e) => e.fechas.inicio >= ini && e.fechas.inicio <= h).length;
+  const prox = partidos().filter((x) => x.fechas.inicio >= h && !val(x, 'jugado', false)).sort((a, b) => a.fechas.inicio.localeCompare(b.fechas.inicio))[0];
+  const dp = prox ? diasEntre(h, prox.fechas.inicio) : null, nr = rutinas().length, tareas = tareasDe('deporte');
+  return {
+    datos: [[r.semanas, r.semanas === 1 ? 'semana activo' : 'semanas activo', 'entrenos', r.semanas ? 'ok' : ''], [en7, 'entrenos en 7 días', 'entrenos'], prox ? [dp === 0 ? 'hoy' : dp, dp === 0 ? 'partido: ' + prox.titulo : 'días al partido', 'partidos'] : ['—', 'sin partidos', 'partidos']],
+    chips: [[en7, 'entrenos en 7 días', 'entrenos'], prox ? [dp === 0 ? 'hoy' : dp + ' d', 'al partido', 'partidos'] : null, nr ? [nr, nr === 1 ? 'rutina' : 'rutinas', 'rutinas'] : null, tareas ? [tareas, tareas === 1 ? 'tarea' : 'tareas', 'pendientes'] : null].filter(Boolean)
+  };
+}

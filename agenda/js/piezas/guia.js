@@ -17,11 +17,11 @@ export function alternarGuia() {
 
 /* [título, texto, elemento a resaltar (varios por si uno está oculto)] */
 const PASOS = [
-  ['Bienvenido a tu nueva Agenda', 'Tu organizador para Personal, Estudios, Oficina y Deporte. En 5 pasos te muestro cómo se usa. Puedes repetirlo desde Ajustes.', []],
-  ['Recordatorios', 'Tus listas para marcar lo que ya hiciste y pasar a «más tarde» o «mañana» lo que no alcanzó.', ['.barra [data-ir="recordatorios"]', '.lateral [data-ir="recordatorios"]']],
-  ['Áreas', 'Cada área de tu vida tiene su color y su panel con tareas, metas, hábitos y notas.', ['.barra [data-ir="areas"]', '.lateral [data-ir="areas"]']],
-  ['Agregar en 2 toques', 'El botón + pregunta qué es y de qué área. Luego lo escribes como lo dirías.', ['#fab', '.lateral .agregar']],
-  ['Modo guía', 'Este botón muestra una explicación corta en cada bloque. Apágalo cuando ya conozcas la app.', ['#btnGuia']]
+  ['Bienvenido a tu nueva Agenda', 'Se ve como la que ya usabas, con tus cuatro espacios: Personal, Estudios, Oficina y Deporte. En 5 pasos te muestro lo nuevo. Puedes repetirlo desde Ajustes.', []],
+  ['Tus espacios', 'Cada espacio tiene su color, sus herramientas y lo que te toca hoy. Toca uno para entrar.', ['.esp-hoy', '.lateral .nav-esp']],
+  ['Agenda y Dinero', 'Tu tiempo (día, semana, mes y año) y tus dos libros de cuentas, siempre a un toque.', ['.barra [data-ir="agenda"]', '.lateral [data-ir="agenda"]']],
+  ['Agregar en 2 toques', 'El botón + pregunta qué es y de qué espacio. Luego lo escribes como lo dirías (o lo dictas).', ['#fab']],
+  ['Ajustes y respaldo', 'Tu PIN, tu nube, el respaldo y el modo guía (explicaciones en cada bloque) están aquí.', ['#btnAjustes', '.lateral .perfil']]
 ];
 let paso = 0;
 

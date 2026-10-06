@@ -9,7 +9,7 @@ import { diaDePago, pagado } from '../datos/calendario.js';
 import { val, resumenPrestamos } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtFecha, MESES, diasEntre, inicioSemana } from '../util/fechas.js';
 import { preferencias } from '../datos/preferencias.js';
-import { fmtSoles } from '../util/dinero.js';
+import { fmtSoles, solesCorto } from '../util/dinero.js';
 import { esc, ico, vacio, plural, explica } from '../util/dom.js';
 import { tarjeta } from './comun.js';
 import { fila, filas, emoji, casilla, pildora, cifra, cifras, cambiarExtra, nuevo, borrar, boton, pie } from './area-comun.js';
@@ -56,14 +56,21 @@ function vistaLibro(libro) {
   const delM = todos.filter((x) => delMes(x, ym) && (!ui.cat || (!esIngreso(x) && ((x.extra.categoria || 'Sin categoría') === ui.cat) ))).sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '') || b.actualizado - a.actualizado);
   const pagos = elementos((x) => x.tipo === 'pago' && libroDePago(x) === libro && x.extra.activo !== false).map((p) => ({ p, dia: diaDePago(p, ym), ok: pagado(p, ym) })).filter((x) => !(val(x.p, 'desde', '') > ym)).sort((a, b) => a.dia.localeCompare(b.dia));
   const hist0 = historial(todos, ym, 6), primero = hist0.findIndex((h) => h.n), hist = primero < 0 ? hist0.slice(-1) : hist0.slice(primero), maxH = Math.max(1, ...hist.map((h) => Math.max(h.ingresos, h.gastos)));
-  const a = COLOR[libro];
+  const a = COLOR[libro], h = hoy().slice(0, 7), ant = resumenMes(todos, sumarMes(ym, -1)), gastoHoy = todos.filter((x) => !esIngreso(x) && x.fechas.inicio === hoy()).reduce((s2, x) => s2 + Math.abs(+x.monto || 0), 0);
   return pestanas(libro) +
-    '<section class="tarjeta area-' + a + '">' + navMes(ym) +
-      '<header class="t-cab"><span class="eti">' + (libro === 'oficina' ? 'OFICINA' : 'PERSONAL') + '</span><h2>' + LIBROS[libro] + '</h2></header>' +
-      cifras([cifra(fmtSoles(r.ingresos), 'ingresos', 'ok'), cifra(fmtSoles(r.gastos), 'gastos'), cifra((r.saldo < 0 ? '' : '+') + fmtSoles(r.saldo), 'saldo del mes', r.saldo < 0 ? 'aviso' : 'ok')]) +
+    '<section class="tarjeta din-heroe area-' + a + '">' + navMes(ym) +
+      '<h2 class="solo-lector">' + LIBROS[libro] + '</h2>' +
+      '<div class="din-cols"><div class="din-col"><b class="din-num gasto">' + fmtSoles(r.gastos) + '</b><small>gastado ' + (ym === h ? 'este mes' : 'en ' + MESES[+ym.slice(5) - 1]) + '</small>' +
+        '<span class="din-barra rojo" aria-hidden="true"><i style="width:' + Math.min(100, presupuestoDe(libro) ? r.gastos / presupuestoDe(libro) * 100 : r.ingresos ? r.gastos / r.ingresos * 100 : 0).toFixed(0) + '%"></i></span>' +
+        '<small>' + (ym === h ? fmtSoles(gastoHoy) + ' hoy' : r.n + ' movimientos') + '</small>' +
+        '<button type="button" class="btn pri ancho" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Gasto</button></div>' +
+      '<div class="din-col"><b class="din-num ingreso">' + fmtSoles(r.ingresos) + '</b><small>ingresó ' + (ym === h ? 'este mes' : 'en ' + MESES[+ym.slice(5) - 1]) + '</small>' +
+        '<span class="din-barra verde" aria-hidden="true"><i style="width:' + Math.min(100, ant.ingresos ? r.ingresos / ant.ingresos * 100 : r.ingresos ? 100 : 0).toFixed(0) + '%"></i></span>' +
+        '<small>Mes pasado: ' + solesCorto(ant.ingresos) + '</small>' +
+        '<button type="button" class="btn ancho btn-ingreso" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="1">' + ico('i-plus') + 'Ingreso</button></div></div>' +
+      '<div class="din-queda"><span>' + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda ' + (ym === h ? 'este mes' : 'de ese mes')) + '</span><b class="' + (r.saldo < 0 ? 'txt-aviso' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b></div>' +
       (pres ? '<div class="presupuesto ' + pres.nivel + '"><div class="pr-txt"><b>Presupuesto: ' + pres.pct + ' %</b><small>' + fmtSoles(r.gastos) + ' de ' + fmtSoles(presupuestoDe(libro)) + (pres.queda >= 0 ? ' · te quedan ' + fmtSoles(pres.queda) : ' · te pasaste por ' + fmtSoles(-pres.queda)) + '</small></div><span class="progreso"><i style="width:' + Math.min(100, pres.pct) + '%"></i></span></div>' : '') +
-      '<div class="pie-tarjeta">' + '<button type="button" class="btn pri" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Gasto</button><button type="button" class="btn" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="1">' + ico('i-plus') + 'Ingreso</button>' +
-        '<button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-meta') + (pres ? 'Presupuesto' : 'Poner presupuesto') + '</button></div>' +
+      '<div class="pie-tarjeta"><button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-meta') + (pres ? 'Presupuesto' : 'Poner presupuesto') + '</button></div>' +
     '</section>' + tarjetaComoVas(libro, todos, ym, r) +
     '<div class="columnas"><div>' +
     tarjeta({ eti: 'PAGOS FIJOS', titulo: 'Pagos fijos de ' + MESES[+ym.slice(5) - 1], n: pagos.filter((x) => x.ok).length + '/' + pagos.length, clase: 'area-' + a,

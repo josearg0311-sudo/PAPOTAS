@@ -4,7 +4,7 @@ import { hoy, sumarDias, inicioSemana, diaSemana, DIAS3, fmtLarga, saludo, horaA
 import { vacio, ico, esc } from '../util/dom.js';
 import { preferencias, minutosVigilia } from '../datos/preferencias.js';
 import { leer, ANTIGUAS } from '../datos/almacen.js';
-import { documento, elementos, buscarElemento, poner } from '../datos/datos.js';
+import { documento, elementos, buscarElemento, poner, cambiarPerfil } from '../datos/datos.js';
 import { modeloVacio } from '../datos/modelo.js';
 import { tocaRespaldar, diasSinRespaldo } from '../datos/respaldo.js';
 import { urgentes, delDia, hechosHoy, ordenar, grupo, marcar, pendientesVisibles } from '../datos/pendientes.js';
@@ -20,6 +20,11 @@ import { avisoDeporte } from './area-deporte.js';
 import { habitosDeHoy } from './area-constancia.js';
 import { marcasHabito, rachaHabito } from '../datos/seguimiento.js';
 import { tarjetaQueHacer, tarjetaSiguiente, tarjetaManana, tarjetaNumeros } from './hoy-extra.js';
+import { tarjetaEspacios } from './espacios.js';
+
+/* Una frase por día (las de tu versión anterior) */
+const FRASES = ['Lo que se agenda, se hace.', 'Hecho es mejor que perfecto.', 'Un paso pequeño cada día llega lejos.', 'Primero lo importante; lo urgente sabe esperar un poco.', 'La disciplina es elegir entre lo que quieres ahora y lo que más quieres.', 'No tienes que verlo todo: solo el siguiente paso.', 'Tu futuro se construye con lo que haces hoy, no mañana.', 'Empieza donde estás, usa lo que tienes, haz lo que puedas.', 'Menos pendientes en la cabeza, más espacio para vivir.', 'La constancia vence al talento cuando el talento no es constante.', 'Cuida los céntimos y los soles se cuidarán solos.', 'Si toma menos de dos minutos, hazlo ya.', 'Descansar también es parte del plan.', 'Celebra lo que ya lograste antes de ir por lo siguiente.', 'Un buen día empieza con tres prioridades claras.', 'Lo que no se mide, no se mejora.', 'Cada tarea tachada es una promesa cumplida contigo.', 'Enfócate en el progreso, no en la perfección.', 'Organizarse es regalarle tiempo a tu yo de mañana.', 'Hoy es un buen día para empezar eso que vienes posponiendo.', 'Ahorra primero, gasta después.', 'Tu energía es limitada: ponla donde importa.', 'Pequeños hábitos, grandes cambios.', 'La motivación te arranca; el hábito te mantiene.', 'Mejor un plan sencillo que se cumple que uno perfecto que no.', 'Termina lo que empiezas y empezarás menos cosas que no terminas.', 'El mejor momento fue ayer; el segundo mejor, ahora.', 'Di que sí a pocas cosas y hazlas muy bien.', 'Anota, suelta y confía en tu agenda.', 'Paso a paso también se llega.'];
+export function fraseDelDia(d) { const n = Math.round((Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8)) - Date.UTC(+d.slice(0, 4), 0, 0)) / 864e5); return FRASES[n % FRASES.length]; }
 
 export const SOBRECARGA = 0.85;
 const C38 = 2 * Math.PI * 38, C46 = 2 * Math.PI * 46;
@@ -37,7 +42,7 @@ export function franjaSemana(diaSel, accion = 'ir-dia') {
   const pend = pendientesVisibles().filter((x) => x.estado !== 'hecho' && x.fechas.inicio);
   return '<div class="franja" role="group" aria-label="Días de esta semana">' + [0, 1, 2, 3, 4, 5, 6].map((i) => {
     const d = sumarDias(ini, i), n = pend.filter((x) => x.fechas.inicio === d).length + bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente').length;
-    return '<button type="button" data-acc="' + accion + '" data-dia="' + d + '" aria-pressed="' + (d === (diaSel || h)) + '"' + (d === h ? ' class="es-hoy"' : '') +
+    return '<button type="button" data-acc="' + accion + '" data-dia="' + d + '" aria-pressed="' + (d === (diaSel || h)) + '" class="' + (d === h ? 'es-hoy' : d < h ? 'pasado' : '') + '"' +
       ' aria-label="' + fmtLarga(d) + ': ' + n + ' cosas"><small>' + DIAS3[diaSemana(d)] + '</small><b>' + +d.slice(8) + '</b><span class="pts">' + '<i></i>'.repeat(Math.min(n, 4)) + '</span></button>';
   }).join('') + '</div>';
 }
@@ -104,41 +109,39 @@ export function vistaHoy() {
   const pr = prioridades(), hechasPr = pr.filter((x) => x.ok && x.t).length;
   const hh = (m) => (m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) : ''));
 
-  return '<div class="columnas"><div>' +
-    '<section class="tarjeta heroe">' +
-      '<div class="heroe-fila"><div class="anillo" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechos hoy"><svg viewBox="0 0 92 92"><circle class="fondo" cx="46" cy="46" r="38"/><circle class="valor" cx="46" cy="46" r="38" stroke-dasharray="' + C38.toFixed(1) + '" stroke-dashoffset="' + (C38 * (1 - pct)).toFixed(1) + '"/></svg><div><b>' + hechos.length + '/' + tot + '</b><small>de hoy</small></div></div>' +
-      '<div><small class="fecha-larga">' + fmtLarga(h) + '</small><h2>' + saludo() + (n ? ', ' + esc(n) : '') + '</h2><p>' +
-        (delDiaL.length ? 'Te quedan <b>' + delDiaL.length + '</b> para hoy' + (urg.length ? ' y <b>' + urg.length + '</b> ' + (urg.length === 1 ? 'urgente' : 'urgentes') : '') + '.' : tot ? '¡Todo hecho por hoy! 🎉' : 'Día libre. Agrega algo con el botón +.') + '</p>' +
-        (fer ? '<p class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></p>' : '') + (tde.length ? '<p class="todo-dia">' + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') + '</div></div>' +
-      franjaSemana() +
-      '<p class="explica"><b>Tu avance del día.</b> El anillo se llena con cada recordatorio que marcas. Toca un día de la franja para verlo en la Agenda.</p>' +
-    '</section>' + tarjetaSiguiente() + tarjetaQueHacer() +
+  const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+  return '<div class="hoy">' +
+    '<header class="hoy-cab"><div class="hc-txt"><small>' + cap(fmtLarga(h)) + '</small><h1 class="ph-saludo">' + saludo() + (n ? ', ' + esc(n) : '') + '</h1><p class="hc-frase">' + esc(fraseDelDia(h)) + '</p></div>' +
+      '<div class="anillo-hoy" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><svg viewBox="0 0 74 74" aria-hidden="true"><circle class="fondo" cx="37" cy="37" r="32"/><circle class="valor" cx="37" cy="37" r="32" stroke-dasharray="' + (2 * Math.PI * 32).toFixed(1) + '" stroke-dashoffset="' + (2 * Math.PI * 32 * (1 - pct)).toFixed(1) + '"/></svg><span><b>' + hechos.length + '/' + tot + '</b>hechas</span></div></header>' +
+    franjaSemana() +
+    (fer || tde.length ? '<p class="hoy-extra">' + (fer ? '<span class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></span>' : '') + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') +
+    (n ? '' : '<section class="pide-nombre"><b>¿Cómo te llamas?</b><span>Para saludarte por tu nombre cada día.</span><form class="pn-form"><label class="solo-lector" for="pnNombre">Tu nombre</label><input id="pnNombre" class="entrada" maxlength="40" autocomplete="given-name" placeholder="Tu nombre, ej. José"><button type="button" class="btn pri" data-acc="nombre-listo">Listo</button></form></section>') +
+    tarjetaEspacios() +
+    tarjetaQueHacer() + tarjetaSiguiente() +
     (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
     (avisoDeporte() ? '<a class="nota-fase aviso-carga" href="#areas/deporte/entrenos">' + ico('i-fuego') + '<span><b>Deporte:</b> ' + esc(avisoDeporte()) + '. Un entreno corto también cuenta: toca para anotarlo.</span></a>' : '') +
     (carga > SOBRECARGA ? '<div class="nota-fase aviso-carga">' + ico('i-info') + '<span><b>Día sobrecargado:</b> tienes ' + hh(mins.total) + ' planificadas de ' + hh(vig) + ' despierto (' + Math.round(carga * 100) + ' %). Considera mover algo a mañana.</span></div>' : '') +
-    tarjeta({ eti: '01', titulo: 'Urgente', n: urg.length, guia: '<b>Lo que no puede esperar.</b> Primero el <b>plazo legal</b>, luego lo vencido 🔴 y lo que vence en 3 días o menos ⚠️.',
-      cuerpo: urg.length ? '<div class="pends">' + urg.slice(0, 6).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' + (urg.length > 6 ? '<p class="pie-ajuste">Y ' + (urg.length - 6) + ' más en Recordatorios.</p>' : '') : vacio('Nada urgente', 'Cuando algo venza pronto o tenga plazo legal, aparecerá aquí primero.') }) +
-    tarjeta({ eti: '02', titulo: 'Recordatorios de hoy', n: delDiaL.length, guia: '<b>Marca lo que ya hiciste</b> con la casilla, o pásalo a <b>Más tarde</b> o a <b>Mañana</b>. También puedes deslizarlo con el dedo.',
+    (!urg.length ? '' : tarjeta({ eti: 'URGENTE', clase: 'w-rojo', titulo: 'Urgente', n: urg.length, guia: '<b>Lo que no puede esperar.</b> Primero el <b>plazo legal</b>, luego lo vencido 🔴 y lo que vence en 3 días o menos ⚠️.',
+      cuerpo: urg.length ? '<div class="pends">' + urg.slice(0, 6).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' + (urg.length > 6 ? '<p class="pie-ajuste">Y ' + (urg.length - 6) + ' más en Recordatorios.</p>' : '') : vacio('Nada urgente', 'Cuando algo venza pronto o tenga plazo legal, aparecerá aquí primero.') })) +
+    tarjeta({ eti: 'PENDIENTES', clase: 'w-rojo', titulo: 'Pendientes <a class="ver-link" href="#recordatorios">Ver todo' + ico('i-der') + '</a>', n: delDiaL.length, guia: '<b>Marca lo que ya hiciste</b> con la casilla, o pásalo a <b>Más tarde</b> o a <b>Mañana</b>. También puedes deslizarlo con el dedo.',
       cuerpo: (delDiaL.length ? '<div class="pends">' + delDiaL.slice(0, 8).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' : vacio(tot ? 'Todo listo por hoy' : 'Nada para hoy', tot ? 'Hiciste ' + hechos.length + (hechos.length === 1 ? ' cosa' : ' cosas') + '. 👏' : 'Agrega uno con el botón +.')) +
         '<div class="pie-tarjeta"><a class="btn" href="#recordatorios">' + ico('i-rec') + 'Ver todas mis listas' + (delDiaL.length > 8 ? ' (' + (delDiaL.length - 8) + ' más)' : '') + '</a><button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día</button></div>' }) +
-    tarjeta({ eti: '03', titulo: 'Tus 3 prioridades', n: hechasPr + ' de 3', guia: '<b>Solo tres.</b> Si todo es prioridad, nada lo es. Escríbelas o elígelas de tus recordatorios.',
+    tarjeta({ eti: 'PRIORIDADES', clase: 'w-ambar', titulo: 'Tus 3 prioridades', n: hechasPr + ' de 3', guia: '<b>Solo tres.</b> Si todo es prioridad, nada lo es. Escríbelas o elígelas de tus recordatorios.',
       cuerpo: '<div class="prioridades">' + pr.map((x, i) => '<div class="prio-fila' + (x.ok ? ' hecho' : '') + '"><span class="prio-n">' + (i + 1) + '</span>' +
         '<label class="solo-lector" for="prio' + i + '">Prioridad ' + (i + 1) + '</label><input id="prio' + i + '" class="entrada" data-prio="' + i + '" maxlength="120" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante de hoy', 'Lo segundo', 'Lo tercero'][i] + '">' +
         '<button type="button" class="casilla" role="checkbox" aria-checked="' + !!x.ok + '" data-acc="prio-ok" data-i="' + i + '" aria-label="Marcar prioridad ' + (i + 1) + '"' + (x.t ? '' : ' disabled') + '><span></span></button></div>').join('') + '</div>' +
         '<div class="pie-tarjeta"><button type="button" class="btn chico" data-acc="prio-elegir">' + ico('i-rec') + 'Elegir de mis recordatorios</button></div>' }) +
-  '</div><div>' +
-    tarjetaNumeros() + tarjetaHabitos() +
-    tarjeta({ eti: '04', titulo: 'Tu día en bloques', n: bloques.length, guia: '<b>Tu día como una línea de tiempo.</b> Eventos, clases de tus cursos y recordatorios con hora, con el color de su área. La línea brillante es la hora actual en Lima.',
+    tarjeta({ eti: 'TU DÍA', clase: 'w-morado', titulo: 'Tu día', n: bloques.length, guia: '<b>Tu día como una línea de tiempo.</b> Eventos, clases de tus cursos y recordatorios con hora, con el color de su área. La línea brillante es la hora actual en Lima.',
       cuerpo: lineaDia(bloques) }) +
-    tarjeta({ eti: '05', titulo: 'Pomodoro', id: 'tarjetaPomo', guia: '<b>25 minutos de foco y 5 de descanso</b> (cada 4, uno de 15). Elige en qué te concentras: al terminar, los minutos se suman a ese recordatorio y a su área.',
+    tarjetaNumeros() + tarjetaManana() + tarjetaHabitos() +
+    tarjeta({ eti: 'FOCO', clase: 'w-rojo', titulo: 'Pomodoro', id: 'tarjetaPomo', guia: '<b>25 minutos de foco y 5 de descanso</b> (cada 4, uno de 15). Elige en qué te concentras: al terminar, los minutos se suman a ese recordatorio y a su área.',
       cuerpo: pomoHTML() }) +
-    tarjeta({ eti: '06', titulo: 'Balance del día', n: fmtHora(p.vigilia.ini, p.formatoHora) + '–' + fmtHora(p.vigilia.fin, p.formatoHora), guia: '<b>¿Te sobrecargaste?</b> Suma las horas planificadas (eventos, clases y recordatorios con hora) y las compara con tus horas despierto. Pasando el ' + Math.round(SOBRECARGA * 100) + ' %, te avisa.',
+    tarjeta({ eti: 'BALANCE', clase: 'w-verde', titulo: 'Balance del día', n: fmtHora(p.vigilia.ini, p.formatoHora) + '–' + fmtHora(p.vigilia.fin, p.formatoHora), guia: '<b>¿Te sobrecargaste?</b> Suma las horas planificadas (eventos, clases y recordatorios con hora) y las compara con tus horas despierto. Pasando el ' + Math.round(SOBRECARGA * 100) + ' %, te avisa.',
       cuerpo: '<div class="balance"><div class="tot"><b>' + hh(mins.total) + '</b><span>planificadas de ' + hh(vig) + ' despierto · ' + Math.round(carga * 100) + ' %</span></div>' +
         '<div class="barra-area" role="img" aria-label="' + AREAS.map((a) => a.nombre + ' ' + hh(mins[a.id] || 0)).join(', ') + '">' + AREAS.map((a) => mins[a.id] ? '<i class="area-' + a.id + '" style="width:' + Math.min(100, (mins[a.id] / vig) * 100).toFixed(1) + '%"></i>' : '').join('') + '</div>' +
         '<div class="leyenda">' + AREAS.map((a) => '<span class="area-' + a.id + '">' + a.nombre + ' ' + hh(mins[a.id] || 0) + '</span>').join('') + '</div>' +
         '<span class="' + (carga > SOBRECARGA ? 'txt-aviso' : 'txt-ok') + '">' + (carga > SOBRECARGA ? 'Día sobrecargado.' : 'Día equilibrado: te quedan ' + hh(Math.max(0, vig - mins.total)) + ' libres.') + '</span></div>' }) +
-    tarjetaManana() +
-  '</div></div>';
+  '</div>';
 }
 
 /* Cada segundo, solo el reloj del Pomodoro (sin repintar la pantalla) */
@@ -152,6 +155,11 @@ export function actualizarPomo() {
 }
 
 export const acciones = {
+  'nombre-listo'() {
+    const i = document.getElementById('pnNombre'), v = i ? i.value.trim().slice(0, 40) : '';
+    if (!v) { if (i) i.focus(); return false; }
+    cambiarPerfil({ nombre: v }); aviso('¡Hola, ' + v.split(/\s+/)[0] + '!'); return true;
+  },
   pomo() { const s = document.getElementById('pomoItem'); if (s) vincular(s.value); alternar(); return true; },
   'pomo-reiniciar'() { reiniciar(); return true; },
   'pomo-rapido'() { modoRapido(!estadoPomo().rapido); aviso(estadoPomo().rapido ? 'Modo prueba: 25 minutos duran 10 segundos.' : 'Pomodoro normal de 25 minutos.'); return true; },

@@ -22,7 +22,7 @@ const TANDA_NOTAS = 24;   // con cientos de notas se muestran por tandas en cada
 const sinTildes = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 /* ---------- Notas ---------- */
-function tarjetaNota(n) {
+export function tarjetaNota(n) {
   const ls = lineasNota(n.notas), fija = !!val(n, 'fija', false), muchas = ls.length > 8;
   return '<article class="nota area-' + area(n.area).id + (fija ? ' fija' : '') + '">' +
     '<button type="button" class="nota-tit" data-acc="nota-editar" data-id="' + esc(n.id) + '"><b>' + (fija ? '📌 ' : '') + esc(n.titulo || 'Sin título') + '</b>' + ico('i-lapiz') + '</button>' +

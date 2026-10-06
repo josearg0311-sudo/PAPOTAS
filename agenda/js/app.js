@@ -1,7 +1,7 @@
 /* ARRANQUE de la Agenda 5.
    La navegación usa la dirección (#hoy, #recordatorios, #areas/estudios…),
    así el botón «atrás» del celular funciona como se espera. */
-import { $, ico } from './util/dom.js';
+import { $, ico, esc } from './util/dom.js';
 import { hoy, fmtCorta, fmtFecha, horaAhora, fmtHora } from './util/fechas.js';
 import { preferencias, alCambiarPref } from './datos/preferencias.js';
 import { anotarError, cuandoFalleGuardar } from './datos/almacen.js';
@@ -18,10 +18,12 @@ import { acciones as accPend, iniciarDeslizar } from './piezas/pendientes-ui.js'
 import { tic as ticPomo } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
 import { marcar, delDia as pendientesDeHoy } from './datos/pendientes.js';
+import { delDia as delDiaCal } from './datos/calendario.js';
 import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, irADia, alElegirIcs, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
 import { vistaMas } from './vistas/mas.js';
+import { vistaHabitos, acciones as accHabitos } from './vistas/habitos.js';
 import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
 import { vistaFinanzas, acciones as accFin } from './vistas/finanzas.js';
 import { vistaNotasSeccion, acciones as accNotas, alEscribirNotas, alCambiarNotas } from './vistas/notas.js';
@@ -40,20 +42,23 @@ import { cargar, empezarVacio } from './datos/datos.js';
 import { resumenAntiguo } from './datos/almacen.js';
 import { mostrarMigracion } from './piezas/migracion-ui.js';
 
-/* ---------- Secciones ---------- */
+/* ---------- Secciones (como la v4.5) ----------
+   Celular: Hoy · Agenda · Dinero · Notas · Más. Laptop: barra lateral con
+   Hoy, Espacios (las 4 áreas), Organizar y tu perfil abajo. */
 const PRINCIPALES = [
   ['hoy', 'Hoy', 'i-hoy'],
-  ['recordatorios', 'Recordatorios', 'i-rec', 'Record.'],
-  ['agenda', 'Agenda', 'i-agenda'],
-  ['areas', 'Áreas', 'i-areas'],
+  ['agenda', 'Agenda', 'i-cal'],
+  ['finanzas', 'Dinero', 'i-grafica'],
+  ['notas', 'Notas', 'i-notas'],
   ['mas', 'Más', 'i-mas']
 ];
-const EN_MAS = [['seguimiento', 'Seguimiento', 'i-seg'], ['finanzas', 'Finanzas', 'i-dinero'], ['notas', 'Notas', 'i-nota'], ['ajustes', 'Ajustes', 'i-ajustes']];
-const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', recordatorios: 'Recordatorios', agenda: 'Agenda', areas: 'Áreas', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Finanzas', notas: 'Notas', papelera: 'Papelera' };
+const ORGANIZAR = [['agenda', 'Agenda', 'i-cal'], ['recordatorios', 'Recordatorios', 'i-tareas'], ['notas', 'Notas', 'i-notas'], ['habitos', 'Hábitos', 'i-habitos'], ['finanzas', 'Dinero', 'i-grafica'], ['seguimiento', 'Seguimiento', 'i-diana']];
+const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', recordatorios: 'Recordatorios', agenda: 'Agenda', areas: 'Espacios', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Dinero', notas: 'Notas', papelera: 'Papelera', habitos: 'Hábitos' };
+const SUBTITULOS = { recordatorios: 'Tus listas y lo que tienes pendiente', agenda: 'Tu tiempo: día, semana, mes y año', finanzas: 'Tus dos libros, cada uno por su lado', notas: 'Tus apuntes, cada uno en su espacio', habitos: 'Lo que haces seguido, espacio por espacio', seguimiento: 'Cómo vas en cada espacio', ajustes: 'Tu agenda, tu nube y tus datos', papelera: 'Lo que borraste, por 30 días', datos: 'Todo lo que tienes guardado', mas: 'Todo lo demás', areas: 'Tus cuatro espacios' };
 
 function leerRuta() {
   const h = decodeURIComponent((location.hash || '').slice(1));
-  const [sec, param, sub] = h.split('/');
+  const [sec0, param, sub] = h.split('/'), sec = sec0 === 'dinero' ? 'finanzas' : sec0;
   if (sec === 'areas' && param && AREAS.some((a) => a.id === param)) return { sec, param, sub: sub || '' };
   if ((sec === 'seguimiento' && param === 'revision') || (sec === 'finanzas' && param === 'oficina') || (sec === 'notas' && param === 'diario')) return { sec, param };
   if (TITULOS[sec]) return { sec, param: '' };
@@ -65,37 +70,66 @@ const ATAJO_V45 = { gasto: 'gasto', ingreso: 'ingreso', anadir: 'recordatorio', 
 const atajoInicial = ATAJO_V45[(location.hash || '').slice(1)] || '';
 if (atajoInicial) { try { history.replaceState(null, '', atajoInicial === 'ingreso' ? '#finanzas' : '#hoy'); } catch (e) { /* nada */ } }
 let ruta = leerRuta() || { sec: preferencias().inicio, param: '' };
-function padre(sec) { return ['seguimiento', 'finanzas', 'notas', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
+function padre(sec) { return ['recordatorios', 'areas', 'seguimiento', 'habitos', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
 
 /* ---------- Indicador de la nube (solo si la conectaste) ---------- */
+function haceCuanto(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  return !t ? 'sin sincronizar' : m < 1 ? 'ahora mismo' : m < 60 ? 'hace ' + m + ' min' : m < 1440 ? 'hace ' + Math.round(m / 60) + ' h' : 'hace ' + Math.round(m / 1440) + ' d';
+}
 function pintarNube() {
   const b = $('btnNube'); if (!b) return;
   const c = nubeConfig(), e = estadoNube();
   b.hidden = !c;
   if (!c) return;
   const est = e.ocupado ? 'ocupada' : e.ok ? 'ok' : 'error';
-  b.className = 'icono-btn nube-' + est;
-  b.setAttribute('aria-label', 'Nube: ' + (est === 'ok' ? 'sincronizada' : est === 'ocupada' ? 'sincronizando' : 'con problema') + '. Abrir ajustes de la nube');
+  b.className = 'chip-nube nube-' + est;
+  $('nubeTxt').textContent = est === 'ocupada' ? 'sincronizando…' : est === 'ok' ? haceCuanto(e.fecha) : 'sin conexión';
+  b.setAttribute('aria-label', 'Nube: ' + (est === 'ok' ? 'sincronizada ' + haceCuanto(e.fecha) : est === 'ocupada' ? 'sincronizando' : 'con problema') + '. Abrir ajustes de la nube');
 }
 window.addEventListener('agenda:nube', pintarNube);
 
 /* ---------- Pintar ---------- */
+const NAV = 'agenda5_nav';
+function plegado(g) { try { return !!(JSON.parse(localStorage.getItem(NAV) || '{}') || {})[g]; } catch (e) { return false; } }
+function cuentaHtml(n, alerta) { return n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : ''; }
 function pintarNav() {
-  const p = padre(ruta.sec);
+  const p = padre(ruta.sec), h = hoy();
   $('barra').innerHTML = PRINCIPALES.map((x) =>
-    '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + (p === x[0] ? ' aria-current="page"' : '') + '>' + ico(x[2]) + '<span>' + (x[3] || x[1]) + '</span></a>').join('');
+    '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + (p === x[0] ? ' aria-current="page"' : '') + '>' + ico(x[2]) + '<span>' + x[1] + '</span></a>').join('');
+  const pend = documento() ? pendientesDeHoy() : [];
+  const porArea = (a) => pend.filter((x) => x.area === a).length;
+  const atras = pend.filter((x) => x.fechas.inicio < h).length;
+  const enAgenda = documento() ? (() => { const d = delDiaCal(h); return d.bloques.length + d.todoDia.length; })() : 0;
+  const d = documento(), nombre = d && d.perfil && d.perfil.nombre ? String(d.perfil.nombre).trim() : '';
+  const actual = (sec, param) => (ruta.sec === sec && (param === undefined || ruta.param === param) ? ' aria-current="page"' : '');
+  const grupo = (g, txt) => '<button type="button" class="grupo" data-grupo="' + g + '" aria-expanded="' + !plegado(g) + '">' + txt + ico('i-der') + '</button>';
   $('lateral').innerHTML =
-    '<div class="marca"><i class="logo" aria-hidden="true"></i><div><b>Agenda</b><small>Lima · ' + fmtCorta(hoy(), false) + '</small></div></div>' +
-    PRINCIPALES.slice(0, 4).map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + (p === x[0] && !ruta.param ? ' aria-current="page"' : '') + '>' + ico(x[2]) + x[1] + '</a>').join('') +
-    '<div class="sep">Áreas</div>' + AREAS.map((a) => '<a href="#areas/' + a.id + '" class="area-nav area-' + a.id + '"' + (ruta.sec === 'areas' && ruta.param === a.id ? ' aria-current="page"' : '') + '><i aria-hidden="true"></i>' + a.nombre + '</a>').join('') +
-    '<div class="sep">Más</div>' + EN_MAS.map((x) => '<a href="#' + x[0] + '"' + (ruta.sec === x[0] ? ' aria-current="page"' : '') + '>' + ico(x[2]) + x[1] + '</a>').join('') +
-    '<button type="button" class="btn pri agregar" data-acc="agregar">' + ico('i-plus') + 'Agregar</button>';
+    '<a class="marca" href="#hoy"><i class="logo" aria-hidden="true"></i><div><b>Agenda</b><small>' + (nombre ? 'de ' + esc(nombre.split(/\s+/)[0]) : 'Mi organización') + '</small></div></a>' +
+    '<nav class="nav-lat">' +
+    '<a href="#hoy" data-ir="hoy"' + actual('hoy') + '>' + ico('i-hoy') + 'Hoy</a>' +
+    grupo('espacios', 'Espacios') + '<div class="nav-grupo"' + (plegado('espacios') ? ' hidden' : '') + '>' +
+    AREAS.map((a) => '<a href="#areas/' + a.id + '" class="nav-esp area-' + a.id + '"' + actual('areas', a.id) + '>' + ico(a.icono) + '<span>' + esc(a.nombre) + '</span>' + cuentaHtml(porArea(a.id)) + '</a>').join('') + '</div>' +
+    grupo('organizar', 'Organizar') + '<div class="nav-grupo"' + (plegado('organizar') ? ' hidden' : '') + '>' +
+    ORGANIZAR.map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' +
+      (x[0] === 'agenda' ? cuentaHtml(enAgenda) : x[0] === 'recordatorios' ? cuentaHtml(pend.length, atras > 0) : '') + '</a>').join('') + '</div>' +
+    '</nav>' +
+    '<div class="pie"><a class="perfil" href="#ajustes"' + actual('ajustes') + '><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span>' +
+    '<span class="perfil-txt"><b>' + (nombre ? esc(nombre.split(/\s+/)[0]) : 'Tu agenda') + '</b><small>Ajustes y respaldo</small></span>' + ico('i-ajustes') + '</a></div>';
 }
 
 function pintarCab() {
   $('cabTitulo').textContent = ruta.sec === 'areas' && ruta.param ? area(ruta.param).nombre : TITULOS[ruta.sec];
   $('cabFecha').textContent = fmtCorta(hoy(), false) + ' · ' + fmtFecha(hoy());
   $('relojTxt').textContent = fmtHora(horaAhora(), preferencias().formatoHora);
+  pintarNube();
+}
+
+/* Título grande de cada sección (Hoy y los espacios traen su propia portada) */
+function cabeceraSeccion() {
+  if (ruta.sec === 'hoy' || (ruta.sec === 'areas' && ruta.param)) return '';
+  const volver = padre(ruta.sec) === 'mas' && ruta.sec !== 'mas' ? '<a class="volver-panel" href="#mas">' + ico('i-izq') + 'Más</a>' : '';
+  return volver + '<header class="pag-cab"><h1>' + TITULOS[ruta.sec] + '</h1>' + (SUBTITULOS[ruta.sec] ? '<p>' + SUBTITULOS[ruta.sec] + '</p>' : '') + '</header>';
 }
 
 function contenido() {
@@ -105,6 +139,7 @@ function contenido() {
     case 'agenda': return vistaAgenda();
     case 'areas': return ruta.param ? vistaArea(ruta.param, ruta.sub) : vistaAreas();
     case 'mas': return vistaMas();
+    case 'habitos': return vistaHabitos();
     case 'ajustes': return vistaAjustes();
     case 'datos': return vistaDatos();
     case 'papelera': return vistaPapelera();
@@ -132,7 +167,7 @@ export function pintar() {
     pintarNav(); pintarCab();
     document.title = ruta.sec === 'hoy' ? 'Agenda' : $('cabTitulo').textContent + ' · Agenda';
     document.body.dataset.seccion = ruta.sec;
-    $('pantalla').innerHTML = contenido();
+    $('pantalla').innerHTML = cabeceraSeccion() + contenido();
     if (ruta.sec === 'ajustes') despuesDePintar();
     pintarInsignia();
   } catch (e) {
@@ -167,7 +202,7 @@ window.addEventListener('hashchange', () => {
 });
 
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
-const ACCIONES = Object.assign({}, accPend, accHoy, accHoyExtra, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, accAdmin, {
+const ACCIONES = Object.assign({}, accPend, accHoy, accHoyExtra, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, accAdmin, accHabitos, {
   agregar() { abrirAgregar(); },
   buscar() { abrirBuscar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
@@ -186,6 +221,7 @@ document.addEventListener('click', (ev) => {
 document.addEventListener('submit', (ev) => {
   const f = ev.target;
   if (f.dataset.form) { ev.preventDefault(); alEnviarRec(f, pintar); }
+  else if (f.classList.contains('pn-form')) { ev.preventDefault(); f.querySelector('[data-acc]').click(); }
 });
 document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target) || alElegirIcs(ev.target) || alCambiarNotas(ev.target)) return; if (alCambiarPrioridad(ev.target) || alCambiarCampo(ev.target)) pintar(); });
 document.addEventListener('input', (ev) => { if (!alEscribirRec(ev.target) && !alEscribirNotas(ev.target, pintar)) alEscribir(ev.target, pintar); });
@@ -212,7 +248,16 @@ cuandoFalleGuardar(() => aviso('No se pudo guardar: el almacenamiento del navega
 aplicarTema();
 aplicarGuia();
 alCambiarPref(() => { aplicarGuia(); });
-$('btnGuia').addEventListener('click', alternarGuia);
+$('btnAtras').addEventListener('click', () => history.back());
+$('btnAdelante').addEventListener('click', () => history.forward());
+/* Plegar y desplegar Espacios / Organizar en la barra lateral (se recuerda) */
+document.addEventListener('click', (ev) => {
+  const g = ev.target.closest && ev.target.closest('[data-grupo]'); if (!g) return;
+  let m = {}; try { m = JSON.parse(localStorage.getItem(NAV) || '{}') || {}; } catch (e) { /* nada */ }
+  m[g.dataset.grupo] = !m[g.dataset.grupo];
+  try { localStorage.setItem(NAV, JSON.stringify(m)); } catch (e) { /* nada */ }
+  pintarNav();
+});
 $('btnTema').addEventListener('click', () => {
   const ahora = document.documentElement.getAttribute('data-tema');
   import('./datos/preferencias.js').then((m) => { m.cambiarPref({ tema: ahora === 'claro' ? 'oscuro' : 'claro' }); if (ruta.sec === 'ajustes') pintar(); });

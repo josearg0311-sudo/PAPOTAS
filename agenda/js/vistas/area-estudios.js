@@ -5,6 +5,7 @@ import { preferencias } from '../datos/preferencias.js';
 import { modeloVacio, LISTA_TAREAS } from '../datos/modelo.js';
 import { val, lista, promedio, APRUEBA, faltas, planSesiones, responderFicha, fichaToca, ordenDias } from '../datos/herramientas.js';
 import { hoy, fmtCorta, fmtHora, diasEntre, DIAS3, esHora, diaSemana } from '../util/fechas.js';
+import { tareasDe } from './espacio-comun.js';
 import { esc, ico, vacio, plural } from '../util/dom.js';
 import { tarjeta } from './comun.js';
 import { fila, filas, casilla, mini, pildora, cifra, cifras, cambiarExtra, nuevo, borrar, boton, pie } from './area-comun.js';
@@ -271,3 +272,13 @@ export const acciones = {
   'fichas-ver'(b, ev, rp) { verFichas(b.dataset.id, rp); },
   'fichas-repasar'(b, ev, rp) { repasar(b.dataset.id, rp); }
 };
+
+/* Resumen para «Tus espacios» y la portada del espacio (como la v4.5) */
+export function resumen() {
+  const ex = examenes(true)[0], ps = cursos().map((c) => promedio(evalsDe(c))).filter((p) => p != null), pg = ps.length ? ps.reduce((a, b) => a + b, 0) / ps.length : null;
+  const toca = fichas().filter((f) => fichaToca(f, hoy())).length, d = ex ? diasEntre(hoy(), ex.fechas.inicio) : null, tareas = tareasDe('estudios'), nc = cursos().length;
+  return {
+    datos: [[pg == null ? '—' : pg.toFixed(1), 'de promedio', 'cursos', pg == null ? '' : pg >= APRUEBA ? 'ok' : 'aviso'], ex ? [d === 0 ? 'hoy' : d, d === 0 ? ex.titulo : 'días al examen', 'examenes', d <= 3 ? 'aviso' : ''] : ['—', 'sin exámenes', 'examenes'], [toca, 'repasos para hoy', 'fichas']],
+    chips: [[tareas, tareas === 1 ? 'tarea' : 'tareas', 'pendientes'], ex ? [d === 0 ? 'hoy' : d + ' d', 'al examen', 'examenes', d <= 3 ? 'aviso' : ''] : null, pg != null ? [pg.toFixed(1), 'promedio', 'cursos'] : null, nc ? [nc, nc === 1 ? 'curso' : 'cursos', 'cursos'] : null].filter(Boolean)
+  };
+}

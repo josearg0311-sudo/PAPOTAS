@@ -31,7 +31,7 @@ const js = r.outputFiles[0].text;
 
 /* 3) index.html */
 let html = leer('index.html');
-const cambiar = (de, a) => { if (!html.includes(de)) throw new Error('No encontré en index.html: ' + de); html = html.replace(de, a); };
+const cambiar = (de, a) => { if (!html.includes(de)) throw new Error('No encontré en index.html: ' + de); html = html.replace(de, () => a); };   // con función: el programa trae «$&» y no debe interpretarse
 cambiar('<link rel="icon" type="image/svg+xml" href="iconos/icono.svg">', '<link rel="icon" type="image/svg+xml" href="' + datos('iconos/icono.svg', 'image/svg+xml') + '">');
 cambiar('<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">', '<link rel="apple-touch-icon" href="' + datos('iconos/apple-touch-icon.png', 'image/png') + '">');
 cambiar('<link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>\n', '');

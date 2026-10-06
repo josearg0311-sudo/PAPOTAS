@@ -53,3 +53,8 @@ export function leerMonto(texto) {
   if (!Number.isFinite(c)) return null;
   return neg ? -c : c;
 }
+/* «S/ 1,250» sin céntimos, para cifras grandes de un vistazo (como la v4.5) */
+export function solesCorto(centimos) {
+  const c = Math.round(Number(centimos) || 0), v = Math.round(Math.abs(c) / 100);
+  return (c < 0 ? '−' : '') + MONEDA + ' ' + String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}

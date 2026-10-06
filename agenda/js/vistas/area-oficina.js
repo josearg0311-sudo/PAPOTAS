@@ -8,7 +8,8 @@ import { val, tarifa, montoHoras, resumenHoras } from '../datos/herramientas.js'
 import { ocurre } from '../datos/calendario.js';
 import { marcar, hechoEn, esChecklist } from '../datos/pendientes.js';
 import { hoy, fmtCorta, fmtFecha, fmtHora, horaAhora, sumarDias, plazo, MESES } from '../util/fechas.js';
-import { fmtSoles } from '../util/dinero.js';
+import { fmtSoles, solesCorto } from '../util/dinero.js';
+import { tareasDe } from './espacio-comun.js';
 import { esc, ico, vacio, plural } from '../util/dom.js';
 import { tarjeta } from './comun.js';
 import { fila, filas, casilla, mini, pildora, pildoraFecha, cifra, cifras, cambiarExtra, nuevo, borrar, boton, pie, anotarMovimiento, quitarMovimiento } from './area-comun.js';
@@ -298,3 +299,16 @@ export const acciones = {
   },
   'ir-lista'(b) { irALista(b.dataset.id); location.hash = '#recordatorios'; }
 };
+
+/* Resumen para «Tus espacios» y la portada del espacio (como la v4.5) */
+export function resumen() {
+  const h = hoy(), act = cobros().filter((x) => x.estado !== 'hecho'), porCobrar = act.reduce((s, x) => s + (+x.monto || 0), 0), venc = act.some((x) => x.fechas.vence && x.fechas.vence < h);
+  const enCurso = elementos((x) => x.tipo === 'pendiente' && x.area === 'oficina' && x.estado === 'en_curso').length, fin = sumarDias(h, 7);
+  const reus = elementos((x) => x.tipo === 'evento' && x.area === 'oficina' && (x.extra.tipoEvento === 'reunion' || x.extra.tipoEvento === 'cita') && x.fechas.inicio >= h && x.fechas.inicio <= fin).length;
+  const ym = h.slice(0, 7), cobrado = cobros().filter((x) => x.estado === 'hecho' && fechaMs(val(x, 'cobradoEn', 0) || (x.datos && x.datos.cobrado)).startsWith(ym)).reduce((s, x) => s + (+x.monto || 0), 0);
+  const tareas = tareasDe('oficina'), legales = conPlazo().filter((x) => x.plazoLegal).length;
+  return {
+    datos: [[solesCorto(porCobrar), 'por cobrar', 'cobros', venc ? 'aviso' : ''], [enCurso, 'en curso', 'tablero'], [reus, 'reuniones en 7 días', 'actas']],
+    chips: [[tareas, tareas === 1 ? 'tarea' : 'tareas', 'pendientes'], legales ? [legales, legales === 1 ? 'plazo legal' : 'plazos legales', 'plazos', 'aviso'] : null, porCobrar ? [solesCorto(porCobrar), 'por cobrar', 'cobros', venc ? 'vencido' : ''] : null, reus ? [reus, reus === 1 ? 'reunión' : 'reuniones', 'actas'] : null, cobrado ? [solesCorto(cobrado), 'cobrado', 'cobros'] : null].filter(Boolean)
+  };
+}
