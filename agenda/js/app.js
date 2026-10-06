@@ -19,7 +19,7 @@ import { tic as ticPomo } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
 import { marcar } from './datos/pendientes.js';
 import { editarEvento } from './piezas/eventos-ui.js';
-import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
+import { vistaAgenda, irADia, alElegirIcs, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
 import { vistaMas } from './vistas/mas.js';
 import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
@@ -175,7 +175,7 @@ document.addEventListener('submit', (ev) => {
   const f = ev.target;
   if (f.dataset.form) { ev.preventDefault(); alEnviarRec(f, pintar); }
 });
-document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target) || alCambiarNotas(ev.target)) return; if (alCambiarPrioridad(ev.target) || alCambiarCampo(ev.target)) pintar(); });
+document.addEventListener('change', (ev) => { if (alElegirArchivo(ev.target) || alElegirIcs(ev.target) || alCambiarNotas(ev.target)) return; if (alCambiarPrioridad(ev.target) || alCambiarCampo(ev.target)) pintar(); });
 document.addEventListener('input', (ev) => { if (!alEscribirRec(ev.target) && !alEscribirNotas(ev.target, pintar)) alEscribir(ev.target, pintar); });
 /* En «Nuevo recordatorio», Enter guarda (Shift+Enter, otra línea) */
 document.addEventListener('keydown', (ev) => {

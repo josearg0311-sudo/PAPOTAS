@@ -6,7 +6,11 @@ import { ico, vacio, esc } from '../util/dom.js';
 import { fmtSoles } from '../util/dinero.js';
 import { preferencias } from '../datos/preferencias.js';
 import { AREAS, area, chipArea } from '../datos/areas.js';
-import { delDia, resumenDia } from '../datos/calendario.js';
+import { delDia, resumenDia, huecosLibres, proximos, resumenAnio } from '../datos/calendario.js';
+import { buscarElemento, poner, aPapelera } from '../datos/datos.js';
+import { modeloVacio } from '../datos/modelo.js';
+import { leerICS, idDeUid } from '../util/ics.js';
+import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { feriado } from '../datos/feriados.js';
 import { ordenar } from '../datos/pendientes.js';
 import { filaPendiente } from '../piezas/pendientes-ui.js';
@@ -68,6 +72,18 @@ function lineaTiempo(dia, bloques) {
   return html + '</div>';
 }
 
+/* Huecos libres del día (desde ahora si es hoy): tocar uno crea un evento ahí */
+function huecosHTML(d, bloques) {
+  const h = hoy(); if (d < h) return '';
+  const p = preferencias(), m = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+  let ini = m(p.vigilia.ini), fin = m(p.vigilia.fin) || 1440; if (fin <= ini) fin = 1440;
+  if (d === h) ini = Math.max(ini, Math.ceil(minutosAhora() / 15) * 15);
+  const l = huecosLibres(bloques, ini, fin, 30);
+  if (!l.length) return '<p class="huecos"><small>Libre</small><span class="sd-libre">Sin huecos libres de 30 min o más</span></p>';
+  const dur = (x) => { const n = x.fin - x.ini; return n >= 60 ? Math.floor(n / 60) + ' h' + (n % 60 ? ' ' + n % 60 : '') : n + ' min'; };
+  return '<div class="huecos"><small>Libre</small>' + l.slice(0, 6).map((x) => '<button type="button" class="chip" data-acc="cal-hueco" data-h="' + x.hIni + '" data-hf="' + (x.fin - x.ini > 60 ? '' : x.hFin) + '" aria-label="Crear evento de ' + fmtHora(x.hIni, p.formatoHora) + ' a ' + fmtHora(x.hFin, p.formatoHora) + '"><span class="mono">' + fmtHora(x.hIni, p.formatoHora) + '–' + fmtHora(x.hFin, p.formatoHora) + '</span> · ' + dur(x) + '</button>').join('') + '</div>';
+}
+
 function panelDia(d, conLinea) {
   const x = delDia(d, ui.area), fer = preferencias().feriados === false ? '' : feriado(d);
   const sinHora = x.sinHora.sort(ordenar);
@@ -75,7 +91,7 @@ function panelDia(d, conLinea) {
   if (fer) html += '<p class="feriado">' + ico('i-bandera') + 'Feriado nacional: <b>' + esc(fer) + '</b></p>';
   if (x.todoDia.length) html += '<div class="todo-dia">' + x.todoDia.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</div>';
   if (x.vencen.length) html += '<div class="grupo-tit"><span>Vence este día</span><span class="linea"></span><span class="mono">' + x.vencen.length + '</span></div><div class="vencen">' + x.vencen.map((v) => filaVence(v, d)).join('') + '</div>';
-  if (conLinea) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div>' + lineaTiempo(d, x.bloques);
+  if (conLinea) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div>' + huecosHTML(d, x.bloques) + lineaTiempo(d, x.bloques);
   else if (x.bloques.length) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div><div class="mini-bloques">' + x.bloques.map((b) => '<button type="button" class="mini-bloque area-' + area(b.area).id + '" data-acc="' + (b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '"><span class="mono">' + fmtHora(b.hIni, preferencias().formatoHora) + '</span><b>' + esc(b.titulo) + '</b></button>').join('') + '</div>';
   html += '<div class="grupo-tit"><span>Recordatorios sin hora</span><span class="linea"></span><span class="mono">' + sinHora.length + '</span></div>' +
     (sinHora.length ? '<div class="pends">' + sinHora.map((p) => filaPendiente(p, { verLista: true })).join('') + '</div>' : vacio('', 'Nada sin hora este día.'));
@@ -126,14 +142,84 @@ function vistaMes(d) {
     '<div class="t-cab"><span class="eti">' + fmtFecha(d) + '</span><h2>' + cap(fmtLarga(d)) + '</h2></div>' + panelDia(d, false);
 }
 
+/* ---------- Próximos 60 días (lista) ---------- */
+function vistaLista() {
+  const p = preferencias(), h = hoy(), l = proximos(h, 60, ui.area);
+  const fila = (acc, id, a, hora, t, extra = '') => '<button type="button" class="mini-bloque area-' + area(a).id + '" data-acc="' + acc + '" data-id="' + esc(id) + '"><span class="mono">' + hora + '</span><b>' + t + '</b>' + extra + '</button>';
+  return '<div class="cal-nav"><b>Próximos 60 días</b></div>' + (l.length ? '<div class="prox-lista">' + l.map((x) => {
+    const fer = p.feriados === false ? '' : feriado(x.dia);
+    return '<section class="prox-dia' + (x.dia === h ? ' es-hoy' : '') + '"><button type="button" class="prox-fecha" data-acc="cal-dia-ir" data-dia="' + x.dia + '"><b>' + cap(fmtCorta(x.dia, false)) + '</b><small>' + cap(relativo(x.dia)) + (fer ? ' · ' + esc(fer) : '') + '</small></button><div class="mini-bloques">' +
+      x.vencen.map((v) => fila(v.tipo === 'pendiente' ? 'p-editar' : 'dato-ver', v.id, v.area, v.plazoLegal ? '⚖️' : '⏳', esc(v.titulo), v.monto ? '<small class="mono">' + fmtSoles(v.monto) + '</small>' : '')).join('') +
+      x.todoDia.map((t) => fila('ev-editar', t.id, t.area, t.cumple ? '🎂' : 'día', esc(t.titulo))).join('') +
+      x.bloques.map((b) => fila(b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver', b.id, b.area, fmtHora(b.hIni, p.formatoHora), esc(b.titulo))).join('') +
+      x.sinHora.map((s) => fila('p-editar', s.id, s.area, '•', esc(s.titulo))).join('') + '</div></section>';
+  }).join('') + '</div>' : vacio('Nada en los próximos 60 días', 'Crea un evento o un recordatorio con fecha y aparecerá aquí.'));
+}
+
+/* ---------- Año ---------- */
+function vistaAno(d) {
+  const y = +d.slice(0, 4), meses = resumenAnio(y, ui.area), h = hoy(), p = preferencias();
+  const max = Math.max(1, ...meses.flatMap((m) => Object.values(m.dias)));
+  return cabecera(String(y)) + '<div class="anio">' + meses.map((m, i) => {
+    const ym = y + '-' + String(i + 1).padStart(2, '0'), ini = inicioSemana(ym + '-01', p.semanaLunes), dias = [];
+    for (let k = 0; k < 42; k++) { const x = sumarDias(ini, k); if (k === 35 && x.slice(0, 7) !== ym) break; const n = x.slice(0, 7) === ym ? m.dias[x] || 0 : -1;
+      dias.push('<i class="' + (n < 0 ? 'fuera' : 'n' + (n ? Math.min(4, Math.ceil(n / max * 4)) : 0)) + (x === h ? ' es-hoy' : '') + (n >= 0 && p.feriados !== false && feriado(x) ? ' fer' : '') + '"></i>'); }
+    return '<button type="button" class="anio-mes' + (ym === h.slice(0, 7) ? ' actual' : '') + '" data-acc="cal-ir-mes" data-v="' + ym + '"><span class="am-cab"><b>' + cap(MESES[i]) + '</b><small class="mono">' + (m.n ? m.n : '—') + '</small></span>' +
+      '<span class="am-dias" aria-hidden="true">' + dias.join('') + '</span>' +
+      m.legales.slice(0, 2).map((x) => '<span class="am-cosa area-' + area(x.area).id + '">⚖️ ' + +x.d.slice(8) + ' · ' + esc(x.t) + '</span>').join('') +
+      m.cumples.slice(0, 3).map((x) => '<span class="am-cosa area-' + area(x.area).id + '">🎂 ' + +x.d.slice(8) + ' · ' + esc(x.t) + '</span>').join('') +
+      (m.cumples.length + m.legales.length > 5 ? '<span class="sd-mas">+' + (m.cumples.length + m.legales.length - 5) + ' más</span>' : '') + '</button>';
+  }).join('') + '</div><p class="anio-ley"><span><i></i>Días con más cosas</span><span><i class="fer"></i>Feriado</span><span>⚖️ Plazo legal · 🎂 Cumpleaños</span></p>';
+}
+
+/* ---------- Traer de otro calendario (.ics) ---------- */
+export function alElegirIcs(t) {
+  if (t.id !== 'archivoIcs' || !t.files || !t.files[0]) return false;
+  const f = t.files[0], lector = new FileReader();
+  lector.onload = () => previaIcs(String(lector.result), f.name);
+  lector.onerror = () => aviso('No se pudo leer el archivo.');
+  lector.readAsText(f); t.value = '';
+  return true;
+}
+function previaIcs(texto, nombre) {
+  const evs = leerICS(texto);
+  if (!evs.length) { aviso('No encontré eventos en «' + nombre + '». ¿Es un archivo .ics de calendario?'); return; }
+  /* Lo que ya tienes (exportado desde aquí o traído antes) no se duplica */
+  const propios = (u) => /@agenda-lima$/.test(u) && buscarElemento(u.replace(/@agenda-lima$/, ''));
+  const lista = evs.map((e) => Object.assign(e, { id: idDeUid(e.uid, e.titulo, e.fecha) })).filter((e) => !propios(e.uid));
+  const nuevos = lista.filter((e) => !buscarElemento(e.id) || buscarElemento(e.id).borrado), h = hoy();
+  const futuros = nuevos.filter((e) => e.repetir || (e.hasta || e.fecha) >= h);
+  let areaSel = ui.area || 'personal', soloFuturos = true;
+  const hoja = abrirHoja('Traer de otro calendario', '<p>En <b>' + esc(nombre) + '</b> hay <b>' + evs.length + '</b> eventos: <b>' + nuevos.length + '</b> ' + (nuevos.length === 1 ? 'nuevo' : 'nuevos') + (evs.length - nuevos.length ? ' (los otros ya están en tu agenda)' : '') + '.</p>' +
+    (nuevos.length ? '<label class="interruptor"><input type="checkbox" id="icsFut" checked><span>Solo los de hoy en adelante (' + futuros.length + ')</span></label>' +
+      '<div class="campo"><span>¿A qué área van?</span><div class="selector envuelve" id="icsArea">' + AREAS.map((a) => '<button type="button" data-v="' + a.id + '" aria-pressed="' + (a.id === areaSel) + '">' + a.nombre + '</button>').join('') + '</div></div>' +
+      '<ul class="ics-previa">' + nuevos.slice(0, 6).map((e) => '<li><span class="mono">' + fmtCorta(e.fecha) + (e.hora ? ' ' + fmtHora(e.hora, preferencias().formatoHora) : '') + '</span> ' + esc(e.titulo) + '</li>').join('') + (nuevos.length > 6 ? '<li>… y ' + (nuevos.length - 6) + ' más</li>' : '') + '</ul>' +
+      '<div class="fila-botones"><button type="button" class="btn pri" id="icsOk">' + ico('i-check') + 'Traer a mi agenda</button></div>' : '<p class="ayuda">No hay nada nuevo que traer.</p>'));
+  if (!nuevos.length) return;
+  hoja.querySelector('#icsArea').addEventListener('click', (ev) => { const b = ev.target.closest('[data-v]'); if (!b) return; areaSel = b.dataset.v; hoja.querySelectorAll('#icsArea button').forEach((x) => x.setAttribute('aria-pressed', x === b)); });
+  hoja.querySelector('#icsFut').addEventListener('change', (ev) => { soloFuturos = ev.target.checked; });
+  hoja.querySelector('#icsOk').addEventListener('click', () => {
+    const elegidos = soloFuturos ? futuros : nuevos, ids = [];
+    elegidos.forEach((e) => {
+      const b = modeloVacio();
+      poner(Object.assign(b, { id: e.id, tipo: 'evento', area: areaSel, titulo: e.titulo, notas: e.notas, borrado: null, todoElDia: e.todoElDia, repetir: e.repetir, aviso: e.aviso,
+        fechas: Object.assign(b.fechas, { inicio: e.fecha, fin: e.hasta, hora: e.hora, horaFin: e.horaFin }), extra: { tipoEvento: 'evento', lugar: e.lugar, importado: nombre } }));
+      ids.push(e.id);
+    });
+    cerrarHoja(); window.dispatchEvent(new Event('agenda:repintar'));
+    aviso(ids.length ? 'Listo: ' + ids.length + ' eventos en tu agenda.' : 'No había eventos de hoy en adelante.', ids.length ? () => { ids.forEach((id) => aPapelera(id)); window.dispatchEvent(new Event('agenda:repintar')); } : null);
+  });
+}
+
 export function vistaAgenda() {
   const d = ui.dia || hoy();
-  const cuerpo = ui.modo === 'semana' ? vistaSemana(d) : ui.modo === 'mes' ? vistaMes(d) : vistaDia(d);
+  const cuerpo = ui.modo === 'semana' ? vistaSemana(d) : ui.modo === 'mes' ? vistaMes(d) : ui.modo === 'ano' ? vistaAno(d) : ui.modo === 'lista' ? vistaLista() : vistaDia(d);
   return tarjeta({ titulo: 'Tu tiempo', clase: 'agenda',
-    guia: '<b>Agenda = tu tiempo.</b> Eventos, clases, recordatorios y vencimientos (pagos, cobros, documentos y plazos) en vista de día, semana o mes. En la vista Día, <b>toca una hora vacía</b> para crear un evento ahí. Filtra por área con los botones de colores.',
-    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes']].map((o) =>
+    guia: '<b>Agenda = tu tiempo.</b> Eventos, clases, recordatorios y vencimientos (pagos, cobros, documentos y plazos) en vista de día, semana o mes. En la vista Día, <b>toca una hora vacía</b> para crear un evento ahí. Filtra por área con los botones de colores. <b>Año</b> muestra cumpleaños y plazos legales de cada mes; <b>Lista</b>, todo lo de los próximos 60 días.',
+    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['ano', 'Año'], ['lista', 'Lista']].map((o) =>
       '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + filtroAreas() + cuerpo }) +
-    '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button></div>';
+    '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
+    '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>';
 }
 
 export const acciones = {
@@ -146,10 +232,12 @@ export const acciones = {
     const n = +b.dataset.n, d = ui.dia || hoy();
     if (ui.modo === 'dia') ui.dia = sumarDias(d, n);
     else if (ui.modo === 'semana') ui.dia = sumarDias(d, 7 * n);
+    else if (ui.modo === 'ano') ui.dia = (+d.slice(0, 4) + n) + '-01-01';
     else { let [y, m] = d.split('-').map(Number); m += n; if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } ui.dia = y + '-' + String(m).padStart(2, '0') + '-01'; }
     return true;
   },
-  'cal-hueco'(b, ev, repintar) { const [hh] = b.dataset.h.split(':'); nuevoEvento(repintar, { fecha: ui.dia || hoy(), hora: b.dataset.h, horaFin: String((+hh + 1) % 24).padStart(2, '0') + ':00', area: ui.area || 'personal' }); },
+  'cal-hueco'(b, ev, repintar) { const [hh, mm] = b.dataset.h.split(':'); nuevoEvento(repintar, { fecha: ui.dia || hoy(), hora: b.dataset.h, horaFin: b.dataset.hf || String((+hh + 1) % 24).padStart(2, '0') + ':' + mm, area: ui.area || 'personal' }); },
+  'cal-ir-mes'(b) { ui.dia = b.dataset.v + '-01'; ui.modo = 'mes'; return true; },
   'cal-nuevo'(b, ev, repintar) { nuevoEvento(repintar, { fecha: b.dataset.d, area: ui.area || 'personal' }); },
   'ev-editar'(b, ev, repintar) { editarEvento(b.dataset.id, repintar); },
   'cal-pago'(b, ev, repintar) { const r = alternarPago(b.dataset.id, b.dataset.ym); repintar(); if (r) aviso(r.texto, () => { alternarPago(b.dataset.id, b.dataset.ym); repintar(); }); },

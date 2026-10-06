@@ -55,6 +55,52 @@ export function csv(movs) {
   return '﻿' + ['Fecha', 'Tipo', 'Descripción', 'Categoría', 'Área', 'Monto (S/)'].map(q).join(',') + '\r\n' + filas.join('\r\n') + '\r\n';
 }
 
+/* Días que tiene un mes «aaaa-mm» */
+export const diasDelMes = (ym) => new Date(Date.UTC(+ym.slice(0, 4), +ym.slice(5, 7), 0)).getUTCDate();
+const gastosEntre = (movs, desde, hasta) => movs.filter((x) => !esIngreso(x) && esFecha(x.fechas && x.fechas.inicio) && x.fechas.inicio >= desde && x.fechas.inicio <= hasta).reduce((s, x) => s + Math.abs(+x.monto || 0), 0);
+
+/* Cómo vas en el mes: comparado con el mes pasado AL MISMO DÍA, el gasto más
+   grande, a cuánto llegarías si sigues así, cuánto puedes gastar por día para
+   no pasarte del presupuesto y lo gastado en la semana (desde «lunes»).
+   Si «ym» ya pasó, compara meses completos y no proyecta. */
+export function analisisMes(movs, ym, hoyStr, presupuesto = 0, lunes = null) {
+  const actual = hoyStr.slice(0, 7) === ym, total = diasDelMes(ym);
+  const dia = actual ? +hoyStr.slice(8) : total;
+  const [y, m] = ym.split('-').map(Number), ant = (m === 1 ? y - 1 : y) + '-' + String(m === 1 ? 12 : m - 1).padStart(2, '0');
+  const diaAnt = Math.min(dia, diasDelMes(ant));
+  const ahora = gastosEntre(movs, ym + '-01', ym + '-' + String(dia).padStart(2, '0'));
+  const antes = gastosEntre(movs, ant + '-01', ant + '-' + String(diaAnt).padStart(2, '0'));
+  const gastos = movs.filter((x) => delMes(x, ym) && !esIngreso(x));
+  const mayor = gastos.reduce((a, x) => (!a || Math.abs(+x.monto || 0) > Math.abs(+a.monto || 0) ? x : a), null);
+  const r = { dia, total, ahora, antes, dif: ahora - antes, pct: antes ? Math.round((ahora - antes) / antes * 100) : null, mayor, actual, proyeccion: null, porDia: null, semana: null, quedan: total - dia + 1 };
+  if (actual) {
+    /* los pagos fijos y los gastos grandes (S/ 300 o más y al menos el 30 % de
+       lo gastado) se cuentan una vez: solo se proyecta lo del día a día */
+    const unaVez = gastos.filter((x) => x.fechas.inicio <= hoyStr && ((x.extra && x.extra.pago) || (Math.abs(+x.monto || 0) >= 30000 && Math.abs(+x.monto || 0) >= ahora * 0.3))).reduce((s, x) => s + Math.abs(+x.monto || 0), 0);
+    const fijos = Math.min(ahora, unaVez);
+    r.proyeccion = dia >= 5 ? fijos + Math.round((ahora - fijos) / dia * total) : null;
+    if (+presupuesto > 0) r.porDia = Math.max(0, Math.floor((presupuesto - ahora) / r.quedan));
+    if (lunes) r.semana = gastosEntre(movs, lunes, hoyStr);
+  }
+  return r;
+}
+
+/* Gastos que se repiten cada mes (mismo nombre en 2 de los últimos 3 meses)
+   y que aún no son pago fijo: candidatos a «pago fijo» */
+const clave = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9ñ ]/g, ' ').replace(/\s+/g, ' ').trim();
+export function repetidos(movs, ym, titulosPagos = []) {
+  const meses = mesesAtras(ym, 3), ya = new Set(titulosPagos.map(clave)), g = {};
+  movs.filter((x) => !esIngreso(x) && !(x.extra && (x.extra.pago || x.extra.desde)) && meses.some((k) => delMes(x, k))).forEach((x) => {
+    const k = clave(x.titulo); if (k.length < 3 || ya.has(k)) return;
+    const e = g[k] || (g[k] = { titulo: x.titulo, meses: new Set(), ultimo: x });
+    e.meses.add(x.fechas.inicio.slice(0, 7));
+    if (x.fechas.inicio >= e.ultimo.fechas.inicio) e.ultimo = x;
+  });
+  return Object.values(g).filter((e) => e.meses.size >= 2 && (e.meses.has(meses[2]) || e.meses.has(meses[1])))
+    .map((e) => ({ titulo: e.ultimo.titulo, monto: Math.abs(+e.ultimo.monto || 0), cat: (e.ultimo.extra && e.ultimo.extra.categoria) || '', dia: +e.ultimo.fechas.inicio.slice(8), meses: e.meses.size, area: e.ultimo.area }))
+    .sort((a, b) => b.monto - a.monto);
+}
+
 /* ---------- Notas con casillas ----------
    Una línea «[ ] algo» o «- [x] algo» es una casilla que se marca tocándola. */
 const RE_CASILLA = /^(\s*(?:[-*•]\s*)?)\[( |x|X)\]\s?(.*)$/;

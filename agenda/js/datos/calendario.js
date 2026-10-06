@@ -120,3 +120,49 @@ export function proximoBloque(hoy, ahoraMin) {
   }
   return null;
 }
+
+/* Huecos libres de un día entre «ini» y «fin» (minutos), de al menos «minimo» */
+export function huecosLibres(bloques, ini, fin, minimo = 30) {
+  const out = []; let t = ini;
+  bloques.slice().sort((a, b) => a.ini - b.ini).forEach((b) => {
+    if (b.ini - t >= minimo) out.push({ ini: t, fin: Math.min(b.ini, fin) });
+    t = Math.max(t, b.fin);
+  });
+  if (fin - t >= minimo) out.push({ ini: t, fin });
+  return out.filter((h) => h.fin - h.ini >= minimo && h.ini < fin).map((h) => Object.assign(h, { hIni: aHora(h.ini), hFin: aHora(h.fin) }));
+}
+
+/* Lo que viene en los próximos «n» días, día por día (solo días con algo) */
+export function proximos(desde, n = 60, area = '') {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const d = sumarDias(desde, i), x = delDia(d, area);
+    const sinHora = x.sinHora.filter((s) => s.estado !== 'hecho'), vencen = x.vencen.filter((v) => !v.hecho);
+    if (x.bloques.length || x.todoDia.length || sinHora.length || vencen.length) out.push({ dia: d, bloques: x.bloques, todoDia: x.todoDia, sinHora, vencen });
+  }
+  return out;
+}
+
+/* Un año de un vistazo, en UNA pasada: por mes, cuántas cosas, cumpleaños
+   y plazos legales; por día, cuántas cosas (para el mapa de calor) */
+export function resumenAnio(anio, area = '') {
+  const meses = Array.from({ length: 12 }, () => ({ n: 0, cumples: [], legales: [], dias: {} }));
+  const sumar = (f, x, extra) => {
+    if (!esFecha(f) || f.slice(0, 4) !== String(anio)) return;
+    const m = meses[+f.slice(5, 7) - 1]; m.n++; m.dias[f] = (m.dias[f] || 0) + 1;
+    if (extra) extra(m);
+  };
+  elementos((x) => !area || x.area === area).forEach((x) => {
+    const f = x.fechas || {};
+    if (x.tipo === 'evento') {
+      const cumple = x.repetir === 'ano' && (x.extra.tipoEvento === 'cumple' || /cumple/i.test(x.titulo));
+      if (x.repetir === 'ano' && esFecha(f.inicio) && f.inicio.slice(0, 4) <= String(anio)) sumar(anio + f.inicio.slice(4), x, cumple ? (m) => m.cumples.push({ t: x.titulo, d: anio + f.inicio.slice(4), area: x.area }) : null);
+      else if (!x.repetir) sumar(f.inicio, x);
+    } else if (x.tipo === 'pendiente' && x.estado !== 'hecho') {
+      if (f.inicio) sumar(f.inicio, x);
+      if (f.vence && x.plazoLegal) sumar(f.vence, x, (m) => m.legales.push({ t: x.titulo, d: f.vence, area: x.area }));
+    } else if ((x.tipo === 'cobro' || x.tipo === 'documento' || x.tipo === 'prestamo') && x.estado !== 'hecho' && f.vence) sumar(f.vence, x);
+  });
+  meses.forEach((m) => { m.cumples.sort((a, b) => a.d.localeCompare(b.d)); m.legales.sort((a, b) => a.d.localeCompare(b.d)); });
+  return meses;
+}

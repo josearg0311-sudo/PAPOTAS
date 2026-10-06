@@ -11,10 +11,10 @@ import { fusionar, normalizarDoc } from '../js/datos/modelo.js';
 import { analizarArchivo } from '../js/datos/respaldo.js';
 import { interpretar } from '../js/util/interpretar.js';
 import { grupo, siguiente, ordenar } from '../js/datos/pendientes.js';
-import { ocurre, minutosPorArea } from '../js/datos/calendario.js';
+import { ocurre, minutosPorArea, huecosLibres } from '../js/datos/calendario.js';
 import { modeloVacio } from '../js/datos/modelo.js';
 import { feriado, pascua } from '../js/datos/feriados.js';
-import { textoICS, enlaceGoogle } from '../js/util/ics.js';
+import { textoICS, enlaceGoogle, leerICS, idDeUid } from '../js/util/ics.js';
 import { diaDePago } from '../js/datos/calendario.js';
 import * as HR from '../js/datos/herramientas.js';
 import * as SG from '../js/datos/seguimiento.js';
@@ -474,6 +474,43 @@ tareas.push(prueba('Buscar: sin tildes, todas las palabras, plurales y lo del t�
   const it = [{ id: 'a', tipo: 'nota', titulo: 'Wifi', notas: 'luz del router', actualizado: 2 }, { id: 'b', tipo: 'pendiente', titulo: 'Pagar la luz', notas: '', actualizado: 1 }, { id: 'c', tipo: 'pendiente', titulo: 'Luz', borrado: 5 }];
   igual(BUS.buscarElementos(it, 'luz').map((x) => x.id), ['b', 'a']);
   igual(BUS.buscarElementos(it, 'l'), []);
+}));
+
+tareas.push(prueba('Traer .ics: horas UTC a Lima, todo el día, varios días, repetir, aviso y sin duplicar', () => {
+  const t = 'BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:a1@google.com\r\nDTSTART:20261010T150000Z\r\nDTEND:20261010T160000Z\r\nSUMMARY:Reunión\\, equipo\r\nLOCATION:Miraflores\r\nRRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR\r\nBEGIN:VALARM\r\nTRIGGER:-PT30M\r\nEND:VALARM\r\nEND:VEVENT\r\n' +
+    'BEGIN:VEVENT\r\nUID:b2\r\nDTSTART;VALUE=DATE:20261224\r\nDTEND;VALUE=DATE:20261227\r\nSUMMARY:Viaje a Cus\r\n co\r\nEND:VEVENT\r\n' +
+    'BEGIN:VEVENT\r\nUID:c3\r\nDTSTART:20261011T030000Z\r\nSUMMARY:Tarde\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:d4\r\nSTATUS:CANCELLED\r\nDTSTART:20261012T100000\r\nSUMMARY:No\r\nEND:VEVENT\r\nEND:VCALENDAR';
+  const l = leerICS(t);
+  igual(l.length, 3);
+  igual([l[0].titulo, l[0].fecha, l[0].hora, l[0].horaFin, l[0].repetir, l[0].aviso, l[0].lugar], ['Reunión, equipo', '2026-10-10', '10:00', '11:00', 'lab', 30, 'Miraflores']);
+  igual([l[1].titulo, l[1].todoElDia, l[1].fecha, l[1].hasta], ['Viaje a Cusco', true, '2026-12-24', '2026-12-26']);
+  igual([l[2].fecha, l[2].hora], ['2026-10-10', '22:00']);
+  /* ida y vuelta con lo que exporta la propia agenda */
+  const e = Object.assign(modeloVacio(), { id: 'eventos_x', tipo: 'evento', titulo: 'Clase', repetir: 'sem', aviso: 15, fechas: Object.assign(modeloVacio().fechas, { inicio: '2026-10-07', hora: '19:00', horaFin: '20:30' }) });
+  const r = leerICS(textoICS([e]))[0];
+  igual([r.uid, r.fecha, r.hora, r.horaFin, r.repetir, r.aviso], ['eventos_x@agenda-lima', '2026-10-07', '19:00', '20:30', 'sem', 15]);
+  igual(idDeUid('a1@google.com') === idDeUid('a1@google.com') && idDeUid('a1@google.com') !== idDeUid('a2@google.com'), true);
+}));
+
+tareas.push(prueba('Agenda: huecos libres entre bloques (desde las 8, de 30 min o más)', () => {
+  const b = [{ ini: 9 * 60, fin: 10 * 60 }, { ini: 9 * 60 + 30, fin: 11 * 60 }, { ini: 11 * 60 + 20, fin: 12 * 60 }, { ini: 15 * 60, fin: 16 * 60 }];
+  igual(huecosLibres(b, 8 * 60, 18 * 60, 30).map((h) => h.hIni + '-' + h.hFin), ['08:00-09:00', '12:00-15:00', '16:00-18:00']);
+  igual(huecosLibres([], 22 * 60, 24 * 60).map((h) => h.hIni + '-' + h.hFin), ['22:00-00:00']);
+}));
+
+tareas.push(prueba('Finanzas: mes pasado al mismo día, proyección sin multiplicar pagos fijos, por día y repetidos', () => {
+  const mv = (id, f, m, t, ex = {}) => Object.assign(modeloVacio(), { id, tipo: 'movimiento', titulo: t, monto: m, fechas: Object.assign(modeloVacio().fechas, { inicio: f }), extra: Object.assign({ libro: 'personal', ingreso: false }, ex) });
+  const movs = [mv('1', '2026-09-03', 10000, 'Netflix'), mv('2', '2026-09-20', 50000, 'Viaje'), mv('3', '2026-10-02', 30000, 'Alquiler', { pago: 'p1' }), mv('4', '2026-10-05', 5000, 'netflix '), mv('5', '2026-10-06', 5000, 'Menú'),
+    mv('6', '2026-08-15', 2000, 'Menú'), mv('7', '2026-10-01', 99900, 'Sueldo', { ingreso: true })];
+  const a = FI.analisisMes(movs, '2026-10', '2026-10-10', 100000, '2026-10-05');
+  igual([a.ahora, a.antes, a.dif, a.mayor.id, a.semana, a.quedan], [40000, 10000, 30000, '3', 10000, 22]);
+  igual(a.proyeccion, 30000 + Math.round(10000 / 10 * 31));
+  igual(a.porDia, Math.floor(60000 / 22));
+  const pasado = FI.analisisMes(movs, '2026-09', '2026-10-10');
+  igual([pasado.ahora, pasado.proyeccion, pasado.porDia], [60000, null, null]);
+  igual(FI.repetidos(movs, '2026-10').map((x) => x.titulo + ':' + x.meses), ['netflix :2', 'Menú:2']);
+  igual(FI.repetidos(movs, '2026-10', ['Netflix']).map((x) => x.titulo), ['Menú']);
+  igual(FI.diasDelMes('2028-02'), 29);
 }));
 
 Promise.all(tareas).then(() => {

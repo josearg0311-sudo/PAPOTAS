@@ -2,12 +2,13 @@
    temática y su color: el PERSONAL (con lo de Estudios y Deporte, cada uno
    en su área) y el de la OFICINA. Nunca se mezclan.
    Direcciones: #finanzas (personal) y #finanzas/oficina */
-import { elementos, buscarElemento, documento, cambiarPerfil } from '../datos/datos.js';
+import { elementos, buscarElemento, documento, cambiarPerfil, aPapelera } from '../datos/datos.js';
 import { AREAS, area } from '../datos/areas.js';
-import { LIBROS, CATEGORIAS, areaDeCategoria, esDelLibro, esIngreso, delMes, resumenMes, historial, estadoPresupuesto, csv } from '../datos/finanzas.js';
+import { LIBROS, CATEGORIAS, areaDeCategoria, esDelLibro, esIngreso, delMes, resumenMes, historial, estadoPresupuesto, csv, analisisMes, repetidos } from '../datos/finanzas.js';
 import { diaDePago, pagado } from '../datos/calendario.js';
 import { val, resumenPrestamos } from '../datos/herramientas.js';
-import { hoy, fmtCorta, MESES, diasEntre } from '../util/fechas.js';
+import { hoy, fmtCorta, fmtFecha, MESES, diasEntre, inicioSemana } from '../util/fechas.js';
+import { preferencias } from '../datos/preferencias.js';
 import { fmtSoles } from '../util/dinero.js';
 import { esc, ico, vacio, plural, explica } from '../util/dom.js';
 import { tarjeta } from './comun.js';
@@ -15,6 +16,7 @@ import { fila, filas, emoji, casilla, pildora, cifra, cifras, cambiarExtra, nuev
 import { editar } from '../piezas/formulario.js';
 import { guardarArchivo } from '../datos/respaldo.js';
 import { aviso } from '../piezas/aviso.js';
+import { cerrarHoja } from '../piezas/hoja.js';
 
 const ui = { mes: '', cat: '', ver: 30 };
 const COLOR = { personal: 'personal', oficina: 'oficina' };
@@ -62,7 +64,7 @@ function vistaLibro(libro) {
       (pres ? '<div class="presupuesto ' + pres.nivel + '"><div class="pr-txt"><b>Presupuesto: ' + pres.pct + ' %</b><small>' + fmtSoles(r.gastos) + ' de ' + fmtSoles(presupuestoDe(libro)) + (pres.queda >= 0 ? ' · te quedan ' + fmtSoles(pres.queda) : ' · te pasaste por ' + fmtSoles(-pres.queda)) + '</small></div><span class="progreso"><i style="width:' + Math.min(100, pres.pct) + '%"></i></span></div>' : '') +
       '<div class="pie-tarjeta">' + '<button type="button" class="btn pri" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Gasto</button><button type="button" class="btn" data-acc="fin-nuevo" data-libro="' + libro + '" data-ing="1">' + ico('i-plus') + 'Ingreso</button>' +
         '<button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-meta') + (pres ? 'Presupuesto' : 'Poner presupuesto') + '</button></div>' +
-    '</section>' +
+    '</section>' + tarjetaComoVas(libro, todos, ym, r) +
     '<div class="columnas"><div>' +
     tarjeta({ eti: 'PAGOS FIJOS', titulo: 'Pagos fijos de ' + MESES[+ym.slice(5) - 1], n: pagos.filter((x) => x.ok).length + '/' + pagos.length, clase: 'area-' + a,
       guia: 'Lo que pagas cada mes. Al marcarlo pagado se anota el gasto en este libro.',
@@ -76,7 +78,7 @@ function vistaLibro(libro) {
     (libro === 'personal' && Object.keys(r.porArea).length > 1 ? tarjeta({ eti: 'POR ÁREA', titulo: 'Cada área con sus gastos', clase: 'area-personal',
       guia: 'Lo de Estudios y Deporte se cuenta en su área, aunque salga de tu libro personal.',
       cuerpo: '<div class="barras">' + AREAS.filter((ar) => r.porArea[ar.id]).map((ar) => '<a class="barra-fila area-' + ar.id + '" href="#areas/' + ar.id + '"><span class="bf-nom">' + ar.nombre + '</span><span class="bf-barra" aria-hidden="true"><i style="width:' + (r.porArea[ar.id] / r.gastos * 100).toFixed(1) + '%"></i></span><span class="bf-val mono">' + fmtSoles(r.porArea[ar.id]) + '</span></a>').join('') + '</div>' }) : '') +
-    enlaceTematico(libro) +
+    tarjetaRepetidos(libro, todos, ym) + enlaceTematico(libro) +
     '</div><div>' +
     tarjeta({ eti: 'MOVIMIENTOS', titulo: ui.cat ? esc(ui.cat) : 'Movimientos de ' + MESES[+ym.slice(5) - 1], n: delM.length, clase: 'area-' + a,
       cuerpo: (delM.length ? filas(delM.slice(0, ui.ver).map(filaMov)) + (delM.length > ui.ver ? '<div class="pie-tarjeta"><button type="button" class="btn" data-acc="fin-mas">Ver más (' + (delM.length - ui.ver) + ')</button></div>' : '') : vacio('Sin movimientos', 'Anota un gasto o un ingreso con los botones de arriba.')) +
@@ -84,9 +86,61 @@ function vistaLibro(libro) {
     tarjeta({ eti: 'INFORME', titulo: hist.length > 1 ? 'Últimos ' + hist.length + ' meses' : 'Este mes', clase: 'area-' + a,
       cuerpo: '<table class="informe"><thead><tr><th scope="col">Mes</th><th scope="col">Ingresos</th><th scope="col">Gastos</th><th scope="col">Saldo</th></tr></thead><tbody>' +
         hist.map((h) => '<tr' + (h.ym === ym ? ' class="actual"' : '') + '><th scope="row"><button type="button" class="enlace" data-acc="fin-ir-mes" data-v="' + h.ym + '">' + cap(MESES[+h.ym.slice(5) - 1]).slice(0, 3) + (h.ym.slice(0, 4) !== hoy().slice(0, 4) ? ' ' + h.ym.slice(2, 4) : '') + '</button></th>' +
-          '<td class="mono">' + fmtSoles(h.ingresos) + '</td><td class="mono"><span class="mini-barra" aria-hidden="true"><i style="width:' + (h.gastos / maxH * 100).toFixed(0) + '%"></i></span>' + fmtSoles(h.gastos) + '</td><td class="mono ' + (h.saldo < 0 ? 'txt-aviso' : 'txt-ok') + '">' + (h.saldo < 0 ? '−' : '+') + fmtSoles(Math.abs(h.saldo)) + '</td></tr>').join('') + '</tbody></table>' }) +
+          '<td class="mono">' + fmtSoles(h.ingresos) + '</td><td class="mono"><span class="mini-barra" aria-hidden="true"><i style="width:' + (h.gastos / maxH * 100).toFixed(0) + '%"></i></span>' + fmtSoles(h.gastos) + '</td><td class="mono ' + (h.saldo < 0 ? 'txt-aviso' : 'txt-ok') + '">' + (h.saldo < 0 ? '−' : '+') + fmtSoles(Math.abs(h.saldo)) + '</td></tr>').join('') + '</tbody></table>' +
+        pie('<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-bajar') + 'Imprimir o guardar en PDF</button>') }) +
     '</div></div>';
 }
+/* Cómo vas: comparado con el mes pasado al mismo día, mayor gasto, proyección,
+   cuánto puedes gastar por día y lo de esta semana */
+function tarjetaComoVas(libro, todos, ym, r) {
+  const h = hoy(), an = analisisMes(todos, ym, h, presupuestoDe(libro), inicioSemana(h, preferencias().semanaLunes !== false));
+  if (!r.gastos && !an.antes) return '';
+  const mesAnt = MESES[(+ym.slice(5) + 10) % 12], l = [];
+  if (an.antes || an.ahora) {
+    const mas = an.dif > 0, igual = Math.abs(an.dif) < 100;
+    l.push(['📊', igual ? 'Gastas casi lo mismo que en ' + mesAnt : 'Llevas <b>' + fmtSoles(Math.abs(an.dif)) + (mas ? ' más' : ' menos') + '</b> que en ' + mesAnt + (an.pct != null ? ' (' + (mas ? '+' : '−') + Math.abs(an.pct) + ' %)' : ''),
+      an.actual ? 'Del 1 al ' + an.dia + ': ' + fmtSoles(an.ahora) + ' ahora · ' + fmtSoles(an.antes) + ' en ' + mesAnt : fmtSoles(an.ahora) + ' en el mes · ' + fmtSoles(an.antes) + ' en ' + mesAnt, mas && !igual ? 'aviso' : 'ok']);
+  }
+  if (an.mayor) l.push(['🔝', 'Tu mayor gasto: <b>' + esc(an.mayor.titulo || 'Gasto') + '</b>', fmtSoles(Math.abs(+an.mayor.monto || 0)) + ' · ' + fmtCorta(an.mayor.fechas.inicio) + (an.mayor.extra.categoria ? ' · ' + esc(an.mayor.extra.categoria) : ''), '']);
+  if (an.proyeccion != null) { const pr = presupuestoDe(libro), pasa = pr && an.proyeccion > pr;
+    l.push(['🔮', 'Si sigues así, cerrarás el mes en <b>' + fmtSoles(an.proyeccion) + '</b>', pr ? (pasa ? 'Te pasarías del presupuesto por ' + fmtSoles(an.proyeccion - pr) : 'Dentro de tu presupuesto (' + fmtSoles(pr) + ')') : 'Según lo que gastas por día (los pagos fijos y gastos grandes se cuentan una vez)', pasa ? 'aviso' : '']); }
+  if (an.porDia != null) l.push(['🗓️', an.porDia > 0 ? 'Puedes gastar <b>' + fmtSoles(an.porDia) + ' por día</b>' : '<b>Ya no te queda presupuesto</b> este mes', 'Para no pasarte en los ' + an.quedan + ' días que quedan (con hoy)', an.porDia > 0 ? 'ok' : 'aviso']);
+  if (an.semana != null) l.push(['📅', 'Esta semana: <b>' + fmtSoles(an.semana) + '</b>', 'Desde el ' + fmtCorta(inicioSemana(h, preferencias().semanaLunes !== false)), '']);
+  return tarjeta({ eti: 'CÓMO VAS', titulo: an.actual ? 'Tu mes hasta hoy' : 'Cómo te fue en ' + MESES[+ym.slice(5) - 1], clase: 'area-' + COLOR[libro],
+    guia: 'Se compara con el mes pasado <b>hasta el mismo día</b>, para que sea justo. La proyección cuenta una sola vez los pagos fijos y los gastos grandes (como el alquiler).',
+    cuerpo: '<ul class="como-vas">' + l.map(([e, t, s, c]) => '<li' + (c ? ' class="cv-' + c + '"' : '') + '><span class="cv-em" aria-hidden="true">' + e + '</span><span><b class="cv-t">' + t + '</b><small>' + s + '</small></span></li>').join('') + '</ul>' });
+}
+/* Gastos que se repiten cada mes → pasarlos a pago fijo con un toque */
+function tarjetaRepetidos(libro, todos, ym) {
+  if (ym !== hoy().slice(0, 7)) return '';
+  const pagos = elementos((x) => x.tipo === 'pago' && libroDePago(x) === libro).map((p) => p.titulo);
+  const l = repetidos(todos, ym, pagos).slice(0, 4);
+  if (!l.length) return '';
+  return tarjeta({ eti: 'SE REPITEN', titulo: 'Gastos de todos los meses', n: l.length, clase: 'area-' + COLOR[libro],
+    guia: 'Gastos con el mismo nombre en varios meses. Si los vuelves <b>pago fijo</b>, te aviso antes de que venzan y se anotan con una casilla.',
+    cuerpo: filas(l.map((x) => fila({ titulo: x.titulo, meta: '<b class="mono">' + fmtSoles(x.monto) + '</b> · en ' + x.meses + ' meses · el día ' + x.dia,
+      final: '<button type="button" class="btn chico" data-acc="fin-a-pago" data-libro="' + libro + '" data-t="' + esc(x.titulo) + '" data-m="' + x.monto + '" data-d="' + x.dia + '" data-c="' + esc(x.cat) + '">Volver pago fijo</button>' }))) });
+}
+/* Informe para imprimir o guardar en PDF (se arma aparte y se imprime) */
+function imprimirInforme(libro) {
+  const ym = ui.mes || hoy().slice(0, 7), todos = movs(libro), r = resumenMes(todos, ym), hist = historial(todos, ym, 6).filter((h) => h.n);
+  const delM = todos.filter((x) => delMes(x, ym)).sort((a, b) => (a.fechas.inicio || '').localeCompare(b.fechas.inicio || ''));
+  const p = presupuestoDe(libro), nombre = (documento().perfil && documento().perfil.nombre) || '';
+  const fila2 = (c) => '<tr>' + c.map((v, i) => '<td' + (i >= c.length - 1 ? ' class="num"' : '') + '>' + v + '</td>').join('') + '</tr>';
+  const html = '<h1>' + LIBROS[libro] + ' · ' + nombreMes(ym) + '</h1><p>' + (nombre ? esc(nombre) + ' · ' : '') + 'Impreso el ' + fmtFecha(hoy()) + '</p>' +
+    '<table><tbody>' + fila2(['Ingresos', fmtSoles(r.ingresos)]) + fila2(['Gastos', fmtSoles(r.gastos)]) + fila2(['<b>Saldo</b>', '<b>' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b>']) + (p ? fila2(['Presupuesto', fmtSoles(p) + ' (' + Math.round(r.gastos / p * 100) + ' % usado)']) : '') + '</tbody></table>' +
+    (r.porCategoria.length ? '<h2>Gastos por categoría</h2><table><thead><tr><th>Categoría</th><th>%</th><th class="num">Monto</th></tr></thead><tbody>' + r.porCategoria.map((c) => fila2([esc(c.cat), c.pct + ' %', fmtSoles(c.monto)])).join('') + '</tbody></table>' : '') +
+    '<h2>Movimientos (' + delM.length + ')</h2>' + (delM.length ? '<table><thead><tr><th>Día</th><th>Descripción</th><th>Categoría</th><th class="num">Monto</th></tr></thead><tbody>' + delM.map((x) => fila2([fmtFecha(x.fechas.inicio), esc(x.titulo || ''), esc(x.extra.categoria || ''), (esIngreso(x) ? '+' : '−') + fmtSoles(Math.abs(+x.monto || 0))])).join('') + '</tbody></table>' : '<p>Sin movimientos.</p>') +
+    (hist.length > 1 ? '<h2>Últimos meses</h2><table><thead><tr><th>Mes</th><th>Ingresos</th><th>Gastos</th><th class="num">Saldo</th></tr></thead><tbody>' + hist.map((h) => fila2([nombreMes(h.ym), fmtSoles(h.ingresos), fmtSoles(h.gastos), (h.saldo < 0 ? '−' : '+') + fmtSoles(Math.abs(h.saldo))])).join('') + '</tbody></table>' : '');
+  let caja = document.getElementById('impresion');
+  if (!caja) { caja = document.createElement('div'); caja.id = 'impresion'; document.body.appendChild(caja); }
+  caja.innerHTML = html;
+  document.body.classList.add('imprimiendo');
+  const fin = () => { document.body.classList.remove('imprimiendo'); caja.innerHTML = ''; window.removeEventListener('afterprint', fin); };
+  window.addEventListener('afterprint', fin);
+  setTimeout(() => { try { window.print(); } catch (e) { fin(); } }, 50);
+}
+
 /* Lo propio de cada libro, sin repetir lo que vive en su área */
 function enlaceTematico(libro) {
   if (libro === 'oficina') {
@@ -119,17 +173,28 @@ function editarMov(id, repintar, pre = {}) {
     repintar(); aviso((ingreso ? '💰 +' : '💸 −') + fmtSoles(v.monto) + ' · ' + (libro === 'oficina' ? 'oficina' : 'personal'));
   }, alBorrar: x ? () => borrar(id, repintar) : null });
   const c = h.querySelector('[name="cat"]'); if (c) c.setAttribute('list', 'dlCats');
+  /* Anotar otra vez hoy (el mismo gasto o ingreso) */
+  if (x) {
+    const fb = h.querySelector('.fila-botones'), otra = document.createElement('button');
+    otra.type = 'button'; otra.className = 'btn'; otra.innerHTML = ico('i-repetir') + 'Anotar otra vez hoy';
+    otra.addEventListener('click', () => {
+      const n = nuevo('movimiento', x.area, { titulo: x.titulo, monto: Math.abs(+x.monto || 0), estado: 'hecho', notas: x.notas, fechas: { inicio: hoy() }, extra: { libro, ingreso: ing, categoria: x.extra.categoria } });
+      cerrarHoja(); repintar();
+      aviso((ing ? '💰 +' : '💸 −') + fmtSoles(Math.abs(+x.monto || 0)) + ' anotado hoy', () => { aPapelera(n.id); repintar(); });
+    });
+    fb.insertBefore(otra, fb.firstChild);
+  }
   /* Categoría de Estudios o Deporte → sugiere su área */
   if (c && libro !== 'oficina') c.addEventListener('change', () => { const ar = areaDeCategoria(c.value); if (ar !== 'personal') { const b = h.querySelector('[data-sel="area"] [data-v="' + ar + '"]'); if (b) b.click(); } });
 }
-function editarPago(id, repintar, libro) {
+function editarPago(id, repintar, libro, pre = {}) {
   const p = id ? buscarElemento(id) : null;
   editar({ titulo: p ? 'Pago fijo' : 'Nuevo pago fijo', campos: [
     { n: 'em', t: 'texto', etq: 'Emoji', v: p ? val(p, 'em', '🧾') : '🧾', max: 4, mitad: true },
-    { n: 'titulo', t: 'texto', etq: 'Qué pagas', v: p ? p.titulo : '', req: true, max: 60, ph: 'Ej. Luz', mitad: true },
-    { n: 'monto', t: 'monto', etq: 'Monto (S/)', v: p ? p.monto : null, mitad: true },
-    { n: 'dia', t: 'num', etq: 'Día del mes', v: p ? val(p, 'dia', 1) : 1, mitad: true, ayuda: 'Si pones 31, en meses más cortos vence el último día.' },
-    { n: 'cat', t: 'texto', etq: 'Categoría', v: p ? val(p, 'cat', 'Servicios') : 'Servicios', max: 40 },
+    { n: 'titulo', t: 'texto', etq: 'Qué pagas', v: p ? p.titulo : pre.titulo || '', req: true, max: 60, ph: 'Ej. Luz', mitad: true },
+    { n: 'monto', t: 'monto', etq: 'Monto (S/)', v: p ? p.monto : pre.monto || null, mitad: true },
+    { n: 'dia', t: 'num', etq: 'Día del mes', v: p ? val(p, 'dia', 1) : pre.dia || 1, mitad: true, ayuda: 'Si pones 31, en meses más cortos vence el último día.' },
+    { n: 'cat', t: 'texto', etq: 'Categoría', v: p ? val(p, 'cat', 'Servicios') : pre.cat || 'Servicios', max: 40 },
     { n: 'activo', t: 'si', etq: 'Activo (desmárcalo si ya no lo pagas)', v: p ? p.extra.activo !== false : true }],
   alGuardar: (v) => {
     const extra = { em: v.em || '🧾', dia: Math.min(31, Math.max(1, +v.dia || 1)), cat: v.cat, activo: v.activo };
@@ -167,5 +232,7 @@ export const acciones = {
   'fin-presupuesto'(b, ev, rp) { editarPresupuesto(b.dataset.libro, rp); },
   'fin-csv'(b) { const l = b.dataset.libro; guardarArchivo(csv(movs(l)), 'libro_' + l + '_' + hoy() + '.csv', 'text/csv'); aviso('Se bajó el libro ' + l + '. Ábrelo con Excel o Google Sheets.'); },
   'pago-nuevo'(b, ev, rp) { editarPago(null, rp, b.dataset.libro); },
+  'fin-a-pago'(b, ev, rp) { editarPago(null, rp, b.dataset.libro, { titulo: b.dataset.t, monto: +b.dataset.m, dia: +b.dataset.d, cat: b.dataset.c }); },
+  'fin-imprimir'(b) { imprimirInforme(b.dataset.libro); },
   'pago-editar'(b, ev, rp) { editarPago(b.dataset.id, rp); }
 };
