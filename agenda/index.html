@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es-PE" data-tema="oscuro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Tu organizador personal: Personal, Estudios, Oficina y Deporte.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Agenda">
+<meta name="format-detection" content="telephone=no">
+<title>Agenda</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/svg+xml" href="iconos/icono.svg">
+<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
+<link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+/* Tema ANTES de pintar, para que no parpadee. Lee la preferencia nueva y,
+   si aún no existe, la que tenías en la versión anterior. */
+(function(){
+  try{
+    var p = JSON.parse(localStorage.getItem('agenda5_pref') || 'null'), t = p && p.tema;
+    if(!t){ var v = JSON.parse(localStorage.getItem('agenda_pref') || '{}') || {}; t = v.temaAuto ? 'auto' : (localStorage.getItem('agenda_tema') || 'auto'); }
+    if(t === 'auto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'oscuro';
+    document.documentElement.setAttribute('data-tema', t === 'claro' ? 'claro' : 'oscuro');
+    if(p && p.guia) document.documentElement.classList.add('guia-previa');
+  }catch(e){}
+})();
+</script>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/componentes.css">
+<link rel="stylesheet" href="css/vistas.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-hoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></symbol>
+  <symbol id="i-rec" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="m8 8 1.5 1.5L12 7M8 14l1.5 1.5L12 13M14.5 8.5H17M14.5 14.5H17"/></symbol>
+  <symbol id="i-agenda" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M7.5 14h3M13.5 14h3M7.5 17.5h3"/></symbol>
+  <symbol id="i-areas" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="2.5"/><rect x="13" y="3" width="8" height="8" rx="2.5"/><rect x="3" y="13" width="8" height="8" rx="2.5"/><rect x="13" y="13" width="8" height="8" rx="2.5"/></symbol>
+  <symbol id="i-mas" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-guia" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .9-1 1.6v.6M12 17h.01"/></symbol>
+  <symbol id="i-luna" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-luna2" viewBox="0 0 24 24"><path d="M5 4h6l-6 7h6M13 12h6l-6 8h6"/></symbol>
+  <symbol id="i-casa" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/></symbol>
+  <symbol id="i-birrete" viewBox="0 0 24 24"><path d="M2 9l10-5 10 5-10 5Z"/><path d="M6 11v5c2 2 10 2 12 0v-5M22 9v6"/></symbol>
+  <symbol id="i-maletin" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="3"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2M2 13h20"/></symbol>
+  <symbol id="i-pesa" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></symbol>
+  <symbol id="i-nota" viewBox="0 0 24 24"><path d="M15 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M15 3v5h5M8 13h8M8 17h5"/></symbol>
+  <symbol id="i-fuego" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5Z"/></symbol>
+  <symbol id="i-meta" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.3"/></symbol>
+  <symbol id="i-seg" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-dinero" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="13" rx="3"/><path d="M2.5 10.5h19M7 15h3"/></symbol>
+  <symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8Z"/></symbol>
+  <symbol id="i-pausa" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
+  <symbol id="i-izq" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-der" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></symbol>
+  <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-candado" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="i-basura" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-nube" viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.7-9h1.8a4.5 4.5 0 1 1 0 9Z"/></symbol>
+</svg>
+
+<div class="app">
+  <nav class="lateral" id="lateral" aria-label="Secciones"></nav>
+  <div class="cuerpo">
+    <header class="cab">
+      <i class="logo solo-movil" aria-hidden="true"></i>
+      <div class="cab-tit"><small id="cabFecha"></small><h1 id="cabTitulo">Agenda</h1></div>
+      <span class="reloj" title="Hora de Lima"><i aria-hidden="true"></i><span id="relojTxt">--:--</span></span>
+      <button type="button" class="icono-btn" id="btnGuia" aria-pressed="false" aria-label="Modo guía: explica cada bloque" title="Modo guía (?)"><svg class="i" aria-hidden="true"><use href="#i-guia"/></svg></button>
+      <button type="button" class="icono-btn" id="btnTema" aria-label="Cambiar entre claro y oscuro" title="Claro u oscuro"><svg class="i" aria-hidden="true"><use href="#i-luna"/></svg></button>
+    </header>
+    <main id="pantalla" class="pantalla" tabindex="-1">
+      <noscript><p class="vacio">La Agenda necesita JavaScript activado.</p></noscript>
+    </main>
+  </div>
+</div>
+<nav class="barra" id="barra" aria-label="Secciones"></nav>
+<button type="button" class="fab" id="fab" aria-label="Agregar rápido" title="Agregar (n)"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+<div id="avisos" class="avisos" aria-live="polite"></div>
+<div id="capaHoja"></div>
+<div id="capaTour"></div>
+
+<div class="portada" id="portada" aria-hidden="true"><i class="logo"></i></div>
+
+<div class="candado" id="candado" role="dialog" aria-modal="true" aria-labelledby="candadoTitulo" hidden>
+  <i class="logo" aria-hidden="true"></i>
+  <b id="candadoTitulo">Escribe tu PIN</b>
+  <div class="puntos-pin" id="puntosPin" aria-hidden="true"></div>
+  <div class="teclado-pin" id="teclado"></div>
+  <small id="candadoNota" aria-live="assertive"></small>
+</div>
+</body>
+</html>

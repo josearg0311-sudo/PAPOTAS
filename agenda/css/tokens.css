@@ -1,0 +1,59 @@
+/* ==========================================================================
+   SISTEMA DE DISEÑO «SEÑAL» · Agenda 5
+   Tu estilo de la v4.5 (paleta «Negro»: negro puro, tarjetas #121214, azul
+   #1D45C4, letra Plus Jakarta, títulos grandes y gruesos, brillo de color en
+   la esquina de las tarjetas) + un toque técnico (cuadrícula tenue, etiquetas
+   y horas en Martian Mono) y didáctico (modo guía, recorrido).
+   Regla: todo color sale de estos tokens. Nada de colores sueltos.
+   ========================================================================== */
+@font-face { font-family: 'Plus Jakarta Sans'; src: url('../fuentes/plus-jakarta.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: 'Martian Mono'; src: url('../fuentes/martian-mono.woff2') format('woff2'); font-weight: 400 600; font-display: swap; }
+
+:root {
+  --f-texto: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: 'Martian Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --radio: 20px; --radio-chico: 12px; --radio-btn: 12px;
+  --toque: 44px;                       /* tamaño mínimo para el dedo */
+  --ancho-lateral: 248px;
+
+  /* Oscuro (por defecto) */
+  --fondo: #000000; --rejilla: rgba(255,255,255,.022);
+  --superficie: #121214; --superficie-2: #1C1C1E; --superficie-3: #26262A;
+  --tinta: #F5F5F7; --tinta-2: #A1A1A6; --tinta-3: #8A8A90;
+  --borde: #26262A; --brillo: rgba(255,255,255,.05);
+  --acento: #1D45C4; --acento-txt: #7B9AF2; --sobre-acento: #FFFFFF; --acento-suave: #0A1430;
+  --rojo: #FF6B61; --rojo-suave: #2B0F0D; --ambar: #FFD60A; --ambar-suave: #2A2406; --verde: #30D158; --verde-suave: #0E2415;
+  --velo: rgba(0,0,0,.66);
+  --sombra: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -18px rgba(0,0,0,.9);
+  --sombra-alta: 0 18px 50px -12px rgba(0,0,0,.85);
+
+  /* Áreas (los colores de tus espacios en la v4.5) */
+  --a-personal: #5AA9FF; --a-personal-s: #0B1E33; --a-personal-t: #A9D1FF;
+  --a-estudios: #2DD4BF; --a-estudios-s: #0A2925; --a-estudios-t: #8BEDE0;
+  --a-oficina: #94A3B8;  --a-oficina-s: #1A1F27;  --a-oficina-t: #CBD5E1;
+  --a-deporte: #4ADE80;  --a-deporte-s: #0C2616;  --a-deporte-t: #9EF0B8;
+  color-scheme: dark;
+}
+
+:root[data-tema="claro"] {
+  --fondo: #FFFFFF; --rejilla: rgba(0,0,0,.03);
+  --superficie: #F4F4F6; --superficie-2: #ECECEF; --superficie-3: #E3E3E7;
+  --tinta: #0A0A0A; --tinta-2: #5E5E63; --tinta-3: #6E6E73;
+  --borde: #E3E3E7; --brillo: rgba(255,255,255,.7);
+  --acento: #1A3FB0; --acento-txt: #1A3FB0; --sobre-acento: #FFFFFF; --acento-suave: #E6ECFF;
+  --rojo: #C4271C; --rojo-suave: #FDECEA; --ambar: #8A6500; --ambar-suave: #FFF6D6; --verde: #1A8540; --verde-suave: #E6F6EB;
+  --velo: rgba(10,10,20,.45);
+  --sombra: 0 1px 2px rgba(0,0,0,.04), 0 10px 24px -18px rgba(0,0,0,.25);
+  --sombra-alta: 0 18px 50px -16px rgba(0,0,0,.35);
+  --a-personal: #1F6FEB; --a-personal-s: #E3EEFF; --a-personal-t: #144FB0;
+  --a-estudios: #0F8F80; --a-estudios-s: #DDF5F1; --a-estudios-t: #0A665E;
+  --a-oficina: #56606B;  --a-oficina-s: #E9ECF0;  --a-oficina-t: #3B434C;
+  --a-deporte: #1E8A4C;  --a-deporte-s: #E2F4E9;  --a-deporte-t: #146637;
+  color-scheme: light;
+}
+
+/* Cada área pone su color en --a (fuerte), --as (fondo suave) y --at (texto) */
+.area-personal { --a: var(--a-personal); --as: var(--a-personal-s); --at: var(--a-personal-t); }
+.area-estudios { --a: var(--a-estudios); --as: var(--a-estudios-s); --at: var(--a-estudios-t); }
+.area-oficina  { --a: var(--a-oficina);  --as: var(--a-oficina-s);  --at: var(--a-oficina-t); }
+.area-deporte  { --a: var(--a-deporte);  --as: var(--a-deporte-s);  --at: var(--a-deporte-t); }
