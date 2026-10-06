@@ -135,3 +135,59 @@
 .datos-antiguos .mono { color: var(--tinta); font-weight: 600; }
 .datos-antiguos .pie-ajuste { border: 0; padding: 0; }
 .registro { min-height: 260px; font-family: var(--f-mono); font-size: 11.5px; }
+
+/* ---------- Fase 4: Agenda ---------- */
+.agenda .fichas { padding-top: 2px; }
+.franja .pts i[class*="area-"], .mes-dia .pts i[class*="area-"] { background: var(--a); }
+.franja [aria-pressed="true"] .pts i[class*="area-"] { box-shadow: 0 0 0 1.5px var(--sobre-acento); }
+.franja-cal { padding-top: 2px; }
+.feriado { display: flex; align-items: center; gap: 8px; margin: 4px 16px 8px; padding: 8px 12px; border-radius: var(--radio-chico); background: var(--rojo-suave); color: var(--tinta); font-size: 13.5px; }
+.feriado .i { width: 18px; height: 18px; color: var(--rojo); }
+.heroe .feriado { margin: 8px 0 0; }
+.agenda .todo-dia { padding: 0 16px 8px; }
+.todo-dia .chip { border: 0; min-height: 30px; cursor: pointer; }
+
+.linea-tiempo { position: relative; margin: 4px 16px 16px; }
+.hueco { position: absolute; left: 0; right: 0; height: 48px; display: block; border: 0; border-top: 1px solid var(--borde); background: transparent; text-align: left; padding: 0; cursor: copy; }
+.hueco span { display: inline-block; width: 60px; padding-top: 3px; font-family: var(--f-mono); font-size: 11px; color: var(--tinta-3); }
+.hueco:hover { background: color-mix(in srgb, var(--acento-txt) 7%, transparent); }
+.ev-bloque { position: absolute; z-index: 1; display: grid; align-content: start; gap: 1px; overflow: hidden; text-align: left; border: 0; border-left: 3px solid var(--a); border-radius: 10px; padding: 5px 9px; background: var(--as); color: var(--at); box-shadow: 0 0 0 1px color-mix(in srgb, var(--a) 25%, transparent); }
+.ev-bloque b { font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-bloque small { font-family: var(--f-mono); font-size: 10.5px; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ev-bloque.corto { grid-auto-flow: column; justify-content: start; align-items: center; gap: 8px; padding-top: 3px; }
+.ahora-linea { position: absolute; left: 0; right: 0; z-index: 2; display: grid; grid-template-columns: 60px 1fr; align-items: center; pointer-events: none; transform: translateY(-50%); }
+.ahora-linea span { font-family: var(--f-mono); font-size: 10.5px; font-weight: 600; color: var(--acento-txt); background: var(--superficie); }
+.ahora-linea i { position: relative; height: 2px; background: var(--acento-txt); box-shadow: 0 0 10px var(--acento-txt); }
+.ahora-linea i::before { content: ""; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--acento-txt); }
+
+.vencen { display: grid; }
+.vence-fila { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-top: 1px solid var(--borde); }
+.vencen .vence-fila:first-child { border-top: 0; }
+.vence-ico { width: 44px; display: grid; place-items: center; color: var(--ambar); }
+.vence-txt { display: grid; gap: 4px; border: 0; background: transparent; text-align: left; padding: 4px 0; min-width: 0; }
+.vence-txt b { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+.vence-fila.hecho b { text-decoration: line-through; color: var(--tinta-3); }
+
+.mini-bloques { display: grid; gap: 6px; padding: 0 16px 10px; }
+.mini-bloque { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 12px; border: 0; border-left: 3px solid var(--a); border-radius: 10px; background: var(--as); color: var(--at); text-align: left; }
+.mini-bloque .mono { font-size: 11px; }
+.mini-bloque b { font-weight: 600; font-size: 14px; }
+
+.semana-dia { grid-template-columns: 52px minmax(0, 1fr) auto; align-items: start; padding: 8px 12px 8px 6px; }
+.sd-lista { display: grid; gap: 3px; min-width: 0; padding-top: 2px; }
+.sd-cosa { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--tinta); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sd-cosa i { width: 7px; height: 7px; border-radius: 2px; background: var(--a); flex: none; }
+.sd-cosa .mono { font-size: 10.5px; color: var(--tinta-2); }
+.sd-cosa.alerta { color: var(--ambar); font-weight: 600; }
+.sd-fer { font-size: 12px; color: var(--rojo); font-weight: 600; }
+.sd-libre, .sd-mas { font-size: 12.5px; color: var(--tinta-3); }
+
+.mes-dia { display: grid; align-content: center; justify-items: center; gap: 3px; padding: 4px 0; }
+.mes-dia b { font-weight: 700; font-size: 15px; }
+.mes-dia .pts { display: flex; gap: 2px; min-height: 5px; }
+.mes-dia .pts i { width: 5px; height: 5px; border-radius: 50%; }
+.mes-dia .pts i.alerta { background: var(--ambar); }
+.mes-dia .pts i.legal { background: var(--rojo); }
+.mes-dia.feriado-dia b { color: var(--rojo); }
+.mes-dia.sel .pts i { box-shadow: 0 0 0 1.5px var(--sobre-acento); }
+.selector.envuelve { display: flex; flex-wrap: wrap; }

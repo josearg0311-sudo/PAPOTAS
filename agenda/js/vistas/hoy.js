@@ -15,6 +15,7 @@ import { estadoPomo, restante, totalMs, mmss, corriendo, alternar, reiniciar, vi
 import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
+import { feriado } from '../datos/feriados.js';
 
 export const SOBRECARGA = 0.85;
 const C38 = 2 * Math.PI * 38, C46 = 2 * Math.PI * 46;
@@ -58,7 +59,7 @@ function lineaDia(bloques) {
     if (!puesto && b.ini > ahora) { puesto = true; html += '<div class="ahora"><span>' + fmtHora(horaAhora(), p.formatoHora) + '</span><i></i></div>'; }
     const pasado = b.fin <= ahora;
     html += '<div class="bloque area-' + area(b.area).id + (pasado ? ' pasado' : '') + '"><span class="h">' + fmtHora(b.hIni, p.formatoHora) + '</span>' +
-      '<button type="button" class="b" data-acc="' + (b.tipo === 'pendiente' ? 'p-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '"><b>' + esc(b.titulo) + '</b><small>' +
+      '<button type="button" class="b" data-acc="' + (b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '"><b>' + esc(b.titulo) + '</b><small>' +
       fmtHora(b.hIni, p.formatoHora) + '–' + fmtHora(b.hFin, p.formatoHora) + (b.tipo === 'clase' ? ' · clase' : b.tipo === 'pendiente' ? ' · recordatorio' : '') + (b.lugar ? ' · ' + esc(b.lugar) : '') + '</small></button></div>';
   });
   if (!puesto) html += '<div class="ahora"><span>' + fmtHora(horaAhora(), p.formatoHora) + '</span><i></i></div>';
@@ -84,6 +85,7 @@ export function vistaHoy() {
   const delDiaL = delDia(h).sort(ordenar), hechos = hechosHoy(h), urg = urgentes(h);
   const tot = delDiaL.length + hechos.length, pct = tot ? hechos.length / tot : 0;
   const bloques = bloquesDelDia(h), tde = todoElDia(h), mins = minutosPorArea(bloques), vig = minutosVigilia(p), carga = mins.total / vig;
+  const fer = p.feriados === false ? '' : feriado(h);
   const pr = prioridades(), hechasPr = pr.filter((x) => x.ok && x.t).length;
   const hh = (m) => (m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) : ''));
 
@@ -92,7 +94,7 @@ export function vistaHoy() {
       '<div class="heroe-fila"><div class="anillo" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechos hoy"><svg viewBox="0 0 92 92"><circle class="fondo" cx="46" cy="46" r="38"/><circle class="valor" cx="46" cy="46" r="38" stroke-dasharray="' + C38.toFixed(1) + '" stroke-dashoffset="' + (C38 * (1 - pct)).toFixed(1) + '"/></svg><div><b>' + hechos.length + '/' + tot + '</b><small>de hoy</small></div></div>' +
       '<div><small class="fecha-larga">' + fmtLarga(h) + '</small><h2>' + saludo() + (n ? ', ' + esc(n) : '') + '</h2><p>' +
         (delDiaL.length ? 'Te quedan <b>' + delDiaL.length + '</b> para hoy' + (urg.length ? ' y <b>' + urg.length + '</b> ' + (urg.length === 1 ? 'urgente' : 'urgentes') : '') + '.' : tot ? '¡Todo hecho por hoy! 🎉' : 'Día libre. Agrega algo con el botón +.') + '</p>' +
-        (tde.length ? '<p class="todo-dia">' + tde.map((t) => '<span class="chip area-' + area(t.area).id + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</span>').join('') + '</p>' : '') + '</div></div>' +
+        (fer ? '<p class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></p>' : '') + (tde.length ? '<p class="todo-dia">' + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') + '</div></div>' +
       franjaSemana() +
       '<p class="explica"><b>Tu avance del día.</b> El anillo se llena con cada recordatorio que marcas. Toca un día de la franja para verlo en la Agenda.</p>' +
     '</section>' +

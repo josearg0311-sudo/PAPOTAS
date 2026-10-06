@@ -39,6 +39,7 @@ export function vistaAjustes() {
     ajuste('Horario despierto', 'Sirve para calcular si un día está sobrecargado.',
       '<div class="horas-par"><label><span>Desde</span><input type="time" class="entrada" data-pref-vigilia="ini" value="' + p.vigilia.ini + '"></label>' +
       '<label><span>Hasta</span><input type="time" class="entrada" data-pref-vigilia="fin" value="' + p.vigilia.fin + '"></label></div>') +
+    ajuste('Feriados del Perú', 'Mostrarlos en Hoy y en la Agenda.', selector('pref-feriados', [['1', 'Mostrar'], ['0', 'Ocultar']], p.feriados ? '1' : '0', 'Feriados')) +
     ajuste('Pantalla de inicio', 'Lo primero que ves al abrir la app.', selector('pref-inicio', PANTALLAS_INICIO, p.inicio, 'Pantalla de inicio')));
 
   const perm = permisoAvisos();
@@ -46,7 +47,8 @@ export function vistaAjustes() {
     ajuste('Avisos del sistema', perm === 'granted' ? 'Activados: los recordatorios con hora te avisan aunque estés en otra app (mientras el navegador la mantenga viva).' : perm === 'denied' ? 'Bloqueados. Actívalos desde el candado de la barra de direcciones → Notificaciones.' : perm === 'no' ? 'Este navegador no los tiene: sonarán dentro de la app.' : 'Aún sin activar. Sin ellos, los avisos solo suenan con la app abierta.',
       (perm === 'default' ? '<button type="button" class="btn pri" data-acc="avisos-permiso">' + ico('i-campana') + 'Activar</button>' : '') + '<button type="button" class="btn" data-acc="avisos-probar">Probar</button>') +
     ajuste('Sonido al avisar', '', selector('pref-sonido', [['1', 'Con sonido'], ['0', 'Silencio']], p.sonido ? '1' : '0', 'Sonido')) +
-    '<p class="pie-ajuste">' + ico('i-info') + 'Una página web solo puede avisar mientras está abierta o en segundo plano reciente. Para lo que no puede fallar (citas, audiencias), en la Fase 4 podrás pasarlo al calendario de tu teléfono.</p>');
+    '<p class="pie-ajuste">' + ico('i-info') + 'Una página web solo puede avisar mientras está abierta o en segundo plano reciente. Para lo que no puede fallar (citas, audiencias), pásalo al calendario de tu teléfono: suena aunque la Agenda esté cerrada.</p>' +
+    ajuste('Pasar al calendario del teléfono', 'Un archivo .ics con tus eventos y recordatorios que vienen. Cada evento también tiene su botón «Google Calendar».', '<button type="button" class="btn" data-acc="ics-todo">' + ico('i-bajar') + 'Todo en .ics</button>'));
 
   html += grupo('Seguridad',
     ajuste('PIN', pin ? 'Activado. Se pide al abrir la app y tras el tiempo que elijas abajo.' : 'Sin PIN: cualquiera que tome tu celular puede ver tu agenda.',
@@ -135,6 +137,8 @@ export function alElegirArchivo(t) {
 }
 
 export const acciones = {
+  'pref-feriados'(b) { cambiarPref({ feriados: b.dataset.v === '1' }); return true; },
+  'ics-todo'() { import('../piezas/eventos-ui.js').then((m) => { const n = m.exportarTodo(); aviso(n ? 'Archivo con ' + n + ' cosas. Ábrelo para agregarlas a tu calendario.' : 'No hay nada próximo para pasar.'); }); },
   'pref-sonido'(b) { cambiarPref({ sonido: b.dataset.v === '1' }); return true; },
   'avisos-permiso'() { pedirPermiso().then((r) => { aviso(r === 'granted' ? 'Avisos activados.' : 'Avisos sin activar.'); window.dispatchEvent(new Event('agenda:repintar')); }); },
   'avisos-probar'() { sonar(); aviso('⏰ Así suena un aviso'); notificar('⏰ Prueba de aviso', 'Así te avisará la Agenda.', 'ajustes', 'prueba'); },

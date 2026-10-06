@@ -5,11 +5,12 @@
 
    Límite honesto: una página web solo avisa mientras está abierta o en
    segundo plano reciente. Para lo que no puede fallar, mejor también
-   pasarlo al calendario del teléfono (llega en la Fase 4). */
+   pasarlo al calendario del teléfono (Agenda → .ics o Google Calendar). */
 import { leer, escribir } from '../datos/almacen.js';
 import { elementos } from '../datos/datos.js';
 import { preferencias } from '../datos/preferencias.js';
-import { hoy, minutosAhora } from '../util/fechas.js';
+import { hoy, minutosAhora, sumarDias } from '../util/fechas.js';
+import { ocurre } from '../datos/calendario.js';
 import { aviso } from './aviso.js';
 
 const CLAVE = 'agenda5_avisados', MARGEN_MIN = 120;
@@ -50,12 +51,27 @@ export function revisarAvisos(alPulsar) {
     avisados[k] = Date.now();
     if (ahora - m <= MARGEN_MIN) sonaron.push(x);
   });
+  /* Eventos con aviso «X minutos antes» (hoy y mañana, por los de 1 día antes) */
+  [h, sumarDias(h, 1)].forEach((dia, k) => {
+    elementos((x) => x.tipo === 'evento' && !x.todoElDia && x.fechas.hora && typeof x.aviso === 'number' && x.aviso >= 0 && ocurre(x.fechas.inicio, x.repetir, dia, x.fechas.fin)).forEach((e) => {
+      const [a, b] = e.fechas.hora.split(':').map(Number), ini = a * 60 + b + k * 1440, cuando = ini - e.aviso, clave = 'ev:' + e.id + '@' + dia;
+      if (ahora < cuando || ahora > ini + 30 || avisados[clave]) return;
+      avisados[clave] = Date.now();
+      sonaron.push(Object.assign({}, e, { esEvento: true }));
+    });
+  });
   if (!Object.keys(avisados).length) return sonaron;
   const limite = Date.now() - 7 * 864e5;
   Object.keys(avisados).forEach((k) => { if (avisados[k] < limite) delete avisados[k]; });
   escribir(CLAVE, avisados);
   sonaron.forEach((x) => {
     sonar();
+    if (x.esEvento) {
+      const falta = x.aviso >= 1440 ? 'mañana a las ' + x.fechas.hora : x.aviso ? 'en ' + x.aviso + ' min (' + x.fechas.hora + ')' : 'ahora';
+      aviso('📅 ' + x.titulo + ' · ' + falta);
+      notificar('📅 ' + x.titulo, 'Empieza ' + falta + (x.extra && x.extra.lugar ? ' · ' + x.extra.lugar : ''), 'agenda', x.id);
+      return;
+    }
     aviso('⏰ ' + x.titulo, alPulsar ? () => alPulsar(x) : null, 'Hecho');
     notificar('⏰ ' + x.titulo, 'Recordatorio · ' + x.fechas.hora, 'recordatorios', x.id);
   });

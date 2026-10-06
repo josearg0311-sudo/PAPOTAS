@@ -17,6 +17,7 @@ const BASE = {
   bloqueoMin: 1,           // minutos de inactividad antes de pedir el PIN
   guia: false,
   sonido: true,
+  feriados: true,
   tourVisto: false
 };
 
@@ -43,7 +44,7 @@ export function normalizarPref(x) {
   if (!PANTALLAS_INICIO.some((o) => o[0] === p.inicio)) p.inicio = 'hoy';
   if (!OPCIONES_BLOQUEO.some((o) => o[0] === +p.bloqueoMin)) p.bloqueoMin = 1;
   p.bloqueoMin = +p.bloqueoMin;
-  p.guia = !!p.guia; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false;
+  p.guia = !!p.guia; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
   return p;
 }
 

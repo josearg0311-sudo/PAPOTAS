@@ -18,6 +18,7 @@ import { acciones as accPend, iniciarDeslizar } from './piezas/pendientes-ui.js'
 import { tic as ticPomo } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
 import { marcar } from './datos/pendientes.js';
+import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, irADia, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea } from './vistas/areas.js';
 import { vistaMas, vistaSeccion } from './vistas/mas.js';
@@ -119,6 +120,7 @@ window.addEventListener('hashchange', () => {
 /* ---------- Acciones (un solo lugar que escucha los toques) ---------- */
 const ACCIONES = Object.assign({}, accPend, accHoy, accRec, accAgenda, accAjustes, accDatos, accPapelera, {
   agregar() { abrirAgregar(); },
+  'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },
   fase(b) { aviso('Esto llega en la Fase ' + b.dataset.n + '.'); },
   'ir-dia'(b) { irADia(b.dataset.dia); ir('agenda'); }

@@ -12,6 +12,9 @@ import { interpretar } from '../js/util/interpretar.js';
 import { grupo, siguiente, ordenar } from '../js/datos/pendientes.js';
 import { ocurre, minutosPorArea } from '../js/datos/calendario.js';
 import { modeloVacio } from '../js/datos/modelo.js';
+import { feriado, pascua } from '../js/datos/feriados.js';
+import { textoICS, enlaceGoogle } from '../js/util/ics.js';
+import { diaDePago } from '../js/datos/calendario.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -223,6 +226,32 @@ tareas.push(prueba('Eventos que se repiten o duran varios días', () => {
 tareas.push(prueba('Balance: los bloques que se pisan no se cuentan dos veces', () => {
   const r = minutosPorArea([{ ini: 540, fin: 600, area: 'oficina' }, { ini: 570, fin: 630, area: 'estudios' }, { ini: 700, fin: 730, area: 'oficina' }]);
   igual([r.total, r.oficina, r.estudios], [120, 90, 30]);
+}));
+
+/* ---------- FASE 4 · Agenda ---------- */
+tareas.push(prueba('Feriados del Perú: fijos y Semana Santa (2026 y 2027)', () => {
+  igual(pascua(2026), '2026-04-05'); igual(pascua(2027), '2027-03-28');
+  igual(feriado('2026-04-02'), 'Jueves Santo'); igual(feriado('2026-04-03'), 'Viernes Santo'); igual(feriado('2027-03-26'), 'Viernes Santo');
+  igual(feriado('2026-07-28'), 'Fiestas Patrias'); igual(feriado('2026-10-08'), 'Combate de Angamos'); igual(feriado('2026-08-30'), 'Santa Rosa de Lima'); igual(feriado('2026-10-06'), '');
+}));
+tareas.push(prueba('Pago fijo del 31: en febrero vence el 28 (y el 29 en bisiesto)', () => {
+  const p = Object.assign(modeloVacio(), { extra: { dia: 31 } });
+  igual(diaDePago(p, '2026-02'), '2026-02-28'); igual(diaDePago(p, '2028-02'), '2028-02-29'); igual(diaDePago(p, '2026-10'), '2026-10-31');
+}));
+const EV = Object.assign(modeloVacio(), { id: 'ev_1', tipo: 'evento', titulo: 'Audiencia; Exp. 04521, sala 3', notas: 'Llevar\ncopias', repetir: 'sem', aviso: 30,
+  fechas: Object.assign(modeloVacio().fechas, { inicio: '2026-10-07', hora: '09:00', horaFin: '11:00' }), extra: { lugar: 'Av. Abancay' } });
+tareas.push(prueba('Archivo .ics: hora de Lima, repetición, alarma y textos escapados', () => {
+  const t = textoICS([EV], 0);
+  ['TZID:America/Lima', 'DTSTART;TZID=America/Lima:20261007T090000', 'DTEND;TZID=America/Lima:20261007T110000', 'SUMMARY:Audiencia\\; Exp. 04521\\, sala 3', 'RRULE:FREQ=WEEKLY', 'TRIGGER:-PT30M', 'LOCATION:Av. Abancay'].forEach((l) => { if (!t.includes(l)) throw new Error('falta ' + l); });
+  if (!t.split('\r\n').every((l) => new TextEncoder().encode(l).length <= 75)) throw new Error('línea de más de 75 bytes');
+}));
+tareas.push(prueba('Archivo .ics: evento de todo el día termina al día siguiente', () => {
+  const t = textoICS([Object.assign({}, EV, { todoElDia: true, repetir: null, fechas: Object.assign({}, EV.fechas, { hora: null, inicio: '2026-12-31' }) })], 0);
+  if (!t.includes('DTSTART;VALUE=DATE:20261231') || !t.includes('DTEND;VALUE=DATE:20270101')) throw new Error(t);
+}));
+tareas.push(prueba('Enlace a Google Calendar con fecha, hora y zona de Lima', () => {
+  const u = new URL(enlaceGoogle(EV));
+  igual([u.searchParams.get('dates'), u.searchParams.get('ctz'), u.searchParams.get('recur')], ['20261007T090000/20261007T110000', 'America/Lima', 'RRULE:FREQ=WEEKLY']);
 }));
 
 Promise.all(tareas).then(() => {

@@ -40,17 +40,20 @@ js/
   app.js              arranque, rutas por dirección (#hoy, #areas/estudios…), acciones
   version.js          versión visible en Ajustes
   util/   fechas.js (Lima) · dinero.js (soles, céntimos, leerMonto) · dom.js (esc, ico, vacio)
+          ics.js (archivo .ics con zona America/Lima, alarma y repetición; enlace a Google Calendar)
           interpretar.js («llamar mañana 10am !! #oficina plazo legal» → título, fecha, hora, prioridad, área, etiquetas)
   datos/  almacen.js (localStorage seguro, claves agenda5_*, solo lectura de v4.5)
           modelo.js (formato v5, normalizar, fusionar) · migracion.js (puro: migrar/verificar/reconstruir)
           datos.js (ÚNICO que lee/cambia «agenda5_datos»; papelera; migrarDesdeV45)
           copias.js (copias automáticas en IndexedDB «agenda5») · respaldo.js (exportar/importar v5 y v4.5)
           pendientes.js (grupos hoy/más tarde/mañana/próximos/algún día/hecho, orden, repetir, urgentes, cerrar el día)
-          calendario.js (ocurre, bloquesDelDia, todoElDia, minutosPorArea) · preferencias.js · areas.js
+          calendario.js (ocurre, bloquesDelDia, todoElDia, minutosPorArea, vencenEl, delDia, resumenDia, pagos fijos)
+          feriados.js (feriados nacionales del Perú, Semana Santa calculada) · preferencias.js · areas.js
   piezas/ candado.js (PIN) · hoja.js · aviso.js · tema.js · guia.js (modo guía y recorrido)
           agregar-rapido.js (2 toques: tipo → área → texto con vista previa; guarda recordatorio, evento, gasto, nota, hábito, meta)
           pendientes-ui.js (fila con casilla, Más tarde/Mañana/Día…, deslizar, editor, listas) · pomodoro.js (agenda5_foco)
-          avisos.js (recordatorios a la hora, sonido, notificaciones; agenda5_avisados) · migracion-ui.js · confirmar.js
+          eventos-ui.js (crear/editar eventos, .ics, Google, marcar pago fijo → gasto en el libro)
+          avisos.js (recordatorios a la hora y eventos «X min antes», sonido, notificaciones; agenda5_avisados) · migracion-ui.js · confirmar.js
   vistas/ hoy · recordatorios · agenda · areas · mas (Seguimiento/Finanzas/Notas) · datos (#datos, explorador) · papelera · ajustes · comun
 fuentes/ iconos/ pruebas/
 ```
@@ -94,7 +97,7 @@ Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 
 1. ✅ **Cimientos**: carpetas, diseño Señal, navegación, formato Lima/soles, PIN arreglado y compatible, bloqueo automático, Ajustes (preferencias, seguridad, ayuda), modo guía y recorrido, manifiesto.
 2. ✅ **Datos**: modelo v5, migración automática con copia (IndexedDB) y verificación exacta, explorador «Tus datos», respaldo exportar/importar (v5 y v4.5, junta sin duplicar), copias automáticas descargables, papelera 30 días, aviso de respaldo >7 días, áreas con conteos reales. SW `agenda-v28`. 42 pruebas (incl. ejemplos v4.5 y datos «raros» en `pruebas/datos/`).
 3. ✅ **Hoy + Recordatorios**: Hoy con avance, urgente (plazo legal primero, 🔴/⚠️), recordatorios de hoy, 3 prioridades (escribir o elegir), día en bloques (eventos con repetición, clases, pendientes con hora), Pomodoro vinculado (suma minutos al pendiente y al área; modo prueba), balance y aviso de sobrecarga (>85 %). Recordatorios con listas (recordatorios / para marcar), grupos por cuándo, crear varios por líneas entendiendo fechas, editor completo, deslizar, cerrar el día con deshacer. Agregar rápido guarda. Avisos a la hora (Ajustes → Avisos). SW `agenda-v29`. 54 pruebas.
-4. Agenda: día/semana/mes con datos, plazos, plazo legal primero, cierre del día.
+4. ✅ **Agenda**: Día (línea de tiempo con carriles solo donde algo se pisa; tocar una hora crea evento), Semana y Mes (puntos por área, 🔴/⚖️), filtro por área, «Vence este día» (pagos fijos con casilla que anota el gasto, cobros, documentos; plazo legal primero), feriados del Perú (se pueden ocultar), crear/editar eventos (tipo, área, varios días, repetir, aviso), avisos de eventos, pasar al calendario del teléfono (.ics y Google). SW `agenda-v30`. 59 pruebas.
 5. Áreas: 4 paneles y sus herramientas (sesiones de estudio para exámenes, entrenos como hábito con racha y aviso).
 6. Seguimiento: hábitos, metas, rachas, revisión semanal, balance y sobrecarga.
 7. Finanzas y Notas (libros integrados, informes).

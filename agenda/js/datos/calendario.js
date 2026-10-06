@@ -2,7 +2,7 @@
    días), clases de los cursos y pendientes con hora. Lo usan Hoy (tu día en
    bloques y el balance) y, en la Fase 4, el calendario. */
 import { elementos } from './datos.js';
-import { diaSemana, esFecha, esHora } from '../util/fechas.js';
+import { diaSemana, esFecha, esHora, plazo } from '../util/fechas.js';
 
 const minDe = (h) => { const [a, b] = h.split(':').map(Number); return a * 60 + b; };
 const aHora = (m) => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
@@ -64,4 +64,47 @@ export function minutosPorArea(bloques) {
     finPrevio = Math.max(finPrevio, b.fin);
   });
   return r;
+}
+
+/* ---------- Vencimientos de un día (Fase 4) ----------
+   Pagos fijos (el día del mes; el 31 en febrero es el 28), cobros,
+   documentos y pendientes con «vence». */
+export function diaDePago(p, ym) {
+  const [y, m] = ym.split('-').map(Number), fin = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const dia = Math.min(+(p.extra && p.extra.dia) || +(p.datos && p.datos.dia) || 1, fin);
+  return ym + '-' + String(dia).padStart(2, '0');
+}
+export function pagado(p, ym) { return !!((p.extra && p.extra.pagados && p.extra.pagados[ym]) || (p.datos && p.datos.pagados && p.datos.pagados[ym])); }
+
+export function vencenEl(dia) {
+  const out = [], ym = dia.slice(0, 7);
+  elementos((x) => x.tipo === 'pago' && (x.extra.activo !== false)).forEach((p) => {
+    const desde = (p.datos && p.datos.desde) || '';
+    if (desde && ym < desde) return;
+    if (diaDePago(p, ym) === dia) out.push({ id: p.id, tipo: 'pago', titulo: p.titulo, area: p.area, monto: p.monto, hecho: pagado(p, ym), ym });
+  });
+  elementos((x) => (x.tipo === 'cobro' || x.tipo === 'documento' || x.tipo === 'prestamo' || x.tipo === 'pendiente') && x.fechas.vence === dia)
+    .forEach((x) => out.push({ id: x.id, tipo: x.tipo, titulo: x.titulo, area: x.area, monto: x.monto, hecho: x.estado === 'hecho', plazoLegal: !!x.plazoLegal }));
+  return out.sort((a, b) => (b.plazoLegal ? 1 : 0) - (a.plazoLegal ? 1 : 0) || (a.hecho ? 1 : 0) - (b.hecho ? 1 : 0));
+}
+
+/* Todo lo de un día, filtrable por área */
+export function delDia(dia, area = '') {
+  const f = (x) => !area || x.area === area;
+  const sinHora = elementos((x) => x.tipo === 'pendiente' && x.fechas.inicio === dia && !x.fechas.hora && f(x));
+  return {
+    bloques: bloquesDelDia(dia).filter(f),
+    todoDia: todoElDia(dia).filter(f),
+    sinHora,
+    vencen: vencenEl(dia).filter(f)
+  };
+}
+/* Para el mes: áreas con algo ese día (puntos de color) y si hay algo vencido/urgente */
+export function resumenDia(dia, area = '', hoy = '') {
+  const d = delDia(dia, area), areas = new Set();
+  d.bloques.forEach((b) => areas.add(b.area)); d.todoDia.forEach((b) => areas.add(b.area));
+  d.sinHora.filter((x) => x.estado !== 'hecho').forEach((x) => areas.add(x.area)); d.vencen.filter((v) => !v.hecho).forEach((v) => areas.add(v.area));
+  const total = d.bloques.length + d.todoDia.length + d.sinHora.filter((x) => x.estado !== 'hecho').length + d.vencen.filter((v) => !v.hecho).length;
+  const alerta = d.vencen.some((v) => !v.hecho && (v.plazoLegal || (hoy && plazo(dia, hoy).nivel !== 'ok')));
+  return { areas: [...areas], total, alerta, legal: d.vencen.some((v) => v.plazoLegal && !v.hecho) };
 }
