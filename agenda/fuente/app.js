@@ -837,13 +837,15 @@ function pintarVista(){
   $('zonaCuentas').classList.add('oculto');
   $('contenido').classList.remove('oculto');
 
+  scVista = '';
+  var cab = (v.indexOf('panel-') === 0 || (sec && sec.esp)) ? '' : cabSeccion(v);
   var html = v.indexOf('panel-') === 0 ? VISTAS[v]()
            : sec && sec.esp ? VISTAS.espacio(sec.esp)
-           : volverPanel(v) + cabSeccion(v) + VISTAS[v]() + navPanel(v);
+           : (cab ? cab + pestanasPanel(v) : volverPanel(v)) + VISTAS[v]() + (cab ? '' : navPanel(v));
   var nueva = ui.antes !== v + (ui.lista || '');
   var dirCls = nueva ? (ui.dir < 0 ? 'vista entra-izq' : 'vista entra-der') : '';
   ui.dir = 1;
-  $('contenido').innerHTML = '<div class="' + dirCls + '">' + html + '</div>';
+  $('contenido').innerHTML = '<div class="' + (dirCls || 'vista') + (scVista ? ' con-color' : '') + '"' + (scVista ? ' style="--sc:' + scVista + '"' : '') + '>' + html + '</div>';
   document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp, .panel-cab'));
   marcarBajado();
   ui.antes = v + (ui.lista || '');
@@ -2077,7 +2079,6 @@ VISTAS.proyectos = function(){
   var html = filtroEsp('proy-esp', ui.proyEsp || '');
   html += act.length ? '<div class="proy-rejilla">' + act.map(tarjetaProyecto).join('') + '</div>'
                      : '<div class="tarjeta">' + vacio('📁', 'Sin proyectos activos', 'Un proyecto junta las tareas de algo grande (la tesis, una mudanza, un cliente) y te muestra cuánto falta.') + '</div>';
-  html += '<div style="margin-top:14px"><button class="btn primario" data-acc="nuevo" data-tipo="proyecto">' + ico('i-plus') + 'Nuevo proyecto</button></div>';
   if(hechos.length) html += '<div class="seccion-tit">Terminados <span class="n">' + hechos.length + '</span></div><div class="proy-rejilla">' + hechos.map(tarjetaProyecto).join('') + '</div>';
   return html;
 };
@@ -3531,12 +3532,48 @@ function cabSeccion(v){
     }
   }catch(e){ d = null; }
   if(!d) return '';
-  /* Título grande y abierto, sin caja: el color de la sección arriba, el
-     resumen debajo y, si hay avance, una línea fina con el porcentaje */
-  return '<header class="cab-grande cab-compacta cab-sec" style="--sc:' + d.c + '">' + '<span class="cg-ico">' + ico(d.i) + '</span>' +
-    '<div class="cg-txt"><h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p></div>' +
-    (d.p != null ? '<div class="cg-anillo" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') +
+  scVista = d.c;
+  /* La banda de cada sección: su color, su icono, el resumen de cómo vas y,
+     debajo, los botones para crear lo suyo sin buscar el «+». */
+  /* En Mi día se crea en el día que estás mirando, no siempre hoy */
+  var accAttr = v === 'agenda' ? 'data-acc="cal-nuevo" data-dia="' + (ui.agDia || hoy) + '"' : 'data-acc="nuevo"';
+  var acc = (ACC_SECCION[v] || []).map(function(a, i){
+    return '<button type="button" class="btn' + (i ? '' : ' primario') + '" ' + accAttr + ' data-tipo="' + a[1] + '">' + ico('i-plus') + a[0] + '</button>';
+  }).join('');
+  return '<header class="cab-grande cab-compacta cab-sec banda" style="--sc:' + d.c + '">' +
+    '<div class="banda-fila"><span class="cg-ico banda-ico">' + ico(d.i) + '</span>' +
+      '<div class="cg-txt"><h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p></div>' +
+      (d.p != null ? '<div class="cg-anillo" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') +
+    '</div>' +
+    (acc ? '<div class="banda-acc">' + acc + '</div>' : '') +
     '</header>';
+}
+/* El color de la sección que se está viendo (lo pone su banda) */
+var scVista = '';
+/* Qué se crea desde la banda de cada sección */
+var ACC_SECCION = {
+  agenda:[['Tarea','tarea'],['Evento','evento'],['Aviso','rec']],
+  calendario:[['Evento','evento'],['Aviso','rec']],
+  tareas:[['Tarea','tarea']], recordatorios:[['Aviso','rec']], proyectos:[['Proyecto','proyecto']],
+  notas:[['Nota','nota']], listas:[['Lista','lista']],
+  habitos:[['Hábito','habito']], metas:[['Meta','meta']], diario:[['Escribir hoy','diario']],
+  pagos:[['Pago fijo','pago']]
+};
+/* Las pestañas de la familia: el inicio del panel y sus hermanas, siempre
+   a la vista debajo de la banda (en vez de «volver» arriba y «anterior /
+   siguiente» abajo). */
+function pestanasPanel(v){
+  var p = panelDe(v), hs = HIJOS_PANEL[p];
+  if(!hs || !hs.some(function(x){ return x[0] === v; })) return '';
+  var k = {}; try{ k = contadores() || {}; }catch(e){}
+  var num = { recordatorios:k.recordatorios, pagos:k.pagos };
+  return '<nav class="tabs-sec" aria-label="Secciones de ' + esc(NOM_PANEL[p]) + '">' +
+    '<button type="button" class="ts-inicio" data-ir="' + p + '" title="Inicio de ' + esc(NOM_PANEL[p]) + '" aria-label="Inicio de ' + esc(NOM_PANEL[p]) + '">' + ico('i-espacios') + '</button>' +
+    hs.filter(function(x){ return !secOculta(x[0]); }).map(function(x){
+      var s = SECCIONES.find(function(z){ return z.id === x[0]; }) || {};
+      return '<button type="button" data-ir="' + x[0] + '"' + (x[0] === v ? ' aria-current="page"' : '') + '>' +
+        ico(s.ico || 'i-der') + '<span>' + esc(({ dinero:'Resumen', agenda:'Mi día' })[x[0]] || s.corto || x[1]) + '</span>' + (num[x[0]] ? '<em>' + num[x[0]] + '</em>' : '') + '</button>';
+    }).join('') + '</nav>';
 }
 
 /* ==========================================================================
@@ -4130,8 +4167,7 @@ VISTAS.habitos = function(){
           return '<button type="button" class="ht-c dia-h' + (k < 4 ? ' lejos' : '') + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '" aria-label="' + esc(x.nombre) + ' el ' + fechaCorta(d) + '"><span class="c">' + CHECK + '</span></button>';
         }).join('') +
         '<span class="ht-racha"><b>' + r + '</b></span></div>';
-    }).join('') + '</section>' +
-    '<div class="pie-fila-btn" style="padding:14px 0 0"><button class="btn chico" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Nuevo hábito</button></div>';
+    }).join('') + '</section>';
   return html;
 };
 
@@ -4170,8 +4206,7 @@ VISTAS.notas = function(){
     .sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || (b.upd || 0) - (a.upd || 0); });
   var total = vivos('notas').length;
   return '<div style="display:flex;gap:8px;margin-bottom:14px">' +
-      (total ? '<input class="entrada" id="notasQ" type="search" placeholder="Buscar en las notas" value="' + esc(ui.notasQ) + '" style="flex:1">' : '<div style="flex:1"></div>') +
-      '<button class="btn primario" data-acc="nuevo" data-tipo="nota">' + ico('i-plus') + 'Nota</button></div>' +
+      (total ? '<input class="entrada" id="notasQ" type="search" placeholder="Buscar en las notas" value="' + esc(ui.notasQ) + '" style="flex:1">' : '') + '</div>' +
     (ns.length ? '<div class="notas-muro">' + ns.map(tarjetaNota).join('') + '</div>'
       : '<div class="tarjeta">' + (total ? vacio('🔎', 'Nada coincide') : vacio('🗒️', 'Sin notas', 'Ideas, datos que no quieres olvidar, direcciones, contraseñas del wifi…')) + '</div>');
 };
@@ -4485,10 +4520,6 @@ VISTAS.agenda = function(){
   if(sinHora.length) html += '<section class="ag-bloque ag-sin-hora"><h3 class="ag-h"><span>Sin hora</span><b>' + sinHora.length + '</b></h3><div class="lista-filas">' + sinHora.map(function(x){ return filaAgenda(x, dia).replace('<span class="hora">—</span>', ''); }).join('') + '</div></section>';
   if(conHora.length) html += '<section class="ag-bloque"><h3 class="ag-h"><span>Por horas</span><b>' + conHora.length + '</b></h3><div class="lista-filas">' + conHora.map(function(x){ return filaAgenda(x, dia); }).join('') + '</div></section>';
   if(!sinHora.length && !conHora.length && !atras.length) html += '<div class="ag-vacio">' + vacio('🌿', 'Día libre', 'No tienes nada agendado para este día.') + '</div>';
-  html += '<div class="ag-anadir">' +
-    '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="tarea" data-dia="' + dia + '">' + ico('i-plus') + 'Tarea</button>' +
-    '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="evento" data-dia="' + dia + '">' + ico('i-plus') + 'Evento</button>' +
-    '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="rec" data-dia="' + dia + '">' + ico('i-plus') + 'Aviso</button></div>';
   var sf = vivos('tareas').filter(function(t){ return !t.hecha && !t.fecha; }).length;
   if(sf) html += '<button type="button" class="ag-sinfecha" data-acc="ag-tareas" data-v="algun"><span>' + ico('i-tareas') + sf + (sf === 1 ? ' tarea sin fecha' : ' tareas sin fecha') + '</span>' + ico('i-der') + '</button>';
   return html;
@@ -4632,9 +4663,15 @@ function relacionados(id, k){
   if(!xs.length) return '';
   return '<div class="relacion"><small>Relacionado</small><div>' + xs.map(function(x){ return '<button type="button" class="ficha" ' + x.a + '>' + x.t + ico('i-der') + '</button>'; }).join('') + '</div></div>';
 }
+var COLOR_PANEL = { Agenda:['#2E6BFF','i-cal'], Dinero:['#30D158','i-grafica'], Notas:['#E7B24A','i-notas'], 'Más':['#BF5AF2','i-mas'] };
 function cabPanel(t, sub, acciones){
-  return '<header class="panel-cab"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</header>' +
-    (acciones ? '<div class="panel-acciones">' + acciones + '</div>' : '');
+  var cp = COLOR_PANEL[t] || ['var(--verde)','i-hoy'];
+  scVista = cp[0];
+  return '<header class="panel-cab banda-panel" style="--sc:' + cp[0] + '">' +
+      '<span class="bp-ico">' + ico(cp[1]) + '</span>' +
+      '<div class="bp-txt"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' +
+      (acciones ? '<div class="panel-acciones">' + acciones + '</div>' : '') +
+    '</header>';
 }
 function accPanel(txt, attrs, clase){ return '<button type="button" class="btn ' + (clase || '') + '" ' + attrs + '>' + ico('i-plus') + txt + '</button>'; }
 
@@ -5044,8 +5081,7 @@ VISTAS.pagos = function(){
   var html = '<div class="cal-cab">' +
     '<button class="btn-icono" data-acc="pagos-mover" data-n="-1" aria-label="Mes anterior">' + ico('i-izq') + '</button>' +
     '<h2>' + MESES[m] + ' ' + y + '</h2>' +
-    '<button class="btn-icono" data-acc="pagos-mover" data-n="1" aria-label="Mes siguiente">' + ico('i-der') + '</button>' +
-    '<div class="der"><button class="btn chico primario" data-acc="nuevo" data-tipo="pago">' + ico('i-plus') + 'Pago fijo</button></div></div>';
+    '<button class="btn-icono" data-acc="pagos-mover" data-n="1" aria-label="Mes siguiente">' + ico('i-der') + '</button></div>';
   if(!vivos('pagos').length){
     var sug = [['💡','Luz',20],['💧','Agua',15],['🌐','Internet',5],['📱','Celular',10],['🏠','Alquiler',1],['💳','Tarjeta de crédito',25]];
     return html + '<div class="tarjeta">' + vacio('🧾', 'Tus pagos de cada mes', 'Apunta lo que pagas todos los meses y la agenda te avisa antes de que venza.') +

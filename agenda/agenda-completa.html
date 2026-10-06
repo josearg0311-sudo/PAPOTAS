@@ -3737,6 +3737,81 @@ body .w .din-queda.din-total{ border-bottom:0 !important }
 .hoy-rapida:focus-within{ border-color:color-mix(in srgb, var(--verde) 55%, transparent) }
 .w-tareas .w-pie:empty{ display:none }
 .sig-tarea small{ color:var(--acento-txt, var(--verde)) !important }
+
+/* =====================================================================
+   AGENDA 2 · cada sección con su banda de color y sus pestañas
+   ===================================================================== */
+.cab-grande.banda{ position:relative; display:flex !important; flex-direction:column; align-items:stretch !important; gap:14px;
+  padding:18px 16px 16px !important; margin:2px 0 12px !important; border-radius:24px !important; overflow:hidden;
+  border:1px solid color-mix(in srgb, var(--sc) 34%, var(--regla)) !important;
+  background:radial-gradient(130% 130% at 0% 0%, color-mix(in srgb, var(--sc) 30%, transparent), transparent 60%),
+             linear-gradient(180deg, color-mix(in srgb, var(--sc) 7%, var(--hoja)), var(--hoja)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 22px 46px -30px var(--sc) !important }
+.banda-fila{ display:flex; align-items:center; gap:14px; min-width:0 }
+.banda .banda-ico{ width:52px !important; height:52px !important; border-radius:16px !important; display:grid !important; place-items:center; flex:none; margin:0 !important;
+  background:color-mix(in srgb, var(--sc) 22%, transparent) !important; color:var(--sc) !important; border:1px solid color-mix(in srgb, var(--sc) 42%, transparent) }
+.banda .banda-ico svg{ width:26px !important; height:26px !important }
+.banda .cg-txt{ flex:1; min-width:0 }
+.banda .cg-tit{ font-size:30px !important; line-height:1.05 !important }
+.banda .cg-sub{ margin-top:5px !important; font-size:13px !important }
+.banda .cg-anillo{ flex:none }
+.banda-acc{ display:flex; gap:8px; flex-wrap:wrap }
+.banda-acc .btn{ flex:1 1 auto; justify-content:center; min-height:42px }
+.banda-acc .btn:not(.primario){ background:color-mix(in srgb, var(--sc) 12%, var(--hoja-2)) !important; border-color:color-mix(in srgb, var(--sc) 30%, var(--regla)) !important }
+@media (max-width:420px){ .banda .cg-tit{ font-size:26px !important } .banda .banda-ico{ width:46px !important; height:46px !important } }
+
+.tabs-sec{ position:sticky; top:calc(var(--arriba) + env(safe-area-inset-top, 0px)); z-index:6; display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;
+  padding:5px; margin:0 0 14px; border-radius:16px; border:1px solid var(--regla);
+  background:color-mix(in srgb, var(--papel) 84%, transparent); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px) }
+.tabs-sec::-webkit-scrollbar{ display:none }
+.tabs-sec button{ flex:none; display:inline-flex; align-items:center; gap:6px; height:38px; padding:0 12px; border-radius:11px; border:0; background:none;
+  color:var(--tinta-2); font:inherit; font-size:13px; font-weight:650; cursor:pointer; white-space:nowrap }
+.tabs-sec button svg{ width:16px; height:16px; flex:none }
+.tabs-sec button[aria-current="page"]{ color:var(--tinta); background:color-mix(in srgb, var(--sc, var(--verde)) 22%, var(--hoja));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--sc, var(--verde)) 48%, transparent) }
+.tabs-sec button[aria-current="page"] svg{ color:var(--sc, var(--verde)) }
+.tabs-sec .ts-inicio{ padding:0 11px; color:var(--tinta-3) }
+.tabs-sec em{ font-style:normal; font-size:10.5px; font-weight:800; min-width:18px; height:18px; padding:0 5px; border-radius:99px;
+  display:grid; place-items:center; background:var(--debe); color:#fff }
+@media (hover:hover){ .tabs-sec button:not([aria-current]):hover{ background:var(--hoja-2); color:var(--tinta) } }
+
+/* Las tarjetas de la sección llevan un toque de su color */
+.con-color .tarjeta{ border-color:color-mix(in srgb, var(--sc) 16%, var(--regla)) !important;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--sc) 5%, var(--hoja)), var(--hoja) 140px) !important }
+.cab-grande.banda .cg-sub{ white-space:normal !important; overflow:visible !important; text-overflow:clip !important }
+
+/* Paneles (Agenda, Dinero, Notas, Más): la misma banda, con sus botones dentro */
+.panel-cab.banda-panel{ display:grid !important; grid-template-columns:auto minmax(0,1fr); grid-template-areas:"ico txt" "acc acc"; column-gap:14px; row-gap:14px;
+  align-items:center; padding:18px 16px 16px !important; margin:2px 0 16px !important; border-radius:24px; overflow:hidden;
+  border:1px solid color-mix(in srgb, var(--sc) 34%, var(--regla));
+  background:radial-gradient(130% 130% at 0% 0%, color-mix(in srgb, var(--sc) 30%, transparent), transparent 60%),
+             linear-gradient(180deg, color-mix(in srgb, var(--sc) 7%, var(--hoja)), var(--hoja));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 22px 46px -30px var(--sc) }
+.panel-cab.banda-panel::before{ display:none !important }
+.banda-panel .bp-ico{ grid-area:ico; width:56px; height:56px; border-radius:17px; display:grid; place-items:center; color:var(--sc);
+  background:color-mix(in srgb, var(--sc) 22%, transparent); border:1px solid color-mix(in srgb, var(--sc) 42%, transparent) }
+.banda-panel .bp-ico svg{ width:28px; height:28px }
+.banda-panel .bp-txt{ grid-area:txt; min-width:0 }
+.banda-panel h2{ font-size:32px !important }
+.banda-panel p{ font-size:13px !important }
+.banda-panel .panel-acciones{ grid-area:acc; margin:0 !important }
+.banda-panel .panel-acciones .btn{ flex:1 1 auto; justify-content:center; min-height:42px }
+.banda-panel .panel-acciones .btn:not(.primario){ background:color-mix(in srgb, var(--sc) 12%, var(--hoja-2)) !important; border-color:color-mix(in srgb, var(--sc) 30%, var(--regla)) !important }
+
+/* Espacios: su portada como banda de su color */
+.portada-esp{ border-radius:24px !important; border:1px solid color-mix(in srgb, var(--ec) 36%, var(--regla)) !important; border-bottom-width:1px !important; overflow:hidden;
+  background:radial-gradient(130% 130% at 0% 0%, color-mix(in srgb, var(--ec) 32%, transparent), transparent 60%),
+             linear-gradient(180deg, color-mix(in srgb, var(--ec) 8%, var(--hoja)), var(--hoja)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 22px 46px -30px var(--ec) !important; margin-bottom:14px !important }
+.portada-esp::before{ display:none !important }
+
+/* Hoy: el saludo dentro de su propia tarjeta de bienvenida */
+header.hoy-cab.portada-hoy.heroe-hoy{ position:relative; padding:18px 16px 14px !important; border-radius:24px !important; overflow:hidden; margin-bottom:16px !important;
+  border:1px solid color-mix(in srgb, var(--verde) 30%, var(--regla)) !important;
+  background:radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--verde) 26%, transparent), transparent 58%),
+             radial-gradient(90% 110% at 100% 100%, color-mix(in srgb, var(--rosa) 14%, transparent), transparent 60%),
+             linear-gradient(180deg, color-mix(in srgb, var(--verde) 6%, var(--hoja)), var(--hoja)) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -32px var(--verde) !important }
 </style>
 </head>
 <body>
@@ -4707,13 +4782,15 @@ function pintarVista(){
   $('zonaCuentas').classList.add('oculto');
   $('contenido').classList.remove('oculto');
 
+  scVista = '';
+  var cab = (v.indexOf('panel-') === 0 || (sec && sec.esp)) ? '' : cabSeccion(v);
   var html = v.indexOf('panel-') === 0 ? VISTAS[v]()
            : sec && sec.esp ? VISTAS.espacio(sec.esp)
-           : volverPanel(v) + cabSeccion(v) + VISTAS[v]() + navPanel(v);
+           : (cab ? cab + pestanasPanel(v) : volverPanel(v)) + VISTAS[v]() + (cab ? '' : navPanel(v));
   var nueva = ui.antes !== v + (ui.lista || '');
   var dirCls = nueva ? (ui.dir < 0 ? 'vista entra-izq' : 'vista entra-der') : '';
   ui.dir = 1;
-  $('contenido').innerHTML = '<div class="' + dirCls + '">' + html + '</div>';
+  $('contenido').innerHTML = '<div class="' + (dirCls || 'vista') + (scVista ? ' con-color' : '') + '"' + (scVista ? ' style="--sc:' + scVista + '"' : '') + '>' + html + '</div>';
   document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp, .panel-cab'));
   marcarBajado();
   ui.antes = v + (ui.lista || '');
@@ -5947,7 +6024,6 @@ VISTAS.proyectos = function(){
   var html = filtroEsp('proy-esp', ui.proyEsp || '');
   html += act.length ? '<div class="proy-rejilla">' + act.map(tarjetaProyecto).join('') + '</div>'
                      : '<div class="tarjeta">' + vacio('📁', 'Sin proyectos activos', 'Un proyecto junta las tareas de algo grande (la tesis, una mudanza, un cliente) y te muestra cuánto falta.') + '</div>';
-  html += '<div style="margin-top:14px"><button class="btn primario" data-acc="nuevo" data-tipo="proyecto">' + ico('i-plus') + 'Nuevo proyecto</button></div>';
   if(hechos.length) html += '<div class="seccion-tit">Terminados <span class="n">' + hechos.length + '</span></div><div class="proy-rejilla">' + hechos.map(tarjetaProyecto).join('') + '</div>';
   return html;
 };
@@ -7401,12 +7477,48 @@ function cabSeccion(v){
     }
   }catch(e){ d = null; }
   if(!d) return '';
-  /* Título grande y abierto, sin caja: el color de la sección arriba, el
-     resumen debajo y, si hay avance, una línea fina con el porcentaje */
-  return '<header class="cab-grande cab-compacta cab-sec" style="--sc:' + d.c + '">' + '<span class="cg-ico">' + ico(d.i) + '</span>' +
-    '<div class="cg-txt"><h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p></div>' +
-    (d.p != null ? '<div class="cg-anillo" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') +
+  scVista = d.c;
+  /* La banda de cada sección: su color, su icono, el resumen de cómo vas y,
+     debajo, los botones para crear lo suyo sin buscar el «+». */
+  /* En Mi día se crea en el día que estás mirando, no siempre hoy */
+  var accAttr = v === 'agenda' ? 'data-acc="cal-nuevo" data-dia="' + (ui.agDia || hoy) + '"' : 'data-acc="nuevo"';
+  var acc = (ACC_SECCION[v] || []).map(function(a, i){
+    return '<button type="button" class="btn' + (i ? '' : ' primario') + '" ' + accAttr + ' data-tipo="' + a[1] + '">' + ico('i-plus') + a[0] + '</button>';
+  }).join('');
+  return '<header class="cab-grande cab-compacta cab-sec banda" style="--sc:' + d.c + '">' +
+    '<div class="banda-fila"><span class="cg-ico banda-ico">' + ico(d.i) + '</span>' +
+      '<div class="cg-txt"><h2 class="cg-tit">' + d.t + '</h2><p class="cg-sub">' + d.s + '</p></div>' +
+      (d.p != null ? '<div class="cg-anillo" title="' + esc(d.pt || '') + '">' + anilloSec(d.p) + '</div>' : '') +
+    '</div>' +
+    (acc ? '<div class="banda-acc">' + acc + '</div>' : '') +
     '</header>';
+}
+/* El color de la sección que se está viendo (lo pone su banda) */
+var scVista = '';
+/* Qué se crea desde la banda de cada sección */
+var ACC_SECCION = {
+  agenda:[['Tarea','tarea'],['Evento','evento'],['Aviso','rec']],
+  calendario:[['Evento','evento'],['Aviso','rec']],
+  tareas:[['Tarea','tarea']], recordatorios:[['Aviso','rec']], proyectos:[['Proyecto','proyecto']],
+  notas:[['Nota','nota']], listas:[['Lista','lista']],
+  habitos:[['Hábito','habito']], metas:[['Meta','meta']], diario:[['Escribir hoy','diario']],
+  pagos:[['Pago fijo','pago']]
+};
+/* Las pestañas de la familia: el inicio del panel y sus hermanas, siempre
+   a la vista debajo de la banda (en vez de «volver» arriba y «anterior /
+   siguiente» abajo). */
+function pestanasPanel(v){
+  var p = panelDe(v), hs = HIJOS_PANEL[p];
+  if(!hs || !hs.some(function(x){ return x[0] === v; })) return '';
+  var k = {}; try{ k = contadores() || {}; }catch(e){}
+  var num = { recordatorios:k.recordatorios, pagos:k.pagos };
+  return '<nav class="tabs-sec" aria-label="Secciones de ' + esc(NOM_PANEL[p]) + '">' +
+    '<button type="button" class="ts-inicio" data-ir="' + p + '" title="Inicio de ' + esc(NOM_PANEL[p]) + '" aria-label="Inicio de ' + esc(NOM_PANEL[p]) + '">' + ico('i-espacios') + '</button>' +
+    hs.filter(function(x){ return !secOculta(x[0]); }).map(function(x){
+      var s = SECCIONES.find(function(z){ return z.id === x[0]; }) || {};
+      return '<button type="button" data-ir="' + x[0] + '"' + (x[0] === v ? ' aria-current="page"' : '') + '>' +
+        ico(s.ico || 'i-der') + '<span>' + esc(({ dinero:'Resumen', agenda:'Mi día' })[x[0]] || s.corto || x[1]) + '</span>' + (num[x[0]] ? '<em>' + num[x[0]] + '</em>' : '') + '</button>';
+    }).join('') + '</nav>';
 }
 
 /* ==========================================================================
@@ -8000,8 +8112,7 @@ VISTAS.habitos = function(){
           return '<button type="button" class="ht-c dia-h' + (k < 4 ? ' lejos' : '') + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '" aria-label="' + esc(x.nombre) + ' el ' + fechaCorta(d) + '"><span class="c">' + CHECK + '</span></button>';
         }).join('') +
         '<span class="ht-racha"><b>' + r + '</b></span></div>';
-    }).join('') + '</section>' +
-    '<div class="pie-fila-btn" style="padding:14px 0 0"><button class="btn chico" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Nuevo hábito</button></div>';
+    }).join('') + '</section>';
   return html;
 };
 
@@ -8040,8 +8151,7 @@ VISTAS.notas = function(){
     .sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || (b.upd || 0) - (a.upd || 0); });
   var total = vivos('notas').length;
   return '<div style="display:flex;gap:8px;margin-bottom:14px">' +
-      (total ? '<input class="entrada" id="notasQ" type="search" placeholder="Buscar en las notas" value="' + esc(ui.notasQ) + '" style="flex:1">' : '<div style="flex:1"></div>') +
-      '<button class="btn primario" data-acc="nuevo" data-tipo="nota">' + ico('i-plus') + 'Nota</button></div>' +
+      (total ? '<input class="entrada" id="notasQ" type="search" placeholder="Buscar en las notas" value="' + esc(ui.notasQ) + '" style="flex:1">' : '') + '</div>' +
     (ns.length ? '<div class="notas-muro">' + ns.map(tarjetaNota).join('') + '</div>'
       : '<div class="tarjeta">' + (total ? vacio('🔎', 'Nada coincide') : vacio('🗒️', 'Sin notas', 'Ideas, datos que no quieres olvidar, direcciones, contraseñas del wifi…')) + '</div>');
 };
@@ -8355,10 +8465,6 @@ VISTAS.agenda = function(){
   if(sinHora.length) html += '<section class="ag-bloque ag-sin-hora"><h3 class="ag-h"><span>Sin hora</span><b>' + sinHora.length + '</b></h3><div class="lista-filas">' + sinHora.map(function(x){ return filaAgenda(x, dia).replace('<span class="hora">—</span>', ''); }).join('') + '</div></section>';
   if(conHora.length) html += '<section class="ag-bloque"><h3 class="ag-h"><span>Por horas</span><b>' + conHora.length + '</b></h3><div class="lista-filas">' + conHora.map(function(x){ return filaAgenda(x, dia); }).join('') + '</div></section>';
   if(!sinHora.length && !conHora.length && !atras.length) html += '<div class="ag-vacio">' + vacio('🌿', 'Día libre', 'No tienes nada agendado para este día.') + '</div>';
-  html += '<div class="ag-anadir">' +
-    '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="tarea" data-dia="' + dia + '">' + ico('i-plus') + 'Tarea</button>' +
-    '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="evento" data-dia="' + dia + '">' + ico('i-plus') + 'Evento</button>' +
-    '<button type="button" class="btn" data-acc="cal-nuevo" data-tipo="rec" data-dia="' + dia + '">' + ico('i-plus') + 'Aviso</button></div>';
   var sf = vivos('tareas').filter(function(t){ return !t.hecha && !t.fecha; }).length;
   if(sf) html += '<button type="button" class="ag-sinfecha" data-acc="ag-tareas" data-v="algun"><span>' + ico('i-tareas') + sf + (sf === 1 ? ' tarea sin fecha' : ' tareas sin fecha') + '</span>' + ico('i-der') + '</button>';
   return html;
@@ -8502,9 +8608,15 @@ function relacionados(id, k){
   if(!xs.length) return '';
   return '<div class="relacion"><small>Relacionado</small><div>' + xs.map(function(x){ return '<button type="button" class="ficha" ' + x.a + '>' + x.t + ico('i-der') + '</button>'; }).join('') + '</div></div>';
 }
+var COLOR_PANEL = { Agenda:['#2E6BFF','i-cal'], Dinero:['#30D158','i-grafica'], Notas:['#E7B24A','i-notas'], 'Más':['#BF5AF2','i-mas'] };
 function cabPanel(t, sub, acciones){
-  return '<header class="panel-cab"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</header>' +
-    (acciones ? '<div class="panel-acciones">' + acciones + '</div>' : '');
+  var cp = COLOR_PANEL[t] || ['var(--verde)','i-hoy'];
+  scVista = cp[0];
+  return '<header class="panel-cab banda-panel" style="--sc:' + cp[0] + '">' +
+      '<span class="bp-ico">' + ico(cp[1]) + '</span>' +
+      '<div class="bp-txt"><h2>' + t + '</h2>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' +
+      (acciones ? '<div class="panel-acciones">' + acciones + '</div>' : '') +
+    '</header>';
 }
 function accPanel(txt, attrs, clase){ return '<button type="button" class="btn ' + (clase || '') + '" ' + attrs + '>' + ico('i-plus') + txt + '</button>'; }
 
@@ -8914,8 +9026,7 @@ VISTAS.pagos = function(){
   var html = '<div class="cal-cab">' +
     '<button class="btn-icono" data-acc="pagos-mover" data-n="-1" aria-label="Mes anterior">' + ico('i-izq') + '</button>' +
     '<h2>' + MESES[m] + ' ' + y + '</h2>' +
-    '<button class="btn-icono" data-acc="pagos-mover" data-n="1" aria-label="Mes siguiente">' + ico('i-der') + '</button>' +
-    '<div class="der"><button class="btn chico primario" data-acc="nuevo" data-tipo="pago">' + ico('i-plus') + 'Pago fijo</button></div></div>';
+    '<button class="btn-icono" data-acc="pagos-mover" data-n="1" aria-label="Mes siguiente">' + ico('i-der') + '</button></div>';
   if(!vivos('pagos').length){
     var sug = [['💡','Luz',20],['💧','Agua',15],['🌐','Internet',5],['📱','Celular',10],['🏠','Alquiler',1],['💳','Tarjeta de crédito',25]];
     return html + '<div class="tarjeta">' + vacio('🧾', 'Tus pagos de cada mes', 'Apunta lo que pagas todos los meses y la agenda te avisa antes de que venza.') +
