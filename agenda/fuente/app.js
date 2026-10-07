@@ -1589,6 +1589,8 @@ function queHacerAhora(hoy, h){
   if(!hoyVisible('hacer') && hab.length && falta && h >= 12) s('var(--azul)', 'i-habitos', 'Te ' + (falta === 1 ? 'falta <b>1 hábito</b>' : 'faltan <b>' + falta + ' hábitos</b>') + ' de hoy', 'Marcar', 'data-ir="habitos"');
   var ac = alertasCat()[0];
   if(ac) s(ac.p >= 1 ? 'var(--debe)' : 'var(--oro)', 'i-diana', '<b>' + esc(ac.cat) + '</b>: ' + (ac.p >= 1 ? 'te pasaste del límite (' + dinero(ac.g) + ' de ' + dinero(ac.lim) + ')' : 'vas en el ' + Math.round(ac.p * 100) + '% del límite del mes'), 'Ver', 'data-acc="mov-ver" data-v="' + ac.libro + '" data-cat="' + esc(ac.cat) + '"');
+  var wdR = deISO(hoy).getDay();
+  if((wdR === 0 || (wdR === 6 && h >= 10) || (wdR === 5 && h >= 17)) && !revisionHecha(inicioSemana(hoy))) s('var(--verde)', 'i-check', 'Cierra la semana: <b>revisión de 5 minutos</b>', 'Empezar', 'data-acc="revision"');
   var gastoHoy = libroDatos('personal').some(function(t){ return t.date === hoy; });
   if(!gastoHoy && h >= 13) s('var(--haber)', 'i-bajar', '¿Gastaste algo hoy? <b>Anótalo</b> en 5 segundos', 'Anotar', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"');
   var di = buscarId('diario', hoy);
@@ -4891,7 +4893,8 @@ VISTAS['panel-mas'] = function(){
     mosaico({ ir:'diario', i:'i-diario', c:'#FF6482', t:'Diario', d:'Cuenta tu día en un par de líneas', n:escritos, nl:'días este mes' }) +
   '</div>';
   html += '<h3 class="panel-sub">Ajustes y herramientas</h3><div class="panel-lista">' +
-    [['ajustes', 'i-ajustes', 'Ajustes', 'Tu nombre, apariencia, avisos, nube y respaldos'], ['acc:buscar', 'i-buscar', 'Buscar', 'En todo lo que tienes'],
+    [['acc:revision', 'i-check', 'Revisión de la semana', revisionHecha(inicioSemana(hoyISO())) ? 'Ya la hiciste esta semana ✓' : 'Cómo te fue y qué viene · 5 minutos'],
+     ['ajustes', 'i-ajustes', 'Ajustes', 'Tu nombre, apariencia, avisos, nube y respaldos'], ['acc:buscar', 'i-buscar', 'Buscar', 'En todo lo que tienes'],
      ['acc:personalizar-hoy', 'i-hoy', 'Elegir qué ver en Hoy', 'Muestra u oculta bloques'], ['secciones', 'i-espacios', 'Administrar secciones', 'Orden y secciones del menú'],
      ['papelera', 'i-basura', 'Papelera', enPapelera().length ? enPapelera().length + ' cosas borradas' : 'Vacía']].map(function(x){
       var at = x[0].indexOf('acc:') === 0 ? 'data-acc="' + x[0].slice(4) + '"' : 'data-ir="' + x[0] + '"';
@@ -6209,6 +6212,59 @@ function editarHabito(id, preset){
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('habitos', x.id, 'Hábito borrado'); pintar(); } };
 }
 /* Ficha de un hábito: rachas, cumplimiento, total y las últimas 12 semanas */
+/* ---------- Revisión de la semana ----------------------------------------
+   Cinco minutos para cerrar la semana: los números, lo que lograste, lo que
+   quedó pendiente (y pasarlo a la próxima), lo que viene y tres preguntas que
+   se guardan (en «revisiones», una por semana). */
+function revisionHecha(sem){ var r = buscarId('revisiones', sem); return !!(r && !r.del && (r.bien || r.mejorar || r.foco)); }
+function hojaRevision(sem){
+  var hoy = hoyISO(), fin = sumarDias(sem, 6), semA = sumarDias(sem, -7), finA = sumarDias(sem, -1), sig = sumarDias(sem, 7);
+  var enSem = function(d, a, b){ return d && d >= a && d <= b; };
+  var hechasEn = function(a, b){ return vivos('tareas').filter(function(t){ return t.hechaEn && enSem(iso(new Date(t.hechaEn)), a, b); }); };
+  var hechas = hechasEn(sem, fin), hechasA = hechasEn(semA, finA).length;
+  var tope = fin < hoy ? fin : hoy;   // a mitad de semana, lo pendiente es lo atrasado hasta hoy
+  var pend = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha <= tope && (!t.rep || t.rep === 'no'); }).sort(ordenTareas);
+  /* Hábitos: lo cumplido sobre lo que tocaba, hasta hoy */
+  var hT = 0, hH = 0;
+  vivos('habitos').forEach(function(x){ for(var k = 0; k < 7; k++){ var d = sumarDias(sem, k); if(d > hoy) break; if(x.dias && x.dias.indexOf(deISO(d).getDay()) < 0) continue; hT++; if(habHecho(x, d)) hH++; } });
+  var gS = 0, gA = 0;
+  movsDe('todo').forEach(function(t){ if(t.type !== 'Gasto') return; if(enSem(t.date, sem, fin)) gS += t.amount; else if(enSem(t.date, semA, finA)) gA += t.amount; });
+  var ent = vivos('entrenos').filter(function(e){ return enSem(e.fecha, sem, fin); }).length;
+  var escr = 0; for(var k = 0; k < 7; k++){ var dx = buscarId('diario', sumarDias(sem, k)); if(dx && !dx.del && dx.texto) escr++; }
+  var evs = 0; for(var j = 0; j < 7; j++) evs += itemsDelDia(sumarDias(sem, j)).filter(function(x){ return x.tipo === 'evento' || x.tipo === 'clase'; }).length;
+  var vienen = []; for(var i = 7; i < 14; i++){ var dv = sumarDias(sem, i); itemsDelDia(dv).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && !(x.o && /^(dia|lab)$/.test(x.o.rep || ''))) vienen.push({ d:dv, x:x }); }); }
+  var ppS = pagosProximos(14).filter(function(x){ return true; }).length;
+  var R = buscarId('revisiones', sem) || {};
+  var num = function(v, t, sub){ return '<div><b>' + v + '</b><small>' + t + '</small>' + (sub ? '<em>' + sub + '</em>' : '') + '</div>'; };
+  var dif = function(a, b, menosEsMejor, fmt){ if(!b) return ''; var d = a - b; if(!d) return 'igual que la anterior'; var mejor = menosEsMejor ? d < 0 : d > 0; return '<span class="' + (mejor ? 'sube' : 'baja') + '">' + (d > 0 ? '▲ ' : '▼ ') + (fmt ? fmt(Math.abs(d)) : Math.abs(Math.round(d))) + '</span> vs. la anterior'; };
+  var pregunta = function(k, t, ph){ return '<label class="campo"><span>' + t + '</span><textarea class="entrada" data-rev="' + k + '" data-sem="' + sem + '" rows="2" maxlength="600" placeholder="' + ph + '">' + esc(R[k] || '') + '</textarea></label>'; };
+  abrirFlotante(cabFlot('Revisión de la semana') +
+    '<div class="revision">' +
+      '<p class="rev-fechas">' + fechaCorta(sem) + ' – ' + fechaCorta(fin) + (sem === inicioSemana(hoy) ? ' · esta semana' : '') +
+        '<span><button type="button" class="btn-icono" data-acc="revision" data-v="' + semA + '" aria-label="Semana anterior">' + ico('i-izq') + '</button>' +
+        (sem < inicioSemana(hoy) ? '<button type="button" class="btn-icono" data-acc="revision" data-v="' + sig + '" aria-label="Semana siguiente">' + ico('i-der') + '</button>' : '') + '</span></p>' +
+      '<h4 class="rev-tit">Tu semana en números</h4><div class="rev-nums">' +
+        num(hechas.length, hechas.length === 1 ? 'tarea hecha' : 'tareas hechas', dif(hechas.length, hechasA)) +
+        num(hT ? Math.round(hH / hT * 100) + '%' : '—', 'de hábitos cumplidos') +
+        num(monCorto(gS), 'gastado', dif(gS, gA, true, monCorto)) +
+        num(evs, evs === 1 ? 'evento o clase' : 'eventos y clases') +
+        (ent ? num(ent, ent === 1 ? 'entrenamiento' : 'entrenamientos') : '') +
+        num(escr + '/7', 'días en el diario') + '</div>' +
+      '<h4 class="rev-tit">🏆 Lo que lograste</h4>' +
+        (hechas.length ? '<ul class="rev-lista">' + hechas.slice(0, 10).map(function(t){ return '<li>' + esc(t.t) + '</li>'; }).join('') + (hechas.length > 10 ? '<li class="mas">y ' + (hechas.length - 10) + ' más</li>' : '') + '</ul>' : '<p class="ayuda-campo">Esta semana no marcaste tareas como hechas.</p>') +
+      '<h4 class="rev-tit">⏳ Quedó pendiente</h4>' +
+        (pend.length ? '<ul class="rev-lista">' + pend.slice(0, 8).map(function(t){ return '<li>' + esc(t.t) + ' <small>' + fechaCorta(t.fecha) + '</small></li>'; }).join('') + '</ul>' +
+          '<button type="button" class="btn chico" data-acc="rev-mover" data-v="' + sem + '">' + ico('i-der') + 'Pasar ' + (pend.length === 1 ? 'la pendiente' : 'las ' + pend.length) + ' al lunes ' + deISO(sig).getDate() + '</button>' : '<p class="ayuda-campo">Nada atrasado. 👌</p>') +
+      '<h4 class="rev-tit">📅 Lo que viene</h4>' +
+        (vienen.length ? '<ul class="rev-lista">' + vienen.slice(0, 8).map(function(v){ return '<li>' + esc(v.x.t) + ' <small>' + cap(DIAS3[deISO(v.d).getDay()]) + ' ' + deISO(v.d).getDate() + (v.x.hora ? ' · ' + v.x.hora : '') + '</small></li>'; }).join('') + '</ul>' : '<p class="ayuda-campo">La próxima semana aún está libre.</p>') +
+        (ppS ? '<p class="ayuda-campo">Además, ' + plural(ppS, 'pago', 'pagos') + ' en las próximas dos semanas.</p>' : '') +
+      '<h4 class="rev-tit">✍️ Para pensar</h4>' +
+        pregunta('bien', '¿Qué salió bien?', 'Lo que te dejó contento…') +
+        pregunta('mejorar', '¿Qué mejorarías?', 'Lo que harías distinto…') +
+        pregunta('foco', 'Lo más importante de la próxima semana', 'Una o dos cosas, no más') +
+      '<p class="ayuda-campo">Se guarda solo mientras escribes.</p>' +
+    '</div>', function(){ pintarSeguro(); });
+}
 function fichaHabito(id){
   var x = buscarId('habitos', id); if(!x) return;
   var hoy = hoyISO(), m = habMeta(x), toca = function(s){ return !x.dias || x.dias.indexOf(deISO(s).getDay()) >= 0; };
@@ -7418,6 +7474,13 @@ document.addEventListener('click', function(ev){
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
     case 'habito-ed': cerrarFlotante(); editarHabito(id); break;
     case 'habito-ver': fichaHabito(id); break;
+    case 'revision': hojaRevision(b.dataset.v || inicioSemana(hoyISO())); break;
+    case 'rev-mover':
+      var semM = b.dataset.v, finM = sumarDias(semM, 6) < hoyISO() ? sumarDias(semM, 6) : hoyISO(), lunesM = sumarDias(semM, 7), movidas = [];
+      vivos('tareas').forEach(function(t){ if(!t.hecha && t.fecha && t.fecha <= finM && (!t.rep || t.rep === 'no')){ movidas.push(JSON.parse(JSON.stringify(t))); var c = JSON.parse(JSON.stringify(t)); c.fecha = lunesM; poner('tareas', c); } });
+      hojaRevision(semM); pintarSeguro();
+      if(movidas.length) aviso('➡️ ' + plural(movidas.length, 'tarea pasada', 'tareas pasadas') + ' al ' + fechaCorta(lunesM), null, 'Deshacer', function(){ movidas.forEach(function(t){ poner('tareas', t); }); hojaRevision(semM); pintarSeguro(); });
+      break;
     case 'hito-ok': case 'hito-x':
       var pH = buscarId('proyectos', id); if(!pH) break;
       pH = JSON.parse(JSON.stringify(pH)); pH.hitos = pH.hitos || [];
