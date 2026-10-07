@@ -826,6 +826,24 @@ function pintar(){
     }catch(e2){}
   }
 }
+/* Rejilla de mosaicos sin huecos: la última fila siempre llena el ancho.
+   En el celular (2 columnas) un mosaico suelto ocupa la fila entera; en la
+   compu (3 columnas) uno suelto ocupa la fila y dos sueltos se reparten a medias */
+function ajustarMosaicos(){
+  [].forEach.call(document.querySelectorAll('#contenido .mosaicos'), function(g){
+    var tramo = [];
+    function cerrar(){
+      var n = tramo.length; if(!n) return;
+      var u = tramo[n - 1];
+      if(n % 2) u.classList.add('lleno-m');
+      if(n % 3 === 1) u.classList.add('lleno-d');
+      else if(n % 3 === 2){ u.classList.add('medio-d'); tramo[n - 2].classList.add('medio-d'); }
+      tramo = [];
+    }
+    [].forEach.call(g.children, function(c){ if(c.classList.contains('ancho')) cerrar(); else tramo.push(c); });
+    cerrar();
+  });
+}
 function pintarVista(){
   repintarAlSoltar = false;
   anotarPantalla();
@@ -862,6 +880,8 @@ function pintarVista(){
   $('contenido').innerHTML = '<div class="' + (dirCls || 'vista') + (scVista ? ' con-color' : '') + '"' + (scVista ? ' style="--sc:' + scVista + '"' : '') + '>' + html + '</div>';
   document.body.classList.toggle('con-titulo-grande', !!$('contenido').querySelector('.cab-grande, .portada-hoy, .portada-esp, .panel-cab'));
   marcarBajado();
+  ajustarMosaicos();
+  var lq = $('latNuevoQue'); if(lq) lq.textContent = queNuevo();
   ui.antes = v + (ui.lista || '');
   if(v === 'hoy' || v === 'tareas' || v === 'recordatorios') actualizarPista();
   tictac();
@@ -1207,6 +1227,40 @@ function guardarGastoRapido(){
   aviso((t.type === 'Gasto' ? '💸 ' : '💰 ') + dinero(monto) + (t.desc ? ' · ' + t.desc : ''), gd ? (gd.pasado ? 'Hoy ya te pasaste por ' + dinero(gd.hoy - gd.porDia) : 'Te quedan ' + dinero(gd.queda) + ' para hoy') : NOM_LIBRO[cual], 'Deshacer', function(){
     cambiarLibro(cual, function(l){ return l.filter(function(x){ return x.id !== t.id; }); }); pintar();
   });
+}
+/* El botón «Nuevo» de la barra: la parte grande crea lo que toca en esta
+   pantalla (y lo dice debajo); la flecha abre el menú con todo lo que se puede crear */
+var LAT_MENU = [
+  ['Día a día', [['tarea','✅','Tarea','T'],['evento','📅','Evento','E'],['rec','🔔','Aviso','A'],['nota','📝','Nota','']]],
+  ['Dinero', [['gasto','💸','Gasto','G'],['ingreso','💰','Ingreso',''],['pago','🧾','Pago fijo','']]],
+  ['Organizar', [['lista','🛒','Lista',''],['habito','🔁','Hábito',''],['meta','🎯','Meta',''],['proyecto','📁','Proyecto','']]]
+];
+function queNuevo(){
+  var v = ui.vista;
+  if(v === 'habitos') return 'Hábito';
+  if(v === 'metas') return 'Meta';
+  if(v === 'pagos') return 'Pago fijo';
+  if(v === 'proyectos') return ui.proy ? 'Tarea del proyecto' : 'Proyecto';
+  if(v === 'dinero' || v === 'movimientos') return 'Gasto';
+  if(v === 'diario') return 'Escribir el día';
+  if(v === 'listas') return ui.lista ? 'Algo a la lista' : 'Lista';
+  var sec = SECCIONES.find(function(s){ return s.id === v; });
+  if(sec && sec.esp) return 'Tarea · ' + espInfo(sec.esp).nom;
+  return 'Tarea, evento o aviso';
+}
+function abrirLatMenu(){
+  var m = $('latMenu');
+  m.innerHTML = LAT_MENU.map(function(g){
+    return '<div class="lm-grupo"><small>' + g[0] + '</small>' + g[1].map(function(o){
+      return '<button type="button" role="menuitem" data-acc="rapido" data-v="' + o[0] + '"><span class="lm-em">' + o[1] + '</span><span class="lm-t">' + o[2] + '</span>' + (o[3] ? '<kbd>' + o[3] + '</kbd>' : '') + '</button>';
+    }).join('') + '</div>';
+  }).join('');
+  m.hidden = false; $('latNuevoMas').setAttribute('aria-expanded', 'true'); $('latNuevoG').classList.add('abierto');
+  var b = m.querySelector('button'); if(b) b.focus();
+}
+function cerrarLatMenu(){
+  var m = $('latMenu'); if(!m || m.hidden) return;
+  m.hidden = true; $('latNuevoMas').setAttribute('aria-expanded', 'false'); $('latNuevoG').classList.remove('abierto');
 }
 /* Mantener pulsado el +: lo más usado a un toque */
 function menuRapido(){
@@ -1950,14 +2004,125 @@ VISTAS.espacio = function(id){
     /* El espacio como panel: cada mosaico es una subpantalla con su dato */
     return volverPanel('esp-' + id) + html + botonAnadir('tarea', 'Añadir en ' + E.nom + '…') +
       '<div class="mosaicos esp-mosaicos">' + subs.map(function(x, i){
-        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0 || (i === subs.length - 1 && subs.length % 2 === 0), viz:vizSub(id, x.k) });
-      }).join('') + '</div>';
+        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0, viz:vizSub(id, x.k) });
+      }).join('') + '</div>' + panelVivoEsp(id);
   }
   var sub = subs.find(function(x){ return x.k === tab; }) || subs[0];
   return '<button type="button" class="volver-panel" data-acc="esp-tab" data-esp="' + id + '" data-v="inicio">' + ico('i-izq') + E.em + ' ' + E.nom + '</button>' +
     '<header class="sub-cab" style="--ec:' + E.c + '"><h2>' + sub.t + '</h2><p>' + sub.d + '</p></header>' +
     '<div class="rejilla dos esp-sub sub-' + tab + '">' + sub.html() + '</div>' + relacionados(id, sub.k) + navSub(id, subs, sub.k);
 };
+/* ==========================================================================
+   EN VIVO: debajo de los mosaicos de cada espacio, cuatro tarjetas que se
+   usan ahí mismo (marcar compras, anotar una falta, cronometrar, tomar agua…)
+   ========================================================================== */
+var CLAVE_AGUA = 'agenda_agua';
+function aguaHoy(){ var a = leerJSON(CLAVE_AGUA, null); return a && a.f === hoyISO() ? +a.n || 0 : 0; }
+function pvCarta(em, t, cuerpo, mas, cls){
+  return '<section class="pv-c' + (cls ? ' ' + cls : '') + '"><header class="pv-cab"><span class="pv-em" aria-hidden="true">' + em + '</span><h3>' + t + '</h3>' +
+    (mas ? '<button type="button" class="pv-mas" ' + mas[1] + '>' + mas[0] + ico('i-der') + '</button>' : '') + '</header>' + cuerpo + '</section>';
+}
+/* Las tareas de hoy (y las atrasadas) del espacio, para marcarlas ahí mismo */
+function pvParaHoy(id){
+  var hoy = hoyISO(), ts = vivos('tareas').filter(function(t){ return espDe(t) === id && !t.hecha && t.fecha && t.fecha <= hoy; }).sort(ordenTareas);
+  var hechas = vivos('tareas').filter(function(t){ return espDe(t) === id && t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) === hoy; }).length;
+  return pvCarta('✅', 'Para hoy', ts.length ? '<ul class="pv-lista pv-tareas">' + ts.slice(0, 4).map(function(t){
+      return '<li>' + casilla('tarea-ok', t.id, false, t.prio ? PRIOS[t.prio].c : '') + '<span class="pv-tx"><b>' + esc(t.t) + '</b><small' + (t.fecha < hoy ? ' class="mal">Atrasada · ' + relativo(t.fecha).toLowerCase() : '>' + (t.hora ? 'A las ' + t.hora : 'Hoy')) + '</small></span></li>';
+    }).join('') + '</ul>' + (ts.length > 4 ? '<p class="pv-nota">y ' + (ts.length - 4) + ' más</p>' : '')
+    : pvVacio(hechas ? '¡Todo listo por hoy! ' + plural(hechas, 'tarea hecha', 'tareas hechas') + ' 🎉' : 'Nada pendiente para hoy.') + '<button type="button" class="btn chico" data-acc="nuevo" data-tipo="tarea">' + ico('i-plus') + 'Nueva tarea</button>',
+    ['Tareas', 'data-acc="esp-tareas" data-v="' + id + '"']);
+}
+function pvVacio(txt){ return '<p class="pv-vacio">' + txt + '</p>'; }
+function panelVivoEsp(id){
+  var hoy = hoyISO(), E = espInfo(id), tab = function(v){ return 'data-acc="esp-tab" data-esp="' + id + '" data-v="' + v + '"'; }, cs = [];
+  if(id === 'personal'){
+    var l = listaCompras(), its = l ? (l.items || []) : [], falta = its.filter(function(i){ return !i.ok; });
+    cs.push(pvCarta('🛒', 'Compras', l ?
+      (falta.length ? '<div class="pv-chips">' + falta.slice(0, 12).map(function(i){
+        return '<button type="button" class="pv-chip" data-acc="pv-compra" data-l="' + l.id + '" data-id="' + i.id + '" title="Marcar como comprado">' + esc(i.t) + '</button>'; }).join('') +
+        (falta.length > 12 ? '<span class="pv-chip mas">+' + (falta.length - 12) + '</span>' : '') + '</div><p class="pv-nota">Toca lo que ya compraste</p>' : pvVacio('Nada por comprar ✨')) +
+      '<form class="pv-form" data-acc="compra-nueva" data-lista="' + l.id + '" autocomplete="off"><input id="compraNueva" maxlength="160" placeholder="Añadir: pan, leche, huevos…" aria-label="Añadir a compras"><button type="submit" class="btn chico primario" aria-label="Añadir">' + ico('i-plus') + '</button></form>'
+      : pvVacio('Aún no tienes lista de compras.') + '<button type="button" class="btn chico" data-acc="nuevo" data-tipo="lista">' + ico('i-plus') + 'Crear lista</button>', ['Casa', tab('casa')]));
+    var m = menuDia(hoy);
+    cs.push(pvCarta('🍽️', 'Menú de hoy', '<div class="pv-menu">' + [['alm', '☀️ Almuerzo'], ['cena', '🌙 Cena']].map(function(k){
+      return '<div class="pv-plato"><small>' + k[1] + '</small><b>' + (m[k[0]] ? esc(m[k[0]]) : '<i>Sin decidir</i>') + '</b><button type="button" class="pv-dado" data-acc="menu-idea" data-d="' + hoy + '" data-k="' + k[0] + '" title="Dame una idea" aria-label="Dame una idea">🎲</button></div>';
+    }).join('') + '</div>', ['Semana', tab('casa')]));
+    var cu = proximosCumples(120).slice(0, 3);
+    cs.push(pvCarta('🎂', 'Próximos cumpleaños', (cu.length ? '<ul class="pv-lista">' + cu.map(function(c){
+      return '<li><span class="pv-cuenta' + (c.en <= 7 ? ' cerca' : '') + '"><b>' + (c.en === 0 ? '🎉' : c.en) + '</b><small>' + (c.en === 0 ? 'hoy' : c.en === 1 ? 'día' : 'días') + '</small></span><span class="pv-tx"><b>' + esc(c.e.t) + '</b><small>' + fechaCorta(c.dia) + (+c.e.nacio ? ' · cumple ' + (+c.dia.slice(0, 4) - c.e.nacio) : '') + '</small></span>' + (c.en <= 14 ? '<span class="pv-tag">🎁 ' + (c.en <= 3 ? '¡Ya!' : 'Regalo') + '</span>' : '') + '</li>';
+    }).join('') + '</ul>' : pvVacio('Sin cumpleaños en los próximos meses.')) + '<button type="button" class="btn chico pv-abajo" data-acc="nuevo-cumple">' + ico('i-plus') + 'Añadir cumpleaños</button>', ['Fechas', tab('fechas')]));    cs.push(pvParaHoy(id));
+  }
+  if(id === 'estudios'){
+    var ya = horaAhora(), cl = clasesDelDia(hoy).sort(function(a, b){ return (a.hora || '').localeCompare(b.hora || ''); }), sigMarcada = false;
+    cs.push(pvCarta('📚', 'Clases de hoy', cl.length ? '<ul class="pv-lista">' + cl.map(function(k){
+      var ahora = k.hora && k.hora <= ya && (!k.fin || ya < k.fin), paso = k.fin ? k.fin <= ya : false, sig = !ahora && !paso && !sigMarcada;
+      if(sig) sigMarcada = true;
+      return '<li class="' + (ahora ? 'pv-ya' : paso ? 'pv-paso' : '') + '"><span class="pv-hora">' + (k.hora || '—') + '</span><span class="pv-tx"><b>' + esc(k.t) + '</b><small>' + (ahora ? 'En clase ahora' : sig ? 'La siguiente' : paso ? 'Terminó' : '') + (k.lugar ? ' · ' + esc(k.lugar) : '') + '</small></span>' +
+        '<button type="button" class="btn chico" data-acc="pv-falta" data-id="' + k.id + '" title="Anotar una falta">Falté</button></li>';
+    }).join('') + '</ul>' : pvVacio('Hoy no tienes clases. Buen día para adelantar.'), ['Horario', tab('cursos')]));
+    var ex = eventosTipo('examen', 120)[0];
+    cs.push(pvCarta('🎯', 'Próximo examen', ex ? '<div class="pv-grande"><strong>' + (ex.en === 0 ? '¡Hoy!' : ex.en) + '</strong><span>' + (ex.en === 0 ? 'es el examen' : ex.en === 1 ? 'día' : 'días') + '</span></div><p class="pv-sub"><b>' + esc(ex.e.t) + '</b> · ' + fechaCorta(ex.dia) + (ex.e.ini ? ' · ' + ex.e.ini : '') + '</p>' +
+      '<div class="pv-botones"><button type="button" class="btn chico" ' + tab('examenes') + '>Plan de repaso</button><button type="button" class="btn chico" data-acc="nuevo-examen">' + ico('i-plus') + 'Otro</button></div>'
+      : pvVacio('Sin exámenes a la vista.') + '<button type="button" class="btn chico" data-acc="nuevo-examen">' + ico('i-plus') + 'Anotar examen</button>', null));
+    var en = buscarId('enfoque', hoy), pomos = en && en.pomosEsp ? +en.pomosEsp.estudios || 0 : 0, corriendo = foco.fin && foco.esp === 'estudios';
+    cs.push(pvCarta('⏱️', 'Sesión de estudio', '<div class="pv-pomos" aria-label="' + pomos + ' sesiones hoy">' + [0, 1, 2, 3].map(function(i){ return '<i class="' + (i < pomos ? 'si' : '') + '">🍅</i>'; }).join('') + (pomos > 4 ? '<b>+' + (pomos - 4) + '</b>' : '') + '</div>' +
+      '<p class="pv-sub">' + (pomos ? plural(pomos, 'sesión', 'sesiones') + ' hoy · ' + (pomos * 25) + ' min de estudio' : 'Bloques de 25 minutos sin distracciones') + '</p>' +
+      (corriendo ? '<div class="pv-grande reloj"><strong id="tiempoFoco">' + mmss(restanteFoco()) + '</strong><span>' + (foco.modo === 'trabajo' ? 'estudiando' : 'descanso') + '</span></div>' : (foco.esp === 'estudios' && foco.resta ? '<p class="pv-sub">En pausa: quedan <b>' + mmss(foco.resta) + '</b></p>' : '')) +
+      '<button type="button" class="btn chico primario" data-acc="pv-foco">' + ico(corriendo ? 'i-pausa' : 'i-play') + (corriendo ? 'Pausar' : foco.esp === 'estudios' && foco.resta ? 'Seguir' : 'Estudiar 25 min') + '</button>', null));
+    var ps = vivos('cursos').map(function(c){ return { c:c, p:promedioCurso(c) }; }).filter(function(x){ return x.p != null; });
+    if(ps.length) cs.push(pvCarta('📊', 'Promedio por curso', '<ul class="pv-barras">' + ps.slice(0, 5).map(function(x){
+      return '<li><span>' + esc(x.c.nombre) + '</span><i><em style="width:' + Math.round(Math.min(20, x.p) / 20 * 100) + '%" class="' + (x.p < NOTA_APROBAR ? 'mal' : '') + '"></em></i><b>' + x.p.toFixed(1) + '</b></li>';
+    }).join('') + '</ul>', ['Cursos', tab('cursos')]));
+  }
+  if(id === 'oficina'){
+    var ini = inicioSemana(hoy), hs = vivos('horas').filter(function(h){ return h.fecha >= ini && h.fecha <= sumarDias(ini, 6); });
+    var minS = hs.reduce(function(a, h){ return a + (+h.min || 0); }, 0), fac = hs.reduce(function(a, h){ return a + (+h.min || 0) / 60 * (+h.tarifa || 0); }, 0);
+    cs.push(pvCarta('⏱️', 'Cronómetro', (reloj && reloj.inicio ?
+      '<div class="pv-grande reloj"><strong id="relojOficina">' + mmssLargo(Date.now() - reloj.inicio) + '</strong><span>' + esc(reloj.cliente || 'Sin cliente') + '</span></div><button type="button" class="btn chico primario" data-acc="reloj-parar">' + ico('i-pausa') + 'Parar y anotar</button>'
+      : '<form class="pv-form" data-acc="reloj-empezar" autocomplete="off"><input id="relojCliente" maxlength="60" placeholder="Cliente o proyecto" aria-label="Cliente o proyecto"><button type="submit" class="btn chico primario">' + ico('i-play') + 'Empezar</button></form>') +
+      '<p class="pv-sub">Esta semana: <b>' + hhmm(minS) + '</b>' + (fac ? ' · ' + dinero(fac) + ' por facturar' : '') + '</p>', ['Horas', tab('trabajo')]));
+    var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }).sort(function(a, b){ return (a.vence || '9').localeCompare(b.vence || '9'); });
+    cs.push(pvCarta('💰', 'Por cobrar', cob.length ? '<ul class="pv-lista">' + cob.slice(0, 3).map(function(x){
+      var v = x.vence ? diasEntre(hoy, x.vence) : null;
+      return '<li><span class="pv-tx"><b>' + esc(x.cliente || 'Cliente') + ' · ' + dinero(+x.monto || 0) + '</b><small class="' + (v != null && v < 0 ? 'mal' : '') + '">' + (v == null ? 'Sin fecha' : v < 0 ? 'Venció hace ' + plural(-v, 'día', 'días') : v === 0 ? 'Vence hoy' : 'Vence en ' + plural(v, 'día', 'días')) + '</small></span>' +
+        '<button type="button" class="btn chico" data-acc="cobro-ok" data-id="' + x.id + '" title="Marcar como cobrado">' + ico('i-ok') + 'Cobrado</button></li>';
+    }).join('') + '</ul>' + (cob.length > 3 ? '<p class="pv-nota">y ' + (cob.length - 3) + ' más</p>' : '') : pvVacio('Nadie te debe nada 🎉'), ['Clientes', tab('cobros')]));
+    var to = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina'; }), col = [0, 0, 0];
+    to.forEach(function(t){ if(!t.hecha || (t.hechaEn && iso(new Date(t.hechaEn)) >= ini)) col[columnaKan(t)]++; });
+    var tot = col[0] + col[1] + col[2] || 1;
+    cs.push(pvCarta('🗂️', 'Tablero', '<div class="pv-kan">' + [['Por hacer', '#94A3B8'], ['En curso', '#5AA9FF'], ['Hecho', '#30D158']].map(function(k, i){
+      return '<div style="--k:' + k[1] + '"><b>' + col[i] + '</b><small>' + k[0] + '</small></div>'; }).join('') + '</div>' +
+      '<div class="pv-kan-barra">' + col.map(function(n, i){ return '<i style="flex:' + n + ';background:' + ['#94A3B8', '#5AA9FF', '#30D158'][i] + '"></i>'; }).join('') + '</div>' +
+      '<p class="pv-nota">Hecho cuenta lo terminado esta semana</p>', ['Abrir', tab('trabajo')]));
+    var re = eventosTipo('reunion', 0);
+    cs.push(pvCarta('🤝', 'Reuniones de hoy', re.length ? '<ul class="pv-lista">' + re.map(function(r){
+      return '<li><span class="pv-hora">' + (r.e.ini || '—') + '</span><span class="pv-tx"><b>' + esc(r.e.t) + '</b><small>' + esc(r.e.lugar || '') + '</small></span></li>'; }).join('') + '</ul>'
+      : pvVacio('Sin reuniones hoy: tiempo para avanzar.') + '<button type="button" class="btn chico" data-acc="pv-reunion">' + ico('i-plus') + 'Agendar reunión</button>', null));
+  }
+  if(id === 'deporte'){
+    var ini2 = inicioSemana(hoy), dias = [], hechos = 0;
+    for(var i = 0; i < 7; i++){
+      var d = sumarDias(ini2, i), es = vivos('entrenos').filter(function(e){ return e.fecha === d; });
+      if(es.length) hechos++;
+      dias.push('<span class="pv-dia' + (es.length ? ' si' : '') + (d === hoy ? ' hoy' : '') + (d > hoy ? ' fut' : '') + '" title="' + fechaCorta(d) + '"><small>' + DIAS3[deISO(d).getDay()].charAt(0).toUpperCase() + '</small><i>' + (es.length ? deporteInfo(es[0].tipo).em : '') + '</i></span>');
+    }
+    cs.push(pvCarta('🗓️', 'Tu semana', '<div class="pv-semana">' + dias.join('') + '</div><p class="pv-sub"><b>' + plural(hechos, 'día', 'días') + '</b> entrenados esta semana</p>' +
+      '<div class="pv-chips">' + DEPORTES.slice(0, 5).map(function(x){ return '<button type="button" class="pv-chip" data-acc="entreno-rapido" data-v="' + x.v + '">' + x.em + ' ' + x.n + '</button>'; }).join('') + '</div>', ['Entrenos', tab('entrenos')]));
+    var ag = aguaHoy(), metaA = 8;
+    cs.push(pvCarta('💧', 'Agua de hoy', '<div class="pv-agua">' + Array.apply(null, Array(metaA)).map(function(_, i){ return '<i class="' + (i < ag ? 'si' : '') + '"></i>'; }).join('') + '</div>' +
+      '<p class="pv-sub"><b>' + ag + ' de ' + metaA + '</b> vasos' + (ag >= metaA ? ' · ¡meta cumplida! 💪' : ' · faltan ' + (metaA - ag)) + '</p>' +
+      '<div class="pv-botones"><button type="button" class="btn chico" data-acc="pv-agua" data-n="-1" aria-label="Quitar un vaso"' + (ag ? '' : ' disabled') + '>−</button><button type="button" class="btn chico primario" data-acc="pv-agua" data-n="1">' + ico('i-plus') + 'Un vaso</button></div>', null));
+    var pesos = vivos('medidas').filter(function(x){ return +x.peso; }).sort(function(a, b){ return a.id.localeCompare(b.id); }), ult = pesos[pesos.length - 1], ant = pesos[Math.max(0, pesos.length - 5)];
+    var dif = ult && ant && ult !== ant ? Math.round((ult.peso - ant.peso) * 10) / 10 : null;
+    cs.push(pvCarta('⚖️', 'Peso', (ult ? '<div class="pv-grande"><strong>' + formNum(+ult.peso) + '</strong><span>kg' + (dif != null ? ' · <em class="' + (dif <= 0 ? 'baja' : 'sube') + '">' + (dif > 0 ? '+' : '') + formNum(dif) + '</em>' : '') + '</span></div>' : pvVacio('Anota tu peso para ver cómo vas.')) +
+      '<form class="pv-form" data-acc="peso" autocomplete="off"><input id="pesoHoy" inputmode="decimal" placeholder="Peso de hoy (kg)" aria-label="Peso de hoy en kg"><button type="submit" class="btn chico primario">Anotar</button></form>', ['Gráfica', tab('cuerpo')]));
+    var pa = eventosTipo('partido', 60)[0], bl = listaBolso(), bIt = bl ? bl.items || [] : [], bOk = bIt.filter(function(x){ return x.ok; }).length;
+    cs.push(pvCarta('⚽', 'Próximo partido', pa ? '<div class="pv-grande"><strong>' + (pa.en === 0 ? '¡Hoy!' : pa.en) + '</strong><span>' + (pa.en === 0 ? (pa.e.ini ? 'a las ' + pa.e.ini : '') : pa.en === 1 ? 'día' : 'días') + '</span></div><p class="pv-sub"><b>' + esc(pa.e.t) + '</b>' + (pa.e.lugar ? ' · ' + esc(pa.e.lugar) : '') + '</p>' +
+      (bl ? '<button type="button" class="btn chico" ' + tab('bolso') + '>🎒 Bolso ' + bOk + '/' + bIt.length + '</button>' : '')
+      : pvVacio('Sin partidos en los próximos dos meses.'), ['Partidos', tab('partidos')]));
+  }
+  return cs.length ? '<section class="pv" style="--ec:' + E.c + '"><h3 class="panel-sub pv-titulo"><span class="pv-punto" aria-hidden="true"></span>En vivo</h3><div class="pv-rejilla">' + cs.join('') + '</div></section>' : '';
+}
 function tarjetaProyEsp(id){
   var E = espInfo(id), hoy = hoyISO(), pa = proyectosActivos(id);
   return '<section class="tarjeta">' + cabTarjeta('i-carpeta', 'Proyectos', E.c, pa.length ? 'Todos' : 'Nuevo', pa.length ? 'data-acc="proy-lista" data-v="' + id + '"' : 'data-acc="nuevo" data-tipo="proyecto"') +
@@ -2112,7 +2277,7 @@ var MODULOS = {
     if(tab === 'cancha') return T.partidos + tarjetaBolso(pa);
     var hr = rutinasHoy();
     return tarjetaSemanaEsp('deporte') + T.entrenos +
-      (hr.length ? '<section class="tarjeta">' + cabTarjeta('i-meta', 'Hoy toca', 'var(--esp-deporte)', 'Entreno', 'data-acc="esp-tab" data-esp="deporte" data-v="entreno"') + '<div class="hoy-toca">' + hr.map(function(r){
+      (hr.length ? '<section class="tarjeta">' + cabTarjeta('i-meta', 'Hoy toca', 'var(--esp-deporte)', 'Entreno', 'data-acc="esp-tab" data-esp="deporte" data-v="entrenos"') + '<div class="hoy-toca">' + hr.map(function(r){
         return '<div class="hoy-toca-item"><span>🏋️ <b>' + esc(r.nombre) + '</b> · ' + (r.ejercicios || []).length + ' ejercicios</span><button class="btn chico primario" data-acc="rutina-empezar" data-id="' + r.id + '">' + ico('i-play') + 'Anotar</button></div>';
       }).join('') + '</div></section>' : '') +
       T.partidos + tarjetaMapaActividad();
@@ -2696,7 +2861,7 @@ function datosHeroe(id){
     var l = listaCompras(), falta = l ? (l.items || []).filter(function(i){ return !i.ok; }).length : 0;
     var cu = proximosCumples(60)[0], teDeben = vivos('deudas').filter(function(x){ return !x.saldada && x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     return d('i-listas', falta, 'por comprar', 'data-acc="esp-tab" data-esp="personal" data-v="casa"') +
-      d('i-regalo', cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', cu ? (cu.en === 0 ? 'hay cumpleaños' : cu.en === 1 ? 'día al próximo cumple' : 'días al próximo cumple') : 'sin cumpleaños cerca', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"') +
+      d('i-regalo', cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', cu ? (cu.en === 0 ? 'hay cumpleaños' : cu.en === 1 ? 'día al próximo cumple' : 'días al próximo cumple') : 'sin cumpleaños cerca', 'data-acc="esp-tab" data-esp="personal" data-v="fechas"') +
       d('i-cuentas', MONEDA + ' ' + formNum(Math.round(teDeben)), 'te deben', 'data-acc="esp-tab" data-esp="personal" data-v="dinero"');
   }
   if(id === 'estudios'){
@@ -2716,8 +2881,8 @@ function datosHeroe(id){
   }
   var ses = vivos('entrenos').filter(function(e){ return e.fecha > sumarDias(hoy, -7) && e.fecha <= hoy; }).length, pa = eventosTipo('partido', 60)[0];
   return d('i-habitos', semanasSeguidas(), 'semanas activo') +
-    d('i-flecha', ses, ses === 1 ? 'entreno en 7 días' : 'entrenos en 7 días', 'data-acc="esp-tab" data-esp="deporte" data-v="entreno"') +
-    d('i-balon', pa ? (pa.en === 0 ? '¡Hoy!' : pa.en) : '—', pa ? (pa.en === 0 ? 'hay partido' : pa.en === 1 ? 'día al partido' : 'días al partido') : 'sin partidos', 'data-acc="esp-tab" data-esp="deporte" data-v="cancha"');
+    d('i-flecha', ses, ses === 1 ? 'entreno en 7 días' : 'entrenos en 7 días', 'data-acc="esp-tab" data-esp="deporte" data-v="entrenos"') +
+    d('i-balon', pa ? (pa.en === 0 ? '¡Hoy!' : pa.en) : '—', pa ? (pa.en === 0 ? 'hay partido' : pa.en === 1 ? 'día al partido' : 'días al partido') : 'sin partidos', 'data-acc="esp-tab" data-esp="deporte" data-v="partidos"');
 }
 
 /* Resumen compacto: lo que viene y lo pendiente del espacio, en una sola tarjeta */
@@ -4628,13 +4793,13 @@ function propuestaDia(dia){
   });
   return { dia:dia, plan:plan, sinSitio:sinSitio };
 }
-function hhmm(m){ return dos(Math.floor(m / 60)) + ':' + dos(m % 60); }
+function horaMin(m){ return dos(Math.floor(m / 60)) + ':' + dos(m % 60); }
 function hojaPlanDia(dia){
   var P = propuestaDia(dia); ui.planDia = P;
   abrirFlotante(cabFlot('Planificar ' + (dia === hoyISO() ? 'hoy' : relativo(dia).toLowerCase())) +
     '<div class="plan-dia">' +
     (P.plan.length ? '<p class="plan-intro">Así quedarían tus tareas en los huecos libres, de la más importante a la menos:</p><div class="lista-filas">' +
-      P.plan.map(function(x){ return '<div class="fila plan-fila"><span class="hora">' + hhmm(x.ini) + '<br><small>' + hhmm(x.fin) + '</small></span><span class="barrita" style="--c:' + colorEsp(x.t) + '"></span>' +
+      P.plan.map(function(x){ return '<div class="fila plan-fila"><span class="hora">' + horaMin(x.ini) + '<br><small>' + horaMin(x.fin) + '</small></span><span class="barrita" style="--c:' + colorEsp(x.t) + '"></span>' +
         '<div class="cuerpo"><div class="titulo">' + esc(x.t.t) + '</div><div class="meta"><span>' + textoDuracion(x.fin - x.ini) + (x.t.dur ? '' : ' (calculado)') + '</span>' + (x.t.prio ? '<span>' + PRIOS[x.t.prio].n + '</span>' : '') + '</div></div></div>'; }).join('') + '</div>'
       : '<p class="plan-intro">No quedan huecos libres de al menos media hora para tus tareas en este día.</p>') +
     (P.sinSitio.length ? '<p class="plan-aviso">' + plural(P.sinSitio.length, 'tarea no cabe', 'tareas no caben') + ' hoy: ' + P.sinSitio.map(function(t){ return esc(t.t); }).join(', ') + '.</p>' : '') +
@@ -4645,7 +4810,7 @@ function hojaPlanDia(dia){
 function aplicarPlanDia(){
   var P = ui.planDia; if(!P || !P.plan.length) return;
   var antes = P.plan.map(function(x){ return JSON.parse(JSON.stringify(buscarId('tareas', x.t.id) || x.t)); });
-  P.plan.forEach(function(x){ var t = buscarId('tareas', x.t.id); if(!t) return; t = JSON.parse(JSON.stringify(t)); t.hora = hhmm(x.ini); if(!t.fecha) t.fecha = P.dia; poner('tareas', t); });
+  P.plan.forEach(function(x){ var t = buscarId('tareas', x.t.id); if(!t) return; t = JSON.parse(JSON.stringify(t)); t.hora = horaMin(x.ini); if(!t.fecha) t.fecha = P.dia; poner('tareas', t); });
   ui.planDia = null; cerrarFlotante(); pintar();
   aviso('🗓️ Día planificado', plural(P.plan.length, 'tarea con hora', 'tareas con hora'), 'Deshacer', function(){ antes.forEach(function(t){ poner('tareas', t); }); pintar(); });
 }
@@ -4848,7 +5013,7 @@ VISTAS['panel-agenda'] = function(){
       mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy || tPend, nl:k.tareasTarde ? plural(k.tareasTarde, 'atrasada', 'atrasadas') : tHoy ? 'para hoy' + (tPend > tHoy ? ' · ' + tPend + ' en total' : '') : (tPend === 1 ? 'pendiente' : 'pendientes'), alerta:!!k.tareasTarde }) +
       mosaico({ ir:'recordatorios', i:'i-campana', c:'#FF9F0A', t:'Avisos', d:'Lo que no se te puede olvidar', n:k.recordatorios || recHoy, nl:k.recordatorios ? 'pasados' : 'para hoy', alerta:!!k.recordatorios }) +
       mosaico({ ir:'proyectos', i:'i-carpeta', c:'#BF5AF2', t:'Proyectos', d:'Metas grandes paso a paso', n:pa, nl:pa === 1 ? 'activo' : 'activos' }) +
-    '</div>';
+    '</div>' + pvAgenda();
 };
 VISTAS['panel-dinero'] = function(){
   var ym = hoyISO().slice(0, 7), todo = movsDe('todo'), tm = totalesMes(todo, ym);
@@ -4865,8 +5030,114 @@ VISTAS['panel-dinero'] = function(){
       mosaico({ acc:'data-acc="mov-ver" data-v="personal"', i:'i-casa', c:'#5AA9FF', t:'Libro personal', d:'Tus gastos personales', n:dinero(totalesMes(movsDe('personal'), ym).sal), nl:'gastado' }) +
       mosaico({ acc:'data-acc="mov-ver" data-v="oficina"', i:'i-maletin', c:'#94A3B8', t:'Libro de la oficina', d:'Cuentas de la oficina', n:dinero(totalesMes(movsDe('oficina'), ym).ent), nl:'facturado' }) +
       mosaico({ ir:'informes', i:'i-bajar', c:'#22C55E', t:'Informes · Excel y PDF', d:'Descarga tus cuentas del mes, del año o de las fechas que elijas', n:todo.length, nl:'movimientos guardados', ancho:true }) +
-    '</div>';
+    '</div>' + pvDinero();
 };
+/* En vivo para los paneles de Agenda, Dinero, Notas y Más */
+function pvBloque(cs, c){
+  cs = cs.filter(Boolean);
+  return cs.length ? '<section class="pv" style="--ec:' + c + '"><h3 class="panel-sub pv-titulo"><span class="pv-punto" aria-hidden="true"></span>En vivo</h3><div class="pv-rejilla">' + cs.join('') + '</div></section>' : '';
+}
+function pvFilaItem(x){
+  var izq = x.tipo === 'tarea' ? casilla('tarea-ok', x.id, x.hecho, x.o && x.o.prio ? x.c : '') : x.tipo === 'rec' ? casilla('rec-ok', x.id, x.hecho, 'var(--naranja, #FF9F0A)') : '<span class="pv-hora">' + (x.hora || 'Día') + '</span>';
+  var E = x.esp ? espInfo(x.esp) : null;
+  return '<li>' + izq + '<span class="pv-tx"><b>' + esc(x.t) + '</b><small>' + (x.tipo === 'tarea' || x.tipo === 'rec' ? (x.hora ? 'A las ' + x.hora : 'Hoy') : (x.fin ? 'Hasta las ' + x.fin : x.tipo === 'clase' ? 'Clase' : 'Evento')) + (E ? ' · ' + E.em + ' ' + E.nom : '') + '</small></span></li>';
+}
+/* Sin atrasadas: las tareas sin fecha, para darles un día con un toque */
+function pvSinFecha(){
+  var sf = vivos('tareas').filter(function(t){ return !t.hecha && !t.fecha; }).sort(ordenTareas);
+  return '<p class="pv-sub">Nada atrasado, vas al día 💪</p>' + (sf.length ? '<p class="pv-nota" style="margin:0">Estas no tienen fecha, ¿cuándo las haces?</p><ul class="pv-lista">' + sf.slice(0, 3).map(function(t){
+    return '<li><span class="pv-tx"><b>' + esc(t.t) + '</b><small>' + (espDe(t) ? espInfo(espDe(t)).em + ' ' + espInfo(espDe(t)).nom : '') + '</small></span><span class="pv-botones"><button type="button" class="btn chico" data-acc="pv-fecha" data-id="' + t.id + '" data-n="0">Hoy</button><button type="button" class="btn chico" data-acc="pv-fecha" data-id="' + t.id + '" data-n="1">Mañana</button></span></li>'; }).join('') + '</ul>' : '');
+}
+function pvAgenda(){
+  var hoy = hoyISO(), ya = horaAhora(), cs = [];
+  cs.push(pvCarta('⚡', 'Anotar al vuelo', '<form class="pv-form" data-acc="hoy-tarea" autocomplete="off"><input id="hoyTarea" maxlength="160" placeholder="ej. pagar la luz mañana 6pm" aria-label="Anotar una tarea" enterkeyhint="done"><button type="submit" class="btn chico primario" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
+    '<p class="pv-nota">Escribe normal: entiendo «mañana», «el viernes», «a las 5», «#oficina», «!» para importante.</p>' +
+    '<div class="pv-chips">' + ['llamar a mamá mañana 7pm', 'informe el viernes #oficina', 'repasar química hoy #estudios'].map(function(e){ return '<button type="button" class="pv-chip suave" data-acc="pv-ejemplo" data-v="' + esc(e) + '">' + esc(e) + '</button>'; }).join('') + '</div>', null));
+  var its = itemsDelDia(hoy).filter(function(x){ return !x.hecho && (!x.hora || (x.fin || x.hora) >= ya); }).sort(function(a, b){ return (a.hora || '99').localeCompare(b.hora || '99'); });
+  cs.push(pvCarta('🕒', 'Lo que sigue hoy', its.length ? '<ul class="pv-lista pv-tareas">' + its.slice(0, 5).map(pvFilaItem).join('') + '</ul>' + (its.length > 5 ? '<p class="pv-nota">y ' + (its.length - 5) + ' más</p>' : '') : pvVacio('Ya no queda nada para hoy. 🌙'), ['Mi día', 'data-ir="agenda"']));
+  var atr = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoy; }).sort(function(a, b){ return a.fecha.localeCompare(b.fecha); });
+  cs.push(pvCarta('⏰', 'Atrasadas', atr.length ? '<ul class="pv-lista pv-tareas">' + atr.slice(0, 3).map(function(t){
+      return '<li>' + casilla('tarea-ok', t.id, false, '') + '<span class="pv-tx"><b>' + esc(t.t) + '</b><small class="mal">' + relativo(t.fecha) + '</small></span></li>'; }).join('') + '</ul>' +
+    '<button type="button" class="btn chico primario pv-abajo" data-acc="pv-atr-hoy">' + ico('i-flecha') + 'Pasar ' + (atr.length === 1 ? 'la atrasada' : 'las ' + atr.length) + ' a hoy</button>'
+    : pvSinFecha(), atr.length ? ['Tareas', 'data-ir="tareas"'] : ['Tareas', 'data-ir="tareas"']));
+  var dias = [], mx = 1;
+  for(var i = 0; i < 7; i++){ var d = sumarDias(hoy, i), n = itemsDelDia(d).filter(function(x){ return !x.hecho; }).length; mx = Math.max(mx, n); dias.push({ d:d, n:n }); }
+  cs.push(pvCarta('📆', 'Próximos 7 días', '<div class="pv-carga">' + dias.map(function(x, j){
+      return '<button type="button" class="' + (j === 0 ? 'hoy' : '') + '" data-acc="pv-dia" data-dia="' + x.d + '" title="' + fechaCorta(x.d) + ': ' + plural(x.n, 'cosa', 'cosas') + '"><b>' + x.n + '</b><i style="height:' + Math.max(6, Math.round(x.n / mx * 100)) + '%"></i><small>' + (j === 0 ? 'Hoy' : cap(DIAS3[deISO(x.d).getDay()])) + '</small></button>';
+    }).join('') + '</div><p class="pv-nota">Toca un día para verlo completo</p>', ['Calendario', 'data-ir="calendario"']));
+  return pvBloque(cs, '#2E6BFF');
+}
+function pvDinero(){
+  var hoy = hoyISO(), ym = hoy.slice(0, 7), lp = movsDe('personal'), tm = totalesMes(lp, ym), cs = [];
+  var usadas = {}; lp.forEach(function(t){ if(t.cat && t.type === 'Gasto') usadas[t.cat] = (usadas[t.cat] || 0) + 1; });
+  var cats = Object.keys(usadas).sort(function(a, b){ return usadas[b] - usadas[a]; }).concat(CATS_BASE).filter(function(c, i, a){ return a.indexOf(c) === i; }).slice(0, 8);
+  cs.push(pvCarta('💸', 'Gasto en 2 toques', '<div class="pv-chips">' + cats.map(function(c){ return '<button type="button" class="pv-chip" data-acc="pv-gcat" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div><p class="pv-nota">Elige la categoría y escribe el monto</p>', null));
+  var fin = new Date(+ym.slice(0, 4), +ym.slice(5, 7), 0).getDate(), quedanDias = fin - (+hoy.slice(8, 10)) + 1;
+  var porPagar = pagosProximos(40).filter(function(x){ return x.ym === ym && espDe(x.p) !== 'oficina'; }).reduce(function(a, x){ return a + (+x.p.monto || 0); }, 0);
+  var libre = tm.ent - tm.sal - porPagar, diario = libre / quedanDias, pct = tm.ent ? Math.min(1, tm.sal / tm.ent) : 0;
+  var gHoy = lp.filter(function(t){ return t.date === hoy && t.type === 'Gasto'; }).reduce(function(a, t){ return a + t.amount; }, 0);
+  cs.push(pvCarta('🧭', 'Puedes gastar hoy', tm.ent ? '<div class="pv-grande"><strong class="' + (diario - gHoy < 0 ? 'mal' : '') + '">' + (diario - gHoy < 0 ? '−' : '') + dinero(Math.abs(diario - gHoy)) + '</strong></div>' +
+      '<p class="pv-sub">' + dinero(Math.max(0, diario)) + ' al día por ' + plural(quedanDias, 'día', 'días') + (gHoy ? ' · hoy ya van ' + dinero(gHoy) : '') + (porPagar ? ' · descontados ' + dinero(porPagar) + ' de pagos' : '') + '</p>' +
+      '<div class="pv-medidor"><i style="width:' + Math.round(pct * 100) + '%" class="' + (pct > .9 ? 'mal' : pct > .7 ? 'ojo' : '') + '"></i></div><p class="pv-nota">Gastaste el ' + Math.round(pct * 100) + '% de lo que entró este mes</p>'
+    : pvVacio('Anota lo que te entra este mes y te digo cuánto puedes gastar cada día.') + '<button type="button" class="btn chico" data-acc="din-anotar" data-libro="personal" data-t="Ingreso">' + ico('i-plus') + 'Anotar ingreso</button>', ['Resumen', 'data-ir="dinero"']));
+  var porCat = {}; lp.forEach(function(t){ if(t.type === 'Gasto' && t.date.slice(0, 7) === ym){ var k = t.cat || 'Sin categoría'; porCat[k] = (porCat[k] || 0) + t.amount; } });
+  var top = Object.keys(porCat).sort(function(a, b){ return porCat[b] - porCat[a]; }).slice(0, 5), mxC = top.length ? porCat[top[0]] : 1;
+  cs.push(pvCarta('🍩', 'En qué se va', top.length ? '<ul class="pv-barras ancha">' + top.map(function(k){
+      return '<li><span>' + esc(k) + '</span><i><em style="width:' + Math.round(porCat[k] / mxC * 100) + '%"></em></i><b>' + dinero(porCat[k]) + '</b></li>'; }).join('') + '</ul>'
+    + (function(){ var ma = mesAntes(ym, 1), lim = ma + '-' + hoy.slice(8, 10), ant = lp.filter(function(t){ return t.type === 'Gasto' && t.date.slice(0, 7) === ma && t.date <= lim; }).reduce(function(a, t){ return a + t.amount; }, 0);
+        return '<p class="pv-sub pv-abajo">Llevas <b>' + dinero(tm.sal) + '</b>' + (ant ? ' · el mes pasado a estas alturas: ' + dinero(ant) + ' <em class="' + (tm.sal > ant ? 'sube' : 'baja') + '">' + (tm.sal > ant ? '▲' : '▼') + ' ' + Math.abs(Math.round((tm.sal - ant) / ant * 100)) + '%</em>' : '') + '</p>'; })()
+    : pvVacio('Sin gastos este mes todavía.'), ['Movimientos', 'data-ir="movimientos"']));
+  var pp = pagosProximos(30).slice(0, 3);
+  cs.push(pvCarta('🧾', 'Pagos que vienen', pp.length ? '<ul class="pv-lista pv-tareas">' + pp.map(function(x){
+      var n = diasEntre(hoy, x.dia);
+      return '<li>' + casilla('pago-ok', x.p.id, false, 'var(--haber)', false, ' data-ym="' + x.ym + '"') + '<span class="pv-tx"><b>' + esc(x.p.em || '🧾') + ' ' + esc(x.p.t) + ' · ' + dinero(+x.p.monto || 0) + '</b><small class="' + (n < 0 ? 'mal' : '') + '">' + (n < 0 ? 'Venció hace ' + plural(-n, 'día', 'días') : n === 0 ? 'Vence hoy' : n === 1 ? 'Vence mañana' : 'En ' + n + ' días') + '</small></span></li>'; }).join('') + '</ul><p class="pv-nota">Marca la casilla cuando lo pagues</p>'
+    : pvVacio('Nada por pagar en los próximos 30 días ✅'), ['Pagos', 'data-ir="pagos"']));
+  return pvBloque(cs, '#30D158');
+}
+function pvNotas(){
+  var ns = vivos('notas'), ls = vivos('listas'), cs = [];
+  cs.push(pvCarta('✍️', 'Nota rápida', '<form class="pv-nota-form" data-acc="pv-nota" autocomplete="off"><textarea id="pvNota" rows="3" maxlength="4000" placeholder="Escribe una idea, un dato, un número… La primera línea es el título. Usa #etiquetas."></textarea><button type="submit" class="btn chico primario">' + ico('i-check') + 'Guardar nota</button></form>', null));
+  var rec = ns.slice().sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || (b.upd || 0) - (a.upd || 0); }).slice(0, 4);
+  cs.push(pvCarta('🗒️', 'Recientes', rec.length ? '<ul class="pv-lista">' + rec.map(function(n){
+      var txt = (n.cuerpo || '').replace(/\s+/g, ' ').trim();
+      return '<li><button type="button" class="pv-fila-btn" data-acc="nota-ed" data-id="' + n.id + '"><span class="pv-tx"><b>' + (n.fija ? '📌 ' : '') + esc(n.t || txt.slice(0, 40) || 'Sin título') + '</b><small>' + esc(txt.slice(0, 70) || 'Vacía') + '</small></span>' + ico('i-der') + '</button></li>'; }).join('') + '</ul>'
+    : pvVacio('Todavía no tienes notas.'), ['Todas', 'data-ir="notas"']));
+  cs.push(pvCarta('☑️', 'Tus listas', ls.length ? '<ul class="pv-lista">' + ls.slice(0, 4).map(function(l){
+      var it = l.items || [], ok = it.filter(function(i){ return i.ok; }).length, p = it.length ? ok / it.length : 0;
+      return '<li><button type="button" class="pv-fila-btn" data-acc="lista-abrir" data-id="' + l.id + '"><span class="pv-em chico">' + esc(l.em || '📝') + '</span><span class="pv-tx"><b>' + esc(l.nombre) + '</b><small>' + (it.length ? (it.length - ok) + ' por marcar' : 'Vacía') + '</small><span class="pv-medidor fino"><i style="width:' + Math.round(p * 100) + '%"></i></span></span>' + ico('i-der') + '</button></li>'; }).join('') + '</ul>'
+    : pvVacio('Sin listas.') + '<button type="button" class="btn chico" data-acc="nuevo" data-tipo="lista">' + ico('i-plus') + 'Crear lista</button>', ['Listas', 'data-ir="listas"']));
+  var tags = {}; ns.forEach(function(n){ etiquetasDe(n).forEach(function(t){ tags[t] = (tags[t] || 0) + 1; }); });
+  var tk = Object.keys(tags).sort(function(a, b){ return tags[b] - tags[a]; });
+  cs.push(pvCarta('🏷️', 'Etiquetas y plantillas', (tk.length ? '<div class="pv-chips">' + tk.slice(0, 10).map(function(t){ return '<button type="button" class="pv-chip" data-acc="nota-tag" data-v="' + esc(t) + '">#' + esc(t) + ' <em>' + tags[t] + '</em></button>'; }).join('') + '</div><p class="pv-nota">Toca una etiqueta para ver solo esas notas</p>'
+    : pvVacio('Escribe #algo dentro de una nota (#ideas, #trabajo) y aquí podrás filtrarlas.')) +
+    '<p class="pv-nota" style="margin:4px 0 0">Empezar una nota con plantilla:</p><div class="pv-chips">' + Object.keys(PLANT_NOTA).map(function(k){ return '<button type="button" class="pv-chip suave" data-acc="pv-plantilla" data-v="' + k + '">' + PLANT_NOTA[k].n + '</button>'; }).join('') + '</div>', null));
+  return pvBloque(cs, '#FFD60A');
+}
+function pvMas(){
+  var hoy = hoyISO(), wd = new Date().getDay(), cs = [];
+  var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
+  cs.push(pvCarta('🔥', 'Hábitos de hoy', hab.length ? '<div class="pv-chips">' + hab.map(function(x){ var ok = habHecho(x, hoy);
+      return '<button type="button" class="pv-chip hab' + (ok ? ' si' : '') + '" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + ok + '">' + esc(x.em || '⭐') + ' ' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>'; }).join('') + '</div><p class="pv-sub"><b>' + hab.filter(function(x){ return habHecho(x, hoy); }).length + ' de ' + hab.length + '</b> hechos hoy</p>'
+    : pvVacio('Sin hábitos para hoy.') + '<button type="button" class="btn chico" data-acc="nuevo" data-tipo="habito">' + ico('i-plus') + 'Crear hábito</button>', ['Hábitos', 'data-ir="habitos"']));
+  var dd = buscarId('diario', hoy), an = dd && !dd.del ? +dd.animo || 0 : 0;
+  cs.push(pvCarta('🌤️', '¿Cómo va tu día?', '<div class="pv-animo">' + [1, 2, 3, 4, 5].map(function(v){
+      return '<button type="button" data-acc="animo" data-dia="' + hoy + '" data-v="' + v + '" aria-pressed="' + (an === v) + '" title="' + ANIMOS[v].n + '"><span>' + ANIMOS[v].e + '</span><small>' + ANIMOS[v].n + '</small></button>'; }).join('') + '</div>' +
+    '<button type="button" class="btn chico pv-abajo" data-acc="diario-dia" data-dia="' + hoy + '">' + ico('i-lapiz') + (dd && dd.texto ? 'Seguir escribiendo' : 'Escribir en el diario') + '</button>', null));
+  var d7 = sumarDias(hoy, -6);
+  var th = vivos('tareas').filter(function(t){ return t.hecha && t.hechaEn && iso(new Date(t.hechaEn)) >= d7; }).length;
+  var en = vivos('entrenos').filter(function(e){ return e.fecha >= d7 && e.fecha <= hoy; }).length;
+  var gs = movsDe('personal').filter(function(t){ return t.type === 'Gasto' && t.date >= d7 && t.date <= hoy; }).reduce(function(a, t){ return a + t.amount; }, 0);
+  var di = vivos('diario').filter(function(e){ return e.id >= d7 && e.id <= hoy && (e.texto || e.animo); }).length;
+  cs.push(pvCarta('📈', 'Tus últimos 7 días', '<div class="pv-numeros">' + [['✅', th, plural(th, 'tarea hecha', 'tareas hechas').replace(/^\d+ /, '')], ['🏃', en, en === 1 ? 'entreno' : 'entrenos'], ['💸', dinero(gs), 'gastado'], ['📔', di, di === 1 ? 'día anotado' : 'días anotados']].map(function(x){
+      return '<div><span>' + x[0] + '</span><b>' + x[1] + '</b><small>' + x[2] + '</small></div>'; }).join('') + '</div>', ['Revisión', 'data-acc="revision"']));
+  var ms = vivos('metas').filter(function(m){ return !m.archivada; }).slice(0, 3);
+  cs.push(pvCarta('🎯', 'Metas', ms.length ? '<ul class="pv-lista">' + ms.map(function(m){
+      var p = Math.min(1, (+m.actual || 0) / (+m.objetivo || 1));
+      return '<li><span class="pv-em chico">' + esc(m.em || '🎯') + '</span><span class="pv-tx"><b>' + esc(m.t) + '</b><small>' + formNum(+m.actual || 0) + ' de ' + formNum(+m.objetivo || 0) + ' ' + esc(m.unidad || '') + ' · ' + Math.round(p * 100) + '%</small><span class="pv-medidor fino"><i style="width:' + Math.round(p * 100) + '%"></i></span></span>' +
+        (+m.objetivo <= 500 && p < 1 ? '<button type="button" class="btn chico" data-acc="pv-meta" data-id="' + m.id + '" aria-label="Sumar uno">+1</button>' : '') + '</li>'; }).join('') + '</ul>'
+    : pvVacio('Sin metas todavía.') + '<button type="button" class="btn chico" data-acc="nuevo" data-tipo="meta">' + ico('i-plus') + 'Crear meta</button>', ['Metas', 'data-ir="metas"']));
+  return pvBloque(cs, '#BF5AF2');
+}
 function k0Pagos(){ return pagosProximos(0).length; }
 VISTAS['panel-notas'] = function(){
   var ns = vivos('notas'), ls = vivos('listas'), fij = ns.filter(function(n){ return n.fija; }).length;
@@ -4876,7 +5147,7 @@ VISTAS['panel-notas'] = function(){
     '<div class="mosaicos">' +
       mosaico({ ir:'notas', i:'i-notas', c:'#FFD60A', t:'Notas', d:'Ideas, datos y apuntes; con casillas si quieres', n:ns.length, nl:fij ? plural(fij, 'fijada', 'fijadas') : 'notas' }) +
       mosaico({ ir:'listas', i:'i-listas', c:'#30D158', t:'Listas', d:'Compras, bolso, pendientes para marcar', n:porMarcar, nl:'por marcar' }) +
-    '</div>';
+    '</div>' + pvNotas();
 };
 VISTAS['panel-mas'] = function(){
   var hoy = hoyISO(), wd = new Date().getDay();
@@ -4891,7 +5162,7 @@ VISTAS['panel-mas'] = function(){
     mosaico({ ir:'habitos', i:'i-habitos', c:'#FF9F0A', t:'Hábitos', d:'Lo que haces cada día y tus rachas', n:habOk + '/' + hab.length, nl:'hoy' }) +
     mosaico({ ir:'metas', i:'i-meta', c:'#FFD60A', t:'Metas', d:'Ahorrar, leer, entrenar… y cuánto falta', n:vivos('metas').length, nl:'metas' }) +
     mosaico({ ir:'diario', i:'i-diario', c:'#FF6482', t:'Diario', d:'Cuenta tu día en un par de líneas', n:escritos, nl:'días este mes' }) +
-  '</div>';
+  '</div>' + pvMas();
   html += '<h3 class="panel-sub">Ajustes y herramientas</h3><div class="panel-lista">' +
     [['acc:revision', 'i-check', 'Revisión de la semana', revisionHecha(inicioSemana(hoyISO())) ? 'Ya la hiciste esta semana ✓' : 'Cómo te fue y qué viene · 5 minutos'],
      ['ajustes', 'i-ajustes', 'Ajustes', 'Tu nombre, apariencia, avisos, nube y respaldos'], ['acc:buscar', 'i-buscar', 'Buscar', 'En todo lo que tienes'],
@@ -7354,7 +7625,9 @@ document.addEventListener('click', function(ev){
       break;
     case 'rapido':
       var rv = b.dataset.v;
-      if(rv === 'gasto') gastoRapido('personal'); else hojaAnadir(rv);
+      if(rv === 'gasto' || rv === 'ingreso') gastoRapido('personal', rv === 'ingreso' ? 'Ingreso' : 'Gasto');
+      else if(['tarea', 'evento', 'rec', 'nota'].indexOf(rv) >= 0) hojaAnadir(rv);
+      else nuevo(rv);
       break;
     case 'nota-check': marcarLineaNota(id, +b.dataset.l); break;
     case 'busq-reciente': var qq = $('q'); if(qq){ qq.value = b.dataset.v; qq.oninput(); } break;
@@ -7605,6 +7878,47 @@ document.addEventListener('click', function(ev){
     case 'rev-mover': ui.revSemana = sumarDias(ui.revSemana || inicioSemana(hoyISO()), +b.dataset.n); pintar(); break;
     case 'sem-mover': ui.calSel = sumarDias(ui.calSel, +b.dataset.n); ui.calMes = ui.calSel.slice(0, 7); pintar(); break;
     case 'cobro-ok': cobrar(id, b); break;
+    case 'pv-compra':
+      var lC = buscarId('listas', b.dataset.l); if(!lC) break;
+      lC = JSON.parse(JSON.stringify(lC)); var itC = (lC.items || []).find(function(x){ return x.id === id; }); if(!itC) break;
+      itC.ok = true; if(esListaCompras(lC)) contarCompra(lC, itC.t); poner('listas', lC);
+      b.classList.add('hecho'); vibrar(10);
+      setTimeout(pintarSeguro, 220);
+      aviso('🛒 ' + itC.t + ' comprado', '', 'Deshacer', function(){ var l2 = JSON.parse(JSON.stringify(buscarId('listas', lC.id))); var i2 = l2.items.find(function(x){ return x.id === itC.id; }); if(i2){ i2.ok = false; poner('listas', l2); pintar(); } });
+      break;
+    case 'pv-falta':
+      var cF = buscarId('cursos', id); if(!cF) break;
+      cF = JSON.parse(JSON.stringify(cF)); cF.faltas = (+cF.faltas || 0) + 1; poner('cursos', cF); pintar();
+      aviso('Falta anotada en ' + cF.nombre, 'Llevas ' + cF.faltas + (cF.maxFaltas ? ' de ' + cF.maxFaltas : '') + (cF.maxFaltas && cF.faltas >= cF.maxFaltas ? ' · ¡llegaste al límite!' : ''), 'Deshacer', function(){ var c2 = JSON.parse(JSON.stringify(buscarId('cursos', cF.id))); c2.faltas = Math.max(0, (+c2.faltas || 0) - 1); poner('cursos', c2); pintar(); });
+      break;
+    case 'pv-foco':
+      if(foco.esp === 'estudios' && (foco.fin || foco.resta)){ focoPlay(); break; }
+      if(foco.fin){ foco.fin = 0; } foco.esp = 'estudios'; foco.modo = 'trabajo'; foco.resta = 0; guardarFoco(); focoPlay();
+      aviso('🍅 A estudiar 25 minutos', 'Te aviso cuando toque descansar'); break;
+    case 'pv-fecha':
+      var tF = buscarId('tareas', id); if(!tF) break;
+      tF = JSON.parse(JSON.stringify(tF)); tF.fecha = sumarDias(hoyISO(), +b.dataset.n || 0); poner('tareas', tF); pintar();
+      aviso('📅 ' + tF.t, relativo(tF.fecha)); break;
+    case 'pv-plantilla': editarNota(null); var plA = edAcciones['pl-' + b.dataset.v]; if(plA) plA(); break;
+    case 'pv-ejemplo': var hT = $('hoyTarea'); if(hT){ hT.value = b.dataset.v; hT.focus(); } break;
+    case 'pv-dia': ui.agDia = b.dataset.dia; ir('agenda'); break;
+    case 'pv-atr-hoy':
+      var hoyA = hoyISO(), movidas = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha && t.fecha < hoyA; }), antesA = movidas.map(function(t){ return { id:t.id, f:t.fecha }; });
+      movidas.forEach(function(t){ t = JSON.parse(JSON.stringify(t)); t.fecha = hoyA; poner('tareas', t); });
+      pintar(); aviso('📅 ' + plural(movidas.length, 'tarea pasada', 'tareas pasadas') + ' a hoy', '', 'Deshacer', function(){ antesA.forEach(function(x){ var t = JSON.parse(JSON.stringify(buscarId('tareas', x.id))); t.fecha = x.f; poner('tareas', t); }); pintar(); });
+      break;
+    case 'pv-gcat':
+      var gc = b.dataset.v; gastoRapido('personal', 'Gasto');
+      setTimeout(function(){ var bc = [].find.call(document.querySelectorAll('[data-acc="gr-cat"]'), function(x){ return x.dataset.v === gc; }); if(bc) bc.click(); else ui.grCat = gc; var mm = $('grMonto'); if(mm) mm.focus(); }, 30);
+      break;
+    case 'pv-meta':
+      var mt = buscarId('metas', id); if(!mt) break;
+      mt = JSON.parse(JSON.stringify(mt)); mt.actual = (+mt.actual || 0) + 1; poner('metas', mt); vibrar(10); pintar();
+      if(mt.actual >= +mt.objetivo) aviso('🎉 ¡Meta cumplida!', mt.t);
+      break;
+    case 'pv-agua':
+      var nA = Math.max(0, Math.min(20, aguaHoy() + (+b.dataset.n || 0))); escribirJSON(CLAVE_AGUA, { f:hoyISO(), n:nA }); vibrar(10); pintar(); break;
+    case 'pv-reunion': editarEvento(null, { tipo:'reunion', esp:'oficina', fecha:hoyISO(), todo:false, aviso:15 }); break;
     case 'nuevo-examen': editarEvento(null, { tipo:'examen', esp:'estudios', todo:false, aviso:1440, color:'rojo' }); break;
     case 'nuevo-reunion': editarEvento(null, { tipo:'reunion', esp:'oficina', aviso:15 }); break;
     case 'nuevo-partido': editarEvento(null, { tipo:'partido', esp:'deporte', aviso:60, t:'Partido' }); break;
@@ -7729,7 +8043,7 @@ document.addEventListener('click', function(ev){
       break;
     case 'hora-ed': cerrarFlotante(); editarHora(id); break;
     case 'reloj-parar': pararReloj(); break;
-    case 'estudiar': foco.esp = 'estudios'; guardarFoco(); ir('foco'); break;
+    case 'estudiar': if(!foco.fin){ foco.esp = 'estudios'; foco.modo = 'trabajo'; foco.resta = 0; guardarFoco(); focoPlay(); aviso('🍅 A estudiar 25 minutos', 'Te aviso cuando toque descansar'); } break;
     case 'foco-esp': foco.esp = b.dataset.v; guardarFoco(); pintar(); break;
     case 'entreno-rapido': ui.entTipo = b.dataset.v; editarEntreno(null, { tipo:b.dataset.v, min:b.dataset.v === 'futbol' ? 90 : b.dataset.v === 'correr' ? 30 : 60 }); break;
     case 'entreno-ed': cerrarFlotante(); editarEntreno(id); break;
@@ -7916,6 +8230,13 @@ document.addEventListener('submit', function(ev){
     if(enHoja && $('capaFlotante').querySelector('form[data-acc="captura"]')) cerrarFlotante();
     pintar();
     if(!enHoja){ var ni = $('entradaCaptura'); if(ni) ni.focus(); }
+  } else if(a === 'pv-nota'){
+    var pn = $('pvNota'), pt = (pn.value || '').trim();
+    if(!pt){ pn.focus(); return; }
+    var lin = pt.split('\n'), tit = lin[0].trim().slice(0, 120), cue = lin.slice(1).join('\n').trim();
+    if(!cue && tit.length > 60){ cue = tit; tit = ''; }
+    poner('notas', { id:nid(), t:tit, cuerpo:cue, color:'', fija:false });
+    aviso('📝 Nota guardada', tit || cue.slice(0, 40)); pintar();
   } else if(a === 'hoy-tarea'){
     var hi = $('hoyTarea'), hv = hi ? hi.value.trim() : '';
     if(!hv) return;
@@ -8143,7 +8464,9 @@ document.addEventListener('keydown', function(ev){
   if(enCampo || ev.ctrlKey || ev.metaKey || ev.altKey) return;
   if($('capaFlotante').innerHTML) return;
   if(ev.key === '/'){ ev.preventDefault(); abrirBuscar(); }
-  else if(ev.key === 'n' || ev.key === 'N'){ ev.preventDefault(); nuevoSegunVista(); }
+  else if(ev.key === 'N' && ev.shiftKey && innerWidth >= 900){ ev.preventDefault(); abrirLatMenu(); }
+  else if(ev.key === 'n' || ev.key === 'N'){ ev.preventDefault(); cerrarLatMenu(); nuevoSegunVista(); }
+  else if({ t:1, e:1, a:1, g:1 }[ev.key]){ ev.preventDefault(); cerrarLatMenu(); if(ev.key === 'g') gastoRapido('personal', 'Gasto'); else hojaAnadir({ t:'tarea', e:'evento', a:'rec' }[ev.key]); }
   else if(/^[1-9]$/.test(ev.key)){ var ns = navSecs(); if(ns[+ev.key - 1]) ir(ns[+ev.key - 1].id); }
 });
 
@@ -8154,8 +8477,19 @@ $('fab').addEventListener('touchstart', function(){ fabLargo = false; fabReloj =
 window.addEventListener('click', function(ev){ if(fabLargo){ fabLargo = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
 ['touchend','touchmove','touchcancel'].forEach(function(e){ $('fab').addEventListener(e, function(){ clearTimeout(fabReloj); }, { passive:true }); });
 $('fab').addEventListener('contextmenu', function(ev){ ev.preventDefault(); if(!fabLargo) menuRapido(); });
-$('latNuevo').addEventListener('click', function(ev){ ev.stopPropagation(); nuevoSegunVista(); });
-$('latNuevo').addEventListener('contextmenu', function(ev){ ev.preventDefault(); menuRapido(); });
+$('latNuevo').addEventListener('click', function(ev){ ev.stopPropagation(); cerrarLatMenu(); nuevoSegunVista(); });
+$('latNuevo').addEventListener('contextmenu', function(ev){ ev.preventDefault(); abrirLatMenu(); });
+$('latNuevoMas').addEventListener('click', function(ev){ ev.stopPropagation(); if($('latMenu').hidden) abrirLatMenu(); else cerrarLatMenu(); });
+$('latMenu').addEventListener('click', function(ev){ if(ev.target.closest('[data-acc]')) setTimeout(cerrarLatMenu, 0); });
+document.addEventListener('click', function(ev){ if(!$('latMenu').hidden && !ev.target.closest('#latNuevoG')) cerrarLatMenu(); });
+document.addEventListener('keydown', function(ev){
+  if($('latMenu').hidden) return;
+  if(ev.key === 'Escape'){ ev.stopPropagation(); cerrarLatMenu(); $('latNuevoMas').focus(); }
+  else if(ev.key === 'ArrowDown' || ev.key === 'ArrowUp'){
+    var bs = [].slice.call($('latMenu').querySelectorAll('button')), i = bs.indexOf(document.activeElement);
+    ev.preventDefault(); bs[(i + (ev.key === 'ArrowDown' ? 1 : bs.length - 1)) % bs.length].focus();
+  }
+}, true);
 ['btnAtras', 'btnAdelante'].forEach(function(id){
   $(id).addEventListener('contextmenu', function(ev){ ev.preventDefault(); hojaHistorialNav(); });
 });

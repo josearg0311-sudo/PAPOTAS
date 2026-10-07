@@ -61,7 +61,11 @@
       <i class="logo-img" aria-hidden="true"></i>
       <div><b>Agenda</b><small id="marcaNombre"></small></div>
     </div>
-    <button type="button" class="lat-nuevo" id="latNuevo" title="Añadir (n) · clic derecho: menú rápido"><span class="ln-mas"><svg class="i"><use href="#i-plus"/></svg></span><span>Nuevo</span><kbd>N</kbd></button>
+    <div class="lat-nuevo-g" id="latNuevoG">
+      <button type="button" class="lat-nuevo" id="latNuevo" title="Crear (tecla N) · Mayús+N: elegir qué"><span class="ln-mas"><svg class="i"><use href="#i-plus"/></svg></span><span class="ln-txt"><b>Nuevo</b><small id="latNuevoQue">Tarea, evento o aviso</small></span></button>
+      <button type="button" class="lat-nuevo-mas" id="latNuevoMas" aria-haspopup="menu" aria-expanded="false" aria-controls="latMenu" title="Elegir qué crear"><svg class="i"><use href="#i-der"/></svg></button>
+      <div class="lat-menu" id="latMenu" role="menu" aria-label="Crear" hidden></div>
+    </div>
     <nav class="nav-lat" id="navLat"></nav>
     <div class="pie">
       <button type="button" class="perfil" data-ir="ajustes" title="Ajustes">
