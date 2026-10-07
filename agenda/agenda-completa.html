@@ -4336,6 +4336,60 @@ body header.portada-hoy, body header.portada-hoy.heroe-hoy{ box-shadow:none !imp
 .cal-mes .celda.fuera{ opacity:1 !important }
 .cal-mes .celda.fuera .mini{ opacity:.9 !important }
 .panel-cab::before, .sub-cab::after, .portada-esp::before{ display:none !important }
+/* Ventana de confirmación propia */
+.confirma{ position:fixed; inset:0; z-index:9000; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.55); animation:cf-entra .15s ease-out }
+.cf-caja{ width:min(400px, 100%); padding:20px; border-radius:18px; background:var(--hoja); border:1px solid var(--regla); box-shadow:0 20px 50px rgba(0,0,0,.5) }
+.cf-msj{ margin:0 0 18px; font-size:15.5px; line-height:1.45; color:var(--tinta); font-weight:600 }
+.cf-bots{ display:flex; gap:10px; justify-content:flex-end }
+.cf-bots .btn{ min-width:110px; justify-content:center }
+.cf-bots .cf-peligro{ background:var(--debe) !important; border-color:var(--debe) !important; color:#fff !important }
+@keyframes cf-entra{ from{ opacity:0 } }
+@media (max-width:599px){ .confirma{ align-items:end; padding:12px 12px calc(12px + env(safe-area-inset-bottom)) } .cf-bots .btn{ flex:1 } }
+
+/* ==========================================================================
+   ORDEN EN EL CELULAR
+   Pestañas y filtros siempre a la vista (sin nada cortado ni escondido a la
+   derecha) y cabeceras de sección sin brillo ni dibujo grande.
+   ========================================================================== */
+body .vista header.cab-grande, body .vista header.cab-sec, body .vista header.banda, body .vista header.banda-panel, body .vista header.portada-esp{ box-shadow:none !important; filter:none !important }
+header.banda .banda-marca, header.banda-panel .banda-marca{ display:none !important }
+header.banda .banda-fondo, header.banda-panel .banda-fondo{ opacity:.1 !important }
+@media (max-width:599px){
+  /* Pestañas de cada sección: todas iguales, icono arriba y nombre abajo */
+  nav.tabs-sec{ display:flex !important; overflow:visible !important; gap:2px !important; padding:4px !important }
+  nav.tabs-sec > button{ flex:1 1 0 !important; min-width:0 !important; flex-direction:column !important; gap:3px !important; padding:7px 2px 6px !important;
+    font-size:10.5px !important; line-height:1.1 !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; justify-content:center !important; position:relative }
+  nav.tabs-sec > button svg{ width:18px !important; height:18px !important; margin:0 !important }
+  nav.tabs-sec > button.ts-inicio{ flex:0 0 34px !important }
+  nav.tabs-sec > button .globo, nav.tabs-sec > button .cuenta, nav.tabs-sec > button .n{ position:absolute; top:2px; right:calc(50% - 20px); margin:0 !important; transform:scale(.85) }
+  /* Filtros de Tareas: cinco iguales, el número debajo */
+  .segmento[data-pestanas="t-filtro"]{ display:grid !important; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:3px !important; overflow:visible !important }
+  .segmento[data-pestanas="t-filtro"] .ficha{ min-width:0 !important; padding:7px 2px !important; font-size:12px !important; display:flex !important; flex-direction:column; align-items:center; justify-content:center; gap:1px; line-height:1.15; white-space:nowrap; text-align:center }
+  .segmento[data-pestanas="t-filtro"] .ficha .n{ font-size:10.5px !important; margin:0 !important }
+  /* Espacios: los cuatro a la vista */
+  nav.esp-pildoras{ display:grid !important; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:4px !important; overflow:visible !important }
+  nav.esp-pildoras > *{ min-width:0 !important; padding:6px 4px !important; font-size:11.5px !important; justify-content:center !important; gap:4px !important }
+  nav.esp-pildoras > * img, nav.esp-pildoras > * .esp-ic{ display:none }
+}
+@media (max-width:599px){
+  nav.esp-pildoras .esp-pil{ position:relative; flex-direction:column !important; padding:6px 2px !important; border-radius:12px !important }
+  nav.esp-pildoras .ep-em{ font-size:17px; width:auto !important; height:auto !important; background:none !important }
+  nav.esp-pildoras .ep-nom{ font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
+  nav.esp-pildoras .esp-pil em{ position:absolute; top:3px; right:5px; font-size:9.5px !important; min-width:16px; height:16px; padding:0 4px !important; line-height:16px }
+}
+@media (max-width:599px){
+  body .portada-esp nav.pe-cambia.esp-pildoras{ display:grid !important; grid-template-columns:repeat(4, minmax(0, 1fr)) !important; gap:5px !important; width:100% }
+  body .portada-esp .esp-pildoras .esp-pil{ width:auto !important; min-width:0 !important; height:auto !important; flex-direction:column !important; gap:2px !important; padding:6px 2px 5px !important; font-size:11px !important; border-radius:12px !important }
+  body .portada-esp .esp-pildoras .esp-pil .ep-em{ width:24px; height:24px; font-size:15px }
+  body .portada-esp .esp-pildoras .esp-pil .ep-nom{ font-size:11px; max-width:100%; overflow:hidden; text-overflow:ellipsis }
+}
+@media (max-width:599px){
+  /* Mes en el celular: solo las barritas de color (el detalle está en la lista del día, debajo) */
+  .cal-mes .celda .mini{ display:none !important }
+  .cal-mes .celda .barras{ display:flex !important }
+  /* Filtros de espacio del calendario: en dos líneas antes que cortados */
+  .fichas.desliza:has([data-acc="cal-esp"]){ flex-wrap:wrap !important; overflow:visible !important }
+}
 </style>
 </head>
 <body>
@@ -5332,6 +5386,26 @@ function pintarVista(){
    Ajustes, en vez de dejar la pantalla en blanco.
    ========================================================================== */
 var CLAVE_ERRORES = 'agenda_errores';
+/* Pregunta de confirmación propia: las del navegador (confirm) están bloqueadas
+   en algunos visores y celulares y ahí el botón no hacía nada */
+function confirmar(msg, si, fn, peligro){
+  var v = document.getElementById('confirma'); if(v) v.remove();
+  v = document.createElement('div'); v.id = 'confirma'; v.className = 'confirma'; v.setAttribute('role', 'alertdialog'); v.setAttribute('aria-modal', 'true');
+  v.innerHTML = '<div class="cf-caja"><p class="cf-msj"></p><div class="cf-bots"><button type="button" class="btn" data-cf="no">Cancelar</button>' +
+    '<button type="button" class="btn primario' + (peligro ? ' cf-peligro' : '') + '" data-cf="si"></button></div></div>';
+  v.querySelector('.cf-msj').textContent = msg; v.querySelector('[data-cf="si"]').textContent = si || 'Sí';
+  function cerrar(){ document.removeEventListener('keydown', tecla, true); v.remove(); }
+  function tecla(ev){ if(ev.key === 'Escape'){ ev.stopPropagation(); ev.preventDefault(); cerrar(); } }
+  v.addEventListener('click', function(ev){
+    ev.stopPropagation();
+    var b = ev.target.closest('[data-cf]');
+    if(!b){ if(ev.target === v) cerrar(); return; }
+    cerrar(); if(b.dataset.cf === 'si') fn();
+  });
+  document.addEventListener('keydown', tecla, true);
+  document.body.appendChild(v);
+  v.querySelector('[data-cf="si"]').focus();
+}
 function anotarError(e, donde){
   try{
     var l = leerJSON(CLAVE_ERRORES, []);
@@ -5356,8 +5430,11 @@ function cabTarjeta(icono, titulo, c, mas, masAcc){
     (mas ? '<button class="mas" ' + (masAcc || '') + '>' + mas + ico('i-der') + '</button>' : '') + '</div>';
 }
 
+/* Dentro del grupo de un día (en Tareas) la fecha ya está en el título: solo se muestra la hora */
+var diaDelGrupo = '';
 function metaFecha(fecha, hora, hecha){
   if(!fecha) return '';
+  if(diaDelGrupo && fecha === diaDelGrupo) return hora ? '<span>' + ico('i-reloj') + hora + '</span>' : '';
   var hoy = hoyISO();
   var cls = hecha ? '' : (fecha < hoy ? 'tarde' : fecha === hoy ? 'hoy' : '');
   return '<span class="' + cls + '">' + ico('i-cal') + relativo(fecha) + (hora ? ' · ' + hora : '') + '</span>';
@@ -7787,7 +7864,7 @@ function hayParaLimpiar(){
 function limpiar(k){
   var cosa = hayParaLimpiar().find(function(x){ return x.k === k; });
   if(!cosa || !cosa.n) return;
-  if(!confirm(cosa.t + ': ' + cosa.n + '. ¿Limpiar? ' + (k === 'listas' ? 'Se quitan de sus listas.' : 'Irán a la papelera.'))) return;
+  confirmar(cosa.t + ': ' + cosa.n + '. ' + (k === 'listas' ? 'Se quitan de sus listas.' : 'Irán a la papelera.'), 'Limpiar', function(){
   var ahora = Date.now();
   if(k === 'listas') vivos('listas').forEach(function(l){
     if((l.items || []).some(function(i){ return i.ok; })){ l.items = l.items.filter(function(i){ return !i.ok; }); l.upd = ahora; }
@@ -7795,6 +7872,7 @@ function limpiar(k){
   else cosa.l.forEach(function(x){ x.del = true; x.upd = x.delEn = ahora; });
   guardar(); pintar();
   aviso('🧹 Limpio', cosa.n + (cosa.n === 1 ? ' cosa' : ' cosas') + (k === 'listas' ? ' quitadas' : ' a la papelera'), 'Deshacer', deshacer);
+  });
 }
 
 VISTAS.secciones = function(){
@@ -8126,7 +8204,7 @@ VISTAS.tareas = function(){
     algun:   function(t){ return !t.hecha && !t.fecha; },
     hechas:  function(t){ return t.hecha; }
   };
-  var NOM = { hoy:'Hoy', prox:'Próximas', todas:'Pendientes', algun:'Algún día', hechas:'Hechas' };
+  var NOM = { hoy:'Hoy', prox:'Próximas', todas:'Todas', algun:'Algún día', hechas:'Hechas' };
   if(ui.tFiltro === 'hoy' && !ui.tFiltroElegido && !enArea.filter(F.hoy).length && enArea.filter(F.todas).length) ui.tFiltro = 'todas';
   var html = '';
 
@@ -8169,7 +8247,7 @@ VISTAS.tareas = function(){
   /* Como una agenda de papel: cada grupo con su fecha grande a la izquierda */
   var grupos = [], idx = {};
   function meter(clave, titulo, rojo, t, num, sub){
-    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[], num:num, sub:sub, hoy:clave === 'b' }); }
+    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[], num:num, sub:sub, hoy:clave === 'b', dia:clave === 'b' ? hoy : clave.charAt(0) === 'c' ? clave.slice(1) : '' }); }
     grupos[idx[clave]].l.push(t);
   }
   lista.forEach(function(t){
@@ -8185,7 +8263,7 @@ VISTAS.tareas = function(){
       '<div class="pl-fecha"><b>' + g.num + '</b><span>' + g.sub + '</span></div>' +
       '<div class="pl-cuerpo"><h3 class="pl-tit">' + g.t + ' <span class="n">' + g.l.length + '</span>' +
         (g.rojo ? '<button class="btn chico" data-acc="t-atrasadas-hoy">Pasar a hoy</button>' : '') + '</h3>' +
-        '<div class="lista-filas">' + g.l.map(filaTarea).join('') + '</div></div></section>';
+        '<div class="lista-filas">' + (function(){ diaDelGrupo = g.dia; var h = g.l.map(filaTarea).join(''); diaDelGrupo = ''; return h; })() + '</div></div></section>';
   }).join('') + '</div>';
 };
 
@@ -8526,7 +8604,7 @@ VISTAS.recordatorios = function(){
   var hechos = todos.filter(function(r){ return r.hecho && (!r.rep || r.rep === 'no'); })
                     .sort(function(a, b){ return (b.upd || 0) - (a.upd || 0); });
 
-  if(!pend.length && !hechos.length) return html + '<div class="tarjeta">' + vacio('🔔', 'Sin recordatorios', 'Escribe arriba qué y cuándo, y la agenda te avisa.') + '</div>';
+  if(!pend.length && !hechos.length) return html + '<div class="tarjeta">' + vacio('🔔', 'Sin recordatorios', 'Toca «+ Aviso» arriba: escribe qué y cuándo, y la agenda te avisa a su hora.') + '</div>';
   function bloque(t, l, rojo){
     if(!l.length) return '';
     return '<section class="rec-bloque' + (rojo ? ' rojo' : '') + '"><h3 class="seccion-tit' + (rojo ? ' rojo' : '') + '">' + t + ' <span class="n">' + l.length + '</span></h3>' +
@@ -8648,7 +8726,7 @@ VISTAS.habitos = function(){
   /* Abajo: la tabla de seguimiento, como en un cuaderno (14 días) */
   var dias = [];
   for(var i = 13; i >= 0; i--) dias.push(sumarDias(hoy, -i));
-  html += '<h3 class="seccion-tit">Seguimiento <span class="n">últimos 14 días</span></h3>' +
+  html += '<h3 class="seccion-tit">Seguimiento <span class="n">días recientes</span></h3>' +
     '<section class="hab-tabla"><div class="ht-fila ht-cab"><span class="ht-nom"></span>' + dias.map(function(d, k){
       return '<span class="ht-d' + (k < 4 ? ' lejos' : '') + (d === hoy ? ' hoy' : '') + '">' + DIAS3[deISO(d).getDay()].charAt(0) + '<i>' + deISO(d).getDate() + '</i></span>';
     }).join('') + '<span class="ht-racha">🔥</span></div>' +
@@ -11161,23 +11239,21 @@ function cargarRespaldo(archivo){
         guardar();
       }
       var cta = j.app === 'agenda' ? j.cuentas : (Array.isArray(j.transactions) ? j : null);
-      if(cta && (cta.transactions || Array.isArray(cta))){
-        var hay = movimientos().length;
-        if(!hay || confirm('El respaldo trae también tus gastos personales. ¿Reemplazar los de este aparato por los del respaldo?')){
-          escribirJSON(CLAVE_LEDGER, cta);
-          recargarCuentas();
-        }
-      }
       var ofi = j.app === 'agenda' ? j.oficina : null;
-      if(ofi && (ofi.transactions || Array.isArray(ofi))){
-        if(!movimientos(CLAVE_OFICINA).length || confirm('El respaldo trae también las cuentas de la oficina. ¿Reemplazar las de este aparato?')){
-          escribirJSON(CLAVE_OFICINA, ofi);
-          recargarCuentas();
-        }
-      }
+      if(!(cta && (cta.transactions || Array.isArray(cta)))) cta = null;
+      if(!(ofi && (ofi.transactions || Array.isArray(ofi)))) ofi = null;
       if(!ag && !cta && !ofi) throw 0;
       aviso('Respaldo cargado', ag ? 'Se juntó con lo que ya tenías.' : null);
       pintar();
+      /* Los libros se reemplazan enteros: si ya tienes movimientos, se pregunta antes */
+      var libros = [];
+      if(cta) libros.push([CLAVE_LEDGER, cta, movimientos().length, 'El respaldo trae también tus gastos personales. ¿Reemplazar los de este aparato por los del respaldo?']);
+      if(ofi) libros.push([CLAVE_OFICINA, ofi, movimientos(CLAVE_OFICINA).length, 'El respaldo trae también las cuentas de la oficina. ¿Reemplazar las de este aparato?']);
+      (function siguienteLibro(){
+        var L = libros.shift(); if(!L) return;
+        function poner(){ escribirJSON(L[0], L[1]); recargarCuentas(); pintar(); siguienteLibro(); }
+        if(!L[2]) poner(); else confirmar(L[3], 'Reemplazar', poner, true);
+      })();
     }catch(e){ aviso('No se pudo leer', 'El archivo no parece un respaldo de la agenda.'); }
   };
   lector.readAsText(archivo);
@@ -11370,7 +11446,9 @@ function hayEjemplos(){ var r = leerJSON('agenda_ejemplos', null); return !!(r &
 function quitarEjemplos(){
   var r = leerJSON('agenda_ejemplos', null);
   if(!r) return;
-  if(!confirm('¿Quitar todos los datos de ejemplo? Lo que anotaste tú se queda tal cual.')) return;
+  confirmar('¿Quitar todos los datos de ejemplo? Lo que anotaste tú se queda tal cual.', 'Quitar ejemplos', function(){ quitarEjemplosYa(r); });
+}
+function quitarEjemplosYa(r){
   var n = 0;
   Object.keys(r.cols || {}).forEach(function(col){
     if(!Array.isArray(db[col])) return;
@@ -11489,12 +11567,10 @@ document.addEventListener('click', function(ev){
     case 'rehacer': rehacer(); break;
     case 'pap-restaurar': restaurarDePapelera(b.dataset.c, id); aviso('Restaurado', PAPELERA_TIPOS[b.dataset.c][0] + ' devuelto a su sitio'); pintar(); break;
     case 'pap-borrar':
-      if(!confirm('¿Borrar para siempre? Ya no se podrá recuperar.')) return;
-      purgar(b.dataset.c, id); guardar(); pintar(); break;
+      confirmar('¿Borrar para siempre? Ya no se podrá recuperar.', 'Borrar', function(){ purgar(b.dataset.c, id); guardar(); pintar(); }, true); break;
     case 'pap-vaciar':
       var nP = enPapelera().length;
-      if(!confirm('¿Vaciar la papelera? Se borrarán para siempre ' + nP + (nP === 1 ? ' cosa.' : ' cosas.'))) return;
-      enPapelera().forEach(function(p){ purgar(p.c, p.x.id); }); guardar(); pintar(); aviso('🗑️ Papelera vacía'); break;
+      confirmar('¿Vaciar la papelera? Se borrarán para siempre ' + plural(nP, 'cosa', 'cosas') + '.', 'Vaciar', function(){ enPapelera().forEach(function(p){ purgar(p.c, p.x.id); }); guardar(); pintar(); aviso('🗑️ Papelera vacía'); }, true); break;
     case 'ir-informes': ir('informes'); break;
     case 'inf-libro': ui.inf.libro = b.dataset.v; pintar(); break;
     case 'inf-per': ui.inf.periodo = b.dataset.v; pintar(); break;
@@ -11543,8 +11619,8 @@ document.addEventListener('click', function(ev){
     case 'sel-esp': var ne = b.dataset.e; conElegidas(function(t){ t.esp = ne; }, espInfo(ne).em + ' A ' + espInfo(ne).nom); break;
     case 'sel-prio': var np = +b.dataset.p; conElegidas(function(t){ t.prio = np; }, 'Prioridad ' + PRIOS[np].n.toLowerCase()); break;
     case 'sel-borrar':
-      if(!ui.sel || !ui.sel.ids.length || !confirm('¿Borrar ' + ui.sel.ids.length + (ui.sel.ids.length === 1 ? ' tarea' : ' tareas') + '? Irán a la papelera.')) break;
-      conElegidas(function(t){ t.del = true; t.delEn = Date.now(); }, '🗑️ A la papelera');
+      if(!ui.sel || !ui.sel.ids.length) break;
+      confirmar('¿Borrar ' + plural(ui.sel.ids.length, 'tarea', 'tareas') + '? Irán a la papelera.', 'Borrar', function(){ conElegidas(function(t){ t.del = true; t.delEn = Date.now(); }, '🗑️ A la papelera'); }, true);
       break;
     /* Administrar secciones */
     case 'abajo-quitar':
@@ -11557,8 +11633,7 @@ document.addEventListener('click', function(ev){
       ab2.push(b.dataset.v); pref.abajo = ab2; guardarPref(); pintar(); break;
     case 'sec-mover': moverSec(b.dataset.v, +b.dataset.d); break;
     case 'sec-restablecer':
-      if(!confirm('¿Volver al orden original, mostrar todas las secciones y la barra de siempre?')) break;
-      delete pref.secOrden; delete pref.secOff; delete pref.abajo; guardarPref(); pintar(); aviso('Secciones como al principio'); break;
+      confirmar('¿Volver al orden original, mostrar todas las secciones y la barra de siempre?', 'Restablecer', function(){ delete pref.secOrden; delete pref.secOff; delete pref.abajo; guardarPref(); pintar(); aviso('Secciones como al principio'); }); break;
     case 'limpiar': limpiar(b.dataset.v); break;
     case 'tarea-ed': cerrarFlotante(); editarTarea(id); break;
     case 'rec-ok': vibrar(); alternarRec(id, b); break;
@@ -11567,9 +11642,9 @@ document.addEventListener('click', function(ev){
     case 'posponer': posponer(id, isNaN(+b.dataset.m) ? b.dataset.m : +b.dataset.m); break;
     case 'rec-ver-hechos': ui.verHechos = !ui.verHechos; pintar(); break;
     case 'rec-borrar-hechos':
-      if(!confirm('¿Borrar todos los recordatorios hechos?')) return;
-      vivos('recordatorios').forEach(function(r){ if(r.hecho && (!r.rep || r.rep === 'no')){ r.del = true; r.upd = r.delEn = Date.now(); } });
-      guardar(); pintar(); break;
+      confirmar('¿Borrar todos los recordatorios hechos? Irán a la papelera.', 'Borrar', function(){
+        vivos('recordatorios').forEach(function(r){ if(r.hecho && (!r.rep || r.rep === 'no')){ r.del = true; r.upd = r.delEn = Date.now(); } });
+        guardar(); pintar(); }, true); break;
     case 'evento-ed': cerrarFlotante(); editarEvento(id); break;
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
     case 'habito-ed': cerrarFlotante(); editarHabito(id); break;
@@ -11577,9 +11652,9 @@ document.addEventListener('click', function(ev){
     case 't-filtro': ui.tFiltro = b.dataset.f; ui.tFiltroElegido = true; if(b.dataset.irTras && ui.vista !== b.dataset.irTras){ ir(b.dataset.irTras); break; } pintar(); break;
     case 't-area': ui.tArea = b.dataset.a; pintar(); break;
     case 't-borrar-hechas':
-      if(!confirm('¿Borrar todas las tareas hechas?')) return;
-      vivos('tareas').forEach(function(x){ if(x.hecha){ x.del = true; x.upd = x.delEn = Date.now(); } });
-      guardar(); pintar(); break;
+      confirmar('¿Borrar todas las tareas hechas? Irán a la papelera.', 'Borrar', function(){
+        vivos('tareas').forEach(function(x){ if(x.hecha){ x.del = true; x.upd = x.delEn = Date.now(); } });
+        guardar(); pintar(); }, true); break;
 
     case 'enfoque-ok':
       var hoy = hoyISO(), e = buscarId('enfoque', hoy) || { id:hoy, items:[] };
@@ -11906,8 +11981,8 @@ document.addEventListener('click', function(ev){
     case 'diario-dia': cerrarFlotante(); ui.diarioDia = b.dataset.dia || id; if(ui.vista !== 'diario') ir('diario'); else { pintar(); window.scrollTo({ top:0, behavior:'smooth' }); } break;
 
     case 'foco-modo':
-      if(foco.fin && !confirm('¿Parar la sesión en marcha?')) return;
-      foco.modo = b.dataset.m; foco.fin = 0; foco.resta = 0; guardarFoco(); pintar(); tictac(); break;
+      var cambiarModo = function(){ foco.modo = b.dataset.m; foco.fin = 0; foco.resta = 0; guardarFoco(); pintar(); tictac(); };
+      if(foco.fin) confirmar('¿Parar la sesión en marcha?', 'Parar', cambiarModo); else cambiarModo(); break;
     case 'foco-play': focoPlay(); break;
     case 'foco-reiniciar': foco.fin = 0; foco.resta = 0; guardarFoco(); document.title = 'Enfoque · Agenda'; pintar(); tictac(); break;
     case 'foco-saltar':
@@ -11917,9 +11992,7 @@ document.addEventListener('click', function(ev){
 
     case 'pin-poner': case 'pin-cambiar': mostrarCandado('nuevo'); break;
     case 'pin-quitar':
-      if(!confirm('¿Quitar el PIN? La agenda se abrirá sin pedirlo.')) return;
-      pinCfg = null; try{ localStorage.removeItem(CLAVE_PIN); }catch(e){}
-      aviso('PIN quitado'); pintar(); break;
+      confirmar('¿Quitar el PIN? La agenda se abrirá sin pedirlo.', 'Quitar PIN', function(){ pinCfg = null; try{ localStorage.removeItem(CLAVE_PIN); }catch(e){} aviso('PIN quitado'); pintar(); }); break;
 
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
@@ -11966,17 +12039,15 @@ document.addEventListener('click', function(ev){
       (navigator.clipboard ? navigator.clipboard.writeText(ta.value) : Promise.reject()).then(function(){ aviso('Copiado'); }, function(){ try{ document.execCommand('copy'); aviso('Copiado'); }catch(e){} });
       break;
     case 'nube-quitar':
-      if(!confirm('¿Dejar de sincronizar este aparato?')) return;
-      nube = null; try{ localStorage.removeItem(CLAVE_NUBE); localStorage.removeItem(LIBROS.personal.nube); localStorage.removeItem(LIBROS.oficina.nube); }catch(e){}
-      estadoNube('off'); pintar(); break;
+      confirmar('¿Dejar de sincronizar este aparato?', 'Dejar de sincronizar', function(){ nube = null; try{ localStorage.removeItem(CLAVE_NUBE); localStorage.removeItem(LIBROS.personal.nube); localStorage.removeItem(LIBROS.oficina.nube); }catch(e){}
+        estadoNube('off'); pintar(); }); break;
     case 'respaldo': descargarRespaldo(); break;
     case 'cargar': $('archivoRespaldo').click(); break;
     case 'instalar': instalar(); break;
     case 'borrar-todo':
-      if(!confirm('¿Borrar TODA la agenda de este aparato? Los gastos personales y la oficina no se tocan.')) return;
-      if(!confirm('Seguro? No se puede deshacer (salvo con un respaldo).')) return;
-      COLS.forEach(function(c){ db[c].forEach(function(x){ if(!x.del){ x.del = true; x.upd = x.delEn = Date.now(); } }); });
-      guardar(); pintar(); aviso('Agenda vaciada'); break;
+      confirmar('¿Borrar TODA la agenda de este aparato? Los gastos personales y la oficina no se tocan. Todo irá a la papelera.', 'Borrar todo', function(){
+        COLS.forEach(function(c){ db[c].forEach(function(x){ if(!x.del){ x.del = true; x.upd = x.delEn = Date.now(); } }); });
+        guardar(); pintar(); aviso('Agenda vaciada', 'Lo puedes recuperar desde la papelera.'); }, true); break;
   }
 });
 

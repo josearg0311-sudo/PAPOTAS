@@ -4269,3 +4269,57 @@ body header.portada-hoy, body header.portada-hoy.heroe-hoy{ box-shadow:none !imp
 .cal-mes .celda.fuera{ opacity:1 !important }
 .cal-mes .celda.fuera .mini{ opacity:.9 !important }
 .panel-cab::before, .sub-cab::after, .portada-esp::before{ display:none !important }
+/* Ventana de confirmación propia */
+.confirma{ position:fixed; inset:0; z-index:9000; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.55); animation:cf-entra .15s ease-out }
+.cf-caja{ width:min(400px, 100%); padding:20px; border-radius:18px; background:var(--hoja); border:1px solid var(--regla); box-shadow:0 20px 50px rgba(0,0,0,.5) }
+.cf-msj{ margin:0 0 18px; font-size:15.5px; line-height:1.45; color:var(--tinta); font-weight:600 }
+.cf-bots{ display:flex; gap:10px; justify-content:flex-end }
+.cf-bots .btn{ min-width:110px; justify-content:center }
+.cf-bots .cf-peligro{ background:var(--debe) !important; border-color:var(--debe) !important; color:#fff !important }
+@keyframes cf-entra{ from{ opacity:0 } }
+@media (max-width:599px){ .confirma{ align-items:end; padding:12px 12px calc(12px + env(safe-area-inset-bottom)) } .cf-bots .btn{ flex:1 } }
+
+/* ==========================================================================
+   ORDEN EN EL CELULAR
+   Pestañas y filtros siempre a la vista (sin nada cortado ni escondido a la
+   derecha) y cabeceras de sección sin brillo ni dibujo grande.
+   ========================================================================== */
+body .vista header.cab-grande, body .vista header.cab-sec, body .vista header.banda, body .vista header.banda-panel, body .vista header.portada-esp{ box-shadow:none !important; filter:none !important }
+header.banda .banda-marca, header.banda-panel .banda-marca{ display:none !important }
+header.banda .banda-fondo, header.banda-panel .banda-fondo{ opacity:.1 !important }
+@media (max-width:599px){
+  /* Pestañas de cada sección: todas iguales, icono arriba y nombre abajo */
+  nav.tabs-sec{ display:flex !important; overflow:visible !important; gap:2px !important; padding:4px !important }
+  nav.tabs-sec > button{ flex:1 1 0 !important; min-width:0 !important; flex-direction:column !important; gap:3px !important; padding:7px 2px 6px !important;
+    font-size:10.5px !important; line-height:1.1 !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; justify-content:center !important; position:relative }
+  nav.tabs-sec > button svg{ width:18px !important; height:18px !important; margin:0 !important }
+  nav.tabs-sec > button.ts-inicio{ flex:0 0 34px !important }
+  nav.tabs-sec > button .globo, nav.tabs-sec > button .cuenta, nav.tabs-sec > button .n{ position:absolute; top:2px; right:calc(50% - 20px); margin:0 !important; transform:scale(.85) }
+  /* Filtros de Tareas: cinco iguales, el número debajo */
+  .segmento[data-pestanas="t-filtro"]{ display:grid !important; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:3px !important; overflow:visible !important }
+  .segmento[data-pestanas="t-filtro"] .ficha{ min-width:0 !important; padding:7px 2px !important; font-size:12px !important; display:flex !important; flex-direction:column; align-items:center; justify-content:center; gap:1px; line-height:1.15; white-space:nowrap; text-align:center }
+  .segmento[data-pestanas="t-filtro"] .ficha .n{ font-size:10.5px !important; margin:0 !important }
+  /* Espacios: los cuatro a la vista */
+  nav.esp-pildoras{ display:grid !important; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:4px !important; overflow:visible !important }
+  nav.esp-pildoras > *{ min-width:0 !important; padding:6px 4px !important; font-size:11.5px !important; justify-content:center !important; gap:4px !important }
+  nav.esp-pildoras > * img, nav.esp-pildoras > * .esp-ic{ display:none }
+}
+@media (max-width:599px){
+  nav.esp-pildoras .esp-pil{ position:relative; flex-direction:column !important; padding:6px 2px !important; border-radius:12px !important }
+  nav.esp-pildoras .ep-em{ font-size:17px; width:auto !important; height:auto !important; background:none !important }
+  nav.esp-pildoras .ep-nom{ font-size:11px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100% }
+  nav.esp-pildoras .esp-pil em{ position:absolute; top:3px; right:5px; font-size:9.5px !important; min-width:16px; height:16px; padding:0 4px !important; line-height:16px }
+}
+@media (max-width:599px){
+  body .portada-esp nav.pe-cambia.esp-pildoras{ display:grid !important; grid-template-columns:repeat(4, minmax(0, 1fr)) !important; gap:5px !important; width:100% }
+  body .portada-esp .esp-pildoras .esp-pil{ width:auto !important; min-width:0 !important; height:auto !important; flex-direction:column !important; gap:2px !important; padding:6px 2px 5px !important; font-size:11px !important; border-radius:12px !important }
+  body .portada-esp .esp-pildoras .esp-pil .ep-em{ width:24px; height:24px; font-size:15px }
+  body .portada-esp .esp-pildoras .esp-pil .ep-nom{ font-size:11px; max-width:100%; overflow:hidden; text-overflow:ellipsis }
+}
+@media (max-width:599px){
+  /* Mes en el celular: solo las barritas de color (el detalle está en la lista del día, debajo) */
+  .cal-mes .celda .mini{ display:none !important }
+  .cal-mes .celda .barras{ display:flex !important }
+  /* Filtros de espacio del calendario: en dos líneas antes que cortados */
+  .fichas.desliza:has([data-acc="cal-esp"]){ flex-wrap:wrap !important; overflow:visible !important }
+}
