@@ -55,6 +55,19 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 | **Préstamos** (en Personal) | Quién te debe y a quién le debes. Al saldarlo se anota solo en tu libro. |
 | **Tu día** | Una línea de tiempo con la marca de "ahora"; lo que ya pasó se apaga. El saludo muestra cuánto del día llevas. |
 
+### Funciones avanzadas
+
+| Qué | Cómo funciona |
+|---|---|
+| **Planificar el día** | Cada tarea puede tener su **duración estimada** (15 min a 4 h). En Agenda → Mi día, «Planificar» reparte las tareas sin hora en tus huecos libres (entre las 7:00 y las 22:00, respetando eventos y clases), de la más importante a la menos. Primero ves la propuesta; al aplicarla cada tarea queda con su hora y se puede deshacer. Arriba sale el tiempo total estimado del día. |
+| **Hábitos con meta** | Un hábito puede tener una meta por día («8 vasos», «10 páginas»): cada toque suma uno y el día cuenta como hecho al llegar. Si se la pones a un hábito que ya tenías, sus días cumplidos se conservan. |
+| **Ficha de cada hábito** | Toca el nombre en «Seguimiento»: racha actual, mejor racha, % de los últimos 30 días, total de veces, mapa de las últimas 12 semanas y qué días de la semana te cuestan más. Con meta, botones − y + para ajustar el día. |
+| **Límites por categoría** | En Dinero → «En qué se va este mes» → Límites: un tope mensual por categoría en cada libro (ves tu promedio de 3 meses al ponerlo). La barra se pone amarilla al 80 % y roja al pasarte; al anotar un gasto que cruza el límite te avisa, y sale en «Qué hacer ahora». |
+| **Notas con #etiquetas** | Escribe #recetas, #trabajo… dentro de una nota y aparece un filtro arriba con cada etiqueta. Se ordenan por recientes, más antiguas o A–Z (las fijadas siempre primero). Al crear una nota puedes empezar con una plantilla: reunión, idea, pendientes, receta o apuntes. |
+| **Ánimo en el diario** | Arriba del texto eliges cómo estuvo tu día (😢 a 😄). El mes del diario muestra la carita de cada día y «Tu ánimo · 30 días» trae el promedio, los días escritos, la racha, la línea de tu ánimo, el reparto de caritas y qué días de la semana suelen ser mejores. |
+| **Hitos en proyectos** | Metas intermedias con fecha dentro de cada proyecto («Entregar el borrador»). Se marcan, salen en el calendario y la tarjeta del proyecto muestra el próximo. |
+| **Revisión de la semana** | Desde Más (y te la sugiere el fin de semana): tus números con comparación (tareas, hábitos, gasto, eventos, entrenos, diario), lo que lograste, lo atrasado con un botón para pasarlo al lunes, lo que viene y tres preguntas que se guardan. Puedes ver semanas anteriores. |
+
 ### Más para cada día
 
 | Qué | Para qué |
