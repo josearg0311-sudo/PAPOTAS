@@ -4669,3 +4669,42 @@ body .vista header.cab-grande.cab-sec.banda, body .vista header.panel-cab.banda-
 :root[data-paleta="negro"][data-tema="claro"]{
   --verde:#142F86; --verde-sube:#0F246A; --verde-piso:#E4EAFB; --acento-txt:#142F86;
 }
+
+/* ===== AZUL MARINO PROFUNDO (paleta Negro, v43) ===== */
+:root[data-paleta="negro"]:not([data-tema="claro"]){
+  --verde:#0F2770; --verde-sube:#18358F; --verde-piso:#050C24; --acento-txt:#7F9AF0; --azul-vivo:#3A5FD9;
+  --papel:#02050E; --hoja:#070C1B; --hoja-2:#0E1530; --regla:#18213D; --regla-2:#121A33;
+}
+:root[data-paleta="negro"][data-tema="claro"]{
+  --verde:#0E2466; --verde-sube:#0A1B4F; --verde-piso:#E2E8F8; --acento-txt:#0E2466; --azul-vivo:#2346B8;
+}
+/* Lo grande en azul profundo, con un filo de luz para que no se pierda en el fondo */
+:root[data-paleta="negro"]:not([data-tema="claro"]) :is(.btn.primario, .lat-nuevo, .lat-nuevo-mas, .fab, .franja-semana button.hoy, .ag-dias button.sel, .ag-dia.hoy .ag-fecha, .cal-mes .celda.sel .num, .celda.hoy .num, .segmento .ficha[aria-pressed="true"], .gr-cats .ficha[aria-pressed="true"], .qh-btn, .lateral .avatar, .aviso.alarma, .tk-ok, .sem-col.hoy .sem-cab b){
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--acento-txt) 45%, transparent), 0 6px 18px -10px rgba(40,80,220,.55) !important;
+}
+:root[data-paleta="negro"]:not([data-tema="claro"]) :is(.btn.primario, .lat-nuevo, .lat-nuevo-mas, .fab):hover{ background:var(--verde-sube) !important; filter:none }
+/* Lo chico (puntos, subrayados, rachas, marcas) en un azul medio que sí se ve */
+:root[data-paleta="negro"] :is(.franja-semana .puntos i, .semana-mini .puntos i, .w-riel i, .ano-dias i.n3, .ideas li::before, .puntos-pin i.lleno, .esp-tabs button[aria-selected="true"]::after, .pest-grupo button[aria-current="page"]::after, .ht-c.ok, .casilla[aria-checked="true"], .interruptor input:checked, .pest-grupo .pg-n, .barra-inf .globo, .gesto-nav.listo){
+  background:var(--azul-vivo) !important; border-color:var(--azul-vivo) !important;
+}
+:root[data-paleta="negro"]:not([data-tema="claro"]) .franja-semana button.hoy .puntos i{ background:#fff !important }
+/* Seleccionados (filtros, segmentos, selectores): el azul de la app, no blanco */
+:root[data-paleta="negro"] :is(.ficha[aria-pressed="true"], .selector button[aria-pressed="true"], .tk-on){
+  background:var(--verde) !important; color:#fff !important; border-color:transparent !important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--acento-txt) 45%, transparent) !important;
+}
+/* Laptop: las rejillas cortas se estiran en vez de dejar media fila vacía */
+@media (min-width:900px){
+  .hab-anillos{ grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)) !important }
+  .listas-rejilla{ grid-template-columns:repeat(auto-fit, minmax(230px, 1fr)) !important }
+}
+@media (min-width:900px){ .metas-rej{ display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)) !important; gap:14px !important } .metas-rej > section{ margin:0 !important } .metas-rej > section:last-child:nth-child(odd){ grid-column:1 / -1 } }
+@media (min-width:900px){
+  body .vista .rejilla.dos.metas-rej{ display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)) !important; gap:14px !important }
+  .proy-rejilla{ grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)) !important }
+}
+@media (min-width:900px){ body .vista .rejilla.dos.metas-rej > *{ margin:0 !important } }
+/* Lo que ya pasó en «Tu día»: atenuado sin perder lectura */
+body .lt-item.pasado{ opacity:1 !important }
+body .lt-item.pasado .titulo{ color:var(--tinta-2) !important }
+body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3) !important }

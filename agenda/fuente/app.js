@@ -982,7 +982,7 @@ function filaAgenda(it, conFecha){
   var nom = { evento:it.o.cumple ? 'Cumpleaños' : (TIPOS_EV[it.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', tarea:'Tarea', clase:'Clase · ' + cuando, pago:'Pago · ' + dinero(+it.o.monto || 0), feriado:'Feriado nacional' }[it.tipo];
   var enEsp = ui.vista.indexOf('esp-') === 0;
   return '<div class="fila' + (it.hecho ? ' hecha' : '') + '">' +
-    '<span class="hora">' + (it.hora || '—') + '</span>' + izq +
+    '<span class="hora">' + (it.hora || '') + '</span>' + izq +
     '<div class="cuerpo" data-acc="' + acc + '" data-id="' + it.id + '"' + (conFecha ? ' data-dia="' + conFecha + '"' : '') + '>' +
       '<div class="titulo">' + esc(it.t) + '</div>' +
       '<div class="meta">' +
@@ -3125,7 +3125,7 @@ function tarjetaSemanaEsp(id){
   return '<section class="tarjeta ancho-2 semana-esp">' + cabTarjeta('i-cal', 'Tu semana en ' + E.nom.toLowerCase(), E.c, 'Calendario', 'data-acc="esp-cal" data-v="' + id + '"') +
     '<div class="semana-cols"><div><h4>Lo que viene</h4>' +
       (prox.length ? '<div class="lista-filas">' + prox.slice(0, 5).map(function(a){
-        return filaAgenda(a.x, a.d).replace('<span class="hora">' + (a.x.hora || '—') + '</span>', '<span class="hora">' + (a.d === hoy ? (a.x.hora || 'Hoy') : cap(relativo(a.d)).slice(0, 3) + (a.x.hora ? '<br>' + a.x.hora : '')) + '</span>');
+        return filaAgenda(a.x, a.d).replace('<span class="hora">' + (a.x.hora || '') + '</span>', '<span class="hora">' + (a.d === hoy ? (a.x.hora || 'Hoy') : cap(relativo(a.d)).slice(0, 3) + (a.x.hora ? '<br>' + a.x.hora : '')) + '</span>');
       }).join('') + '</div>' : '<div class="vacio" style="padding:6px 0">Semana libre. 😌</div>') +
     '</div><div><h4>Pendientes <button class="mas-mini" data-acc="esp-tareas" data-v="' + id + '">' + tareas.length + ' en total</button></h4>' +
       (tareas.length ? '<div class="lista-filas">' + tareas.slice(0, 5).map(filaTarea).join('') + '</div>' : '<div class="vacio" style="padding:6px 0">Todo al día. ✅</div>') +
@@ -4604,7 +4604,7 @@ function cumplimiento(x){
   var hoy = hoyISO(), hechos = 0, toca = 0, creado = x.creada ? iso(new Date(x.creada)) : '';
   for(var i = 0; i < 30; i++){
     var d = sumarDias(hoy, -i);
-    if(creado && d < creado) break;
+    if(creado && d < creado && !x.auto) break;   // los vinculados tienen historia de antes de crearse
     if(!x.dias || x.dias.indexOf(deISO(d).getDay()) >= 0){ toca++; if(habHecho(x, d)) hechos++; }
   }
   return toca ? hechos / toca : 0;
@@ -5725,8 +5725,8 @@ VISTAS.metas = function(){
           '<button class="btn chico primario" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
       '</div>') + '</section>';
   }
-  return '<div class="rejilla dos">' + activas.map(tarjeta).join('') + '</div>' +
-    (archivadas.length ? '<div class="seccion-tit">Archivadas <span class="n">' + archivadas.length + '</span></div><div class="rejilla dos">' + archivadas.map(tarjeta).join('') + '</div>' : '');
+  return '<div class="rejilla dos metas-rej">' + activas.map(tarjeta).join('') + '</div>' +
+    (archivadas.length ? '<div class="seccion-tit">Archivadas <span class="n">' + archivadas.length + '</span></div><div class="rejilla dos metas-rej">' + archivadas.map(tarjeta).join('') + '</div>' : '');
 };
 function formNum(n){ return FMT_NUM.format(Math.round(n * 100) / 100); }
 
@@ -6177,7 +6177,7 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'negro',   nom:'Negro',   gotas:['#16349A','#30D158','#050915'] },
+  { id:'negro',   nom:'Negro',   gotas:['#0F2770','#30D158','#02050E'] },
   { id:'electrico', nom:'Eléctrico', gotas:['#3D8BFF','#45C97A','#18191B'] },
   { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },
