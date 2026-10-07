@@ -4807,6 +4807,10 @@ body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3
 .tk-op{ color:var(--acento-txt) !important; font-weight:700 !important; background:color-mix(in srgb, var(--acento-txt) 12%, var(--hoja-2)) !important }
 .tk-resultado{ display:flex; align-items:center; height:34px; padding:0 12px; border-radius:8px; font-size:16px; font-weight:800; color:var(--tinta); background:color-mix(in srgb, var(--acento-txt) 14%, transparent); font-variant-numeric:tabular-nums }
 .tk-pred{ font-style:normal; color:var(--tinta-2) !important }
+.gr-vista.ojo{ color:var(--oro) }
+.gr-div{ border-style:dashed !important }
+.gr-dividir{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; color:var(--tinta-2) }
+.gr-dividir[hidden]{ display:none }
 </style>
 </head>
 <body>
@@ -4991,7 +4995,7 @@ function normalizar(d){
     }
     if(d.perfil.prefs && typeof d.perfil.prefs === 'object'){
       var pp = {};
-      ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes'].forEach(function(k){ if(k in d.perfil.prefs) pp[k] = d.perfil.prefs[k]; });
+      ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes', 'secOff', 'secOrden', 'abajo', 'atajos', 'tc'].forEach(function(k){ if(k in d.perfil.prefs) pp[k] = d.perfil.prefs[k]; });
       out.perfil.prefs = pp;
     }
   }
@@ -6196,7 +6200,7 @@ document.addEventListener('input', function(ev){
   var c = x.parentNode, h = c.querySelector(':scope > .monto-vista');
   if(!esCuenta(x.value)){ if(h) h.remove(); return; }
   if(!h){ h = document.createElement('small'); h.className = 'monto-vista'; x.after(h); }
-  var n = leerMonto(x.value); h.textContent = n ? '= ' + dinero(Math.abs(n)) : 'No entiendo ese monto'; h.classList.toggle('mal', !n);
+  var n = leerMonto(x.value); h.textContent = n ? textoMonto(x.value) : 'No entiendo ese monto'; h.classList.toggle('mal', !n);
 });
 document.addEventListener('focusout', function(ev){
   var x = ev.target; if(!esCampoMonto(x) || !esCuenta(x.value)) return;
@@ -6209,6 +6213,17 @@ document.addEventListener('keydown', function(ev){
   var i = campos.indexOf(x);
   if(i >= 0 && i < campos.length - 1){ ev.preventDefault(); campos[i + 1].focus(); }
 }, true);
+/* Mis atajos de texto: «midir» → la dirección completa, «cbu» → el número de cuenta */
+function hojaAtajos(){
+  var aj = pref.atajos || {}, ks = Object.keys(aj).sort();
+  abrirFlotante(cabFlot('Mis atajos de texto') +
+    '<p class="ha-guia">Escribe la palabra clave y, al poner espacio, se cambia por el texto. Viajan a tus otros aparatos.</p>' +
+    (ks.length ? '<div class="vinc-lista">' + ks.map(function(k){ return '<div class="vinc-fila"><span><b>' + esc(k) + '</b><small>' + esc(aj[k]) + '</small></span><button type="button" class="btn-icono" data-acc="atajo-x" data-v="' + esc(k) + '" aria-label="Quitar">' + ico('i-x') + '</button></div>'; }).join('') + '</div>' : '<p class="pv-vacio">Aún no tienes atajos.</p>') +
+    '<form class="form" data-acc="atajo-nuevo" autocomplete="off" style="margin-top:14px">' +
+      '<div class="fila-campos">' + campo('Palabra clave', '<input id="atajoClave" maxlength="20" placeholder="ej. midir" autocorrect="off" autocapitalize="off">') +
+      campo('Se cambia por', '<input id="atajoTexto" maxlength="300" placeholder="ej. Av. Larco 123, Miraflores">') + '</div>' +
+      '<button type="submit" class="btn primario">' + ico('i-plus') + 'Añadir atajo</button></form>');
+}
 function gastoRapido(cual, tipo){
   ui.grLibro = cual || ui.grLibro || 'personal'; ui.grTipo = tipo || 'Gasto'; ui.grCat = '';
   var usadas = {};
@@ -6225,8 +6240,10 @@ function gastoRapido(cual, tipo){
         ['Gasto','Ingreso'].map(function(t){ return '<button type="button" data-acc="gr-tipo" data-v="' + t + '" aria-pressed="' + (ui.grTipo === t) + '">' + t + '</button>'; }).join('') + '</div>' +
         '<div class="selector">' + ['personal','oficina'].map(function(l){ return '<button type="button" data-acc="gr-libro" data-v="' + l + '" aria-pressed="' + (ui.grLibro === l) + '">' + NOM_LIBRO[l] + '</button>'; }).join('') + '</div></div>' +
       '<label class="gr-monto"><span>' + MONEDA + '</span><input id="grMonto" inputmode="decimal" placeholder="0.00" autocomplete="off" enterkeyhint="next" aria-label="Monto"></label>' +
-      '<p class="gr-vista" id="grVista" aria-live="polite">Puedes escribir 1,500 · 2k · 12.50+8</p>' +
-      '<div class="gr-rapidos">' + montos.map(function(v){ return '<button type="button" class="ficha" data-acc="gr-monto" data-v="' + v + '">' + MONEDA + ' ' + formNum(v) + '</button>'; }).join('') + '</div>' +
+      '<p class="gr-vista" id="grVista" aria-live="polite">Puedes escribir 1,500 · 2k · 12.50+8 · $20</p>' +
+      '<div class="gr-rapidos">' + montos.map(function(v){ return '<button type="button" class="ficha" data-acc="gr-monto" data-v="' + v + '">' + MONEDA + ' ' + formNum(v) + '</button>'; }).join('') +
+        '<button type="button" class="ficha gr-div" data-acc="gr-div" title="Dividir la cuenta">÷ Dividir</button></div>' +
+      '<div class="gr-dividir" id="grDividir" hidden><span>Entre</span>' + [2, 3, 4, 5, 6].map(function(n){ return '<button type="button" class="ficha" data-acc="gr-div-n" data-n="' + n + '">' + n + '</button>'; }).join('') + '<span>personas</span></div>' +
       '<div class="gr-cats">' + cats.map(function(c){ return '<button type="button" class="ficha" data-acc="gr-cat" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
       '<input class="entrada" id="grDesc" maxlength="160" list="grDescs" placeholder="En qué (opcional) · ej. almuerzo, taxi" enterkeyhint="done" autocapitalize="sentences">' +
       '<datalist id="grDescs">' + descs.map(function(d){ return '<option value="' + esc(d) + '">'; }).join('') + '</datalist>' +
@@ -6235,12 +6252,28 @@ function gastoRapido(cual, tipo){
         '<button type="button" data-acc="gr-fecha" data-v="' + ayer + '" aria-pressed="' + (ui.grFecha === ayer) + '">Ayer</button></div>' +
         '<input type="date" id="grFechaOtra" max="' + hoyG + '" value="' + (otra ? ui.grFecha : '') + '" aria-label="Otra fecha" class="' + (otra ? 'elegida' : '') + '"></div>' +
       '<button type="submit" class="btn primario gr-ok">' + ico('i-check') + 'Anotar en ' + NOM_LIBRO[ui.grLibro] + '</button>' +
-    '</form>');
+    '</form>', function(){
+      /* Si se cierra sin anotar, lo escrito no se pierde */
+      if(ui.grGuardado){ ui.grGuardado = false; return; }
+      var m = $('grMonto'), d = $('grDesc'); if(!m) return;
+      var bo = { monto:m.value, desc:d ? d.value : '', cat:ui.grCat, tipo:ui.grTipo, libro:ui.grLibro, fecha:ui.grFecha };
+      if(!bo.monto.trim() && !bo.desc.trim()) return;
+      setTimeout(function(){
+        if($('grMonto')) return;
+        aviso('📝 Guardé lo que estabas anotando', (bo.monto ? textoMonto(bo.monto).replace('= ', '') : '') + (bo.desc ? ' · ' + bo.desc : ''), 'Recuperar', function(){
+          ui.grFecha = bo.fecha; ui.grFechaHasta = Date.now() + 180000;
+          gastoRapido(bo.libro, bo.tipo); $('grMonto').value = bo.monto; $('grDesc').value = bo.desc; ui.grCat = bo.cat;
+          document.querySelectorAll('.gasto-rapido .gr-cats .ficha').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.v === bo.cat); });
+          $('grMonto').dispatchEvent(new Event('input'));
+        });
+      }, 80);
+    });
   var mI = $('grMonto'), dI = $('grDesc'), catManual = false;
   mI.addEventListener('input', function(){
     var v = mI.value, n = leerMonto(v), vista = $('grVista');
-    vista.textContent = !v.trim() ? 'Puedes escribir 1,500 · 2k · 12.50+8' : n ? '= ' + dinero(Math.abs(n)) : 'No entiendo ese monto';
-    vista.classList.toggle('mal', !!v.trim() && !n);
+    var dup = n ? movsDe(ui.grLibro).find(function(t){ return t.date === (ui.grFecha || hoyISO()) && t.type === ui.grTipo && Math.abs(t.amount - Math.abs(n)) < 0.005; }) : null;
+    vista.textContent = !v.trim() ? 'Puedes escribir 1,500 · 2k · 12.50+8 · $20' : n ? textoMonto(v) + (dup ? ' · ⚠️ ya anotaste ese monto ' + (ui.grFecha && ui.grFecha !== hoyISO() ? 'ese día' : 'hoy') + (dup.desc ? ' (' + dup.desc + ')' : '') : '') : 'No entiendo ese monto';
+    vista.classList.toggle('mal', !!v.trim() && !n); vista.classList.toggle('ojo', !!dup);
   });
   mI.addEventListener('keydown', function(ev){ if(ev.key === 'Enter' && !ev.isComposing){ ev.preventDefault(); if(!leerMonto(mI.value)){ marcarError(mI, 'Escribe cuánto fue'); return; } dI.focus(); } });
   dI.addEventListener('input', function(){
@@ -6265,6 +6298,7 @@ function guardarGastoRapido(){
   if(!monto){ marcarError(m, m.value.trim() ? 'No entiendo ese monto' : 'Escribe cuánto fue'); return; }
   var cual = ui.grLibro || 'personal', desc = ($('grDesc').value || '').trim(), cat = ui.grCat || catSugerida(desc, cual) || '';
   var fG = ui.grFecha && ui.grFecha <= hoyISO() ? ui.grFecha : hoyISO(); ui.grFecha = '';
+  ui.grGuardado = true;
   var t = { id:nid(), date:fG, desc:desc || cat || ui.grTipo, type:ui.grTipo === 'Ingreso' ? 'Ingreso' : 'Gasto', amount:monto, cat:cat.slice(0, 40) };
   cambiarLibro(cual, function(l){ return l.concat([t]); });
   cerrarFlotante(); pintar(); vibrar(15);
@@ -10827,7 +10861,18 @@ function num(v){
 }
 /* Un monto de dinero escrito como sea: «S/ 1,500», «1.500», «2k», «2 mil»,
    «12.50 soles» y también cuentas: «10+5», «3x12.5», «100/4», «20%» de nada no */
+function tipoCambio(){ return +pref.tc > 0 ? +pref.tc : 3.75; }
+function esDolar(v){ return /(us)?\$|usd|d[oó]lar/i.test(String(v || '')) && !/s\/|sol/i.test(String(v || '')); }
 function leerMonto(v){
+  var n = leerMontoBase(String(v == null ? '' : v).replace(/us\$|usd|d[oó]lares?/gi, ''));
+  return esDolar(v) ? Math.round(n * tipoCambio() * 100) / 100 : n;
+}
+/* El texto de ayuda bajo un monto: «= S/ 75.00 (US$ 20 × 3.75)» */
+function textoMonto(v){
+  var n = leerMonto(v); if(!n) return '';
+  return '= ' + dinero(Math.abs(n)) + (esDolar(v) ? ' (US$ ' + formNum(leerMontoBase(String(v).replace(/us\$|usd|d[oó]lares?/gi, ''))) + ' × ' + tipoCambio() + ')' : '');
+}
+function leerMontoBase(v){
   var t = String(v == null ? '' : v).toLowerCase().replace(/s\/\.?|soles?|sol\b|\$|pen/g, '').replace(/−/g, '-').replace(/[×x]/g, '*').replace(/÷/g, '/').trim();
   t = t.replace(/(\d[\d.,]*)\s*(k|mil)\b/g, function(_, n){ return '(' + numMonto(n) + '*1000)'; });
   t = t.replace(/\s+/g, '');
@@ -10850,7 +10895,7 @@ function numMonto(v){
   if(/^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
   return num(t);
 }
-function esCuenta(v){ return /\d\s*[+\-*/×x÷]\s*\d|\d\s*(k|mil)\b|\d[.,]\d{3}\b|s\/|soles/i.test(String(v || '')); }
+function esCuenta(v){ return /\d\s*[+\-*/×x÷]\s*\d|\d\s*(k|mil)\b|\d[.,]\d{3}\b|s\/|soles|\$|usd|d[oó]lar/i.test(String(v || '')); }
 function sumarMeta(id, n){
   var m = buscarId('metas', id);
   if(!m || !n) return;
@@ -11285,7 +11330,9 @@ VISTAS.ajustes = function(){
       '<label class="interruptor"><input type="checkbox" data-teclado="1"' + (pref.teclado !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Teclado de la agenda"></label></div>' +
     (TECLADO.tactil ? '<div class="ajuste"><div class="txt"><b>Tamaño del teclado</b><small>Teclas más chicas o más grandes.</small></div><div class="selector">' + [['c', 'Chico'], ['n', 'Normal'], ['g', 'Grande']].map(function(x){ return '<button type="button" data-acc="tk-tam" data-v="' + x[0] + '" aria-pressed="' + ((pref.tkTam || 'n') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div></div>' : '') +
     '<div class="ajuste"><div class="txt"><b>Autocorrector</b><small>En el celular y en la laptop: corrige al poner espacio («manana» → «mañana», «qeu» → «que»), entiende lo abreviado («xq» → «porque», «tb» → «también»), pone las tildes y el «¿» de las preguntas, quita palabras repetidas y te sugiere la siguiente palabra. Si no querías el cambio, borra una vez y vuelve tu palabra.</small></div>' +
-      '<label class="interruptor"><input type="checkbox" data-autocorr="1"' + (pref.autocorr !== false ? ' checked' : '') + ' aria-label="Autocorrector"></label></div></div>';
+      '<label class="interruptor"><input type="checkbox" data-autocorr="1"' + (pref.autocorr !== false ? ' checked' : '') + ' aria-label="Autocorrector"></label></div>' +
+    '<div class="ajuste"><div class="txt"><b>Mis atajos de texto</b><small>' + (Object.keys(pref.atajos || {}).length ? plural(Object.keys(pref.atajos).length, 'atajo', 'atajos') + ': ' + esc(Object.keys(pref.atajos).slice(0, 4).join(', ')) : 'Una palabra que se cambia por un texto largo (tu dirección, tu número de cuenta…).') + '</small></div><button type="button" class="btn chico" data-acc="atajos-ed">' + ico('i-lapiz') + 'Editar</button></div>' +
+    '<div class="ajuste"><div class="txt"><b>Tipo de cambio</b><small>Para anotar en dólares: «$20» o «20 dólares» se pasa a soles con este valor.</small></div><input class="entrada" data-tc="1" inputmode="decimal" value="' + tipoCambio() + '" aria-label="Tipo de cambio" style="width:92px;text-align:right"></div></div>';
 
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
     '<div class="ajuste"><div class="txt"><b>Tema</b><small>Oscuro, claro o según la hora de tu celular.</small></div>' +
@@ -12652,7 +12699,7 @@ setInterval(pintarPastillaNube, 30000);
 })();
 
 /* ---------- Ajustes que viajan entre aparatos ------------------------- */
-var PREF_VIAJAN = ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes', 'secOff', 'secOrden', 'abajo'];
+var PREF_VIAJAN = ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes', 'secOff', 'secOrden', 'abajo', 'atajos', 'tc'];
 function prefDesdePerfil(){
   var pp = db.perfil && db.perfil.prefs;
   if(!pp) return;
@@ -12990,6 +13037,15 @@ document.addEventListener('click', function(ev){
     case 'gr-tipo': var mt = ($('grMonto') || {}).value || '', dt = ($('grDesc') || {}).value || ''; gastoRapido(ui.grLibro, b.dataset.v); $('grMonto').value = mt; $('grDesc').value = dt; $('grMonto').dispatchEvent(new Event('input')); break;
     case 'gr-libro': var ml = ($('grMonto') || {}).value || '', dl = ($('grDesc') || {}).value || ''; gastoRapido(b.dataset.v, ui.grTipo); $('grMonto').value = ml; $('grDesc').value = dl; $('grMonto').dispatchEvent(new Event('input')); break;
     case 'gr-monto': var gm = $('grMonto'); if(gm){ gm.value = b.dataset.v; gm.dispatchEvent(new Event('input')); var gdsc = $('grDesc'); if(gdsc) gdsc.focus(); } break;
+    case 'gr-div': var gdv = $('grDividir'); if(gdv) gdv.hidden = !gdv.hidden; break;
+    case 'gr-div-n':
+      var gmD = $('grMonto'), totD = gmD ? leerMonto(gmD.value) : 0, nD = +b.dataset.n;
+      if(!totD){ marcarError(gmD, 'Primero escribe el total de la cuenta'); break; }
+      gmD.value = String(Math.round(Math.abs(totD) / nD * 100) / 100); gmD.dispatchEvent(new Event('input'));
+      var gdD = $('grDesc'); if(gdD && !/mi parte/.test(gdD.value)) gdD.value = (gdD.value ? gdD.value + ' ' : '') + '(mi parte de ' + nD + ')';
+      $('grDividir').hidden = true; aviso('÷ ' + dinero(Math.abs(totD)) + ' entre ' + nD, 'Te toca ' + dinero(Math.abs(totD) / nD)); break;
+    case 'atajos-ed': hojaAtajos(); break;
+    case 'atajo-x': var aj = Object.assign({}, pref.atajos || {}); delete aj[b.dataset.v]; pref.atajos = aj; guardarPref(); hojaAtajos(); break;
     case 'gr-fecha':
       ui.grFecha = b.dataset.v; ui.grFechaHasta = Date.now() + 180000; document.querySelectorAll('[data-acc="gr-fecha"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
       var gfo = $('grFechaOtra'); if(gfo){ gfo.value = ''; gfo.classList.remove('elegida'); } break;
@@ -13606,6 +13662,12 @@ document.addEventListener('submit', function(ev){
     if(enHoja && $('capaFlotante').querySelector('form[data-acc="captura"]')) cerrarFlotante();
     pintar();
     if(!enHoja){ var ni = $('entradaCaptura'); if(ni) ni.focus(); }
+  } else if(a === 'atajo-nuevo'){
+    var ak = sinTildes(($('atajoClave').value || '').trim().toLowerCase()).replace(/[^a-zñ]/g, ''), at = ($('atajoTexto').value || '').trim();
+    if(ak.length < 2){ marcarError($('atajoClave'), 'Solo letras, al menos 2'); return; }
+    if(!at){ marcarError($('atajoTexto'), 'Escribe el texto'); return; }
+    var aj2 = Object.assign({}, pref.atajos || {}); aj2[ak] = at.slice(0, 300); pref.atajos = aj2; guardarPref(); hojaAtajos();
+    aviso('⚡ Atajo «' + ak + '» listo', 'Escríbelo y pon espacio');
   } else if(a === 'pv-nota'){
     var pn = $('pvNota'), pt = (pn.value || '').trim();
     if(!pt){ pn.focus(); return; }
@@ -13753,6 +13815,7 @@ document.addEventListener('change', function(ev){
   var t = ev.target;
   if(t.dataset && t.dataset.autocorr){ pref.autocorr = t.checked; escribirJSON(CLAVE_PREF, pref); aviso(t.checked ? '✍️ Autocorrector activado' : 'Autocorrector apagado'); return; }
   if(t.dataset && t.dataset.notasOrden){ ui.notasOrden = t.value; pintar(); return; }
+  if(t.dataset && t.dataset.tc){ var tcv = num(t.value); if(tcv > 0 && tcv < 100){ pref.tc = Math.round(tcv * 1000) / 1000; guardarPref(); aviso('💱 Tipo de cambio: ' + pref.tc); } else { t.value = tipoCambio(); aviso('Ese tipo de cambio no parece correcto'); } return; }
   if(t.dataset && t.dataset.vincHab){
     var xV = buscarId('habitos', t.dataset.vincHab); if(!xV) return;
     xV = vincularHabito(JSON.parse(JSON.stringify(xV)), t.value); poner('habitos', xV); pintar(); hojaVinculos();
@@ -13942,7 +14005,7 @@ document.addEventListener('visibilitychange', function(){
    palabra y la agenda la aprende.
    ========================================================================== */
 var AUTOCORR = (function(){
-  var D = null, prom = null, propias = new Set(leerJSON('agenda_palabras', []));
+  var D = null, prom = null, propias = new Set(leerJSON('agenda_palabras', [])), nombres = new Map();
   function clave(w){ return String(w).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
   function cargar(){
     if(prom) return prom;
@@ -13958,6 +14021,19 @@ var AUTOCORR = (function(){
         var txt = [];
         COLS.forEach(function(c){ (db[c] || []).forEach(function(x){ ['t','nombre','cuerpo','texto','notas','desc','lugar','cliente','concepto','persona','unidad'].forEach(function(k){ if(typeof x[k] === 'string') txt.push(x[k]); }); }); });
         (txt.join(' ').match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/g) || []).forEach(function(w){ var l = w.toLowerCase(); if(!rango.has(l)) propias.add(l); });
+        /* Nombres propios: los que siempre escribes con mayúscula (Juan, Miraflores, ABC) */
+        var may = {}, min = {};
+        txt.join(' \n ').split(/[.!?\n]+/).forEach(function(fr){
+          (fr.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/g) || []).forEach(function(w, i){
+            var l = w.toLowerCase(); if(rango.has(l)) return;
+            if(w.charAt(0) !== l.charAt(0)){ if(i > 0) may[l] = w; } else min[l] = 1;
+          });
+        });
+        /* En los campos que son nombres (clientes, personas, lugares) toda palabra con mayúscula cuenta */
+        COLS.forEach(function(c){ (db[c] || []).forEach(function(x){ ['cliente','persona','lugar'].concat(c === 'clientes' ? ['nombre'] : []).forEach(function(k){
+          if(typeof x[k] === 'string') (x[k].match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/g) || []).forEach(function(w){ var l = w.toLowerCase(); if(w.charAt(0) !== l.charAt(0) && (!rango.has(l) || rango.get(l) > 1500)) may[l] = w; });   // «Juan» sí; «Luz» o «Paz» (palabras muy comunes) no
+        }); }); });
+        Object.keys(may).forEach(function(l){ if(!min[l]) nombres.set(l, may[l]); });
       }catch(e){}
       D = { ws:ws, rango:rango, porClave:porClave, claves:claves };
       return D;
@@ -13996,12 +14072,15 @@ var AUTOCORR = (function(){
   /* Lo que se escribe abreviado en el chat */
   var ABREV = { q:'que', k:'que', xq:'porque', pq:'porque', porq:'porque', xk:'porque', tb:'también', tmb:'también', tbn:'también', tambien:'también',
     xfa:'por favor', porfavor:'por favor', pls:'por favor', aki:'aquí', aca:'acá', osea:'o sea', aver:'a ver', nose:'no sé', nse:'no sé', talvez:'tal vez',
-    enserio:'en serio', deacuerdo:'de acuerdo', aveces:'a veces', envez:'en vez', ntp:'no te preocupes', msj:'mensaje', hrs:'horas', bn:'bien', dsps:'después', despues:'después', tqm:'te quiero mucho' };
+    enserio:'en serio', deacuerdo:'de acuerdo', aveces:'a veces', envez:'en vez', ntp:'no te preocupes', msj:'mensaje', hrs:'horas', bn:'bien', dsps:'después', despues:'después', tqm:'te quiero mucho', mas:'más' };
   /* ¿Qué palabra quisiste escribir? null si está bien o no hay una clara */
   function corregir(w, inicioFrase){
     if(!w || /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(w)) return null;
     var l = w.toLowerCase();
+    var mios = pref.atajos || {};
+    if(mios[l]) return mios[l];
     if(ABREV[l] && !propias.has(l)) return conCaso(ABREV[l], w);
+    if(nombres.has(l) && w === l) return nombres.get(l);
     if(!D || w.length < 2) return null;
     if(conocida(l)) return null;
     /* Con mayúscula a mitad de frase suele ser un nombre: no se toca */
@@ -14118,6 +14197,7 @@ var TECLADO = (function(){
     avisarCambio();
   }
   function reemplazarPalabra(w){
+    snap(true);
     var p = palabraActual();
     if(p) el.setRangeText(w, p.ini, p.fin, 'end'); else escribir(w);
     escribir(' '); ultCorr = null;
@@ -14187,6 +14267,8 @@ var TECLADO = (function(){
   function pintarTeclado(){
     if(!el) return;
     var filas = FILAS[capa];
+    var rec = (pref.emoRec || []).slice(0, 9);
+    if(capa === 'emo' && rec.length >= 3) filas = [rec].concat(filas);
     crear().className = 'tkb tk-tam-' + (pref.tkTam || 'n');
     caja.innerHTML = cabHTML() + '<div class="tk-teclas' + (capa === 'numpad' || capa === 'tel' ? ' tk-numpad' : '') + '">' + filas.map(function(f){
       var ks = typeof f === 'string' ? f.split('') : f;
@@ -14223,7 +14305,10 @@ var TECLADO = (function(){
         (pred.length ? '' : ['á','é','í','ó','ú','ñ','¿','¡'].map(function(a){ return '<button type="button" class="tk-atajo tk-acento" data-t="' + a + '">' + a + '</button>'; }).join(''))) +
       '</div>';
     }
+    var hayHist = (HIST.get(el) || []).length > 0, puedePegar = navigator.clipboard && navigator.clipboard.readText;
     var cab = '<div class="tk-cab">' + barra + '<span class="tk-cab-acc">' +
+      (hayHist ? '<button type="button" class="tk-mini" data-k="↶" aria-label="Deshacer" title="Deshacer">↶</button>' : '') +
+      (puedePegar && capa !== 'numpad' ? '<button type="button" class="tk-mini" data-k="📋" aria-label="Pegar" title="Pegar">📋</button>' : '') +
       (VOZ && capa !== 'numpad' && capa !== 'tel' ? '<button type="button" class="tk-mini" data-k="🎤" aria-label="Dictar">' + ico('i-mic') + '</button>' : '') +
       '<button type="button" class="tk-mini" data-k="⌨" aria-label="Usar el teclado del celular" title="Teclado del celular">⌨︎</button>' +
       '<button type="button" class="tk-mini" data-k="▾" aria-label="Ocultar teclado">▾</button></span></div>';
@@ -14252,14 +14337,31 @@ var TECLADO = (function(){
     if(!v.trim() || /[.!?¡¿]\s+$/.test(v) || /\n\s*$/.test(v)) mayus = mayus === 2 ? 2 : 1;
   }
   function avisarCambio(){ el.dispatchEvent(new Event('input', { bubbles:true })); }
+  /* Deshacer: lo que había en el campo antes de cada cambio (hasta 40 pasos) */
+  var HIST = new WeakMap(), ultSnap = 0;
+  function snap(forzar){
+    if(!el) return;
+    var h = HIST.get(el) || []; HIST.set(el, h);
+    var top = h[h.length - 1], ahora = Date.now();
+    if(top && top.v === el.value) return;
+    /* Las letras seguidas cuentan como un solo paso (una palabra) */
+    if(!forzar && top && ahora - ultSnap < 900 && h.length && /\S$/.test(el.value) && el.value.indexOf(top.v) === 0 && el.value.length - top.v.length < 12) { ultSnap = ahora; return; }
+    h.push({ v:el.value, p:el.selectionStart }); if(h.length > 40) h.shift(); ultSnap = ahora;
+  }
+  function deshacerCampo(){
+    var h = el && HIST.get(el); if(!h || !h.length) return;
+    var x = h.pop(); el.value = x.v; try{ el.setSelectionRange(x.p, x.p); }catch(e){} avisarCambio(); ultCorr = null;
+  }
   function escribir(t){
     if(!el) return;
+    snap(/\s/.test(t) || t.length > 1);
     var s = el.selectionStart, e = el.selectionEnd;
     if(s == null){ el.value += t; } else el.setRangeText(t, s, e, 'end');
     avisarCambio();
   }
   function borrar(){
     if(!el) return;
+    snap(true);
     var s = el.selectionStart, e = el.selectionEnd;
     if(s == null){ el.value = el.value.slice(0, -1); avisarCambio(); return; }
     if(s !== e){ el.setRangeText('', s, e, 'end'); avisarCambio(); return; }
@@ -14335,12 +14437,19 @@ var TECLADO = (function(){
       return;
     }
     if(k === '🎤'){ if(el) dictar(el.id, null); return; }
+    if(k === '↶'){ deshacerCampo(); pintarTeclado(); return; }
+    if(k === '📋'){
+      var dest = el;
+      navigator.clipboard.readText().then(function(tx){ if(!tx || el !== dest) return; snap(true); escribir(capa === 'numpad' ? tx.replace(/[^\d.,+\-×÷*/]/g, '') : tx); pintarTeclado(); }).catch(function(){ aviso('No pude leer lo copiado', 'Mantén el dedo en el campo y elige «Pegar».'); });
+      return;
+    }
     if(k === '='){ calcular(); pintarTeclado(); return; }
     if(k === 'C'){ if(el){ el.value = ''; avisarCambio(); } pintarTeclado(); return; }
     if(k === '−'){ escribir('-'); refrescarCab(); return; }
     if(k === '×' || k === '÷' || (capa === 'numpad' && k === '+')){ escribir(k); refrescarCab(); return; }
     if(capa !== 'numpad' && capa !== 'tel' && /^[.,;:?!]$/.test(k)) antesDeSigno(k);
     var t = capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k;
+    if(capa === 'emo' && /\p{Extended_Pictographic}/u.test(k)){ var er = (pref.emoRec || []).filter(function(x){ return x !== k; }); er.unshift(k); pref.emoRec = er.slice(0, 12); escribirJSON(CLAVE_PREF, pref); }
     if(k === ' ' && capa !== 'abc') capa = 'abc';
     escribir(t);
     if(capa === 'abc' && mayus === 1){ mayus = 0; }

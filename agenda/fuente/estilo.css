@@ -4740,3 +4740,7 @@ body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3
 .tk-op{ color:var(--acento-txt) !important; font-weight:700 !important; background:color-mix(in srgb, var(--acento-txt) 12%, var(--hoja-2)) !important }
 .tk-resultado{ display:flex; align-items:center; height:34px; padding:0 12px; border-radius:8px; font-size:16px; font-weight:800; color:var(--tinta); background:color-mix(in srgb, var(--acento-txt) 14%, transparent); font-variant-numeric:tabular-nums }
 .tk-pred{ font-style:normal; color:var(--tinta-2) !important }
+.gr-vista.ojo{ color:var(--oro) }
+.gr-div{ border-style:dashed !important }
+.gr-dividir{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; color:var(--tinta-2) }
+.gr-dividir[hidden]{ display:none }
