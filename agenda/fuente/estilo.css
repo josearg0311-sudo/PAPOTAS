@@ -3582,7 +3582,6 @@ body .tarjeta .ajuste{ padding-left:0 !important; padding-right:0 !important }
 .tk-sug.tk-mejor{ background:color-mix(in srgb, var(--verde) 22%, transparent); color:var(--tinta); font-weight:750 }
 .tk-sug.tk-tal{ color:var(--tinta-3); font-weight:500 }
 .tk-sug.tk-pulsada{ background:var(--hoja-2) }
-.filtro-pers{ margin:0 0 14px }
 /* Notas dentro de un recuadro: cada una con su fondo */
 body .tarjeta .notas-muro .nota{ background:var(--hoja) !important; border:1px solid var(--marco-borde) !important; border-radius:16px !important; padding:14px !important; margin:0 0 10px !important }
 
@@ -4207,3 +4206,66 @@ button.ec-nom{ display:flex; align-items:center; gap:10px; min-width:0; padding:
   radial-gradient(circle at 98% 52%, color-mix(in srgb, var(--ec) 14%, transparent) 0 8px, transparent 9px) !important;
   -webkit-mask-image:linear-gradient(330deg, #000 10%, transparent 60%); mask-image:linear-gradient(330deg, #000 10%, transparent 60%) }
 @media (max-width:599px){ .ec-anillo{ display:none } }
+
+/* ==========================================================================
+   CALMA
+   Menos brillo y menos color de fondo: las superficies son lisas y el color
+   queda para lo que importa (iconos, rayitas, cifras, botones y alertas).
+   ========================================================================== */
+/* Fondo de la página liso, sin resplandores */
+:root:not([data-tema="claro"]) body, :root[data-tema="claro"] body{ background:var(--papel) !important; background-image:none !important }
+/* Tarjetas y recuadros: lisos, borde neutro, sombra discreta */
+body .panel-hoy > .w:not(.esp-hoy), .ag-bloque, .pl-dia, .rec-bloque, .cal-mes-caja, .tarjeta, .mosaico{
+  background:var(--hoja) !important; border-color:var(--regla) !important }
+:root:not([data-tema="claro"]) .tarjeta, :root:not([data-tema="claro"]) .w, :root:not([data-tema="claro"]) .mosaico{ box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 6px 18px -12px rgba(0,0,0,.7) !important }
+:root[data-tema="claro"] .tarjeta, :root[data-tema="claro"] .w, :root[data-tema="claro"] .mosaico{ box-shadow:0 1px 2px rgba(15,20,35,.06) !important }
+.mosaico::after{ display:none !important }
+.mosaico{ transition:transform .18s, border-color .18s, background .18s !important }
+.mosaico:hover{ border-color:color-mix(in srgb, var(--mc) 40%, var(--regla)) !important; background:color-mix(in srgb, var(--tinta) 2.5%, var(--hoja)) !important; transform:translateY(-2px) }
+.mo-ico{ box-shadow:none !important; background:color-mix(in srgb, var(--mc) 14%, var(--hoja-2)) !important }
+/* Cabeceras de sección: un tinte suave, el dibujo apenas insinuado y sin halo */
+header.banda, header.banda-panel, header.portada-esp{
+  background:linear-gradient(135deg, color-mix(in srgb, var(--sc, var(--ec, var(--verde))) 11%, var(--hoja)) 0%, var(--hoja) 70%) !important;
+  border:1px solid var(--regla) !important; box-shadow:none !important }
+header.banda .banda-fondo, header.banda-panel .banda-fondo, header.portada-esp .banda-fondo{ opacity:.16 !important }
+header.banda .banda-marca, header.banda-panel .banda-marca, header.portada-esp .banda-marca{ opacity:.07 !important; filter:none !important }
+header.portada-hoy{ box-shadow:none !important; border-color:var(--regla) !important }
+header.portada-hoy .banda-fondo{ opacity:.45 !important }
+/* Tus espacios: el color en el borde de arriba y en los detalles, no en toda la tarjeta */
+.ec{ background:linear-gradient(180deg, color-mix(in srgb, var(--ec) 7%, var(--hoja)) 0%, var(--hoja) 55%) !important;
+  border:1px solid var(--regla) !important; border-top:2px solid color-mix(in srgb, var(--ec) 70%, var(--regla)) !important;
+  box-shadow:0 6px 18px -12px rgba(0,0,0,.6) !important }
+:root[data-tema="claro"] .ec{ box-shadow:0 1px 2px rgba(15,20,35,.06) !important }
+.ec:hover{ transform:translateY(-2px); border-color:color-mix(in srgb, var(--ec) 35%, var(--regla)) !important; box-shadow:0 10px 24px -14px rgba(0,0,0,.7) !important }
+.ec::after{ display:none }
+.ec .ec-fondo{ opacity:.35 !important }
+.ec-marca{ opacity:.06 !important }
+.ec-em{ background:color-mix(in srgb, var(--ec) 16%, var(--hoja-2)) !important; border-color:color-mix(in srgb, var(--ec) 30%, transparent) !important; box-shadow:none !important }
+.ec-anillo .v{ filter:none !important }
+.ec-num.libre strong{ text-shadow:none !important }
+.ec-prox i{ background:color-mix(in srgb, var(--ec) 14%, var(--hoja-2)) !important; border-color:color-mix(in srgb, var(--ec) 25%, transparent) !important }
+.ec-dato{ border-color:var(--regla) !important }
+/* Barra lateral: sobria */
+.lateral{ background:color-mix(in srgb, var(--hoja) 65%, var(--papel)) !important; border-right:1px solid var(--regla) !important }
+:root[data-tema="claro"] .lateral{ background:var(--hoja) !important }
+.lateral .marca .logo-img{ filter:none !important }
+.lat-nuevo{ background:var(--verde) !important; box-shadow:0 1px 0 rgba(255,255,255,.15) inset !important }
+.lat-nuevo:hover{ filter:brightness(1.1); box-shadow:0 1px 0 rgba(255,255,255,.15) inset !important }
+.lat-nuevo::after{ display:none }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico){ background:color-mix(in srgb, var(--c) 13%, var(--hoja-2)) !important; box-shadow:none !important }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico)::before{ box-shadow:none !important }
+.lateral .nav-lat button[aria-current="page"] .nl-ico{ box-shadow:none !important }
+.lateral .nl-ico{ background:color-mix(in srgb, var(--c) 11%, transparent) !important; border:0 !important }
+.lateral .nav-lat .nav-esp .cuenta{ box-shadow:none !important }
+.lateral .perfil{ background:var(--hoja) !important; border:1px solid var(--regla) !important }
+.lateral .perfil:hover, .lateral .perfil[aria-current="page"]{ background:var(--hoja-2) !important; border-color:var(--regla) !important }
+.lateral .avatar{ background:var(--verde) !important; box-shadow:none !important }
+header.banda::before, header.banda-panel::before, header.portada-esp::before, header.portada-hoy::before{ display:none !important }
+body header.portada-hoy, body header.portada-hoy.heroe-hoy{ box-shadow:none !important; border-color:var(--regla) !important }
+/* Días pasados y de otros meses: más suaves que los demás, pero legibles */
+.franja-semana button.pasado, .semana-mini .pasado{ opacity:1 !important }
+.franja-semana button.pasado small, .franja-semana button.pasado b, .semana-mini .pasado small, .semana-mini .pasado b{ color:var(--tinta-3) !important }
+.cal-mes .celda.fuera .num{ color:var(--tinta-3) !important; opacity:1 !important; font-weight:500 }
+.cal-mes .celda.fuera{ opacity:1 !important }
+.cal-mes .celda.fuera .mini{ opacity:.9 !important }
+.panel-cab::before, .sub-cab::after, .portada-esp::before{ display:none !important }

@@ -3649,7 +3649,6 @@ body .tarjeta .ajuste{ padding-left:0 !important; padding-right:0 !important }
 .tk-sug.tk-mejor{ background:color-mix(in srgb, var(--verde) 22%, transparent); color:var(--tinta); font-weight:750 }
 .tk-sug.tk-tal{ color:var(--tinta-3); font-weight:500 }
 .tk-sug.tk-pulsada{ background:var(--hoja-2) }
-.filtro-pers{ margin:0 0 14px }
 /* Notas dentro de un recuadro: cada una con su fondo */
 body .tarjeta .notas-muro .nota{ background:var(--hoja) !important; border:1px solid var(--marco-borde) !important; border-radius:16px !important; padding:14px !important; margin:0 0 10px !important }
 
@@ -4274,6 +4273,69 @@ button.ec-nom{ display:flex; align-items:center; gap:10px; min-width:0; padding:
   radial-gradient(circle at 98% 52%, color-mix(in srgb, var(--ec) 14%, transparent) 0 8px, transparent 9px) !important;
   -webkit-mask-image:linear-gradient(330deg, #000 10%, transparent 60%); mask-image:linear-gradient(330deg, #000 10%, transparent 60%) }
 @media (max-width:599px){ .ec-anillo{ display:none } }
+
+/* ==========================================================================
+   CALMA
+   Menos brillo y menos color de fondo: las superficies son lisas y el color
+   queda para lo que importa (iconos, rayitas, cifras, botones y alertas).
+   ========================================================================== */
+/* Fondo de la página liso, sin resplandores */
+:root:not([data-tema="claro"]) body, :root[data-tema="claro"] body{ background:var(--papel) !important; background-image:none !important }
+/* Tarjetas y recuadros: lisos, borde neutro, sombra discreta */
+body .panel-hoy > .w:not(.esp-hoy), .ag-bloque, .pl-dia, .rec-bloque, .cal-mes-caja, .tarjeta, .mosaico{
+  background:var(--hoja) !important; border-color:var(--regla) !important }
+:root:not([data-tema="claro"]) .tarjeta, :root:not([data-tema="claro"]) .w, :root:not([data-tema="claro"]) .mosaico{ box-shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 6px 18px -12px rgba(0,0,0,.7) !important }
+:root[data-tema="claro"] .tarjeta, :root[data-tema="claro"] .w, :root[data-tema="claro"] .mosaico{ box-shadow:0 1px 2px rgba(15,20,35,.06) !important }
+.mosaico::after{ display:none !important }
+.mosaico{ transition:transform .18s, border-color .18s, background .18s !important }
+.mosaico:hover{ border-color:color-mix(in srgb, var(--mc) 40%, var(--regla)) !important; background:color-mix(in srgb, var(--tinta) 2.5%, var(--hoja)) !important; transform:translateY(-2px) }
+.mo-ico{ box-shadow:none !important; background:color-mix(in srgb, var(--mc) 14%, var(--hoja-2)) !important }
+/* Cabeceras de sección: un tinte suave, el dibujo apenas insinuado y sin halo */
+header.banda, header.banda-panel, header.portada-esp{
+  background:linear-gradient(135deg, color-mix(in srgb, var(--sc, var(--ec, var(--verde))) 11%, var(--hoja)) 0%, var(--hoja) 70%) !important;
+  border:1px solid var(--regla) !important; box-shadow:none !important }
+header.banda .banda-fondo, header.banda-panel .banda-fondo, header.portada-esp .banda-fondo{ opacity:.16 !important }
+header.banda .banda-marca, header.banda-panel .banda-marca, header.portada-esp .banda-marca{ opacity:.07 !important; filter:none !important }
+header.portada-hoy{ box-shadow:none !important; border-color:var(--regla) !important }
+header.portada-hoy .banda-fondo{ opacity:.45 !important }
+/* Tus espacios: el color en el borde de arriba y en los detalles, no en toda la tarjeta */
+.ec{ background:linear-gradient(180deg, color-mix(in srgb, var(--ec) 7%, var(--hoja)) 0%, var(--hoja) 55%) !important;
+  border:1px solid var(--regla) !important; border-top:2px solid color-mix(in srgb, var(--ec) 70%, var(--regla)) !important;
+  box-shadow:0 6px 18px -12px rgba(0,0,0,.6) !important }
+:root[data-tema="claro"] .ec{ box-shadow:0 1px 2px rgba(15,20,35,.06) !important }
+.ec:hover{ transform:translateY(-2px); border-color:color-mix(in srgb, var(--ec) 35%, var(--regla)) !important; box-shadow:0 10px 24px -14px rgba(0,0,0,.7) !important }
+.ec::after{ display:none }
+.ec .ec-fondo{ opacity:.35 !important }
+.ec-marca{ opacity:.06 !important }
+.ec-em{ background:color-mix(in srgb, var(--ec) 16%, var(--hoja-2)) !important; border-color:color-mix(in srgb, var(--ec) 30%, transparent) !important; box-shadow:none !important }
+.ec-anillo .v{ filter:none !important }
+.ec-num.libre strong{ text-shadow:none !important }
+.ec-prox i{ background:color-mix(in srgb, var(--ec) 14%, var(--hoja-2)) !important; border-color:color-mix(in srgb, var(--ec) 25%, transparent) !important }
+.ec-dato{ border-color:var(--regla) !important }
+/* Barra lateral: sobria */
+.lateral{ background:color-mix(in srgb, var(--hoja) 65%, var(--papel)) !important; border-right:1px solid var(--regla) !important }
+:root[data-tema="claro"] .lateral{ background:var(--hoja) !important }
+.lateral .marca .logo-img{ filter:none !important }
+.lat-nuevo{ background:var(--verde) !important; box-shadow:0 1px 0 rgba(255,255,255,.15) inset !important }
+.lat-nuevo:hover{ filter:brightness(1.1); box-shadow:0 1px 0 rgba(255,255,255,.15) inset !important }
+.lat-nuevo::after{ display:none }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico){ background:color-mix(in srgb, var(--c) 13%, var(--hoja-2)) !important; box-shadow:none !important }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico)::before{ box-shadow:none !important }
+.lateral .nav-lat button[aria-current="page"] .nl-ico{ box-shadow:none !important }
+.lateral .nl-ico{ background:color-mix(in srgb, var(--c) 11%, transparent) !important; border:0 !important }
+.lateral .nav-lat .nav-esp .cuenta{ box-shadow:none !important }
+.lateral .perfil{ background:var(--hoja) !important; border:1px solid var(--regla) !important }
+.lateral .perfil:hover, .lateral .perfil[aria-current="page"]{ background:var(--hoja-2) !important; border-color:var(--regla) !important }
+.lateral .avatar{ background:var(--verde) !important; box-shadow:none !important }
+header.banda::before, header.banda-panel::before, header.portada-esp::before, header.portada-hoy::before{ display:none !important }
+body header.portada-hoy, body header.portada-hoy.heroe-hoy{ box-shadow:none !important; border-color:var(--regla) !important }
+/* Días pasados y de otros meses: más suaves que los demás, pero legibles */
+.franja-semana button.pasado, .semana-mini .pasado{ opacity:1 !important }
+.franja-semana button.pasado small, .franja-semana button.pasado b, .semana-mini .pasado small, .semana-mini .pasado b{ color:var(--tinta-3) !important }
+.cal-mes .celda.fuera .num{ color:var(--tinta-3) !important; opacity:1 !important; font-weight:500 }
+.cal-mes .celda.fuera{ opacity:1 !important }
+.cal-mes .celda.fuera .mini{ opacity:.9 !important }
+.panel-cab::before, .sub-cab::after, .portada-esp::before{ display:none !important }
 </style>
 </head>
 <body>
@@ -6319,7 +6381,7 @@ VISTAS.espacio = function(id){
     /* El espacio como panel: cada mosaico es una subpantalla con su dato */
     return volverPanel('esp-' + id) + html + botonAnadir('tarea', 'Añadir en ' + E.nom + '…') +
       '<div class="mosaicos esp-mosaicos">' + subs.map(function(x, i){
-        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0, viz:vizSub(id, x.k) });
+        return mosaico({ acc:'data-acc="esp-tab" data-esp="' + id + '" data-v="' + x.k + '"', i:x.i, em:x.em, c:x.c || E.c, t:x.t, d:x.d, n:x.n, nl:x.nl, alerta:x.alerta, ancho:i === 0 || (i === subs.length - 1 && subs.length % 2 === 0), viz:vizSub(id, x.k) });
       }).join('') + '</div>';
   }
   var sub = subs.find(function(x){ return x.k === tab; }) || subs[0];
@@ -6366,10 +6428,6 @@ function filaEventoProx(x){
     (es !== 'personal' ? '<span class="etiqueta">' + E.em + ' ' + esc(E.nom) + '</span>' : '') + '</div></div></div>';
 }
 /* En Personal: ver lo de todos tus espacios o solo lo de Personal */
-function filtroPers(){
-  var solo = pref.persSolo === true;
-  return '<div class="selector filtro-pers"><button type="button" data-acc="pers-todo" data-v="0" aria-pressed="' + !solo + '">De todos tus espacios</button><button type="button" data-acc="pers-todo" data-v="1" aria-pressed="' + solo + '">Solo Personal</button></div>';
-}
 
 var MODULOS = {
   personal: function(tab){
@@ -6964,16 +7022,22 @@ function editarHora(id){
    cancha y el cardio en Deporte.
    ========================================================================== */
 var PESTANAS = {
-  personal:[['inicio','Personal','🏠'],['semana','Tu semana','🗓️'],['eventos','Eventos','📅'],['avisos','Recordatorios','🔔'],['tareas','Tareas','✅'],['notas','Notas y listas','📝'],['dinero','Tu dinero','💰'],['compras','Compras','🛒'],['menu','Menú','🍽️'],['fechas','Fechas importantes','🎂'],['prestamos','Préstamos','🤝'],['pagos','Pagos de la casa','🧾']],
+  personal:[['inicio','Personal','🏠'],['semana','Tu semana','🗓️'],['casa','Casa','🛒'],['fechas','Fechas importantes','🎂'],['dinero','Dinero','💰']],
   estudios:[['inicio','Estudios','🎓'],['semana','Tu semana','🗓️'],['cursos','Cursos y horario','📚'],['examenes','Exámenes','📝'],['dinero','Gastos de estudio','💰']],
-  oficina:[['inicio','Oficina','💼'],['semana','Tu semana','🗓️'],['cobros','Por cobrar','💵'],['clientes','Clientes','🤝'],['trabajo','Tablero','📋'],['reuniones','Reuniones','🗣️'],['dinero','Cuentas','💰'],['pagos','Pagos','🧾']],
+  oficina:[['inicio','Oficina','💼'],['semana','Tu semana','🗓️'],['cobros','Clientes y cobros','💵'],['trabajo','Trabajo','📋'],['dinero','Cuentas','💰']],
   deporte:[['inicio','Deporte','⚽'],['semana','Tu semana','🗓️'],['entrenos','Entrenamientos','🏃'],['rutinas','Rutinas y récords','🏋️'],['cuerpo','Tu cuerpo','⚖️'],['partidos','Partidos','🥅'],['bolso','Tu bolso','🎒'],['actividad','Tus 12 semanas','📈'],['dinero','Gastos de deporte','💰']]
 };
 /* Nombres de antes que siguen llevando a su sitio */
-var ALIAS_TAB = { casa:'compras', papeles:'fechas', entreno:'rutinas', cancha:'partidos' };
+var ALIAS_TAB = { papeles:'fechas', entreno:'rutinas', cancha:'partidos' };
+/* En Personal y Oficina se juntaron pantallas: los nombres de antes llevan a la nueva */
+var ALIAS_ESP = {
+  personal:{ compras:'casa', menu:'casa', eventos:'semana', avisos:'semana', tareas:'semana', notas:'semana', prestamos:'dinero', pagos:'dinero' },
+  oficina:{ clientes:'cobros', reuniones:'trabajo', pagos:'dinero' }
+};
 function tabEsp(id){
   var t = (ui.espTab || {})[id];
   t = ALIAS_TAB[t] || t;
+  t = (ALIAS_ESP[id] || {})[t] || t;
   return PESTANAS[id].some(function(p){ return p[0] === t; }) ? t : 'inicio';
 }
 /* Pasar a la subpantalla de al lado sin volver al panel */
@@ -6994,42 +7058,14 @@ function subpantallas(id){
   if(id === 'personal'){
     var l = listaCompras(), falta = l ? (l.items || []).filter(function(i){ return !i.ok; }).length : 0;
     var cu = proximosCumples(60)[0];
-    var deb = vivos('deudas').filter(function(x){ return !x.saldada; }), teDeben = deb.filter(function(x){ return x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0), debes = deb.filter(function(x){ return x.tipo !== 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
+    var deb = vivos('deudas').filter(function(x){ return !x.saldada; }), teDeben = deb.filter(function(x){ return x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     var ppP = pagosDe('personal');
-    /* Eventos, recordatorios, tareas y notas: los de Personal o, si quieres, los de todos tus espacios */
-    var todosP = pref.persSolo !== true;
-    var deP = function(x){ return todosP || espDe(x) === 'personal'; };
-    var evP = proximosEventos(60).filter(function(x){ return deP(x.e); });
-    var recP = vivos('recordatorios').filter(function(r){ return !(r.hecho && (!r.rep || r.rep === 'no')) && deP(r); }).sort(function(a, b){ return momentoR(a).localeCompare(momentoR(b)); });
-    var tarP = vivos('tareas').filter(function(t){ return !t.hecha && deP(t); }).sort(function(a, b){ return (a.fecha || '9999').localeCompare(b.fecha || '9999') || (b.prio || 0) - (a.prio || 0); });
-    var notP = vivos('notas').filter(deP).sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || (b.upd || 0) - (a.upd || 0); });
-    var lisP = vivos('listas').filter(deP);
-    var recTarde = recP.filter(function(r){ return momentoR(r) <= hoy + 'T' + horaAhora(); }).length;
-    var tarTarde = tarP.filter(function(t){ return t.fecha && t.fecha < hoy; }).length;
-    var porMarcar = lisP.reduce(function(a, l){ return a + (l.items || []).filter(function(i){ return !i.ok; }).length; }, 0);
+    /* Cuatro pantallas: la semana, la casa, las fechas y el dinero (con pagos y préstamos) */
     return [semana,
-      { k:'eventos', i:'i-cal', c:'#5E5CE6', t:'Eventos', d:'Citas, salidas, cumpleaños y todo lo que viene', n:evP.length, nl:'en 60 días', html:function(){
-          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-cal', 'Lo que viene', '#5E5CE6', 'Nuevo evento', 'data-acc="nuevo" data-tipo="evento"') +
-            (evP.length ? '<div class="lista-filas">' + evP.map(filaEventoProx).join('') + '</div>' : vacio('📅', 'Sin eventos por ahora', 'Toca «Nuevo evento» para agendar una cita, una salida o un cumpleaños.')) + '</section>'; } },
-      { k:'avisos', i:'i-campana', c:'#FFD60A', t:'Recordatorios', d:'Lo que la agenda te avisa a su hora', n:recP.length, nl:recTarde ? recTarde + ' pasados sin marcar' : 'activos', alerta:recTarde > 0, html:function(){
-          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-campana', 'Tus recordatorios', 'var(--oro)', 'Nuevo', 'data-acc="nuevo" data-tipo="rec"') +
-            (recP.length ? '<div class="lista-filas rec-lista">' + recP.map(filaRec).join('') + '</div>' : vacio('🔔', 'Sin recordatorios', 'Toca «Nuevo» y la agenda te avisará a la hora que digas.')) + '</section>'; } },
-      { k:'tareas', i:'i-tareas', c:'#FF453A', t:'Tareas', d:'Lo que tienes pendiente', n:tarP.length, nl:tarTarde ? plural(tarTarde, 'atrasada', 'atrasadas') : 'pendientes', alerta:tarTarde > 0, html:function(){
-          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Pendientes', 'var(--debe)', 'Nueva tarea', 'data-acc="nuevo" data-tipo="tarea"') +
-            (tarP.length ? '<div class="lista-filas">' + tarP.slice(0, 60).map(filaTarea).join('') + '</div>' : vacio('✅', 'Nada pendiente', 'Todo al día. Toca «Nueva tarea» para anotar algo.')) + '</section>'; } },
-      { k:'notas', i:'i-notas', c:'#E7B24A', t:'Notas y listas', d:'Tus apuntes y listas para marcar', n:notP.length, nl:(notP.length === 1 ? 'nota' : 'notas') + (porMarcar ? ' · ' + porMarcar + ' por marcar' : ''), html:function(){
-          return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-notas', 'Notas', '#E7B24A', 'Nueva nota', 'data-acc="nuevo" data-tipo="nota"') +
-            (notP.length ? '<div class="notas-muro">' + notP.map(tarjetaNota).join('') + '</div>' : vacio('📝', 'Sin notas', 'Toca «Nueva nota» para guardar una idea, una clave o un apunte.')) + '</section>' +
-            '<section class="tarjeta">' + cabTarjeta('i-listas', 'Listas', 'var(--haber)', 'Nueva lista', 'data-acc="nuevo" data-tipo="lista"') +
-            (lisP.length ? '<div class="lista-filas">' + lisP.map(function(l){ var its = l.items || [], f = its.filter(function(i){ return !i.ok; }).length;
-                return '<div class="fila" data-acc="lista-abrir" data-id="' + l.id + '"><span class="hora" style="font-size:20px">' + esc(l.em || '📝') + '</span><div class="cuerpo"><div class="titulo">' + esc(l.nombre) + '</div><div class="meta"><span>' + (its.length ? f + ' por marcar · ' + its.length + ' en total' : 'Vacía') + '</span></div></div></div>'; }).join('') + '</div>'
-              : vacio('🛒', 'Sin listas', 'Toca «Nueva lista» para la compra, la maleta o lo que quieras marcar.')) + '</section>'; } },
-      { k:'dinero', i:'i-grafica', c:'#30D158', t:'Tu dinero', d:'Gasto e ingreso del mes y tus movimientos', n:dinero(tmE.sal), nl:'gastado', html:function(){ return bloquesDinero('personal') + tarjetaDineroEsp('personal'); } },
-      { k:'compras', i:'i-listas', c:'#5AA9FF', t:'Compras', d:'Tu lista del mercado y lo de siempre', n:falta, nl:'por comprar', html:function(){ return tarjetaCompras() || tarjetaSinCompras(); } },
-      { k:'menu', em:'🍽️', c:'#FF9F0A', t:'Menú', d:'Almuerzo y cena de la semana', html:function(){ return tarjetaMenu(); } },
-      { k:'fechas', i:'i-regalo', c:'#FF6482', t:'Fechas importantes', d:'Cumpleaños y aniversarios, con regalo', n:cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', nl:cu ? (cu.en === 0 ? 'cumpleaños' : 'días al cumple') : 'sin cumples cerca', alerta:!!cu && cu.en <= 3, html:function(){ return tarjetaFechas(); } },
-      { k:'prestamos', i:'i-cuentas', c:'#FFD60A', t:'Préstamos', d:'Quién te debe y a quién le debes', n:dinero(teDeben), nl:debes ? 'te deben · debes ' + dinero(debes) : 'te deben', html:function(){ return tarjetaPrestamos(); } },
-      { k:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos de la casa', d:'Luz, agua, internet, alquiler', n:ppP.length, nl:'por pagar', alerta:ppP.some(function(x){ return !x.p.pagadoHoy; }) && pagosProximos(0).some(function(x){ return espDe(x.p) === 'personal'; }), html:function(){ return tarjPagos('personal', ppP); } }];
+      { k:'casa', em:'🛒', c:'#5AA9FF', t:'Casa', d:'La lista de compras y el menú de la semana', n:falta, nl:'por comprar', html:function(){ return (tarjetaCompras() || tarjetaSinCompras()) + tarjetaMenu(); } },
+      { k:'fechas', i:'i-regalo', c:'#FF6482', t:'Fechas importantes', d:'Cumpleaños y aniversarios, con regalo', n:cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', nl:cu ? (cu.en === 0 ? 'cumpleaños' : cu.en === 1 ? 'día al cumple' : 'días al cumple') : 'sin cumples cerca', alerta:!!cu && cu.en <= 3, html:function(){ return tarjetaFechas(); } },
+      { k:'dinero', i:'i-grafica', c:'#30D158', t:'Dinero', d:'Gastos del mes, pagos de la casa y préstamos', n:dinero(tmE.sal), nl:'gastado' + (ppP.length ? ' · ' + ppP.length + ' por pagar' : ''), alerta:pagosProximos(0).some(function(x){ return espDe(x.p) === 'personal'; }),
+        html:function(){ return bloquesDinero('personal') + tarjPagos('personal', ppP) + tarjetaPrestamos() + tarjetaDineroEsp('personal'); } }];
   }
   if(id === 'estudios'){
     var pg = promedioGeneral(), ex = eventosTipo('examen', 90)[0], nc = vivos('cursos').length;
@@ -7045,13 +7081,11 @@ function subpantallas(id){
     var cob = vivos('cobros').filter(function(x){ return !x.cobrado; }), totC = cob.reduce(function(a, x){ return a + (+x.monto || 0); }, 0), venc = cob.filter(function(x){ return x.vence && x.vence < hoy; }).length;
     var enCurso = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha && t.estado === 'curso'; }).length, porHacer = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha; }).length;
     var reu = eventosTipo('reunion', 7).length, ppO = pagosDe('oficina');
+    /* Cuatro pantallas: la semana, los clientes con lo que te deben, el trabajo (tablero y reuniones) y las cuentas */
     return [semana,
-      { k:'cobros', i:'i-subir', c:'#30D158', t:'Por cobrar', d:'Lo que te deben tus clientes y cuándo vence', n:dinero(totC), nl:venc ? plural(venc, 'vencido', 'vencidos') : cob.length + ' pendientes', alerta:!!venc, html:function(){ return TO.cobros; } },
-      { k:'clientes', i:'i-maletin', c:'#94A3B8', t:'Clientes', d:'Contacto, horas, lo que deben y pagaron', n:clientesTodos().length, nl:'clientes', html:function(){ return tarjetaClientes(); } },
-      { k:'trabajo', i:'i-tareas', c:'#5AA9FF', t:'Tablero', d:'Por hacer, en curso y hecho', n:porHacer, nl:enCurso ? enCurso + ' en curso' : 'por hacer', html:function(){ return tarjetaTablero(); } },
-      { k:'reuniones', em:'🗣️', c:'#BF5AF2', t:'Reuniones', d:'Las de esta semana', n:reu, nl:'en 7 días', html:function(){ return TO.reun; } },
-      { k:'dinero', i:'i-grafica', c:'#FFD60A', t:'Cuentas', d:'Lo facturado, lo gastado y tus movimientos', n:dinero(tmE.ent), nl:'facturado', html:function(){ return bloquesDinero('oficina') + tarjetaDineroEsp('oficina'); } },
-      { k:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos', d:'Pagos fijos de la oficina', n:ppO.length, nl:'por pagar', html:function(){ return tarjPagos('oficina', ppO); } }];
+      { k:'cobros', i:'i-maletin', c:'#30D158', t:'Clientes y cobros', d:'Lo que te deben, cuándo vence y la ficha de cada cliente', n:dinero(totC), nl:venc ? plural(venc, 'vencido', 'vencidos') : 'por cobrar', alerta:!!venc, html:function(){ return TO.cobros + tarjetaClientes(); } },
+      { k:'trabajo', i:'i-tareas', c:'#5AA9FF', t:'Trabajo', d:'Tablero y reuniones de la semana', n:porHacer, nl:(enCurso ? enCurso + ' en curso' : 'por hacer') + (reu ? ' · ' + plural(reu, 'reunión', 'reuniones') : ''), html:function(){ return tarjetaTablero() + TO.reun; } },
+      { k:'dinero', i:'i-grafica', c:'#FFD60A', t:'Cuentas', d:'Lo facturado, lo gastado, los pagos y tus movimientos', n:dinero(tmE.ent), nl:'facturado' + (ppO.length ? ' · ' + ppO.length + ' por pagar' : ''), html:function(){ return bloquesDinero('oficina') + tarjPagos('oficina', ppO) + tarjetaDineroEsp('oficina'); } }];
   }
   var TD = MODULOS.deporte('_T');
   var ses = vivos('entrenos').filter(function(e){ return e.fecha > sumarDias(hoy, -7) && e.fecha <= hoy; }).length;
@@ -7079,7 +7113,7 @@ function datosHeroe(id){
     var cu = proximosCumples(60)[0], teDeben = vivos('deudas').filter(function(x){ return !x.saldada && x.tipo === 'me'; }).reduce(function(a, x){ return a + (+x.monto || 0); }, 0);
     return d('i-listas', falta, 'por comprar', 'data-acc="esp-tab" data-esp="personal" data-v="casa"') +
       d('i-regalo', cu ? (cu.en === 0 ? '¡Hoy!' : cu.en) : '—', cu ? (cu.en === 0 ? 'hay cumpleaños' : cu.en === 1 ? 'día al próximo cumple' : 'días al próximo cumple') : 'sin cumpleaños cerca', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"') +
-      d('i-cuentas', MONEDA + ' ' + formNum(Math.round(teDeben)), 'te deben', 'data-acc="esp-tab" data-esp="personal" data-v="papeles"');
+      d('i-cuentas', MONEDA + ' ' + formNum(Math.round(teDeben)), 'te deben', 'data-acc="esp-tab" data-esp="personal" data-v="dinero"');
   }
   if(id === 'estudios'){
     var pg = promedioGeneral(), ex = eventosTipo('examen', 90)[0];
@@ -11895,7 +11929,6 @@ document.addEventListener('click', function(ev){
       break;
     case 'resumen-mandar': compartir(ui.resumenTit || 'Resumen', ui.resumenTxt || ''); break;
     case 'hoy-libro': pref.hoyLibro = b.dataset.v; escribirJSON(CLAVE_PREF, pref); pintar(); break;
-    case 'pers-todo': pref.persSolo = b.dataset.v === '1'; escribirJSON(CLAVE_PREF, pref); pintar(); break;
     case 'tema': aplicarTema(b.dataset.t); pintar(); break;
     case 'paleta': aplicarPaleta(b.dataset.p); pintar(); break;
     case 'lunes': pref.lunes = b.dataset.v === '1'; guardarPref(); pintar(); break;
