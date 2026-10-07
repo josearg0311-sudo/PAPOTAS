@@ -2971,11 +2971,7 @@ body[data-esp="estudios"] .curso-ico{ font-family:var(--serif); font-style:norma
    ========================================================================== */
 .manana-res{ margin:0 0 8px; font-size:13px; color:var(--tinta-2) }
 .manana-res b{ color:var(--tinta) }
-.w-manana .w-pie, .w-cierre .w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
-.cierre-nums{ display:grid; grid-template-columns:repeat(auto-fit, minmax(72px, 1fr)); gap:8px }
-.cierre-nums > div{ background:var(--hoja-2); border:1px solid var(--regla); border-radius:14px; padding:10px 12px; min-width:0 }
-.cierre-nums b{ display:block; font-family:var(--serif); font-size:22px; font-weight:700; line-height:1.05; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.cierre-nums small{ font-size:11.5px; color:var(--tinta-3); font-weight:650 }
+.w-manana .w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
 .btn-icono.repetir-mov{ flex:none; margin-left:2px; opacity:.7 }
 .btn-icono.repetir-mov:hover, .btn-icono.repetir-mov:active{ opacity:1; color:var(--acento, var(--azul)) }
 .sem-gasto-num{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:12px }
@@ -3075,7 +3071,7 @@ body, body *:not(svg):not(use){ text-transform:none !important; font-style:norma
 h1, h2, h3, h4, .cg-tit, .tarjeta-cab h2, .tarjeta-cab h3, .seccion-t, .seccion-tit, .pe-nom, .ph-saludo, .w-cab b, .hoja-flot .cab h3, .md-nom, .ag-cab h2{
   font-family:var(--letra) !important; letter-spacing:-.02em !important; text-transform:none !important; font-style:normal !important;
 }
-.cifra, .db-monto, .mov-cifras b, .din-queda b, .din-saldo b, .cifras b, .cierre-nums b, .sem-gasto-num b, .mov-mes b, .resumen-dep b, .anillo-hoy b{
+.cifra, .db-monto, .mov-cifras b, .din-queda b, .din-saldo b, .cifras b, .sem-gasto-num b, .mov-mes b, .resumen-dep b, .anillo-hoy b{
   font-family:var(--letra) !important; letter-spacing:-.02em !important; font-variant-numeric:tabular-nums
 }
 small, .meta, .w-lbl, .cifras small, .mov-cifras small, .sem-gasto-num small{ letter-spacing:0 !important }
@@ -3128,7 +3124,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .mas, .ver-link, .mas-mini, .ag-link{ color:var(--verde) !important; background:none !important; border:0 !important; font-weight:650 !important; font-size:14px !important }
 
 /* ---- Tarjetas → secciones planas ---- */
-.tarjeta, .tarjeta.ancho-2, .w, section.w, .din-bloque, .din-queda, .din-saldo, .mov-cifras > div, .cifras div, .cierre-nums > div, .siguiente, .tarjeta.siguiente, .ordenar-cta, .presu, .bienvenida-hoy{
+.tarjeta, .tarjeta.ancho-2, .w, section.w, .din-bloque, .din-queda, .din-saldo, .mov-cifras > div, .cifras div, .siguiente, .tarjeta.siguiente, .ordenar-cta, .presu, .bienvenida-hoy{
   background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; backdrop-filter:none !important; background-image:none !important
 }
 .tarjeta::before, .tarjeta::after, .w::before, .w::after{ display:none !important }
@@ -3198,9 +3194,6 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .enfoque-grande label{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:8px 0 !important }
 .enfoque-grande .n{ color:var(--verde) !important; font-family:var(--letra) !important }
 .w-regre{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important }
-.cierre-nums{ gap:0 !important; border-top:1px solid var(--regla); border-bottom:1px solid var(--regla) }
-.cierre-nums > div{ padding:12px 0 !important }
-.cierre-nums > div + div{ border-left:1px solid var(--regla) !important; padding-left:14px !important }
 .pie-hoy .btn{ background:none !important; color:var(--tinta-3) !important }
 
 /* ---- Espacios ---- */
@@ -3333,7 +3326,6 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .mo-em{ font-size:26px; line-height:1 }
 .mo-txt{ display:flex; flex-direction:column; gap:3px; min-width:0 }
 .mo-txt b{ font-size:17px; font-weight:750; letter-spacing:-.01em }
-.mo-txt small{ font-size:12.5px; color:var(--tinta-3); line-height:1.35 }
 .mo-dato{ display:flex; align-items:baseline; gap:6px; margin-top:auto; flex-wrap:wrap }
 .mo-dato strong{ font-size:24px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--tinta) }
 .mo-dato em{ font-style:normal; font-size:12.5px; color:var(--tinta-2); font-weight:600 }
@@ -3400,7 +3392,6 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .eh-prox i{ display:block; font-style:normal; font-size:10.5px; font-weight:750; color:var(--ec); letter-spacing:.02em }
 .eh-barra{ height:4px; border-radius:4px; background:color-mix(in srgb, var(--tinta) 12%, transparent); overflow:hidden }
 .eh-barra i{ display:block; height:100%; background:var(--ec); border-radius:4px }
-.eh-pie{ font-size:11.5px; color:var(--tinta-3); font-weight:600 }
 @media (min-width:900px){ .eh-rejilla{ grid-template-columns:repeat(4, minmax(0, 1fr)) } }
 .w-dinero-hoy .din-bloques{ margin-bottom:0 !important }
 
@@ -5467,9 +5458,7 @@ VISTAS.hoy = function(){
 
   /* ---- Cabecera corta: saludo y avance del día ---- */
   var accHoy = '<div class="hoy-acc">' +
-    '<button type="button" class="btn chico" data-acc="resumen-dia">' + ico('i-notas') + 'Resumen del día</button>' +
-    '<button type="button" class="btn chico" data-acc="plan-manana">' + ico('i-cal') + 'Mañana</button>' +
-    '<button type="button" class="btn chico" data-acc="cal-ir-dia-hoy" data-dia="' + hoy + '">' + ico('i-reloj') + 'Por horas</button></div>';
+    '<button type="button" class="btn chico" data-acc="resumen-dia">' + ico('i-notas') + 'Resumen del día</button></div>';
   var momento = h < 6 ? 'noche' : h < 12 ? 'manana' : h < 19 ? 'tarde' : 'noche';
   var html = '<header class="hoy-cab portada-hoy heroe-hoy" data-momento="' + momento + '">' +
     '<span class="banda-fondo" aria-hidden="true"></span><span class="hoy-astro" aria-hidden="true"></span>' +
@@ -5506,7 +5495,8 @@ VISTAS.hoy = function(){
   /* Qué hacer ahora: la agenda te dice lo que toca y te lleva */
   if(hoyVisible('ahora')) html += queHacerAhora(hoy, h);
   /* Lo siguiente */
-  if(hoyVisible('ahora')) html += '<div class="w w-2 w-sig">' + tarjetaSiguiente() + '</div>';
+  var sigHoy = hoyVisible('ahora') ? loSiguiente() : null;
+  if(sigHoy && sigHoy.d === hoy) html += '<div class="w w-2 w-sig">' + tarjetaSiguiente() + '</div>';
 
   /* Pendientes: lo justo, con su botón de añadir */
   if(hoyVisible('hacer')){
@@ -5534,7 +5524,6 @@ VISTAS.hoy = function(){
       agenda.length ? lineaDelDia(agenda.slice(0, 5)) + (agenda.length > 5 ? '<button class="w-mas" data-ir="calendario">+' + (agenda.length - 5) + ' más</button>' : '') : '<p class="nada">Sin eventos ni avisos hoy.</p><div class="w-pie">' + accPanel('Evento', 'data-acc="nuevo" data-tipo="evento"') + accPanel('Aviso', 'data-acc="nuevo" data-tipo="rec"') + '</div>');
   }
   /* Al final de la tarde: cómo te fue y qué trae mañana */
-  if(hoyVisible('ahora') && h >= 18) html += widgetCierre(hoy, hechas, tareasHoy.length);
   if(hoyVisible('viene')) html += widgetManana(hoy);
 
   /* Hábitos, agua y plata: bloques que se tocan */
@@ -5575,9 +5564,9 @@ VISTAS.hoy = function(){
   /* Lo que viene: lo próximo de la semana y la cuenta atrás más cercana */
   if(hoyVisible('viene')){
     var prox = [];
-    for(var i = 1; i <= 7 && prox.length < 3; i++){
+    for(var i = 2; i <= 8 && prox.length < 3; i++){
       var d = sumarDias(hoy, i);
-      itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && prox.length < 3) prox.push({ d:d, x:x }); });
+      itemsDelDia(d).forEach(function(x){ if(x.tipo !== 'tarea' && x.tipo !== 'clase' && !x.hecho && !(x.o && /^(dia|lab)$/.test(x.o.rep || '')) && prox.length < 3) prox.push({ d:d, x:x }); });
     }
     var cr = cuentasRegresivas()[0];
     if(prox.length || cr){
@@ -5621,7 +5610,6 @@ function espaciosHoy(hoy){
       (datos.length ? '<span class="eh-datos">' + datos.map(function(d){
         return '<button type="button" class="eh-dato' + (d.alerta ? ' alerta' : '') + '" data-acc="esp-tab" data-esp="' + E.id + '" data-v="' + d.v + '"><b>' + d.n + '</b>' + d.t + '</button>'; }).join('') + '</span>' : '') +
       '<span class="eh-barra"><i style="width:' + Math.round(p * 100) + '%"></i></span>' +
-      '<span class="eh-pie">' + (pendTodas ? pendTodas + ' ' + (pendTodas === 1 ? 'tarea pendiente' : 'tareas pendientes') + (hechas ? ' · ' + hechas + ' hecha' + (hechas === 1 ? '' : 's') + ' hoy' : '') : hechas ? hechas + ' ' + (hechas === 1 ? 'hecha' : 'hechas') + ' hoy · al día ✓' : 'Al día ✓') + '</span>' +
     '</div>';
   }).join('') + '</div></section>';
 }
@@ -5687,7 +5675,7 @@ function queHacerAhora(hoy, h){
   if(pv.length) s('var(--oro)', 'i-recibo', 'Pago de <b>' + esc(pv[0].p.t) + '</b> ' + (pv.length > 1 ? 'y ' + (pv.length - 1) + ' más ' : '') + 'por pagar', 'Pagar', 'data-ir="pagos"');
   var wd = new Date().getDay(), hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
   var falta = hab.filter(function(x){ return !(x.marcas && x.marcas[hoy]); }).length;
-  if(hab.length && falta && h >= 12) s('var(--azul)', 'i-habitos', 'Te ' + (falta === 1 ? 'falta <b>1 hábito</b>' : 'faltan <b>' + falta + ' hábitos</b>') + ' de hoy', 'Marcar', 'data-ir="habitos"');
+  if(!hoyVisible('hacer') && hab.length && falta && h >= 12) s('var(--azul)', 'i-habitos', 'Te ' + (falta === 1 ? 'falta <b>1 hábito</b>' : 'faltan <b>' + falta + ' hábitos</b>') + ' de hoy', 'Marcar', 'data-ir="habitos"');
   var gastoHoy = libroDatos('personal').some(function(t){ return t.date === hoy; });
   if(!gastoHoy && h >= 13) s('var(--haber)', 'i-bajar', '¿Gastaste algo hoy? <b>Anótalo</b> en 5 segundos', 'Anotar', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"');
   var di = buscarId('diario', hoy);
@@ -5697,7 +5685,7 @@ function queHacerAhora(hoy, h){
   if(!hayAlgunaNube() && cosas >= 10 && rs.dias >= (rs.nunca ? 3 : 14))
     s('var(--oro)', 'i-candado', 'Tus datos solo están en este celular: <b>guarda un respaldo</b>' + (rs.nunca ? '' : ' (el último fue hace ' + rs.dias + ' días)'), 'Guardar', 'data-acc="respaldo"');
   var tHoy = vivos('tareas').filter(function(t){ return t.fecha === hoy; }).length;
-  if(!tHoy && h < 14) s('var(--verde)', 'i-plus', 'Aún no tienes tareas para hoy: <b>planea tu día</b>', 'Añadir', 'data-acc="nuevo" data-tipo="tarea"');
+  if(!hoyVisible('hacer') && !tHoy && h < 14) s('var(--verde)', 'i-plus', 'Aún no tienes tareas para hoy: <b>planea tu día</b>', 'Añadir', 'data-acc="nuevo" data-tipo="tarea"');
   var volver = nOc ? '<button type="button" class="qh-volver" data-acc="qh-mostrar">Mostrar ' + (nOc === 1 ? 'la sugerencia oculta' : 'las ' + nOc + ' ocultas') + '</button>' : '';
   if(!out.length) return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b></header><p class="qh-ok">Todo al día. 👌 Si quieres añadir algo, toca el <b>+</b>.</p>' + volver + '</section>';
   return '<section class="w w-2 qh"><header class="w-cab"><b>Qué hacer ahora</b><span class="w-n">' + out.length + '</span></header>' + out.slice(0, 6).join('') + volver + '</section>';
@@ -5732,18 +5720,6 @@ function widgetManana(hoy){
     : '<p class="nada">' + (nt ? 'Sin eventos: día para avanzar pendientes.' : 'Mañana lo tienes libre. 🌿') + '</p>') +
     '<div class="w-pie"><button class="btn chico" data-acc="cal-nuevo" data-tipo="evento" data-dia="' + m + '">' + ico('i-plus') + 'Evento mañana</button>' +
       '<button class="btn chico" data-acc="cal-nuevo" data-tipo="tarea" data-dia="' + m + '">' + ico('i-plus') + 'Tarea mañana</button></div></section>';
-}
-/* Cierre del día: lo que hiciste hoy, en números */
-function widgetCierre(hoy, hechas, total){
-  var wd = new Date().getDay(), hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-  var habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length, gasto = 0, ent = 0;
-  ['personal', 'oficina'].forEach(function(l){ libroDatos(l).forEach(function(t){ if(t.date === hoy && t.type === 'Gasto') gasto += t.amount; }); });
-  vivos('entrenos').forEach(function(e){ if(e.fecha === hoy) ent += +e.min || 0; });
-  var d = buscarId('diario', hoy), escrito = d && !d.del && d.texto;
-  var num = function(v, t){ return '<div><b>' + v + '</b><small>' + t + '</small></div>'; };
-  return '<section class="w w-2 w-cierre"><header class="w-cab"><b>Tu día en números</b></header>' +
-    '<div class="cierre-nums">' + num(hechas + '/' + total, 'tareas') + (hab.length ? num(habOk + '/' + hab.length, 'hábitos') : '') + num(dinero(gasto), 'gastado') + (ent ? num(ent + ' min', 'de deporte') : '') + '</div>' +
-    '<div class="w-pie">' + (escrito ? '<span class="nada" style="padding:0">📖 Ya escribiste en tu diario.</span>' : '<button class="btn chico primario" data-ir="diario">📖 Contar cómo te fue</button>') + '</div></section>';
 }
 function personalizarHoy(){
   abrirFlotante(cabFlot('Qué ver en Hoy') + '<p class="explica">Oculta las secciones que no uses; el saludo y la captura siempre se quedan.</p>' +
@@ -8742,9 +8718,9 @@ function volverPanel(v){
 /* Un mosaico: icono en su color, nombre, para qué sirve y el dato de ahora */
 function mosaico(o){
   if(o.ir && secOculta(o.ir)) return '';   // lo que ocultaste en «Administrar secciones» tampoco sale aquí
-  return '<button type="button" class="mosaico' + (o.ancho ? ' ancho' : '') + (o.alerta ? ' alerta' : '') + '" ' + (o.acc || 'data-ir="' + o.ir + '"') + ' style="--mc:' + o.c + '">' +
+  return '<button type="button" class="mosaico' + (o.ancho ? ' ancho' : '') + (o.alerta ? ' alerta' : '') + '" ' + (o.acc || 'data-ir="' + o.ir + '"') + (o.d ? ' title="' + esc(String(o.d).replace(/<[^>]+>/g, '')) + '"' : '') + ' style="--mc:' + o.c + '">' +
     '<span class="mo-ico">' + (o.em ? '<span class="mo-em">' + o.em + '</span>' : ico(o.i)) + '</span>' +
-    '<span class="mo-txt"><b>' + o.t + '</b><small>' + o.d + '</small></span>' +
+    '<span class="mo-txt"><b>' + o.t + '</b></span>' +
     (o.n != null ? '<span class="mo-dato' + (String(o.n).length > 6 ? ' largo' : '') + '"><strong>' + o.n + '</strong>' + (o.nl ? '<em>' + o.nl + '</em>' : '') + '</span>' : '') +
     vizHTML(o.viz || (o.ir ? vizDe(o.ir) : null)) +
     '<span class="mo-flecha">' + ico('i-der') + '</span></button>';
@@ -11625,7 +11601,6 @@ document.addEventListener('click', function(ev){
     case 'ejemplos': cargarEjemplos(); break;
     case 'quitar-ejemplos': quitarEjemplos(); break;
     case 'resumen-dia': verDia(hoyISO(), 'Resumen del día'); break;
-    case 'plan-manana': verDia(sumarDias(hoyISO(), 1), 'Mañana'); break;
     case 'resumen-copiar':
       try{ navigator.clipboard.writeText(ui.resumenTxt || '').then(function(){ aviso('📋 Copiado', 'Pégalo donde quieras.'); }, function(){ prompt('Copia el resumen:', ui.resumenTxt || ''); }); }catch(e){ prompt('Copia el resumen:', ui.resumenTxt || ''); }
       break;
@@ -12410,7 +12385,8 @@ var TECLADO = (function(){
   try{ detectarEjemplosViejos(); }catch(e){}
   var h = (location.hash || '').slice(1), atajo = '';
   if(h === 'gasto' || h === 'ingreso' || h === 'anadir'){ atajo = h; h = 'hoy'; try{ history.replaceState(null, '', '#hoy'); }catch(e){} }
-  if(h === 'cuentas') h = 'personal';
+  if(h === 'cuentas' || h === 'personal' || h === 'oficina'){ ui.movLibro = h === 'oficina' ? 'oficina' : 'personal'; ui.movCat = ''; h = 'movimientos'; }
+  if(h === 'progreso' || h === 'revision' || h === 'foco') h = 'hoy';
   if(atajo) setTimeout(function(){ if(atajo === 'anadir') hojaAnadir('tarea'); else gastoRapido('personal', atajo === 'ingreso' ? 'Ingreso' : 'Gasto'); }, 400);
   ui.vista = (h === 'ajustes' || SECCIONES.some(function(s){ return s.id === h; })) ? h : 'hoy';
   pintar();

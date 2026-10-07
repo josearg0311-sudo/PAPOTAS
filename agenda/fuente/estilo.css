@@ -2904,11 +2904,7 @@ body[data-esp="estudios"] .curso-ico{ font-family:var(--serif); font-style:norma
    ========================================================================== */
 .manana-res{ margin:0 0 8px; font-size:13px; color:var(--tinta-2) }
 .manana-res b{ color:var(--tinta) }
-.w-manana .w-pie, .w-cierre .w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
-.cierre-nums{ display:grid; grid-template-columns:repeat(auto-fit, minmax(72px, 1fr)); gap:8px }
-.cierre-nums > div{ background:var(--hoja-2); border:1px solid var(--regla); border-radius:14px; padding:10px 12px; min-width:0 }
-.cierre-nums b{ display:block; font-family:var(--serif); font-size:22px; font-weight:700; line-height:1.05; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-.cierre-nums small{ font-size:11.5px; color:var(--tinta-3); font-weight:650 }
+.w-manana .w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
 .btn-icono.repetir-mov{ flex:none; margin-left:2px; opacity:.7 }
 .btn-icono.repetir-mov:hover, .btn-icono.repetir-mov:active{ opacity:1; color:var(--acento, var(--azul)) }
 .sem-gasto-num{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin-bottom:12px }
@@ -3008,7 +3004,7 @@ body, body *:not(svg):not(use){ text-transform:none !important; font-style:norma
 h1, h2, h3, h4, .cg-tit, .tarjeta-cab h2, .tarjeta-cab h3, .seccion-t, .seccion-tit, .pe-nom, .ph-saludo, .w-cab b, .hoja-flot .cab h3, .md-nom, .ag-cab h2{
   font-family:var(--letra) !important; letter-spacing:-.02em !important; text-transform:none !important; font-style:normal !important;
 }
-.cifra, .db-monto, .mov-cifras b, .din-queda b, .din-saldo b, .cifras b, .cierre-nums b, .sem-gasto-num b, .mov-mes b, .resumen-dep b, .anillo-hoy b{
+.cifra, .db-monto, .mov-cifras b, .din-queda b, .din-saldo b, .cifras b, .sem-gasto-num b, .mov-mes b, .resumen-dep b, .anillo-hoy b{
   font-family:var(--letra) !important; letter-spacing:-.02em !important; font-variant-numeric:tabular-nums
 }
 small, .meta, .w-lbl, .cifras small, .mov-cifras small, .sem-gasto-num small{ letter-spacing:0 !important }
@@ -3061,7 +3057,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .mas, .ver-link, .mas-mini, .ag-link{ color:var(--verde) !important; background:none !important; border:0 !important; font-weight:650 !important; font-size:14px !important }
 
 /* ---- Tarjetas → secciones planas ---- */
-.tarjeta, .tarjeta.ancho-2, .w, section.w, .din-bloque, .din-queda, .din-saldo, .mov-cifras > div, .cifras div, .cierre-nums > div, .siguiente, .tarjeta.siguiente, .ordenar-cta, .presu, .bienvenida-hoy{
+.tarjeta, .tarjeta.ancho-2, .w, section.w, .din-bloque, .din-queda, .din-saldo, .mov-cifras > div, .cifras div, .siguiente, .tarjeta.siguiente, .ordenar-cta, .presu, .bienvenida-hoy{
   background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; backdrop-filter:none !important; background-image:none !important
 }
 .tarjeta::before, .tarjeta::after, .w::before, .w::after{ display:none !important }
@@ -3131,9 +3127,6 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .enfoque-grande label{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:8px 0 !important }
 .enfoque-grande .n{ color:var(--verde) !important; font-family:var(--letra) !important }
 .w-regre{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important }
-.cierre-nums{ gap:0 !important; border-top:1px solid var(--regla); border-bottom:1px solid var(--regla) }
-.cierre-nums > div{ padding:12px 0 !important }
-.cierre-nums > div + div{ border-left:1px solid var(--regla) !important; padding-left:14px !important }
 .pie-hoy .btn{ background:none !important; color:var(--tinta-3) !important }
 
 /* ---- Espacios ---- */
@@ -3266,7 +3259,6 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .mo-em{ font-size:26px; line-height:1 }
 .mo-txt{ display:flex; flex-direction:column; gap:3px; min-width:0 }
 .mo-txt b{ font-size:17px; font-weight:750; letter-spacing:-.01em }
-.mo-txt small{ font-size:12.5px; color:var(--tinta-3); line-height:1.35 }
 .mo-dato{ display:flex; align-items:baseline; gap:6px; margin-top:auto; flex-wrap:wrap }
 .mo-dato strong{ font-size:24px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--tinta) }
 .mo-dato em{ font-style:normal; font-size:12.5px; color:var(--tinta-2); font-weight:600 }
@@ -3333,7 +3325,6 @@ body .dato b{ font-size:18px !important; white-space:nowrap }
 .eh-prox i{ display:block; font-style:normal; font-size:10.5px; font-weight:750; color:var(--ec); letter-spacing:.02em }
 .eh-barra{ height:4px; border-radius:4px; background:color-mix(in srgb, var(--tinta) 12%, transparent); overflow:hidden }
 .eh-barra i{ display:block; height:100%; background:var(--ec); border-radius:4px }
-.eh-pie{ font-size:11.5px; color:var(--tinta-3); font-weight:600 }
 @media (min-width:900px){ .eh-rejilla{ grid-template-columns:repeat(4, minmax(0, 1fr)) } }
 .w-dinero-hoy .din-bloques{ margin-bottom:0 !important }
 
