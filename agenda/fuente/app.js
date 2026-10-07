@@ -1989,7 +1989,6 @@ function filaEventoProx(x){
     '<div class="meta"><span>' + cap(fechaLarga(x.dia)) + (e.todo ? '' : ' · ' + e.ini) + '</span>' + (e.lugar ? '<span>' + ico('i-lugar') + esc(e.lugar) + '</span>' : '') +
     (es !== 'personal' ? '<span class="etiqueta">' + E.em + ' ' + esc(E.nom) + '</span>' : '') + '</div></div></div>';
 }
-/* En Personal: ver lo de todos tus espacios o solo lo de Personal */
 
 var MODULOS = {
   personal: function(tab){
@@ -5361,6 +5360,42 @@ function guardarDiario(dia, cambios){
   poner('diario', e);
 }
 /* Días seguidos escribiendo, contando hasta hoy (o ayer si hoy aún no) */
+/* Tu ánimo en los últimos 30 días: la línea, el promedio, cómo se reparte y el mejor día de la semana */
+function tarjetaAnimo(hoy){
+  var pts = [], cuenta = [0,0,0,0,0,0], porDia = {}, suma = 0, n = 0, escritos = 0;
+  for(var i = 29; i >= 0; i--){
+    var d = sumarDias(hoy, -i), x = buscarId('diario', d), a = x && !x.del ? +x.animo || 0 : 0;
+    if(x && !x.del && x.texto) escritos++;
+    if(!a){ pts.push(null); continue; }
+    pts.push(a); cuenta[a]++; suma += a; n++;
+    var wd = deISO(d).getDay(); porDia[wd] = porDia[wd] || [0, 0]; porDia[wd][0] += a; porDia[wd][1]++;
+  }
+  var rd = rachaDiario();
+  var nums = '<div class="an-nums"><div><b>' + (n ? ANIMOS[Math.round(suma / n)].e + ' ' + (suma / n).toFixed(1) : '—') + '</b><small>ánimo promedio</small></div>' +
+    '<div><b>' + escritos + '</b><small>' + 'escritos en 30 días</small></div>' +
+    '<div><b>' + (rd ? '🔥 ' + rd : '0') + '</b><small>' + (rd === 1 ? 'día seguido' : 'días seguidos') + '</small></div></div>';
+  if(n < 2) return '<section class="tarjeta">' + cabTarjeta('i-grafica', 'Tu ánimo', 'var(--rosa)') + '<div class="tarjeta-cuerpo">' + nums +
+    '<p class="ayuda-campo" style="margin:12px 0 0">Elige cada día cómo te fue (arriba, con las caritas) y aquí verás cómo cambia tu ánimo.</p></div></section>';
+  /* La línea: x de 0 a 290, y de 5 (arriba) a 1 (abajo) */
+  var W = 290, H = 90, puntos = [], tramos = [], actual = [];
+  pts.forEach(function(a, i){
+    var x = Math.round(i * W / 29), y = a ? Math.round(8 + (5 - a) * (H - 16) / 4) : null;
+    if(a){ puntos.push('<circle cx="' + x + '" cy="' + y + '" r="3"/>'); actual.push(x + ',' + y); }
+    else if(actual.length){ tramos.push(actual.join(' ')); actual = []; }
+  });
+  if(actual.length) tramos.push(actual.join(' '));
+  var mejor = null, peor = null;
+  Object.keys(porDia).forEach(function(wd){ var v = porDia[wd][0] / porDia[wd][1]; if(porDia[wd][1] < 2) return; if(!mejor || v > mejor.v) mejor = { wd:wd, v:v }; if(!peor || v < peor.v) peor = { wd:wd, v:v }; });
+  var reparto = [5,4,3,2,1].map(function(v){ return '<div class="an-rep"><span>' + ANIMOS[v].e + '</span><i><b style="width:' + Math.round(cuenta[v] / n * 100) + '%"></b></i><small>' + cuenta[v] + '</small></div>'; }).join('');
+  return '<section class="tarjeta">' + cabTarjeta('i-grafica', 'Tu ánimo · 30 días', 'var(--rosa)') + '<div class="tarjeta-cuerpo">' + nums +
+    '<svg class="an-graf" viewBox="-4 0 298 ' + H + '" preserveAspectRatio="none" aria-label="Ánimo de los últimos 30 días">' +
+      [1,2,3,4,5].map(function(v){ var y = Math.round(8 + (5 - v) * (H - 16) / 4); return '<line x1="0" x2="290" y1="' + y + '" y2="' + y + '"/>'; }).join('') +
+      tramos.map(function(t){ return '<polyline points="' + t + '"/>'; }).join('') + puntos.join('') + '</svg>' +
+    '<div class="an-ejes"><span>hace 30 días</span><span>hoy</span></div>' +
+    '<div class="an-reparto">' + reparto + '</div>' +
+    (mejor && peor && mejor.wd !== peor.wd ? '<p class="an-dato">Tus mejores días suelen ser los <b>' + DIAS[mejor.wd] + '</b>; los más flojos, los <b>' + DIAS[peor.wd] + '</b>.</p>' : '') +
+  '</div></section>';
+}
 function rachaDiario(){
   var d = hoyISO(), n = 0, x = buscarId('diario', d);
   if(!(x && !x.del && x.texto)) d = sumarDias(d, -1);
@@ -5385,6 +5420,8 @@ VISTAS.diario = function(){
       '<h2 style="flex:1;justify-content:center">' + (dia === hoy ? 'Hoy' : cap(relativo(dia))) + ' · ' + fechaCorta(dia) + '</h2>' +
       '<button class="btn-icono" data-acc="diario-mover" data-n="1" aria-label="Día siguiente"' + (dia >= hoy ? ' disabled style="opacity:.3"' : '') + '>' + ico('i-der') + '</button></div>' +
     '<div class="tarjeta-cuerpo">' +
+      '<div class="animo-elegir" role="group" aria-label="¿Cómo estuvo tu día?"><span>¿Cómo estuvo tu día?</span><div>' + [1,2,3,4,5].map(function(v){
+        return '<button type="button" data-acc="animo" data-dia="' + dia + '" data-v="' + v + '" aria-pressed="' + !!(e && e.animo === v) + '" title="' + ANIMOS[v].n + '">' + ANIMOS[v].e + '<small>' + ANIMOS[v].n + '</small></button>'; }).join('') + '</div></div>' +
       '<textarea class="entrada" id="textoDiario" data-dia="' + dia + '" maxlength="10000" placeholder="' + esc(PREGUNTAS[deISO(dia).getDate() % PREGUNTAS.length]) + '" style="height:auto;min-height:170px;padding:12px;margin-top:12px;line-height:1.55;resize:vertical">' + esc(e ? e.texto : '') + '</textarea>' +
       '<small style="color:var(--tinta-3);font-size:12px">Se guarda solo mientras escribes.</small>' +
     '</div></section>' + recuerdosHTML(dia);
@@ -5402,7 +5439,7 @@ VISTAS.diario = function(){
     var x = buscarId('diario', d), a = x && !x.del ? x.animo : 0;
     if(a) cuenta[a]++;
     celdas += '<button data-acc="diario-dia" data-dia="' + d + '" class="' + (a ? 'hay' : '') + (d === dia ? ' sel' : '') + '"' + (d > hoy ? ' disabled style="opacity:.35"' : '') + ' title="' + fechaCorta(d) + '">' +
-      (x && x.texto ? '✎' : deISO(d).getDate()) + '</button>';
+      (a ? ANIMOS[a].e : x && x.texto ? '✎' : deISO(d).getDate()) + '</button>';
   }
   html += '<div class="rejilla dos"><section class="tarjeta">' + cabTarjeta('i-cal', cap(MESES[mm]) + ' ' + y, 'var(--rosa)') +
     '<div class="tarjeta-cuerpo"><div class="mes-animo" style="margin-bottom:6px">' + cab.join('') + '</div><div class="mes-animo">' + celdas + '</div>' +
@@ -5410,6 +5447,7 @@ VISTAS.diario = function(){
       '' +
     '</div></div></section>';
 
+  html += tarjetaAnimo(hoy);
   var todas = vivos('diario').filter(function(x){ return x.texto; }).sort(function(a, b){ return b.id.localeCompare(a.id); });
   html += '<section class="tarjeta">' + cabTarjeta('i-diario', 'Entradas', 'var(--verde)') +
     (todas.length > 3 ? '<div class="busca-diario"><input class="entrada" id="buscaDiario" type="search" placeholder="Buscar en tu diario…" autocomplete="off"></div>' : '') +
