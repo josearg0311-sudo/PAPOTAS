@@ -7929,7 +7929,8 @@ var AUTOCORR = (function(){
 var TECLADO = (function(){
   var tactil = window.matchMedia && matchMedia('(pointer:coarse)').matches;
   function activo(){ return tactil && pref.teclado !== false; }
-  var el = null, capa = 'abc', mayus = 0, caja = null, ocultarReloj = null, repetir = null, largo = null, saltarClick = false, ultCorr = null;
+  var el = null, capa = 'abc', mayus = 0, caja = null, ocultarReloj = null, repetir = null, largo = null, saltarClick = false, ultCorr = null, esp = null, ultEsp = 0;
+  var NUM_ARRIBA = { q:'1', w:'2', e:'3', r:'4', t:'5', y:'6', u:'7', i:'8', o:'9', p:'0' };
   function corrigeAqui(){
     if(!el || pref.autocorr === false || esNum(el) || /email|url|tel/.test(el.type || '')) return false;
     if(el.getAttribute('autocorrect') === 'off' || /nombre|llave|codigo|clave|key|mail|ruc|tel/i.test((el.id || '') + ' ' + (el.name || ''))) return false;
@@ -7989,10 +7990,21 @@ var TECLADO = (function(){
     /* Tocar el teclado nunca le quita el foco al campo */
     caja.addEventListener('pointerdown', function(ev){ ev.preventDefault(); pulsar(ev); });
     caja.addEventListener('pointerup', soltar);
-    caja.addEventListener('pointercancel', function(ev){ if(!caja.querySelector('.tk-pop')) soltar(ev); });
-    caja.addEventListener('pointerleave', function(){ if(!caja.querySelector('.tk-pop')) parar(); });
+    caja.addEventListener('pointercancel', function(ev){ if(!caja.querySelector('.tk-pop')) soltar(ev); quitarGlobo(); esp = null; });
+    caja.addEventListener('pointerleave', function(){ if(!caja.querySelector('.tk-pop') && !esp) parar(); });
     /* Con la ventanita de tildes abierta, se elige deslizando o tocando */
     caja.addEventListener('pointermove', function(ev){
+      /* Deslizar el dedo sobre el espacio mueve el cursor */
+      if(esp && el && el.selectionStart != null){
+        var pasos = Math.trunc((ev.clientX - esp.x) / 12);
+        if(pasos !== esp.p){
+          var pos = Math.max(0, Math.min(el.value.length, el.selectionStart + pasos - esp.p));
+          el.setSelectionRange(pos, pos); esp.p = pasos;
+          if(!esp.movido){ esp.movido = true; parar(); var be = caja.querySelector('.tk-esp'); if(be) be.classList.add('tk-cursor'); }
+          vibrar(3);
+        }
+        return;
+      }
       var pop = caja.querySelector('.tk-pop'); if(!pop) return;
       var sobre = document.elementFromPoint(ev.clientX, ev.clientY);
       pop.querySelectorAll('button').forEach(function(x){ x.classList.toggle('tk-sobre', x === (sobre && sobre.closest && sobre.closest('.tk-pop button'))); });
@@ -8004,7 +8016,8 @@ var TECLADO = (function(){
     var nom = { '⇧':'Mayúsculas', '⌫':'Borrar', '↵':'Aceptar', ' ':'Espacio', '123':'Números', 'abc':'Letras', '#+=':'Símbolos', '😊':'Emojis', '=':'Calcular' }[k] || k;
     var txt = k === ' ' ? 'espacio' : k === '⇧' ? (mayus === 2 ? '⇪' : '⇧') : (capa === 'abc' && k.length === 1 && mayus ? k.toUpperCase() : k);
     var cls = 'tk' + (k === ' ' ? ' tk-esp' : '') + (['⇧','⌫','↵','123','abc','#+=','😊'].indexOf(k) >= 0 ? ' tk-fn' : '') + (k === '↵' ? ' tk-ok' : '') + (k === '⇧' && mayus ? ' tk-on' : '');
-    return '<button type="button" class="' + cls + '" data-k="' + esc(k) + '" aria-label="' + esc(nom) + '">' + esc(txt) + '</button>';
+    var num = capa === 'abc' && NUM_ARRIBA[k] ? '<small class="tk-num">' + NUM_ARRIBA[k] + '</small>' : '';
+    return '<button type="button" class="' + cls + (num ? ' tk-connum' : '') + '" data-k="' + esc(k) + '" aria-label="' + esc(nom) + '">' + esc(txt) + num + '</button>';
   }
   function pintarTeclado(){
     if(!el) return;
@@ -8081,6 +8094,24 @@ var TECLADO = (function(){
     var n = cp && cp > 0xFFFF ? 2 : 1;
     el.setRangeText('', s - n, s, 'end'); avisarCambio();
   }
+  function borrarPalabra(){
+    if(!el) return;
+    var s = el.selectionStart;
+    if(s == null || s !== el.selectionEnd){ borrar(); return; }
+    if(!s) return;
+    var m = el.value.slice(0, s).match(/\S*\s*$/), n = (m && m[0].length) || 1;
+    el.setRangeText('', s - n, s, 'end'); avisarCambio();
+  }
+  /* Globito con la letra encima del dedo, como en el teclado del celular */
+  function globo(b, t){
+    quitarGlobo();
+    var r = b.getBoundingClientRect(), rc = caja.getBoundingClientRect(), g = document.createElement('div');
+    g.className = 'tk-globo'; g.textContent = t;
+    var ancho = Math.round(r.width * 1.35), mitad = ancho / 2 + 3;
+    g.style.left = Math.max(mitad, Math.min(rc.width - mitad, r.left - rc.left + r.width / 2)) + 'px'; g.style.top = (r.top - rc.top - 6) + 'px'; g.style.minWidth = ancho + 'px';
+    caja.appendChild(g);
+  }
+  function quitarGlobo(){ var g = caja && caja.querySelector('.tk-globo'); if(g) g.remove(); }
   function calcular(){
     var v = el.value.replace(/−/g, '-').replace(/,/g, '.').replace(/\s/g, '');
     if(!/^[\d.+\-]+$/.test(v) || !/\d[+\-]/.test(v)) return;
@@ -8112,16 +8143,25 @@ var TECLADO = (function(){
     if(k === '↵'){ autocorregir(); ultCorr = null; aceptar(); return; }
     if(k === ' ' || k === ',' || k === '.'){ autocorregir(); }
     else ultCorr = null;
+    /* Dos espacios seguidos: punto y mayúscula */
+    if(k === ' ' && capa === 'abc' && el && Date.now() - ultEsp < 650){
+      var sp = el.selectionStart, v = el.value;
+      if(sp != null && sp >= 2 && sp === el.selectionEnd && v.charAt(sp - 1) === ' ' && /[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ)»"']/.test(v.charAt(sp - 2))){
+        el.setRangeText('. ', sp - 1, sp, 'end'); avisarCambio(); ultEsp = 0; ultCorr = null;
+        if(mayus !== 2) mayus = 1; pintarTeclado(); return;
+      }
+    }
+    ultEsp = k === ' ' ? Date.now() : 0;
     if(k === '⇧'){ mayus = mayus === 0 ? 1 : mayus === 1 ? 2 : 0; pintarTeclado(); return; }
     if(k === '123' || k === 'abc' || k === '#+=' || k === '😊'){ capa = { '123':'num', abc:'abc', '#+=':'sim', '😊':'emo' }[k]; pintarTeclado(); return; }
     if(k === '▾'){ var x = el; ocultar(); if(x) x.blur(); return; }
     if(k === '⌨'){
-      var y = el; ocultar();
+      var y = el; if(!y) return; ocultar();
       y.dataset.nativo = '1'; y.dataset.cambiando = '1'; y.setAttribute('inputmode', y.getAttribute('data-im') || 'text');
       y.blur(); setTimeout(function(){ y.focus(); delete y.dataset.cambiando; }, 30);
       return;
     }
-    if(k === '🎤'){ dictar(el.id, null); return; }
+    if(k === '🎤'){ if(el) dictar(el.id, null); return; }
     if(k === '='){ calcular(); return; }
     if(k === '−'){ escribir('-'); return; }
     var t = capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k;
@@ -8146,16 +8186,22 @@ var TECLADO = (function(){
     var at = b.getAttribute('data-t');
     if(at){ escribir((/\S$/.test(el.value.slice(0, el.selectionStart || 0)) && at.length > 1 ? ' ' : '') + at + (at.length > 1 ? ' ' : '')); vibrar(4); saltarClick = true; return; }
     var k = b.getAttribute('data-k');
-    if(k === '⌫'){ accion(k); largo = setTimeout(function(){ repetir = setInterval(borrar, 70); }, 420); saltarClick = true; return; }
-    /* Mantener pulsada una vocal: las tildes */
+    /* Mantener ⌫: borra letra a letra y, si sigues, palabra a palabra */
+    if(k === '⌫'){ accion(k); largo = setTimeout(function(){ var n = 0; repetir = setInterval(function(){ n++; if(n <= 14) borrar(); else if(n % 3 === 0) borrarPalabra(); }, 70); }, 420); saltarClick = true; return; }
+    if(k === ' ' && el.selectionStart != null) esp = { x:ev.clientX, p:0, movido:false };
+    if(capa !== 'numpad' && k && [...k].length <= 2 && k !== ' ' && !b.classList.contains('tk-fn')) globo(b, capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k);
+    /* Mantener pulsada una tecla: las tildes (vocales) y los números (fila de arriba) */
     var base = capa === 'abc' && mayus ? k.toUpperCase() : k;
-    if(TILDES[base]){
+    var extra = (capa === 'abc' && NUM_ARRIBA[k] ? NUM_ARRIBA[k] : '') + (TILDES[base] || '');
+    if(extra){
       largo = setTimeout(function(){
-        largo = null; saltarClick = true;
+        largo = null; saltarClick = true; quitarGlobo();
+        delete b.dataset.pend;
+        if(extra.length === 1){ escribir(extra); if(mayus === 1) mayus = 0; vibrar(12); pintarTeclado(); return; }
         var pop = document.createElement('div'); pop.className = 'tk-pop';
-        pop.innerHTML = TILDES[base].split('').map(function(c){ return '<button type="button" data-t="' + c + '">' + c + '</button>'; }).join('');
+        pop.innerHTML = extra.split('').map(function(c){ return '<button type="button" data-t="' + c + '">' + c + '</button>'; }).join('');
         var r = b.getBoundingClientRect(), rc = caja.getBoundingClientRect();
-        pop.style.left = Math.max(4, Math.min(rc.width - 44 * TILDES[base].length - 4, r.left - rc.left - 10)) + 'px';
+        pop.style.left = Math.max(4, Math.min(rc.width - 44 * extra.length - 4, r.left - rc.left - 10)) + 'px';
         pop.style.top = (r.top - rc.top - 52) + 'px';
         caja.appendChild(pop); vibrar(12);
       }, 380);
@@ -8165,6 +8211,12 @@ var TECLADO = (function(){
   function soltar(ev){
     var b = ev.target.closest && ev.target.closest('button');
     caja.querySelectorAll('.tk-pulsada').forEach(function(x){ x.classList.remove('tk-pulsada'); });
+    quitarGlobo();
+    var arrastre = esp && esp.movido; esp = null;
+    if(arrastre){
+      caja.querySelectorAll('.tk-pend, [data-pend]').forEach(function(x){ delete x.dataset.pend; });
+      parar(); saltarClick = false; ultCorr = null; ultEsp = 0; autoMayus(); pintarTeclado(); return;
+    }
     var pop = caja.querySelector('.tk-pop');
     if(pop){
       var sobre = document.elementFromPoint(ev.clientX, ev.clientY), elegido = sobre && sobre.closest && sobre.closest('.tk-pop button');
@@ -8196,6 +8248,8 @@ var TECLADO = (function(){
   });
   /* Tocar dentro del campo (mover el cursor) recalcula la mayúscula */
   document.addEventListener('click', function(ev){ if(el && ev.target === el){ autoMayus(); pintarTeclado(); } });
+  /* El diccionario se prepara al rato de abrir, para que corrija desde la primera palabra */
+  if(activo() && pref.autocorr !== false) setTimeout(function(){ (window.requestIdleCallback || function(f){ f(); })(function(){ AUTOCORR.cargar(); }); }, 2500);
   return { activo:activo, tactil:tactil, ocultar:ocultar };
 })();
 
