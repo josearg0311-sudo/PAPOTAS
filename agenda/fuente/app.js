@@ -1463,7 +1463,8 @@ VISTAS.hoy = function(){
 };
 /* Tus cuatro espacios en grande: cuánto tienen hoy, lo próximo y cómo vas */
 function espaciosHoy(hoy){
-  return '<section class="w w-2 esp-hoy"><header class="w-cab"><b>Tus espacios</b></header><div class="eh-rejilla">' + ESPACIOS.map(function(E){
+  var CR = 2 * Math.PI * 17;
+  return '<section class="w w-2 esp-hoy"><header class="w-cab"><b>Tus espacios</b></header><div class="eh-rejilla ec-rejilla">' + ESPACIOS.map(function(E){
     var ts = vivos('tareas').filter(function(t){ return espDe(t) === E.id; });
     var pendTodas = ts.filter(function(t){ return !t.hecha; }).length;
     var pend = ts.filter(function(t){ return !t.hecha && t.fecha && t.fecha <= hoy; }).length;
@@ -1471,15 +1472,20 @@ function espaciosHoy(hoy){
     var ag = agendaEsp(E.id, 7), hoyAg = ag.filter(function(a){ return a.d === hoy && a.x.tipo !== 'tarea'; }).length;
     var prox = ag.filter(function(a){ return a.x.tipo !== 'tarea'; })[0] || ag[0];
     var total = pend + hoyAg, p = hechas + pendTodas ? hechas / (hechas + pendTodas) : 1;
-    var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
+    var cuando = prox ? (prox.d === hoy ? (prox.x.hora || 'Hoy') : cap(relativo(prox.d)).slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
     var datos = datosEspacio(E.id, hoy, ts, ag);
-    return '<div class="eh" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
-      '<button type="button" class="eh-cab" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio"><span class="eh-em eh-em-caja">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</button>' +
-      '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
-      '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
-      (datos.length ? '<span class="eh-datos">' + datos.map(function(d){
-        return '<button type="button" class="eh-dato' + (d.alerta ? ' alerta' : '') + '" data-acc="esp-tab" data-esp="' + E.id + '" data-v="' + d.v + '"><b>' + d.n + '</b>' + d.t + '</button>'; }).join('') + '</span>' : '') +
-      '<span class="eh-barra"><i style="width:' + Math.round(p * 100) + '%"></i></span>' +
+    var anillo = '<span class="ec-anillo" title="' + (pendTodas ? hechas + ' hechas hoy · ' + plural(pendTodas, 'pendiente', 'pendientes') : 'Todo al día') + '">' +
+      '<svg viewBox="0 0 40 40" aria-hidden="true"><circle class="f" cx="20" cy="20" r="17"/><circle class="v" cx="20" cy="20" r="17" stroke-dasharray="' + CR.toFixed(1) + '" stroke-dashoffset="' + (CR * (1 - p)).toFixed(1) + '"/></svg>' +
+      '<b>' + (pendTodas ? Math.round(p * 100) + '<small>%</small>' : '✓') + '</b></span>';
+    return '<div class="ec" data-e="' + E.id + '" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
+      '<span class="ec-fondo" aria-hidden="true"></span><span class="ec-marca" aria-hidden="true">' + E.em + '</span>' +
+      '<div class="ec-top"><button type="button" class="ec-nom" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio"><span class="ec-em">' + E.em + '</span>' +
+        '<span class="ec-tit"><b>' + E.nom + '</b><small>' + esc(E.lema) + '</small></span></button>' + anillo + '</div>' +
+      (total ? '<div class="ec-num"><strong>' + total + '</strong><span>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</span></div>'
+             : '<div class="ec-num libre"><strong>Libre</strong><span>' + (hechas ? plural(hechas, 'hecha', 'hechas') + ' hoy ✓' : 'nada para hoy') + '</span></div>') +
+      '<div class="ec-prox">' + (prox ? '<i>' + esc(cuando) + '</i><span>' + esc(prox.x.t) + '</span>' : '<span class="ec-nada">Sin nada en los próximos 7 días</span>') + '</div>' +
+      (datos.length ? '<div class="ec-datos">' + datos.map(function(d){
+        return '<button type="button" class="ec-dato' + (d.alerta ? ' alerta' : '') + '" data-acc="esp-tab" data-esp="' + E.id + '" data-v="' + d.v + '"><b>' + d.n + '</b>' + d.t + '</button>'; }).join('') + '</div>' : '') +
     '</div>';
   }).join('') + '</div></section>';
 }
@@ -7783,6 +7789,8 @@ $('fab').addEventListener('touchstart', function(){ fabLargo = false; fabReloj =
 window.addEventListener('click', function(ev){ if(fabLargo){ fabLargo = false; ev.stopPropagation(); ev.preventDefault(); } }, true);
 ['touchend','touchmove','touchcancel'].forEach(function(e){ $('fab').addEventListener(e, function(){ clearTimeout(fabReloj); }, { passive:true }); });
 $('fab').addEventListener('contextmenu', function(ev){ ev.preventDefault(); if(!fabLargo) menuRapido(); });
+$('latNuevo').addEventListener('click', function(ev){ ev.stopPropagation(); nuevoSegunVista(); });
+$('latNuevo').addEventListener('contextmenu', function(ev){ ev.preventDefault(); menuRapido(); });
 ['btnAtras', 'btnAdelante'].forEach(function(id){
   $(id).addEventListener('contextmenu', function(ev){ ev.preventDefault(); hojaHistorialNav(); });
 });

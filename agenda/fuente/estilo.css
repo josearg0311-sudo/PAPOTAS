@@ -4053,3 +4053,157 @@ header.portada-hoy[data-momento="noche"] .ph-anillo.sin-tareas .hoy-astro{ inset
 .pl-dia > .pl-cuerpo{ flex:1 1 auto; min-width:0 }
 /* Barra lateral: el icono siempre visible sobre su cajita (también en la sección abierta) */
 .lateral .nav-lat button[data-ir] .nl-ico svg, .lateral .nav-lat button[data-ir][aria-current="page"] .nl-ico svg{ color:inherit !important }
+
+/* ==========================================================================
+   TUS ESPACIOS (Hoy) — tarjetas con su mundo propio
+   Cada espacio con su dibujo de fondo (burbujas, pizarra, plano, cancha),
+   su emoji de marca de agua, un anillo de avance y lo próximo con su hora.
+   ========================================================================== */
+.ec-rejilla{ gap:12px !important }
+.ec{
+  position:relative; overflow:hidden; isolation:isolate; display:flex; flex-direction:column; gap:12px; min-width:0;
+  padding:16px 16px 15px; border-radius:22px; cursor:pointer; color:var(--tinta);
+  background:
+    radial-gradient(120% 85% at 100% 0%, color-mix(in srgb, var(--ec) 30%, transparent), transparent 62%),
+    linear-gradient(165deg, color-mix(in srgb, var(--ec) 13%, var(--hoja)) 0%, var(--hoja) 72%);
+  border:1px solid color-mix(in srgb, var(--ec) 42%, var(--regla));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 12px 30px -16px color-mix(in srgb, var(--ec) 60%, transparent);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1), box-shadow .28s, border-color .28s;
+}
+.ec::after{ content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
+  background:linear-gradient(115deg, transparent 38%, rgba(255,255,255,.10) 50%, transparent 62%); transform:translateX(-120%) }
+.ec:hover{ transform:translateY(-4px); border-color:color-mix(in srgb, var(--ec) 75%, var(--regla));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 22px 44px -18px color-mix(in srgb, var(--ec) 85%, transparent) }
+.ec:hover::after{ transform:translateX(120%); transition:transform .9s ease }
+.ec:active{ transform:translateY(-1px) scale(.99) }
+/* El dibujo de fondo de cada espacio */
+.ec-fondo{ position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.9;
+  -webkit-mask-image:linear-gradient(215deg, #000 8%, transparent 62%); mask-image:linear-gradient(215deg, #000 8%, transparent 62%) }
+.ec[data-e="personal"] .ec-fondo{ background:
+  radial-gradient(circle at 88% 16%, color-mix(in srgb, var(--ec) 34%, transparent) 0 20px, transparent 21px),
+  radial-gradient(circle at 70% 40%, color-mix(in srgb, var(--ec) 22%, transparent) 0 9px, transparent 10px),
+  radial-gradient(circle at 96% 52%, color-mix(in srgb, var(--ec) 18%, transparent) 0 13px, transparent 14px),
+  radial-gradient(circle at 60% 10%, color-mix(in srgb, var(--ec) 26%, transparent) 0 5px, transparent 6px) }
+.ec[data-e="estudios"] .ec-fondo{ background:
+  linear-gradient(color-mix(in srgb, var(--ec) 20%, transparent) 1px, transparent 1px) 0 0/16px 16px,
+  linear-gradient(90deg, color-mix(in srgb, var(--ec) 20%, transparent) 1px, transparent 1px) 0 0/16px 16px }
+.ec[data-e="oficina"] .ec-fondo{ background:
+  linear-gradient(color-mix(in srgb, var(--ec) 26%, transparent) 1px, transparent 1px) 0 0/32px 32px,
+  linear-gradient(90deg, color-mix(in srgb, var(--ec) 26%, transparent) 1px, transparent 1px) 0 0/32px 32px,
+  linear-gradient(color-mix(in srgb, var(--ec) 10%, transparent) 1px, transparent 1px) 0 0/8px 8px,
+  linear-gradient(90deg, color-mix(in srgb, var(--ec) 10%, transparent) 1px, transparent 1px) 0 0/8px 8px }
+.ec[data-e="deporte"] .ec-fondo{ background:
+  radial-gradient(circle at 100% 46%, transparent 0 36px, color-mix(in srgb, var(--ec) 38%, transparent) 37px 38.5px, transparent 39.5px),
+  radial-gradient(circle at 100% 46%, color-mix(in srgb, var(--ec) 45%, transparent) 0 3px, transparent 4px),
+  linear-gradient(90deg, transparent calc(100% - 1.5px), color-mix(in srgb, var(--ec) 38%, transparent) 0),
+  linear-gradient(transparent 12px, color-mix(in srgb, var(--ec) 30%, transparent) 12px 13.5px, transparent 13.5px),
+  repeating-linear-gradient(90deg, color-mix(in srgb, var(--ec) 7%, transparent) 0 22px, transparent 22px 44px) }
+.ec-marca{ position:absolute; right:-14px; bottom:-26px; z-index:-1; font-size:104px; line-height:1; opacity:.10; transform:rotate(-14deg); pointer-events:none; filter:saturate(1.3) }
+.ec-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; min-width:0 }
+button.ec-nom{ display:flex; align-items:center; gap:10px; min-width:0; padding:0; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer }
+.ec-em{ width:42px; height:42px; flex:none; display:grid; place-items:center; font-size:22px; border-radius:14px;
+  background:linear-gradient(145deg, color-mix(in srgb, var(--ec) 34%, var(--hoja-2)), color-mix(in srgb, var(--ec) 12%, var(--hoja-2)));
+  border:1px solid color-mix(in srgb, var(--ec) 55%, transparent); box-shadow:0 8px 18px -8px color-mix(in srgb, var(--ec) 80%, transparent), inset 0 1px 0 rgba(255,255,255,.15) }
+.ec-tit{ display:flex; flex-direction:column; min-width:0 }
+.ec-tit b{ font-size:17px; font-weight:800; letter-spacing:-.02em; color:var(--tinta) }
+.ec-tit small{ font-size:11.5px; font-weight:600; color:var(--tinta-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.ec-anillo{ position:relative; width:46px; height:46px; flex:none }
+.ec-anillo svg{ width:100%; height:100%; transform:rotate(-90deg) }
+.ec-anillo circle{ fill:none; stroke-width:4 }
+.ec-anillo .f{ stroke:color-mix(in srgb, var(--tinta) 12%, transparent) }
+.ec-anillo .v{ stroke:var(--ec); stroke-linecap:round; filter:drop-shadow(0 0 4px color-mix(in srgb, var(--ec) 70%, transparent)); transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.2,1) }
+.ec-anillo b{ position:absolute; inset:0; display:grid; place-items:center; font-size:12.5px; font-weight:800; color:var(--tinta); font-family:var(--cifra, var(--letra)) }
+.ec-anillo b small{ font-size:8px; font-weight:800; margin-left:1px }
+.ec-num{ display:flex; align-items:baseline; gap:8px; min-width:0 }
+.ec-num strong{ font-size:42px; font-weight:800; line-height:.95; letter-spacing:-.04em; color:var(--tinta); font-family:var(--cifra, var(--letra)) }
+.ec-num span{ font-size:13px; font-weight:650; color:var(--tinta-2) }
+.ec-num.libre strong{ font-size:30px; color:var(--ec); text-shadow:0 0 22px color-mix(in srgb, var(--ec) 45%, transparent) }
+.ec-prox{ display:flex; align-items:center; gap:8px; min-height:26px; min-width:0 }
+.ec-prox i{ flex:none; font-style:normal; font-size:11.5px; font-weight:800; padding:4px 9px; border-radius:99px; white-space:nowrap;
+  background:color-mix(in srgb, var(--ec) 24%, transparent); color:var(--tinta); border:1px solid color-mix(in srgb, var(--ec) 40%, transparent) }
+.ec-prox span{ font-size:13px; font-weight:600; color:var(--tinta-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0 }
+.ec-prox .ec-nada{ color:var(--tinta-3); font-weight:500 }
+.ec-datos{ display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; padding-top:2px }
+.ec-dato{ font-size:12px; font-weight:600; padding:5px 10px; border-radius:99px; color:var(--tinta-2); white-space:nowrap;
+  background:color-mix(in srgb, var(--tinta) 5%, transparent); border:1px solid color-mix(in srgb, var(--ec) 28%, var(--regla)); transition:background .15s, border-color .15s }
+.ec-dato b{ color:var(--tinta); font-weight:800; margin-right:1px }
+.ec-dato:hover{ background:color-mix(in srgb, var(--ec) 20%, transparent); border-color:color-mix(in srgb, var(--ec) 60%, transparent) }
+.ec-dato.alerta{ border-color:color-mix(in srgb, var(--debe) 60%, transparent); background:color-mix(in srgb, var(--debe) 12%, transparent) }
+.ec-dato.alerta b{ color:var(--debe) }
+.vista[class*="entra-"] .ec-rejilla .ec{ animation:mo-entra .45s cubic-bezier(.2,.8,.2,1) both }
+.vista[class*="entra-"] .ec-rejilla .ec:nth-child(2){ animation-delay:.05s }
+.vista[class*="entra-"] .ec-rejilla .ec:nth-child(3){ animation-delay:.1s }
+.vista[class*="entra-"] .ec-rejilla .ec:nth-child(4){ animation-delay:.15s }
+:root[data-tema="claro"] .ec{ box-shadow:0 1px 2px rgba(15,20,35,.06), 0 12px 28px -16px color-mix(in srgb, var(--ec) 55%, transparent) }
+:root[data-tema="claro"] .ec-marca{ opacity:.13 }
+:root[data-tema="claro"] .ec-em{ box-shadow:0 6px 14px -8px color-mix(in srgb, var(--ec) 70%, transparent) }
+@media (max-width:599px){
+  .ec{ padding:13px 13px 12px; gap:9px; border-radius:20px }
+  .ec-em{ width:36px; height:36px; font-size:19px; border-radius:12px }
+  .ec-tit b{ font-size:15.5px }
+  .ec-tit small{ display:none }
+  .ec-anillo{ width:38px; height:38px }
+  .ec-anillo b{ font-size:10.5px }
+  .ec-num strong{ font-size:34px }
+  .ec-num.libre strong{ font-size:24px }
+  .ec-num span{ font-size:12px }
+  .ec-prox{ flex-direction:column; align-items:flex-start; gap:4px }
+  .ec-prox span{ font-size:12.5px; max-width:100% }
+  .ec-dato{ font-size:11.5px; padding:4px 8px }
+  .ec-marca{ font-size:84px }
+}
+@media (prefers-reduced-motion: reduce){ .ec, .ec::after, .ec-anillo .v{ transition:none !important; animation:none !important } .ec:hover{ transform:none } }
+
+/* ==========================================================================
+   BARRA LATERAL — segunda versión
+   Aurora de color de fondo, botón «Nuevo» destacado, la sección abierta
+   como una píldora luminosa de su color y los espacios con su número a color.
+   ========================================================================== */
+@media (min-width:900px){ .fab{ display:none !important } }
+.lateral{
+  background:
+    radial-gradient(130% 34% at 0% 0%, color-mix(in srgb, var(--acento-txt, var(--verde-sube)) 20%, transparent), transparent 70%),
+    radial-gradient(110% 26% at 100% 100%, color-mix(in srgb, #B794F6 13%, transparent), transparent 70%),
+    linear-gradient(180deg, color-mix(in srgb, var(--hoja) 82%, var(--papel)), color-mix(in srgb, var(--hoja) 55%, var(--papel))) !important;
+  border-right:1px solid color-mix(in srgb, var(--tinta) 9%, transparent) !important; padding:18px 14px 14px !important }
+.lateral .marca{ border-bottom:0 !important; padding:2px 6px 14px !important; margin-bottom:0 }
+.lateral .marca .logo-img{ width:42px !important; height:42px !important; border-radius:13px; filter:drop-shadow(0 6px 14px color-mix(in srgb, var(--acento-txt, var(--verde-sube)) 45%, transparent)) }
+.lateral .marca b{ font-size:19px !important; font-weight:800 !important; letter-spacing:-.03em }
+.lat-nuevo{ position:relative; overflow:hidden; display:flex; align-items:center; gap:10px; width:100%; margin:0 0 8px; padding:10px 12px 10px 10px; border-radius:15px; border:0; cursor:pointer;
+  font:inherit; font-size:14.5px; font-weight:750; color:var(--sobre-acento, var(--papel));
+  background:linear-gradient(135deg, var(--verde), color-mix(in srgb, var(--verde) 55%, #8B5CF6));
+  box-shadow:0 12px 26px -12px var(--verde), inset 0 1px 0 rgba(255,255,255,.25); transition:transform .2s, box-shadow .2s, filter .2s }
+.lat-nuevo::after{ content:''; position:absolute; inset:0; background:linear-gradient(115deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%); transform:translateX(-120%) }
+.lat-nuevo:hover{ transform:translateY(-1px); filter:brightness(1.08); box-shadow:0 16px 30px -12px var(--verde), inset 0 1px 0 rgba(255,255,255,.3) }
+.lat-nuevo:hover::after{ transform:translateX(120%); transition:transform .8s ease }
+.lat-nuevo:active{ transform:scale(.98) }
+.ln-mas{ width:28px; height:28px; display:grid; place-items:center; border-radius:9px; background:rgba(255,255,255,.2) }
+.ln-mas svg{ width:17px; height:17px; stroke-width:2.6 }
+.lat-nuevo kbd{ margin-left:auto; font:inherit; font-size:11px; font-weight:800; padding:2px 7px; border-radius:7px; background:rgba(255,255,255,.2); opacity:.9 }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico){
+  background:linear-gradient(90deg, color-mix(in srgb, var(--c) 30%, transparent), color-mix(in srgb, var(--c) 6%, transparent)) !important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 34%, transparent), 0 10px 22px -14px var(--c) !important }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico)::before{ left:-14px !important; box-shadow:0 0 12px 1px var(--c) }
+.lateral .nav-lat button[aria-current="page"] .nl-ico{ background:var(--c) !important; box-shadow:0 6px 16px -5px var(--c) }
+.lateral .nl-ico{ border:1px solid color-mix(in srgb, var(--c) 22%, transparent) }
+.lateral .nav-lat button[data-ir]:not(.nav-ico):hover .nl-ico{ background:color-mix(in srgb, var(--c) 24%, transparent) }
+.lateral .nav-lat .nav-esp .cuenta{ background:color-mix(in srgb, var(--c) 22%, transparent) !important; color:var(--c) !important; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent) }
+.lateral .nav-lat .nav-esp .cuenta.alerta{ background:var(--debe) !important; color:#fff !important; box-shadow:none }
+:root[data-tema="claro"] .lateral .nav-lat .nav-esp .cuenta{ background:color-mix(in srgb, var(--c) 14%, transparent) !important }
+.lateral .nav-lat .grupo{ background:linear-gradient(90deg, color-mix(in srgb, var(--tinta) 16%, transparent), transparent) no-repeat 10px calc(100% - 1px) / calc(100% - 20px) 1px !important; margin-bottom:4px }
+.lateral .perfil{ border:1px solid transparent !important;
+  background:linear-gradient(var(--hoja), var(--hoja)) padding-box, linear-gradient(135deg, color-mix(in srgb, var(--acento-txt, var(--verde-sube)) 70%, transparent), color-mix(in srgb, #B794F6 50%, transparent), var(--regla)) border-box !important }
+.lateral .perfil:hover, .lateral .perfil[aria-current="page"]{ background:linear-gradient(var(--hoja-2), var(--hoja-2)) padding-box, linear-gradient(135deg, var(--acento-txt, var(--verde-sube)), #B794F6) border-box !important }
+.lateral .avatar{ background:linear-gradient(135deg, var(--verde), #8B5CF6) !important; color:#fff !important; box-shadow:0 6px 16px -6px var(--verde) }
+:root[data-tema="claro"] .lateral{ background:
+    radial-gradient(130% 34% at 0% 0%, color-mix(in srgb, var(--acento-txt, var(--verde-sube)) 12%, transparent), transparent 70%),
+    radial-gradient(110% 26% at 100% 100%, color-mix(in srgb, #8B5CF6 8%, transparent), transparent 70%), var(--hoja) !important }
+@media (prefers-reduced-motion: reduce){ .lat-nuevo, .lat-nuevo::after{ transition:none !important } }
+.ec-anillo b{ display:flex !important; align-items:baseline; justify-content:center; padding-top:15px; gap:0 }
+@media (max-width:599px){ .ec-anillo b{ padding-top:12px } }
+.ec[data-e="personal"] .ec-fondo{ opacity:.75; background:
+  radial-gradient(circle at 92% 78%, color-mix(in srgb, var(--ec) 26%, transparent) 0 26px, transparent 27px),
+  radial-gradient(circle at 74% 92%, color-mix(in srgb, var(--ec) 18%, transparent) 0 12px, transparent 13px),
+  radial-gradient(circle at 98% 52%, color-mix(in srgb, var(--ec) 14%, transparent) 0 8px, transparent 9px) !important;
+  -webkit-mask-image:linear-gradient(330deg, #000 10%, transparent 60%); mask-image:linear-gradient(330deg, #000 10%, transparent 60%) }
+@media (max-width:599px){ .ec-anillo{ display:none } }
