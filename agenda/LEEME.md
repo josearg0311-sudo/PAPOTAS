@@ -71,7 +71,7 @@ En la captura rápida, `#estudios`, `#oficina`, `#deporte` o `#personal` lo mand
 |---|---|
 | **Saludo** | La fecha, tu frase, el anillo de tareas hechas y cuatro números (por hacer, en agenda, avisos, por pagar). |
 | **Tus espacios** | Los cuatro espacios con lo próximo de cada uno y cómo va su semana. |
-| **Ahora** | **Lo siguiente** de hoy y cuánto falta, y **Tu día** por horas, con la semana arriba para saltar a otro día. Hoy no repite: lo de mañana está en «Mañana», «Lo que viene» empieza pasado mañana y no muestra lo diario. |
+| **Ahora** | El anillo de avance de hoy con el sol (un resplandor de día) o la luna (de noche); si aún no hay tareas, solo el sol o la luna. **Lo siguiente** de hoy y cuánto falta, y **Tu día** por horas, con la semana arriba para saltar a otro día. Hoy no repite: lo de mañana está en «Mañana», «Lo que viene» empieza pasado mañana y no muestra lo diario. |
 | **Por hacer** | Las tareas de hoy y tus hábitos. |
 | **Lo que se viene** | Cuentas regresivas, los próximos 7 días, tus metas y los cumpleaños. |
 | **Dinero** | Los dos libros lado a lado (entró, salió, saldo y cuánto gastaste de lo que entró) y los pagos por vencer. |

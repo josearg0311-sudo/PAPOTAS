@@ -137,7 +137,7 @@ body{
 }
 button,input,select,textarea{ font:inherit; color:inherit }
 button{ cursor:pointer; background:none; border:none; padding:0 }
-a{ color:var(--verde) }
+a{ color:var(--acento-txt, var(--verde)) }
 :focus-visible{ outline:2px solid var(--verde); outline-offset:2px; border-radius:6px }
 .oculto{ display:none !important }
 .cifra{ font-family:var(--cifra); font-variant-numeric:tabular-nums; letter-spacing:-.01em; font-feature-settings:'tnum' }
@@ -237,7 +237,7 @@ svg.i{ width:20px; height:20px; flex:none; fill:none; stroke:currentColor; strok
 .fab{
   position:fixed; right:18px; bottom:calc(var(--barra) + 16px + env(safe-area-inset-bottom)); z-index:25;
   width:56px; height:56px; border-radius:18px; display:grid; place-items:center;
-  background:var(--verde); color:var(--papel); box-shadow:var(--sombra-alta);
+  background:var(--verde); color:var(--sobre-acento, var(--papel)); box-shadow:var(--sombra-alta);
   transition:transform .15s;
 }
 .fab:hover{ transform:translateY(-2px) }
@@ -300,7 +300,7 @@ body.en-cuentas .fab{ display:none }
 }
 .btn:hover{ border-color:var(--tinta-3) }
 .btn:active{ transform:scale(.98) }
-.btn.primario{ background:var(--verde); border-color:var(--verde); color:var(--papel) }
+.btn.primario{ background:var(--verde); border-color:var(--verde); color:var(--sobre-acento, var(--papel)) }
 .btn.primario:hover{ background:var(--verde-sube) }
 .btn.peligro{ color:var(--debe); border-color:color-mix(in srgb, var(--debe) 35%, transparent); background:var(--debe-piso) }
 .btn.chico{ height:32px; padding:0 11px; font-size:12.5px; border-radius:9px }
@@ -473,7 +473,7 @@ body.en-cuentas .fab{ display:none }
 .celda:hover{ border-color:var(--tinta-3) }
 .celda .num{ font-size:13px; font-weight:700; line-height:1; padding:2px 3px }
 .celda.fuera{ opacity:.38 }
-.celda.hoy .num{ background:var(--verde); color:var(--papel); border-radius:6px; align-self:flex-start; padding:3px 5px }
+.celda.hoy .num{ background:var(--verde); color:var(--sobre-acento, var(--papel)); border-radius:6px; align-self:flex-start; padding:3px 5px }
 .celda.sel{ border-color:var(--verde); background:var(--verde-piso) }
 .celda .puntos{ display:flex; gap:3px; flex-wrap:wrap; padding:0 3px }
 .celda .puntos i{ width:6px; height:6px; border-radius:50%; background:var(--c, var(--verde)) }
@@ -616,8 +616,8 @@ mark{ background:color-mix(in srgb, var(--oro) 35%, transparent); color:inherit;
 }
 .aviso b{ display:block }
 .aviso .txt{ flex:1; min-width:0 }
-.aviso button{ font-weight:800; color:var(--verde); white-space:nowrap; padding:4px 6px }
-:root:not([data-tema="claro"]) .aviso button{ color:var(--verde) }
+.aviso button{ font-weight:800; color:var(--acento-txt, var(--verde)); white-space:nowrap; padding:4px 6px }
+:root:not([data-tema="claro"]) .aviso button{ color:var(--acento-txt, var(--verde)) }
 .aviso.alarma{ background:var(--oro); color:#1a1405 }
 .aviso.alarma button{ color:#1a1405; text-decoration:underline }
 
@@ -1052,7 +1052,7 @@ body{
 .sem-cab{ width:100%; height:48px; display:flex; flex-direction:column; align-items:center; justify-content:center; border-bottom:1px solid var(--regla) }
 .sem-cab small{ font-size:10.5px; font-weight:800; text-transform:uppercase; color:var(--tinta-3) }
 .sem-cab b{ font-size:17px }
-.sem-col.hoy .sem-cab b{ color:var(--papel); background:var(--verde); border-radius:8px; padding:0 7px }
+.sem-col.hoy .sem-cab b{ color:var(--sobre-acento, var(--papel)); background:var(--verde); border-radius:8px; padding:0 7px }
 .sem-todo{ padding:3px; display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--regla); overflow:hidden }
 .sem-chip{ font-size:11px; font-weight:650; text-align:left; padding:2px 6px; border-radius:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:color-mix(in srgb, var(--c) 22%, transparent); color:var(--tinta); height:20px; flex:none }
 .sem-cuerpo{ position:relative; background:repeating-linear-gradient(180deg, transparent 0 45px, var(--regla-2) 45px 46px) }
@@ -1935,7 +1935,7 @@ svg.i.izq{ transform:rotate(180deg) }
 }
 .gesto-nav.izq{ left:calc(-44px + var(--p, 0) * 60px) }
 .gesto-nav.der{ right:calc(-44px + var(--p, 0) * 60px) }
-.gesto-nav.listo{ background:var(--verde); color:var(--papel) }
+.gesto-nav.listo{ background:var(--verde); color:var(--sobre-acento, var(--papel)) }
 .gesto-nav svg{ width:22px; height:22px; stroke-width:2.6 }
 
 /* ==========================================================================
@@ -1974,7 +1974,7 @@ body::before{ display:none !important }
 .seccion-tit.rojo{ color:var(--debe) !important }
 .tarjeta-cab{ padding:16px 18px 8px !important }
 .tarjeta-cab h2, .tarjeta-cab h3{ font-size:18px !important; font-weight:560 !important; letter-spacing:-.01em !important; text-transform:none !important; color:var(--tinta) !important }
-.tarjeta-cab .mas{ background:none !important; padding:0 !important; font-size:13px !important; font-weight:650; color:var(--verde) !important }
+.tarjeta-cab .mas{ background:none !important; padding:0 !important; font-size:13px !important; font-weight:650; color:var(--acento-txt, var(--verde)) !important }
 .mas-grupo h4, .adm-grupo-tit{ font-size:17px !important; font-weight:560 !important; letter-spacing:0 !important; text-transform:none !important; color:var(--tinta-2) !important }
 
 /* Etiquetas pequeñas en frase normal, no en mayúsculas */
@@ -2038,7 +2038,7 @@ body::before{ display:none !important }
 .lateral{ background:var(--papel) !important; border-right:1px solid var(--regla-2) !important; box-shadow:none !important }
 .nav-lat button{ border-radius:14px !important }
 .nav-lat button[aria-current="page"]{ background:var(--hoja) !important; box-shadow:none !important; color:var(--tinta) !important }
-.nav-lat button[aria-current="page"] svg{ color:var(--verde) !important }
+.nav-lat button[aria-current="page"] svg{ color:var(--acento-txt, var(--verde)) !important }
 .nav-lat .grupo{ font-family:var(--serif); font-size:14px !important; font-weight:560 !important; letter-spacing:0 !important; text-transform:none !important; color:var(--tinta-3) !important }
 
 /* ----- Barra de abajo: pegada al borde, el activo con un punto ----- */
@@ -2056,17 +2056,17 @@ body::before{ display:none !important }
 .barra-inf button{ color:var(--tinta-3) !important; font-size:10.5px !important; font-weight:600 !important; gap:4px !important }
 .barra-inf button svg{ width:23px !important; height:23px !important; padding:0 !important; background:none !important; border-radius:0 !important }
 .barra-inf button[aria-current="page"]{ color:var(--tinta) !important }
-.barra-inf button[aria-current="page"] svg{ color:var(--verde) !important; background:none !important }
+.barra-inf button[aria-current="page"] svg{ color:var(--acento-txt, var(--verde)) !important; background:none !important }
 .barra-inf button[aria-current="page"]::before{ display:none !important }
 .barra-inf button[aria-current="page"]::after{
   content:""; position:absolute; bottom:6px; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:var(--verde);
 }
-.barra-inf .globo{ background:var(--verde) !important; color:var(--papel) !important; top:6px !important }
+.barra-inf .globo{ background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important; top:6px !important }
 
 /* ----- Botón de añadir: círculo con el acento, sin brillo ----- */
 .fab{
   border-radius:50% !important; width:58px !important; height:58px !important;
-  background:var(--verde) !important; color:var(--papel) !important;
+  background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important;
   box-shadow:0 8px 24px rgba(0,0,0,.35) !important;
 }
 :root[data-tema="claro"] .fab{ color:#fff !important; box-shadow:0 8px 22px rgba(40,30,20,.18) !important }
@@ -2129,11 +2129,11 @@ body::before{ display:none !important }
 .hoja-flot .cab h3{ font-size:22px !important; font-weight:560 !important }
 .rejilla-mas button, .menu-lista button{ border:0 !important; background:var(--hoja-2) !important; border-radius:20px !important }
 .rejilla-mas button[aria-current="page"]{ background:var(--verde-piso) !important; color:var(--tinta) !important }
-.rejilla-mas button svg, .menu-lista svg{ color:var(--verde) !important }
+.rejilla-mas button svg, .menu-lista svg{ color:var(--acento-txt, var(--verde)) !important }
 
 /* ----- Calendario ----- */
 .celda{ border:0 !important }
-.celda.hoy .num, .celda.hoy > b{ background:var(--verde) !important; color:var(--papel) !important }
+.celda.hoy .num, .celda.hoy > b{ background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important }
 .celda.sel{ box-shadow:inset 0 0 0 2px var(--verde) !important }
 
 /* ----- Números: la misma letra del texto, con cifras parejas ----- */
@@ -2210,7 +2210,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
  .rec-lista{ border-top:1px solid var(--regla-2) }
  .rec-lista .fila{ padding-left:2px !important; padding-right:2px !important }
 .nada{ margin:0; padding:14px 2px; color:var(--tinta-3); font-size:14px }
-.ver-link{ margin-left:auto; display:inline-flex; align-items:center; gap:2px; font-family:var(--letra); font-size:13px; font-weight:650; color:var(--verde) }
+.ver-link{ margin-left:auto; display:inline-flex; align-items:center; gap:2px; font-family:var(--letra); font-size:13px; font-weight:650; color:var(--acento-txt, var(--verde)) }
 .ver-link svg{ width:14px; height:14px }
 .sub-t{ display:flex; align-items:center; margin:0 0 8px; font-family:var(--serif); font-size:18px; font-weight:560 }
 .seccion-t .n, .seccion-tit .n{ font-family:var(--letra); font-size:13px; font-weight:600; color:var(--tinta-3) }
@@ -2235,7 +2235,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 }
 .franja-semana button small{ font-size:11px; text-transform:none !important; letter-spacing:0 !important }
 .franja-semana button b{ font-family:var(--serif); font-size:20px; font-weight:560; color:var(--tinta) }
-.franja-semana button.hoy{ background:var(--verde) !important; color:var(--papel) }
+.franja-semana button.hoy{ background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) }
 .franja-semana button.hoy b{ color:var(--papel) }
 .franja-semana button.hoy .puntos i{ background:var(--papel) !important }
 .franja-semana button.pasado{ opacity:.55 }
@@ -2247,7 +2247,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
   display:grid !important; grid-template-columns:44px 1fr auto; align-items:center; gap:8px;
   padding:6px 2px !important; border:0 !important; border-bottom:1px solid var(--regla-2) !important; background:none !important; border-radius:0 !important;
 }
-.enfoque-grande .n{ font-family:var(--serif); font-size:34px !important; font-weight:500; color:var(--verde) !important; background:none !important; width:auto !important; height:auto !important; line-height:1 }
+.enfoque-grande .n{ font-family:var(--serif); font-size:34px !important; font-weight:500; color:var(--acento-txt, var(--verde)) !important; background:none !important; width:auto !important; height:auto !important; line-height:1 }
 .enfoque-grande input{ background:none !important; border:0 !important; font-size:16px !important; padding:10px 0 !important }
 .enfoque-grande label.hecho input{ text-decoration:line-through; color:var(--tinta-3) }
 
@@ -2283,7 +2283,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .pl-fecha{ position:sticky; top:calc(var(--arriba) + 8px); align-self:start; text-align:center; padding-top:2px }
 .pl-fecha b{ display:block; font-family:var(--serif); font-size:38px; font-weight:500; line-height:1; letter-spacing:-.03em }
 .pl-fecha span{ display:block; font-size:11.5px; color:var(--tinta-3); margin-top:3px }
-.pl-dia.es-hoy .pl-fecha b{ color:var(--verde) }
+.pl-dia.es-hoy .pl-fecha b{ color:var(--acento-txt, var(--verde)) }
 .pl-dia.rojo .pl-fecha b, .pl-dia.rojo .pl-tit{ color:var(--debe) }
 .pl-tit{ display:flex; align-items:center; gap:8px; margin:4px 0 4px; font-family:var(--serif); font-size:19px; font-weight:560 }
 .pl-tit .btn{ margin-left:auto; font-family:var(--letra) }
@@ -2354,7 +2354,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 .ht-cab{ padding-bottom:4px }
 .ht-d{ display:flex; flex-direction:column; align-items:center; font-size:10px; color:var(--tinta-3); line-height:1.1 }
 .ht-d i{ font-style:normal; font-size:10.5px; color:var(--tinta-2) }
-.ht-d.hoy, .ht-d.hoy i{ color:var(--verde); font-weight:800 }
+.ht-d.hoy, .ht-d.hoy i{ color:var(--acento-txt, var(--verde)); font-weight:800 }
 .ht-nom{ display:flex; align-items:center; gap:8px; min-width:0; text-align:left }
 .ht-nom .em{ font-size:20px; flex:none }
 .ht-nom .t{ min-width:0 }
@@ -2456,8 +2456,8 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
   display:grid !important; place-items:center; margin:0 auto !important; background:none !important; color:var(--tinta) !important;
 }
 .cal-mes .celda.fuera .num{ color:var(--tinta-3) !important; opacity:.5 }
-.cal-mes .celda.hoy .num{ box-shadow:inset 0 0 0 1.5px var(--verde); color:var(--verde) !important; background:none !important }
-.cal-mes .celda.sel .num{ background:var(--verde) !important; color:var(--papel) !important; box-shadow:none }
+.cal-mes .celda.hoy .num{ box-shadow:inset 0 0 0 1.5px var(--verde); color:var(--acento-txt, var(--verde)) !important; background:none !important }
+.cal-mes .celda.sel .num{ background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important; box-shadow:none }
 .cal-mes .celda.sel{ box-shadow:none !important }
 .cal-mes .celda.fer .num{ color:var(--debe) !important }
 .cal-mes .celda .barras{ display:flex !important; justify-content:center; gap:3px; margin-top:4px; height:6px }
@@ -2507,7 +2507,7 @@ body.con-titulo-grande:not(.bajado) .cabecera h1{ opacity:0; transform:translate
 
 .pe-datos .dato b{ font-weight:700 !important }
 .cal-mes .celda .num{ font-size:21px !important; font-weight:600 !important }
-.enfoque-grande .n{ font-size:40px !important; font-weight:700 !important; transform:none !important; color:var(--verde) !important }
+.enfoque-grande .n{ font-size:40px !important; font-weight:700 !important; transform:none !important; color:var(--acento-txt, var(--verde)) !important }
 
 /* Frases: sin cursiva ni letra a mano */
  .pe-lema, .heroe .frase{ font-family:var(--letra) !important; font-style:normal !important; font-size:14px !important; transform:none !important; color:var(--tinta-2) !important; font-weight:500 }
@@ -2602,7 +2602,7 @@ body{
 .segmento{ display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; padding:4px; border-radius:12px; background:var(--hoja) }
 .segmento::-webkit-scrollbar{ display:none }
 .segmento .ficha{ flex:1 0 auto; justify-content:center; background:none !important; height:36px; border-radius:9px !important; font-weight:700 !important }
-.segmento .ficha[aria-pressed="true"]{ background:var(--verde) !important; color:var(--papel) !important }
+.segmento .ficha[aria-pressed="true"]{ background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important }
 .barra-herr{ display:flex !important; gap:8px; align-items:center; margin:10px 0 8px !important; flex-wrap:wrap }
 .btn-filtro{ max-width:60% }
 
@@ -2612,7 +2612,7 @@ body{
   background:var(--hoja); color:var(--tinta-3); font-weight:600; font-size:14.5px; text-align:left;
   border:1.5px dashed color-mix(in srgb, var(--verde) 35%, var(--regla));
 }
-.anadir-rapido svg{ color:var(--verde); width:20px; height:20px }
+.anadir-rapido svg{ color:var(--acento-txt, var(--verde)); width:20px; height:20px }
 .anadir-rapido:active{ transform:scale(.98) }
 
 /* ----- Hoja de añadir ----- */
@@ -2627,7 +2627,7 @@ body{
 /* ----- HOY: cabecera corta y panel de bloques ----- */
 .hoy-cab{ display:flex !important; align-items:center; gap:14px; padding:4px 0 12px !important; margin:0 !important }
 .hc-txt{ flex:1; min-width:0 }
-.hc-txt small{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--verde) }
+.hc-txt small{ font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--acento-txt, var(--verde)) }
 .hoy-cab .ph-saludo{ margin:4px 0 0 !important; font-size:36px !important }
 .hc-frase{ margin:6px 0 0; font-size:13px; color:var(--tinta-3) }
 .hoy-cab .ph-anillo{ margin:0 !important; width:74px !important; height:74px !important }
@@ -2653,7 +2653,7 @@ body{
 .w .lista-filas{ display:flex; flex-direction:column; gap:6px }
 .w .lista-filas .fila{ background:var(--hoja-2) !important; border:0 !important; border-radius:12px !important; padding:10px 12px !important }
 .w .nada{ padding:6px 0 }
-.w-mas{ display:block; width:100%; margin-top:6px; padding:8px; border-radius:10px; font-size:13px; font-weight:700; color:var(--verde); background:var(--hoja-2) }
+.w-mas{ display:block; width:100%; margin-top:6px; padding:8px; border-radius:10px; font-size:13px; font-weight:700; color:var(--acento-txt, var(--verde)); background:var(--hoja-2) }
 .w-pie{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px }
 .w-pie .anadir-rapido{ margin:0; padding:10px 12px; flex:1 1 160px; background:var(--hoja-2) }
 .w-dia .linea-tiempo{ padding:0 !important }
@@ -2797,7 +2797,7 @@ body{ line-height:1.55 }
 .notas-muro .nota{ margin-bottom:14px !important; padding:18px !important }
 
 /* Nuevas funciones */
-.btn-voz{ flex:none; width:44px !important; height:44px !important; color:var(--verde) }
+.btn-voz{ flex:none; width:44px !important; height:44px !important; color:var(--acento-txt, var(--verde)) }
 .btn-voz.escuchando{ background:var(--debe) !important; color:#fff; animation:late 1s ease-in-out infinite }
 @keyframes late{ 50%{ box-shadow:0 0 0 8px color-mix(in srgb, var(--debe) 25%, transparent) } }
 .hl-acc{ display:flex; align-items:center; gap:8px }
@@ -2817,7 +2817,7 @@ body{ line-height:1.55 }
 .or-botones .btn{ justify-content:center; min-height:48px }
 .or-saltar{ align-self:center }
 
-.barra-herr{ flex-wrap:nowrap !important } .barra-herr .btn-filtro{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; justify-content:flex-start } .btn-compartir{ margin-left:auto; flex:none; width:40px !important; height:40px !important; background:var(--hoja) !important; color:var(--verde) }
+.barra-herr{ flex-wrap:nowrap !important } .barra-herr .btn-filtro{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; justify-content:flex-start } .btn-compartir{ margin-left:auto; flex:none; width:40px !important; height:40px !important; background:var(--hoja) !important; color:var(--acento-txt, var(--verde)) }
 
 /* ==========================================================================
    TECLADO PROPIO
@@ -2849,13 +2849,13 @@ body{ line-height:1.55 }
 .tk-fn{ background:color-mix(in srgb, var(--hoja-2) 60%, var(--regla)); font-size:15px; font-weight:700; color:var(--tinta-2) }
 .tk-on{ background:var(--tinta) !important; color:var(--papel) !important }
 .tk-esp{ flex:5 1 0; font-size:13px; color:var(--tinta-3); font-weight:600 }
-.tk-ok{ flex:1.6 1 0; background:var(--verde) !important; color:var(--papel) !important; font-size:20px }
+.tk-ok{ flex:1.6 1 0; background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important; font-size:20px }
 .tk-pulsada{ transform:translateY(-3px) scale(1.08); background:var(--regla) !important }
 .tk-numpad .tk{ height:54px; font-size:24px }
 .tk-numpad .tk-fila:first-child .tk:last-child, .tk-numpad .tk-fila:nth-child(2) .tk:last-child{ color:var(--verde-sube); font-weight:700 }
 .tk-pop{ position:absolute; display:flex; gap:4px; padding:4px; border-radius:10px; background:var(--hoja); box-shadow:var(--sombra-alta); z-index:2 }
 .tk-pop button{ width:40px; height:44px; border-radius:8px; background:var(--hoja-2); color:var(--tinta); font-size:21px }
-.tk-pop button:hover, .tk-pop button:active{ background:var(--verde); color:var(--papel) }
+.tk-pop button:hover, .tk-pop button:active{ background:var(--verde); color:var(--sobre-acento, var(--papel)) }
 /* Con el teclado abierto: la barra y el + se esconden y el contenido deja sitio */
 body.con-teclado .barra-inf, body.con-teclado .fab{ display:none !important }
 body.con-teclado .contenido{ padding-bottom:calc(var(--kb, 280px) + 24px) !important }
@@ -2865,7 +2865,7 @@ body.con-teclado .avisos{ bottom:calc(var(--kb, 280px) + 12px) !important }
 @media (pointer:fine){ .tkb{ display:none !important } }
 .tk-teclas{ touch-action:none }
 .tk-barra{ touch-action:pan-x }
-.tk-pop button.tk-sobre{ background:var(--verde); color:var(--papel) }
+.tk-pop button.tk-sobre{ background:var(--verde); color:var(--sobre-acento, var(--papel)) }
 .tk-connum{ position:relative }
 .tk-num{ position:absolute; top:3px; right:5px; font-size:9.5px; font-weight:600; line-height:1; color:var(--tinta-3); pointer-events:none }
 .tk-globo{ position:absolute; z-index:3; height:54px; padding:0 8px; transform:translate(-50%, -100%); display:grid; place-items:center;
@@ -2900,7 +2900,7 @@ body.con-teclado .avisos{ bottom:calc(var(--kb, 280px) + 12px) !important }
 .gr-pista{ margin:-6px 0 0; font-size:13px; color:var(--tinta-3) }
 .gr-pista b{ color:var(--haber) }
 .gr-cats{ display:flex; flex-wrap:wrap; gap:8px }
-.gr-cats .ficha[aria-pressed="true"]{ background:var(--verde) !important; color:var(--papel) !important }
+.gr-cats .ficha[aria-pressed="true"]{ background:var(--verde) !important; color:var(--sobre-acento, var(--papel)) !important }
 .gr-ok{ min-height:50px; font-size:16px }
 /* ----- Menú rápido del + ----- */
 .menu-rapido{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; padding-bottom:8px }
@@ -3083,7 +3083,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .cabecera h1{ font-family:var(--letra) !important; font-size:17px !important; font-weight:700 !important; letter-spacing:-.01em !important }
 .barra-inf{ background:color-mix(in srgb, var(--papel) 92%, transparent) !important; backdrop-filter:saturate(1.4) blur(18px); -webkit-backdrop-filter:saturate(1.4) blur(18px); border-top:1px solid var(--regla) !important; box-shadow:none !important }
 .barra-inf button{ color:var(--tinta-3) !important; font-size:10.5px !important; font-weight:600 !important; background:none !important }
-.barra-inf button[aria-current="page"]{ color:var(--verde) !important }
+.barra-inf button[aria-current="page"]{ color:var(--acento-txt, var(--verde)) !important }
 .barra-inf button[aria-current="page"]::before, .barra-inf button[aria-current="page"]::after{ display:none !important }
 .barra-inf .globo{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important }
 .fab{ background:var(--verde) !important; color:var(--sobre-acento, #fff) !important; border-radius:50% !important; width:58px !important; height:58px !important; box-shadow:0 8px 24px color-mix(in srgb, var(--verde) 35%, transparent) !important }
@@ -3121,7 +3121,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .btn.primario .i{ color:var(--sobre-acento, #fff) }
 .btn.peligro{ background:var(--debe-piso) !important; color:var(--debe) !important }
 .btn-icono{ background:none !important; border:0 !important; box-shadow:none !important }
-.mas, .ver-link, .mas-mini, .ag-link{ color:var(--verde) !important; background:none !important; border:0 !important; font-weight:650 !important; font-size:14px !important }
+.mas, .ver-link, .mas-mini, .ag-link{ color:var(--acento-txt, var(--verde)) !important; background:none !important; border:0 !important; font-weight:650 !important; font-size:14px !important }
 
 /* ---- Tarjetas → secciones planas ---- */
 .tarjeta, .tarjeta.ancho-2, .w, section.w, .din-bloque, .din-queda, .din-saldo, .mov-cifras > div, .cifras div, .siguiente, .tarjeta.siguiente, .ordenar-cta, .presu, .bienvenida-hoy{
@@ -3167,7 +3167,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 
 /* ---- Hoy ---- */
 .hoy-cab, .portada-hoy, .heroe-hoy{ background:none !important; border:0 !important; box-shadow:none !important; padding:6px 0 16px !important }
-.hoy-cab small, .portada-hoy small{ color:var(--verde) !important; font-weight:700 !important; font-size:13px !important }
+.hoy-cab small, .portada-hoy small{ color:var(--acento-txt, var(--verde)) !important; font-weight:700 !important; font-size:13px !important }
 .ph-saludo{ font-size:32px !important; font-weight:800 !important; line-height:1.1 !important; letter-spacing:-.02em !important }
 .hc-frase{ color:var(--tinta-2) !important }
 .anillo-hoy .valor{ stroke:var(--verde) !important }
@@ -3182,7 +3182,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .w-cab b{ font-size:20px !important; font-weight:750 !important }
 .w-n{ background:none !important; color:var(--tinta-3) !important; font-size:15px !important; font-weight:600 !important }
 .w-sig .siguiente{ padding:0 0 4px !important; border-left:3px solid var(--c, var(--verde)) !important; padding-left:14px !important }
-.siguiente small{ color:var(--verde) !important; font-weight:700 !important }
+.siguiente small{ color:var(--acento-txt, var(--verde)) !important; font-weight:700 !important }
 .siguiente b{ font-size:22px !important; font-weight:750 !important }
 
 .w-riel{ height:4px !important; border-radius:4px !important; background:var(--regla) !important }
@@ -3192,7 +3192,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .w-hab .v{ stroke:var(--verde) !important }
 
 .enfoque-grande label{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:8px 0 !important }
-.enfoque-grande .n{ color:var(--verde) !important; font-family:var(--letra) !important }
+.enfoque-grande .n{ color:var(--acento-txt, var(--verde)) !important; font-family:var(--letra) !important }
 .w-regre{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important }
 .pie-hoy .btn{ background:none !important; color:var(--tinta-3) !important }
 
@@ -3238,8 +3238,8 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .ag-dias button{ display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 0 6px; border-radius:14px; color:var(--tinta-2) }
 .ag-dias small{ font-size:11px; font-weight:650; color:var(--tinta-3) }
 .ag-dias b{ font-size:18px; font-weight:750; color:var(--tinta) }
-.ag-dias i{ font-style:normal; font-size:10px; line-height:8px; height:8px; color:var(--verde); letter-spacing:1px }
-.ag-dias button.hoy b{ color:var(--verde) }
+.ag-dias i{ font-style:normal; font-size:10px; line-height:8px; height:8px; color:var(--acento-txt, var(--verde)); letter-spacing:1px }
+.ag-dias button.hoy b{ color:var(--acento-txt, var(--verde)) }
 .ag-dias button.sel{ background:var(--verde) }
 .ag-dias button.sel small, .ag-dias button.sel b, .ag-dias button.sel i{ color:var(--sobre-acento, #fff) !important }
 .ag-cab{ display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 10px; margin-bottom:14px }
@@ -3250,7 +3250,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .ag-h b{ font-weight:700; color:var(--tinta-3) }
 .ag-h .tarde{ color:var(--debe) }
 .ag-h .ag-link{ margin-left:auto; font-size:13px !important }
-.ag-mas{ color:var(--verde); font-weight:650; padding:10px 0 }
+.ag-mas{ color:var(--acento-txt, var(--verde)); font-weight:650; padding:10px 0 }
 .ag-anadir{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; margin:6px 0 14px }
 .ag-anadir .btn{ justify-content:center }
 .ag-sinfecha{ display:flex; align-items:center; justify-content:space-between; width:100%; padding:14px 0; border-top:1px solid var(--regla); border-bottom:1px solid var(--regla); color:var(--tinta-2); font-weight:600 }
@@ -3264,7 +3264,7 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 
 /* Menú Más */
 .rejilla-mas button{ background:var(--hoja) !important; border:0 !important; border-radius:14px !important; box-shadow:none !important }
-.rejilla-mas button[aria-current="page"]{ color:var(--verde) !important }
+.rejilla-mas button[aria-current="page"]{ color:var(--acento-txt, var(--verde)) !important }
 .mas-grupo h4{ font-family:var(--letra) !important; font-size:13px !important; font-weight:700 !important; color:var(--tinta-3) !important; letter-spacing:0 !important }
 
 /* Vacíos y avisos */
@@ -3274,9 +3274,9 @@ body.bajado .cabecera, .cabecera.bajada{ border-bottom-color:var(--regla) !impor
 .aviso.alarma *{ color:var(--sobre-acento, #fff) !important }
 /* Restos de cajas del diseño anterior */
 body .panel-hoy .fila, body .w .fila, body .w-tareas .fila, body .lista-filas > .fila{ background:none !important; border-radius:0 !important; padding:13px 0 !important; box-shadow:none !important }
-body .anadir-rapido{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:13px 0 !important; margin:0 0 10px !important; color:var(--verde) !important; font-weight:650 !important; justify-content:flex-start !important }
-body .anadir-rapido .i{ color:var(--verde) !important }
-body .w-mas{ background:none !important; border:0 !important; color:var(--verde) !important; padding:10px 0 !important; text-align:left !important; font-weight:650 !important; width:auto !important }
+body .anadir-rapido{ background:none !important; border:0 !important; border-bottom:1px solid var(--regla) !important; border-radius:0 !important; padding:13px 0 !important; margin:0 0 10px !important; color:var(--acento-txt, var(--verde)) !important; font-weight:650 !important; justify-content:flex-start !important }
+body .anadir-rapido .i{ color:var(--acento-txt, var(--verde)) !important }
+body .w-mas{ background:none !important; border:0 !important; color:var(--acento-txt, var(--verde)) !important; padding:10px 0 !important; text-align:left !important; font-weight:650 !important; width:auto !important }
 body .segmento, body .segmento-fijo{ background:var(--papel) !important; border:0 !important; box-shadow:none !important }
 body .segmento{ padding:0 !important; gap:6px !important }
 body .portada-esp, body .esp-heroe{ margin:0 0 8px !important; padding:4px 0 14px !important }
@@ -4085,6 +4085,41 @@ header.portada-hoy .hoy-astro{ right:-18px !important; top:-18px !important; wid
 :root[data-tema="claro"] .lateral .nav-lat button[data-ir="notas"]{ --c:#8A6100 }
 :root[data-tema="claro"] .lateral .nav-lat button[data-ir="habitos"]{ --c:#B04E07 }
 :root[data-tema="claro"] .lateral .nav-lat button[data-ir="dinero"]{ --c:#187A39 }
+
+/* ==========================================================================
+   REVISIÓN GENERAL
+   ========================================================================== */
+/* El nombre del espacio en Hoy es un botón de verdad (teclado y lector de pantalla) */
+button.eh-cab{ width:100%; padding:0; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer }
+/* Zonas de toque cómodas sin cambiar cómo se ve: casillas, bolitas de hábitos y enlaces chicos */
+.casilla, .ht-c, button.mas{ position:relative }
+.casilla::after{ content:''; position:absolute; inset:-11px }
+.ht-c::after{ content:''; position:absolute; inset:-4px }
+button.mas::after{ content:''; position:absolute; inset:-10px -4px }
+/* Contadores de las fichas y botón de ingreso: legibles también en claro */
+.ficha .n{ opacity:.9 }
+.ficha[aria-pressed="true"] .n{ opacity:.85 }
+:root[data-tema="claro"] .btn.btn-ingreso, :root[data-tema="claro"] .btn.btn-ingreso:hover, :root[data-tema="claro"] .din-bloque .btn.btn-ingreso{ background:color-mix(in srgb, var(--haber) 9%, var(--hoja)) !important }
+/* El sol o la luna, detrás del anillo de avance (como un halo) */
+header.portada-hoy .ph-anillo{ position:relative; isolation:isolate }
+header.portada-hoy .ph-anillo .hoy-astro{ position:absolute !important; z-index:-1; inset:-12px !important; right:-12px !important; top:-12px !important; width:auto !important; height:auto !important; opacity:.9 }
+header.portada-hoy[data-momento="noche"] .ph-anillo .hoy-astro{ inset:-16px !important; right:-16px !important; top:-16px !important; opacity:.75 }
+header.portada-hoy .ph-anillo.sin-tareas{ min-width:72px; min-height:72px }
+header.portada-hoy .ph-anillo.sin-tareas .hoy-astro{ inset:4px !important; right:4px !important; top:4px !important; opacity:1 }
+/* Día: resplandor alrededor del anillo con el centro libre. Noche: una luna chica en su esquina */
+header.portada-hoy .ph-anillo .hoy-astro{ inset:-14px !important; right:-14px !important; top:-14px !important; opacity:1 !important; box-shadow:none !important }
+header.portada-hoy[data-momento="manana"] .ph-anillo .hoy-astro{ background:radial-gradient(circle, transparent 0 50%, rgba(255,205,110,.55) 56%, rgba(255,190,90,.18) 66%, transparent 74%) !important }
+header.portada-hoy[data-momento="tarde"] .ph-anillo .hoy-astro{ background:radial-gradient(circle, transparent 0 50%, rgba(255,150,95,.55) 56%, rgba(255,130,80,.18) 66%, transparent 74%) !important }
+header.portada-hoy[data-momento="noche"] .ph-anillo .hoy-astro{ inset:auto !important; right:-10px !important; top:-10px !important; width:30px !important; height:30px !important;
+  background:radial-gradient(circle at 70% 32%, transparent 0 46%, #ECE7FF 48%) !important; border-radius:50%; filter:drop-shadow(0 0 8px rgba(200,190,255,.55)) }
+header.portada-hoy .ph-anillo.sin-tareas .hoy-astro{ inset:6px !important; right:6px !important; top:6px !important; width:auto !important; height:auto !important }
+header.portada-hoy[data-momento="manana"] .ph-anillo.sin-tareas .hoy-astro{ background:radial-gradient(circle, #FFD27A 0 42%, rgba(255,190,90,.35) 46% 60%, transparent 64%) !important }
+header.portada-hoy[data-momento="tarde"] .ph-anillo.sin-tareas .hoy-astro{ background:radial-gradient(circle, #FF9E6B 0 42%, rgba(255,140,90,.3) 46% 60%, transparent 64%) !important }
+header.portada-hoy[data-momento="noche"] .ph-anillo.sin-tareas .hoy-astro{ inset:14px !important; right:14px !important; top:14px !important; background:radial-gradient(circle at 68% 34%, transparent 0 44%, #ECE7FF 46%) !important }
+/* La lista de cada día ocupa todo el ancho de su tarjeta */
+.pl-dia > .pl-cuerpo{ flex:1 1 auto; min-width:0 }
+/* Barra lateral: el icono siempre visible sobre su cajita (también en la sección abierta) */
+.lateral .nav-lat button[data-ir] .nl-ico svg, .lateral .nav-lat button[data-ir][aria-current="page"] .nl-ico svg{ color:inherit !important }
 </style>
 </head>
 <body>
@@ -4355,6 +4390,8 @@ function relativo(s){
   if(n < -1 && n > -7) return 'Hace ' + (-n) + ' días';
   return DIAS3[deISO(s).getDay()] + ' ' + fechaCorta(s);
 }
+/* «1 nota» / «3 notas»: el número con su palabra en singular o plural */
+function plural(n, uno, varios){ return n + ' ' + (+n === 1 ? uno : varios); }
 function cap(s){ return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function inicioSemana(s){
   var d = deISO(s), w = d.getDay();
@@ -4448,7 +4485,7 @@ var AREAS_BASE = ['Personal','Trabajo','Casa','Salud','Estudios','Dinero'];
 var DIAS_N = { domingo:0, lunes:1, martes:2, miercoles:3, jueves:4, viernes:5, sabado:6 };
 var MESES_N = { enero:1, febrero:2, marzo:3, abril:4, mayo:5, junio:6, julio:7, agosto:8, septiembre:9, setiembre:9, octubre:10, noviembre:11, diciembre:12 };
 
-function interpretar(texto){
+function interpretar(texto, diaBase){
   var orig = ' ' + texto + ' ';
   var bajo = sinTildes(orig);
   var fecha = '', hora = '', prio = 0, area = '';
@@ -4524,7 +4561,7 @@ function interpretar(texto){
   if((m = /\s#([\wáéíóúñü]+)(?=\s)/i.exec(orig))){ area = cap(m[1]); cortar(m); }
 
   /* Solo la hora: hoy si aún no ha pasado; si ya pasó, mañana */
-  if(hora && !fecha) fecha = hora > horaAhora() ? hoy : sumarDias(hoy, 1);
+  if(hora && !fecha) fecha = diaBase || (hora > horaAhora() ? hoy : sumarDias(hoy, 1));
 
   var limpio = orig.replace(/\s+/g, ' ').trim()
                    .replace(/\s+(el|la|a|para|de|en|y)$/i, '')
@@ -5537,7 +5574,7 @@ VISTAS.hoy = function(){
   var C = 2 * Math.PI * 30;
   var agenda = items.filter(function(i){ return i.tipo !== 'tarea'; });
   function w(clase, titulo, n, ver, cuerpo){
-    return '<section class="w ' + clase + '">' + (titulo ? '<header class="w-cab"><b>' + titulo + '</b>' + (n != null ? '<span class="w-n">' + n + '</span>' : '') +
+    return '<section class="w ' + clase + '">' + (titulo ? '<header class="w-cab"><b>' + titulo + '</b>' + (n != null && n !== 0 && n !== '0/0' ? '<span class="w-n">' + n + '</span>' : '') +
       (ver ? '<button class="ver-link" ' + ver + '>Ver todo ' + ico('i-der') + '</button>' : '') + '</header>' : '') + cuerpo + '</section>';
   }
 
@@ -5546,13 +5583,14 @@ VISTAS.hoy = function(){
     '<button type="button" class="btn chico" data-acc="resumen-dia">' + ico('i-notas') + 'Resumen del día</button></div>';
   var momento = h < 6 ? 'noche' : h < 12 ? 'manana' : h < 19 ? 'tarde' : 'noche';
   var html = '<header class="hoy-cab portada-hoy heroe-hoy" data-momento="' + momento + '">' +
-    '<span class="banda-fondo" aria-hidden="true"></span><span class="hoy-astro" aria-hidden="true"></span>' +
+    '<span class="banda-fondo" aria-hidden="true"></span>' +
     '<div class="hc-txt"><small>' + cap(DIAS[ahora.getDay()]) + ' ' + ahora.getDate() + ' de ' + MESES[ahora.getMonth()] + '</small>' +
       '<h2 class="ph-saludo">' + saludo + (nombre ? ', ' + esc(nombre.split(' ')[0]) : '') + '</h2>' +
       '<p class="hc-frase">' + esc(fraseDelDia()) + '</p></div>' +
-    '<div class="anillo-hoy ph-anillo"><svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
+    '<div class="anillo-hoy ph-anillo' + (tareasHoy.length ? '' : ' sin-tareas') + '"><span class="hoy-astro" aria-hidden="true"></span>' +
+      (tareasHoy.length ? '<svg class="anillo" viewBox="0 0 72 72" aria-label="' + Math.round(pct * 100) + '% de las tareas de hoy"><circle class="fondo" cx="36" cy="36" r="30"/>' +
       '<circle class="valor" cx="36" cy="36" r="30" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
-      '<span><b>' + hechas + '/' + tareasHoy.length + '</b>hechas</span></div>' +
+      '<span><b>' + hechas + '/' + tareasHoy.length + '</b>hechas</span>' : '') + '</div>' +
     accHoy +
   '</header>';
 
@@ -5630,8 +5668,8 @@ VISTAS.hoy = function(){
     var libH = /^(personal|oficina)$/.test(pref.hoyLibro || '') ? pref.hoyLibro : 'todo';
     html += '<section class="w w-2 w-dinero-hoy"><header class="w-cab"><b>Tu dinero</b>' + (ppH.length ? '<span class="w-n">' + ppH.length + ' por pagar</span>' : '') +
       '<button class="ver-link" data-acc="mov-ver" data-v="' + (libH === 'todo' ? 'ambos' : libH) + '">Ver todo ' + ico('i-der') + '</button></header>' +
-      '<div class="selector din-hoy-sel">' + [['todo','Los dos'],['personal','🏠 Personal'],['oficina','💼 Oficina']].map(function(o){
-        return '<button type="button" data-acc="hoy-libro" data-v="' + o[0] + '" aria-pressed="' + (libH === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+      (movsDe('personal').length || movsDe('oficina').length ? '<div class="selector din-hoy-sel">' + [['todo','Los dos'],['personal','🏠 Personal'],['oficina','💼 Oficina']].map(function(o){
+        return '<button type="button" data-acc="hoy-libro" data-v="' + o[0] + '" aria-pressed="' + (libH === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' : '') +
       (libH === 'todo' ? dineroDosLibros() : bloquesDinero(libH)) + '</section>';
   }
 
@@ -5688,8 +5726,8 @@ function espaciosHoy(hoy){
     var total = pend + hoyAg, p = hechas + pendTodas ? hechas / (hechas + pendTodas) : 1;
     var cuando = prox ? (prox.d === hoy ? (prox.x.hora ? prox.x.hora : 'hoy') : relativo(prox.d).toLowerCase().slice(0, 10) + (prox.x.hora ? ' ' + prox.x.hora : '')) : '';
     var datos = datosEspacio(E.id, hoy, ts, ag);
-    return '<div role="button" tabindex="0" class="eh" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
-      '<span class="eh-cab"><span class="eh-em eh-em-caja">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</span>' +
+    return '<div class="eh" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio" style="--ec:' + E.c + '">' +
+      '<button type="button" class="eh-cab" data-acc="esp-tab" data-esp="' + E.id + '" data-v="inicio"><span class="eh-em eh-em-caja">' + E.em + '</span><b>' + E.nom + '</b>' + ico('i-der') + '</button>' +
       '<span class="eh-num"><strong>' + total + '</strong><em>' + (total === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
       '<span class="eh-prox">' + (prox ? '<i>Próximo</i>' + esc(prox.x.t) + ' · ' + cuando : '<i>Libre</i>' + esc(E.lema)) + '</span>' +
       (datos.length ? '<span class="eh-datos">' + datos.map(function(d){
@@ -5789,6 +5827,7 @@ function widgetManana(hoy){
   var ag = its.filter(function(x){ return x.tipo !== 'tarea' && !x.hecho; });
   var nt = vivos('tareas').filter(function(t){ return !t.hecha && t.fecha === m; }).length;
   var pagos = ag.filter(function(x){ return x.tipo === 'pago'; }).length;
+  if(!ag.length && !nt) return '';
   var primero = ag.filter(function(x){ return x.hora; })[0];
   var res = [];
   if(primero) res.push('Empiezas a las <b>' + primero.hora + '</b>');
@@ -6352,7 +6391,7 @@ function detalleProyecto(p){
       (n != null ? '<span class="dato">' + ico('i-bandera') + '<b>' + (n < 0 ? 'Vencido' : n) + '</b>' + (n >= 0 ? (n === 1 ? ' día' : ' días') : '') + '</span>' : '') + '</div></section>' +
     (ritmo ? '<p style="margin:-4px 2px 14px;color:var(--tinta-2);font-size:13px">' + ritmo + '</p>' : '') +
     '<div class="tarjeta">' +
-      '<form class="captura" data-acc="proy-tarea" data-id="' + p.id + '" style="margin:12px;box-shadow:none" autocomplete="off"><input id="proyTarea" type="text" maxlength="200" placeholder="Nueva tarea del proyecto… (Enter)"><button class="btn primario chico" type="submit">' + ico('i-plus') + '</button></form>' +
+      '<form class="captura" data-acc="proy-tarea" data-id="' + p.id + '" style="margin:12px;box-shadow:none" autocomplete="off"><input id="proyTarea" type="text" maxlength="200" placeholder="Nueva tarea del proyecto… (Enter)"><button class="btn primario chico" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
       (pend.length ? '<div class="lista-filas">' + pend.map(filaTarea).join('') + '</div>' : vacio('🎯', a.total ? 'Todo hecho' : 'Sin tareas', a.total ? 'Márcalo como terminado arriba.' : 'Divide el proyecto en pasos pequeños.')) +
     '</div>' +
     (hechas.length ? '<div class="seccion-tit">Hechas <span class="n">' + hechas.length + '</span></div><div class="tarjeta"><div class="lista-filas">' + hechas.map(filaTarea).join('') + '</div></div>' : '');
@@ -6436,7 +6475,7 @@ function tarjetaPrestamos(){
       var m = d.tipo === 'me', n = d.fecha ? diasEntre(hoy, d.fecha) : null;
       return '<div class="fila">' + casilla('deuda-ok', d.id, false, m ? 'var(--haber)' : 'var(--oro)') +
         '<div class="cuerpo" data-acc="deuda-ed" data-id="' + d.id + '"><div class="titulo">' + (m ? esc(d.persona) + ' te debe' : 'Le debes a ' + esc(d.persona)) + '</div>' +
-        '<div class="meta">' + (d.concepto ? '<span>' + esc(d.concepto) + '</span>' : '') + (n != null ? '<span class="' + (n < 0 ? 'tarde' : n <= 2 ? 'hoy' : '') + '">' + (n < 0 ? 'desde hace ' + (-n) + ' días' : relativo(d.fecha)) + '</span>' : '') + '</div></div>' +
+        '<div class="meta">' + (d.concepto ? '<span>' + esc(d.concepto) + '</span>' : '') + (n != null ? '<span class="' + (n < 0 ? 'tarde' : n <= 2 ? 'hoy' : '') + '">' + (n < 0 ? 'desde hace ' + plural(-n, 'día', 'días') : relativo(d.fecha)) + '</span>' : '') + '</div></div>' +
         '<span class="monto" style="color:' + (m ? 'var(--haber)' : 'var(--oro)') + '">' + dinero(+d.monto || 0) + '</span>' +
         (m ? '<button class="btn-icono recordar" data-acc="deuda-recordar" data-id="' + d.id + '" title="Recordárselo por WhatsApp" aria-label="Recordárselo por WhatsApp">💬</button>' : '') + '</div>';
     }).join('') + '</div>' : '<div class="vacio" style="padding-top:2px">Nadie te debe y no debes nada. 🙌</div>') + '</section>';
@@ -6614,7 +6653,7 @@ function tarjetaCompras(){
       return '<button type="button" class="compra" data-acc="compra-ok" data-lista="' + l.id + '" data-id="' + i.id + '">' + esc(i.t) + '</button>';
     }).join('') : '<span class="vacio" style="padding:4px 0">Nada que comprar. 🛒</span>') + '</div>' +
     siempreHTML(l) +
-    '<form class="captura" data-acc="compra-nueva" data-lista="' + l.id + '" style="margin:0 12px 12px;box-shadow:none" autocomplete="off"><input id="compraNueva" maxlength="80" placeholder="Añadir a la compra… (Enter)"><button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form></section>';
+    '<form class="captura" data-acc="compra-nueva" data-lista="' + l.id + '" style="margin:0 12px 12px;box-shadow:none" autocomplete="off"><input id="compraNueva" maxlength="80" placeholder="Añadir a la compra… (Enter)"><button class="btn chico primario" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form></section>';
 }
 
 /* ---------- Complementos: lo de siempre, recordar, regalo, plan, bolso ------ */
@@ -6814,7 +6853,7 @@ function subpantallas(id){
       { k:'avisos', i:'i-campana', c:'#FFD60A', t:'Recordatorios', d:'Lo que la agenda te avisa a su hora', n:recP.length, nl:recTarde ? recTarde + ' pasados sin marcar' : 'activos', alerta:recTarde > 0, html:function(){
           return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-campana', 'Tus recordatorios', 'var(--oro)', 'Nuevo', 'data-acc="nuevo" data-tipo="rec"') +
             (recP.length ? '<div class="lista-filas rec-lista">' + recP.map(filaRec).join('') + '</div>' : vacio('🔔', 'Sin recordatorios', 'Toca «Nuevo» y la agenda te avisará a la hora que digas.')) + '</section>'; } },
-      { k:'tareas', i:'i-tareas', c:'#FF453A', t:'Tareas', d:'Lo que tienes pendiente', n:tarP.length, nl:tarTarde ? tarTarde + ' atrasadas' : 'pendientes', alerta:tarTarde > 0, html:function(){
+      { k:'tareas', i:'i-tareas', c:'#FF453A', t:'Tareas', d:'Lo que tienes pendiente', n:tarP.length, nl:tarTarde ? plural(tarTarde, 'atrasada', 'atrasadas') : 'pendientes', alerta:tarTarde > 0, html:function(){
           return filtroPers() + '<section class="tarjeta">' + cabTarjeta('i-tareas', 'Pendientes', 'var(--debe)', 'Nueva tarea', 'data-acc="nuevo" data-tipo="tarea"') +
             (tarP.length ? '<div class="lista-filas">' + tarP.slice(0, 60).map(filaTarea).join('') + '</div>' : vacio('✅', 'Nada pendiente', 'Todo al día. Toca «Nueva tarea» para anotar algo.')) + '</section>'; } },
       { k:'notas', i:'i-notas', c:'#E7B24A', t:'Notas y listas', d:'Tus apuntes y listas para marcar', n:notP.length, nl:(notP.length === 1 ? 'nota' : 'notas') + (porMarcar ? ' · ' + porMarcar + ' por marcar' : ''), html:function(){
@@ -6846,7 +6885,7 @@ function subpantallas(id){
     var enCurso = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha && t.estado === 'curso'; }).length, porHacer = vivos('tareas').filter(function(t){ return espDe(t) === 'oficina' && !t.hecha; }).length;
     var reu = eventosTipo('reunion', 7).length, ppO = pagosDe('oficina');
     return [semana,
-      { k:'cobros', i:'i-subir', c:'#30D158', t:'Por cobrar', d:'Lo que te deben tus clientes y cuándo vence', n:dinero(totC), nl:venc ? venc + ' vencidos' : cob.length + ' pendientes', alerta:!!venc, html:function(){ return TO.cobros; } },
+      { k:'cobros', i:'i-subir', c:'#30D158', t:'Por cobrar', d:'Lo que te deben tus clientes y cuándo vence', n:dinero(totC), nl:venc ? plural(venc, 'vencido', 'vencidos') : cob.length + ' pendientes', alerta:!!venc, html:function(){ return TO.cobros; } },
       { k:'clientes', i:'i-maletin', c:'#94A3B8', t:'Clientes', d:'Contacto, horas, lo que deben y pagaron', n:clientesTodos().length, nl:'clientes', html:function(){ return tarjetaClientes(); } },
       { k:'trabajo', i:'i-tareas', c:'#5AA9FF', t:'Tablero', d:'Por hacer, en curso y hecho', n:porHacer, nl:enCurso ? enCurso + ' en curso' : 'por hacer', html:function(){ return tarjetaTablero(); } },
       { k:'reuniones', em:'🗣️', c:'#BF5AF2', t:'Reuniones', d:'Las de esta semana', n:reu, nl:'en 7 días', html:function(){ return TO.reun; } },
@@ -6953,15 +6992,17 @@ function tarjetaDineroEsp(id){
 /* Hoy, «Los dos»: cada libro en su fila (toca para ir a sus movimientos) y el total */
 function dineroDosLibros(){
   var ym = hoyISO().slice(0, 7), totQ = 0;
+  var botones = '<div class="din-hoy-acc"><button class="btn primario" data-acc="din-anotar" data-libro="personal" data-t="Gasto">' + ico('i-plus') + 'Gasto</button>' +
+      '<button class="btn btn-ingreso" data-acc="din-anotar" data-libro="personal" data-t="Ingreso">' + ico('i-plus') + 'Ingreso</button></div>';
+  /* Sin ningún movimiento todavía: una línea y los botones, sin tres ceros */
+  if(!movsDe('personal').length && !movsDe('oficina').length) return '<p class="nada">Aún no anotas gastos ni ingresos. Empieza con el primero.</p>' + botones;
   var filas = [['personal','🏠','Personal'],['oficina','💼','Oficina']].map(function(L){
     var tm = totalesMes(movsDe(L[0]), ym), q = tm.ent - tm.sal; totQ += q;
     return '<button type="button" class="dlh" data-acc="mov-ver" data-v="' + L[0] + '"><span class="dlh-ico">' + L[1] + '</span>' +
       '<span class="dlh-txt"><b>' + L[2] + '</b><small><em class="sale">Salió ' + monCorto(tm.sal) + '</em><em class="entra">Entró ' + monCorto(tm.ent) + '</em></small></span>' +
       '<span class="dlh-q' + (q < 0 ? ' neg' : '') + '"><small>' + (q < 0 ? 'En rojo' : 'Queda') + '</small><b>' + (q < 0 ? '−' : '') + dinero(Math.abs(q)) + '</b></span>' + ico('i-der') + '</button>';
   }).join('');
-  return '<div class="din-libros-hoy">' + filas + '</div>' +
-    '<div class="din-hoy-acc"><button class="btn primario" data-acc="din-anotar" data-libro="personal" data-t="Gasto">' + ico('i-plus') + 'Gasto</button>' +
-      '<button class="btn btn-ingreso" data-acc="din-anotar" data-libro="personal" data-t="Ingreso">' + ico('i-plus') + 'Ingreso</button></div>' +
+  return '<div class="din-libros-hoy">' + filas + '</div>' + botones +
     '<div class="din-queda din-total' + (totQ < 0 ? ' neg' : '') + '"><span>' + (totQ < 0 ? 'Entre los dos vas en rojo' : 'Entre los dos te queda') + '</span><b>' + (totQ < 0 ? '−' : '') + dinero(Math.abs(totQ)) + '</b></div>';
 }
 function bloquesDinero(id){
@@ -7325,7 +7366,7 @@ function tarjetaCuerpo(){
   return '<section class="tarjeta">' + cabTarjeta('i-grafica', 'Tu cuerpo', 'var(--esp-deporte)') +
     '<div class="tarjeta-cuerpo"><div class="peso-fila"><div class="peso-actual"><b>' + (ultP ? formNum(+ultP.peso) + ' kg' : '—') + '</b>' +
       (ultP && antP ? '<small class="' + (+ultP.peso <= +antP.peso ? 'baja' : 'sube') + '">' + (+ultP.peso - +antP.peso > 0 ? '+' : '') + formNum(+ultP.peso - +antP.peso) + ' kg desde el ' + fechaCorta(antP.id) + '</small>' : '<small>Anota tu peso de vez en cuando</small>') + '</div>' +
-      '<form class="peso-form" data-acc="peso" autocomplete="off"><input class="entrada" id="pesoHoy" inputmode="decimal" placeholder="kg hoy"><button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form></div>' +
+      '<form class="peso-form" data-acc="peso" autocomplete="off"><input class="entrada" id="pesoHoy" inputmode="decimal" placeholder="kg hoy"><button class="btn chico primario" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form></div>' +
       linea +
       '<div class="imc">' + (imc ? '<div><small>IMC</small><b>' + imc.toFixed(1) + '</b></div><span class="necesita ' + cat[1] + '">' + cat[0] + '</span>' +
         '<div class="imc-barra"><i style="left:' + Math.max(0, Math.min(100, (imc - 15) / 20 * 100)).toFixed(1) + '%"></i></div>' : '<small>Pon tu estatura para calcular tu IMC:</small>') +
@@ -7516,7 +7557,7 @@ function resumenSec(id){
         var fin = sumarDias(hoy, 7);
         n = vivos('eventos').filter(function(e){ return e.fecha >= hoy && e.fecha <= fin; }).length;
         return vivos('eventos').length + ' eventos · ' + n + ' esta semana';
-      case 'recordatorios': n = vivos('recordatorios').filter(function(r){ return !r.hecho; }).length; return n + ' activos';
+      case 'recordatorios': n = vivos('recordatorios').filter(function(r){ return !r.hecho; }).length; return plural(n, 'activo', 'activos');
       case 'listas':
         var faltan = 0; vivos('listas').forEach(function(l){ (l.items || []).forEach(function(i){ if(!i.ok) faltan++; }); });
         return vivos('listas').length + ' listas · ' + faltan + ' por marcar';
@@ -7722,21 +7763,21 @@ function cabSeccion(v){
     } else if(v === 'recordatorios'){
       var rs = vivos('recordatorios').filter(function(r){ return !r.hecho; }), venc = recordatoriosVencidos().length;
       var hoyR = rs.filter(function(r){ return momentoR(r).slice(0, 10) === hoy; }).length;
-      d = { c:'var(--oro)', i:'i-campana', t:'Avisos', s:hoyR + ' para hoy' + (venc ? ' · <em>' + venc + ' pasados sin marcar</em>' : '') + ' · ' + rs.length + ' activos' };
+      d = { c:'var(--oro)', i:'i-campana', t:'Avisos', s:hoyR + ' para hoy' + (venc ? ' · <em>' + plural(venc, 'pasado', 'pasados') + ' sin marcar</em>' : '') + ' · ' + plural(rs.length, 'activo', 'activos') };
     } else if(v === 'listas' && !ui.lista){
       var ls = vivos('listas'), faltan = 0, total = 0;
       ls.forEach(function(l){ (l.items || []).forEach(function(i){ total++; if(!i.ok) faltan++; }); });
       d = { c:'var(--haber)', i:'i-listas', t:'Listas', s:ls.length + (ls.length === 1 ? ' lista' : ' listas') + ' · ' + faltan + ' cosas por marcar', p:total ? (total - faltan) / total : null, pt:'marcado' };
     } else if(v === 'notas'){
       var ns = vivos('notas');
-      d = { c:'#E7B24A', i:'i-notas', t:'Notas', s:ns.length + (ns.length === 1 ? ' nota' : ' notas') + ' · ' + ns.filter(function(n){ return n.fija; }).length + ' fijadas' };
+      d = { c:'#E7B24A', i:'i-notas', t:'Notas', s:ns.length + (ns.length === 1 ? ' nota' : ' notas') + ' · ' + plural(ns.filter(function(n){ return n.fija; }).length, 'fijada', 'fijadas') };
     } else if(v === 'habitos'){
       var wd = new Date().getDay(), hs = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
       var ok = hs.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
       var mejor = Math.max.apply(null, vivos('habitos').map(function(x){ return racha(x); }).concat([0]));
       var semH = 0, semT = 0, iniH = inicioSemana(hoy);
       vivos('habitos').forEach(function(x){ for(var k = 0; k < 7; k++){ var dk = sumarDias(iniH, k); if(dk > hoy) break; if(x.dias && x.dias.indexOf(deISO(dk).getDay()) < 0) continue; semT++; if(x.marcas && x.marcas[dk]) semH++; } });
-      d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:'Hoy ' + ok + ' de ' + hs.length + (semT ? ' · semana ' + Math.round(semH / semT * 100) + '%' : '') + (mejor ? ' · racha 🔥 ' + mejor : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
+      d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:(vivos('habitos').length ? (hs.length ? 'Hoy ' + ok + ' de ' + hs.length : 'Hoy descansas') : 'Aún no tienes hábitos') + (semT ? ' · semana ' + Math.round(semH / semT * 100) + '%' : '') + (mejor ? ' · racha 🔥 ' + mejor : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
     } else if(v === 'metas'){
       var ms = vivos('metas').filter(function(m){ return !m.archivada; });
       var prom = ms.length ? ms.reduce(function(a, m){ return a + Math.min(1, (+m.actual || 0) / (+m.objetivo || 1)); }, 0) / ms.length : 0;
@@ -7912,7 +7953,7 @@ VISTAS.tareas = function(){
       '<button type="button" class="btn chico" data-acc="sel-todas">' + ico('i-check') + (lista.every(function(t){ return elegida(t.id); }) ? 'Ninguna' : 'Todas (' + lista.length + ')') + '</button>' :
       '<button type="button" class="btn chico" data-acc="sel-on" data-col="tareas">' + ico('i-check') + 'Seleccionar</button>') : '') +
     '<button type="button" class="btn-icono btn-compartir" data-acc="compartir-tareas" title="Compartir por WhatsApp" aria-label="Compartir pendientes">' + ico('i-compartir') + '</button>' +
-    '</div>' + botonAnadir('tarea', 'Añadir tarea…') +
+    '</div>' +
     (paraOrdenar().length ? '<button type="button" class="ordenar-cta" data-acc="ordenar"><span>🧹</span><span><b>Ordenar ' + paraOrdenar().length + (paraOrdenar().length === 1 ? ' pendiente' : ' pendientes') + '</b><small>Atrasadas o sin fecha: decide en un toque qué hacer con cada una</small></span>' + ico('i-der') + '</button>' : '');
   if(eligiendo) html += barraSel();
   if(ui.tFiltro === 'hechas'){
@@ -8063,6 +8104,9 @@ function huecosLibres(its, d){
 }
 function huecosHTML(its, d){
   if(d < hoyISO()) return '';
+  /* Sin nada con hora ya dice «Día libre»; y de noche, hoy ya no hay huecos que buscar */
+  if(!its.some(function(x){ return x.hora && x.tipo !== 'tarea' && x.tipo !== 'rec' && x.tipo !== 'pago'; })) return '';
+  if(d === hoyISO()){ var ah = new Date(); if(ah.getHours() * 60 + ah.getMinutes() > 21 * 60) return ''; }
   var hs = huecosLibres(its, d), hh = function(m){ return dos(Math.floor(m / 60)) + ':' + dos(m % 60); };
   if(!hs.length) return '<div class="huecos lleno">⛔ Sin huecos libres de una hora entre 7:00 y 22:00</div>';
   return '<div class="huecos"><span>🟢 Libre</span>' + hs.slice(0, 4).map(function(h){
@@ -8076,7 +8120,7 @@ function panelDia(d){
   return '<section class="tarjeta cal-panel"><div class="tarjeta-cab"><h3>' + cap(fechaLarga(d)) + '</h3>' +
       '<button class="mas" data-acc="cal-ir-dia" data-dia="' + d + '">Ver por horas' + ico('i-der') + '</button></div>' +
     (fer ? '<div class="fer-banda">🇵🇪 Feriado: ' + esc(fer) + '</div>' : '') + huecosHTML(its, d) +
-    '<form class="captura cal-rapido" data-acc="cal-rapido" autocomplete="off"><input id="calRapido" maxlength="200" placeholder="Añadir este día… ej. «dentista 4pm» o «cumple de Ana»"><button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form>' +
+    '<form class="captura cal-rapido" data-acc="cal-rapido" autocomplete="off"><input id="calRapido" maxlength="200" placeholder="Añadir este día… ej. «dentista 4pm» o «cumple de Ana»"><button class="btn chico primario" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
     (its.filter(function(x){ return x.tipo !== 'feriado'; }).length ? '<div class="lista-filas">' + its.filter(function(x){ return x.tipo !== 'feriado'; }).map(function(x){ return filaAgenda(x, d); }).join('') + '</div>'
                 : '<div class="vacio" style="padding:4px 16px 8px">Día libre.</div>') +
     '<div class="pie-fila-btn">' +
@@ -8276,7 +8320,6 @@ VISTAS.recordatorios = function(){
     html += '<div class="banda">' + ico('i-campana') + '<div class="txt"><b>Activa los avisos</b>Para que los recordatorios te salten aunque estés en otra pestaña.</div>' +
       '<button class="btn chico primario" data-acc="permiso">Activar</button></div>';
   }
-  html += botonAnadir('rec', 'Nuevo recordatorio…');
 
   var ya = hoyISO() + 'T' + horaAhora(), finHoy = hoyISO() + 'T99';
   var todos = vivos('recordatorios');
@@ -8328,7 +8371,7 @@ VISTAS.listas = function(){
         '</header>' +
         '<form class="captura hl-captura" data-acc="item-nuevo" autocomplete="off">' +
           '<input id="nuevoItem" type="text" maxlength="160" placeholder="Añadir a la lista… (Enter)" enterkeyhint="enter">' + botonVoz('nuevoItem') +
-          '<button type="submit" class="btn primario chico">' + ico('i-plus') + '</button></form>' +
+          '<button type="submit" class="btn primario chico" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
         (orden.length ? '<div class="lista-filas hl-renglones">' + orden.map(function(x){
           return '<div class="item-lista' + (x.ok ? ' ok' : '') + '">' + casilla('item-ok', x.id, x.ok, color(l.color), true) +
             '<span class="t" data-acc="item-ed" data-id="' + x.id + '">' + esc(x.t) + '</span>' +
@@ -8936,7 +8979,7 @@ VISTAS['panel-agenda'] = function(){
     '<div class="mosaicos">' +
       mosaico({ ir:'agenda', i:'i-hoy', c:'#2E6BFF', t:'Mi día', d:'Todo lo de un día junto: tareas, eventos y avisos', n:pendHoy, nl:'para hoy', ancho:true }) +
       mosaico({ ir:'calendario', i:'i-cal', c:'#30D158', t:'Calendario', d:'Tu mes, semana o año de un vistazo', n:ne, nl:'en 7 días' }) +
-      mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy || tPend, nl:k.tareasTarde ? k.tareasTarde + ' atrasadas' : tHoy ? 'para hoy' + (tPend > tHoy ? ' · ' + tPend + ' en total' : '') : (tPend === 1 ? 'pendiente' : 'pendientes'), alerta:!!k.tareasTarde }) +
+      mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy || tPend, nl:k.tareasTarde ? plural(k.tareasTarde, 'atrasada', 'atrasadas') : tHoy ? 'para hoy' + (tPend > tHoy ? ' · ' + tPend + ' en total' : '') : (tPend === 1 ? 'pendiente' : 'pendientes'), alerta:!!k.tareasTarde }) +
       mosaico({ ir:'recordatorios', i:'i-campana', c:'#FF9F0A', t:'Avisos', d:'Lo que no se te puede olvidar', n:k.recordatorios || recHoy, nl:k.recordatorios ? 'pasados' : 'para hoy', alerta:!!k.recordatorios }) +
       mosaico({ ir:'proyectos', i:'i-carpeta', c:'#BF5AF2', t:'Proyectos', d:'Metas grandes paso a paso', n:pa, nl:pa === 1 ? 'activo' : 'activos' }) +
     '</div>';
@@ -8965,7 +9008,7 @@ VISTAS['panel-notas'] = function(){
   return cabPanel('Notas', ns.length + (ns.length === 1 ? ' nota' : ' notas') + ' y ' + ls.length + (ls.length === 1 ? ' lista' : ' listas'),
       accPanel('Nota', 'data-acc="nuevo" data-tipo="nota"', 'primario') + accPanel('Lista', 'data-acc="nuevo" data-tipo="lista"')) +
     '<div class="mosaicos">' +
-      mosaico({ ir:'notas', i:'i-notas', c:'#FFD60A', t:'Notas', d:'Ideas, datos y apuntes; con casillas si quieres', n:ns.length, nl:fij ? fij + ' fijadas' : 'notas' }) +
+      mosaico({ ir:'notas', i:'i-notas', c:'#FFD60A', t:'Notas', d:'Ideas, datos y apuntes; con casillas si quieres', n:ns.length, nl:fij ? plural(fij, 'fijada', 'fijadas') : 'notas' }) +
       mosaico({ ir:'listas', i:'i-listas', c:'#30D158', t:'Listas', d:'Compras, bolso, pendientes para marcar', n:porMarcar, nl:'por marcar' }) +
     '</div>';
 };
@@ -9228,7 +9271,7 @@ VISTAS.metas = function(){
     if(m.fecha && falta > 0){
       var dias = diasEntre(hoyISO(), m.fecha);
       ritmo = dias > 0 ? 'Quedan ' + dias + ' días · ' + formNum(falta / dias) + ' ' + esc(m.unidad || '') + ' al día para llegar'
-                       : dias === 0 ? 'La fecha límite es hoy' : 'La fecha límite pasó hace ' + (-dias) + ' días';
+                       : dias === 0 ? 'La fecha límite es hoy' : 'La fecha límite pasó hace ' + plural(-dias, 'día', 'días');
       /* ¿Vas al día? Lo que deberías llevar si avanzaras parejo desde que la creaste */
       var desde = m.creada ? iso(new Date(+m.creada)) : '', tot = desde ? diasEntre(desde, m.fecha) : 0, pas = desde ? diasEntre(desde, hoyISO()) : 0;
       if(tot > 0 && pas > 0 && dias > 0){
@@ -9252,7 +9295,7 @@ VISTAS.metas = function(){
         '<button class="btn chico" data-acc="meta-sumar" data-id="' + m.id + '" data-n="1">+1</button>' +
         '<form data-acc="meta-cantidad" data-id="' + m.id + '" style="display:flex;gap:6px;flex:1;min-width:150px">' +
           '<input class="entrada" name="n" inputmode="decimal" placeholder="Sumar…" style="height:32px;border-radius:9px;font-size:13px">' +
-          '<button class="btn chico primario" type="submit">' + ico('i-plus') + '</button></form>' +
+          '<button class="btn chico primario" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
       '</div></section>';
   }
   return '<div class="rejilla dos">' + activas.map(tarjeta).join('') + '</div>' +
@@ -10345,7 +10388,7 @@ function resultados(texto){
   });
   vivos('habitos').forEach(function(x){ if(sinTildes(x.nombre).indexOf(q) >= 0) add('i-habitos', x.nombre, 'Hábito', 'habito-ed', x.id); });
   vivos('cursos').forEach(function(c){ if(sinTildes(c.nombre + ' ' + (c.prof || '') + ' ' + (c.aula || '')).indexOf(q) >= 0) add('i-birrete', c.nombre, 'Curso' + (c.aula ? ' · ' + c.aula : ''), 'curso-ed', c.id); });
-  vivos('rutinas').forEach(function(r){ if(sinTildes(r.nombre + ' ' + (r.ejercicios || []).map(function(x){ return x.n; }).join(' ')).indexOf(q) >= 0) add('i-meta', r.nombre, 'Rutina de gym · ' + (r.ejercicios || []).length + ' ejercicios', 'rutina-ed', r.id); });
+  vivos('rutinas').forEach(function(r){ if(sinTildes(r.nombre + ' ' + (r.ejercicios || []).map(function(x){ return x.n; }).join(' ')).indexOf(q) >= 0) add('i-meta', r.nombre, 'Rutina de gym · ' + plural((r.ejercicios || []).length, 'ejercicio', 'ejercicios'), 'rutina-ed', r.id); });
   vivos('entrenos').forEach(function(e){ var d = deporteInfo(e.tipo); if(sinTildes(d.n + ' ' + (e.notas || '')).indexOf(q) >= 0) add('i-balon', d.em + ' ' + d.n + (e.notas ? ' · ' + e.notas.slice(0, 40) : ''), 'Entrenamiento · ' + fechaCorta(e.fecha), 'entreno-ed', e.id); });
   vivos('metas').forEach(function(m){ if(sinTildes(m.t).indexOf(q) >= 0) add('i-meta', m.t, 'Meta · ' + formNum(+m.actual || 0) + ' de ' + formNum(+m.objetivo || 0), 'meta-ed', m.id); });
   vivos('pagos').forEach(function(p){ if(sinTildes(p.t + ' ' + (p.cat || '')).indexOf(q) >= 0) add('i-recibo', p.t, 'Pago fijo · día ' + p.dia + ' · ' + dinero(+p.monto || 0), 'pago-ed', p.id); });
@@ -11790,7 +11833,7 @@ document.addEventListener('submit', function(ev){
   } else if(a === 'cal-rapido'){
     var ci2 = $('calRapido'), cv2 = ci2.value.trim();
     if(!cv2) return;
-    var pc = interpretar(cv2), fc = pc.fecha || ui.calSel, tc = pc.texto || cv2, espC = pc.esp || ui.calEsp || espPorDefecto();
+    var pc = interpretar(cv2, ui.calSel), fc = pc.fecha || ui.calSel, tc = pc.texto || cv2, espC = pc.esp || ui.calEsp || espPorDefecto();
     var esCumple = /^(cumple|aniversario)/i.test(sinTildes(tc));
     var evC = { id:nid(), t:tc, fecha:fc, hasta:'', todo:!pc.hora, ini:pc.hora || '', fin:pc.hora ? sumarHora(pc.hora, 60) : '', lugar:'', color:esCumple ? 'rosa' : 'esp', esp:espC, tipo:'evento', rep:esCumple ? 'ano' : 'no', aviso:pc.hora ? 15 : -1, notas:'' };
     if(esCumple){ evC.cumple = true; evC.todo = true; evC.aviso = 1440; }
