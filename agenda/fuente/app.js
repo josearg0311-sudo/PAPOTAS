@@ -554,7 +554,7 @@ function pintarNav(){
     if(plegado) return abre + '<button type="button" class="nav-ico" data-ir="' + s.id + '" title="' + s.nom + '" aria-label="' + s.nom + '"' + (vPadre === s.id ? ' aria-current="page"' : '') + '>' + ico(s.ico) + (n ? '<span class="punto-nav' + (alerta ? ' alerta' : '') + '"></span>' : '') + '</button>' + cierra;
     return abre +
       ('<button type="button"' + enEsp + ' data-ir="' + s.id + '"' + (vPadre === s.id ? ' aria-current="page"' : '') + '>' +
-        ico(s.ico) + s.nom + (n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : '') +
+        '<span class="nl-ico">' + ico(s.ico) + '</span><span class="nl-txt">' + s.nom + '</span>' + (n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : '') +
       '</button>');
   }).join(''));
   var DINERO = ['dinero','personal','oficina','pagos'], AB = barraAbajo();
@@ -583,7 +583,8 @@ function pintarNav(){
   document.querySelectorAll('.lateral .pie [data-ir]').forEach(function(b){
     if(ui.vista === 'ajustes') b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
   });
-  $('marcaNombre').textContent = db.perfil.nombre ? 'de ' + db.perfil.nombre : 'Mi organización';
+  var dHoy = new Date();
+  $('marcaNombre').textContent = cap(DIAS[dHoy.getDay()]) + ' ' + dHoy.getDate() + ' de ' + MESES[dHoy.getMonth()];
   ponerInsignia(k.tareas + k.recordatorios);
 }
 

@@ -3934,3 +3934,87 @@ header.portada-hoy > *:not(.banda-fondo):not(.hoy-astro){ position:relative; z-i
   linear-gradient(90deg, transparent 5px, var(--l) 5px 7px, transparent 7px 19px, var(--l) 19px 21px, transparent 21px) 0 0/30px 30px !important }
 [data-sec="habitos"] .banda-fondo{ opacity:.32 }
 header.portada-hoy .hoy-astro{ right:-18px !important; top:-18px !important; width:88px; height:88px; opacity:.85 }
+
+/* ==========================================================================
+   CONTRASTE
+   Textos secundarios, bordes y colores de acento ajustados para que se lean
+   bien en todas las paletas: texto gris al menos 5:1, bordes visibles y
+   colores de dinero y de espacios por encima del mínimo de lectura.
+   ========================================================================== */
+:root[data-paleta="negro"]:not([data-tema="claro"]){ --tinta-2:#B5BCCA; --tinta-3:#8D95A6; --regla:#394151; --regla-2:#2C3240; --debe:#FF574D; --verde-sube:#718EE4; --acento-txt:#6B8DF0; }
+:root[data-paleta="negro"][data-tema="claro"]{ --tinta-2:#49494D; --tinta-3:#636367; --regla:#C6C6C9; --regla-2:#D7D7DA; --haber:#177635; --debe:#C5291D; --oro:#826100; --esp-personal:#1B62D0; --esp-estudios:#0C7367; --esp-deporte:#1A7541; }
+:root[data-paleta="electrico"]:not([data-tema="claro"]){ --tinta-2:#B9BDC2; --tinta-3:#92969C; --regla:#414347; --regla-2:#323437; }
+:root[data-paleta="electrico"][data-tema="claro"]{ --tinta-2:#49515A; --tinta-3:#656B73; --regla:#CBD0D5; --regla-2:#DEE1E5; --haber:#1B7D45; --oro:#936409; --esp-personal:#1D68DD; --esp-estudios:#0D7B6E; --esp-deporte:#1B7D45; --verde:#1D66D8; }
+:root[data-paleta="brasa"]:not([data-tema="claro"]){ --tinta-2:#C2BAAF; --tinta-3:#9B9389; --regla:#46413B; --regla-2:#37332F; --debe:#E96B4F; }
+:root[data-paleta="brasa"][data-tema="claro"]{ --tinta-2:#564E46; --tinta-3:#716960; --regla:#D4CCC0; --regla-2:#E5DED4; --oro:#8F651B; --esp-personal:#1D68DC; --esp-estudios:#0D7A6D; --esp-deporte:#1B7D45; --verde:#A45519; }
+:root[data-paleta="jade"]:not([data-tema="claro"]){ --tinta-2:#B5C0BC; --tinta-3:#8C9996; --regla:#3E4644; --regla-2:#303735; }
+:root[data-paleta="jade"][data-tema="claro"]{ --tinta-2:#46534F; --tinta-3:#616D68; --regla:#C5CFCB; --regla-2:#DAE1DE; --haber:#467933; --oro:#8A6820; --esp-personal:#1D68DD; --esp-estudios:#0D7B6E; --esp-deporte:#1B7D45; --verde:#1F7863; }
+:root[data-paleta="grafito"]:not([data-tema="claro"]){ --tinta-2:#BBBDB6; --tinta-3:#949690; --regla:#424441; --regla-2:#333532; }
+:root[data-paleta="grafito"][data-tema="claro"]{ --tinta-2:#4E504A; --tinta-3:#686A64; --regla:#CCCDC6; --regla-2:#DEDFD9; --haber:#37794B; --oro:#896720; --esp-personal:#1D67DB; --esp-estudios:#0D7A6D; --esp-deporte:#1B7C44; --verde:#597311; }
+
+/* Bordes, desactivados y textos de ayuda: que se distingan */
+:root{ --borde-card:var(--regla) }
+::placeholder{ color:var(--tinta-3); opacity:1 }
+.franja-semana button.pasado, .semana-mini .pasado{ opacity:.72 }
+.lt-item.pasado, .sem-ev.hecho, .sem-chip.hecho{ opacity:.66 }
+.cal-mes .celda.fuera .num{ opacity:.75 }
+.btn-icono:disabled{ opacity:.42 }
+.barra-sel-acc button[disabled]{ opacity:.5 }
+:focus-visible{ outline:2px solid var(--acento-txt, var(--verde-sube)); outline-offset:2px }
+:root:not([data-tema="claro"]) .tarjeta, :root:not([data-tema="claro"]) .w, :root:not([data-tema="claro"]) .mosaico{
+  box-shadow:inset 0 1px 0 color-mix(in srgb, var(--tinta) 7%, transparent), 0 8px 24px rgba(0,0,0,.35) }
+:root[data-tema="claro"] .tarjeta, :root[data-tema="claro"] .w, :root[data-tema="claro"] .mosaico{
+  box-shadow:0 1px 2px rgba(15,20,35,.08), 0 6px 18px rgba(15,20,35,.08) }
+
+/* ==========================================================================
+   BARRA LATERAL (laptop)
+   Cada sección con su icono en una cajita; los espacios con su color.
+   La sección abierta se marca con fondo, raya y el icono relleno.
+   ========================================================================== */
+.lateral{ background:color-mix(in srgb, var(--hoja) 70%, var(--papel)) !important; border-right:1px solid var(--regla) !important; padding:16px 12px 12px !important }
+.lateral .marca{ padding:4px 8px 14px !important; margin-bottom:6px; border-bottom:1px solid var(--regla-2) }
+.lateral .marca b{ color:var(--tinta) }
+.lateral .marca small{ color:var(--tinta-2) !important; font-size:12px !important; font-weight:600; margin-top:1px }
+.lateral .nav-lat{ gap:2px !important }
+.lateral .nav-lat button[data-ir]:not(.nav-ico){
+  --c:var(--acento-txt, var(--verde-sube));
+  position:relative; gap:11px !important; min-height:40px !important; padding:5px 10px 5px 8px !important; border-radius:12px !important;
+  font-size:14px !important; font-weight:600 !important; color:var(--tinta-2) !important; background:none !important; box-shadow:none !important;
+  transition:background .14s, color .14s }
+.lateral .nl-ico{ width:30px; height:30px; flex:none; display:grid; place-items:center; border-radius:9px;
+  background:color-mix(in srgb, var(--c) 14%, transparent); color:var(--c); transition:background .14s, color .14s, transform .14s }
+.lateral .nl-ico svg{ width:17px !important; height:17px !important; color:inherit !important }
+.lateral .nl-txt{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.lateral .nav-lat button[data-ir]:not(.nav-ico):hover{ background:var(--hoja-2) !important; color:var(--tinta) !important }
+.lateral .nav-lat button[data-ir]:not(.nav-ico):hover .nl-ico{ transform:scale(1.06) }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico){
+  background:color-mix(in srgb, var(--c) 15%, var(--hoja-2)) !important; color:var(--tinta) !important; font-weight:750 !important }
+.lateral .nav-lat button[data-ir][aria-current="page"]:not(.nav-ico)::before{
+  content:''; position:absolute; left:-12px; top:8px; bottom:8px; width:4px; border-radius:0 4px 4px 0; background:var(--c) }
+.lateral .nav-lat button[aria-current="page"] .nl-ico{ background:var(--c); color:var(--papel) }
+:root[data-tema="claro"] .lateral .nav-lat button[aria-current="page"] .nl-ico{ color:#fff }
+.lateral .nav-lat .cuenta{ min-width:22px !important; height:21px !important; padding:0 7px !important; border-radius:99px !important;
+  font-size:11.5px !important; font-weight:800 !important; background:var(--regla) !important; color:var(--tinta) !important }
+.lateral .nav-lat .cuenta.alerta{ background:var(--debe) !important; color:#fff !important }
+.lateral .nav-lat .grupo{ color:var(--tinta-2) !important; font-size:11px !important; font-weight:800 !important; letter-spacing:.12em !important;
+  text-transform:uppercase !important; font-family:var(--letra) !important; padding:16px 10px 6px !important }
+.lateral .nav-lat .grupo:hover{ color:var(--tinta) !important }
+.lateral .nav-lat .grupo svg{ opacity:1 !important }
+.lateral .nav-lat .nav-ico{ color:var(--tinta-2) !important }
+.lateral .nav-lat .nav-ico:hover{ background:var(--hoja-2) !important; color:var(--tinta) !important }
+.lateral .nav-lat .nav-ico[aria-current="page"]{ background:color-mix(in srgb, var(--acento-txt, var(--verde-sube)) 18%, var(--hoja-2)) !important; color:var(--tinta) !important; box-shadow:none !important }
+.lateral .pie{ border-top:1px solid var(--regla-2) !important; padding-top:10px !important }
+.lateral .perfil{ padding:8px !important; border-radius:14px !important; border:1px solid var(--regla); background:var(--hoja) }
+.lateral .perfil:hover, .lateral .perfil[aria-current="page"]{ background:var(--hoja-2) !important; border-color:color-mix(in srgb, var(--acento-txt, var(--verde-sube)) 45%, var(--regla)) }
+.lateral .perfil-txt b{ color:var(--tinta) }
+.lateral .perfil-txt small{ color:var(--tinta-2) !important }
+.lateral .perfil > svg{ color:var(--tinta-2) !important }
+/* Cada sección de «Organizar» con su color, el mismo de su panel */
+.lateral .nav-lat button[data-ir="agenda"]{ --c:#6E95FF }
+.lateral .nav-lat button[data-ir="notas"]{ --c:#E7B24A }
+.lateral .nav-lat button[data-ir="habitos"]{ --c:#FF9F43 }
+.lateral .nav-lat button[data-ir="dinero"]{ --c:#3DDC6B }
+:root[data-tema="claro"] .lateral .nav-lat button[data-ir="agenda"]{ --c:#1F5FE0 }
+:root[data-tema="claro"] .lateral .nav-lat button[data-ir="notas"]{ --c:#8A6100 }
+:root[data-tema="claro"] .lateral .nav-lat button[data-ir="habitos"]{ --c:#B04E07 }
+:root[data-tema="claro"] .lateral .nav-lat button[data-ir="dinero"]{ --c:#187A39 }
