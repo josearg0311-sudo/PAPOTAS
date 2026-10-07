@@ -38,6 +38,12 @@ function normalizar(d){
   if(d.perfil && typeof d.perfil === 'object'){
     out.perfil = { nombre:String(d.perfil.nombre || '').slice(0,40), upd:+d.perfil.upd || 0 };
     if(d.perfil.presu && typeof d.perfil.presu === 'object') out.perfil.presu = { personal:+d.perfil.presu.personal || 0, oficina:+d.perfil.presu.oficina || 0 };
+    if(d.perfil.presuCat && typeof d.perfil.presuCat === 'object'){
+      var pc = {};
+      ['personal', 'oficina'].forEach(function(l){ var o = d.perfil.presuCat[l]; if(!o || typeof o !== 'object') return; pc[l] = {};
+        Object.keys(o).slice(0, 60).forEach(function(c){ var v = +o[c]; if(v > 0) pc[l][String(c).slice(0, 40)] = Math.round(v * 100) / 100; }); });
+      out.perfil.presuCat = pc;
+    }
     if(d.perfil.prefs && typeof d.perfil.prefs === 'object'){
       var pp = {};
       ['estatura', 'metaKm', 'hiit', 'feriados', 'hoyOff', 'lunes'].forEach(function(k){ if(k in d.perfil.prefs) pp[k] = d.perfil.prefs[k]; });
@@ -1191,7 +1197,8 @@ function guardarGastoRapido(){
   var t = { id:nid(), date:hoyISO(), desc:desc || cat || ui.grTipo, type:ui.grTipo === 'Ingreso' ? 'Ingreso' : 'Gasto', amount:monto, cat:cat.slice(0, 40) };
   cambiarLibro(cual, function(l){ return l.concat([t]); });
   cerrarFlotante(); pintar(); vibrar(15);
-  var gd = null;
+  var gd = null, alLim = t.type === 'Gasto' ? avisoLimite(cual, t.cat || 'Sin categoría', monto) : null;
+  if(alLim){ setTimeout(function(){ aviso(alLim, 'Límites por categoría', 'Ver', function(){ ui.dinLibro = cual; ir('dinero'); }); }, 2600); }
   aviso((t.type === 'Gasto' ? '💸 ' : '💰 ') + dinero(monto) + (t.desc ? ' · ' + t.desc : ''), gd ? (gd.pasado ? 'Hoy ya te pasaste por ' + dinero(gd.hoy - gd.porDia) : 'Te quedan ' + dinero(gd.queda) + ' para hoy') : NOM_LIBRO[cual], 'Deshacer', function(){
     cambiarLibro(cual, function(l){ return l.filter(function(x){ return x.id !== t.id; }); }); pintar();
   });
@@ -1575,6 +1582,8 @@ function queHacerAhora(hoy, h){
   var wd = new Date().getDay(), hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
   var falta = hab.filter(function(x){ return !(habHecho(x, hoy)); }).length;
   if(!hoyVisible('hacer') && hab.length && falta && h >= 12) s('var(--azul)', 'i-habitos', 'Te ' + (falta === 1 ? 'falta <b>1 hábito</b>' : 'faltan <b>' + falta + ' hábitos</b>') + ' de hoy', 'Marcar', 'data-ir="habitos"');
+  var ac = alertasCat()[0];
+  if(ac) s(ac.p >= 1 ? 'var(--debe)' : 'var(--oro)', 'i-diana', '<b>' + esc(ac.cat) + '</b>: ' + (ac.p >= 1 ? 'te pasaste del límite (' + dinero(ac.g) + ' de ' + dinero(ac.lim) + ')' : 'vas en el ' + Math.round(ac.p * 100) + '% del límite del mes'), 'Ver', 'data-acc="mov-ver" data-v="' + ac.libro + '" data-cat="' + esc(ac.cat) + '"');
   var gastoHoy = libroDatos('personal').some(function(t){ return t.date === hoy; });
   if(!gastoHoy && h >= 13) s('var(--haber)', 'i-bajar', '¿Gastaste algo hoy? <b>Anótalo</b> en 5 segundos', 'Anotar', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"');
   var di = buscarId('diario', hoy);
@@ -4527,10 +4536,16 @@ VISTAS.dinero = function(){
   /* En qué se va: cada categoría lleva a sus movimientos */
   var porCat = {};
   lista.forEach(function(t){ if(t.type === 'Gasto' && t.date.slice(0, 7) === ym){ var c = t.cat || 'Sin categoría'; porCat[c] = (porCat[c] || 0) + t.amount; } });
-  var catL = Object.keys(porCat).sort(function(x, y){ return porCat[y] - porCat[x]; });
-  html += '<section class="tarjeta">' + cabTarjeta('i-listas', 'En qué se va este mes', 'var(--debe)') +
-    (catL.length ? '<div class="cats-din">' + catL.slice(0, 7).map(function(c, i){
-      var p = m.sal ? porCat[c] / m.sal : 0;
+  var lims = limitesCat(sel);
+  Object.keys(lims).forEach(function(c){ if(!(c in porCat)) porCat[c] = 0; });
+  var catL = Object.keys(porCat).sort(function(x, y){ var lx = lims[x] ? porCat[x] / lims[x] : -1, ly = lims[y] ? porCat[y] / lims[y] : -1; return (ly >= .8) - (lx >= .8) || porCat[y] - porCat[x]; });
+  var nLim = Object.keys(lims).length;
+  html += '<section class="tarjeta">' + cabTarjeta('i-listas', 'En qué se va este mes', 'var(--debe)', nLim ? 'Límites' : 'Poner límites', 'data-acc="lim-ed" data-v="' + (sel === 'oficina' ? 'oficina' : 'personal') + '"') +
+    (catL.length ? '<div class="cats-din">' + catL.slice(0, nLim ? 12 : 7).map(function(c, i){
+      var lim = lims[c], p = lim ? porCat[c] / lim : (m.sal ? porCat[c] / m.sal : 0);
+      if(lim) return '<button type="button" class="barra-h cat-fila con-limite' + (p >= 1 ? ' pasado' : p >= .8 ? ' cerca' : '') + '" data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '" data-cat="' + esc(c) + '">' +
+        '<span>' + esc(c) + '<small>' + (p >= 1 ? 'te pasaste por ' + dinero(porCat[c] - lim) : 'quedan ' + dinero(lim - porCat[c])) + '</small></span>' +
+        '<div class="barra-prog"><i style="width:' + Math.min(100, p * 100).toFixed(1) + '%"></i></div><b>' + dinero(porCat[c]) + '<small> / ' + monCorto(lim) + '</small></b></button>';
       return '<button type="button" class="barra-h cat-fila" style="--c:' + ['var(--debe)','var(--oro)','var(--azul)','var(--rosa)','var(--verde)','var(--haber)','var(--tinta-3)'][i] + '" data-acc="mov-ver" data-v="' + (sel === 'todo' ? 'ambos' : sel) + '" data-cat="' + esc(c) + '"><span>' + esc(c) + '</span>' +
         '<div class="barra-prog"><i style="width:' + (p * 100).toFixed(1) + '%;background:var(--c)"></i></div><b>' + dinero(porCat[c]) + '</b></button>';
     }).join('') + '</div>' : '<div class="vacio" style="padding-top:4px">Sin gastos este mes todavía.</div>') + '</section>';
@@ -5044,6 +5059,70 @@ function anotarMovimiento(f){
     pintar();
   });
   var mm = $('qaMonto'); if(mm) mm.focus();
+}
+/* ---------- Límites por categoría ----------------------------------------
+   Cada libro puede tener un tope mensual por categoría (Comida S/ 600, Taxi
+   S/ 150…). Se ve en «En qué se va este mes», avisa al anotar un gasto que
+   llega al 80 % o se pasa, y sale en «Qué hacer ahora». */
+function limitesCat(sel){
+  var pc = (db.perfil && db.perfil.presuCat) || {};
+  if(sel === 'personal' || sel === 'oficina') return Object.assign({}, pc[sel] || {});
+  var o = {};
+  ['personal', 'oficina'].forEach(function(l){ Object.keys(pc[l] || {}).forEach(function(c){ o[c] = (o[c] || 0) + (+pc[l][c] || 0); }); });
+  return o;
+}
+function gastoCatMes(libro, cat, ym){
+  return movsDe(libro).reduce(function(a, t){ return a + (t.type === 'Gasto' && t.date.slice(0, 7) === ym && (t.cat || 'Sin categoría') === cat ? t.amount : 0); }, 0);
+}
+/* Las categorías que van por encima del 80 % de su límite este mes, la peor primero */
+function alertasCat(){
+  var ym = hoyISO().slice(0, 7), out = [], pc = (db.perfil && db.perfil.presuCat) || {};
+  ['personal', 'oficina'].forEach(function(l){ Object.keys(pc[l] || {}).forEach(function(c){
+    var lim = +pc[l][c] || 0; if(!lim) return;
+    var g = gastoCatMes(l, c, ym), p = g / lim;
+    if(p >= .8) out.push({ libro:l, cat:c, g:g, lim:lim, p:p });
+  }); });
+  return out.sort(function(a, b){ return b.p - a.p; });
+}
+function avisoLimite(libro, cat, monto){
+  var lim = +(((db.perfil || {}).presuCat || {})[libro] || {})[cat] || 0; if(!lim || !cat) return null;
+  var g = gastoCatMes(libro, cat, hoyISO().slice(0, 7)), antes = g - monto;
+  if(g > lim && antes <= lim) return '⚠️ ' + cat + ': te pasaste del límite (' + dinero(g) + ' de ' + dinero(lim) + ')';
+  if(g > lim) return cat + ': vas ' + dinero(g - lim) + ' por encima del límite';
+  if(g >= lim * .8 && antes < lim * .8) return cat + ': ya vas en el ' + Math.round(g / lim * 100) + '% del límite (' + dinero(lim - g) + ' libres)';
+  return null;
+}
+function editarLimites(libro){
+  libro = libro === 'oficina' ? 'oficina' : 'personal';
+  var pc = (db.perfil && db.perfil.presuCat) || {}, act = pc[libro] || {};
+  /* Las categorías que usas (últimos 3 meses) más las que ya tienen límite */
+  var ym = hoyISO().slice(0, 7), desde = mesAntes(ym, 2), uso = {};
+  movsDe(libro).forEach(function(t){ if(t.type === 'Gasto' && t.date.slice(0, 7) >= desde){ var c = t.cat || 'Sin categoría'; uso[c] = (uso[c] || 0) + t.amount; } });
+  Object.keys(act).forEach(function(c){ if(!(c in uso)) uso[c] = 0; });
+  CATS_BASE.forEach(function(c){ if(!(c in uso)) uso[c] = -1; });
+  var cats = Object.keys(uso).sort(function(a, b){ return uso[b] - uso[a]; }).slice(0, 18);
+  abrirFlotante(cabFlot('Límites por categoría') +
+    '<form class="form" id="formEd" autocomplete="off">' +
+      '<div class="selector">' + ['personal', 'oficina'].map(function(l){ return '<button type="button" data-acc="lim-libro" data-v="' + l + '" aria-pressed="' + (l === libro) + '">' + (l === 'personal' ? '🏠 Personal' : '💼 Oficina') + '</button>'; }).join('') + '</div>' +
+      '<p class="ayuda-campo" style="margin:10px 0 4px">Cuánto quieres gastar como máximo cada mes en cada categoría. Deja vacío lo que no quieras controlar. Entre paréntesis, tu promedio de los últimos 3 meses.</p>' +
+      '<div class="lim-lista">' + cats.map(function(c){
+        var prom = uso[c] > 0 ? uso[c] / 3 : 0;
+        return '<label class="lim-fila"><span>' + esc(c) + (prom ? ' <small>(' + monCorto(prom) + '/mes)</small>' : '') + '</span><input data-cat="' + esc(c) + '" inputmode="decimal" value="' + (act[c] || '') + '" placeholder="—"></label>';
+      }).join('') + '</div>' +
+      '<label class="lim-fila lim-nueva"><input id="limNuevaCat" maxlength="40" placeholder="Otra categoría…"><input id="limNuevoMonto" inputmode="decimal" placeholder="Monto"></label>' +
+      '<div class="botones"><button type="submit" class="btn primario">' + ico('i-check') + 'Guardar límites</button></div>' +
+    '</form>');
+  var f = $('formEd');
+  f.onsubmit = function(ev){
+    ev.preventDefault();
+    var o = {};
+    f.querySelectorAll('[data-cat]').forEach(function(i){ var v = num(i.value); if(v > 0) o[i.dataset.cat] = Math.round(v * 100) / 100; });
+    var nc = ($('limNuevaCat').value || '').trim(), nm = num($('limNuevoMonto').value);
+    if(nc && nm > 0) o[nc.slice(0, 40)] = Math.round(nm * 100) / 100;
+    var nuevo = Object.assign({}, (db.perfil && db.perfil.presuCat) || {}); nuevo[libro] = o;
+    db.perfil = Object.assign({}, db.perfil, { presuCat:nuevo, upd:Date.now() });
+    guardar(); cerrarFlotante(); pintar(); aviso('Límites guardados', plural(Object.keys(o).length, 'categoría', 'categorías') + ' con límite en ' + NOM_LIBRO[libro].toLowerCase());
+  };
 }
 function editarPresupuesto(){
   var p = (db.perfil && db.perfil.presu) || {};
@@ -7552,6 +7631,8 @@ document.addEventListener('click', function(ev){
       break;
     case 'qa-cat': var qc = $('qaCat'); if(qc){ qc.value = b.dataset.v; } var qm2 = $('qaMonto'); if(qm2 && !qm2.value) qm2.focus(); break;
     case 'presu-ed': editarPresupuesto(); break;
+    case 'lim-ed': editarLimites(b.dataset.v); break;
+    case 'lim-libro': editarLimites(b.dataset.v); break;
     case 'tarea-manana': tareaAManana(id); break;
     case 't-atrasadas-hoy':
       var hoyA = hoyISO(), movidas = [];
