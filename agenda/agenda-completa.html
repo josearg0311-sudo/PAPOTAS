@@ -4485,6 +4485,22 @@ header.banda .banda-fondo, header.banda-panel .banda-fondo{ opacity:.1 !importan
 .an-rep i b{ display:block; height:100%; background:var(--rosa); border-radius:99px }
 .an-rep small{ font-size:12px; color:var(--tinta-2); text-align:right }
 .an-dato{ margin:12px 0 0; font-size:13px; color:var(--tinta-2) }
+/* Proyectos: hitos */
+.hitos{ display:flex; flex-direction:column; padding:0 16px; position:relative }
+.hito{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--regla); position:relative }
+.hito:last-child{ border-bottom:0 }
+.hito .casilla{ --c:var(--oro) }
+.hito-txt{ flex:1; min-width:0; display:flex; flex-direction:column }
+.hito-txt b{ font-weight:650 }
+.hito-txt small{ font-size:12px; color:var(--tinta-3) }
+.hito.ok .hito-txt b{ text-decoration:line-through; color:var(--tinta-3) }
+.hito.tarde .hito-txt small{ color:var(--debe) }
+.hito .btn-icono{ width:30px; height:30px; opacity:.6 }
+.hito-form{ display:flex; gap:8px; margin:10px 16px 16px !important; box-shadow:none !important }
+.hito-form #hitoT{ flex:1; min-width:0 }
+.hito-form #hitoF{ flex:none; width:150px }
+.proy-hito-sig{ color:var(--tinta-2) }
+@media (max-width:420px){ .hito-form{ flex-wrap:wrap } .hito-form #hitoF{ flex:1 } }
 </style>
 </head>
 <body>
@@ -4990,6 +5006,11 @@ function calcularDia(dia){
   vivos('pagos').forEach(function(p){
     if(p.activo === false || (p.desde && ym < p.desde)) return;
     if(diaPago(p, ym) === dia) out.push({ tipo:'pago', id:p.id, t:(p.em ? p.em + ' ' : '') + p.t, hora:'', c:'var(--oro)', hecho:pagado(p, ym), ym:ym, esp:espDe(p), o:p });
+  /* Hitos de los proyectos activos */
+  vivos('proyectos').forEach(function(p){
+    if(p.estado === 'hecho') return;
+    (p.hitos || []).forEach(function(h){ if(h.fecha === dia) out.push({ tipo:'hito', id:p.id, t:'🏁 ' + h.t + ' · ' + p.nombre, hora:'', c:colorEsp(p), hecho:!!h.ok, esp:espDe(p), o:p }); });
+  });
   });
   out = out.concat(clasesDelDia(dia));
   out.sort(function(a, b){
@@ -5570,7 +5591,7 @@ function filaAgenda(it, conFecha){
   else if(it.tipo === 'pago') izq = casilla('pago-ok', it.id, it.hecho, 'var(--oro)', false, ' data-ym="' + it.ym + '"');
   else if(it.tipo === 'rec') izq = '<span class="icono-tipo" style="--c:' + it.c + '">' + ico('i-campana') + '</span>';
   else izq = '<span class="barrita" style="--c:' + it.c + '"></span>';
-  var acc = { tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed', feriado:'cal-feriado' }[it.tipo];
+  var acc = { hito:'proy-abrir', tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed', feriado:'cal-feriado' }[it.tipo];
   var cuando = it.hora ? it.hora + (it.fin ? '–' + it.fin : '') : (it.tipo === 'evento' ? 'Todo el día' : '');
   var nom = { evento:it.o.cumple ? 'Cumpleaños' : (TIPOS_EV[it.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', tarea:'Tarea', clase:'Clase · ' + cuando, pago:'Pago · ' + dinero(+it.o.monto || 0), feriado:'Feriado nacional' }[it.tipo];
   var enEsp = ui.vista.indexOf('esp-') === 0;
@@ -5945,7 +5966,7 @@ function tarjetaSiguiente(){
       '<span class="sig-meta">' + (sug.fecha ? (sug.fecha < hoyS ? 'Atrasada · ' : 'Para hoy · ') : 'Sin fecha · ') + Es.em + ' ' + esc(Es.nom) + (pt.length > 1 ? ' · ' + (pt.length - 1) + ' pendientes más' : '') + '</span></section>';
   }
   var x = s.x, E = x.esp ? espInfo(x.esp) : null;
-  var acc = { tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' }[x.tipo];
+  var acc = { hito:'proy-abrir', tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' }[x.tipo];
   var cuando = s.d === hoyISO() ? (s.enCurso ? 'En curso · hasta las ' + (x.fin || x.hora) : textoFalta(minutosHasta(x.hora))) : cap(relativo(s.d)) + ' · ' + x.hora;
   var nom = { evento:(TIPOS_EV[x.o.tipo] || TIPOS_EV.evento).n, rec:'Recordatorio', tarea:'Tarea', clase:'Clase', pago:'Pago' }[x.tipo];
   return '<section class="tarjeta siguiente' + (s.enCurso ? ' en-curso' : '') + '" style="--c:' + x.c + '" data-acc="' + acc + '" data-id="' + x.id + '">' +
@@ -6092,7 +6113,7 @@ VISTAS.hoy = function(){
       html += w('w-2 w-viene', 'Lo que viene', null, 'data-ir="calendario"',
         (cr ? '<button type="button" class="w-regre" style="--c:' + (cr.e.cumple ? 'var(--rosa)' : colorEsp(cr.e)) + '" data-acc="evento-ed" data-id="' + cr.e.id + '"><b>' + (cr.en === 0 ? '¡Hoy!' : cr.en) + '</b><span>' + (cr.en === 0 ? '' : cr.en === 1 ? 'día para' : 'días para') + '<em>' + esc(cr.e.t) + '</em></span></button>' : '') +
         (prox.length ? '<div class="lista-filas">' + prox.map(function(p){
-          var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
+          var acc = { hito:'proy-abrir', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed' }[p.x.tipo];
           return '<div class="fila"><span class="hora">' + cap(relativo(p.d)).slice(0, 9) + (p.x.hora ? '<br>' + p.x.hora : '') + '</span><span class="barrita" style="--c:' + p.x.c + '"></span>' +
             '<div class="cuerpo" data-acc="' + acc + '" data-id="' + p.x.id + '"><div class="titulo">' + esc(p.x.t) + '</div></div></div>';
         }).join('') + '</div>' : ''));
@@ -6241,7 +6262,7 @@ function widgetManana(hoy){
     '<button class="ver-link" data-acc="cal-ir-dia-hoy" data-dia="' + m + '">Ver día ' + ico('i-der') + '</button></header>' +
     (res.length ? '<p class="manana-res">' + res.join(' · ') + '</p>' : '') +
     (ag.length ? '<div class="lista-filas">' + ag.slice(0, 4).map(function(x){
-      var acc = { rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' }[x.tipo] || 'evento-ed';
+      var acc = { hito:'proy-abrir', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed' }[x.tipo] || 'evento-ed';
       return '<div class="fila"><span class="hora">' + (x.hora || 'Todo<br>el día') + '</span><span class="barrita" style="--c:' + x.c + '"></span>' +
         '<div class="cuerpo" data-acc="' + acc + '" data-id="' + x.id + '"><div class="titulo">' + esc(x.t) + '</div></div></div>';
     }).join('') + (ag.length > 4 ? '<button class="w-mas" data-acc="cal-ir-dia-hoy" data-dia="' + m + '">+' + (ag.length - 4) + ' más</button>' : '') + '</div>'
@@ -6738,6 +6759,20 @@ var MODULOS = {
    vive en un espacio, tiene fecha límite y muestra cuánto falta.
    ========================================================================== */
 function tareasDe(pid){ return vivos('tareas').filter(function(t){ return t.proy === pid; }); }
+function proxHito(p){ return (p.hitos || []).filter(function(h){ return !h.ok && h.fecha; }).sort(function(a, b){ return a.fecha.localeCompare(b.fecha); })[0] || null; }
+function tarjetaHitos(p){
+  var hs = (p.hitos || []).slice().sort(function(a, b){ return (a.fecha || '9').localeCompare(b.fecha || '9'); }), hoy = hoyISO();
+  var hechos = hs.filter(function(h){ return h.ok; }).length;
+  return '<section class="tarjeta proy-hitos">' + cabTarjeta('i-bandera', 'Hitos' + (hs.length ? ' · ' + hechos + ' de ' + hs.length : ''), 'var(--oro)') +
+    (hs.length ? '<div class="hitos">' + hs.map(function(h){
+      var n = h.fecha ? diasEntre(hoy, h.fecha) : null;
+      return '<div class="hito' + (h.ok ? ' ok' : n != null && n < 0 ? ' tarde' : '') + '"><button type="button" class="casilla" role="checkbox" aria-checked="' + !!h.ok + '" data-acc="hito-ok" data-id="' + p.id + '" data-h="' + h.id + '">' + CHECK + '</button>' +
+        '<div class="hito-txt"><b>' + esc(h.t) + '</b><small>' + (h.fecha ? fechaCorta(h.fecha) + (h.ok ? '' : n < 0 ? ' · venció hace ' + plural(-n, 'día', 'días') : n === 0 ? ' · hoy' : ' · en ' + plural(n, 'día', 'días')) : 'sin fecha') + '</small></div>' +
+        '<button type="button" class="btn-icono" data-acc="hito-x" data-id="' + p.id + '" data-h="' + h.id + '" aria-label="Quitar hito">' + ico('i-x') + '</button></div>';
+    }).join('') + '</div>' : '<p class="ayuda-campo" style="margin:0 16px 10px">Los hitos son las metas intermedias con fecha: «Entregar el borrador», «Primera versión», «Mudanza».</p>') +
+    '<form class="captura hito-form" data-acc="hito-nuevo" data-id="' + p.id + '" autocomplete="off"><input id="hitoT" maxlength="80" placeholder="Nuevo hito…"><input id="hitoF" type="date" aria-label="Fecha del hito"><button class="btn chico primario" type="submit" aria-label="Añadir hito">' + ico('i-plus') + '</button></form>' +
+  '</section>';
+}
 function avanceProy(pid){
   var ts = tareasDe(pid), h = ts.filter(function(t){ return t.hecha; }).length;
   return { total:ts.length, hechas:h, p:ts.length ? h / ts.length : 0 };
@@ -6760,6 +6795,7 @@ function tarjetaProyecto(p){
   return '<button type="button" class="tarjeta proy-card" style="--c:' + E.c + '" data-acc="proy-abrir" data-id="' + p.id + '">' +
     '<div class="proy-cab">' + anilloMini(a.p, E.c) + '<div style="min-width:0;flex:1"><b>' + esc(p.nombre) + '</b>' +
       '<small>' + E.em + ' ' + E.nom + ' · ' + a.hechas + ' de ' + a.total + ' tareas</small></div></div>' +
+    (proxHito(p) ? '<div class="proy-sig proy-hito-sig">🏁 <b>' + esc(proxHito(p).t) + '</b> · ' + cap(relativo(proxHito(p).fecha)).toLowerCase() + '</div>' : '') +
     (sig ? '<div class="proy-sig">Siguiente: <b>' + esc(sig.t) + '</b></div>' : '<div class="proy-sig">' + (a.total ? '¡Todo hecho! Márcalo terminado.' : 'Añade la primera tarea.') + '</div>') +
     (n != null ? '<div class="proy-lim ' + (n < 0 ? 'tarde' : n <= 7 ? 'pronto' : '') + '">' + ico('i-bandera') + (n < 0 ? 'Venció hace ' + (-n) + ' días' : n === 0 ? 'Vence hoy' : 'Faltan ' + n + ' días · ' + fechaCorta(p.limite)) + '</div>' : '') +
   '</button>';
@@ -6780,7 +6816,7 @@ function detalleProyecto(p){
   var ts = tareasDe(p.id), pend = ts.filter(function(t){ return !t.hecha; }).sort(ordenTareas), hechas = ts.filter(function(t){ return t.hecha; });
   var n = p.limite ? diasEntre(hoyISO(), p.limite) : null;
   var ritmo = '';
-  if(n != null && n > 0 && pend.length) ritmo = 'Para llegar a tiempo: unas ' + Math.ceil(pend.length / Math.max(1, Math.ceil(n / 7))) + ' tareas por semana.';
+  if(n != null && n > 0 && pend.length) var porSem = Math.ceil(pend.length / Math.max(1, Math.ceil(n / 7))); ritmo = 'Para llegar a tiempo: ' + (porSem === 1 ? 'una tarea' : 'unas ' + porSem + ' tareas') + ' por semana.';
   return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><button class="btn chico" data-acc="proy-volver">' + ico('i-izq') + 'Proyectos</button><div style="flex:1"></div>' +
       '<button class="btn chico" data-acc="proy-estado" data-id="' + p.id + '">' + (p.estado === 'hecho' ? 'Reabrir' : ico('i-check') + 'Terminado') + '</button>' +
       '<button class="btn-icono" data-acc="proy-ed" data-id="' + p.id + '" aria-label="Editar">' + ico('i-lapiz') + '</button></div>' +
@@ -6793,6 +6829,7 @@ function detalleProyecto(p){
       '<form class="captura" data-acc="proy-tarea" data-id="' + p.id + '" style="margin:12px;box-shadow:none" autocomplete="off"><input id="proyTarea" type="text" maxlength="200" placeholder="Nueva tarea del proyecto… (Enter)"><button class="btn primario chico" type="submit" aria-label="Añadir">' + ico('i-plus') + '</button></form>' +
       (pend.length ? '<div class="lista-filas">' + pend.map(filaTarea).join('') + '</div>' : vacio('🎯', a.total ? 'Todo hecho' : 'Sin tareas', a.total ? 'Márcalo como terminado arriba.' : 'Divide el proyecto en pasos pequeños.')) +
     '</div>' +
+    tarjetaHitos(p) +
     (hechas.length ? '<div class="seccion-tit">Hechas <span class="n">' + hechas.length + '</span></div><div class="tarjeta"><div class="lista-filas">' + hechas.map(filaTarea).join('') + '</div></div>' : '');
 }
 function editarProyecto(id, preset){
@@ -8390,7 +8427,7 @@ function itemsCal(d){
   if(fer && ocultos.indexOf('feriado') < 0 && !ui.calEsp) out.unshift({ tipo:'feriado', id:'fer-' + d, t:'🇵🇪 ' + fer, hora:'', c:'var(--debe)', o:{} });
   return out;
 }
-var ACC_ITEM = { tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed', feriado:'cal-feriado' };
+var ACC_ITEM = { hito:'proy-abrir', tarea:'tarea-ed', rec:'rec-ed', pago:'pago-ed', evento:'evento-ed', clase:'curso-ed', feriado:'cal-feriado' };
 
 /* Bloques con hora de un día, repartidos en carriles si se pisan */
 function bloquesDia(its){
@@ -12016,6 +12053,12 @@ document.addEventListener('click', function(ev){
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
     case 'habito-ed': cerrarFlotante(); editarHabito(id); break;
     case 'habito-ver': fichaHabito(id); break;
+    case 'hito-ok': case 'hito-x':
+      var pH = buscarId('proyectos', id); if(!pH) break;
+      pH = JSON.parse(JSON.stringify(pH)); pH.hitos = pH.hitos || [];
+      if(a === 'hito-x') pH.hitos = pH.hitos.filter(function(h){ return h.id !== b.dataset.h; });
+      else pH.hitos.forEach(function(h){ if(h.id === b.dataset.h){ h.ok = !h.ok; if(h.ok) aviso('🏁 Hito cumplido', h.t); } });
+      poner('proyectos', pH); pintar(); break;
     case 'nota-tag': ui.notasTag = b.dataset.v || ''; if(ui.vista !== 'notas') ir('notas'); else pintar(); break;
     case 'hab-mas': sumarHabito(id, 1); break;
     case 'hab-menos': sumarHabito(id, -1); break;
@@ -12470,6 +12513,12 @@ document.addEventListener('submit', function(ev){
     lN = JSON.parse(JSON.stringify(lN)); lN.items = lN.items || [];
     cv.split(/\s*[;,\n]\s*/).filter(Boolean).forEach(function(t){ lN.items.push({ id:nid(), t:t.slice(0, 160), ok:false }); });
     poner('listas', lN); pintar(); var cn = $('compraNueva'); if(cn) cn.focus();
+  } else if(a === 'hito-nuevo'){
+    var ht = $('hitoT'), hf = $('hitoF'), tH = (ht.value || '').trim();
+    if(!tH){ ht.focus(); return; }
+    var pN = buscarId('proyectos', f.dataset.id); if(!pN) return;
+    pN = JSON.parse(JSON.stringify(pN)); pN.hitos = (pN.hitos || []).concat([{ id:nid(), t:tH.slice(0, 80), fecha:hf.value || '', ok:false }]);
+    poner('proyectos', pN); pintar(); var ht2 = $('hitoT'); if(ht2) ht2.focus();
   } else if(a === 'cal-rapido'){
     var ci2 = $('calRapido'), cv2 = ci2.value.trim();
     if(!cv2) return;

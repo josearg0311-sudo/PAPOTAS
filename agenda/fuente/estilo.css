@@ -4418,3 +4418,19 @@ header.banda .banda-fondo, header.banda-panel .banda-fondo{ opacity:.1 !importan
 .an-rep i b{ display:block; height:100%; background:var(--rosa); border-radius:99px }
 .an-rep small{ font-size:12px; color:var(--tinta-2); text-align:right }
 .an-dato{ margin:12px 0 0; font-size:13px; color:var(--tinta-2) }
+/* Proyectos: hitos */
+.hitos{ display:flex; flex-direction:column; padding:0 16px; position:relative }
+.hito{ display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--regla); position:relative }
+.hito:last-child{ border-bottom:0 }
+.hito .casilla{ --c:var(--oro) }
+.hito-txt{ flex:1; min-width:0; display:flex; flex-direction:column }
+.hito-txt b{ font-weight:650 }
+.hito-txt small{ font-size:12px; color:var(--tinta-3) }
+.hito.ok .hito-txt b{ text-decoration:line-through; color:var(--tinta-3) }
+.hito.tarde .hito-txt small{ color:var(--debe) }
+.hito .btn-icono{ width:30px; height:30px; opacity:.6 }
+.hito-form{ display:flex; gap:8px; margin:10px 16px 16px !important; box-shadow:none !important }
+.hito-form #hitoT{ flex:1; min-width:0 }
+.hito-form #hitoF{ flex:none; width:150px }
+.proy-hito-sig{ color:var(--tinta-2) }
+@media (max-width:420px){ .hito-form{ flex-wrap:wrap } .hito-form #hitoF{ flex:1 } }
