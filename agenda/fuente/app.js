@@ -1102,7 +1102,7 @@ function textoDia(dia){
   ta.forEach(function(x){ l.push((x.hecho ? '   ✅ ' : x.tarde ? '   ⚠️ ' : '   ☐ ') + x.t + (x.hora ? ' · ' + x.hora : '') + (x.tarde ? ' (atrasada)' : '')); });
   if(dia === hoy){
     var wd = new Date().getDay(), hs = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-    if(hs.length){ var ok = hs.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length; l.push(''); l.push('🔥 Hábitos: ' + ok + ' de ' + hs.length); }
+    if(hs.length){ var ok = hs.filter(function(x){ return habHecho(x, hoy); }).length; l.push(''); l.push('🔥 Hábitos: ' + ok + ' de ' + hs.length); }
     var gasto = 0; ['personal', 'oficina'].forEach(function(lb){ libroDatos(lb).forEach(function(t){ if(t.date === hoy && t.type === 'Gasto') gasto += t.amount; }); });
     if(gasto) l.push('💸 Gastado hoy: ' + dinero(gasto));
   }
@@ -1423,13 +1423,13 @@ VISTAS.hoy = function(){
   if(hoyVisible('hacer')){
     var wd = ahora.getDay(), CH = 2 * Math.PI * 20;
     var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-    var habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+    var habOk = hab.filter(function(x){ return habHecho(x, hoy); }).length;
     html += w('w-2 w-habitos', 'Hábitos', habOk + '/' + hab.length, 'data-ir="habitos"',
       hab.length ? '<div class="w-habs">' + hab.map(function(x){
-        var ok = !!(x.marcas && x.marcas[hoy]);
+        var ok = !!(habHecho(x, hoy)), m = habMeta(x), fr = ok ? 1 : m ? Math.min(1, habCant(x, hoy) / m) : 0;
         return '<button type="button" class="w-hab' + (ok ? ' ok' : '') + '" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + ok + '" title="' + esc(x.nombre) + '">' +
-          '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" class="f"/><circle cx="24" cy="24" r="20" class="v" stroke-dasharray="' + CH.toFixed(1) + '" stroke-dashoffset="' + (ok ? 0 : CH).toFixed(1) + '"/></svg>' +
-          '<span class="em">' + esc(x.em || '⭐') + '</span><small>' + esc(x.nombre) + '</small></button>';
+          '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" class="f"/><circle cx="24" cy="24" r="20" class="v" stroke-dasharray="' + CH.toFixed(1) + '" stroke-dashoffset="' + (CH * (1 - fr)).toFixed(1) + '"/></svg>' +
+          '<span class="em">' + esc(x.em || '⭐') + '</span><small>' + esc(x.nombre) + (m ? ' · ' + habCant(x, hoy) + '/' + m : '') + '</small></button>';
       }).join('') + '</div>' : '<p class="nada">Crea tu primer hábito. <button class="btn chico" data-acc="nuevo" data-tipo="habito">Crear</button></p>');
   }
   if(hoyVisible('dinero')){
@@ -1573,7 +1573,7 @@ function queHacerAhora(hoy, h){
   var pv = pagosProximos(0);
   if(pv.length) s('var(--oro)', 'i-recibo', 'Pago de <b>' + esc(pv[0].p.t) + '</b> ' + (pv.length > 1 ? 'y ' + (pv.length - 1) + ' más ' : '') + 'por pagar', 'Pagar', 'data-ir="pagos"');
   var wd = new Date().getDay(), hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-  var falta = hab.filter(function(x){ return !(x.marcas && x.marcas[hoy]); }).length;
+  var falta = hab.filter(function(x){ return !(habHecho(x, hoy)); }).length;
   if(!hoyVisible('hacer') && hab.length && falta && h >= 12) s('var(--azul)', 'i-habitos', 'Te ' + (falta === 1 ? 'falta <b>1 hábito</b>' : 'faltan <b>' + falta + ' hábitos</b>') + ' de hoy', 'Marcar', 'data-ir="habitos"');
   var gastoHoy = libroDatos('personal').some(function(t){ return t.date === hoy; });
   if(!gastoHoy && h >= 13) s('var(--haber)', 'i-bajar', '¿Gastaste algo hoy? <b>Anótalo</b> en 5 segundos', 'Anotar', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"');
@@ -2716,7 +2716,7 @@ function tarjetaSemanaEsp(id){
       (tareas.length ? '<div class="lista-filas">' + tareas.slice(0, 5).map(filaTarea).join('') + '</div>' : '<div class="vacio" style="padding:6px 0">Todo al día. ✅</div>') +
     '</div></div>' +
     (hs.length ? '<div class="chips-habito">' + hs.map(function(x){
-      var ok = x.marcas && x.marcas[hoy];
+      var ok = habHecho(x, hoy);
       return '<button type="button" class="chip-habito" data-acc="habito-hoy" data-id="' + x.id + '" aria-pressed="' + !!ok + '"><span class="em">' + esc(x.em || '⭐') + '</span>' + esc(x.nombre) + (ok ? ' ✓' : '') + '</button>';
     }).join('') + '</div>' : '') +
     '<div class="atajos">' +
@@ -3522,10 +3522,10 @@ function cabSeccion(v){
       d = { c:'#E7B24A', i:'i-notas', t:'Notas', s:ns.length + (ns.length === 1 ? ' nota' : ' notas') + ' · ' + plural(ns.filter(function(n){ return n.fija; }).length, 'fijada', 'fijadas') };
     } else if(v === 'habitos'){
       var wd = new Date().getDay(), hs = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-      var ok = hs.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+      var ok = hs.filter(function(x){ return habHecho(x, hoy); }).length;
       var mejor = Math.max.apply(null, vivos('habitos').map(function(x){ return racha(x); }).concat([0]));
       var semH = 0, semT = 0, iniH = inicioSemana(hoy);
-      vivos('habitos').forEach(function(x){ for(var k = 0; k < 7; k++){ var dk = sumarDias(iniH, k); if(dk > hoy) break; if(x.dias && x.dias.indexOf(deISO(dk).getDay()) < 0) continue; semT++; if(x.marcas && x.marcas[dk]) semH++; } });
+      vivos('habitos').forEach(function(x){ for(var k = 0; k < 7; k++){ var dk = sumarDias(iniH, k); if(dk > hoy) break; if(x.dias && x.dias.indexOf(deISO(dk).getDay()) < 0) continue; semT++; if(habHecho(x, dk)) semH++; } });
       d = { c:'#FB923C', i:'i-habitos', t:'Hábitos', s:(vivos('habitos').length ? (hs.length ? 'Hoy ' + ok + ' de ' + hs.length : 'Hoy descansas') : 'Aún no tienes hábitos') + (semT ? ' · semana ' + Math.round(semH / semT * 100) + '%' : '') + (mejor ? ' · racha 🔥 ' + mejor : ''), p:hs.length ? ok / hs.length : null, pt:'de hoy' };
     } else if(v === 'metas'){
       var ms = vivos('metas').filter(function(m){ return !m.archivada; });
@@ -4154,13 +4154,29 @@ VISTAS.listas = function(){
 };
 
 /* ---------- Hábitos ------------------------------------------------------- */
+/* Un hábito puede ser de sí/no o tener una meta numérica (8 vasos, 10 páginas):
+   en ese caso cada día guarda la cantidad y cuenta como hecho al llegar a la meta */
+function habMeta(x){ return +x.meta > 1 ? +x.meta : 0; }
+function habCant(x, d){ var v = x.marcas && x.marcas[d]; return +v || 0; }
+function habHecho(x, d){ var m = habMeta(x); return m ? habCant(x, d) >= m : !!(x.marcas && x.marcas[d]); }
+/* La mejor racha de su historia */
+function mejorRacha(x){
+  var ks = Object.keys(x.marcas || {}).filter(function(d){ return habHecho(x, d); }).sort();
+  if(!ks.length) return 0;
+  var toca = function(s){ return !x.dias || x.dias.indexOf(deISO(s).getDay()) >= 0; };
+  var mejor = 0, n = 0, d = ks[0], fin = hoyISO();
+  for(var i = 0; i < 3000 && d <= fin; i++){
+    if(toca(d)){ if(habHecho(x, d)){ n++; if(n > mejor) mejor = n; } else if(d < fin) n = 0; }
+    d = sumarDias(d, 1);
+  }
+  return mejor;
+}
 function racha(x){
   var hoy = hoyISO(), n = 0, d = hoy;
   var toca = function(s){ return !x.dias || x.dias.indexOf(deISO(s).getDay()) >= 0; };
-  var marcas = x.marcas || {};
-  if(toca(hoy) && !marcas[hoy]) d = sumarDias(hoy, -1);   // hoy aún se puede hacer
+  if(toca(hoy) && !habHecho(x, hoy)) d = sumarDias(hoy, -1);   // hoy aún se puede hacer
   for(var i = 0; i < 1000; i++){
-    if(toca(d)){ if(marcas[d]) n++; else break; }
+    if(toca(d)){ if(habHecho(x, d)) n++; else break; }
     d = sumarDias(d, -1);
   }
   return n;
@@ -4170,7 +4186,7 @@ function cumplimiento(x){
   for(var i = 0; i < 30; i++){
     var d = sumarDias(hoy, -i);
     if(creado && d < creado) break;
-    if(!x.dias || x.dias.indexOf(deISO(d).getDay()) >= 0){ toca++; if(x.marcas && x.marcas[d]) hechos++; }
+    if(!x.dias || x.dias.indexOf(deISO(d).getDay()) >= 0){ toca++; if(habHecho(x, d)) hechos++; }
   }
   return toca ? hechos / toca : 0;
 }
@@ -4189,14 +4205,14 @@ VISTAS.habitos = function(){
   /* Arriba: lo de hoy en anillos grandes, un toque y listo */
   var wd = deISO(hoy).getDay(), CH = 2 * Math.PI * 30;
   var deHoy = hs.filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; });
-  var okHoy = deHoy.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+  var okHoy = deHoy.filter(function(x){ return habHecho(x, hoy); }).length;
   var html = '<section class="hab-hoy"><h3 class="seccion-tit">Hoy <span class="n">' + okHoy + ' de ' + deHoy.length + '</span></h3>' +
     (deHoy.length ? '<div class="hab-anillos">' + deHoy.map(function(x){
-      var ok = !!(x.marcas && x.marcas[hoy]), r = racha(x);
+      var ok = !!(habHecho(x, hoy)), r = racha(x), m = habMeta(x), fr = ok ? 1 : m ? Math.min(1, habCant(x, hoy) / m) : 0;
       return '<button type="button" class="hab-anillo' + (ok ? ' ok' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + hoy + '" aria-pressed="' + ok + '">' +
-        '<svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" class="f"/><circle cx="36" cy="36" r="30" class="v" stroke-dasharray="' + CH.toFixed(1) + '" stroke-dashoffset="' + (ok ? 0 : CH).toFixed(1) + '"/></svg>' +
+        '<svg viewBox="0 0 72 72"><circle cx="36" cy="36" r="30" class="f"/><circle cx="36" cy="36" r="30" class="v" stroke-dasharray="' + CH.toFixed(1) + '" stroke-dashoffset="' + (CH * (1 - fr)).toFixed(1) + '"/></svg>' +
         '<span class="em">' + esc(x.em || '⭐') + '</span>' +
-        '<b>' + esc(x.nombre) + '</b><small>' + (r ? '🔥 ' + r + (r === 1 ? ' día' : ' días') : 'Empieza hoy') + '</small></button>';
+        '<b>' + esc(x.nombre) + '</b><small>' + (m ? habCant(x, hoy) + ' de ' + m + ' ' + esc(x.unidad || '') + (r ? ' · 🔥 ' + r : '') : r ? '🔥 ' + r + (r === 1 ? ' día' : ' días') : 'Empieza hoy') + '</small></button>';
     }).join('') + '</div>' : '<p class="nada">Hoy no toca ningún hábito. 😌</p>') + '</section>';
 
   /* Abajo: la tabla de seguimiento, como en un cuaderno (14 días) */
@@ -4209,9 +4225,9 @@ VISTAS.habitos = function(){
     hs.map(function(x){
       var r = racha(x), pc = cumplimiento(x);
       var frec = !x.dias || x.dias.length === 7 ? 'Cada día' : x.dias.length + ' días por semana';
-      return '<div class="ht-fila habito"><button type="button" class="ht-nom" data-acc="habito-ed" data-id="' + x.id + '" title="Editar"><span class="em">' + esc(x.em || '⭐') + '</span><span class="t"><b>' + esc(x.nombre) + '</b><small>' + frec + ' · ' + Math.round(pc * 100) + '%</small></span></button>' +
+      return '<div class="ht-fila habito"><button type="button" class="ht-nom" data-acc="habito-ver" data-id="' + x.id + '" title="Ver estadísticas"><span class="em">' + esc(x.em || '⭐') + '</span><span class="t"><b>' + esc(x.nombre) + '</b><small>' + frec + ' · ' + Math.round(pc * 100) + '%</small></span></button>' +
         dias.map(function(d, k){
-          var w = deISO(d).getDay(), libre = x.dias && x.dias.indexOf(w) < 0, ok = x.marcas && x.marcas[d];
+          var w = deISO(d).getDay(), libre = x.dias && x.dias.indexOf(w) < 0, ok = habHecho(x, d);
           return '<button type="button" class="ht-c dia-h' + (k < 4 ? ' lejos' : '') + (ok ? ' ok' : '') + (libre ? ' libre' : '') + (d === hoy ? ' hoy' : '') + '" data-acc="habito-dia" data-id="' + x.id + '" data-dia="' + d + '" aria-label="' + esc(x.nombre) + ' el ' + fechaCorta(d) + '"><span class="c">' + CHECK + '</span></button>';
         }).join('') +
         '<span class="ht-racha"><b>' + r + '</b></span></div>';
@@ -4537,6 +4553,48 @@ VISTAS.dinero = function(){
 };
 
 /* ---------- Agenda: el día, con sus tareas, eventos, avisos y pagos -------- */
+/* ---------- Planificar el día ---------------------------------------------
+   Reparte las tareas del día que no tienen hora en los huecos libres entre las
+   7:00 y las 22:00, de la más importante a la menos, con su duración estimada
+   (30 minutos si no tiene). Primero muestra la propuesta; al aplicar, cada
+   tarea queda con su hora y se puede deshacer. */
+function textoDuracion(min){ var h = Math.floor(min / 60), m = min % 60; return h ? h + ' h' + (m ? ' ' + m + ' min' : '') : m + ' min'; }
+function propuestaDia(dia){
+  var its = itemsDelDia(dia).filter(function(x){ return x.tipo !== 'feriado'; });
+  var tareas = its.filter(function(x){ return x.tipo === 'tarea' && !x.hora && !x.hecho; }).map(function(x){ return buscarId('tareas', x.id); }).filter(Boolean)
+    .sort(function(a, b){ return (b.prio || 0) - (a.prio || 0) || (a.dur || 30) - (b.dur || 30); });
+  var huecos = huecosLibres(its, dia).map(function(h){ return [Math.ceil(h[0] / 15) * 15, h[1]]; });
+  var plan = [], sinSitio = [];
+  tareas.forEach(function(t){
+    var d = +t.dur || 30, h = huecos.find(function(x){ return x[1] - x[0] >= d; });
+    if(!h){ sinSitio.push(t); return; }
+    plan.push({ t:t, ini:h[0], fin:h[0] + d });
+    h[0] += d + 5; h[0] = Math.ceil(h[0] / 5) * 5;
+  });
+  return { dia:dia, plan:plan, sinSitio:sinSitio };
+}
+function hhmm(m){ return dos(Math.floor(m / 60)) + ':' + dos(m % 60); }
+function hojaPlanDia(dia){
+  var P = propuestaDia(dia); ui.planDia = P;
+  abrirFlotante(cabFlot('Planificar ' + (dia === hoyISO() ? 'hoy' : relativo(dia).toLowerCase())) +
+    '<div class="plan-dia">' +
+    (P.plan.length ? '<p class="plan-intro">Así quedarían tus tareas en los huecos libres, de la más importante a la menos:</p><div class="lista-filas">' +
+      P.plan.map(function(x){ return '<div class="fila plan-fila"><span class="hora">' + hhmm(x.ini) + '<br><small>' + hhmm(x.fin) + '</small></span><span class="barrita" style="--c:' + colorEsp(x.t) + '"></span>' +
+        '<div class="cuerpo"><div class="titulo">' + esc(x.t.t) + '</div><div class="meta"><span>' + textoDuracion(x.fin - x.ini) + (x.t.dur ? '' : ' (calculado)') + '</span>' + (x.t.prio ? '<span>' + PRIOS[x.t.prio].n + '</span>' : '') + '</div></div></div>'; }).join('') + '</div>'
+      : '<p class="plan-intro">No quedan huecos libres de al menos media hora para tus tareas en este día.</p>') +
+    (P.sinSitio.length ? '<p class="plan-aviso">' + plural(P.sinSitio.length, 'tarea no cabe', 'tareas no caben') + ' hoy: ' + P.sinSitio.map(function(t){ return esc(t.t); }).join(', ') + '.</p>' : '') +
+    '<p class="plan-nota">Consejo: ponle a cada tarea su «Duración estimada» para que el plan sea más exacto.</p>' +
+    '<div class="botones"><button type="button" class="btn" data-cerrar="1">Cancelar</button>' +
+      (P.plan.length ? '<button type="button" class="btn primario" data-acc="plan-aplicar">' + ico('i-check') + 'Aplicar el plan</button>' : '') + '</div></div>');
+}
+function aplicarPlanDia(){
+  var P = ui.planDia; if(!P || !P.plan.length) return;
+  var antes = P.plan.map(function(x){ return JSON.parse(JSON.stringify(buscarId('tareas', x.t.id) || x.t)); });
+  P.plan.forEach(function(x){ var t = buscarId('tareas', x.t.id); if(!t) return; t = JSON.parse(JSON.stringify(t)); t.hora = hhmm(x.ini); if(!t.fecha) t.fecha = P.dia; poner('tareas', t); });
+  ui.planDia = null; cerrarFlotante(); pintar();
+  aviso('🗓️ Día planificado', plural(P.plan.length, 'tarea con hora', 'tareas con hora'), 'Deshacer', function(){ antes.forEach(function(t){ poner('tareas', t); }); pintar(); });
+}
+
 VISTAS.agenda = function(){
   var hoy = hoyISO(), dia = ui.agDia || hoy, ini = inicioSemana(dia);
   ui.calSel = dia; ui.calMes = dia.slice(0, 7);
@@ -4556,7 +4614,11 @@ VISTAS.agenda = function(){
       (atras.length > 6 ? '<button type="button" class="ag-mas" data-acc="ag-tareas" data-v="hoy">Ver las ' + atras.length + '</button>' : '') + '</section>';
   }
   var sinHora = its.filter(function(x){ return !x.hora; }), conHora = its.filter(function(x){ return x.hora; }).sort(function(a, b){ return a.hora.localeCompare(b.hora); });
-  if(sinHora.length) html += '<section class="ag-bloque ag-sin-hora"><h3 class="ag-h"><span>Sin hora</span><b>' + sinHora.length + '</b></h3><div class="lista-filas">' + sinHora.map(function(x){ return filaAgenda(x, dia).replace('<span class="hora">—</span>', ''); }).join('') + '</div></section>';
+  var tSinHora = sinHora.filter(function(x){ return x.tipo === 'tarea' && !x.hecho; });
+  var minEst = its.filter(function(x){ return x.tipo === 'tarea' && !x.hecho; }).reduce(function(a, x){ return a + (+(x.o && x.o.dur) || 0); }, 0);
+  if(minEst) html += '<p class="ag-estimado">' + ico('i-reloj') + 'Tareas de ' + (dia === hoy ? 'hoy' : 'este día') + ': <b>' + textoDuracion(minEst) + '</b> estimadas</p>';
+  if(sinHora.length) html += '<section class="ag-bloque ag-sin-hora"><h3 class="ag-h"><span>Sin hora</span><b>' + sinHora.length + '</b>' +
+    (tSinHora.length && dia >= hoy ? '<button type="button" class="ag-link" data-acc="plan-dia" data-dia="' + dia + '">' + ico('i-reloj') + 'Planificar</button>' : '') + '</h3><div class="lista-filas">' + sinHora.map(function(x){ return filaAgenda(x, dia).replace('<span class="hora">—</span>', ''); }).join('') + '</div></section>';
   if(conHora.length) html += '<section class="ag-bloque"><h3 class="ag-h"><span>Por horas</span><b>' + conHora.length + '</b></h3><div class="lista-filas">' + conHora.map(function(x){ return filaAgenda(x, dia); }).join('') + '</div></section>';
   if(!sinHora.length && !conHora.length && !atras.length) html += '<div class="ag-vacio">' + vacio('🌿', 'Día libre', 'No tienes nada agendado para este día.') + '</div>';
   var sf = vivos('tareas').filter(function(t){ return !t.hecha && !t.fecha; }).length;
@@ -4632,7 +4694,7 @@ function vizDe(ir){
   if(ir === 'movimientos'){ var l = movsDe('todo'), b = []; for(var i = 6; i >= 0; i--){ var d = sumarDias(hoy, -i); b.push(l.filter(function(t){ return t.date === d && t.type === 'Gasto'; }).reduce(function(a, t){ return a + t.amount; }, 0)); } return { barras:b, marca:6 }; }
   if(ir === 'pagos'){ var pm = pagadoMes(''); return pm == null ? null : { p:pm }; }
   if(ir === 'listas'){ var it = []; vivos('listas').forEach(function(x){ it = it.concat(x.items || []); }); return it.length ? { p:it.filter(function(i){ return i.ok; }).length / it.length } : null; }
-  if(ir === 'habitos'){ var wd = new Date().getDay(), hb = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; }); return hb.length ? { p:hb.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length / hb.length } : null; }
+  if(ir === 'habitos'){ var wd = new Date().getDay(), hb = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; }); return hb.length ? { p:hb.filter(function(x){ return habHecho(x, hoy); }).length / hb.length } : null; }
   if(ir === 'metas'){ var ms = vivos('metas'); return ms.length ? { p:ms.reduce(function(a, m){ return a + Math.min(1, (+m.actual || 0) / (+m.objetivo || 1)); }, 0) / ms.length } : null; }
   if(ir.indexOf('esp-') === 0){
     var id = ir.slice(4), tt = vivos('tareas').filter(function(t){ return espDe(t) === id; });
@@ -4763,7 +4825,7 @@ VISTAS['panel-notas'] = function(){
 };
 VISTAS['panel-mas'] = function(){
   var hoy = hoyISO(), wd = new Date().getDay();
-  var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; }), habOk = hab.filter(function(x){ return x.marcas && x.marcas[hoy]; }).length;
+  var hab = vivos('habitos').filter(function(x){ return !x.dias || x.dias.indexOf(wd) >= 0; }), habOk = hab.filter(function(x){ return habHecho(x, hoy); }).length;
   var escritos = vivos('diario').filter(function(e){ return e.id.slice(0, 7) === hoy.slice(0, 7) && e.texto; }).length;
   var html = cabPanel('Más', 'Tus espacios, hábitos y ajustes');
   html += '<h3 class="panel-sub">Tus espacios</h3><div class="mosaicos">' + ESPACIOS.map(function(E){
@@ -5628,7 +5690,10 @@ function editarTarea(id, preset){
       campo('Qué hay que hacer', '<input name="t" required maxlength="200" value="' + esc(t.t) + '" placeholder="Ej. Renovar el DNI">') +
       '<div class="fila-campos">' + campo('Fecha', '<input type="date" name="fecha" value="' + esc(t.fecha) + '">') +
                                     campo('Hora (opcional)', '<input type="time" name="hora" value="' + esc(t.hora) + '">') + '</div>' +
-      '<div class="fila-campos">' + campo('Repetir', selRep(t.rep)) +
+      '<div class="fila-campos">' + campo('Duración estimada', '<select name="dur">' + [['', 'Sin calcular'], ['15', '15 min'], ['30', '30 min'], ['45', '45 min'], ['60', '1 hora'], ['90', '1 h 30'], ['120', '2 horas'], ['180', '3 horas'], ['240', '4 horas']].map(function(o){
+          return '<option value="' + o[0] + '"' + (String(t.dur || '') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>') +
+        campo('Repetir', selRep(t.rep)) + '</div>' +
+      '<div class="fila-campos">' +
         campo('Etiqueta (opcional)', '<input name="area" list="listaAreas" maxlength="30" value="' + esc(t.area) + '" placeholder="Ej. Casa, Tesis, Cliente X"><datalist id="listaAreas">' +
           areas.map(function(a){ return '<option value="' + esc(a) + '">'; }).join('') + '</datalist>') + '</div>' +
       (proyectosActivos().length || t.proy ? campo('Proyecto', '<select name="proy"><option value="">— Ninguno —</option>' + vivos('proyectos').filter(function(p){ return p.estado !== 'hecho' || p.id === t.proy; }).map(function(p){ return '<option value="' + p.id + '"' + (t.proy === p.id ? ' selected' : '') + '>' + esc(p.nombre) + '</option>'; }).join('') + '</select>') : '') +
@@ -5644,6 +5709,7 @@ function editarTarea(id, preset){
     e.preventDefault(); t.esp = leerSelector('esp') || t.esp || espPorDefecto();
     t.t = f.t.value.trim(); if(!t.t) return;
     t.fecha = f.fecha.value; t.hora = f.hora.value; t.rep = f.rep.value;
+    t.dur = +f.dur.value || undefined;
     if(t.rep !== 'no' && !t.fecha) t.fecha = hoyISO();
     t.area = f.area.value.trim(); t.notas = f.notas.value.trim();
     t.prio = +leerSelector('prio') || 0;
@@ -5942,6 +6008,9 @@ function editarHabito(id, preset){
       campo('Hábito', '<input name="n" required maxlength="60" value="' + esc(x.nombre) + '" placeholder="Ej. Caminar 30 minutos">') +
       grupo('Icono', selector('em', EMOJIS_H.map(function(e){ return { v:e, n:e }; }), x.em, 'emojis')) +
       grupo('Qué días', selector('dias', orden.map(function(d){ return { v:String(d), n:cap(DIAS3[d]) }; }), (x.dias || [0,1,2,3,4,5,6]).map(String), '', true)) +
+      '<div class="fila-campos">' + campo('Meta por día (opcional)', '<input name="meta" type="number" inputmode="numeric" min="2" max="999" value="' + (habMeta(x) || '') + '" placeholder="Ej. 8">') +
+        campo('Unidad', '<input name="unidad" maxlength="20" value="' + esc(x.unidad || '') + '" placeholder="Ej. vasos, páginas">') + '</div>' +
+      '<p class="ayuda-campo">Con meta, cada toque suma uno y el día cuenta como hecho al llegar (8 de 8 vasos). Sin meta, un toque y listo.</p>' +
       campo('Avisarme a las (opcional)', '<input type="time" name="h" value="' + esc(x.hora || '') + '">') +
       selectorEsp(x.esp || (id ? espDe(x) : espPorDefecto())) + botonesEd(!!id) +
     '</form>');
@@ -5954,18 +6023,68 @@ function editarHabito(id, preset){
     var d = leerSelector('dias', true).map(Number);
     x.dias = d.length ? d : [0,1,2,3,4,5,6];
     x.hora = f.h.value || '';
+    var mt = Math.round(+f.meta.value || 0), metaAntes = habMeta(x); x.meta = mt > 1 ? mt : undefined; x.unidad = f.unidad.value.trim() || undefined;
+    /* Los días ya hechos siguen contando como hechos al cambiar (o quitar) la meta */
+    Object.keys(x.marcas || {}).forEach(function(d){
+      var v = +x.marcas[d] || 0, antes = metaAntes ? v >= metaAntes : v > 0;
+      if(x.meta){ if(antes) x.marcas[d] = x.meta; } else if(v > 0){ if(antes) x.marcas[d] = 1; else delete x.marcas[d]; }
+    });
     poner('habitos', x); cerrarFlotante(); pintar();
     if(x.hora && 'Notification' in window && Notification.permission === 'default') pedirPermiso();
   };
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('habitos', x.id, 'Hábito borrado'); pintar(); } };
 }
+/* Ficha de un hábito: rachas, cumplimiento, total y las últimas 12 semanas */
+function fichaHabito(id){
+  var x = buscarId('habitos', id); if(!x) return;
+  var hoy = hoyISO(), m = habMeta(x), toca = function(s){ return !x.dias || x.dias.indexOf(deISO(s).getDay()) >= 0; };
+  var total = Object.keys(x.marcas || {}).filter(function(d){ return habHecho(x, d); }).length;
+  var pc30 = Math.round(cumplimiento(x) * 100), r = racha(x), mr = Math.max(mejorRacha(x), r);
+  /* Mapa: 12 semanas, de lunes a domingo, la más reciente a la derecha */
+  var ini = sumarDias(inicioSemana(hoy), -77), cols = '';
+  for(var w = 0; w < 12; w++){
+    var celdas = '';
+    for(var k = 0; k < 7; k++){
+      var d = sumarDias(ini, w * 7 + k), cls = d > hoy ? 'fut' : !toca(d) ? 'libre' : habHecho(x, d) ? 'ok' : (m && habCant(x, d) ? 'medio' : '');
+      celdas += '<i class="' + cls + '" title="' + fechaCorta(d) + (m ? ': ' + habCant(x, d) + '/' + m : '') + '"></i>';
+    }
+    cols += '<span>' + celdas + '</span>';
+  }
+  /* Por día de la semana: qué días te cuestan más */
+  var porDia = [0,0,0,0,0,0,0], tocaDia = [0,0,0,0,0,0,0];
+  for(var i = 0; i < 84; i++){ var dd = sumarDias(hoy, -i), wd = deISO(dd).getDay(); if(!toca(dd)) continue; tocaDia[wd]++; if(habHecho(x, dd)) porDia[wd]++; }
+  var orden = pref.lunes ? [1,2,3,4,5,6,0] : [0,1,2,3,4,5,6];
+  var semana = orden.map(function(wd){ var p = tocaDia[wd] ? porDia[wd] / tocaDia[wd] : 0;
+    return '<div class="hf-dia"><span class="hf-barra"><i style="height:' + Math.round(p * 100) + '%"></i></span><small>' + DIAS3[wd].charAt(0).toUpperCase() + '</small></div>'; }).join('');
+  var num = function(v, t){ return '<div><b>' + v + '</b><small>' + t + '</small></div>'; };
+  abrirFlotante(cabFlot(esc(x.em || '⭐') + ' ' + esc(x.nombre)) +
+    '<div class="hab-ficha">' +
+      (m ? '<div class="hf-meta"><span>Hoy</span><div class="hf-cont"><button type="button" class="btn-icono" data-acc="hab-menos" data-id="' + x.id + '" aria-label="Uno menos">−</button><b>' + habCant(x, hoy) + ' / ' + m + '</b><button type="button" class="btn-icono" data-acc="hab-mas" data-id="' + x.id + '" aria-label="Uno más">+</button></div><small>' + esc(x.unidad || '') + '</small></div>' : '') +
+      '<div class="hf-nums">' + num('🔥 ' + r, r === 1 ? 'día seguido' : 'días seguidos') + num(mr, 'mejor racha') + num(pc30 + '%', 'últimos 30 días') + num(total, total === 1 ? 'vez en total' : 'veces en total') + '</div>' +
+      '<h4 class="hf-tit">Últimas 12 semanas</h4><div class="hf-mapa">' + cols + '</div>' +
+      '<div class="hf-ley"><i></i> no hecho <i class="ok"></i> hecho' + (m ? ' <i class="medio"></i> a medias' : '') + ' <i class="libre"></i> no toca</div>' +
+      '<h4 class="hf-tit">Por día de la semana</h4><div class="hf-semana">' + semana + '</div>' +
+      '<div class="botones"><button type="button" class="btn" data-acc="habito-ed" data-id="' + x.id + '">' + ico('i-lapiz') + 'Editar</button></div>' +
+    '</div>');
+}
+function sumarHabito(id, n){
+  var x = buscarId('habitos', id); if(!x) return;
+  var hoy = hoyISO(), m = habMeta(x); if(!m) return;
+  x.marcas = x.marcas || {};
+  var c = Math.max(0, Math.min(m * 3, habCant(x, hoy) + n));
+  if(c) x.marcas[hoy] = c; else delete x.marcas[hoy];
+  poner('habitos', x); fichaHabito(id); pintarSeguro();
+}
 function alternarHabito(id, dia){
   var x = buscarId('habitos', id);
   if(!x) return;
   x.marcas = x.marcas || {};
-  if(x.marcas[dia]) delete x.marcas[dia]; else x.marcas[dia] = 1;
+  var m = habMeta(x);
+  if(m){ var c = habCant(x, dia); if(c >= m) delete x.marcas[dia]; else x.marcas[dia] = c + 1; }
+  else if(x.marcas[dia]) delete x.marcas[dia]; else x.marcas[dia] = 1;
   poner('habitos', x);
-  if(x.marcas[dia] && dia === hoyISO()){
+  if(m && x.marcas[dia] && x.marcas[dia] < m) aviso((x.em || '⭐') + ' ' + x.marcas[dia] + ' de ' + m + ' ' + (x.unidad || ''), x.nombre);
+  if(habHecho(x, dia) && dia === hoyISO()){
     var r = racha(x);
     if(r > 1 && (r % 7 === 0 || r === 3)) aviso('🔥 ¡' + r + ' días seguidos!', x.nombre);
   }
@@ -6294,7 +6413,7 @@ function revisarAlarmas(){
 
   /* Hábitos con hora: si hoy toca y aún no lo marcaste */
   vivos('habitos').forEach(function(x){
-    if(!x.hora || (x.dias && x.dias.indexOf(deISO(hoy).getDay()) < 0) || (x.marcas && x.marcas[hoy])) return;
+    if(!x.hora || (x.dias && x.dias.indexOf(deISO(hoy).getDay()) < 0) || (habHecho(x, hoy))) return;
     var ms = momentoMs(hoy, x.hora), k = 'h:' + x.id + ':' + hoy;
     if(ms <= ahora && !avisados[k]){
       avisados[k] = ahora;
@@ -7124,6 +7243,9 @@ document.addEventListener('click', function(ev){
     case 'evento-ed': cerrarFlotante(); editarEvento(id); break;
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
     case 'habito-ed': cerrarFlotante(); editarHabito(id); break;
+    case 'habito-ver': fichaHabito(id); break;
+    case 'hab-mas': sumarHabito(id, 1); break;
+    case 'hab-menos': sumarHabito(id, -1); break;
 
     case 't-filtro': ui.tFiltro = b.dataset.f; ui.tFiltroElegido = true; if(b.dataset.irTras && ui.vista !== b.dataset.irTras){ ir(b.dataset.irTras); break; } pintar(); break;
     case 't-area': ui.tArea = b.dataset.a; pintar(); break;
@@ -7377,6 +7499,8 @@ document.addEventListener('click', function(ev){
       break;
     case 'din-libro': ui.dinLibro = b.dataset.v; pintar(); break;
     case 'ag-dia': ui.agDia = b.dataset.dia; pintar(); break;
+    case 'plan-dia': hojaPlanDia(b.dataset.dia || hoyISO()); break;
+    case 'plan-aplicar': aplicarPlanDia(); break;
     case 'ag-sem': ui.agDia = sumarDias(ui.agDia || hoyISO(), +b.dataset.n); pintar(); break;
     case 'ag-tareas': ui.tFiltro = b.dataset.v || 'hoy'; ir('tareas'); break;
     case 'qh-ocultar': vibrar(8); qhGuardar(qhOcultas(hoyISO()).concat([b.dataset.k])); pintar(); break;

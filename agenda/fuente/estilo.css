@@ -4323,3 +4323,49 @@ header.banda .banda-fondo, header.banda-panel .banda-fondo{ opacity:.1 !importan
   /* Filtros de espacio del calendario: en dos líneas antes que cortados */
   .fichas.desliza:has([data-acc="cal-esp"]){ flex-wrap:wrap !important; overflow:visible !important }
 }
+
+/* ==========================================================================
+   FUNCIONES NUEVAS
+   ========================================================================== */
+/* Planificar el día */
+.ag-estimado{ display:flex; align-items:center; gap:7px; margin:0 0 12px; font-size:13.5px; color:var(--tinta-2) }
+.ag-estimado .i{ width:16px; height:16px; color:var(--acento-txt, var(--verde-sube)) }
+.ag-estimado b{ color:var(--tinta) }
+.ag-h .ag-link{ display:inline-flex; align-items:center; gap:5px }
+.ag-h .ag-link .i{ width:14px; height:14px }
+.plan-dia{ padding:0 16px 16px }
+.plan-intro{ margin:0 0 10px; color:var(--tinta-2); font-size:14px }
+.plan-fila .hora small{ color:var(--tinta-3); font-size:11px }
+.plan-aviso{ margin:12px 0 0; padding:10px 12px; border-radius:12px; background:color-mix(in srgb, var(--oro) 12%, var(--hoja-2)); color:var(--tinta); font-size:13.5px }
+.plan-nota{ margin:12px 0 14px; color:var(--tinta-3); font-size:12.5px }
+.plan-dia .botones{ display:flex; gap:10px; justify-content:flex-end }
+/* Ficha de hábito */
+.hab-ficha{ padding:0 16px 16px }
+.ayuda-campo{ margin:-4px 0 12px; font-size:12.5px; color:var(--tinta-3); line-height:1.4 }
+.hf-meta{ display:flex; align-items:center; gap:12px; padding:12px 14px; margin:0 0 14px; border-radius:14px; background:var(--hoja-2); border:1px solid var(--regla) }
+.hf-meta > span{ font-weight:700; color:var(--tinta-2) }
+.hf-cont{ display:flex; align-items:center; gap:10px; margin-left:auto }
+.hf-cont b{ font-size:22px; font-weight:800; min-width:70px; text-align:center }
+.hf-cont .btn-icono{ width:40px; height:40px; font-size:22px; border-radius:12px; background:var(--hoja); border:1px solid var(--regla) }
+.hf-meta small{ color:var(--tinta-3) }
+.hf-nums{ display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:8px }
+.hf-nums > div{ padding:12px 8px; border-radius:14px; background:var(--hoja-2); text-align:center }
+.hf-nums b{ display:block; font-size:20px; font-weight:800 }
+.hf-nums small{ font-size:11.5px; color:var(--tinta-2); line-height:1.2; display:block; margin-top:2px }
+.hf-tit{ margin:18px 0 8px; font-size:14px; color:var(--tinta-2); font-weight:700 }
+.hf-mapa{ display:grid; grid-template-columns:repeat(12, minmax(0, 1fr)); gap:4px }
+.hf-mapa span{ display:grid; grid-template-rows:repeat(7, 1fr); gap:4px }
+.hf-mapa i, .hf-ley i{ display:block; aspect-ratio:1; border-radius:4px; background:color-mix(in srgb, var(--tinta) 9%, transparent) }
+.hf-mapa i.ok, .hf-ley i.ok{ background:var(--haber) }
+.hf-mapa i.medio, .hf-ley i.medio{ background:color-mix(in srgb, var(--haber) 45%, transparent) }
+.hf-mapa i.libre, .hf-ley i.libre{ background:none; box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--tinta) 10%, transparent) }
+.hf-mapa i.fut{ background:none }
+.hf-ley{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:8px; font-size:11.5px; color:var(--tinta-3) }
+.hf-ley i{ width:11px; height:11px; margin-left:6px }
+.hf-semana{ display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; align-items:end }
+.hf-dia{ display:flex; flex-direction:column; align-items:center; gap:5px }
+.hf-barra{ width:100%; max-width:30px; height:70px; border-radius:8px; background:color-mix(in srgb, var(--tinta) 7%, transparent); display:flex; align-items:flex-end; overflow:hidden }
+.hf-barra i{ display:block; width:100%; background:var(--haber); border-radius:8px 8px 0 0 }
+.hf-dia small{ font-size:11.5px; color:var(--tinta-2); font-weight:700 }
+.hab-ficha .botones{ display:flex; justify-content:flex-end; margin-top:16px }
+@media (max-width:420px){ .hf-nums{ grid-template-columns:repeat(2, minmax(0, 1fr)) } }
