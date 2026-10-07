@@ -4450,6 +4450,17 @@ header.banda .banda-fondo, header.banda-panel .banda-fondo{ opacity:.1 !importan
 .lim-fila input{ width:110px; flex:none; text-align:right }
 .lim-nueva{ margin-top:8px; border-bottom:0 }
 .lim-nueva input:first-child{ flex:1; width:auto; text-align:left }
+/* Notas: etiquetas, orden y plantillas */
+.notas-barra{ display:flex; gap:8px; margin-bottom:12px }
+.notas-barra #notasQ{ flex:1; min-width:0 }
+.notas-barra .notas-orden{ flex:none; width:auto; max-width:140px }
+.notas-filtro{ margin:0 0 14px; flex-wrap:wrap !important; overflow:visible !important }
+.nota-tags{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px }
+.nota-tag{ font-size:11.5px; font-weight:700; padding:3px 8px; border-radius:99px; background:color-mix(in srgb, var(--c, var(--acento-txt)) 14%, var(--hoja-2)); color:var(--tinta-2); border:0 }
+.nota-tag:hover{ color:var(--tinta) }
+.plantillas-nota{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:6px 0 2px }
+.plantillas-nota > span{ font-size:12.5px; color:var(--tinta-3); font-weight:600; margin-right:2px }
+.plantillas-nota .ficha{ font-size:12.5px; padding:5px 10px }
 </style>
 </head>
 <body>
@@ -8852,18 +8863,36 @@ function marcarLineaNota(id, i){
   ls[i] = ls[i].replace(/\[( |x|X)\]/, function(_, c){ return c === ' ' ? '[x]' : '[ ]'; });
   n.cuerpo = ls.join('\n'); poner('notas', n); vibrar(8); pintarSeguro();
 }
+/* Etiquetas: las palabras con # dentro de la nota (#recetas, #trabajo…) */
+function etiquetasDe(n){
+  var out = [], re = /(^|[\s(,.;:¡¿])#([0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ_-]{2,30})/g, m, txt = (n.t || '') + '\n' + (n.cuerpo || '');
+  while((m = re.exec(txt))){ var e = m[2].toLowerCase(); if(out.indexOf(e) < 0) out.push(e); }
+  return out;
+}
 function tarjetaNota(n){
+  var et = etiquetasDe(n);
   return '<div role="button" tabindex="0" class="tarjeta nota" style="--c:' + (n.color ? color(n.color) : 'var(--regla)') + '" data-acc="nota-ed" data-id="' + n.id + '">' +
     (n.t ? '<b>' + esc(n.t) + '</b>' : '') + cuerpoNota(n) +
+    (et.length ? '<span class="nota-tags">' + et.slice(0, 5).map(function(e){ return '<button type="button" class="nota-tag" data-acc="nota-tag" data-v="' + esc(e) + '">#' + esc(e) + '</button>'; }).join('') + '</span>' : '') +
     '<small>' + (n.fija ? ico('i-pin') : '') + relativo(iso(new Date(n.upd || Date.now()))) + '</small></div>';
 }
 VISTAS.notas = function(){
-  var q = sinTildes(ui.notasQ.trim());
-  var ns = vivos('notas').filter(function(n){ return !q || sinTildes(n.t + ' ' + n.cuerpo).indexOf(q) >= 0; })
-    .sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || (b.upd || 0) - (a.upd || 0); });
-  var total = vivos('notas').length;
-  return '<div style="display:flex;gap:8px;margin-bottom:14px">' +
-      (total ? '<input class="entrada" id="notasQ" type="search" placeholder="Buscar en las notas" value="' + esc(ui.notasQ) + '" style="flex:1">' : '') + '</div>' +
+  var q = sinTildes(ui.notasQ.trim()), tag = ui.notasTag || '', orden = ui.notasOrden || 'recientes';
+  var todas = vivos('notas'), cuenta = {};
+  todas.forEach(function(n){ etiquetasDe(n).forEach(function(e){ cuenta[e] = (cuenta[e] || 0) + 1; }); });
+  if(tag && !cuenta[tag]) tag = ui.notasTag = '';
+  var ORD = { recientes:function(a, b){ return (b.upd || 0) - (a.upd || 0); }, antiguas:function(a, b){ return (a.creada || a.upd || 0) - (b.creada || b.upd || 0); },
+    az:function(a, b){ return String(a.t || a.cuerpo || '').localeCompare(String(b.t || b.cuerpo || ''), 'es', { sensitivity:'base' }); } };
+  var ns = todas.filter(function(n){ return (!q || sinTildes(n.t + ' ' + n.cuerpo).indexOf(q) >= 0) && (!tag || etiquetasDe(n).indexOf(tag) >= 0); })
+    .sort(function(a, b){ return (b.fija ? 1 : 0) - (a.fija ? 1 : 0) || ORD[orden](a, b); });
+  var total = todas.length, tags = Object.keys(cuenta).sort(function(a, b){ return cuenta[b] - cuenta[a] || a.localeCompare(b); });
+  return '<div class="notas-barra">' +
+      (total ? '<input class="entrada" id="notasQ" type="search" placeholder="Buscar en las notas" value="' + esc(ui.notasQ) + '">' +
+        '<select class="entrada notas-orden" data-notas-orden="1" aria-label="Ordenar">' + [['recientes','Recientes'],['antiguas','Más antiguas'],['az','A – Z']].map(function(o){
+          return '<option value="' + o[0] + '"' + (orden === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' : '') + '</div>' +
+    (tags.length ? '<div class="fichas notas-filtro"><button type="button" class="ficha" data-acc="nota-tag" data-v="" aria-pressed="' + !tag + '">Todas <span class="n">' + total + '</span></button>' +
+      tags.slice(0, 20).map(function(e){ return '<button type="button" class="ficha" data-acc="nota-tag" data-v="' + esc(e) + '" aria-pressed="' + (tag === e) + '">#' + esc(e) + ' <span class="n">' + cuenta[e] + '</span></button>'; }).join('') + '</div>'
+      : (total ? '<p class="ayuda-campo">Consejo: escribe <b>#etiqueta</b> en una nota (#recetas, #trabajo) y podrás filtrarlas aquí.</p>' : '')) +
     (ns.length ? '<div class="notas-muro">' + ns.map(tarjetaNota).join('') + '</div>'
       : '<div class="tarjeta">' + (total ? vacio('🔎', 'Nada coincide') : vacio('🗒️', 'Sin notas', 'Ideas, datos que no quieres olvidar, direcciones, contraseñas del wifi…')) + '</div>');
 };
@@ -10605,13 +10634,21 @@ function menuPosponer(id){
 }
 
 /* ---------- Editor de nota: se guarda sola mientras escribes --------------- */
+var PLANT_NOTA = {
+  reunion:{ n:'🗣️ Reunión', t:'Reunión: ', c:'Fecha: ' + '{hoy}' + '\nAsistentes: \n\nTemas:\n- \n\nAcuerdos:\n[ ] \n\n#reuniones' },
+  idea:{ n:'💡 Idea', t:'Idea: ', c:'Qué es:\n\nPor qué vale la pena:\n\nSiguiente paso:\n[ ] \n\n#ideas' },
+  pendientes:{ n:'☑️ Pendientes', t:'Pendientes', c:'[ ] \n[ ] \n[ ] ' },
+  receta:{ n:'🍳 Receta', t:'Receta: ', c:'Porciones: \nTiempo: \n\nIngredientes:\n- \n\nPasos:\n1. \n\n#recetas' },
+  clase:{ n:'🎓 Apuntes', t:'Apuntes: ', c:'Curso: \nFecha: {hoy}\n\nIdeas clave:\n- \n\nDudas:\n- \n\n#estudios' }
+};
 function editarNota(id){
   var n = id ? JSON.parse(JSON.stringify(buscarId('notas', id))) : { id:nid(), t:'', cuerpo:'', color:'', fija:false };
   var existe = !!id, reloj = null;
   abrirFlotante(cabFlot(id ? 'Nota' : 'Nueva nota') +
     '<form class="form" id="formEd" autocomplete="off">' +
       '<input class="entrada" name="t" maxlength="120" value="' + esc(n.t) + '" placeholder="Título" style="font-weight:700;font-size:17px">' +
-      '<label class="campo"><textarea name="cuerpo" rows="10" maxlength="20000" placeholder="Escribe…" style="min-height:220px">' + esc(n.cuerpo) + '</textarea></label>' +
+      (id ? '' : '<div class="plantillas-nota"><span>Empezar con:</span>' + Object.keys(PLANT_NOTA).map(function(k){ return '<button type="button" class="ficha" data-ed="pl-' + k + '">' + PLANT_NOTA[k].n + '</button>'; }).join('') + '</div>') +
+      '<label class="campo"><textarea name="cuerpo" rows="10" maxlength="20000" placeholder="Escribe… (usa #etiquetas para ordenarlas)" style="min-height:220px">' + esc(n.cuerpo) + '</textarea></label>' +
       grupo('Color', selector('color', [{ v:'', c:'var(--regla)', tt:'sin color' }].concat(OPC_COLOR), n.color || '', 'colores')) +
       selectorEsp(n.esp || (id ? espDe(n) : espPorDefecto())) +
       '<label class="interruptor"><input type="checkbox" name="fija"' + (n.fija ? ' checked' : '') + '>Fijar arriba y en Hoy</label>' +
@@ -10632,7 +10669,7 @@ function editarNota(id){
     poner('notas', n);
   }
   f.oninput = function(){ clearTimeout(reloj); reloj = setTimeout(guardarYa, 500); };
-  f.onchange = guardarYa;
+  f.onchange = function(ev){ if(ev && ev.target && ev.target.closest && ev.target.closest('.plantillas-nota')) return; guardarYa(); };
   f.onsubmit = function(ev){ ev.preventDefault(); cerrarFlotante(); };
   edAcciones = {
     borrar: function(){
@@ -10658,6 +10695,16 @@ function editarNota(id){
       ta.setRangeText('[ ] ', ini, ini, 'end'); ta.focus(); guardarYa();
     }
   };
+  /* Plantillas: rellenan el título y el cuerpo (solo si la nota está vacía o casi) */
+  Object.keys(PLANT_NOTA).forEach(function(kp){
+    edAcciones['pl-' + kp] = function(){
+      var P = PLANT_NOTA[kp];
+      if(f.cuerpo.value.trim() && f.cuerpo.value.trim() !== (n.cuerpo || '').trim()){ aviso('La nota ya tiene texto', 'Las plantillas se usan en una nota vacía.'); return; }
+      f.t.value = f.t.value.trim() || P.t; f.cuerpo.value = P.c.replace('{hoy}', fechaCorta(hoyISO()));
+      f.t.focus(); try{ f.t.setSelectionRange(f.t.value.length, f.t.value.length); }catch(e){}
+      guardarYa();
+    };
+  });
 }
 
 /* ---------- Editor de hábito ---------------------------------------------- */
@@ -11907,6 +11954,7 @@ document.addEventListener('click', function(ev){
     case 'nota-ed': cerrarFlotante(); editarNota(id); break;
     case 'habito-ed': cerrarFlotante(); editarHabito(id); break;
     case 'habito-ver': fichaHabito(id); break;
+    case 'nota-tag': ui.notasTag = b.dataset.v || ''; if(ui.vista !== 'notas') ir('notas'); else pintar(); break;
     case 'hab-mas': sumarHabito(id, 1); break;
     case 'hab-menos': sumarHabito(id, -1); break;
 
@@ -12468,6 +12516,7 @@ document.addEventListener('input', function(ev){
 document.addEventListener('change', function(ev){
   var t = ev.target;
   if(t.dataset && t.dataset.autocorr){ pref.autocorr = t.checked; escribirJSON(CLAVE_PREF, pref); aviso(t.checked ? '✍️ Autocorrector activado' : 'Autocorrector apagado'); return; }
+  if(t.dataset && t.dataset.notasOrden){ ui.notasOrden = t.value; pintar(); return; }
   if(t.dataset && t.dataset.teclado){ pref.teclado = t.checked; escribirJSON(CLAVE_PREF, pref); if(!t.checked) TECLADO.ocultar(); aviso(t.checked ? '⌨️ Teclado de la agenda activado' : 'Vuelves al teclado del celular'); return; }
   if(t.dataset && t.dataset.secVer){
     var so = (pref.secOff || []).filter(function(x){ return x !== t.dataset.secVer; });
