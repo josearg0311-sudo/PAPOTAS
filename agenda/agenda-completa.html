@@ -4727,6 +4727,15 @@ body .vista header.cab-grande.cab-sec.banda, body .vista header.panel-cab.banda-
 .cliente-reu{ margin:0 14px 8px; padding:8px 10px; border-radius:10px; font-size:12.5px; color:var(--tinta-2); background:color-mix(in srgb, var(--esp-oficina, #A78BFA) 12%, transparent) }
 .cliente-reu b{ color:var(--tinta) }
 .dia-datos .vinc-fijas{ margin:0 }
+
+/* ===== AZUL PROFUNDO (paleta Negro): acento y fondo más oscuros ===== */
+:root[data-paleta="negro"]:not([data-tema="claro"]){
+  --verde:#16349A; --verde-sube:#1F42B4; --verde-piso:#081232; --acento-txt:#7894EE;
+  --papel:#050915; --hoja:#0C1222; --hoja-2:#131B30; --regla:#1F2A44; --regla-2:#18213A;
+}
+:root[data-paleta="negro"][data-tema="claro"]{
+  --verde:#142F86; --verde-sube:#0F246A; --verde-piso:#E4EAFB; --acento-txt:#142F86;
+}
 </style>
 </head>
 <body>
@@ -10072,7 +10081,7 @@ function relacionados(id, k){
   if(!xs.length) return '';
   return '<div class="relacion"><small>Relacionado</small><div>' + xs.map(function(x){ return '<button type="button" class="ficha" ' + x.a + '>' + x.t + ico('i-der') + '</button>'; }).join('') + '</div></div>';
 }
-var COLOR_PANEL = { Agenda:['#2E6BFF','i-cal'], Dinero:['#30D158','i-grafica'], Notas:['#E7B24A','i-notas'], 'Más':['#BF5AF2','i-mas'] };
+var COLOR_PANEL = { Agenda:['#1F4FD1','i-cal'], Dinero:['#30D158','i-grafica'], Notas:['#E7B24A','i-notas'], 'Más':['#BF5AF2','i-mas'] };
 function cabPanel(t, sub, acciones){
   var cp = COLOR_PANEL[t] || ['var(--verde)','i-hoy'];
   scVista = cp[0];
@@ -10096,7 +10105,7 @@ VISTAS['panel-agenda'] = function(){
   return cabPanel('Agenda', cap(fechaLarga(hoy)) + ' · ' + pendHoy + (pendHoy === 1 ? ' cosa pendiente hoy' : ' cosas pendientes hoy'),
       accPanel('Tarea', 'data-acc="nuevo" data-tipo="tarea"', 'primario') + accPanel('Evento', 'data-acc="nuevo" data-tipo="evento"') + accPanel('Aviso', 'data-acc="nuevo" data-tipo="rec"')) +
     '<div class="mosaicos">' +
-      mosaico({ ir:'agenda', i:'i-hoy', c:'#2E6BFF', t:'Mi día', d:'Todo lo de un día junto: tareas, eventos y avisos', n:pendHoy, nl:'para hoy', ancho:true }) +
+      mosaico({ ir:'agenda', i:'i-hoy', c:'#1F4FD1', t:'Mi día', d:'Todo lo de un día junto: tareas, eventos y avisos', n:pendHoy, nl:'para hoy', ancho:true }) +
       mosaico({ ir:'calendario', i:'i-cal', c:'#30D158', t:'Calendario', d:'Tu mes, semana o año de un vistazo', n:ne, nl:'en 7 días' }) +
       mosaico({ ir:'tareas', i:'i-tareas', c:'#FFD60A', t:'Tareas', d:'Lo que tienes que hacer', n:tHoy || tPend, nl:k.tareasTarde ? plural(k.tareasTarde, 'atrasada', 'atrasadas') : tHoy ? 'para hoy' + (tPend > tHoy ? ' · ' + tPend + ' en total' : '') : (tPend === 1 ? 'pendiente' : 'pendientes'), alerta:!!k.tareasTarde }) +
       mosaico({ ir:'recordatorios', i:'i-campana', c:'#FF9F0A', t:'Avisos', d:'Lo que no se te puede olvidar', n:k.recordatorios || recHoy, nl:k.recordatorios ? 'pasados' : 'para hoy', alerta:!!k.recordatorios }) +
@@ -10112,7 +10121,7 @@ VISTAS['panel-dinero'] = function(){
   return cabPanel('Dinero', cap(MESES[+ym.slice(5, 7) - 1]) + ': te queda ' + (queda < 0 ? '−' : '') + dinero(Math.abs(queda)),
       accPanel('Gasto', 'data-acc="din-anotar" data-libro="personal" data-t="Gasto"', 'primario') + accPanel('Ingreso', 'data-acc="din-anotar" data-libro="personal" data-t="Ingreso"', 'btn-ingreso')) +
     '<div class="mosaicos">' +
-      mosaico({ ir:'dinero', i:'i-grafica', c:'#2E6BFF', t:'Resumen del mes', d:'Cuánto entró, cuánto salió, en qué se va y cómo vas', n:dinero(tm.sal), nl:'gastado', ancho:true }) +
+      mosaico({ ir:'dinero', i:'i-grafica', c:'#1F4FD1', t:'Resumen del mes', d:'Cuánto entró, cuánto salió, en qué se va y cómo vas', n:dinero(tm.sal), nl:'gastado', ancho:true }) +
       mosaico({ ir:'movimientos', i:'i-cuentas', c:'#30D158', t:'Movimientos', d:'Cada gasto e ingreso, para ver o corregir', n:nMes, nl:'este mes' }) +
       mosaico({ ir:'pagos', i:'i-recibo', c:'#FF453A', t:'Pagos fijos', d:'Luz, internet, alquiler…', n:np, nl:np ? dinero(pend) + ' por pagar' : 'todo pagado', alerta:!!k0Pagos() }) +
       mosaico({ acc:'data-acc="mov-ver" data-v="personal"', i:'i-casa', c:'#5AA9FF', t:'Libro personal', d:'Tus gastos personales', n:dinero(totalesMes(movsDe('personal'), ym).sal), nl:'gastado' }) +
@@ -10153,7 +10162,7 @@ function pvAgenda(){
   cs.push(pvCarta('📆', 'Próximos 7 días', '<div class="pv-carga">' + dias.map(function(x, j){
       return '<button type="button" class="' + (j === 0 ? 'hoy' : '') + '" data-acc="pv-dia" data-dia="' + x.d + '" title="' + fechaCorta(x.d) + ': ' + plural(x.n, 'cosa', 'cosas') + '"><b>' + x.n + '</b><i style="height:' + Math.max(6, Math.round(x.n / mx * 100)) + '%"></i><small>' + (j === 0 ? 'Hoy' : cap(DIAS3[deISO(x.d).getDay()])) + '</small></button>';
     }).join('') + '</div><p class="pv-nota">Toca un día para verlo completo</p>', ['Calendario', 'data-ir="calendario"']));
-  return pvBloque(cs, '#2E6BFF');
+  return pvBloque(cs, '#1F4FD1');
 }
 function pvDinero(){
   var hoy = hoyISO(), ym = hoy.slice(0, 7), lp = movsDe('personal'), tm = totalesMes(lp, ym), cs = [];
@@ -11042,7 +11051,7 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'negro',   nom:'Negro',   gotas:['#1D45C4','#30D158','#000000'] },
+  { id:'negro',   nom:'Negro',   gotas:['#16349A','#30D158','#050915'] },
   { id:'electrico', nom:'Eléctrico', gotas:['#3D8BFF','#45C97A','#18191B'] },
   { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },
