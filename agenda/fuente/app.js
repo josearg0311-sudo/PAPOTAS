@@ -1194,38 +1194,138 @@ function ordenarPendientes(){
 
 /* ---------- Gasto rápido: monto, categoría y listo ------------------------ */
 var CATS_BASE = ['Comida','Transporte','Casa','Servicios','Salud','Ocio','Deporte','Estudios'];
+/* ---------- Ayudas para rellenar datos y cuentas ------------------------- */
+/* Categoría según lo que escribes: primero lo que tú ya usaste, si no por palabras */
+var CAT_PALABRAS = [
+  [/taxi|uber|didi|cabify|bus|combi|micro|pasaje|metro|colectivo|gasolina|grifo|peaje|estacionamiento|cochera/, 'Transporte'],
+  [/almuerzo|desayuno|cena|men[uú]|pollo|chifa|pizza|hamburguesa|caf[eé]|super|mercado|tottus|plaza vea|wong|metro|vivanda|bodega|pan\b|frutas?|comida|restaurante|delivery|rappi|pedidosya/, 'Comida'],
+  [/luz|agua|internet|cable|tel[eé]fono|celular|recarga|plan|gas\b|movistar|claro|entel|bitel|sedapal|enel|luz del sur/, 'Servicios'],
+  [/farmacia|inkafarma|mifarma|doctor|m[eé]dico|cl[ií]nica|medicina|pastillas|dentista|an[aá]lisis|seguro/, 'Salud'],
+  [/cine|netflix|spotify|disney|hbo|youtube|juego|salida|fiesta|concierto|bar\b|cerveza|tragos/, 'Ocio'],
+  [/gym|gimnasio|cancha|pichanga|f[uú]tbol|zapatillas|chimpunes|prote[ií]na|suplemento/, 'Deporte'],
+  [/libro|curso|universidad|colegio|pensi[oó]n|matr[ií]cula|copias|fotocopias|[uú]tiles|clase/, 'Estudios'],
+  [/alquiler|renta|mantenimiento|limpieza|ferreter[ií]a|muebles|casa|depa/, 'Casa'],
+  [/sueldo|planilla|quincena|salario/, 'Sueldo'], [/venta|vend[ií]/, 'Ventas'], [/cobro|factura|honorarios/, 'Cobro']
+];
+function catSugerida(desc, libro){
+  var d = sinTildes(String(desc || '')).toLowerCase().trim(); if(d.length < 3) return '';
+  var cuenta = {};
+  movsDe(libro || 'todo').forEach(function(t){ if(t.cat && sinTildes(t.desc || '').toLowerCase().trim() === d) cuenta[t.cat] = (cuenta[t.cat] || 0) + 1; });
+  var mejor = Object.keys(cuenta).sort(function(a, b){ return cuenta[b] - cuenta[a]; })[0];
+  if(mejor) return mejor;
+  var r = CAT_PALABRAS.find(function(x){ return x[0].test(d); });
+  return r ? r[1] : '';
+}
+/* Lo que más escribes en «En qué», para elegir sin teclear */
+function descsRecientes(tipo){
+  var vistos = {}, out = [];
+  movsDe('todo').slice().sort(function(a, b){ return b.date.localeCompare(a.date); }).forEach(function(t){
+    if(tipo && t.type !== tipo) return;
+    var d = (t.desc || '').trim(); if(!d || d.length > 40) return;
+    var k = d.toLowerCase(); vistos[k] = (vistos[k] || 0) + 1; if(vistos[k] === 1) out.push(d);
+  });
+  return out.slice(0, 30);
+}
+/* Los montos que más repites (para tocarlos en vez de escribirlos) */
+function montosFrecuentes(tipo, cat){
+  var c = {};
+  movsDe('todo').slice(-200).forEach(function(t){ if(t.type === tipo && (!cat || t.cat === cat)) c[t.amount] = (c[t.amount] || 0) + 1; });
+  var top = Object.keys(c).sort(function(a, b){ return c[b] - c[a] || a - b; }).slice(0, 4).map(Number).sort(function(a, b){ return a - b; });
+  return top.length >= 2 ? top : (tipo === 'Ingreso' ? [100, 500, 1000, 2000] : [5, 10, 20, 50]);
+}
+/* Marca un campo con su error, sin ventanitas */
+function marcarError(inp, msj){
+  if(!inp) return;
+  var c = inp.closest('.campo, label, .gr-monto') || inp.parentNode;
+  c.classList.add('con-error');
+  var m = c.querySelector('.msj-error'); if(!m){ m = document.createElement('small'); m.className = 'msj-error'; c.appendChild(m); }
+  m.textContent = msj; inp.focus(); vibrar(30);
+  inp.addEventListener('input', function f(){ c.classList.remove('con-error'); if(m.parentNode) m.remove(); inp.removeEventListener('input', f); });
+}
+/* Campos de monto en toda la agenda: muestran el resultado mientras escribes
+   («= S/ 1,500.00») y, al salir, dejan la cuenta hecha. En los formularios de
+   cuentas, Enter pasa al siguiente campo y en el último guarda. */
+function esCampoMonto(x){ return x && x.tagName === 'INPUT' && /decimal/.test((x.getAttribute('data-im') || '') + ' ' + (x.getAttribute('inputmode') || '')) && x.id !== 'grMonto' && !/peso|estatura|km|metaKm/i.test((x.id || '') + (x.name || '')); }
+document.addEventListener('input', function(ev){
+  var x = ev.target; if(!esCampoMonto(x)) return;
+  var c = x.parentNode, h = c.querySelector(':scope > .monto-vista');
+  if(!esCuenta(x.value)){ if(h) h.remove(); return; }
+  if(!h){ h = document.createElement('small'); h.className = 'monto-vista'; x.after(h); }
+  var n = leerMonto(x.value); h.textContent = n ? '= ' + dinero(Math.abs(n)) : 'No entiendo ese monto'; h.classList.toggle('mal', !n);
+});
+document.addEventListener('focusout', function(ev){
+  var x = ev.target; if(!esCampoMonto(x) || !esCuenta(x.value)) return;
+  var n = leerMonto(x.value); if(n){ x.value = String(Math.round(Math.abs(n) * 100) / 100); var h = x.parentNode.querySelector(':scope > .monto-vista'); if(h) h.remove(); }
+});
+document.addEventListener('keydown', function(ev){
+  var x = ev.target;
+  if(ev.key !== 'Enter' || ev.isComposing || !x || x.tagName !== 'INPUT' || !x.form || !x.form.dataset.sig) return;
+  var campos = [].filter.call(x.form.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=date]):not([type=time]), select, textarea'), function(c){ return c.offsetParent && !c.disabled && !c.readOnly; });
+  var i = campos.indexOf(x);
+  if(i >= 0 && i < campos.length - 1){ ev.preventDefault(); campos[i + 1].focus(); }
+}, true);
 function gastoRapido(cual, tipo){
   ui.grLibro = cual || ui.grLibro || 'personal'; ui.grTipo = tipo || 'Gasto'; ui.grCat = '';
   var usadas = {};
   libroDatos(ui.grLibro).forEach(function(t){ if(t.cat && t.type === ui.grTipo) usadas[t.cat] = (usadas[t.cat] || 0) + 1; });
   var cats = Object.keys(usadas).sort(function(a, b){ return usadas[b] - usadas[a]; }).concat(ui.grTipo === 'Ingreso' ? ['Sueldo','Ventas','Cobro'] : CATS_BASE)
     .filter(function(c, i, arr){ return arr.indexOf(c) === i; }).slice(0, 10);
-  var gd = null;
+  if(!ui.grFechaHasta || Date.now() > ui.grFechaHasta) ui.grFecha = '';
+  ui.grFecha = ui.grFecha && ui.grFecha < hoyISO() ? ui.grFecha : hoyISO();
+  var hoyG = hoyISO(), ayer = sumarDias(hoyG, -1), otra = ui.grFecha !== hoyG && ui.grFecha !== ayer;
+  var descs = descsRecientes(ui.grTipo), montos = montosFrecuentes(ui.grTipo);
   abrirFlotante(cabFlot(ui.grTipo === 'Ingreso' ? 'Ingreso rápido' : 'Gasto rápido') +
     '<form class="form gasto-rapido" data-acc="gasto-rapido" autocomplete="off">' +
       '<div class="gr-conmuta"><div class="selector">' +
         ['Gasto','Ingreso'].map(function(t){ return '<button type="button" data-acc="gr-tipo" data-v="' + t + '" aria-pressed="' + (ui.grTipo === t) + '">' + t + '</button>'; }).join('') + '</div>' +
         '<div class="selector">' + ['personal','oficina'].map(function(l){ return '<button type="button" data-acc="gr-libro" data-v="' + l + '" aria-pressed="' + (ui.grLibro === l) + '">' + NOM_LIBRO[l] + '</button>'; }).join('') + '</div></div>' +
-      '<label class="gr-monto"><span>' + MONEDA + '</span><input id="grMonto" inputmode="decimal" placeholder="0.00" autocomplete="off"></label>' +
-      (gd ? '<p class="gr-pista">Hoy puedes gastar <b>' + dinero(gd.queda) + '</b></p>' : '') +
+      '<label class="gr-monto"><span>' + MONEDA + '</span><input id="grMonto" inputmode="decimal" placeholder="0.00" autocomplete="off" enterkeyhint="next" aria-label="Monto"></label>' +
+      '<p class="gr-vista" id="grVista" aria-live="polite">Puedes escribir 1,500 · 2k · 12.50+8</p>' +
+      '<div class="gr-rapidos">' + montos.map(function(v){ return '<button type="button" class="ficha" data-acc="gr-monto" data-v="' + v + '">' + MONEDA + ' ' + formNum(v) + '</button>'; }).join('') + '</div>' +
       '<div class="gr-cats">' + cats.map(function(c){ return '<button type="button" class="ficha" data-acc="gr-cat" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
-      '<input class="entrada" id="grDesc" maxlength="160" placeholder="En qué (opcional) · ej. almuerzo, taxi">' +
+      '<input class="entrada" id="grDesc" maxlength="160" list="grDescs" placeholder="En qué (opcional) · ej. almuerzo, taxi" enterkeyhint="done" autocapitalize="sentences">' +
+      '<datalist id="grDescs">' + descs.map(function(d){ return '<option value="' + esc(d) + '">'; }).join('') + '</datalist>' +
+      '<div class="gr-fecha"><span>Fecha</span><div class="selector">' +
+        '<button type="button" data-acc="gr-fecha" data-v="' + hoyG + '" aria-pressed="' + (ui.grFecha === hoyG) + '">Hoy</button>' +
+        '<button type="button" data-acc="gr-fecha" data-v="' + ayer + '" aria-pressed="' + (ui.grFecha === ayer) + '">Ayer</button></div>' +
+        '<input type="date" id="grFechaOtra" max="' + hoyG + '" value="' + (otra ? ui.grFecha : '') + '" aria-label="Otra fecha" class="' + (otra ? 'elegida' : '') + '"></div>' +
       '<button type="submit" class="btn primario gr-ok">' + ico('i-check') + 'Anotar en ' + NOM_LIBRO[ui.grLibro] + '</button>' +
     '</form>');
+  var mI = $('grMonto'), dI = $('grDesc'), catManual = false;
+  mI.addEventListener('input', function(){
+    var v = mI.value, n = leerMonto(v), vista = $('grVista');
+    vista.textContent = !v.trim() ? 'Puedes escribir 1,500 · 2k · 12.50+8' : n ? '= ' + dinero(Math.abs(n)) : 'No entiendo ese monto';
+    vista.classList.toggle('mal', !!v.trim() && !n);
+  });
+  mI.addEventListener('keydown', function(ev){ if(ev.key === 'Enter' && !ev.isComposing){ ev.preventDefault(); if(!leerMonto(mI.value)){ marcarError(mI, 'Escribe cuánto fue'); return; } dI.focus(); } });
+  dI.addEventListener('input', function(){
+    if(catManual && ui.grCat) return;
+    var c = catSugerida(dI.value, ui.grLibro); if(!c) return;
+    ui.grCat = c;
+    var cont = document.querySelector('.gasto-rapido .gr-cats'), b = cont && [].find.call(cont.querySelectorAll('.ficha'), function(x){ return x.dataset.v === c; });
+    if(cont && !b){ cont.insertAdjacentHTML('afterbegin', '<button type="button" class="ficha" data-acc="gr-cat" data-v="' + esc(c) + '">' + esc(c) + '</button>'); }
+    if(cont) cont.querySelectorAll('.ficha').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.v === c); x.classList.toggle('auto', x.dataset.v === c); });
+  });
+  document.querySelector('.gasto-rapido .gr-cats').addEventListener('click', function(){ catManual = true; });
+  $('grFechaOtra').addEventListener('change', function(ev){
+    var v = ev.target.value; if(!v) return; ui.grFecha = v > hoyISO() ? hoyISO() : v; ui.grFechaHasta = Date.now() + 180000;
+    document.querySelectorAll('[data-acc="gr-fecha"]').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.v === ui.grFecha); });
+    ev.target.classList.add('elegida');
+  });
   setTimeout(function(){ var m = $('grMonto'); if(m) m.focus(); }, 60);
 }
 function guardarGastoRapido(){
-  var m = $('grMonto'), v = (m.value || '').replace(/−/g, '-').replace(/,/g, '.');
-  if(/\d[+\-]/.test(v)){ var tot = 0; (v.match(/[+\-]?[\d.]+/g) || []).forEach(function(x){ tot += parseFloat(x) || 0; }); v = String(tot); }
-  var monto = Math.round(Math.abs(num(v)) * 100) / 100;
-  if(!monto){ m.focus(); aviso('Falta el monto'); return; }
-  var cual = ui.grLibro || 'personal', cat = ui.grCat || '', desc = ($('grDesc').value || '').trim();
-  var t = { id:nid(), date:hoyISO(), desc:desc || cat || ui.grTipo, type:ui.grTipo === 'Ingreso' ? 'Ingreso' : 'Gasto', amount:monto, cat:cat.slice(0, 40) };
+  var m = $('grMonto');
+  var monto = Math.round(Math.abs(leerMonto(m.value)) * 100) / 100;
+  if(!monto){ marcarError(m, m.value.trim() ? 'No entiendo ese monto' : 'Escribe cuánto fue'); return; }
+  var cual = ui.grLibro || 'personal', desc = ($('grDesc').value || '').trim(), cat = ui.grCat || catSugerida(desc, cual) || '';
+  var fG = ui.grFecha && ui.grFecha <= hoyISO() ? ui.grFecha : hoyISO(); ui.grFecha = '';
+  var t = { id:nid(), date:fG, desc:desc || cat || ui.grTipo, type:ui.grTipo === 'Ingreso' ? 'Ingreso' : 'Gasto', amount:monto, cat:cat.slice(0, 40) };
   cambiarLibro(cual, function(l){ return l.concat([t]); });
   cerrarFlotante(); pintar(); vibrar(15);
   var gd = null, alLim = t.type === 'Gasto' ? avisoLimite(cual, t.cat || 'Sin categoría', monto) : null;
   if(alLim){ setTimeout(function(){ aviso(alLim, 'Límites por categoría', 'Ver', function(){ ui.dinLibro = cual; ir('dinero'); }); }, 2600); }
-  aviso((t.type === 'Gasto' ? '💸 ' : '💰 ') + dinero(monto) + (t.desc ? ' · ' + t.desc : ''), gd ? (gd.pasado ? 'Hoy ya te pasaste por ' + dinero(gd.hoy - gd.porDia) : 'Te quedan ' + dinero(gd.queda) + ' para hoy') : NOM_LIBRO[cual], 'Deshacer', function(){
+  aviso((t.type === 'Gasto' ? '💸 ' : '💰 ') + dinero(monto) + (t.desc ? ' · ' + t.desc : '') + (t.date !== hoyISO() ? ' · ' + relativo(t.date).toLowerCase() : ''), gd ? (gd.pasado ? 'Hoy ya te pasaste por ' + dinero(gd.hoy - gd.porDia) : 'Te quedan ' + dinero(gd.queda) + ' para hoy') : NOM_LIBRO[cual], 'Deshacer', function(){
     cambiarLibro(cual, function(l){ return l.filter(function(x){ return x.id !== t.id; }); }); pintar();
   });
 }
@@ -1920,7 +2020,7 @@ function semanasSeguidas(){
 function editarCobro(id, preset){
   var x = id ? JSON.parse(JSON.stringify(buscarId('cobros', id))) : Object.assign({ id:nid(), cliente:'', concepto:'', monto:'', vence:sumarDias(hoyISO(), 15), cobrado:0, esp:'oficina' }, preset || {});
   abrirFlotante(cabFlot(id ? 'Cobro' : 'Nuevo cobro') +
-    '<form class="form" id="formEd" autocomplete="off">' +
+    '<form class="form" id="formEd" autocomplete="off" data-sig="1">' +
       campo('Cliente', '<input name="c" required maxlength="60" value="' + esc(x.cliente) + '" placeholder="Ej. Empresa ABC">') +
       campo('Concepto', '<input name="k" maxlength="80" value="' + esc(x.concepto) + '" placeholder="Ej. Factura F001-123, asesoría de agosto">') +
       '<div class="fila-campos">' + campo('Monto (' + MONEDA + ')', '<input name="m" inputmode="decimal" required value="' + esc(x.monto) + '">') +
@@ -1931,7 +2031,7 @@ function editarCobro(id, preset){
   f.onsubmit = function(ev){
     ev.preventDefault();
     x.cliente = f.c.value.trim(); if(!x.cliente) return;
-    x.concepto = f.k.value.trim(); x.monto = Math.round(num(f.m.value) * 100) / 100; x.vence = f.v.value;
+    x.concepto = f.k.value.trim(); x.monto = Math.round(leerMonto(f.m.value) * 100) / 100; x.vence = f.v.value;
     poner('cobros', x); cerrarFlotante(); pintar();
   };
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('cobros', x.id, 'Cobro borrado'); pintar(); } };
@@ -2403,7 +2503,7 @@ function editarProyecto(id, preset){
 function editarDeuda(id, preset){
   var x = id ? JSON.parse(JSON.stringify(buscarId('deudas', id))) : Object.assign({ id:nid(), persona:'', concepto:'', monto:'', tipo:'me', fecha:'', saldada:0, esp:'personal' }, preset || {});
   abrirFlotante(cabFlot(id ? 'Préstamo' : 'Nuevo préstamo') +
-    '<form class="form" id="formEd" autocomplete="off">' +
+    '<form class="form" id="formEd" autocomplete="off" data-sig="1">' +
       grupo('Quién le debe a quién', selector('tipoD', [{ v:'me', n:'💚 Me deben' }, { v:'yo', n:'🧡 Yo debo' }], x.tipo)) +
       campo('Persona', '<input name="p" required maxlength="60" value="' + esc(x.persona) + '" placeholder="Ej. Carlos">') +
       campo('Por qué', '<input name="c" maxlength="80" value="' + esc(x.concepto) + '" placeholder="Ej. Entradas del concierto">') +
@@ -2416,7 +2516,7 @@ function editarDeuda(id, preset){
     ev.preventDefault();
     x.persona = f.p.value.trim(); if(!x.persona) return;
     x.tipo = leerSelector('tipoD') || 'me'; x.concepto = f.c.value.trim();
-    x.monto = Math.round(num(f.m.value) * 100) / 100; x.fecha = f.f.value;
+    x.monto = Math.round(leerMonto(f.m.value) * 100) / 100; x.fecha = f.f.value;
     poner('deudas', x); cerrarFlotante(); pintar();
   };
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('deudas', x.id, 'Préstamo borrado'); pintar(); } };
@@ -2975,7 +3075,7 @@ function editarHora(id){
   f.onsubmit = function(ev){
     ev.preventDefault();
     h.cliente = f.c.value.trim(); h.fecha = f.f.value || hoyISO(); h.ini = f.i.value; h.min = Math.max(1, parseInt(f.m.value, 10) || 1);
-    h.nota = f.n.value.trim(); h.tarifa = num(f.t.value) || '';
+    h.nota = f.n.value.trim(); h.tarifa = leerMonto(f.t.value) || '';
     poner('horas', h); cerrarFlotante(); pintar();
   };
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('horas', h.id, 'Registro borrado'); pintar(); } };
@@ -5483,24 +5583,25 @@ function editarMovimiento(cual, id, preset){
   ['personal', 'oficina'].forEach(function(l){ libroDatos(l).forEach(function(x){ if(x.cat) usadas[x.cat] = (usadas[x.cat] || 0) + 1; }); });
   var cats = Object.keys(usadas).sort(function(a, b){ return usadas[b] - usadas[a]; }).concat(CATS_BASE, ['Sueldo', 'Ventas', 'Cobro']).filter(function(c, i, arr){ return arr.indexOf(c) === i; });
   abrirFlotante(cabFlot(id ? 'Movimiento' : 'Nuevo movimiento') +
-    '<form class="form" id="formEd" autocomplete="off">' +
+    '<form class="form" id="formEd" autocomplete="off" data-sig="1">' +
       grupo('Tipo', selector('movTipoEd', [{ v:'Gasto', n:'💸 Gasto' }, { v:'Ingreso', n:'💰 Ingreso' }], t.type)) +
       '<div class="fila-campos">' + campo('Monto (' + MONEDA + ')', '<input name="monto" inputmode="decimal" required value="' + (t.amount || '') + '" placeholder="0.00">') +
         campo('Fecha', '<input type="date" name="fecha" value="' + esc(t.date) + '">') + '</div>' +
-      campo('En qué', '<input name="desc" maxlength="160" value="' + esc(t.desc) + '" placeholder="Ej. Almuerzo, taxi, sueldo">') +
+      '<div class="fechas-rapidas">' + [['Hoy', hoyISO()], ['Ayer', sumarDias(hoyISO(), -1)], ['Anteayer', sumarDias(hoyISO(), -2)]].map(function(x){ return '<button type="button" class="ficha" data-ed="fecha-r" data-v="' + x[1] + '">' + x[0] + '</button>'; }).join('') + '</div>' +
+      campo('En qué', '<input name="desc" maxlength="160" list="movDescs" value="' + esc(t.desc) + '" placeholder="Ej. Almuerzo, taxi, sueldo" autocapitalize="sentences"><datalist id="movDescs">' + descsRecientes().map(function(d){ return '<option value="' + esc(d) + '">'; }).join('') + '</datalist>') +
       campo('Categoría', '<input name="cat" maxlength="40" list="movCats" value="' + esc(t.cat) + '" placeholder="Opcional"><datalist id="movCats">' + cats.map(function(c){ return '<option value="' + esc(c) + '">'; }).join('') + '</datalist>') +
       '<div class="chips-cat">' + cats.slice(0, 8).map(function(c){ return '<button type="button" class="ficha" data-ed="cat" data-v="' + esc(c) + '">' + esc(c) + '</button>'; }).join('') + '</div>' +
       grupo('Libro', selector('movLibroEd', [{ v:'personal', n:'🏠 Personal' }, { v:'oficina', n:'💼 Oficina' }], cual)) +
       botonesEd(!!id, id ? '<button type="button" class="btn" data-ed="repetir">' + ico('i-rep') + 'Repetir hoy</button>' : '') +
     '</form>');
-  var f = $('formEd');
+  var f = $('formEd'), catTocada = !!t.cat;
   if(!id) setTimeout(function(){ f.monto.focus(); }, 60);
+  f.cat.addEventListener('input', function(){ catTocada = !!f.cat.value; });
+  f.desc.addEventListener('input', function(){ if(catTocada) return; var c = catSugerida(f.desc.value, cual); if(c){ f.cat.value = c; f.cat.classList.add('auto'); } });
   f.onsubmit = function(ev){
     ev.preventDefault();
-    var v = String(f.monto.value || '').replace(/−/g, '-').replace(/,/g, '.');
-    if(/\d[+\-]/.test(v)){ var tot = 0; (v.match(/[+\-]?[\d.]+/g) || []).forEach(function(x){ tot += parseFloat(x) || 0; }); v = String(tot); }
-    var monto = Math.round(Math.abs(num(v)) * 100) / 100;
-    if(!monto){ f.monto.focus(); aviso('Falta el monto'); return; }
+    var monto = Math.round(Math.abs(leerMonto(f.monto.value)) * 100) / 100;
+    if(!monto){ marcarError(f.monto, f.monto.value.trim() ? 'No entiendo ese monto' : 'Escribe el monto'); return; }
     var tipo = leerSelector('movTipoEd') || t.type, dest = leerSelector('movLibroEd') || cual;
     var datos = { date:/^\d{4}-\d{2}-\d{2}$/.test(f.fecha.value) ? f.fecha.value : hoyISO(), desc:f.desc.value.trim() || f.cat.value.trim() || tipo, type:tipo, amount:monto, cat:f.cat.value.trim().slice(0, 40) };
     if(id && dest === cual) cambiarLibro(cual, function(l){ return l.map(function(x){ return String(x.id) === String(id) ? Object.assign({}, x, datos) : x; }); });
@@ -5512,7 +5613,8 @@ function editarMovimiento(cual, id, preset){
     aviso(id ? 'Movimiento guardado' : (tipo === 'Gasto' ? '💸 ' : '💰 ') + dinero(monto), datos.desc + (dest !== cual && id ? ' · pasó a ' + NOM_LIBRO[dest] : ''));
   };
   edAcciones = {
-    cat: function(b){ f.cat.value = b.dataset.v; },
+    cat: function(b){ f.cat.value = b.dataset.v; catTocada = true; f.cat.classList.remove('auto'); },
+    'fecha-r': function(b){ f.fecha.value = b.dataset.v; vibrar(6); },
     borrar: function(){
       var copia = o;
       cerrarFlotante();
@@ -5581,8 +5683,8 @@ function cambiarLibro(cual, fn){
   sincronizarLibro(cual);
 }
 function anotarMovimiento(f){
-  var monto = Math.round(Math.abs(num(f.monto.value)) * 100) / 100;
-  if(!monto){ f.monto.focus(); aviso('Falta el monto'); return; }
+  var monto = Math.round(Math.abs(leerMonto(f.monto.value)) * 100) / 100;
+  if(!monto){ marcarError(f.monto, f.monto.value.trim() ? 'No entiendo ese monto' : 'Escribe el monto'); return; }
   var cual = ui.dinLibro && ui.dinLibro !== 'todo' ? ui.dinLibro : (ui.qaLibro || 'personal');
   var t = { id:nid(), date:/^\d{4}-\d{2}-\d{2}$/.test(f.fecha.value) ? f.fecha.value : hoyISO(),
             desc:f.desc.value.trim() || f.cat.value.trim() || (ui.qaTipo === 'Ingreso' ? 'Ingreso' : 'Gasto'),
@@ -5653,7 +5755,7 @@ function editarLimites(libro){
     ev.preventDefault();
     var o = {};
     f.querySelectorAll('[data-cat]').forEach(function(i){ var v = num(i.value); if(v > 0) o[i.dataset.cat] = Math.round(v * 100) / 100; });
-    var nc = ($('limNuevaCat').value || '').trim(), nm = num($('limNuevoMonto').value);
+    var nc = ($('limNuevaCat').value || '').trim(), nm = leerMonto($('limNuevoMonto').value);
     if(nc && nm > 0) o[nc.slice(0, 40)] = Math.round(nm * 100) / 100;
     var nuevo = Object.assign({}, (db.perfil && db.perfil.presuCat) || {}); nuevo[libro] = o;
     db.perfil = Object.assign({}, db.perfil, { presuCat:nuevo, upd:Date.now() });
@@ -5672,7 +5774,7 @@ function editarPresupuesto(){
   var f = $('formEd');
   f.onsubmit = function(ev){
     ev.preventDefault();
-    db.perfil = Object.assign({}, db.perfil, { presu:{ personal:Math.max(0, num(f.p.value)), oficina:Math.max(0, num(f.o.value)) }, upd:Date.now() });
+    db.perfil = Object.assign({}, db.perfil, { presu:{ personal:Math.max(0, leerMonto(f.p.value)), oficina:Math.max(0, leerMonto(f.o.value)) }, upd:Date.now() });
     guardar(); cerrarFlotante(); pintar(); aviso('Presupuesto guardado');
   };
 }
@@ -5770,7 +5872,40 @@ function editarMeta(id, preset){
   };
   edAcciones = { borrar: function(){ cerrarFlotante(); quitar('metas', m.id, 'Meta borrada'); pintar(); } };
 }
-function num(v){ var n = parseFloat(String(v == null ? '' : v).replace(/\s/g, '').replace(',', '.')); return isFinite(n) ? n : 0; }
+/* Un número escrito a mano: «74,5», «1,500», «1.500,50», «1,500.50» */
+function num(v){
+  var t = String(v == null ? '' : v).replace(/\s/g, '');
+  if(t.indexOf(',') >= 0 && t.indexOf('.') >= 0){ if(t.lastIndexOf(',') > t.lastIndexOf('.')) t = t.replace(/\./g, '').replace(',', '.'); else t = t.replace(/,/g, ''); }
+  else if(/^-?\d{1,3}(,\d{3})+$/.test(t)) t = t.replace(/,/g, '');
+  else t = t.replace(',', '.');
+  var n = parseFloat(t); return isFinite(n) ? n : 0;
+}
+/* Un monto de dinero escrito como sea: «S/ 1,500», «1.500», «2k», «2 mil»,
+   «12.50 soles» y también cuentas: «10+5», «3x12.5», «100/4», «20%» de nada no */
+function leerMonto(v){
+  var t = String(v == null ? '' : v).toLowerCase().replace(/s\/\.?|soles?|sol\b|\$|pen/g, '').replace(/−/g, '-').replace(/[×x]/g, '*').replace(/÷/g, '/').trim();
+  t = t.replace(/(\d[\d.,]*)\s*(k|mil)\b/g, function(_, n){ return '(' + numMonto(n) + '*1000)'; });
+  t = t.replace(/\s+/g, '');
+  var tokens = t.match(/\(?[\d.,]+\*1000\)|[\d.,]+|[+\-*/]/g);
+  if(!tokens || tokens.join('') !== t) return numMonto(t);
+  /* Calculadora simple: primero × y ÷, después + y − */
+  var vals = [], ops = [];
+  tokens.forEach(function(x){ if(/^[+\-*/]$/.test(x)) ops.push(x); else vals.push(/\*1000\)$/.test(x) ? numMonto(x.replace(/[()]/g, '').replace('*1000', '')) * 1000 : numMonto(x)); });
+  if(ops.length && /^[+\-]$/.test(tokens[0])){ vals.unshift(0); }
+  if(vals.length !== ops.length + 1) return numMonto(t);
+  for(var i = 0; i < ops.length; i++){
+    if(ops[i] === '*' || ops[i] === '/'){ var r = ops[i] === '*' ? vals[i] * vals[i + 1] : (vals[i + 1] ? vals[i] / vals[i + 1] : 0); vals.splice(i, 2, r); ops.splice(i, 1); i--; }
+  }
+  var tot = vals[0]; ops.forEach(function(o, k){ tot = o === '+' ? tot + vals[k + 1] : tot - vals[k + 1]; });
+  return Math.round(tot * 100) / 100;
+}
+/* Dinero: además de lo de num(), «1.500» y «12.500» son miles (nadie pone 3 decimales en soles) */
+function numMonto(v){
+  var t = String(v == null ? '' : v).replace(/\s/g, '');
+  if(/^-?\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
+  return num(t);
+}
+function esCuenta(v){ return /\d\s*[+\-*/×x÷]\s*\d|\d\s*(k|mil)\b|\d[.,]\d{3}\b|s\/|soles/i.test(String(v || '')); }
 function sumarMeta(id, n){
   var m = buscarId('metas', id);
   if(!m || !n) return;
@@ -5835,7 +5970,7 @@ function editarPago(id, preset){
   var p = id ? JSON.parse(JSON.stringify(buscarId('pagos', id))) :
     Object.assign({ id:nid(), t:'', monto:'', dia:1, em:'🧾', cat:'', pagados:{}, activo:true, aviso:true, desde:hoyISO().slice(0, 7) }, preset || {});
   abrirFlotante(cabFlot(id ? 'Pago fijo' : 'Nuevo pago fijo') +
-    '<form class="form" id="formEd" autocomplete="off">' +
+    '<form class="form" id="formEd" autocomplete="off" data-sig="1">' +
       campo('Qué pagas', '<input name="t" required maxlength="60" value="' + esc(p.t) + '" placeholder="Ej. Luz, Internet, Alquiler">') +
       '<div class="fila-campos">' + campo('Monto (' + MONEDA + ')', '<input name="m" inputmode="decimal" value="' + esc(p.monto) + '" placeholder="0.00">') +
         campo('Vence el día', '<input name="d" type="number" min="1" max="31" required value="' + esc(p.dia) + '">') + '</div>' +
@@ -5851,7 +5986,7 @@ function editarPago(id, preset){
   f.onsubmit = function(ev){
     ev.preventDefault(); p.esp = leerSelector('esp') || p.esp || espPorDefecto();
     p.t = f.t.value.trim(); if(!p.t) return;
-    p.monto = Math.round(num(f.m.value) * 100) / 100; p.dia = Math.min(31, Math.max(1, parseInt(f.d.value, 10) || 1));
+    p.monto = Math.round(leerMonto(f.m.value) * 100) / 100; p.dia = Math.min(31, Math.max(1, parseInt(f.d.value, 10) || 1));
     p.cat = f.c.value.trim(); p.em = leerSelector('em') || '🧾'; p.aviso = f.av.checked; p.anotar = f.an.checked;
     if(f.act) p.activo = f.act.checked;
     poner('pagos', p); cerrarFlotante(); pintar();
@@ -6203,8 +6338,9 @@ VISTAS.ajustes = function(){
       '<button class="btn chico" data-acc="personalizar-hoy">' + ico('i-hoy') + 'Elegir</button></div>' +
     '<div class="ajuste"><div class="txt"><b>Teclado de la agenda</b><small>' + (TECLADO.tactil ? 'Usa el teclado propio al escribir (con ñ, tildes, atajos, emojis y calculadora para montos). Apágalo para volver al del celular.' : 'Solo aparece en el celular o la tableta.') + '</small></div>' +
       '<label class="interruptor"><input type="checkbox" data-teclado="1"' + (pref.teclado !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Teclado de la agenda"></label></div>' +
-    '<div class="ajuste"><div class="txt"><b>Autocorrector</b><small>Mientras escribes con el teclado de la agenda: sugiere palabras arriba y corrige al poner espacio («manana» → «mañana»). Si no querías el cambio, borra una vez y vuelve tu palabra.</small></div>' +
-      '<label class="interruptor"><input type="checkbox" data-autocorr="1"' + (pref.autocorr !== false ? ' checked' : '') + (TECLADO.tactil ? '' : ' disabled') + ' aria-label="Autocorrector"></label></div></div>';
+    (TECLADO.tactil ? '<div class="ajuste"><div class="txt"><b>Tamaño del teclado</b><small>Teclas más chicas o más grandes.</small></div><div class="selector">' + [['c', 'Chico'], ['n', 'Normal'], ['g', 'Grande']].map(function(x){ return '<button type="button" data-acc="tk-tam" data-v="' + x[0] + '" aria-pressed="' + ((pref.tkTam || 'n') === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div></div>' : '') +
+    '<div class="ajuste"><div class="txt"><b>Autocorrector</b><small>En el celular y en la laptop: corrige al poner espacio («manana» → «mañana», «qeu» → «que»), entiende lo abreviado («xq» → «porque», «tb» → «también»), pone las tildes y el «¿» de las preguntas, quita palabras repetidas y te sugiere la siguiente palabra. Si no querías el cambio, borra una vez y vuelve tu palabra.</small></div>' +
+      '<label class="interruptor"><input type="checkbox" data-autocorr="1"' + (pref.autocorr !== false ? ' checked' : '') + ' aria-label="Autocorrector"></label></div></div>';
 
   html += '<div class="seccion-tit">Apariencia</div><div class="tarjeta">' +
     '<div class="ajuste"><div class="txt"><b>Tema</b><small>Oscuro, claro o según la hora de tu celular.</small></div>' +
@@ -6347,6 +6483,44 @@ function sumarHora(h, min){
 function fechaPorDefecto(){ return ui.vista === 'calendario' ? ui.calSel : (new Date().getHours() >= 23 ? sumarDias(hoyISO(), 1) : hoyISO()); }
 
 /* ---------- Editor de tarea ------------------------------------------------ */
+/* Debajo del título de una tarea, un aviso o un evento: botones de fecha y hora
+   y lectura de lo que escribes («dentista mañana 6pm #personal»): pone el día,
+   la hora y el espacio solos y al guardar deja el título limpio. */
+function ayudaFechaHora(f, horaNom, opc){
+  opc = opc || {};
+  var hoy = hoyISO(), w = deISO(hoy).getDay(), sab = sumarDias(hoy, ((6 - w + 7) % 7) || 7), lun = sumarDias(hoy, ((1 - w + 7) % 7) || 7);
+  var dias = [['Hoy', hoy], ['Mañana', sumarDias(hoy, 1)], ['Sábado', sab], ['Lunes', lun]].concat(opc.sinFecha ? [['Sin fecha', '']] : []);
+  var horas = ['08:00', '12:00', '15:00', '18:00', '20:00'];
+  var campoT = f.t.closest('.campo') || f.t.parentNode;
+  campoT.insertAdjacentHTML('afterend', '<div class="ayuda-fh"><p class="afh-leido" hidden></p>' +
+    (opc.sinDias ? '' : '<div class="afh-fila">' + dias.map(function(d){ return '<button type="button" class="ficha" data-afh-f="' + d[1] + '">' + d[0] + '</button>'; }).join('') + '</div>') +
+    '<div class="afh-fila">' + horas.map(function(h){ return '<button type="button" class="ficha" data-afh-h="' + h + '">' + h.replace(':00', '') + (+h.slice(0, 2) < 12 ? ' am' : +h.slice(0, 2) === 12 ? ' m' : ' pm') + '</button>'; }).join('') + '</div></div>');
+  var caja = campoT.nextElementSibling, leido = caja.querySelector('.afh-leido'), limpio = null;
+  function marcar(){
+    caja.querySelectorAll('[data-afh-f]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.afhF === f.fecha.value); });
+    caja.querySelectorAll('[data-afh-h]').forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.afhH === f[horaNom].value); });
+  }
+  caja.addEventListener('click', function(ev){
+    var b = ev.target.closest('button'); if(!b) return;
+    if(b.dataset.afhF != null){ f.fecha.value = b.dataset.afhF; delete f.fecha.dataset.auto; }
+    if(b.dataset.afhH != null){ f[horaNom].value = f[horaNom].value === b.dataset.afhH ? '' : b.dataset.afhH; delete f[horaNom].dataset.auto; f[horaNom].dispatchEvent(new Event('change')); }
+    vibrar(6); marcar();
+  });
+  f.fecha.addEventListener('change', function(){ delete f.fecha.dataset.auto; marcar(); });
+  f[horaNom].addEventListener('change', marcar);
+  f.t.addEventListener('input', function(){
+    var p = interpretar(f.t.value), txt = [];
+    limpio = null;
+    if(p.fecha && (!f.fecha.value || f.fecha.dataset.auto || f.fecha.value === (opc.fechaInicial || ''))){ f.fecha.value = p.fecha; f.fecha.dataset.auto = '1'; txt.push('📅 ' + cap(relativo(p.fecha))); }
+    if(p.hora && (!f[horaNom].value || f[horaNom].dataset.auto || f[horaNom].value === (opc.horaInicial || ''))){ f[horaNom].value = p.hora; f[horaNom].dataset.auto = '1'; f[horaNom].dispatchEvent(new Event('change')); txt.push('🕒 ' + p.hora); }
+    if(p.esp){ var be = document.querySelector('#formEd [data-grupo="esp"] [data-sel="' + p.esp + '"]'); if(be){ be.closest('[data-grupo]').querySelectorAll('[data-sel]').forEach(function(x){ x.setAttribute('aria-pressed', x === be); }); txt.push(espInfo(p.esp).em + ' ' + espInfo(p.esp).nom); } }
+    if(txt.length && p.texto && p.texto !== f.t.value.trim()){ limpio = p.texto; leido.hidden = false; leido.innerHTML = '✨ Entendí: <b>' + txt.join(' · ') + '</b> — al guardar quedará «' + esc(p.texto) + '»'; }
+    else leido.hidden = true;
+    marcar();
+  });
+  f.addEventListener('submit', function(){ if(limpio && f.t.value.trim()){ var p = interpretar(f.t.value); if(p.texto) f.t.value = p.texto; } }, true);
+  marcar();
+}
 function editarTarea(id, preset){
   var t = id ? JSON.parse(JSON.stringify(buscarId('tareas', id))) : Object.assign({ id:nid(), t:'', fecha:'', hora:'', prio:0, area:'', rep:'no', sub:[], notas:'', creada:Date.now() }, preset || {});
   var areas = AREAS_BASE.slice();
@@ -6370,6 +6544,7 @@ function editarTarea(id, preset){
       selectorEsp(t.esp || (id ? espDe(t) : espPorDefecto())) + botonesEd(!!id, id ? '<button type="button" class="btn" data-ed="duplicar" title="Duplicar" aria-label="Duplicar">' + ico('i-copiar') + '</button><button type="button" class="btn" data-ed="alternar">' + (t.hecha ? 'Marcar pendiente' : ico('i-check') + 'Hecha') + '</button>' : '') +
     '</form>');
   var f = $('formEd');
+  ayudaFechaHora(f, 'hora', { sinFecha:true, fechaInicial:t.fecha, horaInicial:t.hora });
   if(!id) f.t.focus();
   f.onsubmit = function(e){
     e.preventDefault(); t.esp = leerSelector('esp') || t.esp || espPorDefecto();
@@ -6480,6 +6655,7 @@ function editarEvento(id, preset){
       selectorEsp(e.esp || (id ? espDe(e) : espPorDefecto())) + botonesEd(!!id, '<button type="button" class="btn" data-ed="compartir" aria-label="Compartir">' + ico('i-compartir') + '</button>' + (id ? '<button type="button" class="btn" data-ed="nota-ev" title="Su nota" aria-label="Abrir su nota">📝</button>' : '') + (id ? '<button type="button" class="btn" data-ed="duplicar" title="Duplicar" aria-label="Duplicar">' + ico('i-copiar') + '</button><button type="button" class="btn" data-ed="google">' + ico('i-enlace') + 'Google</button><button type="button" class="btn" data-ed="ics">.ics</button>' : '')) +
     '</form>');
   var f = $('formEd');
+  ayudaFechaHora(f, 'ini', { fechaInicial:e.fecha, horaInicial:e.ini, sinDias:true });
   if(!id) f.t.focus();
   f.todo.onchange = function(){ $('filaHoras').style.display = f.todo.checked ? 'none' : ''; };
   f.jugado.onchange = function(){ $('filaJugado').style.display = f.jugado.checked ? '' : 'none'; };
@@ -6546,6 +6722,7 @@ function editarRec(id, preset){
       selectorEsp(r.esp || (id ? espDe(r) : espPorDefecto())) + botonesEd(!!id, '<button type="button" class="btn" data-ed="google">' + ico('i-enlace') + 'Google</button><button type="button" class="btn" data-ed="ics">.ics</button>') +
     '</form>');
   var f = $('formEd');
+  ayudaFechaHora(f, 'hora', { fechaInicial:r.fecha, horaInicial:r.hora });
   if(!id && !r.t) f.t.focus();
   function leer(){
     r.t = f.t.value.trim(); r.fecha = f.fecha.value || hoyISO(); r.hora = f.hora.value || '09:00';
@@ -7865,8 +8042,12 @@ document.addEventListener('click', function(ev){
     case 'menu-mas': menuMas(); break;
     case 'anadir': hojaAnadir(b.dataset.tipo); break;
     case 'gasto-rapido': gastoRapido(b.dataset.v || 'personal'); break;
-    case 'gr-tipo': var mt = ($('grMonto') || {}).value || ''; gastoRapido(ui.grLibro, b.dataset.v); $('grMonto').value = mt; break;
-    case 'gr-libro': var ml = ($('grMonto') || {}).value || ''; gastoRapido(b.dataset.v, ui.grTipo); $('grMonto').value = ml; break;
+    case 'gr-tipo': var mt = ($('grMonto') || {}).value || '', dt = ($('grDesc') || {}).value || ''; gastoRapido(ui.grLibro, b.dataset.v); $('grMonto').value = mt; $('grDesc').value = dt; $('grMonto').dispatchEvent(new Event('input')); break;
+    case 'gr-libro': var ml = ($('grMonto') || {}).value || '', dl = ($('grDesc') || {}).value || ''; gastoRapido(b.dataset.v, ui.grTipo); $('grMonto').value = ml; $('grDesc').value = dl; $('grMonto').dispatchEvent(new Event('input')); break;
+    case 'gr-monto': var gm = $('grMonto'); if(gm){ gm.value = b.dataset.v; gm.dispatchEvent(new Event('input')); var gdsc = $('grDesc'); if(gdsc) gdsc.focus(); } break;
+    case 'gr-fecha':
+      ui.grFecha = b.dataset.v; ui.grFechaHasta = Date.now() + 180000; document.querySelectorAll('[data-acc="gr-fecha"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+      var gfo = $('grFechaOtra'); if(gfo){ gfo.value = ''; gfo.classList.remove('elegida'); } break;
     case 'gr-cat':
       ui.grCat = ui.grCat === b.dataset.v ? '' : b.dataset.v;
       b.parentNode.querySelectorAll('.ficha').forEach(function(x){ x.setAttribute('aria-pressed', x.dataset.v === ui.grCat); });
@@ -8163,6 +8344,7 @@ document.addEventListener('click', function(ev){
       if(mt.actual >= +mt.objetivo) aviso('🎉 ¡Meta cumplida!', mt.t);
       break;
     case 'vinculos': hojaVinculos(); break;
+    case 'tk-tam': pref.tkTam = b.dataset.v; escribirJSON(CLAVE_PREF, pref); b.parentNode.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); aviso('⌨️ Teclado ' + b.textContent.toLowerCase()); break;
     case 'evento-nota': notaDeEvento(id, b.dataset.dia); break;
     case 'cliente-facturar': facturarHoras(b.dataset.n); break;
     case 'partido-entreno': editarEntreno(null, { tipo:'futbol', min:90, fecha:b.dataset.dia, notas:b.dataset.t || '' }); break;
@@ -8555,7 +8737,7 @@ document.addEventListener('submit', function(ev){
   } else if(a === 'pich-costo' || a === 'pich-jug'){
     var eJ = JSON.parse(JSON.stringify(buscarId('eventos', f.dataset.id)));
     eJ.pich = eJ.pich || { costo:'', jug:[] };
-    if(a === 'pich-costo') eJ.pich.costo = num($('pichCosto').value) || '';
+    if(a === 'pich-costo') eJ.pich.costo = leerMonto($('pichCosto').value) || '';
     else { var vj = $('pichJug').value.trim(); if(!vj) return; vj.split(/\s*[,;\n]\s*/).filter(Boolean).forEach(function(n){ eJ.pich.jug.push({ n:n.slice(0, 30), p:false }); }); }
     poner('eventos', eJ); pintar();
     if(a === 'pich-jug'){ var pj2 = $('pichJug'); if(pj2) pj2.focus(); }
@@ -8827,7 +9009,11 @@ var AUTOCORR = (function(){
       var ws = t.split(' '), rango = new Map(), porClave = new Map(), claves = new Array(ws.length);
       ws.forEach(function(w, i){ rango.set(w, i); var k = claves[i] = clave(w); if(!porClave.has(k)) porClave.set(k, w); });
       /* Tus palabras (nombres, lugares, cosas tuyas) cuentan como conocidas */
-      try{ (JSON.stringify(db).match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/g) || []).forEach(function(w){ var l = w.toLowerCase(); if(!rango.has(l)) propias.add(l); }); }catch(e){}
+      try{
+        var txt = [];
+        COLS.forEach(function(c){ (db[c] || []).forEach(function(x){ ['t','nombre','cuerpo','texto','notas','desc','lugar','cliente','concepto','persona','unidad'].forEach(function(k){ if(typeof x[k] === 'string') txt.push(x[k]); }); }); });
+        (txt.join(' ').match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,}/g) || []).forEach(function(w){ var l = w.toLowerCase(); if(!rango.has(l)) propias.add(l); });
+      }catch(e){}
       D = { ws:ws, rango:rango, porClave:porClave, claves:claves };
       return D;
     }).catch(function(){ return null; });
@@ -8841,22 +9027,37 @@ var AUTOCORR = (function(){
     return c;
   }
   var ABC = 'abcdefghijklmnopqrstuvwxyz';
+  /* Las teclas vecinas en el teclado: equivocarse de una a su vecina es lo más común */
+  var FILAS_Q = ['qwertyuiop', 'asdfghjklñ', 'zxcvbnm'], VECINAS = {};
+  FILAS_Q.forEach(function(f, r){ f.split('').forEach(function(ch, i){
+    var v = [f[i - 1], f[i + 1]];
+    [FILAS_Q[r - 1], FILAS_Q[r + 1]].forEach(function(o){ if(o){ v.push(o[i - 1], o[i], o[i + 1]); } });
+    VECINAS[ch] = v.filter(Boolean).join('');
+  }); });
+  /* Cada palabra a un error de distancia, con su peso: menos peso = más probable */
   function cerca(k){
-    var c = new Set(), i, j;
+    var c = new Map(), i, j;
+    function pon(w, p){ if(w !== k && (!c.has(w) || c.get(w) > p)) c.set(w, p); }
     for(i = 0; i <= k.length; i++){
-      if(i < k.length) c.add(k.slice(0, i) + k.slice(i + 1));
-      if(i < k.length - 1) c.add(k.slice(0, i) + k[i + 1] + k[i] + k.slice(i + 2));
+      if(i < k.length) pon(k.slice(0, i) + k.slice(i + 1), i > 0 && k[i] === k[i - 1] ? .3 : .8);   // letra de más (doble: muy probable)
+      if(i < k.length - 1) pon(k.slice(0, i) + k[i + 1] + k[i] + k.slice(i + 2), .5);              // dos letras cambiadas de sitio
       for(j = 0; j < 26; j++){
-        if(i < k.length) c.add(k.slice(0, i) + ABC[j] + k.slice(i + 1));
-        c.add(k.slice(0, i) + ABC[j] + k.slice(i));
+        if(i < k.length) pon(k.slice(0, i) + ABC[j] + k.slice(i + 1), (VECINAS[k[i]] || '').indexOf(ABC[j]) >= 0 ? .45 : 1);   // tecla vecina
+        pon(k.slice(0, i) + ABC[j] + k.slice(i), .9);                                                // letra que faltó
       }
     }
-    c.delete(k); return c;
+    return c;
   }
+  /* Lo que se escribe abreviado en el chat */
+  var ABREV = { q:'que', k:'que', xq:'porque', pq:'porque', porq:'porque', xk:'porque', tb:'también', tmb:'también', tbn:'también', tambien:'también',
+    xfa:'por favor', porfavor:'por favor', pls:'por favor', aki:'aquí', aca:'acá', osea:'o sea', aver:'a ver', nose:'no sé', nse:'no sé', talvez:'tal vez',
+    enserio:'en serio', deacuerdo:'de acuerdo', aveces:'a veces', envez:'en vez', ntp:'no te preocupes', msj:'mensaje', hrs:'horas', bn:'bien', dsps:'después', despues:'después', tqm:'te quiero mucho' };
   /* ¿Qué palabra quisiste escribir? null si está bien o no hay una clara */
   function corregir(w, inicioFrase){
-    if(!D || !w || w.length < 2 || /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(w)) return null;
+    if(!w || /[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/.test(w)) return null;
     var l = w.toLowerCase();
+    if(ABREV[l] && !propias.has(l)) return conCaso(ABREV[l], w);
+    if(!D || w.length < 2) return null;
     if(conocida(l)) return null;
     /* Con mayúscula a mitad de frase suele ser un nombre: no se toca */
     var mayus = w.charAt(0) !== l.charAt(0);
@@ -8865,7 +9066,7 @@ var AUTOCORR = (function(){
     if(D.porClave.has(k)) return conCaso(D.porClave.get(k), w);
     if(mayus || l.length < 3) return null;
     var mejor = null, rm = Infinity, tope = l.length < 5 ? 4000 : 20000;
-    cerca(k).forEach(function(x){ var c = D.porClave.get(x); if(c){ var r = D.rango.get(c); if(r < rm && r < tope){ rm = r; mejor = c; } } });
+    cerca(k).forEach(function(peso, x){ var c = D.porClave.get(x); if(c){ var r = D.rango.get(c); if(r < tope && (r + 40) * peso < rm){ rm = (r + 40) * peso; mejor = c; } } });
     return mejor ? conCaso(mejor, w) : null;
   }
   /* Hasta 3 palabras que empiezan como lo que vas escribiendo */
@@ -8884,7 +9085,44 @@ var AUTOCORR = (function(){
     propias.add(l);
     var g = leerJSON('agenda_palabras', []); if(g.indexOf(l) < 0){ g.push(l); escribirJSON('agenda_palabras', g.slice(-500)); }
   }
-  return { cargar:cargar, listo:listo, corregir:corregir, sugerir:sugerir, aprender:aprender, conocida:function(w){ return D ? conocida(String(w).toLowerCase()) : true; } };
+  /* Al cerrar una pregunta: «¿donde queda?» → «¿dónde queda?», «por que» → «por qué»,
+     y si falta el «¿» del comienzo, lo pone */
+  var INTERROG = { que:'qué', como:'cómo', donde:'dónde', adonde:'adónde', cuando:'cuándo', quien:'quién', quienes:'quiénes', cual:'cuál', cuales:'cuáles', cuanto:'cuánto', cuanta:'cuánta', cuantos:'cuántos', cuantas:'cuántas' };
+  function pregunta(antes){
+    var ini = Math.max(antes.lastIndexOf('¿'), Math.max(antes.lastIndexOf('.'), antes.lastIndexOf('!'), antes.lastIndexOf('?'), antes.lastIndexOf('\n')) + 1);
+    var tieneAbre = antes.lastIndexOf('¿') >= 0 && antes.lastIndexOf('¿') === ini;
+    var seg = antes.slice(tieneAbre ? ini + 1 : ini), pre = antes.slice(0, tieneAbre ? ini + 1 : ini);
+    if(!/[A-Za-zÁÉÍÓÚáéíóúñÑ]/.test(seg)) return null;
+    var hecho = false;
+    var nuevo = seg.replace(/\b(por)\s+que\b/i, function(m, a){ hecho = true; return a + ' qué'; });
+    if(!hecho) nuevo = nuevo.replace(/^(\s*(?:y|pero|entonces|a|de|en|para|con|desde|hasta|por)?\s*)(\S+)/i, function(m, a, w){ var t = INTERROG[w.toLowerCase()]; if(!t) return m; hecho = true; return a + conCaso(t, w); });
+    var lead = nuevo.match(/^\s*/)[0];
+    if(!tieneAbre) nuevo = lead + '¿' + nuevo.slice(lead.length);
+    return nuevo === seg ? null : pre + nuevo;
+  }
+  /* La palabra que suele venir después, según lo que tú escribes en la agenda */
+  var BASE_SIG = { de:['la','los','las'], que:['no','me','es'], en:['la','el','casa'], el:['lunes','día','viernes'], la:['reunión','casa','oficina'], para:['el','la','mañana'],
+    a:['las','la','ver'], por:['favor','la','el'], con:['el','la','mi'], mi:['casa','mamá','cuenta'], no:['me','se','hay'], me:['falta','toca','toca'], hay:['que','reunión'], tengo:['que','clase','reunión'], ir:['al','a','por'], al:['banco','gym','médico'],
+    pagar:['la','el','luz'], comprar:['pan','leche','regalo'], llamar:['a','al','mamá'], las:['8','9','6'], reunión:['con','de','a'], hoy:['a','en','tengo'], mañana:['a','en','temprano'] };
+  var sig = null;
+  function siguientes(prev){
+    if(!prev) return [];
+    if(!sig){
+      sig = {};
+      try{
+        var textos = [];
+        ['tareas','eventos','recordatorios','notas','diario'].forEach(function(c){ vivos(c).forEach(function(x){ textos.push(x.t || '', x.cuerpo || '', x.texto || ''); }); });
+        textos.join(' \n ').toLowerCase().split(/[\n.!?]+/).forEach(function(fr){
+          var ws = fr.match(/[a-záéíóúüñ]+/g) || [];
+          for(var i = 0; i < ws.length - 1; i++){ var a = sig[ws[i]] = sig[ws[i]] || {}; a[ws[i + 1]] = (a[ws[i + 1]] || 0) + 1; }
+        });
+      }catch(e){}
+    }
+    var p = prev.toLowerCase(), m = sig[p] || {}, out = Object.keys(m).sort(function(a, b){ return m[b] - m[a]; }).slice(0, 3);
+    (BASE_SIG[p] || []).forEach(function(w){ if(out.length < 3 && out.indexOf(w) < 0) out.push(w); });
+    return out;
+  }
+  return { pregunta:pregunta, siguientes:siguientes, olvidarSig:function(){ sig = null; }, cargar:cargar, listo:listo, corregir:corregir, sugerir:sugerir, aprender:aprender, conocida:function(w){ return D ? conocida(String(w).toLowerCase()) : true; } };
 })();
 
 var TECLADO = (function(){
@@ -8911,10 +9149,28 @@ var TECLADO = (function(){
     ultCorr = null;
     if(capa !== 'abc' || !corrigeAqui() || !AUTOCORR.listo()) return;
     var p = palabraActual(); if(!p) return;
+    /* «de de» → «de» (salvo las que sí se repiten) */
+    var antesP = el.value.slice(0, p.ini), rep = antesP.match(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)\s+$/);
+    if(rep && rep[1].toLowerCase() === p.w.toLowerCase() && p.w.length > 1 && ['no','si','sí','ja','je','muy','más','tan','bla','que'].indexOf(p.w.toLowerCase()) < 0){
+      var iniRep = p.ini - (antesP.length - antesP.search(/\s+$/));
+      el.setRangeText('', iniRep, p.fin, 'end'); avisarCambio();
+      ultCorr = { ini:iniRep, orig:antesP.slice(iniRep) + p.w, nuevo:'' }; return;
+    }
     var c = AUTOCORR.corregir(p.w, p.inicioFrase);
     if(!c || c === p.w) return;
     el.setRangeText(c, p.ini, p.fin, 'end'); avisarCambio();
     ultCorr = { ini:p.ini, orig:p.w, nuevo:c };
+  }
+  /* Antes de un signo: sin espacio delante («hola ,» → «hola,»); y al cerrar una pregunta, sus tildes y su «¿» */
+  function antesDeSigno(k){
+    if(!el || el.selectionStart == null || el.selectionStart !== el.selectionEnd) return;
+    var s0 = el.selectionStart, v = el.value;
+    if(v.charAt(s0 - 1) === ' ' && /[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ)»"']/.test(v.charAt(s0 - 2))){ el.setRangeText('', s0 - 1, s0, 'end'); s0--; }
+    if(k === '?' && corrigeAqui()){
+      var nuevo = AUTOCORR.pregunta(el.value.slice(0, s0));
+      if(nuevo){ el.setRangeText(nuevo, 0, s0, 'end'); }
+    }
+    avisarCambio();
   }
   function reemplazarPalabra(w){
     var p = palabraActual();
@@ -8926,7 +9182,8 @@ var TECLADO = (function(){
     num: ['1234567890', ['-', '/', ':', ';', '(', ')', 'S/', '&', '@', '"'], ['#+=', '.', ',', '?', '!', "'", '%', '⌫'], ['abc', '😊', ',', ' ', '.', '↵']],
     sim: [['[', ']', '{', '}', '#', '%', '^', '*', '+', '='], ['_', '\\', '|', '~', '<', '>', '€', '$', '£', '•'], ['123', '°', '…', '¿', '¡', '«', '»', '⌫'], ['abc', '😊', ',', ' ', '.', '↵']],
     emo: [['😀', '😂', '😅', '😍', '😎', '🤔', '😴', '😢', '😡', '🙌'], ['👍', '👎', '👊', '💪', '🙏', '👏', '❤️', '🔥', '✅', '❌'], ['⚽', '🏋️', '🏃', '📚', '💼', '🏠', '💰', '🎉', '⌫'], ['abc', '🍕', '☕', ' ', '📅', '↵']],
-    numpad: [['1', '2', '3', '+'], ['4', '5', '6', '−'], ['7', '8', '9', '⌫'], ['.', '0', '=', '↵']]
+    numpad: [['1', '2', '3', '+'], ['4', '5', '6', '−'], ['7', '8', '9', '×'], ['.', '0', '⌫', '÷'], ['C', '=', '↵']],
+    tel: [['1', '2', '3'], ['4', '5', '6'], ['7', '8', '9'], ['+', '0', '⌫'], [' ', '↵']]
   };
   var TILDES = { a:'áàä', e:'éèë', i:'íìï', o:'óòö', u:'úüù', n:'ñ', A:'ÁÀÄ', E:'ÉÈË', I:'ÍÌÏ', O:'ÓÒÖ', U:'ÚÜÙ', N:'Ñ', '?':'¿', '!':'¡' };
   var ATAJOS = ['hoy', 'mañana', 'pasado mañana', 'el lunes', 'el viernes', 'el sábado', '9am', '12pm', '6pm', '8pm', '!!', '#personal', '#estudios', '#oficina', '#deporte'];
@@ -8938,7 +9195,9 @@ var TECLADO = (function(){
     var t = (x.getAttribute('type') || 'text').toLowerCase();
     return ['text', 'search', 'email', 'url', 'tel', ''].indexOf(t) >= 0;
   }
-  function esNum(x){ var m = x.getAttribute('data-im') || x.getAttribute('inputmode') || ''; return m === 'decimal' || m === 'numeric' || m === 'tel'; }
+  function esNum(x){ var m = x.getAttribute('data-im') || x.getAttribute('inputmode') || ''; return m === 'decimal' || m === 'numeric' || m === 'tel' || x.type === 'tel'; }
+  function esTel(x){ return (x.getAttribute('data-im') || x.getAttribute('inputmode')) === 'tel' || x.type === 'tel'; }
+  function esCorreo(x){ return x.type === 'email' || /mail|correo/i.test((x.id || '') + ' ' + (x.name || '')); }
   function preparar(x){
     if(!activo() || !valido(x) || x.dataset.nativo) return;
     if(!x.hasAttribute('data-im')) x.setAttribute('data-im', x.getAttribute('inputmode') || '');
@@ -8974,16 +9233,17 @@ var TECLADO = (function(){
     return caja;
   }
   function tecla(k){
-    var nom = { '⇧':'Mayúsculas', '⌫':'Borrar', '↵':'Aceptar', ' ':'Espacio', '123':'Números', 'abc':'Letras', '#+=':'Símbolos', '😊':'Emojis', '=':'Calcular' }[k] || k;
+    var nom = { '⇧':'Mayúsculas', '⌫':'Borrar', '↵':'Aceptar', ' ':'Espacio', '123':'Números', 'abc':'Letras', '#+=':'Símbolos', '😊':'Emojis', '=':'Calcular', 'C':'Borrar todo', '×':'Por', '÷':'Entre', '−':'Menos' }[k] || k;
     var txt = k === ' ' ? 'espacio' : k === '⇧' ? (mayus === 2 ? '⇪' : '⇧') : (capa === 'abc' && k.length === 1 && mayus ? k.toUpperCase() : k);
-    var cls = 'tk' + (k === ' ' ? ' tk-esp' : '') + (['⇧','⌫','↵','123','abc','#+=','😊'].indexOf(k) >= 0 ? ' tk-fn' : '') + (k === '↵' ? ' tk-ok' : '') + (k === '⇧' && mayus ? ' tk-on' : '');
+    var cls = 'tk' + (k === ' ' ? ' tk-esp' : '') + (['⇧','⌫','↵','123','abc','#+=','😊','C'].indexOf(k) >= 0 ? ' tk-fn' : '') + (capa === 'numpad' && ['+','−','×','÷','='].indexOf(k) >= 0 ? ' tk-op' : '') + (k === '↵' ? ' tk-ok' : '') + (k === '⇧' && mayus ? ' tk-on' : '');
     var num = capa === 'abc' && NUM_ARRIBA[k] ? '<small class="tk-num">' + NUM_ARRIBA[k] + '</small>' : '';
     return '<button type="button" class="' + cls + (num ? ' tk-connum' : '') + '" data-k="' + esc(k) + '" aria-label="' + esc(nom) + '">' + esc(txt) + num + '</button>';
   }
   function pintarTeclado(){
     if(!el) return;
     var filas = FILAS[capa];
-    crear().innerHTML = cabHTML() + '<div class="tk-teclas' + (capa === 'numpad' ? ' tk-numpad' : '') + '">' + filas.map(function(f){
+    crear().className = 'tkb tk-tam-' + (pref.tkTam || 'n');
+    caja.innerHTML = cabHTML() + '<div class="tk-teclas' + (capa === 'numpad' || capa === 'tel' ? ' tk-numpad' : '') + '">' + filas.map(function(f){
       var ks = typeof f === 'string' ? f.split('') : f;
       return '<div class="tk-fila">' + ks.map(tecla).join('') + '</div>';
     }).join('') + '</div>';
@@ -9003,15 +9263,23 @@ var TECLADO = (function(){
       barra = '<div class="tk-barra tk-sugs">' +
         (corr ? '<button type="button" class="tk-sug tk-tal" data-s="' + esc(pw.w) + '">«' + esc(pw.w) + '»</button>' : '') +
         lista.map(function(x, i){ return '<button type="button" class="tk-sug' + (i === 0 && corr ? ' tk-mejor' : '') + '" data-s="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') + '</div>';
-    } else if(capa !== 'numpad'){
-      var enCaptura = el.id === 'entradaCaptura' || el.id === 'calRapido';
+    } else if(capa === 'numpad'){
+      var vN = el.value, nN = typeof leerMonto === 'function' ? leerMonto(vN) : 0;
+      if(vN && /[+\-−×÷*/]/.test(vN.slice(1))) barra = '<div class="tk-barra"><span class="tk-resultado">= ' + (nN ? dinero(Math.abs(nN)) : '…') + '</span></div>';
+      else if(!vN && typeof esCampoMonto === 'function' && (esCampoMonto(el) || el.id === 'grMonto')) barra = '<div class="tk-barra">' + montosFrecuentes('Gasto').map(function(m){ return '<button type="button" class="tk-atajo" data-set="' + m + '">' + MONEDA + ' ' + formNum(m) + '</button>'; }).join('') + '</div>';
+    } else if(capa !== 'tel'){
+      var enCaptura = el.id === 'entradaCaptura' || el.id === 'calRapido' || el.id === 'hoyTarea';
+      var antesC = el.value.slice(0, el.selectionStart || 0), prevW = capa === 'abc' && corrigeAqui() && /\s$/.test(antesC) ? (antesC.match(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)\s$/) || [])[1] : null;
+      var pred = prevW ? AUTOCORR.siguientes(prevW) : [];
       barra = '<div class="tk-barra">' +
-        (enCaptura ? ATAJOS.map(function(a){ return '<button type="button" class="tk-atajo" data-t="' + esc(a) + '">' + esc(a) + '</button>'; }).join('') : '') +
-        ['á','é','í','ó','ú','ñ','¿','¡'].map(function(a){ return '<button type="button" class="tk-atajo tk-acento" data-t="' + a + '">' + a + '</button>'; }).join('') +
+        (esCorreo(el) ? ['@gmail.com', '@hotmail.com', '@outlook.com', '.com', '.pe', '@'].map(function(a){ return '<button type="button" class="tk-atajo" data-raw="' + a + '">' + a + '</button>'; }).join('') :
+        pred.map(function(x){ return '<button type="button" class="tk-sug tk-pred" data-s="' + esc(x) + '">' + esc(x) + '</button>'; }).join('') +
+        (enCaptura && !pred.length ? ATAJOS.map(function(a){ return '<button type="button" class="tk-atajo" data-t="' + esc(a) + '">' + esc(a) + '</button>'; }).join('') : '') +
+        (pred.length ? '' : ['á','é','í','ó','ú','ñ','¿','¡'].map(function(a){ return '<button type="button" class="tk-atajo tk-acento" data-t="' + a + '">' + a + '</button>'; }).join(''))) +
       '</div>';
     }
     var cab = '<div class="tk-cab">' + barra + '<span class="tk-cab-acc">' +
-      (VOZ && capa !== 'numpad' ? '<button type="button" class="tk-mini" data-k="🎤" aria-label="Dictar">' + ico('i-mic') + '</button>' : '') +
+      (VOZ && capa !== 'numpad' && capa !== 'tel' ? '<button type="button" class="tk-mini" data-k="🎤" aria-label="Dictar">' + ico('i-mic') + '</button>' : '') +
       '<button type="button" class="tk-mini" data-k="⌨" aria-label="Usar el teclado del celular" title="Teclado del celular">⌨︎</button>' +
       '<button type="button" class="tk-mini" data-k="▾" aria-label="Ocultar teclado">▾</button></span></div>';
     return cab;
@@ -9020,7 +9288,7 @@ var TECLADO = (function(){
     clearTimeout(ocultarReloj);
     if(!AUTOCORR.listo()) AUTOCORR.cargar().then(function(){ if(el) pintarTeclado(); });
     var cambio = el !== x; el = x;
-    if(cambio){ capa = esNum(x) ? 'numpad' : 'abc'; mayus = 0; autoMayus(); }
+    if(cambio){ capa = esTel(x) ? 'tel' : esNum(x) ? 'numpad' : 'abc'; mayus = 0; autoMayus(); }
     pintarTeclado();
     caja.classList.remove('oculto');
     document.body.classList.add('con-teclado');
@@ -9074,10 +9342,9 @@ var TECLADO = (function(){
   }
   function quitarGlobo(){ var g = caja && caja.querySelector('.tk-globo'); if(g) g.remove(); }
   function calcular(){
-    var v = el.value.replace(/−/g, '-').replace(/,/g, '.').replace(/\s/g, '');
-    if(!/^[\d.+\-]+$/.test(v) || !/\d[+\-]/.test(v)) return;
-    var partes = v.match(/[+\-]?[\d.]+/g) || [], t = 0;
-    partes.forEach(function(p){ t += parseFloat(p) || 0; });
+    var v = el.value;
+    if(!/\d\s*[+\-−×÷*/]\s*\d/.test(v)) return;
+    var t = leerMonto(v); if(!t && t !== 0) return;
     el.value = String(Math.round(t * 100) / 100); avisarCambio();
   }
   function aceptar(){
@@ -9102,7 +9369,7 @@ var TECLADO = (function(){
       ultCorr = null; borrar(); refrescarCab(); return;
     }
     if(k === '↵'){ autocorregir(); ultCorr = null; aceptar(); return; }
-    if(k === ' ' || k === ',' || k === '.'){ autocorregir(); }
+    if(k === ' ' || /^[.,;:?!]$/.test(k)){ autocorregir(); }
     else ultCorr = null;
     /* Dos espacios seguidos: punto y mayúscula */
     if(k === ' ' && capa === 'abc' && el && Date.now() - ultEsp < 650){
@@ -9123,12 +9390,16 @@ var TECLADO = (function(){
       return;
     }
     if(k === '🎤'){ if(el) dictar(el.id, null); return; }
-    if(k === '='){ calcular(); return; }
-    if(k === '−'){ escribir('-'); return; }
+    if(k === '='){ calcular(); pintarTeclado(); return; }
+    if(k === 'C'){ if(el){ el.value = ''; avisarCambio(); } pintarTeclado(); return; }
+    if(k === '−'){ escribir('-'); refrescarCab(); return; }
+    if(k === '×' || k === '÷' || (capa === 'numpad' && k === '+')){ escribir(k); refrescarCab(); return; }
+    if(capa !== 'numpad' && capa !== 'tel' && /^[.,;:?!]$/.test(k)) antesDeSigno(k);
     var t = capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k;
     if(k === ' ' && capa !== 'abc') capa = 'abc';
     escribir(t);
     if(capa === 'abc' && mayus === 1){ mayus = 0; }
+    if(capa === 'numpad' || capa === 'tel'){ refrescarCab(); return; }
     autoMayus(); pintarTeclado();
   }
   function parar(){ clearTimeout(largo); clearInterval(repetir); largo = repetir = null; }
@@ -9144,13 +9415,16 @@ var TECLADO = (function(){
     b.classList.add('tk-pulsada');
     var su = b.getAttribute('data-s');
     if(su){ if(b.classList.contains('tk-tal')) AUTOCORR.aprender(su); reemplazarPalabra(su); if(mayus === 1) mayus = 0; autoMayus(); pintarTeclado(); vibrar(4); saltarClick = true; return; }
+    var raw = b.getAttribute('data-raw'), setv = b.getAttribute('data-set');
+    if(raw){ escribir(raw); vibrar(4); saltarClick = true; return; }
+    if(setv){ el.value = setv; avisarCambio(); refrescarCab(); vibrar(4); saltarClick = true; return; }
     var at = b.getAttribute('data-t');
     if(at){ escribir((/\S$/.test(el.value.slice(0, el.selectionStart || 0)) && at.length > 1 ? ' ' : '') + at + (at.length > 1 ? ' ' : '')); vibrar(4); saltarClick = true; return; }
     var k = b.getAttribute('data-k');
     /* Mantener ⌫: borra letra a letra y, si sigues, palabra a palabra */
     if(k === '⌫'){ accion(k); largo = setTimeout(function(){ var n = 0; repetir = setInterval(function(){ n++; if(n <= 14) borrar(); else if(n % 3 === 0) borrarPalabra(); }, 70); }, 420); saltarClick = true; return; }
     if(k === ' ' && el.selectionStart != null) esp = { x:ev.clientX, p:0, movido:false };
-    if(capa !== 'numpad' && k && [...k].length <= 2 && k !== ' ' && !b.classList.contains('tk-fn')) globo(b, capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k);
+    if(capa !== 'numpad' && capa !== 'tel' && k && [...k].length <= 2 && k !== ' ' && !b.classList.contains('tk-fn')) globo(b, capa === 'abc' && mayus && k.length === 1 ? k.toUpperCase() : k);
     /* Mantener pulsada una tecla: las tildes (vocales) y los números (fila de arriba) */
     var base = capa === 'abc' && mayus ? k.toUpperCase() : k;
     var extra = (capa === 'abc' && NUM_ARRIBA[k] ? NUM_ARRIBA[k] : '') + (TILDES[base] || '');
@@ -9214,6 +9488,46 @@ var TECLADO = (function(){
   return { activo:activo, tactil:tactil, ocultar:ocultar };
 })();
 
+/* El mismo autocorrector en la laptop (y con el teclado del celular): corrige al
+   poner espacio o un signo, arregla las preguntas al cerrar «?» y, si borras
+   justo después, vuelve tu palabra y la aprende. */
+(function(){
+  var ult = null;
+  function puede(x){
+    if(pref.autocorr === false || TECLADO.activo() || !x || x.closest && x.closest('#candado')) return false;
+    var esTxt = x.tagName === 'TEXTAREA' || (x.tagName === 'INPUT' && /^(text|search|)$/.test((x.getAttribute('type') || 'text').toLowerCase()));
+    if(!esTxt || x.readOnly) return false;
+    if(/decimal|numeric|tel/.test((x.getAttribute('inputmode') || '') + (x.getAttribute('data-im') || '')) || x.getAttribute('autocorrect') === 'off') return false;
+    return !/nombre|llave|codigo|clave|key|mail|ruc|tel|monto|^q$|buscar/i.test((x.id || '') + ' ' + (x.name || ''));
+  }
+  function avisar(x){ x.dispatchEvent(new Event('input', { bubbles:true })); }
+  document.addEventListener('focusin', function(ev){ if(puede(ev.target)) AUTOCORR.cargar(); });
+  document.addEventListener('keydown', function(ev){
+    var x = ev.target;
+    if(ev.ctrlKey || ev.metaKey || ev.altKey || ev.isComposing) return;
+    if(ev.key === 'Backspace'){
+      if(ult && ult.el === x && x.selectionStart === x.selectionEnd && x.selectionStart === ult.pos && x.value.slice(ult.ini, ult.pos - 1) === ult.nuevo){
+        ev.preventDefault(); x.setRangeText(ult.orig, ult.ini, ult.pos, 'end'); avisar(x); AUTOCORR.aprender(ult.orig);
+      }
+      ult = null; return;
+    }
+    var signo = /^[ .,;:?!]$/.test(ev.key) || (ev.key === 'Enter' && x.tagName === 'TEXTAREA');
+    if(!signo){ if(ev.key.length === 1) ult = null; return; }
+    if(!puede(x) || !AUTOCORR.listo() || x.selectionStart == null || x.selectionStart !== x.selectionEnd) return;
+    var pos = x.selectionStart, antes = x.value.slice(0, pos), m = antes.match(/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+$/), hecho = null;
+    if(m){
+      var ini = pos - m[0].length, previo = antes.slice(0, ini);
+      if(!/[#@\d]$/.test(previo)){
+        var c = AUTOCORR.corregir(m[0], !previo.trim() || /[.!?¡¿\n]\s*$/.test(previo));
+        if(c && c !== m[0]){ x.setRangeText(c, ini, pos, 'end'); pos = ini + c.length; hecho = { el:x, ini:ini, orig:m[0], nuevo:c, pos:pos + 1 }; }
+      }
+    }
+    if(ev.key === '?'){ var nv = AUTOCORR.pregunta(x.value.slice(0, pos)); if(nv){ x.setRangeText(nv, 0, pos, 'end'); hecho = null; } }
+    else if(/^[.,;:!]$/.test(ev.key) && x.value.charAt(pos - 1) === ' ' && /\w/.test(x.value.charAt(pos - 2))){ x.setRangeText('', pos - 1, pos, 'end'); hecho = null; }
+    ult = hecho;
+    avisar(x);
+  }, true);
+})();
 /* ==========================================================================
    ARRANQUE
    ========================================================================== */

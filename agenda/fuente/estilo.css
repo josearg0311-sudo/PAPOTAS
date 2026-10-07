@@ -4708,3 +4708,35 @@ body .vista header.cab-grande.cab-sec.banda, body .vista header.panel-cab.banda-
 body .lt-item.pasado{ opacity:1 !important }
 body .lt-item.pasado .titulo{ color:var(--tinta-2) !important }
 body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3) !important }
+
+/* ===== FORMULARIOS DE DATOS Y CUENTAS ===== */
+.gr-vista{ margin:-6px 4px 0; font-size:13px; font-weight:650; color:var(--tinta-3); min-height:18px }
+.gr-vista.mal{ color:var(--debe) }
+.gr-rapidos{ display:flex; flex-wrap:wrap; gap:6px }
+.gr-rapidos .ficha{ font-variant-numeric:tabular-nums }
+.gr-fecha{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+.gr-fecha > span{ font-size:13px; font-weight:650; color:var(--tinta-2) }
+.gr-fecha input[type=date]{ flex:1; min-width:140px; padding:8px 10px; border-radius:12px; border:1px solid var(--regla); background:var(--hoja-2); color:var(--tinta-2); font:inherit; font-size:14px }
+.gr-fecha input.elegida{ border-color:var(--acento-txt); color:var(--tinta) }
+.ficha.auto, input.auto{ box-shadow:inset 0 0 0 1px var(--acento-txt) !important }
+.ficha.auto::after{ content:" ✨"; font-size:11px }
+.con-error input, .con-error.gr-monto{ border-color:var(--debe) !important; box-shadow:0 0 0 2px color-mix(in srgb, var(--debe) 35%, transparent) !important }
+.msj-error{ display:block; margin-top:5px; font-size:12.5px; font-weight:650; color:var(--debe) }
+.gr-monto.con-error{ flex-wrap:wrap } .gr-monto .msj-error{ flex-basis:100% }
+.monto-vista{ display:block; margin-top:5px; font-size:12.5px; font-weight:650; color:var(--acento-txt) }
+.monto-vista.mal{ color:var(--debe) }
+.fechas-rapidas{ display:flex; gap:6px; margin:-4px 0 4px }
+.ayuda-fh{ display:flex; flex-direction:column; gap:6px; margin:-4px 0 4px }
+.afh-fila{ display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px }
+.afh-fila::-webkit-scrollbar{ display:none }
+.afh-fila .ficha{ flex:none; padding:6px 11px; font-size:13px }
+.afh-leido{ margin:0; padding:8px 10px; border-radius:10px; font-size:12.5px; color:var(--tinta-2); background:color-mix(in srgb, var(--acento-txt) 10%, transparent) }
+.afh-leido b{ color:var(--tinta) }
+
+/* ===== TECLADO: tamaños, calculadora, predicción ===== */
+.tkb.tk-tam-c .tk{ height:34px !important; font-size:17px !important }
+.tkb.tk-tam-g .tk{ height:50px !important; font-size:22px !important }
+.tkb.tk-tam-c .tk-numpad .tk{ height:40px !important } .tkb.tk-tam-g .tk-numpad .tk{ height:56px !important; font-size:25px !important }
+.tk-op{ color:var(--acento-txt) !important; font-weight:700 !important; background:color-mix(in srgb, var(--acento-txt) 12%, var(--hoja-2)) !important }
+.tk-resultado{ display:flex; align-items:center; height:34px; padding:0 12px; border-radius:8px; font-size:16px; font-weight:800; color:var(--tinta); background:color-mix(in srgb, var(--acento-txt) 14%, transparent); font-variant-numeric:tabular-nums }
+.tk-pred{ font-style:normal; color:var(--tinta-2) !important }
