@@ -4811,6 +4811,11 @@ body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3
 .gr-div{ border-style:dashed !important }
 .gr-dividir{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:13px; color:var(--tinta-2) }
 .gr-dividir[hidden]{ display:none }
+.nov-lista li.nov-ir{ cursor:pointer; transition:background .15s }
+.nov-lista li.nov-ir:hover{ background:color-mix(in srgb, var(--acento-txt) 12%, transparent) }
+#avisos .aviso[hidden]{ display:none !important }
+#avisos .aviso.alarma[data-mas]{ position:relative; margin-bottom:14px }
+#avisos .aviso.alarma[data-mas]::after{ content:attr(data-mas); position:absolute; left:50%; bottom:-11px; transform:translateX(-50%); padding:2px 10px; border-radius:99px; font-size:11.5px; font-weight:700; color:#fff; background:var(--azul-vivo, #3A5FD9); box-shadow:0 2px 8px rgba(0,0,0,.4) }
 </style>
 </head>
 <body>
@@ -6214,6 +6219,31 @@ document.addEventListener('keydown', function(ev){
   if(i >= 0 && i < campos.length - 1){ ev.preventDefault(); campos[i + 1].focus(); }
 }, true);
 /* Mis atajos de texto: «midir» → la dirección completa, «cbu» → el número de cuenta */
+/* ---------- Novedades: lo nuevo de esta versión, una vez al abrirla ---------- */
+var VERSION_APP = 'v46';
+var NOVEDADES = [
+  ['🔗', 'Todo conectado', 'Hábitos que se marcan solos (agua, gastos, entrenos, diario, estudio…), metas que se llenan solas, horas que se facturan como cobro y el diario con lo que pasó cada día. Míralo en Más → Conexiones.', 'vinculos'],
+  ['⚡', 'En vivo en cada sección', 'Debajo de los mosaicos: compras, menú, clases, cronómetro, agua, peso, nota rápida, cuánto puedes gastar hoy… para usar ahí mismo.', ''],
+  ['💸', 'Montos como los escribes', '«1,500», «2k», «$20», «12.50+8»: ves el resultado al toque. Gasto rápido con fecha, montos frecuentes, categoría automática y «÷ Dividir».', 'gasto'],
+  ['⌨️', 'Teclado y autocorrector', 'Corrige también en la laptop, entiende «xq», «tb», pone tildes y «¿» en las preguntas, predice la siguiente palabra, deshace y pega. Tus atajos de texto en Ajustes.', 'atajos'],
+  ['📅', 'Escribe como hablas', 'En tareas, avisos y eventos: «dentista mañana 6pm #personal» pone el día, la hora y el espacio solos.', ''],
+  ['🎨', 'Azul marino', 'Un azul más profundo en todo el programa, rejillas sin huecos y el botón «Nuevo» con menú (Mayús+N en la laptop).', '']
+];
+function hojaNovedades(){
+  abrirFlotante(cabFlot('✨ Novedades') +
+    '<p class="ha-guia">Lo nuevo de la agenda (' + VERSION_APP + '). Toca una para probarla.</p>' +
+    '<ul class="vinc-fijas nov-lista">' + NOVEDADES.map(function(n){
+      return '<li' + (n[3] ? ' class="nov-ir" data-acc="nov-ir" data-v="' + n[3] + '" role="button" tabindex="0"' : '') + '><span>' + n[0] + '</span><div><b>' + n[1] + '</b><small>' + n[2] + '</small></div></li>';
+    }).join('') + '</ul>' +
+    '<button type="button" class="btn primario" data-cerrar="1" style="width:100%;margin-top:14px">¡Listo!</button>');
+}
+function mostrarNovedades(){
+  if(pref.novedades === VERSION_APP) return;
+  var nuevo = !vivos('tareas').length && !vivos('eventos').length && !vivos('notas').length;
+  pref.novedades = VERSION_APP; escribirJSON(CLAVE_PREF, pref);
+  if(nuevo || $('capaFlotante').innerHTML) return;   // la primera vez que se usa la agenda, no hay «novedades»
+  hojaNovedades();
+}
 function hojaAtajos(){
   var aj = pref.atajos || {}, ks = Object.keys(aj).sort();
   abrirFlotante(cabFlot('Mis atajos de texto') +
@@ -10467,6 +10497,7 @@ VISTAS['panel-mas'] = function(){
   '</div>' + pvMas();
   html += '<h3 class="panel-sub">Ajustes y herramientas</h3><div class="panel-lista">' +
     [['acc:revision', 'i-check', 'Revisión de la semana', revisionHecha(inicioSemana(hoyISO())) ? 'Ya la hiciste esta semana ✓' : 'Cómo te fue y qué viene · 5 minutos'],
+     ['acc:novedades', 'i-estrella', 'Novedades', 'Lo nuevo de esta versión'],
      ['acc:vinculos', 'i-enlace', 'Conexiones', 'Lo que se marca y se llena solo entre secciones'],
      ['ajustes', 'i-ajustes', 'Ajustes', 'Tu nombre, apariencia, avisos, nube y respaldos'], ['acc:buscar', 'i-buscar', 'Buscar', 'En todo lo que tienes'],
      ['acc:personalizar-hoy', 'i-hoy', 'Elegir qué ver en Hoy', 'Muestra u oculta bloques'], ['secciones', 'i-espacios', 'Administrar secciones', 'Orden y secciones del menú'],
@@ -12277,18 +12308,25 @@ function aviso(titulo, texto, boton, alPulsar, alarma){
   el.innerHTML = '<div class="txt"><b>' + esc(titulo) + '</b>' + (texto ? esc(texto) : '') + '</div>' +
     (boton ? '<button type="button">' + esc(boton) + '</button>' : '') +
     (alarma ? '<button type="button" data-cerrar="1">OK</button>' : '');
-  if(boton) el.querySelector('button').onclick = function(){ el.remove(); alPulsar(); };
+  if(boton) el.querySelector('button').onclick = function(){ el.remove(); ordenarAlarmas(); alPulsar(); };
   var ok = el.querySelector('[data-cerrar]');
-  if(ok) ok.onclick = function(){ el.remove(); };
+  if(ok) ok.onclick = function(){ el.remove(); ordenarAlarmas(); };
   /* Un aviso a la vez (las alarmas se quedan): no tapan la pantalla */
   if(!alarma) [].slice.call(caja.querySelectorAll('.aviso:not(.alarma)')).forEach(function(x){ x.remove(); });
   el.querySelector('.txt').onclick = function(){ if(!alarma) el.remove(); };
   caja.appendChild(el);
-  while(caja.children.length > 3) caja.firstChild.remove();
+  ordenarAlarmas();
   if(!alarma) setTimeout(function(){ el.remove(); }, boton ? 6000 : 3200);
   return el;
 }
 
+/* Varias alarmas a la vez: se ven dos y un «+N avisos más»; ninguna se pierde,
+   al cerrar una aparece la siguiente */
+function ordenarAlarmas(){
+  var als = [].slice.call(document.querySelectorAll('#avisos .aviso.alarma'));
+  als.forEach(function(a, i){ a.hidden = i >= 2; a.removeAttribute('data-mas'); });
+  if(als.length > 2) als[1].setAttribute('data-mas', '+' + (als.length - 2) + (als.length - 2 === 1 ? ' aviso más' : ' avisos más'));
+}
 /* ==========================================================================
    ALARMAS
    Cada 15 segundos se mira si algo toca. Lo que ya sonó se apunta en este
@@ -13045,6 +13083,8 @@ document.addEventListener('click', function(ev){
       var gdD = $('grDesc'); if(gdD && !/mi parte/.test(gdD.value)) gdD.value = (gdD.value ? gdD.value + ' ' : '') + '(mi parte de ' + nD + ')';
       $('grDividir').hidden = true; aviso('÷ ' + dinero(Math.abs(totD)) + ' entre ' + nD, 'Te toca ' + dinero(Math.abs(totD) / nD)); break;
     case 'atajos-ed': hojaAtajos(); break;
+    case 'novedades': hojaNovedades(); break;
+    case 'nov-ir': cerrarFlotante(); var nv = b.dataset.v; setTimeout(function(){ if(nv === 'vinculos') hojaVinculos(); else if(nv === 'gasto') gastoRapido('personal', 'Gasto'); else if(nv === 'atajos') hojaAtajos(); }, 120); break;
     case 'atajo-x': var aj = Object.assign({}, pref.atajos || {}); delete aj[b.dataset.v]; pref.atajos = aj; guardarPref(); hojaAtajos(); break;
     case 'gr-fecha':
       ui.grFecha = b.dataset.v; ui.grFechaHasta = Date.now() + 180000; document.querySelectorAll('[data-acc="gr-fecha"]').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
@@ -14070,7 +14110,7 @@ var AUTOCORR = (function(){
     return c;
   }
   /* Lo que se escribe abreviado en el chat */
-  var ABREV = { q:'que', k:'que', xq:'porque', pq:'porque', porq:'porque', xk:'porque', tb:'también', tmb:'también', tbn:'también', tambien:'también',
+  var ABREV = { q:'que', xq:'porque', pq:'porque', porq:'porque', xk:'porque', tb:'también', tmb:'también', tbn:'también', tambien:'también',
     xfa:'por favor', porfavor:'por favor', pls:'por favor', aki:'aquí', aca:'acá', osea:'o sea', aver:'a ver', nose:'no sé', nse:'no sé', talvez:'tal vez',
     enserio:'en serio', deacuerdo:'de acuerdo', aveces:'a veces', envez:'en vez', ntp:'no te preocupes', msj:'mensaje', hrs:'horas', bn:'bien', dsps:'después', despues:'después', tqm:'te quiero mucho', mas:'más' };
   /* ¿Qué palabra quisiste escribir? null si está bien o no hay una clara */
@@ -14623,6 +14663,7 @@ var TECLADO = (function(){
   tictac();
   setInterval(tictac, 1000);
   try{ vincularPrimeraVez(); }catch(e){ anotarError(e, 'vincular'); }
+  setTimeout(function(){ try{ mostrarNovedades(); }catch(e){ anotarError(e, 'novedades'); } }, 2200);
   revisarAlarmas();
   setInterval(revisarAlarmas, 15000);
   if(hayAlgunaNube()) sincronizarTodo();
