@@ -1266,7 +1266,7 @@ document.addEventListener('keydown', function(ev){
 }, true);
 /* Mis atajos de texto: «midir» → la dirección completa, «cbu» → el número de cuenta */
 /* ---------- Novedades: lo nuevo de esta versión, una vez al abrirla ---------- */
-var VERSION_APP = 'v46';
+var VERSION_APP = 'v47';
 var NOVEDADES = [
   ['🔗', 'Todo conectado', 'Hábitos que se marcan solos (agua, gastos, entrenos, diario, estudio…), metas que se llenan solas, horas que se facturan como cobro y el diario con lo que pasó cada día. Míralo en Más → Conexiones.', 'vinculos'],
   ['⚡', 'En vivo en cada sección', 'Debajo de los mosaicos: compras, menú, clases, cronómetro, agua, peso, nota rápida, cuánto puedes gastar hoy… para usar ahí mismo.', ''],
@@ -1890,7 +1890,13 @@ function espDe(x){
   if(x && x.esp && espInfo(x.esp).id === x.esp) return x.esp;
   return espDeTexto(x && (x.area || x.cat || '')) || 'personal';
 }
+var memoEspTxt = {};
 function espDeTexto(t){
+  var k = t || ''; if(k in memoEspTxt) return memoEspTxt[k];
+  var r = espDeTextoCalc(k); if(Object.keys(memoEspTxt).length > 500) memoEspTxt = {};
+  return (memoEspTxt[k] = r);
+}
+function espDeTextoCalc(t){
   t = sinTildes(t || '');
   if(!t) return '';
   if(/^(estudio|estudios|uni|universidad|cole|colegio|clase|clases|curso|cursos|examen|tesis)$/.test(t)) return 'estudios';
@@ -4282,7 +4288,8 @@ VISTAS.tareas = function(){
   if(ui.tFiltro === 'hechas'){
     lista.sort(function(a, b){ return (b.hechaEn || 0) - (a.hechaEn || 0); });
     if(!lista.length) return html + '<div class="tarjeta">' + vacio('🗂️', 'Aún no hay tareas hechas') + '</div>';
-    return html + '<div class="tarjeta"><div class="lista-filas">' + lista.slice(0, 200).map(filaTarea).join('') + '</div></div>' +
+    var topeH = (ui.tMas && ui.tMas.hechas) || 60;
+    return html + '<div class="tarjeta"><div class="lista-filas">' + lista.slice(0, topeH).map(filaTarea).join('') + (lista.length > topeH ? '<button type="button" class="ver-mas" data-acc="t-mas" data-g="hechas" data-n="' + (topeH + 100) + '">Mostrar más <small>(quedan ' + (lista.length - topeH) + ')</small></button>' : '') + '</div></div>' +
       '<div style="margin-top:12px"><button class="btn chico peligro" data-acc="t-borrar-hechas">' + ico('i-basura') + 'Borrar las hechas</button></div>';
   }
   lista.sort(ordenTareas);
@@ -4297,7 +4304,7 @@ VISTAS.tareas = function(){
   /* Como una agenda de papel: cada grupo con su fecha grande a la izquierda */
   var grupos = [], idx = {};
   function meter(clave, titulo, rojo, t, num, sub){
-    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ t:titulo, rojo:rojo, l:[], num:num, sub:sub, hoy:clave === 'b', dia:clave === 'b' ? hoy : clave.charAt(0) === 'c' ? clave.slice(1) : '' }); }
+    if(!(clave in idx)){ idx[clave] = grupos.length; grupos.push({ k:clave, t:titulo, rojo:rojo, l:[], num:num, sub:sub, hoy:clave === 'b', dia:clave === 'b' ? hoy : clave.charAt(0) === 'c' ? clave.slice(1) : '' }); }
     grupos[idx[clave]].l.push(t);
   }
   lista.forEach(function(t){
@@ -4313,7 +4320,12 @@ VISTAS.tareas = function(){
       '<div class="pl-fecha"><b>' + g.num + '</b><span>' + g.sub + '</span></div>' +
       '<div class="pl-cuerpo"><h3 class="pl-tit">' + g.t + ' <span class="n">' + g.l.length + '</span>' +
         (g.rojo ? '<button class="btn chico" data-acc="t-atrasadas-hoy">Pasar a hoy</button>' : '') + '</h3>' +
-        '<div class="lista-filas">' + (function(){ diaDelGrupo = g.dia; var h = g.l.map(filaTarea).join(''); diaDelGrupo = ''; return h; })() + '</div></div></section>';
+        '<div class="lista-filas">' + (function(){
+          /* Las listas largas se muestran de a poco: pintar 500 filas de golpe traba el celular */
+          var tope = (ui.tMas && ui.tMas[g.k]) || 40, resto = g.l.length - tope;
+          diaDelGrupo = g.dia; var h = g.l.slice(0, tope).map(filaTarea).join(''); diaDelGrupo = '';
+          return h + (resto > 0 ? '<button type="button" class="ver-mas" data-acc="t-mas" data-g="' + g.k + '" data-n="' + (tope + 60) + '">Mostrar ' + Math.min(60, resto) + ' más <small>(quedan ' + resto + ')</small></button>' : '');
+        })() + '</div></div></section>';
   }).join('') + '</div>';
 };
 
@@ -4863,7 +4875,7 @@ VISTAS.notas = function(){
     (tags.length ? '<div class="fichas notas-filtro"><button type="button" class="ficha" data-acc="nota-tag" data-v="" aria-pressed="' + !tag + '">Todas <span class="n">' + total + '</span></button>' +
       tags.slice(0, 20).map(function(e){ return '<button type="button" class="ficha" data-acc="nota-tag" data-v="' + esc(e) + '" aria-pressed="' + (tag === e) + '">#' + esc(e) + ' <span class="n">' + cuenta[e] + '</span></button>'; }).join('') + '</div>'
       : (total ? '<p class="ayuda-campo">Consejo: escribe <b>#etiqueta</b> en una nota (#recetas, #trabajo) y podrás filtrarlas aquí.</p>' : '')) +
-    (ns.length ? '<div class="notas-muro">' + ns.map(tarjetaNota).join('') + '</div>'
+    (ns.length ? '<div class="notas-muro">' + ns.slice(0, ui.nMas || 60).map(tarjetaNota).join('') + '</div>' + (ns.length > (ui.nMas || 60) ? '<button type="button" class="ver-mas" data-acc="n-mas">Mostrar más notas <small>(quedan ' + (ns.length - (ui.nMas || 60)) + ')</small></button>' : '')
       : '<div class="tarjeta">' + (total ? vacio('🔎', 'Nada coincide') : vacio('🗒️', 'Sin notas', 'Ideas, datos que no quieres olvidar, direcciones, contraseñas del wifi…')) + '</div>');
 };
 
@@ -8431,6 +8443,8 @@ document.addEventListener('click', function(ev){
       if(mt.actual >= +mt.objetivo) aviso('🎉 ¡Meta cumplida!', mt.t);
       break;
     case 'vinculos': hojaVinculos(); break;
+    case 'n-mas': ui.nMas = (ui.nMas || 60) + 90; var yN = window.scrollY; pintar(); window.scrollTo(0, yN); break;
+    case 't-mas': ui.tMas = ui.tMas || {}; ui.tMas[b.dataset.g] = +b.dataset.n; var ySc = window.scrollY; pintar(); window.scrollTo(0, ySc); break;
     case 'tk-tam': pref.tkTam = b.dataset.v; escribirJSON(CLAVE_PREF, pref); b.parentNode.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); aviso('⌨️ Teclado ' + b.textContent.toLowerCase()); break;
     case 'evento-nota': notaDeEvento(id, b.dataset.dia); break;
     case 'cliente-facturar': facturarHoras(b.dataset.n); break;

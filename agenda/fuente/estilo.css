@@ -4749,3 +4749,50 @@ body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3
 #avisos .aviso[hidden]{ display:none !important }
 #avisos .aviso.alarma[data-mas]{ position:relative; margin-bottom:14px }
 #avisos .aviso.alarma[data-mas]::after{ content:attr(data-mas); position:absolute; left:50%; bottom:-11px; transform:translateX(-50%); padding:2px 10px; border-radius:99px; font-size:11.5px; font-weight:700; color:#fff; background:var(--azul-vivo, #3A5FD9); box-shadow:0 2px 8px rgba(0,0,0,.4) }
+
+/* ===== RENDIMIENTO: lo que está fuera de la pantalla no se dibuja hasta llegar ===== */
+.planner .pl-dia, .notas-muro > *, .lista-filas > .fila, .mov-dia, .pl-dia{ content-visibility:auto; contain-intrinsic-size:auto 72px }
+.planner .pl-dia{ contain-intrinsic-size:auto 320px }
+.ver-mas{ display:block; width:100%; margin:6px 0 2px; padding:12px; border-radius:12px; font-weight:700; font-size:14px; color:var(--acento-txt); background:color-mix(in srgb, var(--acento-txt) 8%, transparent); border:1px dashed color-mix(in srgb, var(--acento-txt) 35%, transparent) }
+.ver-mas small{ font-weight:600; color:var(--tinta-3) }
+
+/* ===== ADAPTACIÓN A DISPOSITIVOS ===== */
+/* Tableta horizontal y laptops chicas (con la barra lateral): los 4 espacios en 2×2 para que no se aprieten */
+@media (min-width:900px) and (max-width:1279px){
+  .espacios-carrusel{ grid-template-columns:repeat(2, minmax(0, 1fr)) !important }
+  .panel-hoy{ grid-template-columns:repeat(2, minmax(0, 1fr)) !important }
+}
+/* Pantallas muy anchas: el contenido no se estira de lado a lado */
+@media (min-width:1600px){
+  #contenido, #zonaCuentas{ max-width:1240px; margin-left:auto; margin-right:auto }
+}
+/* Celular acostado (poca altura): barra de abajo y cabecera compactas, más lugar para el contenido */
+@media (orientation:landscape) and (max-height:500px){
+  :root{ --barra:46px }
+  .barra-inf button{ flex-direction:row; gap:6px; font-size:11.5px }
+  .barra-inf button svg{ width:20px !important; height:20px !important; padding:0 !important }
+  .barra-inf button[aria-current="page"] svg{ background:none !important }
+  .cabecera{ min-height:0 !important; padding-top:4px !important; padding-bottom:4px !important }
+  .portada-hoy h1, .cab-grande h1, .pe-nom{ font-size:26px !important }
+  .portada-hoy, .cab-grande, .portada-esp{ padding-top:12px !important; padding-bottom:12px !important }
+  .fab{ width:48px !important; height:48px !important; bottom:calc(var(--barra) + 10px) !important }
+  .hoja-flot{ max-height:94vh !important }
+  .tkb .tk{ height:30px !important; font-size:16px !important }
+}
+/* Celulares muy chicos (320 px): menos aire a los lados */
+@media (max-width:340px){
+  .vista{ padding-left:0; padding-right:0 }
+  .portada-hoy h1{ font-size:30px !important }
+  .mosaico{ padding:13px !important }
+  .mo-dato strong{ font-size:21px !important }
+}
+/* En pantallas táctiles: casillas y enlaces chicos tienen una zona de toque de 44 px, sin cambiar cómo se ven */
+@media (pointer:coarse){
+  .casilla, .mas, .ver-link, .ag-link, .pv-tag, .pv-mas, .ec-dato{ position:relative }
+  .casilla::before, .mas::before, .ver-link::before, .ag-link::before, .pv-tag::before, .pv-mas::before{ content:""; position:absolute; inset:-11px -8px; }
+  .casilla::before{ inset:-11px }
+  .ec-dato{ min-height:32px }
+  .interruptor{ padding:8px 0 }
+  .ht-c{ min-width:22px; min-height:22px }
+}
+@media (min-width:900px) and (max-width:1279px){ body .eh-rejilla.ec-rejilla{ grid-template-columns:repeat(2, minmax(0, 1fr)) !important } }
