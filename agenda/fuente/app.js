@@ -1266,8 +1266,9 @@ document.addEventListener('keydown', function(ev){
 }, true);
 /* Mis atajos de texto: «midir» → la dirección completa, «cbu» → el número de cuenta */
 /* ---------- Novedades: lo nuevo de esta versión, una vez al abrirla ---------- */
-var VERSION_APP = 'v48';
+var VERSION_APP = 'v49';
 var NOVEDADES = [
+  ['📲', 'Se instala en el celular', 'La agenda ya se instala como app de verdad en Android (icono propio, sin barra del navegador) y el botón «Instalar» te dice los pasos exactos según tu celular y navegador.', ''],
   ['🔗', 'Todo conectado', 'Hábitos que se marcan solos (agua, gastos, entrenos, diario, estudio…), metas que se llenan solas, horas que se facturan como cobro y el diario con lo que pasó cada día. Míralo en Más → Conexiones.', 'vinculos'],
   ['⚡', 'En vivo en cada sección', 'Debajo de los mosaicos: compras, menú, clases, cronómetro, agua, peso, nota rápida, cuánto puedes gastar hoy… para usar ahí mismo.', ''],
   ['💸', 'Montos como los escribes', '«1,500», «2k», «$20», «12.50+8»: ves el resultado al toque. Gasto rápido con fecha, montos frecuentes, categoría automática y «÷ Dividir».', 'gasto'],
@@ -8084,10 +8085,34 @@ var promesaInstalar = null;
 window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); promesaInstalar = e; });
 function instalar(){
   if(promesaInstalar){ promesaInstalar.prompt(); promesaInstalar.userChoice.then(function(){ promesaInstalar = null; }); return; }
-  var iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ aviso('Ya está instalada'); return; }
-  aviso('Cómo instalarla', iOS ? 'Safari → Compartir → Añadir a pantalla de inicio.' : 'Menú ⋮ del navegador → Instalar aplicación. Tiene que estar abierta por su dirección https.');
+  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ aviso('Ya está instalada', 'La estás usando como app.'); return; }
+  hojaInstalar();
 }
+/* Pasos según DÓNDE la tienes abierta: cada caso falla por un motivo distinto */
+function hojaInstalar(){
+  var ua = navigator.userAgent, pasos, nota = '';
+  var iOS = /iPad|iPhone|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  var dentroDeApp = /Instagram|FBAN|FBAV|FB_IAB|WhatsApp|Line\/|Telegram|TikTok|; wv\)/.test(ua);
+  var enMarco = false; try{ enMarco = window.top !== window.self; }catch(_){ enMarco = true; }
+  var segura = location.protocol === 'https:' || /^(localhost|127\.)/.test(location.hostname);
+  if(enMarco || !segura){
+    pasos = ['Ábrela por su dirección web (la de Netlify, que empieza por <b>https://</b>).', 'Así, desde un archivo o una vista previa, ningún celular deja instalar.'];
+  } else if(dentroDeApp){
+    pasos = ['Estás dentro de otra app (WhatsApp, Instagram…), que no deja instalar.', 'Toca el menú <b>⋮</b> o <b>···</b> → <b>Abrir en el navegador</b> (Chrome o Safari).', 'Ahí vuelve a tocar <b>Instalar</b>.'];
+  } else if(iOS){
+    pasos = /CriOS|FxiOS|EdgiOS/.test(ua) ?
+      ['En iPhone se instala mejor desde <b>Safari</b>: copia la dirección y ábrela ahí.', 'Toca <b>Compartir</b> (el cuadrado con la flecha ↑).', 'Elige <b>Añadir a pantalla de inicio</b> → <b>Añadir</b>.'] :
+      ['Toca <b>Compartir</b> (el cuadrado con la flecha ↑), abajo en Safari.', 'Baja y elige <b>Añadir a pantalla de inicio</b>.', 'Deja «Abrir como app web» activado y toca <b>Añadir</b>.'];
+  } else if(/SamsungBrowser/.test(ua)){
+    pasos = ['Toca el menú <b>≡</b> abajo a la derecha.', 'Elige <b>Añadir página a</b> → <b>Pantalla de inicio</b>.'];
+  } else {
+    pasos = ['Toca el menú <b>⋮</b> de Chrome, arriba a la derecha.', 'Elige <b>Instalar aplicación</b> (o <b>Añadir a pantalla de inicio</b> → <b>Instalar</b>).', 'Si no aparece: recarga la página una vez y espera unos segundos.'];
+    nota = 'Si la borraste hace poco, Chrome tarda en volver a ofrecerla: en Ajustes del sitio, borra los datos de la página (ojo: antes conecta la nube para no perder nada) y recarga.';
+  }
+  abrirFlotante(cabFlot('Instalar la agenda') + '<ol class="pasos-inst">' + pasos.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ol>' +
+    (nota ? '<p class="pasos-nota">' + nota + '</p>' : '') + '<p class="pasos-nota">Instalada se abre sin barra del navegador, con su icono, y funciona sin conexión.</p>');
+}
+window.addEventListener('appinstalled', function(){ promesaInstalar = null; try{ aviso('Agenda instalada', 'Ya la tienes en tu pantalla de inicio.'); }catch(_){} });
 
 /* ==========================================================================
    EVENTOS

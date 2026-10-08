@@ -1,0 +1,91 @@
+{
+ "name": "Agenda · Mi organización",
+ "short_name": "Agenda",
+ "description": "Tareas, listas, calendario, recordatorios, hábitos, metas, diario, pagos, notas y cuentas.",
+ "id": "./",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "any",
+ "lang": "es",
+ "dir": "ltr",
+ "background_color": "#000000",
+ "theme_color": "#000000",
+ "categories": [
+  "productivity",
+  "lifestyle",
+  "finance"
+ ],
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any"
+  },
+  {
+   "src": "icon-maskable-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "maskable"
+  },
+  {
+   "src": "icon-maskable-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
+  }
+ ],
+ "shortcuts": [
+  {
+   "name": "Anotar gasto",
+   "short_name": "Gasto",
+   "url": "./#gasto",
+   "icons": [
+    {
+     "src": "icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "Anotar ingreso",
+   "short_name": "Ingreso",
+   "url": "./#ingreso",
+   "icons": [
+    {
+     "src": "icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "Añadir tarea",
+   "short_name": "Tarea",
+   "url": "./#anadir",
+   "icons": [
+    {
+     "src": "icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  },
+  {
+   "name": "Mi día",
+   "short_name": "Agenda",
+   "url": "./#agenda",
+   "icons": [
+    {
+     "src": "icon-192.png",
+     "sizes": "192x192"
+    }
+   ]
+  }
+ ]
+}

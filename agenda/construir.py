@@ -110,6 +110,7 @@ def armar(completa):
 <link rel="icon" type="image/svg+xml" href="{favicon}">
 <link rel="apple-touch-icon" href="{apple}">
 {'' if completa else '<link rel="preload" href="jakarta.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="barlow-700.woff2" as="font" type="font/woff2" crossorigin>'}
+{'' if completa else '<link rel="manifest" href="manifest.webmanifest">'}
 <title>Agenda</title>
 <script>
 /* Tema y paleta ANTES de pintar nada (claves propias de la agenda), y el
@@ -144,11 +145,21 @@ def armar(completa):
         {{ name:'Mi día', short_name:'Agenda', url: base + aqui + '#agenda' }}
       ]
     }};
-    var txt = JSON.stringify(m), h;
-    try{{ h = URL.createObjectURL(new Blob([txt], {{ type:'application/manifest+json' }})); }}
-    catch(_){{ h = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(txt); }}
-    var l = document.createElement('link'); l.rel = 'manifest'; l.href = h;
-    document.head.appendChild(l);
+    var txt = JSON.stringify(m);
+    var enMemoria = function(){{
+      var h;
+      try{{ h = URL.createObjectURL(new Blob([txt], {{ type:'application/manifest+json' }})); }}
+      catch(_){{ h = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(txt); }}
+      var l = document.querySelector('link[rel=manifest]');
+      if(!l){{ l = document.createElement('link'); l.rel = 'manifest'; document.head.appendChild(l); }}
+      l.href = h;
+    }};
+    /* Android solo INSTALA de verdad (app con icono propio) si el manifiesto
+       es un archivo real con dirección https: el de memoria (blob:) solo da
+       un acceso directo, o nada. Si está manifest.webmanifest al lado se usa
+       ese; si no (subiste solo el html), el de memoria. */
+    if({'true' if completa else 'false'} || !base || location.protocol !== 'https:' && !/^(localhost|127\.)/.test(location.hostname)) enMemoria();
+    else fetch('manifest.webmanifest', {{ method:'HEAD', cache:'no-cache' }}).then(function(r){{ if(!r.ok) enMemoria(); }}, enMemoria);
   }}catch(e){{}}
   window.ICONO_AGENDA = '{icono_aviso}';
   window.FUENTE_AGENDA = {letra_js};
@@ -178,3 +189,31 @@ for nombre, completa in (('index.html', False), ('agenda-completa.html', True)):
     with open(os.path.join(AQUI, nombre), 'w') as f:
         f.write(html)
     print(nombre + ':', len(html.encode()) // 1024, 'KB', '· comprimido', len(gzip.compress(html.encode(), 6)) // 1024, 'KB')
+
+# El manifiesto como ARCHIVO de verdad, para la versión ligera: Android solo
+# crea la app instalada (con su icono, sin barra del navegador) cuando el
+# manifiesto tiene dirección https propia. Direcciones relativas: sirve igual
+# en la raíz o dentro de una carpeta.
+manifiesto = {
+    'name': 'Agenda · Mi organización', 'short_name': 'Agenda',
+    'description': 'Tareas, listas, calendario, recordatorios, hábitos, metas, diario, pagos, notas y cuentas.',
+    'id': './', 'start_url': './', 'scope': './',
+    'display': 'standalone', 'orientation': 'any', 'lang': 'es', 'dir': 'ltr',
+    'background_color': '#000000', 'theme_color': '#000000',
+    'categories': ['productivity', 'lifestyle', 'finance'],
+    'icons': [
+        {'src': 'icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
+        {'src': 'icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+        {'src': 'icon-maskable-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'maskable'},
+        {'src': 'icon-maskable-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'},
+    ],
+    'shortcuts': [
+        {'name': 'Anotar gasto', 'short_name': 'Gasto', 'url': './#gasto', 'icons': [{'src': 'icon-192.png', 'sizes': '192x192'}]},
+        {'name': 'Anotar ingreso', 'short_name': 'Ingreso', 'url': './#ingreso', 'icons': [{'src': 'icon-192.png', 'sizes': '192x192'}]},
+        {'name': 'Añadir tarea', 'short_name': 'Tarea', 'url': './#anadir', 'icons': [{'src': 'icon-192.png', 'sizes': '192x192'}]},
+        {'name': 'Mi día', 'short_name': 'Agenda', 'url': './#agenda', 'icons': [{'src': 'icon-192.png', 'sizes': '192x192'}]},
+    ],
+}
+with open(os.path.join(AQUI, 'manifest.webmanifest'), 'w') as f:
+    json.dump(manifiesto, f, ensure_ascii=False, indent=1)
+print('manifest.webmanifest: listo')

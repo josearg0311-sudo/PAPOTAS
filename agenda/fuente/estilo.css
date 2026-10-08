@@ -4814,3 +4814,10 @@ body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3
 /* Tarjetas: borde visible para separarlas del fondo */
 :root[data-paleta="negro"]:not([data-tema="claro"]) :is(.tarjeta, .w, .mosaico, .pv-c, .ec){ border-color:var(--regla) !important }
 :root[data-paleta="negro"]:not([data-tema="claro"]) :is(.mosaico, .pv-c){ border:1px solid var(--regla) }
+
+/* ==========================================================================
+   INSTALAR · pasos
+   ========================================================================== */
+.pasos-inst{ margin:4px 0 12px; padding-left:22px; display:grid; gap:10px; line-height:1.45 }
+.pasos-inst li::marker{ color:var(--acento-txt); font-weight:700 }
+.pasos-nota{ margin:0 0 10px; font-size:13px; color:var(--tinta-2); line-height:1.45 }
