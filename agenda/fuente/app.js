@@ -1266,7 +1266,7 @@ document.addEventListener('keydown', function(ev){
 }, true);
 /* Mis atajos de texto: «midir» → la dirección completa, «cbu» → el número de cuenta */
 /* ---------- Novedades: lo nuevo de esta versión, una vez al abrirla ---------- */
-var VERSION_APP = 'v47';
+var VERSION_APP = 'v48';
 var NOVEDADES = [
   ['🔗', 'Todo conectado', 'Hábitos que se marcan solos (agua, gastos, entrenos, diario, estudio…), metas que se llenan solas, horas que se facturan como cobro y el diario con lo que pasó cada día. Míralo en Más → Conexiones.', 'vinculos'],
   ['⚡', 'En vivo en cada sección', 'Debajo de los mosaicos: compras, menú, clases, cronómetro, agua, peso, nota rápida, cuánto puedes gastar hoy… para usar ahí mismo.', ''],
@@ -6391,7 +6391,7 @@ function confirmarNuevo(){
 
 /* ---------- Ajustes -------------------------------------------------------- */
 var PALETAS = [
-  { id:'negro',   nom:'Negro',   gotas:['#0F2770','#30D158','#02050E'] },
+  { id:'negro',   nom:'Negro',   gotas:['#0A1C55','#30D158','#010409'] },
   { id:'electrico', nom:'Eléctrico', gotas:['#3D8BFF','#45C97A','#18191B'] },
   { id:'brasa',   nom:'Brasa',   gotas:['#F0883E','#8FC45A','#1A1816'] },
   { id:'jade',    nom:'Jade',    gotas:['#5FD3B3','#E9C66F','#171C1B'] },

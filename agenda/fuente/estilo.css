@@ -4796,3 +4796,21 @@ body .lt-item.pasado .meta, body .lt-item.pasado .meta span{ color:var(--tinta-3
   .ht-c{ min-width:22px; min-height:22px }
 }
 @media (min-width:900px) and (max-width:1279px){ body .eh-rejilla.ec-rejilla{ grid-template-columns:repeat(2, minmax(0, 1fr)) !important } }
+
+/* ===== AZUL MARINO NOCHE + MÁS CONTRASTE (paleta Negro, v48) ===== */
+:root[data-paleta="negro"]:not([data-tema="claro"]){
+  --verde:#0A1C55; --verde-sube:#13296F; --verde-piso:#040A22; --acento-txt:#94ABF7; --azul-vivo:#4F74EC;
+  --papel:#010409; --hoja:#050A18; --hoja-2:#0B1228; --regla:#1A2442; --regla-2:#131B34;
+  --tinta:#F7F8FB; --tinta-2:#C9D0DD; --tinta-3:#A3ACBE;
+}
+:root[data-paleta="negro"][data-tema="claro"]{
+  --verde:#0A1A4F; --verde-sube:#071339; --verde-piso:#E1E7F7; --acento-txt:#0A1A4F; --azul-vivo:#1F3FA8;
+  --tinta:#05070C; --tinta-2:#3E4550; --tinta-3:#565D69; --regla:#C3C9D3; --regla-2:#D5DAE2;
+}
+/* El azul es casi tan oscuro como el fondo: un filo de luz más marcado para que botones y selección se distingan */
+:root[data-paleta="negro"]:not([data-tema="claro"]) :is(.btn.primario, .lat-nuevo, .lat-nuevo-mas, .fab, .franja-semana button.hoy, .ag-dias button.sel, .ag-dia.hoy .ag-fecha, .cal-mes .celda.sel .num, .celda.hoy .num, .segmento .ficha[aria-pressed="true"], .gr-cats .ficha[aria-pressed="true"], .qh-btn, .lateral .avatar, .aviso.alarma, .tk-ok, .sem-col.hoy .sem-cab b, .ficha[aria-pressed="true"], .selector button[aria-pressed="true"], .tk-on){
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--acento-txt) 62%, transparent), 0 6px 20px -8px rgba(60,100,240,.55) !important;
+}
+/* Tarjetas: borde visible para separarlas del fondo */
+:root[data-paleta="negro"]:not([data-tema="claro"]) :is(.tarjeta, .w, .mosaico, .pv-c, .ec){ border-color:var(--regla) !important }
+:root[data-paleta="negro"]:not([data-tema="claro"]) :is(.mosaico, .pv-c){ border:1px solid var(--regla) }
