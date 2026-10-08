@@ -1266,7 +1266,7 @@ document.addEventListener('keydown', function(ev){
 }, true);
 /* Mis atajos de texto: «midir» → la dirección completa, «cbu» → el número de cuenta */
 /* ---------- Novedades: lo nuevo de esta versión, una vez al abrirla ---------- */
-var VERSION_APP = 'v50';
+var VERSION_APP = 'v51';
 var NOVEDADES = [
   ['📲', 'Se instala en el celular', 'Se instala directo en Android, sin pasar por Google Play (como antes), y el botón «Instalar» te dice los pasos exactos según tu celular y navegador.', ''],
   ['🔗', 'Todo conectado', 'Hábitos que se marcan solos (agua, gastos, entrenos, diario, estudio…), metas que se llenan solas, horas que se facturan como cobro y el diario con lo que pasó cada día. Míralo en Más → Conexiones.', 'vinculos'],

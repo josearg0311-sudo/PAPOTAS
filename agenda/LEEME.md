@@ -226,10 +226,11 @@ el check verde. El botón **Instalar** de la agenda dice los pasos exactos segú
 el celular y el navegador (también si la abriste desde WhatsApp o Instagram,
 que no dejan instalar).
 
-El manifiesto va **dentro** de la página, a propósito: así Android la instala
-directo, sin pasar por Google Play. Con un `manifest.webmanifest` aparte (v49)
-Chrome intentaba la instalación por Play, que en celulares Xiaomi se quedaba
-para siempre en «Instalando…».
+El manifiesto va **dentro** de la página y con los **iconos metidos dentro**
+(se leen de los `.png` al abrir), a propósito: así Chrome en Android la pone
+él mismo en la pantalla de inicio, sin mandarla a «fabricar» a Google Play
+(WebAPK). Ese camino por Play, en celulares Xiaomi, se quedaba para siempre en
+«Instalando…» (v49 y v50).
 
 Una vez abierta, se guarda en el celular: **abre al instante** y funciona
 **sin internet**. Cuando subo una versión nueva, al abrirla aparece

@@ -88,7 +88,7 @@ def armar(completa):
         # Iconos del manifiesto: archivos al lado, con la dirección completa
         iconos_js = ('[{src:base+carpeta+"icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},'
                      '{src:base+carpeta+"icon-512.png",sizes:"512x512",type:"image/png",purpose:"any"},'
-                     '{src:base+carpeta+"icon-maskable-512.png",sizes:"512x512",type:"image/png",purpose:"maskable"}]')
+                     '{src:base+carpeta+"icon-maskable-192.png",sizes:"192x192",type:"image/png",purpose:"maskable"}]')
         icono_aviso = 'icon-192.png'
         letra_js = 'new URL("jakarta.woff2", location.href).href'
         serif_js = 'new URL("barlow-700.woff2", location.href).href'
@@ -144,19 +144,30 @@ def armar(completa):
         {{ name:'Mi día', short_name:'Agenda', url: base + aqui + '#agenda' }}
       ]
     }};
-    var txt = JSON.stringify(m);
     var enMemoria = function(){{
-      var h;
+      var h, txt = JSON.stringify(m);
       try{{ h = URL.createObjectURL(new Blob([txt], {{ type:'application/manifest+json' }})); }}
       catch(_){{ h = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(txt); }}
       var l = document.querySelector('link[rel=manifest]');
       if(!l){{ l = document.createElement('link'); l.rel = 'manifest'; document.head.appendChild(l); }}
       l.href = h;
     }};
-    /* En memoria, a propósito: así Android la instala directo, sin pasar
-       por Google Play (con un archivo .webmanifest aparte intenta la
-       instalación por Play, que en Xiaomi se queda en «Instalando…»). */
-    enMemoria();
+    /* INSTALACIÓN DIRECTA, sin Google Play. Con iconos que son direcciones
+       https, Chrome en Android manda a «fabricar» la app a Google Play
+       (WebAPK), y en Xiaomi eso se queda para siempre en «Instalando…». Con
+       los iconos metidos dentro (data:) Chrome no puede usar ese camino y la
+       pone él mismo en la pantalla de inicio, abriéndose como app. Los
+       iconos se leen del archivo de al lado (ya guardado, es al instante). */
+    var directo = {'false' if completa else 'true'}, hecho = false;
+    var listo = function(){{ if(!hecho){{ hecho = true; enMemoria(); }} }};
+    if(directo && window.fetch && window.FileReader){{
+      setTimeout(listo, 4000);
+      Promise.all(m.icons.map(function(ic){{
+        return fetch(ic.src).then(function(r){{ if(!r.ok) throw 0; return r.blob(); }}).then(function(b){{
+          return new Promise(function(si, no){{ var f = new FileReader(); f.onload = function(){{ si(f.result); }}; f.onerror = no; f.readAsDataURL(b); }});
+        }});
+      }})).then(function(ds){{ if(!hecho){{ m.icons.forEach(function(ic, i){{ ic.src = ds[i]; }}); listo(); }} }}, listo);
+    }} else listo();
   }}catch(e){{}}
   window.ICONO_AGENDA = '{icono_aviso}';
   window.FUENTE_AGENDA = {letra_js};
