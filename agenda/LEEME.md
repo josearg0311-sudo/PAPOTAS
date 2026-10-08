@@ -214,7 +214,7 @@ Tiene que abrirse desde una dirección **https**:
   `https://josearg0311-sudo.github.io/PAPOTAS/agenda/`. La dirección no cambia
   nunca, así que los datos no se "mudan".
 - **Netlify**: arrastra a https://app.netlify.com/drop una carpeta (o un .zip) con
-  `index.html`, `agenda-completa.html`, `manifest.webmanifest`, `sw.js`, `_headers`, `icono.svg`, las tres
+  `index.html`, `agenda-completa.html`, `sw.js`, `_headers`, `icono.svg`, las tres
   letras `.woff2` y los cinco `.png`. No hacen falta `fuente/`, `construir.py` ni
   este LEEME. El archivo `_headers` hace que el celular siempre reciba la versión
   nueva. Para actualizar, arrastra la carpeta nueva **sobre el mismo sitio**
@@ -226,10 +226,10 @@ el check verde. El botón **Instalar** de la agenda dice los pasos exactos segú
 el celular y el navegador (también si la abriste desde WhatsApp o Instagram,
 que no dejan instalar).
 
-**`manifest.webmanifest` tiene que subirse**: Android solo crea la app de verdad
-(icono propio, sin barra del navegador) si el manifiesto es un archivo con
-dirección https. Si se sube solo el html, la agenda usa uno de respaldo en
-memoria, pero entonces Android puede ofrecer apenas un acceso directo o nada.
+El manifiesto va **dentro** de la página, a propósito: así Android la instala
+directo, sin pasar por Google Play. Con un `manifest.webmanifest` aparte (v49)
+Chrome intentaba la instalación por Play, que en celulares Xiaomi se quedaba
+para siempre en «Instalando…».
 
 Una vez abierta, se guarda en el celular: **abre al instante** y funciona
 **sin internet**. Cuando subo una versión nueva, al abrirla aparece
