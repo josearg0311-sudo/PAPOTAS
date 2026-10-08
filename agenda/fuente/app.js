@@ -8107,7 +8107,7 @@ function hojaInstalar(){
     pasos = ['Toca el menú <b>≡</b> abajo a la derecha.', 'Elige <b>Añadir página a</b> → <b>Pantalla de inicio</b>.'];
   } else {
     pasos = ['Toca el menú <b>⋮</b> de Chrome, arriba a la derecha.', 'Elige <b>Instalar aplicación</b> (o <b>Añadir a pantalla de inicio</b> → <b>Instalar</b>).', 'Si no aparece: recarga la página una vez y espera unos segundos.'];
-    nota = 'Si la borraste hace poco, Chrome tarda en volver a ofrecerla: en Ajustes del sitio, borra los datos de la página (ojo: antes conecta la nube para no perder nada) y recarga.';
+    nota = 'Si se queda en «Instalando…» (pasa mucho en Xiaomi, Redmi y POCO): Ajustes → Aplicaciones → Chrome → Permisos → Otros permisos → activa <b>Accesos directos en la pantalla de inicio</b>, y revisa que Google Play esté actualizado. Si la borraste hace poco, Chrome tarda en volver a ofrecerla: en Ajustes del sitio, borra los datos de la página (ojo: antes conecta la nube para no perder nada) y recarga.';
   }
   abrirFlotante(cabFlot('Instalar la agenda') + '<ol class="pasos-inst">' + pasos.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ol>' +
     (nota ? '<p class="pasos-nota">' + nota + '</p>' : '') + '<p class="pasos-nota">Instalada se abre sin barra del navegador, con su icono, y funciona sin conexión.</p>');
