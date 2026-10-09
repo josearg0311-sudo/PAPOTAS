@@ -4162,7 +4162,7 @@ html[data-tema="claro"] .pos-perfiles b{ color:#0f7a55 }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v12.1</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v12.2</span>
     </div>
   </nav>
 
@@ -6425,7 +6425,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v12.1';
+const VERSION = 'v12.2';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -7807,6 +7807,7 @@ let topeHoy = 8;
 let verHoy = 'plataforma';
 try{ verHoy = localStorage.getItem('pap_ver_hoy') || 'plataforma'; }catch(_){}
 
+let colaHoyVisible = null;
 function pintaHoy(){
   const eco = economia();
   const hoy = hoyISO();
@@ -7867,6 +7868,10 @@ function pintaHoy(){
   else if(filtroHoy === 'atrasados') cola = vencidos.filter(function(c){ return -(diasHasta(c.vencimiento)||0) > 7 && seFueron.indexOf(c) < 0; });
   else cola = porCobrar;
   cola = cola.slice().sort(porFecha);
+  /* La ronda de «Empezar la ronda» es ESTA lista, la que cuenta el botón:
+     antes se recalculaba aparte y con «recientes» o dentro de una
+     plataforma el botón decía 3 y la ronda abría a todos. */
+  colaHoyVisible = cola;
   const conTel = cola.filter(function(c){ return telefonoDe(c); }).length;
 
   /* La meta del mes, si la has puesto; si no, el anillo mide lo cobrado
@@ -8177,6 +8182,13 @@ function perfilesDe(m){
   sobrantes.forEach(function(c){ casillas.push({n:null, cliente:c}); });
   return casillas;
 }
+/* Los huecos de verdad. Un cliente sin número de perfil («Perfil A», vacío,
+   repetido) no tiene casilla propia, pero OCUPA un sitio: si no se
+   descuenta, la cuenta parece tener más libres de los que tiene y se vende
+   un perfil que no existe. Se dejan solo tantos huecos como sitios quedan. */
+function huecosReales(m){
+  return perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).slice(0, libresDe(m));
+}
 function primerPerfilLibre(m){
   const hueco = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; })[0];
   return hueco ? 'Perfil ' + hueco.n : '';
@@ -8349,8 +8361,8 @@ function huecosGlobales(){
     const pa = String(a.nombre||'').trim().toUpperCase(), pb = String(b.nombre||'').trim().toUpperCase();
     return pa.localeCompare(pb,'es') || (Number(a.numero)||0) - (Number(b.numero)||0);
   }).forEach(function(m){
-    perfilesDe(m).forEach(function(x){
-      if(x.n && !x.cliente) fuera.push({plataforma:String(m.nombre||'').trim().toUpperCase(), m:m, n:x.n});
+    huecosReales(m).forEach(function(x){
+      fuera.push({plataforma:String(m.nombre||'').trim().toUpperCase(), m:m, n:x.n});
     });
   });
   return fuera;
@@ -8687,7 +8699,7 @@ function hojaPlataforma(n){
   const gente  = genteDe(n);
   const huecos = [];
   g.cuentas.forEach(function(m){
-    perfilesDe(m).forEach(function(x){ if(x.n && !x.cliente) huecos.push({m:m, n:x.n}); });
+    huecosReales(m).forEach(function(x){ huecos.push({m:m, n:x.n}); });
   });
 
   $('#titulo').textContent = n;
@@ -10409,15 +10421,28 @@ function dibujarMes(d){
   g.fillText(d.activos + ' clientes activos · hecho con PAPOTAS', 80, H - 70);
   return k;
 }
-function hojaResumenMes(){
-  const d = datosDelMes(hoyISO().slice(0,7));
+function mesMas(mes, n){
+  const y = Number(mes.slice(0,4)), m = Number(mes.slice(5,7)) - 1 + n;
+  const f = new Date(y, m, 1);
+  return f.getFullYear() + '-' + String(f.getMonth() + 1).padStart(2, '0');
+}
+function hojaResumenMes(mesPedido){
+  /* Si este mes todavía no tiene cobros, se abre el último que sí tiene. */
+  let mes = mesPedido || hoyISO().slice(0,7);
+  if(!mesPedido && !datosDelMes(mes).cobros){
+    const ult = ventas.map(function(v){ return String(v.fecha||'').slice(0,7); }).filter(Boolean).sort().pop();
+    if(ult && ult < mes) mes = ult;
+  }
+  const d = datosDelMes(mes);
   const k = dibujarMes(d);
   const url = k.toDataURL('image/png');
   const nombre = 'papotas-' + d.mes + '.png';
   abrirModal('Tu mes en una imagen',
     '<img class="mes-img" src="' + url + '" alt="Resumen del mes: cobrado ' + esc(dinero(d.cobrado)) + '">' +
     '<p class="ayuda">Guárdala para comparar mes a mes, o compártela.</p>',
-    [{texto:'Guardar imagen', clase:'', hacer:function(){
+    [{texto:'‹', clase:'fantasma', hacer:function(){ hojaResumenMes(mesMas(mes, -1)); }},
+     {texto:'›', clase:'fantasma', hacer:function(){ if(mes < hoyISO().slice(0,7)) hojaResumenMes(mesMas(mes, 1)); }},
+     {texto:'Guardar imagen', clase:'', hacer:function(){
        const a = document.createElement('a'); a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
      }},
      {texto:'Compartir', clase:'principal', hacer:function(){
@@ -11386,7 +11411,7 @@ function moverLote(){
   if(!lista.length) return;
   const opc = servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
     .map(function(m){
-      const libres = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).length;
+      const libres = huecosReales(m).length;
       return [m.id, nombreCuenta(m) + ' · ' + (libres ? libres + ' ' + plural(libres,'sitio libre','sitios libres') : 'sin sitio')];
     });
   abrirModal('Mover a ' + lista.length,
@@ -11399,7 +11424,7 @@ function moverLote(){
        const m = buscarMaster(val('lt-cuenta'));
        if(!m){ avisar('Elige a qué cuenta', 'mal'); return; }
        recordarPaso('mover ' + lista.length + ' clientes');
-       const huecos = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).map(function(x){ return 'Perfil ' + x.n; });
+       const huecos = huecosReales(m).map(function(x){ return 'Perfil ' + x.n; });
        let movidos = 0;
        lista.forEach(function(c){
          if(String(c.cuentaMasterId) === String(m.id)){ movidos++; return; }
@@ -12396,16 +12421,20 @@ function formCliente(id, previo){
     });
 }
 
+/* El siguiente número libre de una plataforma: con NETFLIX 1 a 7, el 8. */
+function siguienteNumeroDe(nombre){
+  const n = String(nombre || '').trim().toUpperCase();
+  if(!n) return 1;
+  return servicios.filter(function(x){ return String(x.nombre||'').trim().toUpperCase() === n; })
+    .reduce(function(a,x){ return Math.max(a, Number(x.numero)||0); }, 0) + 1;
+}
 function formMaster(id, plataformaPuesta){
   const m = id ? buscarMaster(id) : null;
   const esNuevo = !m;
   /* Al crear desde una plataforma, viene ya escrita y con el siguiente
      número libre, que es lo que se iba a teclear igualmente. */
   const nombrePre = m ? m.nombre : (plataformaPuesta || '');
-  const numeroPre = m ? m.numero : (plataformaPuesta
-    ? servicios.filter(function(x){ return String(x.nombre||'').trim().toUpperCase() === plataformaPuesta; })
-               .reduce(function(a,x){ return Math.max(a, Number(x.numero)||0); }, 0) + 1
-    : 1);
+  const numeroPre = m ? m.numero : siguienteNumeroDe(plataformaPuesta || '');
   abrirModal(esNuevo ? 'Nueva cuenta master' : 'Editar cuenta',
     '<div class="rejilla r2">' +
       campo('ms-nombre','Plataforma',{valor:nombrePre, pista:'NETFLIX, DISNEY+, MAX…'}) +
@@ -12441,6 +12470,17 @@ function formMaster(id, plataformaPuesta){
        destino.nombre = nombre;
        destino.nota = val('ms-nota').trim();
        destino.numero = Math.max(1, Math.round(num('ms-numero')) || 1);
+       /* Dos «NETFLIX 1» no se distinguen en ninguna lista: si el número ya
+          lo tiene otra cuenta de la misma plataforma, pasa al siguiente. */
+       const repetida = servicios.some(function(x){
+         return x !== destino && String(x.id) !== String(destino.id) &&
+           String(x.nombre||'').trim().toUpperCase() === nombre && Number(x.numero) === destino.numero;
+       });
+       if(repetida){
+         const antes = destino.numero;
+         destino.numero = siguienteNumeroDe(nombre);
+         setTimeout(function(){ avisar(nombre + ' ' + antes + ' ya existía: esta queda como ' + nombre + ' ' + destino.numero, ''); }, 400);
+       }
        destino.correo = val('ms-correo').trim();
        destino.contrasena = val('ms-clave');
        destino.perfiles = Math.max(0, Math.round(num('ms-perfiles')) || 0);
@@ -12469,7 +12509,17 @@ function formMaster(id, plataformaPuesta){
        }
        guardar(); cerrarModal(); pintar();
        avisar(esNuevo ? nombreCuenta(destino) + ' agregada' : 'Cambios guardados', 'bien', true);
-     }}]);
+     }}],
+    /* Al escribir la plataforma en una cuenta nueva, el número se pone
+       solo en el siguiente libre, mientras no lo hayas tocado tú. */
+    function(){
+      if(!esNuevo) return;
+      const nom = document.getElementById('ms-nombre'), numero = document.getElementById('ms-numero');
+      if(!nom || !numero) return;
+      let tocado = false;
+      numero.addEventListener('input', function(){ tocado = true; });
+      nom.addEventListener('input', function(){ if(!tocado) numero.value = siguienteNumeroDe(nom.value); });
+    });
 }
 
 /* ---------- Mover a alguien de sitio ------------------------------------
@@ -12496,7 +12546,7 @@ function cuerpoMover(){
   const opc = [['','Dejarlo sin cuenta']].concat(
     servicios.slice().sort(function(a,b){ return nombreCuenta(a).localeCompare(nombreCuenta(b),'es'); })
       .map(function(m){
-        const libres = perfilesDe(m).filter(function(x){ return x.n && !x.cliente; }).length;
+        const libres = huecosReales(m).length;
         return [m.id, nombreCuenta(m) + ' · ' + (libres ? libres + ' ' + plural(libres,'sitio libre','sitios libres') : 'sin sitio')];
       }));
   return '<div class="pila">' +
@@ -14096,7 +14146,9 @@ document.addEventListener('click', function(ev){
     const hoy = hoyISO(), av = Number(ajustes.diasAlerta||5);
     const deben = debe;
     let lista = [];
-    if(aQuien === 'hoy-visible'){
+    if(aQuien === 'hoy-visible' && colaHoyVisible){
+      lista = colaHoyVisible.slice();
+    }else if(aQuien === 'hoy-visible'){
       if(filtroHoy === 'perdidos') lista = perdidos(clientes);
       else if(filtroHoy === 'colgados') lista = clientes.filter(muyAtrasado);
       else if(filtroHoy === 'vencidos') lista = clientes.filter(function(c){ const x=diasHasta(c.vencimiento); return !yaCobrado(c) && x!==null && x<0; });

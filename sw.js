@@ -15,7 +15,7 @@
    Ojo: esto NO guarda tus datos. Tus datos viven en el propio navegador y, si
    configuras la nube, en Supabase. Esto solo guarda el programa. */
 
-const CACHE = 'papotas-v74';
+const CACHE = 'papotas-v75';
 /* Los logos de las plataformas van en su propia caja, que no se vacía al
    cambiar de versión: así salen al momento y también sin internet. */
 const LOGOS = 'papotas-logos';
