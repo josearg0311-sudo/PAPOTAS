@@ -6666,6 +6666,14 @@ function tonoOscuroDe(){
   return TONOS.some(function(x){ return x[0] === t; }) ? t : 'carbon';
 }
 function aplicarTema(){
+  /* v11: quien tenía «Negro» guardado de antes pasa una vez al azul
+     pizarra nuevo (se veía demasiado negro). Si luego elige Negro a mano,
+     se respeta. */
+  if(!ajustes.tonoV11){
+    if(ajustes.tonoOscuro === 'negro') ajustes.tonoOscuro = 'carbon';
+    ajustes.tonoV11 = true;
+    try{ guardarClave(CLAVES.ajustes, JSON.stringify(ajustes)); }catch(_){}
+  }
   document.documentElement.setAttribute('data-tema', ajustes.modoClaro ? 'claro' : 'oscuro');
   document.documentElement.setAttribute('data-fondo', tonoOscuroDe());
   if(ajustes.contrasteAlto) document.documentElement.setAttribute('data-realce','alto');
