@@ -4096,6 +4096,21 @@ html[data-tema="claro"] .pos-perfiles b{ color:#0f7a55 }
   .hh-acc .btn:not(.bien) .et{ display:block !important; font-size:10.5px; font-weight:700; line-height:1.1; white-space:nowrap }
   .hh-acc .btn:not(.bien) .btn-n{ position:absolute; top:4px; right:4px; font-size:10px; min-width:18px; height:18px; padding:0 5px }
 }
+
+/* v13 */
+.fiel{ color:#f5b301; font-size:.85em; vertical-align:1px }
+.insignia.fiel-ins{ color:#b58100; background:color-mix(in srgb, #f5b301 16%, transparent); border:1px solid color-mix(in srgb, #f5b301 45%, transparent) }
+html:not([data-tema="claro"]) .insignia.fiel-ins{ color:#ffcf4d }
+.aviso-extra{ background:var(--bien) !important; color:#06281c !important; border-color:transparent !important; margin-left:6px }
+.tel-fila{ gap:10px; align-items:center }
+.tel-fila .f-txt{ flex:1 1 auto !important; min-width:0 !important; display:flex !important }
+.tel-in{ width:160px !important; max-width:45%; min-width:0; flex:0 0 160px !important; padding:8px 10px; border-radius:10px; border:1px solid var(--linea-fuerte); background:var(--capa-alta); color:var(--txt); font:inherit; font-size:14px }
+.tel-in.mal{ border-color:var(--mal) } .tel-in.ok{ border-color:var(--bien); opacity:.8 }
+.tel-fila.hecha .f-nom::after{ content:" ✓"; color:var(--bien) }
+.tel-debe{ font-size:10.5px; font-weight:800; color:var(--mal); border:1px solid currentColor; border-radius:99px; padding:0 6px; margin-left:4px }
+.cx-q{ width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--linea-fuerte); background:var(--capa-alta); color:var(--txt); font:inherit; font-size:16px; margin-bottom:10px }
+.cx-lista .f{ gap:10px; align-items:center }
+@media (max-width:620px){ .tel-fila{ flex-wrap:wrap } .tel-in{ width:100% !important; max-width:none; flex:1 1 100% !important } }
 </style>
 </head>
 <body>
@@ -4162,7 +4177,7 @@ html[data-tema="claro"] .pos-perfiles b{ color:#0f7a55 }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v12.2</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v13</span>
     </div>
   </nav>
 
@@ -4320,6 +4335,7 @@ const AJUSTES_BASE = {
   plantillaCobro:'Hola {cliente} 👋 Te recuerdo que tu {servicio} vence el {vencimiento}. Son {monto}. ¡Gracias!',
   plantillaEntrega:'¡Listo {cliente}! 🎬\nPlataforma: {servicio}\nCorreo: {correo}\nClave: {contrasena}\nPerfil: {perfil}\nPIN: {pin}\nVence: {vencimiento}',
   plantillaVencido:'Hola {cliente}, tu {servicio} venció el {vencimiento} 😕 Avísame si lo renuevas y te lo reactivo al toque.',
+  plantillaRecibo:'✅ ¡Gracias {cliente}! Recibí tu pago de {monto} por {servicio}. Tu cuenta queda activa hasta el {vencimiento}. 🙌',
   plantillaAtrasado:'Hola {cliente}, tu {servicio} lleva {dias} días vencido (desde el {vencimiento}). Son {monto}. Si no lo vas a seguir usando avísame y libero el perfil. ¡Gracias!'
 };
 
@@ -5152,7 +5168,7 @@ function masterDe(c){
    decenas de miles de vueltas para dibujar una sola pantalla. */
 let _porMaster = null, _eco = null;
 function olvidarIndices(){
-  _porMaster = null; _eco = null; _personas = null;
+  _porMaster = null; _eco = null; _personas = null; _pagos = null;
   /* El texto donde se busca se arma una vez por cliente y se guarda en la
      propia ficha. Si no se tira aquí, al cambiarle el teléfono a alguien
      se seguiría buscando en el de antes. */
@@ -6425,7 +6441,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v12.2';
+const VERSION = 'v13';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -6471,7 +6487,7 @@ const ICONO = {
   gente:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>'
 };
 
-function avisar(texto, clase, conDeshacer){
+function avisar(texto, clase, conDeshacer, extra){
   const caja = $('#avisos');
   const d = document.createElement('div');
   d.className = 'aviso ' + (clase||'');
@@ -6487,12 +6503,21 @@ function avisar(texto, clase, conDeshacer){
     btn.addEventListener('click', function(){ d.remove(); deshacerPaso(); });
     d.appendChild(btn);
   }
+  /* Una acción de seguida, p. ej. «Mandar recibo» después de cobrar. */
+  if(extra && extra.texto){
+    const b2 = document.createElement('button');
+    b2.className = 'aviso-deshacer aviso-extra';
+    b2.type = 'button';
+    b2.textContent = extra.texto;
+    b2.addEventListener('click', function(){ d.remove(); try{ extra.hacer(); }catch(_){} });
+    d.insertBefore(b2, d.querySelector('.aviso-deshacer'));
+  }
   caja.appendChild(d);
   setTimeout(function(){
     d.style.transition = 'opacity .25s, transform .25s';
     d.style.opacity = '0'; d.style.transform = 'translateY(8px)';
     setTimeout(function(){ d.remove(); }, 260);
-  }, conDeshacer ? 7000 : 2600);
+  }, extra ? 9000 : conDeshacer ? 7000 : 2600);
 }
 
 /* ---------- Deshacer ----------------------------------------------------
@@ -7136,7 +7161,7 @@ function tarjetaCobro(c){
   return '<div class="cc ' + clase + '" data-cid="' + esc(c.id) + '" style="' + tonoDe(plat) + '">' +
     '<button class="cc-id" data-ficha="' + esc(c.id) + '" title="Ver la ficha de ' + esc(c.nombre||'') + '">' +
       logoPlataforma(plat, 30) +
-      '<span class="cc-txt"><b>' + esc(c.nombre || 'Sin nombre') + '</b>' +
+      '<span class="cc-txt"><b>' + esc(c.nombre || 'Sin nombre') + (esFiel(c) ? ' <span class="fiel" title="Cliente fiel: te ha pagado ' + pagosDe(c) + ' veces">★</span>' : '') + '</b>' +
         '<small>' + esc(m ? nombreCuenta(m) : (plat || 'Sin cuenta')) + (perfilBonito(c) ? ' · ' + esc(perfilBonito(c)) : '') + '</small>' +
         '<small class="cc-cuando">' + esc(enPausa(c) ? 'En pausa' : textoDiasCorto(c.vencimiento)) + (k > 1 ? ' · ' + k + ' cuotas' : '') + '</small>' +
       '</span>' +
@@ -7556,7 +7581,7 @@ function tarjetaCliente(c){
     '<span class="tc-alto">' +
       logoPlataforma(plat, 40) +
       '<span class="tc-id">' +
-        '<b>' + esc(c.nombre || 'Sin nombre') + '</b>' +
+        '<b>' + esc(c.nombre || 'Sin nombre') + (esFiel(c) ? ' <span class="fiel" title="Te ha pagado ' + pagosDe(c) + ' veces: cliente fiel">★</span>' : '') + '</b>' +
         '<small>' +
           (m ? '<span class="chip-cuenta" style="' + tonoDe(plat) + '">' + esc(nombreCuenta(m)) + '</span>' +
                (perfil ? '<span class="chip-perfil">' + esc(perfil) + '</span>' : '')
@@ -7867,7 +7892,22 @@ function pintaHoy(){
   else if(filtroHoy === 'recientes') cola = vencidos.filter(function(c){ return -(diasHasta(c.vencimiento)||0) <= 7 && seFueron.indexOf(c) < 0; });
   else if(filtroHoy === 'atrasados') cola = vencidos.filter(function(c){ return -(diasHasta(c.vencimiento)||0) > 7 && seFueron.indexOf(c) < 0; });
   else cola = porCobrar;
-  cola = cola.slice().sort(porFecha);
+  /* RONDA INTELIGENTE: primero a quien es más probable que te pague hoy.
+     Los que vencen hoy, luego los recién vencidos, los que están por
+     vencer, y al final los atrasados (de los más recientes a los más
+     viejos). Dentro de cada grupo, los fieles primero. */
+  const grupoCobro = function(c){
+    const d = diasHasta(c.vencimiento);
+    if(d === null) return 4;
+    return d === 0 ? 0 : (d < 0 && d >= -7) ? 1 : d > 0 ? 2 : 3;
+  };
+  cola = cola.slice().sort(function(a, b){
+    const ga = grupoCobro(a), gb = grupoCobro(b);
+    if(ga !== gb) return ga - gb;
+    const fa = esFiel(a) ? 0 : 1, fb = esFiel(b) ? 0 : 1;
+    if(fa !== fb) return fa - fb;
+    return ga === 3 ? String(b.vencimiento||'').localeCompare(String(a.vencimiento||'')) : porFecha(a, b);
+  });
   /* La ronda de «Empezar la ronda» es ESTA lista, la que cuenta el botón:
      antes se recalculaba aparte y con «recientes» o dentro de una
      plataforma el botón decía 3 y la ronda abría a todos. */
@@ -8201,6 +8241,17 @@ function enPausa(c){ return !!(c && c.pausado); }
    persona…) pero todavía no le renuevas: la marca dice «no le vuelvas a
    cobrar» sin tocar su fecha ni apuntar dinero. Vale para ESTE vencimiento:
    en cuanto lo renuevas o le cambias la fecha, la marca se va sola. */
+/* CLIENTE FIEL: te ha pagado al menos 2 veces y ahora no arrastra deuda
+   vieja. Son los que hay que cuidar (y a los que se cobra primero). */
+let _pagos = null;
+function pagosDe(c){
+  if(!_pagos){
+    _pagos = new Map();
+    ventas.forEach(function(v){ const k = String(v.clienteId || ''); if(k) _pagos.set(k, (_pagos.get(k) || 0) + 1); });
+  }
+  return _pagos.get(String(c && c.id)) || 0;
+}
+function esFiel(c){ return !!c && !enPausa(c) && pagosDe(c) >= 2 && cuotasPendientes(c) <= 1; }
 function yaCobrado(c){ return !!(c && c.yaCobre && c.yaCobre.venc === String(c.vencimiento || '')); }
 function debe(c){
   if(enPausa(c)) return false;
@@ -9027,6 +9078,7 @@ function hojaCliente(c){
                lo primero que hay que ver al abrir su ficha. En las listas va
                tintada porque allí se repite cien veces; aquí no se repite. */
             pastillaEstado(c, false) +
+            (esFiel(c) ? '<span class="insignia fiel-ins" title="Te ha pagado ' + pagosDe(c) + ' veces">★ Cliente fiel · ' + pagosDe(c) + ' pagos</span>' : '') +
             (enPausa(c) ? '<span class="insignia aviso" title="No sale en Hoy ni en «por cobrar»">' +
               ICONO.reloj + 'En pausa</span>' : '') +
             (fut ? '<span class="insignia info" title="Ya está programado">' + ICONO.etiqueta +
@@ -9784,6 +9836,8 @@ function pintaAjustes(){
         campo('aj-pl-atrasado','Cuando está atrasado (más de 7 días)',{tipo:'textarea', valor:ajustes.plantillaAtrasado || AJUSTES_BASE.plantillaAtrasado, filas:3,
           ayuda:'En la ronda «automática» cada cliente recibe el suyo: el recordatorio antes de vencer, el de «ya venció» la primera semana y este después. {dias} pone los días que lleva.'}) +
         campo('aj-pl-entrega','Entrega de datos',{tipo:'textarea', valor:ajustes.plantillaEntrega, filas:4}) +
+        campo('aj-pl-recibo','Recibo de pago',{tipo:'textarea', valor:ajustes.plantillaRecibo || AJUSTES_BASE.plantillaRecibo, filas:3,
+          ayuda:'Sale el botón «Mandar recibo» justo después de cobrar. {monto} es lo que te pagó y {vencimiento} hasta cuándo queda.'}) +
         campo('aj-firma','Firma al final',{valor:ajustes.firmaWs, pista:'Opcional · déjalo vacío para no firmar',
           ayuda:'Se pega al final de TODOS los mensajes. Si arrastras una firma del programa viejo y ya no te representa, bórrala aquí.'}) +
         (ajustes.firmaWs
@@ -10084,6 +10138,8 @@ function queHacerAhoraPap(x){
                     : '<b>Llevas ' + hace + ' días sin respaldo</b>: baja uno, tarda un segundo',
       'Bajar', 'data-qh-ver="@respaldo"');
   }
+  const sinTel = sinTelefono().length;
+  if(sinTel) fila('aviso', ICONO.wa, '<b>' + sinTel + ' ' + plural(sinTel,'cliente','clientes') + ' sin teléfono</b>: no les llega la ronda', 'Completar', 'data-telefonos="1"');
   if(x.libres > 0) fila('info', ICONO.capas, 'Tienes <b>' + x.libres + ' ' + plural(x.libres, 'perfil libre', 'perfiles libres') + '</b> para vender', 'Ver', 'data-qh-ver="@negocio"');
   const total = filas.length;
   const visibles = (qhTodo || total <= 4) ? filas : filas.slice(0, 3);
@@ -10234,6 +10290,7 @@ function heroHoy(x){
     '<div class="hh-acc">' +
       '<button class="btn bien" data-escribir-a="hoy-visible"' + (n ? '' : ' disabled title="Hoy no hay a quién escribir"') + '>' + ICONO.wa +
         'Empezar la ronda' + (n ? '<span class="btn-n">' + n + '</span>' : '') + '</button>' +
+      '<button class="btn" data-cobro-express="1" title="Te pagó alguien: búscalo y cóbrale en dos toques">' + ICONO.cobrar + '<span class="et">Cobrar</span></button>' +
       '<button class="btn" data-todos-wa="hoy-visible" title="Manda uno detrás de otro">' + ICONO.rayo + '<span class="et">A todos</span></button>' +
       (x.libres > 0 ? '<button class="btn" data-vender="1" title="Perfiles libres y el mensaje de oferta listo">' + ICONO.etiqueta + '<span class="et">Vender</span><span class="btn-n">' + x.libres + '</span></button>' : '') +
       '<button class="btn" data-resumen-mes="1" title="El mes en una imagen para guardar o compartir">' + ICONO.barras + '<span class="et">Mi mes</span></button>' +
@@ -10339,6 +10396,109 @@ function hojaVender(){
      }}]);
 }
 let ventaTexto = '';
+/* COMPLETAR TELÉFONOS: los que no tienen número no reciben la ronda. Se
+   escriben uno detrás de otro aquí, y si la misma persona tiene número en
+   otra ficha, se copia con un toque. */
+function telefonoSugerido(c){
+  const nom = sinTildes(String(c.nombre || '').trim().toUpperCase());
+  if(!nom) return '';
+  const otro = clientes.find(function(x){
+    return x !== c && sinTildes(String(x.nombre || '').trim().toUpperCase()) === nom && normalizarTelefono(x.telefono).vale;
+  });
+  return otro ? otro.telefono : '';
+}
+function sinTelefono(){
+  return clientes.filter(function(c){ return !enPausa(c) && !telefonoDe(c); })
+    .sort(function(a,b){ return (debe(b) ? 1 : 0) - (debe(a) ? 1 : 0) || String(a.nombre||'').localeCompare(String(b.nombre||''), 'es'); });
+}
+function hojaTelefonos(){
+  const lista = sinTelefono();
+  if(!lista.length){ avisar('Todos tus clientes tienen teléfono 👌', 'bien'); return; }
+  const copiables = lista.filter(telefonoSugerido);
+  abrirModal('Completar teléfonos',
+    '<p class="ayuda" style="margin-top:0"><b>' + lista.length + ' ' + plural(lista.length,'cliente','clientes') + '</b> sin número: no les llega la ronda ni el recibo. ' +
+      'Escribe el número y pulsa Enter: se guarda solo y pasa al siguiente. Primero van los que te deben.</p>' +
+    '<div class="lista tel-lista">' + lista.map(function(c){
+      const sug = telefonoSugerido(c);
+      return '<div class="f tel-fila" data-cid="' + esc(c.id) + '">' + logoPlataforma(platDe(c), 28) +
+        '<span class="f-txt"><span class="f-nom">' + esc(c.nombre || 'Sin nombre') + (debe(c) ? ' <span class="tel-debe">debe</span>' : '') + '</span>' +
+        '<span class="f-sub">' + esc(platDe(c) || '') + (sug ? ' · en otra ficha: <b>' + esc(sug) + '</b>' : '') + '</span></span>' +
+        '<input class="tel-in" type="tel" inputmode="tel" autocomplete="off" placeholder="987 654 321" data-tel-de="' + esc(c.id) + '" value="' + esc(sug ? '' : '') + '">' +
+        (sug ? '<button class="btn mini" data-tel-copiar="' + esc(c.id) + '" title="Usar ' + esc(sug) + '">Usar</button>' : '') +
+      '</div>';
+    }).join('') + '</div>',
+    (copiables.length ? [{texto:'Copiar los ' + copiables.length + ' que ya conozco', clase:'', hacer:function(){
+        recordarPaso('copiar teléfonos de otras fichas');
+        copiables.forEach(function(c){ c.telefono = telefonoSugerido(c); });
+        olvidarIndices(); guardar(); cerrarModal(); pintar();
+        avisar(copiables.length + ' ' + plural(copiables.length,'teléfono copiado','teléfonos copiados'), 'bien', true);
+      }}] : []).concat([{texto:'Listo', clase:'principal', hacer:function(){ cerrarModal(); pintar(); }}]),
+    function(cuerpo){
+      const guardarTel = function(inp){
+        const c = buscarCliente(inp.dataset.telDe); if(!c) return false;
+        const v = String(inp.value || '').trim(); if(!v) return false;
+        const n = normalizarTelefono(v);
+        if(!n.vale){
+          inp.classList.add('mal');
+          if(inp.dataset.avisado !== v){ inp.dataset.avisado = v; avisar('Ese número no sirve: ' + n.porque, 'mal'); }
+          return false;
+        }
+        c.telefono = v; olvidarIndices(); guardar();
+        inp.classList.remove('mal'); inp.classList.add('ok'); inp.disabled = true;
+        const fila = inp.closest('.tel-fila'); if(fila) fila.classList.add('hecha');
+        return true;
+      };
+      cuerpo.addEventListener('keydown', function(ev){
+        const inp = ev.target.closest && ev.target.closest('.tel-in');
+        if(!inp || ev.key !== 'Enter') return;
+        ev.preventDefault();
+        if(guardarTel(inp)){
+          const sig = Array.prototype.find.call(cuerpo.querySelectorAll('.tel-in:not([disabled])'), function(x){ return x !== inp; });
+          if(sig) sig.focus();
+        }
+      });
+      cuerpo.addEventListener('change', function(ev){ const inp = ev.target.closest && ev.target.closest('.tel-in'); if(inp) guardarTel(inp); });
+      cuerpo.addEventListener('click', function(ev){
+        const b = ev.target.closest && ev.target.closest('[data-tel-copiar]'); if(!b) return;
+        const c = buscarCliente(b.dataset.telCopiar); if(!c) return;
+        const inp = cuerpo.querySelector('[data-tel-de="' + CSS.escape(b.dataset.telCopiar) + '"]');
+        if(inp){ inp.value = telefonoSugerido(c); guardarTel(inp); b.remove(); }
+      });
+    });
+}
+/* COBRO EXPRESS: «me yapeó Carlos» → escribes car → Cobrar. Tres toques. */
+function hojaCobroExpress(){
+  abrirModal('Cobro express',
+    '<input id="cx-q" class="cx-q" type="search" autocomplete="off" placeholder="¿Quién te pagó? Nombre, teléfono o plataforma">' +
+    '<div class="lista cx-lista" id="cx-lista"></div>',
+    [{texto:'Cerrar', clase:'fantasma', hacer:cerrarModal}],
+    function(cuerpo){
+      const q = cuerpo.querySelector('#cx-q'), caja = cuerpo.querySelector('#cx-lista');
+      const pinta = function(){
+        const t = sinTildes(String(q.value || '').trim()).toLowerCase();
+        const dig = t.replace(/\D/g, '');
+        let lista = clientes.filter(function(c){ return !enPausa(c); });
+        if(t){
+          const pal = t.split(/\s+/).filter(Boolean);
+          lista = lista.filter(function(c){
+            const h = pajarDe(c).toLowerCase();
+            return (dig.length >= 4 && h.indexOf(dig) >= 0) || pal.every(function(w){ return h.indexOf(w) >= 0; });
+          });
+        }else lista = lista.filter(function(c){ return cuotasPendientes(c) > 0 || diasHasta(c.vencimiento) === 0; });
+        lista = lista.sort(function(a,b){ return (cuotasPendientes(b) > 0 ? 1 : 0) - (cuotasPendientes(a) > 0 ? 1 : 0) || String(a.vencimiento||'').localeCompare(String(b.vencimiento||'')); }).slice(0, 8);
+        caja.innerHTML = lista.length ? lista.map(function(c){
+          return '<div class="f">' + logoPlataforma(platDe(c), 30) +
+            '<span class="f-txt"><span class="f-nom">' + esc(c.nombre || 'Sin nombre') + '</span>' +
+            '<span class="f-sub">' + esc(platDe(c) || '') + ' · ' + esc(textoDias(c.vencimiento)) + '</span></span>' +
+            (yaCobrado(c) ? '<span class="pastilla cobrado corta">' + ICONO.ok + '<b>Ya cobrado</b></span>' : '') +
+            '<button class="btn mini principal" data-cierra="1" data-cobrar="' + esc(c.id) + '">Cobrar ' + esc(dinero(aCobrarDe(c))) + '</button></div>';
+        }).join('') : '<p class="ayuda" style="padding:10px 4px">Nadie con ese nombre.</p>';
+      };
+      q.addEventListener('input', pinta);
+      q.addEventListener('keydown', function(ev){ if(ev.key === 'Enter'){ const b = caja.querySelector('[data-cobrar]'); if(b){ ev.preventDefault(); b.click(); } } });
+      pinta(); setTimeout(function(){ q.focus(); }, 80);
+    });
+}
 /* MI MES EN UNA IMAGEN: cobrado, gastado, ganancia, la mejor plataforma y
    la meta, dibujado en un lienzo para guardarlo o mandarlo. */
 function datosDelMes(mes){
@@ -11687,7 +11847,28 @@ function renovar(id, cobrando, cuantas, yaPregunte){
   pintar();
   avisar(cobrando
     ? 'Cobrado ' + dinero(monto*meses) + ' · ' + c.nombre + ' hasta ' + fechaBonita(nueva)
-    : c.nombre + ' renovado hasta ' + fechaBonita(nueva), 'bien', true);
+    : c.nombre + ' renovado hasta ' + fechaBonita(nueva), 'bien', true,
+    (cobrando && cobrado > 0 && telefonoDe(c)) ? {texto:'Mandar recibo', hacer:function(){ mandarRecibo(c.id, cobrado); }} : null);
+}
+/* EL RECIBO: «recibí tu pago, vence el…». Da confianza al cliente y deja
+   escrito en su chat hasta cuándo tiene el servicio. */
+function textoRecibo(c, pagado){
+  let t = ajustes.plantillaRecibo || AJUSTES_BASE.plantillaRecibo;
+  if(ajustes.firmaWs) t += '\n\n' + ajustes.firmaWs;
+  const m = masterDe(c);
+  return t.replace(/\{cliente\}/g, c.nombre || '')
+    .replace(/\{servicio\}/g, c.servicio || (m && m.nombre) || '')
+    .replace(/\{monto\}/g, dinero(pagado || cobroDe(c)))
+    .replace(/\{vencimiento\}/g, fechaBonita(c.vencimiento))
+    .replace(/\{perfil\}/g, c.perfil || '')
+    .replace(/\{negocio\}/g, ajustes.nombre || 'PAPOTAS');
+}
+function mandarRecibo(id, pagado){
+  const c = buscarCliente(id); if(!c) return;
+  const n = normalizarTelefono(c.telefono);
+  if(!n.vale){ avisarTelefonoMalo(c, n); return; }
+  saltarAWhatsApp(n.tel, textoRecibo(c, pagado));
+  apuntarHecho(c, 'wa', 'Le mandaste el recibo'); guardar();
 }
 
 /* ---------- EL GASTO DE UNA CUENTA MASTER -------------------------------
@@ -13973,7 +14154,7 @@ document.addEventListener('click', function(ev){
      que pulsaste ese botón: pasó, y guardar los ajustes dejó de funcionar
      porque la pantalla se repintaba antes de leer lo que habías escrito.
      Los nombres ya no chocan, y además nunca se hace caso a la raíz. */
-  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin],[data-qh-mas],[data-mov-mas],[data-logo-subir],[data-logo-quitar],[data-ir-a],[data-ir-plat],[data-atajos],[data-instalar],[data-ya-cobre],[data-ver-cobrados],[data-vender],[data-resumen-mes],[data-perdidos],[data-ultimo]') : null;
+  const t = ev.target.closest ? ev.target.closest('[data-cola],[data-entrar-m],[data-nuevo-costo],[data-editar-costo],[data-a-tarifa],[data-escribir-a],[data-todos-wa],[data-escribir-cuenta],[data-nueva-en],[data-clientes-de],[data-cobrar-de],[data-quitar-plat],[data-mes],[data-plat],[data-volver],[data-vraiz],[data-vplat],[data-ver-cuenta],[data-poner-en],[data-limpiar-busqueda],[data-desliza],[data-vgente],[data-ordtab],[data-mas-hoy],[data-rescate],[data-renovar-todas],[data-vaj],[data-modo],[data-tono],[data-contraste],[data-colores],[data-modo-elegir],[data-elegir],[data-elegir-todos],[data-lote],[data-adelanto],[data-pausar],[data-mover],[data-hueco],[data-accesos],[data-accesos-m],[data-precio],[data-quitar-precio-cli],[data-nueva-tarifa],[data-editar-tarifa],[data-diag],[data-juntar],[data-recuperar],[data-historia],[data-visto-gesto],[data-tirar],[data-csv],[data-deshacer],[data-nueva-rapida],[data-editar-rapida],[data-borrar-rapida],[data-ficha],[data-wa-persona],[data-abrir],[data-cobrar],[data-renovar],[data-correr],[data-cuotas],[data-wa],[data-editar-c],[data-borrar-c],[data-editar-m],[data-borrar-m],[data-renovar-m],[data-verclave],[data-copiar],[data-ver-cliente],[data-fhoy],[data-agrupa],[data-verhoy],[data-fcli],[data-ir-cuentas],[data-ir-clientes],[data-nuevo-cliente],[data-nueva-cuenta],[data-nuevo-gasto],[data-calmes],[data-dia],[data-fhoy-pendientes],[data-fhoy-vencidos],[data-fhoy-hoy],[data-fhoy-semana],[data-fhoy-colgados],[data-fhoy-perdidos],[data-borrar-g],[data-qh-ver],[data-hoy-plat],[data-ronda-plat],[data-entrar-plat],[data-plat-libres],[data-fhoy-cerrar],[data-vdin],[data-qh-mas],[data-mov-mas],[data-logo-subir],[data-logo-quitar],[data-ir-a],[data-ir-plat],[data-atajos],[data-instalar],[data-ya-cobre],[data-ver-cobrados],[data-vender],[data-resumen-mes],[data-perdidos],[data-ultimo],[data-telefonos],[data-cobro-express]') : null;
   if(!t || t === document.documentElement || t === document.body) return;
   /* Desde el panel de atajos: se cierra y se hace lo pedido. */
   if(t.closest('.atajos') && cerrarModalActual) cerrarModal();
@@ -14168,8 +14349,10 @@ document.addEventListener('click', function(ev){
     }
     /* Sin repetidos y por urgencia. */
     const vistos = {};
-    lista = lista.filter(function(c){ if(vistos[c.id]) return false; vistos[c.id]=1; return true; })
-                 .sort(function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
+    lista = lista.filter(function(c){ if(vistos[c.id]) return false; vistos[c.id]=1; return true; });
+    /* La de Hoy ya viene en el orden inteligente; las demás, por fecha. */
+    if(!(aQuien === 'hoy-visible' && colaHoyVisible))
+      lista.sort(function(a,b){ return String(a.vencimiento||'9').localeCompare(String(b.vencimiento||'9')); });
     if(deTodos){ avisarDeMandarATodos(lista); return; }
     abrirCola(lista);
     return;
@@ -14239,6 +14422,8 @@ document.addEventListener('click', function(ev){
   }
   if(d.verCobrados){ hojaYaCobrados(); return; }
   if(d.vender){ hojaVender(); return; }
+  if(d.telefonos){ hojaTelefonos(); return; }
+  if(d.cobroExpress){ hojaCobroExpress(); return; }
   if(d.resumenMes){ hojaResumenMes(); return; }
   if(d.perdidos){ hojaPerdidos(); return; }
   if(d.ultimo){
@@ -14575,6 +14760,7 @@ document.addEventListener('click', function(ev){
     ajustes.plantillaCobro = val('aj-pl-cobro');
     ajustes.plantillaVencido = val('aj-pl-vencido');
     ajustes.plantillaAtrasado = val('aj-pl-atrasado');
+    ajustes.plantillaRecibo = val('aj-pl-recibo');
     ajustes.plantillaEntrega = val('aj-pl-entrega');
     ajustes.firmaWs = val('aj-firma');
     ajustes.waComoAbrir = val('aj-wa-abrir') || 'auto';
