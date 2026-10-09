@@ -4111,6 +4111,76 @@ html:not([data-tema="claro"]) .insignia.fiel-ins{ color:#ffcf4d }
 .cx-q{ width:100%; padding:13px 14px; border-radius:14px; border:1px solid var(--linea-fuerte); background:var(--capa-alta); color:var(--txt); font:inherit; font-size:16px; margin-bottom:10px }
 .cx-lista .f{ gap:10px; align-items:center }
 @media (max-width:620px){ .tel-fila{ flex-wrap:wrap } .tel-in{ width:100% !important; max-width:none; flex:1 1 100% !important } }
+
+/* ===================== ELEGANTE (v13.1) =====================
+   Menos ruido: sin luces moviéndose detrás, sin punteado, sin brillos de
+   color derramándose. Un vino sobrio en lugar del rojo neón y un semáforo
+   más suave. El color de cada plataforma queda en su logo y en un filo. */
+html:not([data-tema="claro"]){
+  --marca:#9b2c49; --marca-alta:#e58da2; --marca-canto:#4d1323;
+  --marca-suave:rgba(155,44,73,.14); --marca-linea:rgba(155,44,73,.34);
+  --mal:#ec8b94;   --mal-fondo:rgba(236,139,148,.11);  --mal-linea:rgba(236,139,148,.30);
+  --aviso:#e4b56c; --aviso-fondo:rgba(228,181,108,.11); --aviso-linea:rgba(228,181,108,.30);
+  --bien:#62c9a2;  --bien-fondo:rgba(98,201,162,.11);  --bien-linea:rgba(98,201,162,.30);
+  --info:#94aee8;  --info-fondo:rgba(148,174,232,.11); --info-linea:rgba(148,174,232,.30);
+  --mal-vivo:#d9616e; --aviso-vivo:#d9a24c; --bien-vivo:#3fb489; --info-vivo:#6f8fdc;
+  --brillo-marca:transparent;
+}
+html[data-tema="claro"]{
+  --marca:#8c2541; --marca-canto:#5a1729;
+  --marca-suave:rgba(140,37,65,.07); --marca-linea:rgba(140,37,65,.22);
+  --mal-vivo:#c0394d; --aviso-vivo:#c98a2e; --bien-vivo:#2f9a74; --info-vivo:#4a6fc7;
+}
+/* Fondo liso, sin luces ni punteado */
+html:not([data-tema="claro"]) body{ background:var(--fondo) !important }
+html #app::before, html #app::after{ display:none !important }
+html:not([data-tema="claro"]) #lienzo{ background:transparent !important }
+/* Tarjetas: superficie limpia, borde neutro */
+html:not([data-tema="claro"]) .tarjeta{
+  background:var(--marco-fondo) !important; border:1px solid var(--marco-borde) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 12px 28px -22px rgba(0,0,0,.7) !important }
+html:not([data-tema="claro"]) .azulejo{
+  background:var(--marco-fondo) !important; border:1px solid var(--marco-borde) !important; box-shadow:none !important }
+/* Inicio: sin halo rojo */
+.hero-hoy{ border:1px solid var(--linea-fuerte) !important;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--marca) 9%, var(--marco-fondo)) 0%, var(--marco-fondo) 55%) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 16px 34px -26px rgba(0,0,0,.8) !important }
+html[data-tema="claro"] .hero-hoy{ background:linear-gradient(160deg, color-mix(in srgb, var(--marca) 4%, #fff) 0%, #fff 60%) !important;
+  box-shadow:0 10px 26px -20px rgba(30,20,30,.35) !important }
+.hh-chip{ background:transparent !important }
+.hh-chip.mal, .hh-chip.aviso, .hh-chip.cobrado{ border-color:var(--linea-fuerte) !important }
+/* Portadas: neutras con un filo del color de la marca */
+.poster{
+  background:linear-gradient(180deg, color-mix(in srgb, var(--tono, var(--marca)) 10%, var(--capa)) 0%, var(--capa) 60%) !important;
+  border:1px solid var(--linea) !important; box-shadow:0 10px 24px -22px rgba(0,0,0,.8) !important }
+.poster:not(.pos-nuevo)::before{ content:""; position:absolute; left:0; right:0; top:0; height:3px;
+  background:var(--tono, var(--marca)); opacity:.85 }
+.poster::after{ display:none }
+@media (hover:hover){ .poster:hover{ transform:translateY(-2px) !important; border-color:var(--linea-fuerte) !important;
+  box-shadow:0 14px 28px -20px rgba(0,0,0,.85) !important } }
+.pos-logo{ background:transparent !important; box-shadow:none !important }
+.pos-logo .f-marca{ box-shadow:0 4px 12px -6px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08) !important }
+.pos-estado{ background:transparent !important; border-color:color-mix(in srgb, currentColor 50%, transparent) !important; font-weight:700 }
+.pos-n{ background:color-mix(in srgb, var(--mal-vivo) 85%, #000) !important; box-shadow:none !important }
+.pos-barra{ background:color-mix(in srgb, var(--txt) 10%, transparent) !important }
+.pos-barra i{ opacity:.8 }
+html[data-tema="claro"] .poster{ background:linear-gradient(180deg, color-mix(in srgb, var(--tono, var(--marca)) 6%, #fff) 0%, #fff 60%) !important;
+  box-shadow:0 8px 20px -18px rgba(30,20,30,.4) !important }
+html[data-tema="claro"] .pos-nom{ color:var(--txt) }
+/* Banner de una plataforma: tinte suave */
+.banner-plat{ border:1px solid var(--linea-fuerte) !important;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--tono) 18%, var(--capa)) 0%, var(--capa) 65%) !important;
+  box-shadow:0 16px 34px -26px rgba(0,0,0,.8) !important }
+/* Botón principal: vino mate, sin brillo */
+.btn.principal{ box-shadow:0 1px 0 rgba(255,255,255,.12) inset, 0 6px 14px -10px rgba(0,0,0,.7) !important }
+/* Insignias rojas de la barra: más discretas */
+.nav-btn .insignia-n, .nav-btn .n, .nav-btn [class*="globo"]{ background:color-mix(in srgb, var(--mal-vivo) 85%, #000) !important }
+
+.ficha, .ficha.viva{ box-shadow:0 8px 20px -18px rgba(0,0,0,.8) !important; border-color:var(--linea) !important;
+  border-left:3px solid color-mix(in srgb, var(--tono) 75%, transparent) !important }
+.ficha::after{ opacity:.07 !important }
+.ficha .f-marca{ box-shadow:0 0 0 1px rgba(255,255,255,.08) !important }
+#atajos-fab{ box-shadow:0 8px 18px -12px rgba(0,0,0,.8) !important }
 </style>
 </head>
 <body>
@@ -4177,7 +4247,7 @@ html:not([data-tema="claro"]) .insignia.fiel-ins{ color:#ffcf4d }
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v13</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v13.1</span>
     </div>
   </nav>
 
@@ -6441,7 +6511,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v13';
+const VERSION = 'v13.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
