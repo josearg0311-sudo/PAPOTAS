@@ -4086,6 +4086,16 @@ html[data-tema="claro"] .pos-info, html[data-tema="claro"] .pos-perfiles{ color:
   .hh-meta{ min-width:0 }
   #barra .nav-btn{ min-height:58px }
 }
+
+/* v12.1: revisión final */
+html[data-tema="claro"] .pos-estado{ background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.08) }
+html[data-tema="claro"] .pos-estado.mal{ color:#c0263f } html[data-tema="claro"] .pos-estado.aviso{ color:#a35b00 } html[data-tema="claro"] .pos-estado.bien{ color:#0f7a55 }
+html[data-tema="claro"] .pos-perfiles b{ color:#0f7a55 }
+@media (max-width:620px){
+  .hh-acc .btn:not(.bien){ flex-direction:column; gap:3px; min-height:58px !important; padding:6px 2px !important; position:relative }
+  .hh-acc .btn:not(.bien) .et{ display:block !important; font-size:10.5px; font-weight:700; line-height:1.1; white-space:nowrap }
+  .hh-acc .btn:not(.bien) .btn-n{ position:absolute; top:4px; right:4px; font-size:10px; min-width:18px; height:18px; padding:0 5px }
+}
 </style>
 </head>
 <body>
@@ -4152,7 +4162,7 @@ html[data-tema="claro"] .pos-info, html[data-tema="claro"] .pos-perfiles{ color:
       <a class="carril-mini" id="btn-volver-viejo" href="index.html" title="Volver al PAPOTAS de siempre" aria-label="Volver al PAPOTAS de siempre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg>
       </a>
-      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v12</span>
+      <span id="sello-carril" title="Si esto no coincide con la última versión, estás abriendo una copia guardada antigua">v12.1</span>
     </div>
   </nav>
 
@@ -6415,7 +6425,7 @@ function aplicarRespaldo(rec){
 
 /* ---------- 6. Piezas de interfaz --------------------------------------- */
 
-const VERSION = 'v12';
+const VERSION = 'v12.1';
 
 const $  = function(s, d){ return (d||document).querySelector(s); };
 const $$ = function(s, d){ return Array.prototype.slice.call((d||document).querySelectorAll(s)); };
@@ -9046,8 +9056,9 @@ function hojaCliente(c){
           '<span class="cabeza-icono verde">' + ICONO.ok + '</span>' +
           '<div class="crece"><h2>Ya le cobraste</h2>' +
             '<p>Lo marcaste el ' + esc(fechaBonita(c.yaCobre.fecha)) + ': no le vuelvas a cobrar este vencimiento. ' +
-            'Cuando le renueves, la marca se quita sola.</p></div>' +
-          '<button class="btn mini principal" data-renovar="' + esc(c.id) + '">' + ICONO.renovar + '<span class="et">Renovar ahora</span></button>' +
+            'Cuando puedas, anota el cobro: así entra en «Cobrado» y le renueva. La marca se quita sola.</p></div>' +
+          '<button class="btn mini principal" data-cobrar="' + esc(c.id) + '" title="Apunta lo que te pagó en Dinero y le renueva">' + ICONO.cobrar + '<span class="et">Anotar el cobro y renovar</span></button>' +
+          '<button class="btn mini" data-renovar="' + esc(c.id) + '" title="Le renueva sin apuntar dinero">' + ICONO.renovar + '<span class="et">Solo renovar</span></button>' +
         '</div></div>'
       : '') +
     panelHistoria(c) +
@@ -10206,13 +10217,13 @@ function heroHoy(x){
       chip('mal', atrasados.length, atrasados.length ? 'atrasados · ' + dinero(suma(atrasados)) : 'atrasados (+7 días)', 'data-fhoy="atrasados" title="Llevan más de una semana: hay que insistir"') +
       chip('aviso', x.deHoy.length, x.deHoy.length ? 'hoy · ' + dinero(suma(x.deHoy)) : 'vencen hoy', 'data-fhoy-hoy="1"') +
       chip('bien', x.semana.length, 'esta semana', 'data-fhoy-semana="1"') +
-      (x.yaCobrados && x.yaCobrados.length ? chip('cobrado', x.yaCobrados.length, 'ya cobrados · falta renovar', 'data-ver-cobrados="1"') : '') +
+      (x.yaCobrados && x.yaCobrados.length ? chip('cobrado', x.yaCobrados.length, 'ya cobrados · ' + dinero(x.yaCobrados.reduce(function(a,c){ return a + cobroDe(c); }, 0)), 'data-ver-cobrados="1" title="Te pagaron pero aún no lo anotas ni renuevas"') : '') +
     '</div>' +
     '<div class="hh-acc">' +
       '<button class="btn bien" data-escribir-a="hoy-visible"' + (n ? '' : ' disabled title="Hoy no hay a quién escribir"') + '>' + ICONO.wa +
         'Empezar la ronda' + (n ? '<span class="btn-n">' + n + '</span>' : '') + '</button>' +
       '<button class="btn" data-todos-wa="hoy-visible" title="Manda uno detrás de otro">' + ICONO.rayo + '<span class="et">A todos</span></button>' +
-      (x.libres > 0 ? '<button class="btn" data-vender="1" title="Perfiles libres y el mensaje de oferta listo">' + ICONO.etiqueta + '<span class="et">¿Qué vendo hoy?</span><span class="btn-n">' + x.libres + '</span></button>' : '') +
+      (x.libres > 0 ? '<button class="btn" data-vender="1" title="Perfiles libres y el mensaje de oferta listo">' + ICONO.etiqueta + '<span class="et">Vender</span><span class="btn-n">' + x.libres + '</span></button>' : '') +
       '<button class="btn" data-resumen-mes="1" title="El mes en una imagen para guardar o compartir">' + ICONO.barras + '<span class="et">Mi mes</span></button>' +
       '<button class="btn" data-nueva-cuenta="1">' + ICONO.tele + '<span class="et">Cuenta</span></button>' +
       '<button class="btn" data-nuevo-gasto="1">' + ICONO.caja + '<span class="et">Gasto</span></button>' +
@@ -10243,7 +10254,7 @@ function hojaPerdidos(){
         '<span class="f-sub">' + cuotasPendientes(c) + ' cuotas · ' + esc(dinero(deudaDe(c))) + ' · desde el ' + esc(fechaBonita(c.vencimiento)) + '</span></span>' +
         '<span class="f-acciones">' +
           (tel ? '<button class="btn mini bien icono" data-ultimo="' + esc(c.id) + '" title="Último mensaje" aria-label="Último mensaje a ' + esc(c.nombre||'') + '">' + ICONO.wa + '</button>' : '') +
-          '<button class="btn mini" data-pausar="' + esc(c.id) + '">Pausar</button>' +
+          '<button class="btn mini" data-cierra="1" data-pausar="' + esc(c.id) + '">Pausar</button>' +
         '</span></div>';
     }).join('') + '</div>',
     [{texto:'Pausar a todos', clase:'', hacer:function(){
@@ -10264,14 +10275,14 @@ function hojaYaCobrados(){
   const lista = clientes.filter(yaCobrado).sort(function(a,b){ return String(a.vencimiento||'').localeCompare(String(b.vencimiento||'')); });
   if(!lista.length){ avisar('No tienes a nadie marcado como «ya cobrado»'); return; }
   abrirModal('Ya les cobraste',
-    '<p class="ayuda" style="margin-top:0">Te pagaron y no salen en la ronda, pero aún no les renuevas. Renuévalos cuando quieras: la marca se quita sola.</p>' +
+    '<p class="ayuda" style="margin-top:0">Te pagaron y no salen en la ronda, pero aún no les renuevas. «Anotar y renovar» apunta el dinero en «Cobrado» y les corre la fecha; la marca se quita sola.</p>' +
     '<div class="lista">' + lista.map(function(c){
       return '<div class="f">' + logoPlataforma(platDe(c), 30) +
         '<span class="f-txt"><span class="f-nom">' + esc(c.nombre || 'Sin nombre') + '</span>' +
         '<span class="f-sub">Marcado el ' + esc(fechaBonita(c.yaCobre.fecha)) + ' · vencía el ' + esc(fechaBonita(c.vencimiento)) + ' · ' + esc(dinero(cobroDe(c))) + '</span></span>' +
         '<span class="f-acciones">' +
-          '<button class="btn mini principal" data-renovar="' + esc(c.id) + '">Renovar</button>' +
-          '<button class="btn mini icono" data-ya-cobre="' + esc(c.id) + '" title="Quitar la marca" aria-label="Quitar la marca a ' + esc(c.nombre||'') + '">' + ICONO.x + '</button>' +
+          '<button class="btn mini principal" data-cierra="1" data-cobrar="' + esc(c.id) + '" title="Apunta el cobro en Dinero y le renueva">Anotar y renovar</button>' +
+          '<button class="btn mini icono" data-cierra="1" data-ya-cobre="' + esc(c.id) + '" title="Quitar la marca" aria-label="Quitar la marca a ' + esc(c.nombre||'') + '">' + ICONO.x + '</button>' +
         '</span></div>';
     }).join('') + '</div>',
     [{texto:'Listo', clase:'principal', hacer:cerrarModal}]);
@@ -10303,7 +10314,7 @@ function hojaVender(){
       return '<div class="f">' + logoPlataforma(n, 30) +
         '<span class="f-txt"><span class="f-nom">' + esc(n) + '</span><span class="f-sub">' + porPlat[n] + ' ' + plural(porPlat[n],'libre','libres') +
         (precio(n) ? ' · ' + esc(dinero(precio(n))) + ' c/u' : '') + '</span></span>' +
-        '<span class="f-acciones"><button class="btn mini" data-plat="' + esc(n) + '">Ver</button></span></div>';
+        '<span class="f-acciones"><button class="btn mini" data-cierra="1" data-plat="' + esc(n) + '">Ver</button></span></div>';
     }).join('') + '</div>' +
     '<label class="campo" style="margin-top:12px"><span>Mensaje de oferta</span><textarea id="vender-txt" rows="7">' + esc(ventaTexto) + '</textarea></label>',
     [{texto:'Copiar', clase:'', hacer:function(){
@@ -11629,6 +11640,7 @@ function renovar(id, cobrando, cuantas, yaPregunte){
   recordarPaso(cobrando ? 'cobrar a ' + (c.nombre||'un cliente')
                         : 'renovar a ' + (c.nombre||'un cliente'));
   const cobrado = cobrarUno(c, cobrando, n);
+  delete c.yaCobre;   /* renovado: la marca «ya le cobré» ya cumplió */
   if(cobrando) c.cobradoEl = hoyISO();
   const nueva = c.vencimiento;
   const monto = cobrado;
@@ -13915,6 +13927,9 @@ document.addEventListener('click', function(ev){
   if(!t || t === document.documentElement || t === document.body) return;
   /* Desde el panel de atajos: se cierra y se hace lo pedido. */
   if(t.closest('.atajos') && cerrarModalActual) cerrarModal();
+  /* Botones dentro de una ventana que llevan a otro sitio o cambian la
+     lista: la ventana se cierra para no dejarla con datos viejos. */
+  if(t.closest('[data-cierra]') && cerrarModalActual) cerrarModal();
   /* Al soltar un deslizamiento, el navegador manda además un clic. Sin
      este freno, deslizar para cobrar abría encima la ficha del cliente. */
   const deslizada = t.closest && t.closest('.tc[data-hubodeslice]');
