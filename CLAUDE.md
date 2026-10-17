@@ -85,11 +85,12 @@ fuentes/ iconos/ pruebas/ diccionario/ (palabras-es.txt ~39 000 palabras por uso
 
 ## Identidad propia «Bitácora» (desde la 5.5, Fase 17)
 El usuario: «no quiero que se parezca a PAPOTAS, quiero que tenga su propia identidad»; y luego, del primer intento (azul noche): «se parece mucho a la agenda anterior». PAPOTAS = oscuro cálido marrón, carmesí; v4.5 = negro y azul con Plus Jakarta. **Nada de eso.**
-- Libreta de puntos (bullet journal). Tokens en `css/tokens.css`: oscuro = **tinta verde bosque** (`--fondo #0C1714`, hojas `#13221D`, texto crema `#F2EFE4`); claro = papel crema (`#F4F0E4`, hojas `#FFFDF6`, tinta `#17261F`, enlaces verdes `#1E6247`). Acento = **marcatextos amarillo** (`#F6C945` / `#F2C230`, texto oscuro encima). Ámbar de aviso = naranja.
+- ⚠️ **El usuario: «NO QUITES LA ESENCIA OSCURA QUE ES DE MI PREFERENCIA SIEMPRE».** El tema por defecto es `oscuro` (también si la preferencia viene rota; ya no se toma el tema de la v4.5); claro solo si lo elige en Ajustes. Toda mejora de diseño se piensa y se muestra primero en oscuro.
+- Libreta de puntos (bullet journal). Tokens en `css/tokens.css`: oscuro = **casi negro con toque verde tinta** (`--fondo #060A09`, hojas `#0F1815`, texto crema `#F2EFE4`); claro = papel crema (`#F4F0E4`, hojas `#FFFDF6`, tinta `#17261F`, enlaces verdes `#1E6247`). Acento = **marcatextos amarillo** (`#F6C945` / `#F2C230`, texto oscuro encima). Ámbar de aviso = naranja.
 - Letras: títulos **Fraunces** (`--f-titulo`, `fuentes/fraunces.woff2`), texto **Instrument Sans** (`fuentes/instrument-sans.woff2`). Plus Jakarta queda solo de respaldo.
 - Fondo con puntos; títulos grandes subrayados con marcatextos; Hoy como página de agenda (número del día grande en serifa + día y mes, saludo debajo de una línea punteada, frase en cursiva); hojas con la esquina de abajo a la izquierda casi recta; casillas redondas; barra de abajo **flotante** (pastilla) con el marcatextos en la pestaña activa; botón + amarillo.
 - **Logo nuevo** (`iconos/icono.svg` + PNG 192/512/maskable/apple, generados con playwright): libreta crema con anillas amarillas, una línea resaltada, un punto y un check, sobre verde.
-- Reglas al final de `css/vistas.css` («IDENTIDAD BITÁCORA»). Color del navegador `#0C1714` / `#F4F0E4`.
+- Reglas al final de `css/vistas.css` («IDENTIDAD BITÁCORA»). Color del navegador `#060A09` / `#F4F0E4`.
 
 ## Sistema de diseño: LA CARA DE LA v4.5 (Fase 12; la organización sigue, los colores cambiaron en la 5.5)
 El usuario pidió que la v5 se vea y se organice **como su v4.5** («guíate de eso», con capturas). Medidas tomadas de la v4.5 en vivo (scratchpad/v45-compacto.txt). Todo color sale de `css/tokens.css`; las reglas de la Fase 12 están al final de `css/vistas.css` y el armazón en `css/base.css`.

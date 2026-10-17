@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0C1714">
+<meta name="theme-color" content="#060A09">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="Tu organizador personal: Personal, Estudios, Oficina y Deporte.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,7 +23,7 @@
 (function(){
   try{
     var p = JSON.parse(localStorage.getItem('agenda5_pref') || 'null'), t = p && p.tema;
-    if(!t){ var v = JSON.parse(localStorage.getItem('agenda_pref') || '{}') || {}; t = v.temaAuto ? 'auto' : (localStorage.getItem('agenda_tema') || 'auto'); }
+    if(!t) t = 'oscuro';   /* oscuro siempre por defecto */
     if(t === 'auto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'oscuro';
     document.documentElement.setAttribute('data-tema', t === 'claro' ? 'claro' : 'oscuro');
     if(p && p.guia) document.documentElement.classList.add('guia-previa');
@@ -142,7 +142,7 @@
   function falta(que) {
     if (document.getElementById('faltaPrograma')) return;
     var d = document.createElement('div'); d.id = 'faltaPrograma';
-    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#0C1714;color:#EEF1F8;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
+    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#060A09;color:#EEF1F8;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
     d.innerHTML = '<div style="max-width:520px;margin:0 auto"><h1 style="font-size:24px;margin:0 0 12px">La Agenda no se cargó completa</h1>' +
       '<p>Faltan archivos del programa (' + que + '). <b>Tus datos están a salvo</b> en este aparato: no se tocaron.</p>' +
       '<p><b>Si acabas de publicar:</b> en Netlify arrastra la <b>carpeta completa</b> (la que tiene dentro <code>index.html</code>, <code>css</code>, <code>js</code>, <code>fuentes</code>, <code>iconos</code> y <code>diccionario</code>), no solo el archivo index.html.</p>' +

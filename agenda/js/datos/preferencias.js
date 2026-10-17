@@ -9,7 +9,7 @@ export const OPCIONES_BLOQUEO = [[0, 'Solo al abrir'], [1, 'Tras 1 minuto'], [5,
 
 const BASE = {
   v: 1,
-  tema: 'auto',            // 'auto' | 'oscuro' | 'claro'
+  tema: 'oscuro',          // 'auto' | 'oscuro' | 'claro' · oscuro siempre por defecto (preferencia del usuario)
   formatoHora: '24',       // '24' | '12'
   semanaLunes: true,
   vigilia: { ini: '06:00', fin: '22:00' },
@@ -27,10 +27,7 @@ const BASE = {
 function desdeAntiguas() {
   const p = Object.assign({}, BASE, { vigilia: Object.assign({}, BASE.vigilia) });
   const viejaPref = leer(ANTIGUAS.pref, {}) || {};
-  let tema = null;
-  try { tema = localStorage.getItem(ANTIGUAS.tema); } catch (e) { tema = null; }
-  if (viejaPref.temaAuto) p.tema = 'auto';
-  else if (tema === 'claro' || tema === 'oscuro') p.tema = tema;
+  /* El tema NO se toma de la v4.5: el usuario quiere la Agenda oscura siempre (claro solo si lo elige en Ajustes) */
   if (typeof viejaPref.lunes === 'boolean') p.semanaLunes = viejaPref.lunes;
   return p;
 }
@@ -38,7 +35,7 @@ function desdeAntiguas() {
 /* Corrige lo que venga mal (a mano, de otra versión…) sin perder lo bueno */
 export function normalizarPref(x) {
   const p = Object.assign({}, BASE, x && typeof x === 'object' ? x : {});
-  if (!['auto', 'oscuro', 'claro'].includes(p.tema)) p.tema = 'auto';
+  if (!['auto', 'oscuro', 'claro'].includes(p.tema)) p.tema = 'oscuro';
   if (!['24', '12'].includes(String(p.formatoHora))) p.formatoHora = '24';
   p.formatoHora = String(p.formatoHora);
   p.semanaLunes = p.semanaLunes !== false;

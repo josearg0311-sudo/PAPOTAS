@@ -20,11 +20,11 @@
   --toque: 44px;                       /* tamaño mínimo para el dedo */
   --ancho-lateral: 248px;
 
-  /* Oscuro (por defecto): tinta verde bosque */
-  --fondo: #0C1714; --rejilla: rgba(220,235,215,.075);
-  --superficie: #13221D; --superficie-2: #1A2D27; --superficie-3: #243A32;
+  /* Oscuro (por defecto, SIEMPRE el preferido del usuario): casi negro con un toque de verde tinta */
+  --fondo: #060A09; --rejilla: rgba(220,235,215,.07);
+  --superficie: #0F1815; --superficie-2: #16231F; --superficie-3: #20322B;
   --tinta: #F2EFE4; --tinta-2: #B9C2B6; --tinta-3: #97A498;
-  --borde: #22362E; --brillo: rgba(255,255,255,.04);
+  --borde: #1E2E28; --brillo: rgba(255,255,255,.04);
   --acento: #F6C945; --acento-txt: #F6C945; --sobre-acento: #1A1405; --acento-suave: #2C2A14;
   --rojo: #FF8577; --rojo-suave: #351A18; --ambar: #FFA552; --ambar-suave: #33230F; --verde: #6EE29A; --verde-suave: #12301F;
   --velo: rgba(4,10,8,.72);

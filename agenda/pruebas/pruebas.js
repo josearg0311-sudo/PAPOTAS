@@ -86,7 +86,7 @@ tareas.push(prueba('Contar los datos antiguos no los modifica', () => {
 /* ---------- Preferencias ---------- */
 tareas.push(prueba('Preferencias rotas se corrigen sin romper la app', () => {
   const p = normalizarPref({ tema: 'rosado', formatoHora: 13, vigilia: { ini: '25:00', fin: 'x' }, inicio: 'nada', bloqueoMin: 7 });
-  igual([p.tema, p.formatoHora, p.vigilia.ini, p.vigilia.fin, p.inicio, p.bloqueoMin], ['auto', '24', '06:00', '22:00', 'hoy', 1]);
+  igual([p.tema, p.formatoHora, p.vigilia.ini, p.vigilia.fin, p.inicio, p.bloqueoMin], ['oscuro', '24', '06:00', '22:00', 'hoy', 1]);
 }));
 tareas.push(prueba('Horas despierto (también si cruza la medianoche)', () => {
   igual(minutosVigilia(normalizarPref({ vigilia: { ini: '06:00', fin: '22:00' } })), 960);
