@@ -230,9 +230,9 @@ export function vistaHorario() {
       (dias.includes(h) ? '' : '<button type="button" class="btn chico" data-acc="hor-paso" data-n="0">Esta semana</button>') + '</div>' +
     '<section class="horario" aria-label="Horario de la semana">' +
       '<div class="hr-cab"><span></span>' + dias.map((d) => '<button type="button" class="' + (d === h ? 'hoy' : '') + '" data-acc="ir-dia" data-dia="' + d + '" aria-label="Ver ' + fmtLarga(d) + '"><small>' + DIAS3[diaSemana(d)] + '</small><b>' + +d.slice(8) + '</b></button>').join('') + '</div>' +
-      '<div class="hr-cuerpo" style="height:' + alto + 'px">' +
+      '<div class="hr-cuerpo" data-ini="' + iniM + '" style="height:' + alto + 'px">' +
         '<div class="hr-horas">' + horas.map((t) => '<span style="top:' + y(t) + 'px">' + fmtHora(String(t / 60).padStart(2, '0') + ':00', p.formatoHora).replace(':00', '').replace(' ', '\u00a0') + '</span>').join('') + '</div>' +
-        porDia.map((bs, i) => '<div class="hr-col' + (dias[i] === h ? ' hoy' : '') + '">' + horas.map((t) => '<i style="top:' + y(t) + 'px"></i>').join('') +
+        porDia.map((bs, i) => '<div class="hr-col' + (dias[i] === h ? ' hoy' : '') + '" data-dia="' + dias[i] + '" title="Toca una hora libre para crear un evento">' + horas.map((t) => '<i style="top:' + y(t) + 'px"></i>').join('') +
           (dias[i] === h && ahora >= iniM && ahora <= finM ? '<em class="hr-ahora" style="top:' + y(ahora) + 'px"></em>' : '') +
           bs.map((b) => '<button type="button" class="hr-bloque area-' + area(b.area).id + '" style="top:' + (y(b.ini) + 1) + 'px;height:' + Math.max(18, (b.fin - b.ini) / 60 * PX_H - 2) + 'px" data-acc="' + (b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '" aria-label="' + esc(b.titulo) + ', ' + fmtHora(b.hIni, p.formatoHora) + ' a ' + fmtHora(b.hFin, p.formatoHora) + '"><b>' + esc(b.titulo) + '</b><small>' + fmtHora(b.hIni, p.formatoHora) + '</small></button>').join('') + '</div>').join('') +
       '</div></section>' +
@@ -250,9 +250,30 @@ export function vistaPlan() {
   let cuerpo;
   if (modo === 'dia') { ui.modo = 'dia'; cuerpo = '<section class="tarjeta plan-card">' + vistaDia(d) + '</section>'; }
   else if (modo === 'mes') { ui.modo = 'mes'; cuerpo = '<section class="tarjeta plan-card">' + vistaMes(d) + '</section>'; }
-  else cuerpo = vistaHorario() + venceSemana();
+  else cuerpo = resumenSemana() + vistaHorario() + venceSemana();
   return '<div class="plan6">' + seg + cuerpo + '</div>';
 }
+/* Tu semana en números: cuántas cosas, horas ocupadas y el día más cargado */
+function resumenSemana() {
+  const p = preferencias(), ini = inicioSemana(ui.horario || hoy(), p.semanaLunes), dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
+  const bl = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente'));
+  const n = bl.reduce((t, x) => t + x.length, 0), min = bl.reduce((t, x) => t + x.reduce((u, b) => u + (b.fin - b.ini), 0), 0);
+  if (!n) return '';
+  const top = bl.reduce((a, x, i) => (x.length > bl[a].length ? i : a), 0);
+  const horas = Math.round(min / 6) / 10;
+  return '<div class="sem6-res"><div><b>' + n + '</b><small>' + (n === 1 ? 'cosa' : 'cosas') + ' con hora</small></div><div><b>' + String(horas).replace('.', ',') + ' h</b><small>ocupadas</small></div><div><b>' + cap(DIAS3[diaSemana(dias[top])]) + '</b><small>el día más cargado</small></div></div>';
+}
+/* Tocar una hora libre del horario crea un evento a esa hora (con mouse o dedo) */
+document.addEventListener('click', (ev) => {
+  const col = ev.target.closest && ev.target.closest('.hr-col');
+  if (!col || ev.target.closest('.hr-bloque')) return;
+  const cuerpo = col.closest('.hr-cuerpo'), y = ev.clientY - col.getBoundingClientRect().top;
+  const min = +cuerpo.dataset.ini + Math.floor(y / PX_H) * 60, hh = Math.floor(min / 60);
+  if (hh < 0 || hh > 23) return;
+  const hora = String(hh).padStart(2, '0') + ':00', fin = String(Math.min(23, hh + 1)).padStart(2, '0') + ':00';
+  nuevoEvento(() => window.dispatchEvent(new Event('agenda:repintar')), { fecha: col.dataset.dia, hora, horaFin: fin, area: 'personal' });
+});
+
 /* Lo que vence esta semana (pagos, cobros, plazos; el plazo legal primero) */
 function venceSemana() {
   const p = preferencias(), ini = inicioSemana(ui.horario || hoy(), p.semanaLunes);

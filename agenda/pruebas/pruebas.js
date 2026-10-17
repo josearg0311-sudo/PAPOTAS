@@ -24,7 +24,8 @@ import * as CO from '../js/datos/corrector.js';
 import { separarMonto } from '../js/piezas/dictado.js';
 import { enlaceWhatsApp } from '../js/piezas/compartir.js';
 import { sumarDias as SD } from '../js/util/fechas.js';
-import { entender } from '../js/datos/entender.js';
+import { entender, entenderVarios } from '../js/datos/entender.js';
+import { teclear, centimos } from '../js/piezas/teclado-monto.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -551,6 +552,45 @@ tareas.push(prueba('Agenda 6: un solo campo entiende gasto, ingreso, lista, even
   igual([entender('comprar 3 panes', o).tipo, entender('pagar luz 95 mañana', o).tipo, entender('a las 10:30 llamar', o).tipo], ['recordatorio', 'recordatorio', 'recordatorio']);
   igual(entender('nota: ideas para el viaje', o).tipo, 'nota');
   igual([entender('', o), entender('regar plantas', o).fecha], [null, '2026-10-17']);
+}));
+
+tareas.push(prueba('Agenda 6.1: el + entiende ayer, lo que se repite y varias cosas a la vez', () => {
+  const o = { hoy: '2026-10-17', ahoraMin: 600 };
+  const a = entender('taxi 15 ayer', o);
+  igual([a.tipo, a.monto, a.titulo, a.fecha], ['gasto', 1500, 'Taxi', '2026-10-16']);
+  igual([entender('almuerzo hoy 20', o).fecha, entender('menú 12', o).fecha], ['2026-10-17', '2026-10-17']);
+  const g = entender('gym cada lunes 7am', o);
+  igual([g.tipo, g.titulo, g.fecha, g.hora, g.repetir], ['recordatorio', 'Gym', '2026-10-19', '07:00', 'sem']);
+  const v = entender('tomar vitaminas todos los días 9pm', o);
+  igual([v.titulo, v.hora, v.repetir], ['Tomar vitaminas', '21:00', 'dia']);
+  igual([entender('pagar netflix cada mes', o).repetir, entender('revisar correo de lunes a viernes', o).repetir, entender('regar plantas', o).repetir], ['mes', 'lab', '']);
+  const muchos = entenderVarios('almuerzo 25; taxi 10\nllamar a Ana mañana', o);
+  igual(muchos.map((x) => x.tipo + ':' + (x.monto || x.titulo)), ['gasto:2500', 'gasto:1000', 'recordatorio:Llamar a Ana']);
+  igual(entenderVarios('compras: leche; pan', o).length, 1);
+  igual(entenderVarios('', o), []);
+}));
+
+tareas.push(prueba('Agenda 6.1: el teclado de monto escribe, suma y no deja montos raros', () => {
+  const t = (teclas) => teclas.reduce((m, k) => teclear(m, k), '');
+  igual([t(['1', '2', '.', '5']), t(['0', '5']), t(['.', '5']), t(['1', '.', '2', '3', '4'])], ['12.5', '5', '0.5', '1.23']);
+  igual([t(['1', '00']), t(['00']), t(['1', '.', '00']), t(['1', '2', '⌫']), t(['9', 'C'])], ['100', '', '1.00', '1', '']);
+  igual([t(['+']), t(['5', '+', '+']), t(['1', '2', '.', '5', '+', '8'])], ['', '5+', '12.5+8']);
+  igual([centimos('12.5+8'), centimos('1,250'.replace(',', '')), centimos(''), centimos('5+')], [2050, 125000, 0, 500]);
+  igual(t(['9', '9', '9', '9', '9', '9', '9', '9', '9']), '99999999');
+}));
+
+tareas.push(prueba('Agenda 6.1: el + no se confunde con frases de todos los días', () => {
+  const o = { hoy: '2026-10-17', ahoraMin: 600 };
+  const tip = (t) => entender(t, o).tipo;
+  igual([tip('pagué 15 de luz ayer'), tip('cobré 50 de adelanto'), tip('taxi 20 de ida')], ['gasto', 'ingreso', 'gasto']);
+  igual(entender('pagué 15 de luz ayer', o).fecha, '2026-10-16');
+  const of = entender('taxi 18 oficina', o);
+  igual([of.tipo, of.monto, of.libro, of.titulo], ['gasto', 1800, 'oficina', 'Taxi']);
+  igual([tip('almuerzo 25 hoy oficina'), entender('almuerzo 25 hoy oficina', o).libro], ['gasto', 'oficina']);
+  igual([tip('Reunión con Ana: viernes 4pm'), tip('ojo: llamar al notario mañana'), tip('https://google.com')], ['evento', 'recordatorio', 'recordatorio']);
+  igual([tip('llamar a mamá 8'), tip('llamar a mamá s/ 8')], ['recordatorio', 'gasto']);
+  igual(entenderVarios('nota: pan; leche', o).map((x) => x.tipo), ['nota']);
+  igual(entender('15 de octubre cita médica', o).tipo, 'evento');
 }));
 
 Promise.all(tareas).then(() => {

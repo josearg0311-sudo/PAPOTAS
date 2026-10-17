@@ -28,6 +28,8 @@ const cuantos = (k) => ui.ver[k] || (k === 'hecho' ? TANDA.hecho : TANDA.otro);
 const VACIOS = { hoy: 'Nada pendiente para hoy. 👌', tarde: 'Lo que pases a «Más tarde» aparece aquí.', manana: 'Mañana lo tienes libre.', prox: 'Nada programado para los próximos días.', algun: 'Ideas sin fecha: guárdalas aquí para no olvidarlas.', hecho: 'Lo que marques como hecho baja aquí.' };
 
 export function irALista(id) { ui.lista = id || ''; }
+/* Ir a una lista: en Listas (#listas/<id>) la dirección manda, así que se cambia la dirección */
+function irLista(id) { ui.lista = id || ''; ui.ver = {}; if (location.hash.startsWith('#listas/')) location.hash = '#listas/' + (id || 'todos'); }
 
 function masBoton(k, total, vistos) {
   if (total <= vistos) return '';
@@ -85,13 +87,43 @@ export function vistaListas6(param) {
     return { l, p, ok, faltan, check: esChecklist(l) };
   }).filter((x) => x.p.length || !x.l.extra.sistema)
     .sort((a, b) => (b.faltan.length ? 1 : 0) - (a.faltan.length ? 1 : 0));
-  return '<div class="listas6">' +
+  return (tarj.length > 6 ? '<label class="l6-buscar"><span class="solo-lector">Buscar una lista</span>' + ico('i-buscar') + '<input id="l6Buscar" class="entrada" type="search" placeholder="Buscar una lista o algo de adentro…" autocomplete="off"></label>' : '') +
+    '<div class="listas6">' +
     '<a class="l6 l6-todo" href="#listas/todos"><span class="l6-n">' + todos.length + '</span><b>Todo lo pendiente</b><small>' + (hoyN ? hoyN + ' para hoy' : 'nada para hoy') + ' · ordenado por día</small></a>' +
-    tarj.map(({ l, p, ok, faltan, check }) => '<a class="l6" href="#listas/' + esc(l.id) + '">' + anillo(ok, p.length) +
+    tarj.map(({ l, p, ok, faltan, check }) => '<a class="l6" href="#listas/' + esc(l.id) + '" data-busca="' + esc((l.titulo + ' ' + p.map((x) => x.titulo).join(' ')).toLowerCase()) + '">' + anillo(ok, p.length) +
       '<b>' + esc(l.titulo) + '</b><small>' + (p.length ? ok + ' de ' + p.length + (faltan.length ? ' · ' + esc(faltan.slice(0, 2).map((x) => x.titulo).join(', ')) + (faltan.length > 2 ? '…' : '') : ' · todo listo ✓') : (check ? 'vacía' : 'sin recordatorios')) + '</small></a>').join('') +
-    '<button type="button" class="l6 l6-nueva" data-acc="r-nueva-checklist">' + ico('i-plus') + '<b>Nueva lista</b><small>o escribe en el + «compras: leche, pan»</small></button>' +
+    '<button type="button" class="l6 l6-nueva" data-acc="l6-nueva">' + ico('i-plus') + '<b>Nueva lista</b><small>o escribe en el + «compras: leche, pan»</small></button>' +
     '</div>';
 }
+
+/* Plantillas para empezar una lista para marcar en un toque */
+const PLANTILLAS = [
+  ['Compras del mes', ['Arroz', 'Aceite', 'Azúcar', 'Leche', 'Huevos', 'Pan', 'Fideos', 'Atún', 'Papel higiénico', 'Detergente', 'Jabón', 'Fruta']],
+  ['Maleta de viaje', ['DNI', 'Cargador', 'Audífonos', 'Ropa', 'Casaca', 'Cepillo de dientes', 'Bloqueador', 'Medicinas', 'Pasajes', 'Efectivo']],
+  ['Mochila del gym', ['Toalla', 'Tomatodo', 'Polo de cambio', 'Zapatillas', 'Candado', 'Sandalias', 'Audífonos']],
+  ['Mudanza', ['Cajas', 'Cinta de embalaje', 'Plumón', 'Bolsas', 'Movilidad', 'Cambiar dirección en el banco', 'Luz y agua a mi nombre']],
+  ['Cumpleaños / reunión', ['Invitaciones', 'Torta', 'Bebidas', 'Piqueos', 'Vasos y platos', 'Velas', 'Música', 'Hielo']]
+];
+function abrirNuevaLista(repintar) {
+  const hoja = abrirHoja('Nueva lista para marcar', '<form class="cap" id="l6Form"><label class="campo"><span>Nombre</span><input id="l6Nombre" class="entrada" maxlength="60" placeholder="Ej. Compras, Maleta, Útiles" autocomplete="off"></label>' +
+    '<p class="cap-ej-tit">O empieza con una plantilla:</p><div class="l6-plantillas">' + PLANTILLAS.map((x, i) => '<button type="button" class="cap-ej siempre" data-l6-p="' + i + '"><b>' + esc(x[0]) + '</b><small>' + x[1].length + ' cosas</small></button>').join('') + '</div>' +
+    '<button type="submit" class="btn pri cap-guardar">Crear lista vacía</button></form>');
+  const crear = (titulo, cosas) => {
+    const t = String(titulo || '').trim(); if (!t) { aviso('Ponle un nombre.'); hoja.querySelector('#l6Nombre').focus(); return; }
+    const l = crearLista({ titulo: t, clase: 'checklist' });
+    if (cosas && cosas.length) crearDesdeTexto(cosas.join('\n'), { lista: l.id });
+    cerrarHoja(true); location.hash = '#listas/' + l.id; repintar();
+    aviso('Lista ' + t + (cosas && cosas.length ? ' con ' + cosas.length + ' cosas' : ''), () => { aPapelera(l.id); location.hash = '#listas'; repintar(); });
+  };
+  hoja.querySelector('#l6Form').addEventListener('submit', (ev) => { ev.preventDefault(); crear(hoja.querySelector('#l6Nombre').value, []); });
+  hoja.querySelectorAll('[data-l6-p]').forEach((b) => b.addEventListener('click', () => { const p = PLANTILLAS[+b.dataset.l6P], n = hoja.querySelector('#l6Nombre').value.trim(); crear(n || p[0], p[1]); }));
+}
+/* Buscar entre tus listas (por su nombre o lo que tienen adentro) */
+document.addEventListener('input', (ev) => {
+  if (ev.target.id !== 'l6Buscar') return;
+  const q = ev.target.value.trim().toLowerCase();
+  document.querySelectorAll('.listas6 .l6[data-busca]').forEach((el) => { el.hidden = !!q && !el.dataset.busca.includes(q); });
+});
 
 export function vistaRecordatorios() {
   const h = hoy(), l = ui.lista ? buscarElemento(ui.lista) : null;
@@ -153,8 +185,9 @@ export function vistaRecordatorios() {
 
 export const acciones = {
   saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
+  'l6-nueva'(b, ev, repintar) { abrirNuevaLista(repintar); },
   'r-nueva-checklist'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; ui.ver = {}; location.hash = '#listas/' + id; }, 'checklist'); },
-  'r-lista-ir'(b) { ui.lista = b.dataset.id; ui.ver = {}; location.hash = '#listas/' + b.dataset.id; },
+  'r-lista-ir'(b) { ui.lista = b.dataset.id; ui.ver = {}; if (location.hash === '#listas/' + b.dataset.id) return true; location.hash = '#listas/' + b.dataset.id; },
   'r-lista'(b) { ui.lista = b.dataset.v; ui.ver = {}; ui.sel = null; return true; },
   'r-sel-ini'() { ui.sel = []; return true; },
   'r-sel-fin'() { ui.sel = null; return true; },
@@ -173,8 +206,8 @@ export const acciones = {
     const hoja = abrirHoja('¿A qué área?', '<div class="opciones">' + AREAS.map((a) => '<button type="button" class="opcion area-' + a.id + '" data-a="' + a.id + '"><b>' + esc(a.nombre) + '</b></button>').join('') + '</div>');
     hoja.querySelectorAll('[data-a]').forEach((o) => o.addEventListener('click', () => aplicarSel((id) => { const x = JSON.parse(JSON.stringify(buscarElemento(id))); x.area = o.dataset.a; poner(x); }, 'Pasados a ' + area(o.dataset.a).nombre, repintar)));
   },
-  'r-nueva-lista'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; }); },
-  'r-editar-lista'(b, ev, repintar) { editarLista(ui.lista, repintar, (id) => { ui.lista = id; }); },
+  'r-nueva-lista'(b, ev, repintar) { editarLista(null, repintar, (id) => { irLista(id); }); },
+  'r-editar-lista'(b, ev, repintar) { editarLista(ui.lista, repintar, (id) => { irLista(id); }); },
   'r-mas'(b) { const k = b.dataset.v; ui.ver[k] = cuantos(k) + (k === 'hecho' ? 30 : 100); return true; },
   'r-compartir'() {
     const l = buscarElemento(ui.lista); if (!l) return;
@@ -186,8 +219,8 @@ export const acciones = {
     const l = buscarElemento(ui.lista); if (!l) return;
     const n = crearLista({ titulo: l.titulo + ' (copia)', area: l.area, clase: l.extra.clase || 'checklist' }), t0 = Date.now();
     pendientesDe(l.id).sort((a, c) => (a.origen && c.origen ? a.origen.indice - c.origen.indice : a.creado - c.creado)).forEach((x, i) => poner(Object.assign(modeloVacio(), { id: nuevoId('pend'), tipo: 'pendiente', titulo: x.titulo, area: x.area, prioridad: x.prioridad, notas: x.notas, etiquetas: (x.etiquetas || []).slice(), lista: n.id, fechas: Object.assign(modeloVacio().fechas, { inicio: null }), creado: t0 + i })));
-    ui.lista = n.id; ui.ver = {}; repintar();
-    aviso('Lista duplicada, todo sin marcar', () => { aPapelera(n.id); ui.lista = l.id; repintar(); });
+    irLista(n.id); repintar();
+    aviso('Lista duplicada, todo sin marcar', () => { aPapelera(n.id); irLista(l.id); repintar(); });
   },
   'r-desmarcar-todo'(b, ev, repintar) {
     import('../datos/datos.js').then(({ poner }) => {

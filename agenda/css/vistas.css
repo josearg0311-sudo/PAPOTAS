@@ -937,9 +937,9 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 .pide-nombre b { font-size: 19px; }
 .pide-nombre .pn-form { flex: 1 1 260px; margin: 0; }
 /* Todo entra suave, uno tras otro */
-.hoy > * { animation: aparecer .45s cubic-bezier(.2, .8, .2, 1) both; }
-.hoy > :nth-child(2) { animation-delay: .04s; } .hoy > :nth-child(3) { animation-delay: .08s; } .hoy > :nth-child(4) { animation-delay: .12s; }
-.hoy > :nth-child(5) { animation-delay: .16s; } .hoy > :nth-child(6) { animation-delay: .2s; } .hoy > :nth-child(n+7) { animation-delay: .24s; }
+.pantalla.entra .hoy > * { animation: aparecer .45s cubic-bezier(.2, .8, .2, 1) both; }
+.pantalla.entra .hoy > :nth-child(2) { animation-delay: .04s; } .pantalla.entra .hoy > :nth-child(3) { animation-delay: .08s; } .pantalla.entra .hoy > :nth-child(4) { animation-delay: .12s; }
+.pantalla.entra .hoy > :nth-child(5) { animation-delay: .16s; } .pantalla.entra .hoy > :nth-child(6) { animation-delay: .2s; } .pantalla.entra .hoy > :nth-child(n+7) { animation-delay: .24s; }
 @keyframes aparecer { from { opacity: 0; transform: translateY(12px); } }
 
 /* ---------- Colores en calma (5.5): neutro + lima; rojo solo para lo urgente ----------
@@ -972,7 +972,7 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
   .hoy > .franja { grid-column: 2; grid-row: 1 / 4; align-self: stretch; align-items: stretch; padding: 14px; border: 1px solid var(--borde); border-radius: var(--radio); background: linear-gradient(180deg, var(--brillo), transparent 120px), var(--superficie); }
 }
 .hoy-col { display: contents; }
-.hoy-col > * { animation: aparecer .45s .2s cubic-bezier(.2, .8, .2, 1) both; }
+.pantalla.entra .hoy-col > * { animation: aparecer .45s .2s cubic-bezier(.2, .8, .2, 1) both; }
 @media (min-width: 1180px) { .hoy > .franja { grid-template-rows: 1fr; align-items: stretch; } .hoy > .franja button { display: flex; flex-direction: column; align-items: center; justify-content: center; } .hoy > .franja b { font-size: 30px; } }
 /* Listas y cuentas de Hoy sin bordes de colores: neutros, el lima marca el avance */
 .hl, .hc-libro { border-color: var(--borde) !important; }
@@ -996,7 +996,7 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 @media (min-width: 980px) {
   .lateral { grid-template-columns: auto auto minmax(0, 1fr) auto; grid-template-areas: "marca tabs cap perfil"; }
   .archivador { margin-right: 0; }
-  .cap-barra { grid-area: cap; display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 48px; margin-right: 56px; padding: 0 10px 0 16px; border: 1px solid var(--superficie-3); border-radius: 99px; background: var(--superficie); color: var(--tinta-3); font: inherit; font-size: 14px; text-align: left; cursor: text; transition: border-color .15s; }
+  .cap-barra { grid-area: cap; display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 48px; margin-right: 0; padding: 0 10px 0 16px; border: 1px solid var(--superficie-3); border-radius: 99px; background: var(--superficie); color: var(--tinta-3); font: inherit; font-size: 14px; text-align: left; cursor: text; transition: border-color .15s; }
   .cap-barra:hover { border-color: color-mix(in srgb, var(--acento) 60%, var(--borde)); }
   .cap-barra .i { flex: none; width: 18px; height: 18px; color: var(--acento-txt); stroke-width: 2.6; }
   .cap-barra span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1081,13 +1081,21 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 .p6-btns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
 .p6-btns .btn { min-height: 52px; font-size: 16px; font-weight: 700; }
 .p6-dia { display: flex; justify-content: space-between; padding: 12px 16px 4px; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-2); }
-.p6-detalle { justify-self: start; }
+.p6-detalle { justify-self: start; max-width: 100%; white-space: normal; height: auto; min-height: 48px; text-align: left; }
 @media (min-width: 1180px) { .plata6 { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } .plata6 > .seg6, .plata6 > .p6-detalle { grid-column: 1 / -1; } .plata6 > .seg6 { max-width: 360px; } .plata6 > .tarjeta:last-of-type { grid-column: 2; grid-row: 2 / span 3; } }
 
 /* ---------- El + que entiende todo ---------- */
 .cap { display: grid; gap: 12px; }
 .cap-entrada { min-height: 56px; font-size: 17px; border-color: color-mix(in srgb, var(--acento) 70%, var(--borde)); }
-.cap-previa { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 12px 14px; border-radius: 16px; background: var(--superficie-2); }
+.cap-fila { display: flex; gap: 8px; }
+.cap-fila .cap-entrada { flex: 1; min-width: 0; }
+.cap-mic { flex: none; width: 56px; height: 56px; border-radius: 16px; }
+.cap-mic[aria-pressed="true"] { background: var(--rojo-suave); color: var(--rojo); animation: latido6 1.4s ease-in-out infinite; }
+.cap-previa { display: grid; gap: 10px; min-height: 64px; padding: 12px 14px; border-radius: 16px; background: var(--superficie-2); }
+.cap-previa:not(.varias) { display: flex; align-items: center; gap: 12px; }
+.cap-una { display: flex; align-items: center; gap: 12px; }
+.cap-varias { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--acento-txt); }
+.cap-ej.siempre { border-style: solid; border-color: color-mix(in srgb, var(--acento) 45%, var(--borde)); color: var(--tinta); }
 .cap-signo { flex: none; display: grid; place-items: center; min-width: 42px; height: 42px; padding: 0 6px; border-radius: 13px; background: var(--acento); color: var(--sobre-acento); font-weight: 800; font-size: 15px; }
 .cap-que { display: grid; min-width: 0; }
 .cap-que small { font-size: 13px; color: var(--tinta-2); overflow-wrap: anywhere; }
@@ -1112,3 +1120,47 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 .tm-pie { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 8px; align-items: center; }
 .tm-guardar { min-height: 54px; font-size: 16px; font-weight: 800; }
 @media (min-width: 980px) { .plan6 > .seg6 { max-width: 420px; } }
+
+/* ---------- Agenda 6.1 · Hoy en vivo ---------- */
+.f6-barra { display: block; height: 6px; border-radius: 99px; background: color-mix(in srgb, var(--tinta) 12%, transparent); overflow: hidden; }
+.f6-barra i { display: block; height: 100%; border-radius: 99px; background: var(--acento); box-shadow: 0 0 12px var(--resplandor); transition: width .9s linear; }
+.foco6 .f6-reloj { display: grid; gap: 10px; }
+.foco6 .a6-tit { font-size: clamp(54px, 16vw, 76px); font-variant-numeric: tabular-nums; letter-spacing: -.05em; }
+.foco6 .a6-cuando i { animation: latido6 1.4s ease-in-out infinite; }
+.cierre6 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 16px; border-radius: 20px; border: 1px dashed var(--superficie-3); background: var(--superficie); }
+.c6-txt { flex: 1 1 200px; display: grid; }
+.c6-txt small { font-size: 13px; color: var(--tinta-2); }
+
+/* ---------- Agenda 6.1 · Plata ---------- */
+.cv6-barras { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; height: 120px; padding: 4px 16px 0; align-items: end; }
+.cv6-dia { display: grid; grid-template-rows: 1fr auto; gap: 6px; height: 100%; align-items: end; justify-items: center; }
+.cv6-dia i { display: block; width: 100%; max-width: 30px; border-radius: 8px 8px 4px 4px; background: var(--superficie-3); }
+.cv6-dia.hoy i { background: var(--acento); box-shadow: 0 0 14px var(--resplandor); }
+.cv6-dia small { font-size: 11px; color: var(--tinta-2); }
+.cv6-dia.hoy small { color: var(--acento-txt); font-weight: 700; }
+.cv6-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; padding: 14px 16px 4px; }
+.cv6-datos > div { display: grid; }
+.cv6-datos b { font-family: var(--f-titulo); font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+.cv6-datos small { font-size: 12.5px; color: var(--tinta-2); }
+.cv6-cats { display: grid; padding: 8px 8px 12px; }
+.cv6-cat { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 44px; padding: 4px 8px; border: 0; border-radius: 12px; background: transparent; color: var(--tinta); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.cv6-cat:hover { background: var(--superficie-2); }
+.cv6-cb { display: block; height: 6px; border-radius: 9px; background: var(--superficie-3); overflow: hidden; }
+.cv6-cb i { display: block; height: 100%; border-radius: 9px; background: var(--tinta-2); }
+.tm-teclas { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tm-teclas .tm-op { background: var(--superficie-3); color: var(--acento-txt); }
+.tm-teclas .tm-ancha { grid-column: span 2; }
+.tm-monto { font-size: clamp(34px, 11vw, 60px); overflow-wrap: anywhere; }
+
+/* ---------- Agenda 6.1 · Plan y Listas ---------- */
+.sem6-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.sem6-res > div { display: grid; padding: 12px 14px; border-radius: 18px; border: 1px solid var(--borde); background: var(--superficie); }
+.sem6-res b { font-family: var(--f-titulo); font-size: 22px; font-weight: 800; letter-spacing: -.03em; }
+.sem6-res small { font-size: 12px; color: var(--tinta-2); }
+.hr-col { cursor: copy; }
+.l6-buscar { display: flex; align-items: center; gap: 10px; padding: 0 6px 0 16px; border-radius: 99px; border: 1px solid var(--borde); background: var(--superficie); }
+.l6-buscar .i { width: 18px; height: 18px; color: var(--tinta-3); flex: none; }
+.l6-buscar .entrada { border: 0; background: transparent; min-height: 48px; }
+.l6-plantillas { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.l6-plantillas .cap-ej { display: grid; justify-items: start; min-height: 58px; padding: 8px 14px; border-radius: 16px; text-align: left; }
+.l6-plantillas small { font-size: 12px; color: var(--tinta-2); }

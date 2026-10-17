@@ -7,7 +7,7 @@ import { leer, ANTIGUAS } from '../datos/almacen.js';
 import { documento, elementos, buscarElemento, poner, cambiarPerfil } from '../datos/datos.js';
 import { modeloVacio } from '../datos/modelo.js';
 import { tocaRespaldar, diasSinRespaldo } from '../datos/respaldo.js';
-import { urgentes, delDia, hechosHoy, ordenar, grupo, marcar, pendientesVisibles } from '../datos/pendientes.js';
+import { urgentes, delDia, hechosHoy, ordenar, grupo, marcar, pendientesVisibles, paraCerrarDia } from '../datos/pendientes.js';
 import { bloquesDelDia, todoElDia, minutosPorArea, proximoBloque } from '../datos/calendario.js';
 import { AREAS, area } from '../datos/areas.js';
 import { filaPendiente } from '../piezas/pendientes-ui.js';
@@ -116,14 +116,14 @@ export function vistaHoy() {
   const bloques = bloquesDelDia(h), tde = todoElDia(h), mins = minutosPorArea(bloques), vig = minutosVigilia(p), carga = mins.total / vig;
   const fer = p.feriados === false ? '' : feriado(h);
   /* En modo simple lo urgente (plazo legal, vencido, vence pronto) va dentro de Pendientes, primero */
-  const ids = new Set(delDiaL.map((x) => x.id)), pend = simple() ? urg.filter((x) => !ids.has(x.id)).concat(delDiaL).sort((a, b) => (b.plazoLegal ? 1 : 0) - (a.plazoLegal ? 1 : 0)) : delDiaL;
+  const ids = new Set(delDiaL.map((x) => x.id)), pend = urg.filter((x) => !ids.has(x.id)).concat(delDiaL).sort((a, b) => (b.plazoLegal ? 1 : 0) - (a.plazoLegal ? 1 : 0));   // lo urgente siempre adentro, el plazo legal primero
   const fila = (x) => filaPendiente(x, { verLista: !simple(), acciones: !simple() });
   const pr = prioridades(), hechasPr = pr.filter((x) => x.ok && x.t).length;
   const hh = (m) => (m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) : ''));
 
   const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
   /* Por hacer = lo de hoy sin hora (lo que tiene hora ya está en «Tu día»), lo atrasado y lo urgente */
-  const porHacer = pend.filter((x) => !x.fechas.hora || x.fechas.inicio < h);
+  const porHacer = pend.filter((x) => !(x.fechas.hora && x.fechas.inicio === h));
   return '<div class="hoy hoy6">' +
     '<header class="hoy-cab"><div class="hc-fecha" aria-hidden="true"><b>' + (+h.slice(8, 10)) + '</b></div><div class="hc-txt"><small>' + cap(fmtLarga(h).split(' ')[0]) + ' · ' + MESES[+h.slice(5, 7) - 1] + '</small><h1 class="ph-saludo">' + (n ? 'Hola, ' + esc(n.split(/\s+/)[0]) : saludo()) + '</h1></div></header>' +
     (tot ? '<div class="hc-avance" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><i style="--p:' + Math.round(pct * 100) + '%"></i><span><b>' + hechos.length + ' de ' + tot + '</b> ' + (hechos.length === tot ? '¡todo hecho! 🎉' : 'listas hoy') + '</span></div>' : '') +
@@ -135,24 +135,36 @@ export function vistaHoy() {
       ahoraHTML(h, porHacer) +
       (!porHacer.length ? '' : tarjeta({ eti: 'POR HACER', titulo: 'Por hacer', n: porHacer.length || null,
         cuerpo: (porHacer.length ? '<div class="pends">' + porHacer.slice(0, 10).map(fila).join('') + '</div>' + (porHacer.length > 10 ? '<div class="pie-tarjeta"><a class="btn" href="#listas">Ver ' + (porHacer.length - 10) + ' más</a></div>' : '') : vacio(tot ? 'Todo listo por hoy' : 'Nada pendiente', 'Toca + y escribe lo que tengas que hacer.')) })) +
+      cierreDia(h, porHacer) +
     '</div><div class="hoy-col">' +
       tarjeta({ eti: 'TU DÍA', titulo: 'Tu día', n: bloques.length || null, cuerpo: lineaDia(bloques) }) +
       minis(h) +
-      (simple() ? '' : tarjetaHabitos() + tarjetaManana() + tarjetaNumeros() + tarjeta({ eti: 'FOCO', titulo: 'Pomodoro', id: 'tarjetaPomo', cuerpo: pomoHTML() })) +
+      (simple() ? '' : tarjetaHabitos() + tarjetaManana() + tarjetaNumeros() + (corriendo() ? '' : tarjeta({ eti: 'FOCO', titulo: 'Pomodoro', id: 'tarjetaPomo', cuerpo: pomoHTML() }))) +
     '</div>' +
   '</div>';
 }
 
 /* Lo único grande de Hoy: lo que toca AHORA (o lo siguiente, o lo más importante) */
 function ahoraHTML(h, porHacer) {
-  const f = preferencias().formatoHora, s = proximoBloque(h, minutosAhora());
+  const f = preferencias().formatoHora, ahora = minutosAhora(), s = proximoBloque(h, ahora);
   const bt = (acc, id, txt, pri) => '<button type="button" class="btn' + (pri ? ' pri' : '') + '" data-acc="' + acc + '" data-id="' + esc(id) + '">' + txt + '</button>';
+  /* Con el foco en marcha, Ahora ES el foco: la cuenta regresiva grande (se mueve sola cada segundo) */
+  const stp = estadoPomo(), pausado = !corriendo() && stp.resta > 0 && stp.resta < totalMs();
+  if (corriendo() || pausado) {
+    const st = stp, it = st.item ? buscarElemento(st.item) : null, r = restante(), tot = totalMs();
+    return '<section class="ahora6 foco6' + (pausado ? ' pausa' : '') + '" aria-label="Foco"><p class="a6-cuando"><i aria-hidden="true"></i>' + (pausado ? 'Foco en pausa' : st.modo === 'foco' ? 'Foco en marcha' : 'Descanso') + '</p>' +
+      '<div class="f6-reloj"><b id="pomoTxt" class="a6-tit" role="timer">' + mmss(r) + '</b><span class="f6-barra" aria-hidden="true"><i id="pomoBarra" style="width:' + (100 * (1 - r / tot)).toFixed(1) + '%"></i></span></div>' +
+      (it ? '<p class="a6-desp">En: <b>' + esc(it.titulo) + '</b></p>' : '') +
+      '<div class="a6-btns"><button type="button" class="btn pri" data-acc="pomo">' + ico(pausado ? 'i-play' : 'i-pausa') + (pausado ? 'Seguir' : 'Pausar') + '</button><button type="button" class="btn" data-acc="pomo-reiniciar">Terminar</button></div></section>';
+  }
   if (s && s.dia === h) {
     const b = s.b, acc = b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver';
     const desp = bloquesDelDia(h).filter((x) => x.ini > b.ini && x.id !== b.id)[0];
-    const cuando = s.enCurso ? 'Ahora · hasta las ' + fmtHora(b.hFin, f) : s.faltan < 60 ? 'En ' + s.faltan + ' min · ' + fmtHora(b.hIni, f) : 'Lo siguiente · ' + fmtHora(b.hIni, f);
+    const falta = b.fin - ahora, cuando = s.enCurso ? 'Ahora · ' + (falta < 60 ? 'quedan ' + falta + ' min' : 'hasta las ' + fmtHora(b.hFin, f)) : s.faltan < 60 ? 'En ' + s.faltan + ' min · ' + fmtHora(b.hIni, f) : 'Lo siguiente · ' + fmtHora(b.hIni, f);
+    const prog = s.enCurso ? Math.min(100, Math.max(0, (ahora - b.ini) / Math.max(1, b.fin - b.ini) * 100)) : 0;
     return '<section class="ahora6 area-' + area(b.area).id + (s.enCurso ? ' en-curso' : '') + '" aria-label="Lo que toca ahora">' +
       '<p class="a6-cuando"><i aria-hidden="true"></i>' + cuando + '</p><h2 class="a6-tit">' + esc(b.titulo) + '</h2>' +
+      (s.enCurso ? '<span class="f6-barra" role="img" aria-label="Va ' + Math.round(prog) + ' %"><i style="width:' + prog.toFixed(1) + '%"></i></span>' : '') +
       '<p class="a6-chips"><span class="chip area-' + area(b.area).id + '">' + (b.tipo === 'clase' ? 'Clase' : b.tipo === 'pendiente' ? 'Recordatorio' : 'Evento') + '</span>' + (b.lugar ? '<span class="chip-n">' + esc(b.lugar) + '</span>' : '') + '</p>' +
       '<div class="a6-btns">' + (b.tipo === 'pendiente' ? bt('p-marcar', b.id, ico('i-check') + 'Listo', true) : bt('h6-foco', b.tipo === 'clase' ? '' : b.id, (corriendo() ? 'Foco en marcha' : 'Empezar foco 25 min'), true)) + bt(acc, b.id, 'Ver') + '</div>' +
       (desp ? '<p class="a6-desp">Después: <b>' + esc(desp.titulo) + '</b> a las ' + fmtHora(desp.hIni, f) + '</p>' : '') + '</section>';
@@ -164,11 +176,22 @@ function ahoraHTML(h, porHacer) {
   return '<section class="ahora6 libre" aria-label="Día libre"><p class="a6-cuando"><i aria-hidden="true"></i>Nada más por hoy</p><h2 class="a6-tit">Día libre 🌿</h2><div class="a6-btns"><button type="button" class="btn pri" data-acc="captura">' + ico('i-plus') + 'Anotar algo</button></div></section>';
 }
 
+/* Desde las 6 p. m.: cerrar el día (lo que quedó pasa a mañana) y cómo viene mañana */
+function cierreDia(h, porHacer) {
+  if (minutosAhora() < 18 * 60) return '';
+  const f = preferencias().formatoHora, m = sumarDias(h, 1), bm = bloquesDelDia(m), pm = pendientesVisibles().filter((x) => x.estado !== 'hecho' && x.fechas.inicio === m);
+  const quedan = paraCerrarDia(h).length, nm = bm.length + pm.length;   // lo mismo que pasará el botón
+  if (!quedan && !nm) return '';
+  return '<section class="cierre6" aria-label="Cierre del día"><div class="c6-txt"><b>' + (quedan ? 'Te ' + (quedan === 1 ? 'queda 1 cosa' : 'quedan ' + quedan + ' cosas') + ' de hoy' : 'Hoy, todo listo ✓') + '</b>' +
+    '<small>Mañana: ' + (nm ? nm + (nm === 1 ? ' cosa' : ' cosas') + (bm[0] ? ' · empiezas a las ' + fmtHora(bm[0].hIni, f) : '') : 'libre 🌿') + '</small></div>' +
+    (quedan ? '<button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Pasar a mañana</button>' : '') + '</section>';
+}
+
 /* Dos cuadros chicos: la plata de hoy y la lista que tienes a medias (sin repetir sus pantallas) */
 function minis(h) {
   const ym = h.slice(0, 7), mov = elementos((x) => x.tipo === 'movimiento');
   const per = mov.filter((x) => esDelLibro(x, 'personal')), r = resumenMes(per, ym);
-  const gHoy = mov.filter((x) => !esIngreso(x) && x.fechas.inicio === h).reduce((t, x) => t + Math.abs(+x.monto || 0), 0);
+  const gHoy = per.filter((x) => !esIngreso(x) && x.fechas.inicio === h).reduce((t, x) => t + Math.abs(+x.monto || 0), 0);   // solo el libro personal, como «te quedan»
   const ls = listas().filter(esChecklist).map((l) => { const p = pendientesDe(l.id); return { l, p, ok: p.filter((x) => x.estado === 'hecho').length }; }).filter((x) => x.p.length && x.ok < x.p.length);
   const l = ls[0];
   return '<div class="minis6">' +
@@ -184,6 +207,7 @@ export function actualizarPomo() {
   const r = restante(), tot = totalMs();
   if (t) t.textContent = mmss(r);
   if (a) a.setAttribute('stroke-dashoffset', (C46 * (1 - r / tot)).toFixed(1));
+  const br = document.getElementById('pomoBarra'); if (br) br.style.width = (100 * (1 - r / tot)).toFixed(1) + '%';
   const pill = document.getElementById('pildoraPomo');
   if (pill) { pill.hidden = !corriendo() || !!t; const s = pill.querySelector('span'); if (s) s.textContent = mmss(r); }
 }

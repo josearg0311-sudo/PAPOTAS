@@ -8,12 +8,12 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Un + que entiende todo', '⚡', 'Escribe como hablas: «almuerzo 25» es un gasto, «compras: leche, pan» una lista, «reunión viernes 4pm» un evento.', 'agregar'],
-  ['Hoy', '☀️', 'Lo que toca ahora en grande, con un botón para empezar 25 min de foco. Debajo, lo que te falta y tu día.', '#hoy'],
-  ['Plan', '📅', 'Agenda y Horario juntos: tu semana por horas, tu día y tu mes.', '#plan'],
-  ['Listas', '☑️', 'Recordatorios y listas para marcar en un solo lugar, cada una con su avance.', '#listas'],
-  ['Plata', '💰', 'Personal y Oficina: cuánto te queda, y un teclado de números grande para anotar en segundos.', '#plata'],
-  ['Lo demás, en Más', '✨', 'Notas, hábitos, ajustes y el detalle de la agenda y las cuentas. Nada se perdió.', '#mas']
+  ['El + más listo', '⚡', 'Varias cosas a la vez («almuerzo 25; taxi 10»), gastos de ayer («taxi 15 ayer»), lo que se repite («gym cada lunes 7am»), tus gastos de siempre en un toque y dictar con la voz.', 'agregar'],
+  ['Foco dentro de Hoy', '⏱️', '«Empezar foco» convierte «Ahora» en una cuenta regresiva; puedes pausar y seguir. De noche, cierra el día y mira cómo viene mañana.', '#hoy'],
+  ['Plata: cómo vas', '💰', 'Tus últimos 7 días en barras, cuánto puedes gastar por día y en qué se te va más. El teclado ahora suma (12.50 + 8).', '#plata'],
+  ['Plan', '📅', 'Tu semana en números y, en la laptop, toca una hora libre del horario para crear un evento.', '#plan'],
+  ['Listas', '☑️', 'Plantillas (súper, maleta, gym, mudanza, fiesta) y buscador cuando tienes muchas.', '#listas'],
+  ['Arreglos', '🔧', 'Lo urgente siempre aparece en Hoy, «1,250» siempre es mil doscientos cincuenta y Plata ya no se sale de la pantalla.', '#hoy']
 ];
 
 export function abrirNovedades() {

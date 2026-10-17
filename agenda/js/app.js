@@ -15,9 +15,9 @@ import { cuandoSeGuarde } from './piezas/agregar-rapido.js';
 import { abrirCaptura } from './piezas/captura.js';
 import { abrirMonto } from './piezas/teclado-monto.js';
 import { vistaHoy, acciones as accHoy, alCambiarPrioridad, actualizarPomo } from './vistas/hoy.js';
-import { vistaRecordatorios, vistaListas, vistaListas6, acciones as accRec, alEscribir as alEscribirRec, alEnviar as alEnviarRec } from './vistas/recordatorios.js';
+import { vistaRecordatorios, vistaListas6, acciones as accRec, alEscribir as alEscribirRec, alEnviar as alEnviarRec } from './vistas/recordatorios.js';
 import { acciones as accPend, iniciarDeslizar } from './piezas/pendientes-ui.js';
-import { tic as ticPomo } from './piezas/pomodoro.js';
+import { tic as ticPomo, corriendo as pomoCorre, restante as pomoResta, mmss } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
 import { marcar, delDia as pendientesDeHoy, crearDesdeTexto } from './datos/pendientes.js';
 import { aPapelera } from './datos/datos.js';
@@ -82,6 +82,8 @@ function pintarNube() {
   const est = e.ocupado ? 'ocupada' : e.ok ? 'ok' : 'error';
   b.className = 'chip-nube nube-' + est;
   $('nubeTxt').textContent = est === 'ocupada' ? 'sincronizando…' : est === 'ok' ? haceCuanto(e.fecha) : 'sin conexión';
+  const ln = document.getElementById('latNube');
+  if (ln) { ln.hidden = false; ln.className = 'lat-nube nube-' + est; ln.querySelector('span').textContent = $('nubeTxt').textContent; ln.setAttribute('aria-label', b.getAttribute('aria-label') || 'Nube'); }
   b.setAttribute('aria-label', 'Nube: ' + (est === 'ok' ? 'sincronizada ' + haceCuanto(e.fecha) : est === 'ocupada' ? 'sincronizando' : 'con problema') + '. Abrir ajustes de la nube');
 }
 window.addEventListener('agenda:nube', pintarNube);
@@ -104,7 +106,11 @@ function pintarNav() {
     (preferencias().completo ? '<span class="pest-sep" aria-hidden="true"></span>' + AREAS.map((a) => '<a href="#areas/' + a.id + '" class="pest pest-esp area-' + a.id + '"' + actual('areas', a.id) + ' title="' + esc(a.nombre) + '" aria-label="' + esc(a.nombre) + '"><i class="pest-emoji" aria-hidden="true">' + esc(a.emoji || '') + '</i><span>' + esc(a.nombre) + '</span></a>').join('') : '') +
     '<a href="#mas" class="pest pest-chica" data-ir="mas"' + (p === 'mas' && !(ruta.sec === 'areas' && ruta.param) ? ' aria-current="page"' : '') + '>' + ico('i-mas') + '<span>Más</span></a></nav>' +
     '<button type="button" class="cap-barra" data-acc="captura">' + ico('i-plus') + '<span>Escribe lo que sea… «almuerzo 25», «llamar a Ana mañana 10am»</span><kbd>N</kbd></button>' +
-    '<a class="perfil" href="#ajustes"' + actual('ajustes') + ' aria-label="Ajustes y respaldo" title="Ajustes y respaldo"><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span></a>';
+    /* A la derecha, en la misma fila (nada se encima): foco en marcha, nube, buscar y tú */
+    '<div class="lat-der"><a class="lat-pomo" id="latPomo" href="#hoy"' + (pomoCorre() ? '' : ' hidden') + ' aria-label="Foco en marcha"><i aria-hidden="true"></i><span>' + mmss(pomoResta()) + '</span></a>' +
+    '<button type="button" class="lat-nube" id="latNube" hidden data-acc="nube-ir"><i aria-hidden="true"></i><span></span></button>' +
+    '<button type="button" class="icono-btn lat-buscar" data-acc="buscar" aria-label="Buscar (tecla /)" title="Buscar (/)">' + ico('i-buscar') + '</button>' +
+    '<a class="perfil" href="#ajustes"' + actual('ajustes') + ' aria-label="Ajustes y respaldo" title="Ajustes y respaldo"><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span></a></div>';
 }
 
 function pintarCab() {
@@ -133,7 +139,6 @@ function contenido() {
     case 'listas': return vistaListas6(ruta.param);
     case 'plan': return vistaPlan();
     case 'plata': return vistaPlata(ruta.param);
-    case 'listas-marcar': return vistaListas();
     case 'horario': return vistaHorario();
     case 'ajustes': return vistaAjustes();
     case 'datos': return vistaDatos();
@@ -166,7 +171,10 @@ export function pintar() {
     const pan = $('pantalla'), clave = ruta.sec + '/' + (ruta.param || '') + '/' + (ruta.sub || '');
     pan.innerHTML = cabeceraSeccion() + contenido();
     /* Al cambiar de pantalla, una entrada suave (solo entonces, no en cada repintado) */
-    if (clave !== ultimaPantalla) { ultimaPantalla = clave; pan.classList.remove('entra'); void pan.offsetWidth; pan.classList.add('entra'); }
+    if (clave !== ultimaPantalla) {
+      ultimaPantalla = clave; pan.classList.remove('entra'); void pan.offsetWidth; pan.classList.add('entra');
+      clearTimeout(pintar.t); pintar.t = setTimeout(() => pan.classList.remove('entra'), 900);   // la entrada solo al llegar, no en cada repintado
+    } else pan.classList.remove('entra');
     if (ruta.sec === 'ajustes') despuesDePintar();
     pintarInsignia();
   } catch (e) {
@@ -204,6 +212,7 @@ window.addEventListener('hashchange', () => {
 const ACCIONES = Object.assign({}, accPend, accHoy, accHoyExtra, accRec, accAgenda, accAjustes, accDatos, accPapelera, accAreas, accSeg, accFin, accNotas, accAdmin, accHabitos, {
   agregar() { abrirCaptura(); },
   captura() { abrirCaptura(); },
+  'nube-ir'() { $('btnNube').click(); },
   monto(b) { abrirMonto({ libro: b.dataset.libro || 'personal', ingreso: b.dataset.ing === '1' }); },
   buscar() { abrirBuscar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
@@ -283,7 +292,12 @@ if (!yaHabia) {
 document.getElementById('portada')?.remove();
 setInterval(() => { pintarCab(); }, 15000);
 /* Cada segundo: el reloj del Pomodoro (sin repintar) */
-setInterval(() => { if (ticPomo()) pintar(); else actualizarPomo(); }, 1000);
+setInterval(() => {
+  if (ticPomo()) { pintar(); return; }
+  actualizarPomo();
+  const lp = document.getElementById('latPomo');
+  if (lp) { lp.hidden = !pomoCorre() || ruta.sec === 'hoy'; lp.querySelector('span').textContent = mmss(pomoResta()); }
+}, 1000);
 /* Cada 30 s: ¿toca algún recordatorio? (Hecho desde el aviso lo marca) */
 const alPulsarAviso = (x) => { marcar(x.id); pintar(); };
 setInterval(() => { if (revisarAvisos(alPulsarAviso).length) pintar(); }, 30000);
@@ -294,7 +308,12 @@ cuandoSeGuarde(() => pintar());
 
 /* A medianoche (hora de Lima) cambia el día: todo se repinta */
 let dia = hoy();
-setInterval(() => { if (hoy() !== dia) { dia = hoy(); pintar(); } }, 60000);
+/* Hoy se mueve solo: cada minuto se repinta (lo de «Ahora», cuánto falta), si no estás escribiendo */
+setInterval(() => {
+  if (hoy() !== dia) { dia = hoy(); pintar(); return; }
+  const escribiendo = /INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '');
+  if (ruta.sec === 'hoy' && !document.hidden && !escribiendo && !document.body.classList.contains('con-hoja')) pintar();
+}, 60000);
 
 /* Primera vez: el recorrido de bienvenida */
 function arrancarRecorrido() { if (!preferencias().tourVisto) setTimeout(iniciarRecorrido, 400); }
