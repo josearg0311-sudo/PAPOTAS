@@ -19,7 +19,6 @@ import { tic as ticPomo } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
 import { marcar, delDia as pendientesDeHoy, crearDesdeTexto } from './datos/pendientes.js';
 import { aPapelera } from './datos/datos.js';
-import { delDia as delDiaCal } from './datos/calendario.js';
 import { editarEvento } from './piezas/eventos-ui.js';
 import { vistaAgenda, vistaHorario, irADia, alElegirIcs, acciones as accAgenda } from './vistas/agenda.js';
 import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
@@ -43,9 +42,10 @@ import { cargar, empezarVacio } from './datos/datos.js';
 import { resumenAntiguo } from './datos/almacen.js';
 import { mostrarMigracion } from './piezas/migracion-ui.js';
 
-/* ---------- Secciones (como la v4.5) ----------
-   Celular: Hoy · Agenda · Dinero · Notas · Más. Laptop: barra lateral con
-   Hoy, Espacios (las 4 áreas), Organizar y tu perfil abajo. */
+/* ---------- Secciones ----------
+   Celular: Hoy · Recordatorios · Agenda · Cuentas · Más (barra flotante).
+   Laptop: «archivador», pestañas de carpeta arriba con lo esencial, tus
+   espacios (su emoji) y Más; tu perfil arriba a la derecha. */
 /* Lo que más usas va primero: recordatorios, listas para marcar, agenda,
    horario y las cuentas (personal y oficina). */
 const PRINCIPALES = [
@@ -56,7 +56,6 @@ const PRINCIPALES = [
   ['mas', 'Más', 'i-mas']
 ];
 const ESENCIAL = [['recordatorios', 'Recordatorios', 'i-tareas'], ['listas', 'Listas para marcar', 'i-listas'], ['agenda', 'Agenda', 'i-cal'], ['horario', 'Horario', 'i-reloj'], ['finanzas', 'Cuentas', 'i-grafica']];
-const ORGANIZAR = [['notas', 'Notas', 'i-notas'], ['habitos', 'Hábitos', 'i-habitos'], ['seguimiento', 'Seguimiento', 'i-diana']];
 const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', recordatorios: 'Recordatorios', listas: 'Listas para marcar', agenda: 'Agenda', horario: 'Horario', areas: 'Espacios', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Cuentas', notas: 'Notas', papelera: 'Papelera', habitos: 'Hábitos' };
 const SUBTITULOS = { recordatorios: 'Lo que tienes que hacer, por día', listas: 'Compras, maleta, mochila… marca lo que ya tienes', agenda: 'Tu tiempo: día, semana y mes', horario: 'Tu semana hora por hora: clases, trabajo y lo que se repite', finanzas: 'Personal y oficina, cada una por su lado', notas: 'Tus apuntes, cada uno en su espacio', habitos: 'Lo que haces seguido, espacio por espacio', seguimiento: 'Cómo vas en cada espacio', ajustes: 'Tu agenda, tu nube y tus datos', papelera: 'Lo que borraste, por 30 días', datos: 'Todo lo que tienes guardado', mas: 'Todo lo demás', areas: 'Tus cuatro espacios' };
 
@@ -94,9 +93,6 @@ function pintarNube() {
 window.addEventListener('agenda:nube', pintarNube);
 
 /* ---------- Pintar ---------- */
-const NAV = 'agenda5_nav';
-/* Espacios empieza plegado en modo simple (lo esencial va arriba) */
-function plegado(g) { try { const m = JSON.parse(localStorage.getItem(NAV) || '{}') || {}; return g in m ? !!m[g] : (g === 'espacios' && !preferencias().completo); } catch (e) { return false; } }
 function cuentaHtml(n, alerta) { return n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : ''; }
 function pintarNav() {
   const p = padre(ruta.sec), h = hoy();
@@ -105,23 +101,22 @@ function pintarNav() {
   const pend = documento() ? pendientesDeHoy() : [];
   const porArea = (a) => pend.filter((x) => x.area === a).length;
   const atras = pend.filter((x) => x.fechas.inicio < h).length;
-  const enAgenda = documento() ? (() => { const d = delDiaCal(h); return d.bloques.length + d.todoDia.length; })() : 0;
   const d = documento(), nombre = d && d.perfil && d.perfil.nombre ? String(d.perfil.nombre).trim() : '';
   const actual = (sec, param) => (ruta.sec === sec && (param === undefined || ruta.param === param) ? ' aria-current="page"' : '');
-  const grupo = (g, txt) => '<button type="button" class="grupo" data-grupo="' + g + '" aria-expanded="' + !plegado(g) + '">' + txt + ico('i-der') + '</button>';
+  /* Laptop: «archivador», pestañas de carpeta arriba (nada de barra lateral) */
+  const pest = (href, ir, txt, icono, extra, clase) => '<a href="#' + href + '" class="pest' + (clase ? ' ' + clase : '') + '"' + (ir ? ' data-ir="' + ir + '"' : '') + extra + '>' + icono + '<span>' + txt + '</span>';
   $('lateral').innerHTML =
     '<a class="marca" href="#hoy"><i class="logo" aria-hidden="true"></i><div><b>Agenda</b><small>' + (nombre ? 'de ' + esc(nombre.split(/\s+/)[0]) : 'Mi organización') + '</small></div></a>' +
-    '<nav class="nav-lat">' +
-    '<a href="#hoy" data-ir="hoy"' + actual('hoy') + '>' + ico('i-hoy') + 'Hoy</a>' +
-    ESENCIAL.map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' +
-      (x[0] === 'agenda' ? cuentaHtml(enAgenda) : x[0] === 'recordatorios' ? cuentaHtml(pend.length, atras > 0) : '') + '</a>').join('') +
-    grupo('espacios', 'Espacios') + '<div class="nav-grupo"' + (plegado('espacios') ? ' hidden' : '') + '>' +
-    AREAS.map((a) => '<a href="#areas/' + a.id + '" class="nav-esp area-' + a.id + '"' + actual('areas', a.id) + '>' + ico(a.icono) + '<span>' + esc(a.nombre) + '</span>' + cuentaHtml(porArea(a.id)) + '</a>').join('') + '</div>' +
-    grupo('organizar', 'Más') + '<div class="nav-grupo"' + (plegado('organizar') ? ' hidden' : '') + '>' +
-    ORGANIZAR.filter((x) => preferencias().completo || x[0] !== 'seguimiento').map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span></a>').join('') + '</div>' +
+    '<nav class="archivador" aria-label="Secciones">' +
+    pest('hoy', 'hoy', 'Hoy', ico('i-hoy'), actual('hoy')) + '</a>' +
+    ESENCIAL.map((x) => pest(x[0], x[0], x[0] === 'listas' ? 'Listas' : x[1], ico(x[2]), actual(x[0])) +
+      (x[0] === 'recordatorios' ? cuentaHtml(pend.length, atras > 0) : '') + '</a>').join('') +
+    /* Tus espacios: solo con «Mostrar todo»; solo su emoji (el nombre se ve en el que está abierto) */
+    (preferencias().completo ? '<span class="pest-sep" aria-hidden="true"></span>' + AREAS.map((a) => pest('areas/' + a.id, '', esc(a.nombre), '<i class="pest-emoji" aria-hidden="true">' + esc(a.emoji || '') + '</i>', actual('areas', a.id) + ' title="' + esc(a.nombre) + '" aria-label="' + esc(a.nombre) + (porArea(a.id) ? ', ' + porArea(a.id) + ' para hoy' : '') + '"', 'pest-esp area-' + a.id) + '</a>').join('') : '') +
+    '<span class="pest-sep" aria-hidden="true"></span>' +
+    pest('mas', 'mas', 'Más', ico('i-mas'), padre(ruta.sec) === 'mas' && !(ruta.sec === 'areas' && ruta.param) ? ' aria-current="page"' : '', 'pest-chica') + '</a>' +
     '</nav>' +
-    '<div class="pie"><a class="perfil" href="#ajustes"' + actual('ajustes') + '><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span>' +
-    '<span class="perfil-txt"><b>' + (nombre ? esc(nombre.split(/\s+/)[0]) : 'Tu agenda') + '</b><small>Ajustes y respaldo</small></span>' + ico('i-ajustes') + '</a></div>';
+    '<a class="perfil" href="#ajustes"' + actual('ajustes') + ' aria-label="Ajustes y respaldo" title="Ajustes y respaldo"><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span></a>';
 }
 
 function pintarCab() {
@@ -272,14 +267,6 @@ aplicarGuia();
 alCambiarPref(() => { aplicarGuia(); });
 $('btnAtras').addEventListener('click', () => history.back());
 $('btnAdelante').addEventListener('click', () => history.forward());
-/* Plegar y desplegar Espacios / Organizar en la barra lateral (se recuerda) */
-document.addEventListener('click', (ev) => {
-  const g = ev.target.closest && ev.target.closest('[data-grupo]'); if (!g) return;
-  let m = {}; try { m = JSON.parse(localStorage.getItem(NAV) || '{}') || {}; } catch (e) { /* nada */ }
-  m[g.dataset.grupo] = !m[g.dataset.grupo];
-  try { localStorage.setItem(NAV, JSON.stringify(m)); } catch (e) { /* nada */ }
-  pintarNav();
-});
 $('btnTema').addEventListener('click', () => {
   const ahora = document.documentElement.getAttribute('data-tema');
   import('./datos/preferencias.js').then((m) => { m.cambiarPref({ tema: ahora === 'claro' ? 'oscuro' : 'claro' }); if (ruta.sec === 'ajustes') pintar(); });

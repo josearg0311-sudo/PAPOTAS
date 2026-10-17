@@ -8,12 +8,12 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Cara nueva, propia', '📒', 'Logo nuevo y cara de libreta: tinta verde (o papel crema en claro), títulos con serifa y un marcatextos amarillo para lo de hoy.', '#hoy'],
+  ['Cara nueva, propia', '📒', 'Logo nuevo y cara de libreta, oscura como te gusta: pestañas de carpeta en la laptop, marcatextos amarillo y Hoy que se mueve contigo.', '#hoy'],
   ['Recordatorios', '✅', 'Abajo, a un toque. Desliza una fila para moverla o terminarla.', '#recordatorios'],
   ['Listas para marcar', '☑️', 'Compras, maleta, mochila… cada lista con su avance y lo que falta.', '#listas'],
   ['Agenda y Horario', '📅', 'Tu día, semana y mes; y el Horario con tus clases y eventos de la semana por hora.', '#horario'],
-  ['Cuentas', '💰', 'Personal y Oficina separadas, con lo gastado y lo que ingresó; también en Hoy.', '#cuentas'],
-  ['Añadir rápido en Hoy', '⚡', 'Escribe «llamar a Ana mañana 10am» y queda con fecha y hora.', '#hoy']
+  ['Cuentas', '💰', 'Personal y Oficina separadas, con lo gastado y lo que ingresó; también en Hoy.', '#finanzas'],
+  ['Más simple', '✨', 'Sin espacios ni pasos de más: el + solo pregunta qué es (y en un gasto, si es personal u oficina). Los espacios siguen en Ajustes → «Mostrar todo».', 'agregar']
 ];
 
 export function abrirNovedades() {

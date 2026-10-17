@@ -8,7 +8,7 @@ import { documento, elementos, buscarElemento, poner, cambiarPerfil } from '../d
 import { modeloVacio } from '../datos/modelo.js';
 import { tocaRespaldar, diasSinRespaldo } from '../datos/respaldo.js';
 import { urgentes, delDia, hechosHoy, ordenar, grupo, marcar, pendientesVisibles } from '../datos/pendientes.js';
-import { bloquesDelDia, todoElDia, minutosPorArea } from '../datos/calendario.js';
+import { bloquesDelDia, todoElDia, minutosPorArea, proximoBloque } from '../datos/calendario.js';
 import { AREAS, area } from '../datos/areas.js';
 import { filaPendiente } from '../piezas/pendientes-ui.js';
 import { estadoPomo, restante, totalMs, mmss, corriendo, alternar, reiniciar, vincular, minutosHoy, MODOS, modoRapido } from '../piezas/pomodoro.js';
@@ -19,7 +19,7 @@ import { feriado } from '../datos/feriados.js';
 import { avisoDeporte } from './area-deporte.js';
 import { habitosDeHoy } from './area-constancia.js';
 import { marcasHabito, rachaHabito } from '../datos/seguimiento.js';
-import { tarjetaQueHacer, tarjetaSiguiente, tarjetaManana, tarjetaNumeros } from './hoy-extra.js';
+import { tarjetaQueHacer, tarjetaManana, tarjetaNumeros } from './hoy-extra.js';
 import { tarjetaEspacios } from './espacios.js';
 import { listas, esChecklist, pendientesDe } from '../datos/pendientes.js';
 import { esDelLibro, esIngreso, resumenMes } from '../datos/finanzas.js';
@@ -126,6 +126,17 @@ function tarjetaCuentas() {
    lo pendiente y tus horas. Lo demás vuelve con «Mostrar todo» en Ajustes. */
 const simple = () => !preferencias().completo;
 
+/* Lo que viene ahora (en curso o lo siguiente de hoy); si no hay nada, la frase del día */
+function lineaViva(h) {
+  const s = proximoBloque(h, minutosAhora()), f = preferencias().formatoHora;
+  if (s && s.dia === h) {
+    const b = s.b, acc = b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver';
+    const cuando = s.enCurso ? 'hasta las ' + fmtHora(b.hFin, f) : s.faltan < 60 ? 'en ' + s.faltan + ' min' : 'a las ' + fmtHora(b.hIni, f);
+    return '<button type="button" class="hc-viva area-' + area(b.area).id + (s.enCurso ? ' en-curso' : '') + '" data-acc="' + acc + '" data-id="' + esc(b.id) + '"><i aria-hidden="true"></i><span>' + (s.enCurso ? 'Ahora' : 'Lo siguiente') + ': <b>' + esc(b.titulo) + '</b> · ' + esc(cuando) + '</span></button>';
+  }
+  return '<p class="hc-frase">' + esc(fraseDelDia(h)) + '</p>';
+}
+
 export function vistaHoy() {
   const p = preferencias(), h = hoy(), n = nombre(), doc = documento(), rs = diasSinRespaldo();
   const delDiaL = delDia(h).sort(ordenar), hechos = hechosHoy(h), urg = urgentes(h);
@@ -140,13 +151,16 @@ export function vistaHoy() {
 
   const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
   return '<div class="hoy">' +
-    '<header class="hoy-cab"><div class="hc-fecha" aria-hidden="true"><b>' + (+h.slice(8, 10)) + '</b><span>' + fmtLarga(h).split(' ')[0] + '<br>' + MESES[+h.slice(5, 7) - 1] + ' ' + h.slice(0, 4) + '</span></div><div class="hc-txt"><small class="solo-lector">' + cap(fmtLarga(h)) + '</small><h1 class="ph-saludo">' + saludo() + (n ? ', ' + esc(n) : '') + '</h1><p class="hc-frase">' + esc(fraseDelDia(h)) + '</p></div>' +
-      '<div class="anillo-hoy" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><svg viewBox="0 0 74 74" aria-hidden="true"><circle class="fondo" cx="37" cy="37" r="32"/><circle class="valor" cx="37" cy="37" r="32" stroke-dasharray="' + (2 * Math.PI * 32).toFixed(1) + '" stroke-dashoffset="' + (2 * Math.PI * 32 * (1 - pct)).toFixed(1) + '"/></svg><span><b>' + hechos.length + '/' + tot + '</b>hechas</span></div></header>' +
+    /* Portada viva: el día como página de agenda, el avance como un trazo de marcatextos
+       que se llena, y debajo lo que viene ahora (o la frase del día si no hay nada) */
+    '<header class="hoy-cab"><div class="hc-fecha" aria-hidden="true"><b>' + (+h.slice(8, 10)) + '</b></div><div class="hc-txt"><small>' + cap(fmtLarga(h).split(' ')[0]) + ' · ' + MESES[+h.slice(5, 7) - 1] + '</small><h1 class="ph-saludo">' + saludo() + (n ? ', ' + esc(n) : '') + '</h1></div></header>' +
+    (tot ? '<div class="hc-avance" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><i style="--p:' + Math.round(pct * 100) + '%"></i><span><b>' + hechos.length + '/' + tot + '</b> ' + (hechos.length === tot ? '¡todo hecho! 🎉' : 'hechas hoy') + '</span></div>' : '') +
+    lineaViva(h) +
     franjaSemana() +
     (fer || tde.length ? '<p class="hoy-extra">' + (fer ? '<span class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></span>' : '') + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') +
-    (n ? '' : '<section class="pide-nombre"><b>¿Cómo te llamas?</b><span>Para saludarte por tu nombre cada día.</span><form class="pn-form"><label class="solo-lector" for="pnNombre">Tu nombre</label><input id="pnNombre" class="entrada" maxlength="40" autocomplete="given-name" placeholder="Tu nombre, ej. José"><button type="button" class="btn pri" data-acc="nombre-listo">Listo</button></form></section>') +
+    (n ? '' : '<section class="pide-nombre"><b>¿Cómo te llamas?</b><form class="pn-form"><label class="solo-lector" for="pnNombre">Tu nombre</label><input id="pnNombre" class="entrada" maxlength="40" autocomplete="given-name" placeholder="Tu nombre, ej. José"><button type="button" class="btn pri" data-acc="nombre-listo">Listo</button></form></section>') +
     (simple() ? '' : tarjetaEspacios()) +
-    (simple() ? '' : tarjetaQueHacer() + tarjetaSiguiente()) +
+    (simple() ? '' : tarjetaQueHacer())   /* «Lo siguiente» ya va en la portada */ +
     (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
     (!simple() && avisoDeporte() ? '<a class="nota-fase aviso-carga" href="#areas/deporte/entrenos">' + ico('i-fuego') + '<span><b>Deporte:</b> ' + esc(avisoDeporte()) + '. Un entreno corto también cuenta: toca para anotarlo.</span></a>' : '') +
     (!simple() && carga > SOBRECARGA ? '<div class="nota-fase aviso-carga">' + ico('i-info') + '<span><b>Día sobrecargado:</b> tienes ' + hh(mins.total) + ' planificadas de ' + hh(vig) + ' despierto (' + Math.round(carga * 100) + ' %). Considera mover algo a mañana.</span></div>' : '') +

@@ -19,7 +19,7 @@ export const SECCIONES_MAS = [
 import { preferencias } from '../datos/preferencias.js';
 
 /* En modo simple: solo lo de todos los días */
-const SIMPLE = ['listas', 'horario', 'notas', 'areas', 'habitos', 'ajustes'];
+const SIMPLE = ['listas', 'horario', 'notas', 'habitos', 'ajustes'];   /* los espacios solo con «Mostrar todo» */
 export function vistaMas() {
   return '<div class="mas">' + SECCIONES_MAS.filter((s) => preferencias().completo || SIMPLE.includes(s[0])).map((s) =>
       '<a class="mas-btn" href="#' + s[0] + '"><span class="ic">' + ico(s[2]) + '</span><b>' + s[1] + '</b><small>' + s[3] + '</small>' +

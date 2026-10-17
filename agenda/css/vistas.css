@@ -914,7 +914,53 @@ body { background-image: radial-gradient(circle at 1px 1px, var(--rejilla) 1.2px
 .barra a[aria-current="page"] { color: var(--tinta); font-weight: 700; background: var(--acento-suave); }
 .barra a[aria-current="page"] .i { background: var(--acento); color: var(--sobre-acento); }
 .fab { border-radius: 20px 20px 20px 6px; box-shadow: 0 10px 24px -6px rgba(0, 0, 0, .45); }
+
+/* Laptop: espacios en pestañas de solo emoji; Hoy como libreta abierta (dos páginas) */
 @media (min-width: 980px) {
-  .lateral { background: var(--superficie); }
-  .nav-lat a[aria-current="page"] { background: var(--acento-suave); }
+  .pest-esp:not([aria-current="page"]) { padding: 0 13px; }
+  .pest-esp:not([aria-current="page"]) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (min-width: 1180px) {
+  .hoy { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; align-items: start; }
+  .hoy > :not(.tarjeta) { grid-column: 1 / -1; }
+  .hoy .franja, .hoy .hc-avance, .hoy .hc-viva { max-width: 760px; }
+}
+
+/* ---------- Hoy vivo (5.5): sin repetir, con movimiento ---------- */
+.hoy-cab { display: flex; align-items: flex-end; gap: 14px; padding: 4px 0 0; }
+.hc-fecha b { font-size: clamp(64px, 18vw, 92px); line-height: .8; font-weight: 500; }
+.hoy-cab .hc-txt { border-top: 0; padding: 0 0 4px; }
+.hc-txt small { display: block; font-size: 12.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--tinta-2); }
+.hc-txt .ph-saludo { margin-top: 2px; font-size: clamp(26px, 7vw, 34px); line-height: 1.25; }
+/* Avance: un trazo de marcatextos que se llena solo */
+.hc-avance { display: flex; align-items: center; gap: 12px; }
+.hc-avance i { position: relative; flex: 1; height: 10px; border-radius: 99px; background: var(--superficie-3); overflow: hidden; }
+.hc-avance i::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--p); border-radius: 99px; background: var(--acento); animation: llenar .9s cubic-bezier(.2, .8, .2, 1) both; }
+.hc-avance span { flex: none; font-size: 13px; color: var(--tinta-2); }
+.hc-avance b { font-size: 15px; color: var(--tinta); }
+@keyframes llenar { from { width: 0; } }
+/* Lo que viene ahora: una línea viva con su color */
+.hc-viva { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 8px 14px; border: 1px dashed color-mix(in srgb, var(--a) 55%, var(--borde)); border-radius: 16px 16px 16px 4px; background: color-mix(in srgb, var(--as) 70%, transparent); color: var(--tinta); font: inherit; font-size: 14px; text-align: left; cursor: pointer; }
+.hc-viva i { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--a); }
+.hc-viva.en-curso i { animation: latido 1.6s ease-in-out infinite; }
+.hc-viva b { font-weight: 700; }
+@keyframes latido { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--a) 60%, transparent); } 50% { box-shadow: 0 0 0 7px transparent; } }
+.hc-frase { margin: 0; font-style: italic; color: var(--tinta-2); }
+/* Pedir el nombre: una sola línea, sin tarjeta grande */
+.pide-nombre { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 8px 8px 16px; border-radius: 18px 18px 18px 4px; background: var(--acento-suave); border: 0; }
+.pide-nombre b { font-family: var(--f-titulo); font-size: 18px; font-weight: 600; }
+.pide-nombre .pn-form { flex: 1 1 260px; margin: 0; }
+/* Los títulos grandes se subrayan solos al entrar */
+.pag-cab h1, .ph-saludo, .pe-nom, .herr-cab h1 { background-size: 100% 100%; background-repeat: no-repeat; animation: subrayar .7s .15s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes subrayar { from { background-size: 0% 100%; } }
+/* Las hojas de Hoy entran una tras otra */
+.hoy > * { animation: aparecer .45s cubic-bezier(.2, .8, .2, 1) both; }
+.hoy > :nth-child(2) { animation-delay: .04s; } .hoy > :nth-child(3) { animation-delay: .08s; } .hoy > :nth-child(4) { animation-delay: .12s; }
+.hoy > :nth-child(5) { animation-delay: .16s; } .hoy > :nth-child(6) { animation-delay: .2s; } .hoy > :nth-child(n+7) { animation-delay: .24s; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(10px); } }
+/* Pestañas que se levantan al pasar */
+@media (min-width: 980px) {
+  .pest { transition: transform .15s, background .15s; }
+  .pest:hover:not([aria-current="page"]) { transform: translateY(-3px); }
+  .pe-cambia { display: none; }   /* ya están las pestañas de tus espacios arriba */
 }
