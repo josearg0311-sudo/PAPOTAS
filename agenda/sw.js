@@ -22,7 +22,7 @@ const ARCHIVOS = [
   './js/vistas/comun.js', './js/vistas/hoy.js', './js/vistas/recordatorios.js', './js/vistas/agenda.js', './js/vistas/areas.js', './js/vistas/mas.js', './js/vistas/ajustes.js', './js/vistas/datos.js', './js/vistas/papelera.js',
   './js/vistas/area-comun.js', './js/vistas/area-personal.js', './js/vistas/area-estudios.js', './js/vistas/area-oficina.js', './js/vistas/area-deporte.js', './js/vistas/area-constancia.js', './js/vistas/seguimiento.js', './js/vistas/finanzas.js', './js/vistas/notas.js', './js/datos/finanzas.js', './js/datos/nube.js', './js/vistas/admin.js', './js/datos/corrector.js', './js/piezas/teclado.js', './diccionario/palabras-es.txt', './js/datos/seguimiento.js', './js/datos/herramientas.js', './js/piezas/formulario.js',
   './js/datos/buscador.js', './js/piezas/buscar.js', './js/vistas/hoy-extra.js', './js/piezas/compartir.js', './js/piezas/descanso.js', './js/piezas/dictado.js', './js/piezas/novedades.js', './js/vistas/espacios.js', './js/vistas/espacio-comun.js', './js/vistas/habitos.js',
-  './fuentes/instrument-sans.woff2', './fuentes/plus-jakarta.woff2', './fuentes/fraunces.woff2', './fuentes/martian-mono.woff2',
+  './fuentes/geist.woff2', './fuentes/bricolage.woff2', './fuentes/plus-jakarta.woff2', './fuentes/martian-mono.woff2',
   './iconos/icono.svg', './iconos/icon-192.png', './iconos/icon-512.png', './iconos/icon-maskable-192.png', './iconos/icon-maskable-512.png', './iconos/apple-touch-icon.png'
 ];
 

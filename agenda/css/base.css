@@ -74,55 +74,56 @@ button:disabled { cursor: not-allowed; opacity: .55; }
 }
 .fab .i { width: 26px; height: 26px; stroke-width: 2.4; }
 
-/* ---------- Laptop: «archivador» (5.5) ----------
-   Nada de barra lateral: arriba la marca y la cabecera, y debajo las
-   pestañas de carpeta (lo esencial, tus espacios con su color y lo demás).
-   La pestaña donde estás se pinta con el marcatextos. */
+/* ---------- Laptop: una sola fila (5.5) ----------
+   Nada de barra lateral: a la izquierda la marca, al centro la navegación
+   en una pastilla de vidrio, a la derecha buscar y tu perfil. */
 @media (min-width: 980px) {
   .app { display: grid; grid-template-columns: minmax(0, 1fr); }
   .cuerpo { display: contents; }
   .lateral {
     grid-row: 1; grid-column: 1; position: sticky; top: 0; z-index: 15;
-    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "marca . perfil" "tabs tabs tabs";
-    align-items: center; column-gap: 16px; padding: 10px max(32px, calc((100vw - 1240px) / 2)) 0;
-    background: color-mix(in srgb, var(--fondo) 92%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--borde);
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "marca tabs perfil";
+    align-items: center; column-gap: 16px; min-height: 76px; padding: 0 max(28px, calc((100vw - 1280px) / 2));
+    background: color-mix(in srgb, var(--fondo) 70%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.4); backdrop-filter: blur(18px) saturate(1.4);
   }
-  .lateral .marca { grid-area: marca; display: flex; align-items: center; gap: 10px; min-height: 52px; }
-  .lateral .marca .logo { width: 40px; height: 40px; border-radius: 12px; }
-  .lateral .marca b { display: block; font-size: 22px; line-height: 1.1; }
+  .lateral .marca { grid-area: marca; display: flex; align-items: center; gap: 10px; min-height: 48px; }
+  .lateral .marca .logo { width: 38px; height: 38px; border-radius: 12px; }
+  .lateral .marca b { display: block; font-size: 21px; line-height: 1.05; }
   .lateral .marca small { display: block; font-size: 12px; color: var(--tinta-3); }
-  .perfil { grid-area: perfil; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; }
-  .avatar { width: 36px; height: 36px; border-radius: 12px 12px 12px 4px; display: grid; place-items: center; font-weight: 800; font-size: 15px; color: var(--sobre-acento); background: var(--acento); }
+  .perfil { grid-area: perfil; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 15px; color: var(--sobre-acento); background: var(--acento); box-shadow: 0 4px 16px -4px var(--resplandor); }
   .perfil[aria-current="page"] .avatar { box-shadow: 0 0 0 3px var(--fondo), 0 0 0 5px var(--acento); }
-  .archivador { grid-area: tabs; display: flex; align-items: flex-end; gap: 4px; margin-top: 6px; overflow-x: auto; scrollbar-width: none; }
+  .archivador {
+    grid-area: tabs; justify-self: center; display: flex; align-items: center; gap: 2px; max-width: 100%; margin-right: 56px; padding: 4px;
+    overflow-x: auto; scrollbar-width: none; border: 1px solid var(--borde); border-radius: 99px;
+    background: color-mix(in srgb, var(--superficie) 85%, transparent); box-shadow: var(--sombra);
+  }
   .archivador::-webkit-scrollbar { display: none; }
   .pest {
-    position: relative; display: inline-flex; align-items: center; gap: 8px; flex: none; min-height: 44px; padding: 0 16px; margin-bottom: -1px;
-    border: 1px solid var(--borde); border-bottom-color: transparent; border-radius: 14px 14px 0 0;
-    background: var(--superficie); color: var(--tinta-2); font-size: 14px; font-weight: 650; white-space: nowrap;
+    position: relative; display: inline-flex; align-items: center; gap: 7px; flex: none; min-height: 44px; padding: 0 15px; border-radius: 99px;
+    color: var(--tinta-2); font-size: 14px; font-weight: 550; white-space: nowrap; transition: background .15s, color .15s;
   }
   .pest .i { width: 17px; height: 17px; }
   .pest:hover { color: var(--tinta); background: var(--superficie-2); }
-  .pest[aria-current="page"] { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); font-weight: 750; }
-  .pest-esp { box-shadow: inset 0 3px 0 var(--a); }
-  .pest-esp[aria-current="page"] { background: var(--as); border-color: var(--a); color: var(--tinta); box-shadow: inset 0 3px 0 var(--a); }
+  .pest[aria-current="page"] { background: var(--acento); color: var(--sobre-acento); font-weight: 650; box-shadow: 0 4px 18px -6px var(--resplandor); }
+  .pest-esp[aria-current="page"] { background: var(--as); color: var(--tinta); box-shadow: inset 0 0 0 1px var(--a); }
   .pest-emoji { font-style: normal; font-size: 16px; line-height: 1; }
-  .pest-chica { padding: 0 12px; font-size: 13px; }
-  .pest-sep { flex: none; width: 10px; }
-  .pest .cuenta { min-width: 22px; height: 20px; padding: 0 6px; display: grid; place-items: center; border-radius: 99px; background: var(--superficie-3); font-size: 11px; font-weight: 750; color: var(--tinta); }
-  .pest[aria-current="page"] .cuenta { background: color-mix(in srgb, var(--sobre-acento) 18%, transparent); color: var(--sobre-acento); }
+  .pest-chica { padding: 0 13px; }
+  .pest-sep { flex: none; width: 1px; height: 22px; margin: 0 4px; background: var(--borde); }
+  .pest .cuenta { min-width: 20px; height: 20px; padding: 0 6px; display: grid; place-items: center; border-radius: 99px; background: var(--superficie-3); font-size: 11px; font-weight: 700; color: var(--tinta); }
+  .pest[aria-current="page"] .cuenta { background: color-mix(in srgb, var(--sobre-acento) 15%, transparent); color: var(--sobre-acento); }
   .pest .cuenta.alerta { background: var(--rojo-suave); color: var(--rojo); }
   .cab {
-    grid-row: 1; grid-column: 1; align-self: start; justify-self: end; position: sticky; top: 0; z-index: 16;
-    min-height: 62px; margin: 0 calc(max(32px, (100vw - 1240px) / 2) + 56px) 0 0; padding: 10px 0 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+    grid-row: 1; grid-column: 1; align-self: center; justify-self: end; position: sticky; top: 16px; z-index: 16;
+    min-height: 44px; margin: 0 calc(max(28px, (100vw - 1280px) / 2) + 56px) 0 0; padding: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none;
   }
   .cab .cab-esp { display: none; }
-  .pantalla { grid-row: 2; grid-column: 1; width: 100%; max-width: 1240px; margin: 0 auto; padding: 28px 32px 80px; }
+  .pantalla { grid-row: 2; grid-column: 1; width: 100%; max-width: 1240px; margin: 0 auto; padding: 22px 32px 80px; }
   .barra, .solo-movil { display: none !important; }
   .solo-escritorio { display: flex !important; }
   .fab { right: 28px; bottom: 28px; }
 }
+@media (min-width: 980px) and (max-width: 1239px) { .pest .i { display: none; } .lateral .marca small { display: none; } }
 
 /* ---------- Pantalla de entrada ---------- */
 .portada { position: fixed; inset: 0; z-index: 90; background: var(--fondo); display: grid; place-items: center; }
