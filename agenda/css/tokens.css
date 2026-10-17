@@ -32,11 +32,11 @@
   --sombra: 0 1px 0 rgba(255,255,255,.04) inset, 0 16px 40px -24px rgba(0,0,0,.9);
   --sombra-alta: 0 24px 60px -16px rgba(0,0,0,.85);
 
-  /* Espacios */
-  --a-personal: #6CB2FF; --a-personal-s: #121D2E; --a-personal-t: #B3D7FF;
-  --a-estudios: #3ED9C4; --a-estudios-s: #0E2524; --a-estudios-t: #95EEE2;
-  --a-oficina: #B4BCC6;  --a-oficina-s: #1C2027;  --a-oficina-t: #D6DCE3;
-  --a-deporte: #5BE38E;  --a-deporte-s: #0F2619;  --a-deporte-t: #A5F2C0;
+  /* Espacios: colores que combinan con el lima (violeta, celeste, gris claro, naranja) */
+  --a-personal: #B49CFF; --a-personal-s: #1D1833; --a-personal-t: #D9CCFF;
+  --a-estudios: #7DD3FC; --a-estudios-s: #0F2230; --a-estudios-t: #C4EBFF;
+  --a-oficina: #C4C9D1;  --a-oficina-s: #1E2228;  --a-oficina-t: #E3E6EA;
+  --a-deporte: #FDBA74;  --a-deporte-s: #2A1D10;  --a-deporte-t: #FFDDB8;
   color-scheme: dark;
 }
 
@@ -51,10 +51,10 @@
   --velo: rgba(10,13,16,.45);
   --sombra: 0 1px 2px rgba(0,0,0,.04), 0 12px 28px -20px rgba(0,0,0,.3);
   --sombra-alta: 0 18px 50px -16px rgba(0,0,0,.3);
-  --a-personal: #1F63D6; --a-personal-s: #E2ECFC; --a-personal-t: #144BA8;
-  --a-estudios: #0E8475; --a-estudios-s: #DCF2EE; --a-estudios-t: #0A625A;
-  --a-oficina: #545E6E;  --a-oficina-s: #E9EAEC;  --a-oficina-t: #39414E;
-  --a-deporte: #1C8048; --a-deporte-s: #E0F2E6;  --a-deporte-t: #146637;
+  --a-personal: #6D28D9; --a-personal-s: #EFE9FF; --a-personal-t: #5B21B6;
+  --a-estudios: #0369A1; --a-estudios-s: #E0F2FE; --a-estudios-t: #075985;
+  --a-oficina: #4B5563;  --a-oficina-s: #EEF0F2;  --a-oficina-t: #374151;
+  --a-deporte: #C2410C;  --a-deporte-s: #FFEDD5;  --a-deporte-t: #9A3412;
   color-scheme: light;
 }
 

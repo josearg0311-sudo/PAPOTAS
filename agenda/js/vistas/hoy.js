@@ -164,6 +164,8 @@ export function vistaHoy() {
     (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
     (!simple() && avisoDeporte() ? '<a class="nota-fase aviso-carga" href="#areas/deporte/entrenos">' + ico('i-fuego') + '<span><b>Deporte:</b> ' + esc(avisoDeporte()) + '. Un entreno corto también cuenta: toca para anotarlo.</span></a>' : '') +
     (!simple() && carga > SOBRECARGA ? '<div class="nota-fase aviso-carga">' + ico('i-info') + '<span><b>Día sobrecargado:</b> tienes ' + hh(mins.total) + ' planificadas de ' + hh(vig) + ' despierto (' + Math.round(carga * 100) + ' %). Considera mover algo a mañana.</span></div>' : '') +
+    /* Dos columnas en la laptop: lo que hay que hacer a la izquierda; tu día, listas y cuentas a la derecha */
+    '<div class="hoy-col">' +
     (simple() || !urg.length ? '' : tarjeta({ eti: 'URGENTE', clase: 'w-rojo', titulo: 'Urgente', n: urg.length, guia: '<b>Lo que no puede esperar.</b> Primero el <b>plazo legal</b>, luego lo vencido 🔴 y lo que vence en 3 días o menos ⚠️.',
       cuerpo: urg.length ? '<div class="pends">' + urg.slice(0, 6).map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' + (urg.length > 6 ? '<p class="pie-ajuste">Y ' + (urg.length - 6) + ' más en Recordatorios.</p>' : '') : vacio('Nada urgente', 'Cuando algo venza pronto o tenga plazo legal, aparecerá aquí primero.') })) +
     tarjeta({ eti: 'PENDIENTES', clase: 'w-rojo', titulo: 'Pendientes <a class="ver-link" href="#recordatorios">Ver todo' + ico('i-der') + '</a>', n: pend.length, guia: '<b>Marca lo que ya hiciste</b> con la casilla, o pásalo a <b>Más tarde</b> o a <b>Mañana</b>. También puedes deslizarlo con el dedo.',
@@ -176,6 +178,7 @@ export function vistaHoy() {
         '<label class="solo-lector" for="prio' + i + '">Prioridad ' + (i + 1) + '</label><input id="prio' + i + '" class="entrada" data-prio="' + i + '" maxlength="120" value="' + esc(x.t) + '" placeholder="' + ['Lo más importante de hoy', 'Lo segundo', 'Lo tercero'][i] + '">' +
         '<button type="button" class="casilla" role="checkbox" aria-checked="' + !!x.ok + '" data-acc="prio-ok" data-i="' + i + '" aria-label="Marcar prioridad ' + (i + 1) + '"' + (x.t ? '' : ' disabled') + '><span></span></button></div>').join('') + '</div>' +
         '<div class="pie-tarjeta"><button type="button" class="btn chico" data-acc="prio-elegir">' + ico('i-rec') + 'Elegir de mis recordatorios</button></div>' })) +
+    '</div><div class="hoy-col">' +
     tarjeta({ eti: 'TU DÍA', clase: 'w-morado', titulo: 'Tu día', n: bloques.length, guia: '<b>Tu día como una línea de tiempo.</b> Eventos, clases de tus cursos y recordatorios con hora, con el color de su área. La línea brillante es la hora actual en Lima.',
       cuerpo: lineaDia(bloques) }) +
     tarjetaListas() + tarjetaCuentas() +
@@ -187,7 +190,7 @@ export function vistaHoy() {
         '<div class="barra-area" role="img" aria-label="' + AREAS.map((a) => a.nombre + ' ' + hh(mins[a.id] || 0)).join(', ') + '">' + AREAS.map((a) => mins[a.id] ? '<i class="area-' + a.id + '" style="width:' + Math.min(100, (mins[a.id] / vig) * 100).toFixed(1) + '%"></i>' : '').join('') + '</div>' +
         '<div class="leyenda">' + AREAS.map((a) => '<span class="area-' + a.id + '">' + a.nombre + ' ' + hh(mins[a.id] || 0) + '</span>').join('') + '</div>' +
         '<span class="' + (carga > SOBRECARGA ? 'txt-aviso' : 'txt-ok') + '">' + (carga > SOBRECARGA ? 'Día sobrecargado.' : 'Día equilibrado: te quedan ' + hh(Math.max(0, vig - mins.total)) + ' libres.') + '</span></div>' })) +
-  '</div>';
+  '</div></div>';
 }
 
 /* Cada segundo, solo el reloj del Pomodoro (sin repintar la pantalla) */

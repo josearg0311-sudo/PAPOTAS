@@ -910,11 +910,6 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
   .pest-esp:not([aria-current="page"]) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .pe-cambia { display: none; }   /* ya están las pestañas de tus espacios arriba */
 }
-@media (min-width: 1180px) {
-  .hoy { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; align-items: start; }
-  .hoy > :not(.tarjeta) { grid-column: 1 / -1; }
-  .hoy .franja, .hoy .hc-avance, .hoy .hc-viva { max-width: 760px; }
-}
 
 /* ---------- Hoy vivo: sin repetir, con movimiento ---------- */
 .hoy-cab { display: flex; align-items: flex-end; gap: 16px; padding: 6px 0 0; }
@@ -946,3 +941,39 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 .hoy > :nth-child(2) { animation-delay: .04s; } .hoy > :nth-child(3) { animation-delay: .08s; } .hoy > :nth-child(4) { animation-delay: .12s; }
 .hoy > :nth-child(5) { animation-delay: .16s; } .hoy > :nth-child(6) { animation-delay: .2s; } .hoy > :nth-child(n+7) { animation-delay: .24s; }
 @keyframes aparecer { from { opacity: 0; transform: translateY(12px); } }
+
+/* ---------- Colores en calma (5.5): neutro + lima; rojo solo para lo urgente ----------
+   El usuario: «no me terminan de gustar el contraste de colores». Cada espacio
+   se nota solo en un punto o una raya fina, nunca en fondos de color. */
+.chip { background: var(--superficie-2); color: var(--tinta-2); }
+.chip::before { border-radius: 50%; }
+.casilla span { border-color: var(--tinta-3); }
+.casilla[aria-checked="true"] span { background: var(--acento); border-color: var(--acento); }
+.casilla[aria-checked="true"] span::after { border-color: var(--sobre-acento); }
+.t-cab h2::before { background: var(--acento); box-shadow: 0 0 12px var(--resplandor); }
+.bloque .b, .ev-bloque { background: var(--superficie-2); color: var(--tinta); box-shadow: none; }
+.bloque .b small { color: var(--tinta-2); }
+.ev-bloque small { color: var(--tinta-2); }
+.hc-viva { background: var(--superficie); border-color: var(--borde); }
+.hc-viva i { background: var(--acento); box-shadow: 0 0 10px var(--resplandor); }
+.hc-viva:not(.en-curso) i { background: var(--tinta-2); box-shadow: none; }
+.franja .pts i { background: var(--tinta-3); }
+
+/* ---------- Laptop: sin huecos ----------
+   Arriba en dos columnas: el día, el avance y lo que viene a la izquierda; la
+   semana en un panel a la derecha. Debajo, las tarjetas en dos columnas. */
+@media (min-width: 1180px) {
+  .hoy { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; align-items: start; }
+  .hoy > * { grid-column: 1 / -1; }
+  .hoy > .hoy-col { grid-column: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; }
+  .hoy > .hoy-cab { grid-column: 1; grid-row: 1; }
+  .hoy > .hc-avance { grid-column: 1; grid-row: 2; }
+  .hoy > .hc-viva, .hoy > .hc-frase { grid-column: 1; grid-row: 3; }
+  .hoy > .franja { grid-column: 2; grid-row: 1 / 4; align-self: stretch; align-items: stretch; padding: 14px; border: 1px solid var(--borde); border-radius: var(--radio); background: linear-gradient(180deg, var(--brillo), transparent 120px), var(--superficie); }
+}
+.hoy-col { display: contents; }
+.hoy-col > * { animation: aparecer .45s .2s cubic-bezier(.2, .8, .2, 1) both; }
+@media (min-width: 1180px) { .hoy > .franja { grid-template-rows: 1fr; align-items: stretch; } .hoy > .franja button { display: flex; flex-direction: column; align-items: center; justify-content: center; } .hoy > .franja b { font-size: 30px; } }
+/* Listas y cuentas de Hoy sin bordes de colores: neutros, el lima marca el avance */
+.hl, .hc-libro { border-color: var(--borde) !important; }
+.lt-barra i { background: var(--acento); }
