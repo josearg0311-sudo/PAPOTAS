@@ -8,7 +8,7 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Cara nueva, propia', '📒', 'La Agenda ahora es una libreta: tinta azul noche (o papel crema en claro), títulos con serifa y un marcatextos amarillo para lo de hoy.', '#hoy'],
+  ['Cara nueva, propia', '📒', 'Logo nuevo y cara de libreta: tinta verde (o papel crema en claro), títulos con serifa y un marcatextos amarillo para lo de hoy.', '#hoy'],
   ['Recordatorios', '✅', 'Abajo, a un toque. Desliza una fila para moverla o terminarla.', '#recordatorios'],
   ['Listas para marcar', '☑️', 'Compras, maleta, mochila… cada lista con su avance y lo que falta.', '#listas'],
   ['Agenda y Horario', '📅', 'Tu día, semana y mes; y el Horario con tus clases y eventos de la semana por hora.', '#horario'],

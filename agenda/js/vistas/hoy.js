@@ -1,6 +1,6 @@
 /* HOY: lo urgente (plazo legal primero), tus recordatorios de hoy, tus 3
    prioridades, tu día en bloques, el Pomodoro y el balance de horas. */
-import { hoy, sumarDias, inicioSemana, diaSemana, DIAS3, fmtLarga, saludo, horaAhora, minutosAhora, fmtHora, fmtCorta } from '../util/fechas.js';
+import { hoy, sumarDias, inicioSemana, diaSemana, DIAS3, MESES, fmtLarga, saludo, horaAhora, minutosAhora, fmtHora, fmtCorta } from '../util/fechas.js';
 import { vacio, ico, esc } from '../util/dom.js';
 import { preferencias, minutosVigilia } from '../datos/preferencias.js';
 import { leer, ANTIGUAS } from '../datos/almacen.js';
@@ -140,7 +140,7 @@ export function vistaHoy() {
 
   const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
   return '<div class="hoy">' +
-    '<header class="hoy-cab"><div class="hc-txt"><small>' + cap(fmtLarga(h)) + '</small><h1 class="ph-saludo">' + saludo() + (n ? ', ' + esc(n) : '') + '</h1><p class="hc-frase">' + esc(fraseDelDia(h)) + '</p></div>' +
+    '<header class="hoy-cab"><div class="hc-fecha" aria-hidden="true"><b>' + (+h.slice(8, 10)) + '</b><span>' + fmtLarga(h).split(' ')[0] + '<br>' + MESES[+h.slice(5, 7) - 1] + ' ' + h.slice(0, 4) + '</span></div><div class="hc-txt"><small class="solo-lector">' + cap(fmtLarga(h)) + '</small><h1 class="ph-saludo">' + saludo() + (n ? ', ' + esc(n) : '') + '</h1><p class="hc-frase">' + esc(fraseDelDia(h)) + '</p></div>' +
       '<div class="anillo-hoy" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><svg viewBox="0 0 74 74" aria-hidden="true"><circle class="fondo" cx="37" cy="37" r="32"/><circle class="valor" cx="37" cy="37" r="32" stroke-dasharray="' + (2 * Math.PI * 32).toFixed(1) + '" stroke-dashoffset="' + (2 * Math.PI * 32 * (1 - pct)).toFixed(1) + '"/></svg><span><b>' + hechos.length + '/' + tot + '</b>hechas</span></div></header>' +
     franjaSemana() +
     (fer || tde.length ? '<p class="hoy-extra">' + (fer ? '<span class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></span>' : '') + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') +

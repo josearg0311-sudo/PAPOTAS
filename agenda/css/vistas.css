@@ -867,33 +867,54 @@ body[data-seccion="recordatorios"] .pantalla { padding-bottom: 200px; }
 @media (max-width: 759px) { .hr-bloque { padding: 2px 3px; } .hr-bloque b { font-size: 10.5px; font-weight: 650; } .hr-bloque small { display: none; } }
 
 /* ==========================================================================
-   IDENTIDAD «CUADERNO» (5.5): la Agenda con cara propia, no la de PAPOTAS.
-   Hojas lisas sobre papel con renglones, títulos con serifa, marcatextos
-   amarillo para lo de hoy y lo principal, punto de color para cada espacio.
+   IDENTIDAD «BITÁCORA» (5.5): la Agenda con cara propia, distinta de PAPOTAS y
+   de la v4.5. Libreta de puntos: tinta verde o papel crema, títulos con
+   serifa subrayados con marcatextos amarillo, hojas lisas, barra flotante.
    ========================================================================== */
-body { background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rejilla) 31px 32px); background-attachment: fixed; }
+body { background-image: radial-gradient(circle at 1px 1px, var(--rejilla) 1.2px, transparent 1.6px); background-size: 22px 22px; background-attachment: fixed; }
 .pag-cab h1, .encabezado h1, .heroe h2, .ph-saludo, .pe-nom, .area-cab h2, .herr-cab h1, .t-cab h2, .seccion-t,
-.hoja-cab h2, .tour-caja h2, .migracion-caja h2, .candado b, .grupo-ajustes, .lateral .marca b, .lt-cab b, .rep-q, .ord-tarjeta b {
-  font-family: var(--f-titulo); font-weight: 650; letter-spacing: -.015em; font-variation-settings: 'SOFT' 50, 'WONK' 0;
+.hoja-cab h2, .tour-caja h2, .migracion-caja h2, .candado b, .grupo-ajustes, .lateral .marca b, .lt-cab b, .rep-q, .ord-tarjeta b, .hc-fecha b {
+  font-family: var(--f-titulo); font-weight: 650; letter-spacing: -.015em; font-variation-settings: 'SOFT' 100, 'WONK' 1;
 }
 .ph-saludo, .pe-nom, .pag-cab h1, .area-cab h2, .herr-cab h1 { font-weight: 600; letter-spacing: -.02em; }
-.t-cab h2 { font-size: 21px; }
+/* Marcatextos debajo de los títulos grandes */
+.pag-cab h1, .ph-saludo, .pe-nom, .herr-cab h1 { display: inline; background: linear-gradient(transparent 62%, color-mix(in srgb, var(--acento) 55%, transparent) 62%, color-mix(in srgb, var(--acento) 55%, transparent) 92%, transparent 92%); -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 4px; margin-left: -4px; }
 
-/* Tarjetas = hojas lisas (sin brillos de color) */
-.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); }
-.t-cab h2::before { width: 10px; height: 10px; border-radius: 50%; }
-.mosaico, .mosaico.ancho, .area-tarjeta { background: var(--superficie); }
+/* Hoy como página de agenda: número del día grande, día y mes al lado */
+.hoy-cab { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 6px 14px; }
+.hc-fecha { display: flex; align-items: center; gap: 10px; }
+.hc-fecha b { font-size: 64px; line-height: .9; font-weight: 500; color: var(--acento-txt); }
+.hc-fecha span { font-size: 13px; font-weight: 600; line-height: 1.3; text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-2); }
+.hoy-cab .anillo-hoy { grid-column: 2; grid-row: 1; }
+.hoy-cab .hc-txt { grid-column: 1 / -1; padding-top: 4px; border-top: 1.5px dashed var(--borde); }
+.ph-saludo { font-size: 30px; line-height: 1.35; }
+.hc-txt .ph-saludo { margin-top: 8px; }
+.hc-frase { margin-top: 8px; font-style: italic; }
+
+/* Hojas lisas */
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: 22px 22px 22px 6px; box-shadow: var(--sombra); }
+.t-cab h2 { font-size: 21px; }
+.t-cab h2::before { width: 9px; height: 9px; border-radius: 50%; }
+.t-cab h2 .ver-link, .t-cab h2 .n { font-family: var(--f-texto); letter-spacing: 0; }
+.ver-link { white-space: nowrap; }
+.mosaico, .mosaico.ancho, .area-tarjeta { background: var(--superficie); border-radius: 20px 20px 20px 6px; }
 .mosaico { border-top: 3px solid var(--m, var(--a, var(--acento))); }
 .siguiente { border-left: 0; border-top: 3px solid var(--a, var(--acento)); }
+.casilla span { border-radius: 50%; }
 
-/* Barra de abajo: el marcatextos marca dónde estás */
-.barra { background: color-mix(in srgb, var(--superficie) 96%, transparent); }
-.barra a[aria-current="page"] { color: var(--tinta); font-weight: 750; }
+/* Semana: el día elegido, marcado con marcatextos redondo */
+.franja button { border-radius: 99px; }
+
+/* Barra de abajo flotante, como una pastilla */
+@media (max-width: 979px) {
+  .barra { left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding: 4px; border: 1px solid var(--borde); border-radius: 26px; background: color-mix(in srgb, var(--superficie) 94%, transparent); box-shadow: var(--sombra-alta); }
+  .barra a { min-height: 56px; border-radius: 22px; }
+  .fab { bottom: calc(94px + env(safe-area-inset-bottom, 0px)); }
+}
+.barra a[aria-current="page"] { color: var(--tinta); font-weight: 700; background: var(--acento-suave); }
 .barra a[aria-current="page"] .i { background: var(--acento); color: var(--sobre-acento); }
-.fab { border-radius: 18px; box-shadow: 0 10px 24px -6px rgba(0, 0, 0, .45); }
+.fab { border-radius: 20px 20px 20px 6px; box-shadow: 0 10px 24px -6px rgba(0, 0, 0, .45); }
 @media (min-width: 980px) {
   .lateral { background: var(--superficie); }
   .nav-lat a[aria-current="page"] { background: var(--acento-suave); }
 }
-.t-cab h2 .ver-link, .t-cab h2 .n { font-family: var(--f-texto); letter-spacing: 0; }
-.ver-link { white-space: nowrap; }

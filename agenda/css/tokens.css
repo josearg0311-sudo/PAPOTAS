@@ -1,52 +1,53 @@
 /* ==========================================================================
-   IDENTIDAD «CUADERNO» · Agenda 5 (desde la 5.5)
-   La Agenda tiene su propia cara, distinta de PAPOTAS: una libreta.
-   - Tinta azul noche (oscuro) o papel crema (claro), con renglones tenues.
+   IDENTIDAD «BITÁCORA» · Agenda 5 (desde la 5.5)
+   La Agenda tiene su propia cara, distinta de PAPOTAS y de la v4.5: una
+   libreta de puntos (bullet journal).
+   - Tinta verde bosque (oscuro) o papel crema (claro), con puntos tenues.
    - Marcatextos amarillo como acento: lo de hoy y los botones principales.
-   - Títulos con serifa (Fraunces), texto en Plus Jakarta.
-   - Tarjetas lisas como hojas, sin brillos de color; el espacio se marca
-     con un punto de su color.
+   - Títulos con serifa (Fraunces), texto en Instrument Sans.
+   - Hojas lisas; títulos subrayados con marcatextos; barra flotante.
    Regla: todo color sale de estos tokens. Nada de colores sueltos.
    ========================================================================== */
 @font-face { font-family: 'Plus Jakarta Sans'; src: url('../fuentes/plus-jakarta.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: 'Instrument Sans'; src: url('../fuentes/instrument-sans.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
 @font-face { font-family: 'Fraunces'; src: url('../fuentes/fraunces.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
 
 :root {
-  --f-texto: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --f-texto: 'Instrument Sans', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --f-titulo: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --f-mono: var(--f-texto);   /* cifras en Plus Jakarta con números parejos */
+  --f-mono: var(--f-texto);   /* cifras con números parejos */
   --radio: 18px; --radio-chico: 12px; --radio-btn: 12px;
   --toque: 44px;                       /* tamaño mínimo para el dedo */
   --ancho-lateral: 248px;
 
-  /* Oscuro (por defecto): tinta azul noche */
-  --fondo: #0D1322; --rejilla: rgba(160,180,230,.045);
-  --superficie: #151D30; --superficie-2: #1C263C; --superficie-3: #26324C;
-  --tinta: #EEF1F8; --tinta-2: #AEB7CA; --tinta-3: #8E99B0;
-  --borde: #263149; --brillo: rgba(255,255,255,.04);
-  --acento: #F6C945; --acento-txt: #F6C945; --sobre-acento: #1A1405; --acento-suave: #2E2813;
-  --rojo: #FF7A70; --rojo-suave: #34161A; --ambar: #FFA552; --ambar-suave: #33220F; --verde: #4ADE80; --verde-suave: #0F2A1F;
-  --velo: rgba(5,8,16,.7);
+  /* Oscuro (por defecto): tinta verde bosque */
+  --fondo: #0C1714; --rejilla: rgba(220,235,215,.075);
+  --superficie: #13221D; --superficie-2: #1A2D27; --superficie-3: #243A32;
+  --tinta: #F2EFE4; --tinta-2: #B9C2B6; --tinta-3: #97A498;
+  --borde: #22362E; --brillo: rgba(255,255,255,.04);
+  --acento: #F6C945; --acento-txt: #F6C945; --sobre-acento: #1A1405; --acento-suave: #2C2A14;
+  --rojo: #FF8577; --rojo-suave: #351A18; --ambar: #FFA552; --ambar-suave: #33230F; --verde: #6EE29A; --verde-suave: #12301F;
+  --velo: rgba(4,10,8,.72);
   --sombra: 0 1px 0 rgba(255,255,255,.03) inset, 0 10px 26px -18px rgba(0,0,0,.8);
   --sombra-alta: 0 18px 50px -12px rgba(0,0,0,.75);
 
   /* Espacios */
-  --a-personal: #6CB2FF; --a-personal-s: #13243D; --a-personal-t: #B3D7FF;
-  --a-estudios: #3ED9C4; --a-estudios-s: #0F2A30; --a-estudios-t: #95EEE2;
-  --a-oficina: #A3B1C6;  --a-oficina-s: #1D2537;  --a-oficina-t: #D0D9E6;
-  --a-deporte: #5BE38E;  --a-deporte-s: #102B22;  --a-deporte-t: #A5F2C0;
+  --a-personal: #6CB2FF; --a-personal-s: #132838; --a-personal-t: #B3D7FF;
+  --a-estudios: #3ED9C4; --a-estudios-s: #0F2C2A; --a-estudios-t: #95EEE2;
+  --a-oficina: #B4BCC6;  --a-oficina-s: #1F2A2A;  --a-oficina-t: #D6DCE3;
+  --a-deporte: #5BE38E;  --a-deporte-s: #113020;  --a-deporte-t: #A5F2C0;
   color-scheme: dark;
 }
 
 :root[data-tema="claro"] {
-  /* Claro: papel crema y tinta */
-  --fondo: #F6F2E8; --rejilla: rgba(40,60,110,.06);
-  --superficie: #FFFDF7; --superficie-2: #F1ECDF; --superficie-3: #E6DFCF;
-  --tinta: #18203A; --tinta-2: #4C5470; --tinta-3: #596079;
-  --borde: #E3DCCB; --brillo: rgba(255,255,255,.7);
-  --acento: #F2C230; --acento-txt: #7A5300; --sobre-acento: #1A1405; --acento-suave: #FBEFC4;
+  /* Claro: papel crema y tinta verde */
+  --fondo: #F4F0E4; --rejilla: rgba(30,60,45,.16);
+  --superficie: #FFFDF6; --superficie-2: #EFEADC; --superficie-3: #E4DDCB;
+  --tinta: #17261F; --tinta-2: #46554D; --tinta-3: #56645B;
+  --borde: #E0D9C6; --brillo: rgba(255,255,255,.7);
+  --acento: #F2C230; --acento-txt: #1E6247; --sobre-acento: #1A1405; --acento-suave: #FAEFC6;
   --rojo: #B8261B; --rojo-suave: #FBE8E4; --ambar: #A04B00; --ambar-suave: #FDEBD8; --verde: #137036; --verde-suave: #E3F3E6;
-  --velo: rgba(24,32,58,.45);
+  --velo: rgba(20,35,28,.45);
   --sombra: 0 1px 2px rgba(40,30,10,.05), 0 10px 24px -18px rgba(40,30,10,.3);
   --sombra-alta: 0 18px 50px -16px rgba(40,30,10,.35);
   --a-personal: #1F63D6; --a-personal-s: #E2ECFC; --a-personal-t: #144BA8;

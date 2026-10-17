@@ -83,12 +83,13 @@ fuentes/ iconos/ pruebas/ diccionario/ (palabras-es.txt ~39 000 palabras por uso
 - Con una hoja abierta, los avisos flotantes suben arriba (para no tapar «Guardar»).
 - Navegación (desde la 5.4): celular = barra inferior **Hoy · Recordatorios · Agenda · Cuentas · Más** + botón `+`; laptop (≥980 px) = barra lateral con lo esencial arriba (Recordatorios, Listas para marcar, Agenda, Horario, Cuentas), luego Espacios (plegado en modo simple) y Más (Notas, Hábitos…).
 
-## Identidad propia «Cuaderno» (desde la 5.5, Fase 17)
-El usuario: «no quiero que se parezca a PAPOTAS, quiero que tenga su propia identidad». PAPOTAS = oscuro cálido marrón, carmesí, cifras con borde izquierdo de color: **nada de eso en la Agenda**.
-- Tokens en `css/tokens.css`: oscuro = tinta azul noche (`--fondo #0D1322`, hojas `#151D30`); claro = papel crema (`#F6F2E8`, hojas `#FFFDF7`, tinta `#18203A`). Acento = **marcatextos amarillo** (`--acento #F6C945` / claro `#F2C230`, con texto oscuro `--sobre-acento`; en claro el texto de acento es `#7A5300`). Ámbar de aviso pasa a naranja para no confundirse con el acento.
-- Títulos con serifa **Fraunces** (`--f-titulo`, `fuentes/fraunces.woff2`); el resto en Plus Jakarta.
-- Fondo con renglones tenues (`--rejilla`), tarjetas lisas como hojas (sin brillos de color), punto de color junto al título, mosaicos con borde superior de su color, barra de abajo con el marcatextos en la pestaña activa, botón + cuadrado redondeado amarillo.
-- Las reglas de identidad están al final de `css/vistas.css` («IDENTIDAD CUADERNO»). Color del tema del navegador: `#0D1322` / `#F6F2E8`.
+## Identidad propia «Bitácora» (desde la 5.5, Fase 17)
+El usuario: «no quiero que se parezca a PAPOTAS, quiero que tenga su propia identidad»; y luego, del primer intento (azul noche): «se parece mucho a la agenda anterior». PAPOTAS = oscuro cálido marrón, carmesí; v4.5 = negro y azul con Plus Jakarta. **Nada de eso.**
+- Libreta de puntos (bullet journal). Tokens en `css/tokens.css`: oscuro = **tinta verde bosque** (`--fondo #0C1714`, hojas `#13221D`, texto crema `#F2EFE4`); claro = papel crema (`#F4F0E4`, hojas `#FFFDF6`, tinta `#17261F`, enlaces verdes `#1E6247`). Acento = **marcatextos amarillo** (`#F6C945` / `#F2C230`, texto oscuro encima). Ámbar de aviso = naranja.
+- Letras: títulos **Fraunces** (`--f-titulo`, `fuentes/fraunces.woff2`), texto **Instrument Sans** (`fuentes/instrument-sans.woff2`). Plus Jakarta queda solo de respaldo.
+- Fondo con puntos; títulos grandes subrayados con marcatextos; Hoy como página de agenda (número del día grande en serifa + día y mes, saludo debajo de una línea punteada, frase en cursiva); hojas con la esquina de abajo a la izquierda casi recta; casillas redondas; barra de abajo **flotante** (pastilla) con el marcatextos en la pestaña activa; botón + amarillo.
+- **Logo nuevo** (`iconos/icono.svg` + PNG 192/512/maskable/apple, generados con playwright): libreta crema con anillas amarillas, una línea resaltada, un punto y un check, sobre verde.
+- Reglas al final de `css/vistas.css` («IDENTIDAD BITÁCORA»). Color del navegador `#0C1714` / `#F4F0E4`.
 
 ## Sistema de diseño: LA CARA DE LA v4.5 (Fase 12; la organización sigue, los colores cambiaron en la 5.5)
 El usuario pidió que la v5 se vea y se organice **como su v4.5** («guíate de eso», con capturas). Medidas tomadas de la v4.5 en vivo (scratchpad/v45-compacto.txt). Todo color sale de `css/tokens.css`; las reglas de la Fase 12 están al final de `css/vistas.css` y el armazón en `css/base.css`.
@@ -159,4 +160,4 @@ Cada elemento (ver `js/datos/modelo.js`): `{ id, tipo, area, titulo, prioridad: 
    - Hoy simple = portada + Pendientes (con línea «Añadir algo…» que entiende fecha y hora) + Tu día + Listas para marcar + Tus cuentas (personal y oficina: gastado, ingresó, + Gasto). Tus espacios solo en «Mostrar todo».
    - Recordatorios simple: sin medidor, sin botones por fila (se desliza), sin grupos vacíos.
    - Rapidez: `bloquesDelDia`, `todoElDia` y `vencenEl` se recuerdan por día hasta que cambian los datos (`revision()` en datos.js: sube en cada guardar/cargar/migrar/juntar y lleva la cantidad de elementos). Hoy con 5 000 cosas: 0,49 s → 0,28 s; un espacio 0,41 s → 0,27 s. Entrada suave al cambiar de pantalla (respeta «reducir movimiento»).
-17. ✅ **Identidad propia «Cuaderno»** (versión 5.5, SW `agenda-v43`): paleta tinta/papel, marcatextos amarillo, títulos Fraunces, renglones, hojas lisas; novedades reescritas para lo esencial. axe limpio en claro y oscuro. Archivo único probado.
+17. ✅ **Identidad propia «Bitácora»** (versión 5.5, SW `agenda-v43`): verde tinta/papel crema, marcatextos amarillo, Fraunces + Instrument Sans, puntos, Hoy como página de agenda, barra flotante, logo nuevo; novedades reescritas para lo esencial. axe limpio en claro y oscuro. Archivo único probado.
