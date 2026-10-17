@@ -15,6 +15,7 @@ import { diaSemana } from '../util/fechas.js';
 import { interpretar } from '../util/interpretar.js';
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
+import { preferencias } from '../datos/preferencias.js';
 import { modeloVacio, nuevoId } from '../datos/modelo.js';
 import { crearLista } from '../datos/pendientes.js';
 import { compartir } from '../piezas/compartir.js';
@@ -22,6 +23,7 @@ import { compartir } from '../piezas/compartir.js';
 /* Con muchos pendientes se muestran por tandas (pintar mil filas traba el celular) */
 const TANDA = { hecho: 8, otro: 40 };
 const ui = { lista: '', ver: {}, sel: null };
+const simple = () => !preferencias().completo;   // modo simple: sin medidor, sin botones extra y sin grupos vacíos
 const cuantos = (k) => ui.ver[k] || (k === 'hecho' ? TANDA.hecho : TANDA.otro);
 const VACIOS = { hoy: 'Nada pendiente para hoy. 👌', tarde: 'Lo que pases a «Más tarde» aparece aquí.', manana: 'Mañana lo tienes libre.', prox: 'Nada programado para los próximos días.', algun: 'Ideas sin fecha: guárdalas aquí para no olvidarlas.', hecho: 'Lo que marques como hecho baja aquí.' };
 
@@ -52,6 +54,20 @@ function aplicarSel(fn, texto, repintar) {
   aviso(texto + ' · ' + n + (n === 1 ? ' recordatorio' : ' recordatorios'), () => { antes.forEach((x) => { if (buscarElemento(x.id) && buscarElemento(x.id).borrado) restaurar(x.id); poner(x); }); repintar(); });
 }
 
+/* LISTAS PARA MARCAR (#listas): todas tus listas de compras, maleta,
+   mochila… a la vista, con cuánto llevas marcado. */
+export function vistaListas() {
+  const ls = listas().filter(esChecklist);
+  return (ls.length ? '<div class="listas-grilla">' + ls.map((l) => {
+    const p = pendientesDe(l.id), ok = p.filter((x) => x.estado === 'hecho').length, faltan = p.filter((x) => x.estado !== 'hecho');
+    return '<button type="button" class="lista-tarj area-' + l.area + '" data-acc="r-lista-ir" data-id="' + esc(l.id) + '">' +
+      '<span class="lt-cab"><b>' + esc(l.titulo) + '</b><small>' + ok + '/' + p.length + '</small></span>' +
+      '<span class="lt-barra" aria-hidden="true"><i style="width:' + (p.length ? Math.round(ok / p.length * 100) : 0) + '%"></i></span>' +
+      '<span class="lt-items">' + (faltan.length ? faltan.slice(0, 3).map((x) => '<span>○ ' + esc(x.titulo) + '</span>').join('') + (faltan.length > 3 ? '<span class="tenue">y ' + (faltan.length - 3) + ' más</span>' : '') : '<span>✓ Todo marcado</span>') + '</span></button>';
+  }).join('') + '</div>' : vacio('Aún no tienes listas para marcar', 'Crea una para las compras, la maleta o la mochila del gym.')) +
+    '<div class="fila-botones izq"><button type="button" class="btn pri" data-acc="r-nueva-checklist">' + ico('i-plus') + 'Nueva lista para marcar</button></div>';
+}
+
 export function vistaRecordatorios() {
   const h = hoy(), l = ui.lista ? buscarElemento(ui.lista) : null;
   if (ui.lista && (!l || l.borrado)) ui.lista = '';
@@ -61,8 +77,10 @@ export function vistaRecordatorios() {
 
   let html = '<div class="listas" role="group" aria-label="Tus listas">' +
     '<button type="button" class="lista-btn" data-acc="r-lista" data-v="" aria-pressed="' + !ui.lista + '">Todos <span class="n">' + pend('') + '</span></button>' +
-    lsts.map((x) => '<button type="button" class="lista-btn area-' + x.area + (esChecklist(x) ? ' check' : '') + '" data-acc="r-lista" data-v="' + esc(x.id) + '" aria-pressed="' + (ui.lista === x.id) + '"><i aria-hidden="true"></i>' + esc(x.titulo) + ' <span class="n">' + pend(x.id) + '</span></button>').join('') +
+    lsts.filter((x) => !simple() || !esChecklist(x) || x.id === ui.lista).map((x) => '<button type="button" class="lista-btn area-' + x.area + (esChecklist(x) ? ' check' : '') + '" data-acc="r-lista" data-v="' + esc(x.id) + '" aria-pressed="' + (ui.lista === x.id) + '"><i aria-hidden="true"></i>' + esc(x.titulo) + ' <span class="n">' + pend(x.id) + '</span></button>').join('') +
+    (simple() ? '<a class="lista-btn" href="#listas">' + ico('i-listas') + 'Listas para marcar</a>' : '') +
     '<button type="button" class="lista-btn nueva" data-acc="r-nueva-lista">' + ico('i-plus') + 'Nueva lista</button></div>';
+  if (check) html = '<a class="volver-panel" href="#listas">' + ico('i-izq') + 'Listas para marcar</a>' + html;
 
   const cuenta = {}; GRUPOS.forEach((g) => { cuenta[g[0]] = 0; });
   todos.forEach((x) => { cuenta[grupo(x)]++; });
@@ -73,10 +91,10 @@ export function vistaRecordatorios() {
     titulo: l ? esc(l.titulo) + (l.extra.sistema ? '' : ' <button type="button" class="icono-btn mini" data-acc="r-editar-lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button>') : 'Todos mis recordatorios',
     clase: l ? 'area-' + l.area : '',
     guia: check ? '<b>Lista para marcar:</b> toca la casilla de lo que ya tienes o ya hiciste. No usa días.' : '<b>Cómo funciona:</b> toca la casilla cuando lo hagas. Si hoy no da, usa <b>Más tarde</b>, <b>Mañana</b> o <b>Día…</b>, o desliza con el dedo: a la derecha lo marcas, a la izquierda pasa a mañana. Al final del día, <b>Cerrar el día</b> pasa lo pendiente a mañana.',
-    cuerpo: (check ? '' : '<div class="medidor" role="group" aria-label="Cuántos hay en cada momento">' + GRUPOS.map((g) =>
+    cuerpo: (check || simple() ? '' : '<div class="medidor" role="group" aria-label="Cuántos hay en cada momento">' + GRUPOS.map((g) =>
         '<a class="medidor-btn' + (g[0] === 'hoy' && vencidos ? ' rojo' : g[0] === 'hecho' ? ' verde' : '') + '" href="#recordatorios" data-acc="saltar" data-v="' + g[0] + '"><b>' + cuenta[g[0]] + '</b><small>' + g[1] + '</small></a>').join('') + '</div>') +
       '<form class="anadir" data-form="r-anadir"><label for="nuevoRec" class="solo-lector">Nuevo recordatorio</label>' +
-      '<textarea id="nuevoRec" rows="1" placeholder="' + (check ? 'Agregar… (una cosa por línea)' : 'Nuevo… ej. «llamar al notario mañana 10am». Pega varias líneas para crear varios.') + '" enterkeyhint="done"></textarea>' +
+      '<textarea id="nuevoRec" rows="1" placeholder="' + (check ? 'Agregar… (una cosa por línea)' : (simple() ? 'Escribe algo… ej. «llamar al notario mañana 10am»' : 'Nuevo… ej. «llamar al notario mañana 10am». Pega varias líneas para crear varios.')) + '" enterkeyhint="done"></textarea>' +
       '<button type="submit" class="btn pri" aria-label="Agregar">' + ico('i-plus') + '</button></form><p class="pista" id="pistaRec" aria-live="polite"></p>'
   });
 
@@ -93,15 +111,16 @@ export function vistaRecordatorios() {
     let g = todos.filter((x) => grupo(x) === k);
     if (k === 'hecho') g.sort((a, b) => hechoEn(b) - hechoEn(a)); else g.sort(ordenar);
     const total = g.length;
+    if (simple() && !total && k !== 'hoy') return;   // en modo simple no se muestran grupos vacíos
     g = g.slice(0, cuantos(k));
     const sub = k === 'hoy' ? ' · ' + fmtCorta(h) : k === 'manana' ? ' · ' + fmtCorta(sumarDias(h, 1)) : '';
     html += '<section class="tarjeta grupo" id="g-' + k + '"><div class="grupo-tit' + (k === 'hoy' && vencidos ? ' rojo' : '') + '"><span>' + nom + sub + '</span><span class="linea"></span><span class="mono">' + total + '</span></div>' +
       (k === 'hoy' && vencidos && !ui.sel ? '<div class="ordenar-cta"><span>🧹 <b>' + vencidos + (vencidos === 1 ? ' atrasado' : ' atrasados') + '</b>: decide qué hacer con cada uno</span><button type="button" class="btn chico pri" data-acc="ordenar">Ordenar</button></div>' : '') +
-      (g.length ? '<div class="pends">' + g.map((x) => (ui.sel && k !== 'hecho' ? filaSel(x) : filaPendiente(x, { verLista: !ui.lista }))).join('') + '</div>' : vacio('', VACIOS[k])) +
+      (g.length ? '<div class="pends">' + g.map((x) => (ui.sel && k !== 'hecho' ? filaSel(x) : filaPendiente(x, { verLista: !ui.lista && !simple(), acciones: !simple() }))).join('') + '</div>' : vacio('', VACIOS[k])) +
       masBoton(k, total, g.length) + '</section>';
   });
-  html += '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button>' +
-    '<button type="button" class="btn" data-acc="r-sel-ini">' + ico('i-check') + 'Elegir varios</button>' +
+  html += '<div class="fila-botones izq">' + (simple() ? '' : '<button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button>' +
+    '<button type="button" class="btn" data-acc="r-sel-ini">' + ico('i-check') + 'Elegir varios</button>') +
     (l && ui.lista ? '<button type="button" class="btn" data-acc="r-compartir">' + ico('i-subir') + 'Compartir la lista</button>' : '') + '</div>';
   if (ui.sel) html += barraSel();
   return html;
@@ -109,6 +128,7 @@ export function vistaRecordatorios() {
 
 export const acciones = {
   saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
+  'r-nueva-checklist'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; ui.ver = {}; location.hash = '#recordatorios'; }, 'checklist'); },
   'r-lista-ir'(b) { ui.lista = b.dataset.id; ui.ver = {}; if (location.hash !== '#recordatorios') location.hash = '#recordatorios'; else return true; },
   'r-lista'(b) { ui.lista = b.dataset.v; ui.ver = {}; ui.sel = null; return true; },
   'r-sel-ini'() { ui.sel = []; return true; },

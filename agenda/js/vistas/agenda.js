@@ -6,7 +6,7 @@ import { ico, vacio, esc } from '../util/dom.js';
 import { fmtSoles } from '../util/dinero.js';
 import { preferencias } from '../datos/preferencias.js';
 import { AREAS, area, chipArea } from '../datos/areas.js';
-import { delDia, resumenDia, huecosLibres, proximos, resumenAnio } from '../datos/calendario.js';
+import { delDia, resumenDia, huecosLibres, proximos, resumenAnio, bloquesDelDia } from '../datos/calendario.js';
 import { buscarElemento, poner, aPapelera } from '../datos/datos.js';
 import { modeloVacio } from '../datos/modelo.js';
 import { leerICS, idDeUid } from '../util/ics.js';
@@ -18,7 +18,7 @@ import { editarEvento, nuevoEvento, alternarPago, exportarTodo } from '../piezas
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
 
-const ui = { modo: 'dia', dia: null, area: '' };
+const ui = { modo: 'dia', dia: null, area: '', horario: '' };
 export function irADia(d) { ui.dia = d; ui.modo = 'dia'; }
 const PX_MIN = 0.8;   // 48 px por hora
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -211,20 +211,49 @@ function previaIcs(texto, nombre) {
   });
 }
 
+/* ---------- HORARIO (#horario): tu semana en columnas, hora por hora ----------
+   Clases de tus cursos, trabajo, partidos y todo lo que tiene hora. Cada
+   bloque con el color de su espacio; tócalo para abrirlo. */
+const PX_H = 44;   // alto de una hora
+export function vistaHorario() {
+  const p = preferencias(), h = hoy(), ini = inicioSemana(ui.horario || h, p.semanaLunes), dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
+  const porDia = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente'));
+  const todos = porDia.flat(), m = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
+  let iniM = m(p.vigilia.ini), finM = m(p.vigilia.fin) || 1440; if (finM <= iniM) finM = 1440;
+  todos.forEach((b) => { iniM = Math.min(iniM, Math.floor(b.ini / 60) * 60); finM = Math.max(finM, Math.min(1440, Math.ceil(b.fin / 60) * 60)); });
+  iniM = Math.floor(iniM / 60) * 60;
+  const alto = (finM - iniM) / 60 * PX_H, y = (min) => (min - iniM) / 60 * PX_H;
+  const horas = []; for (let t = iniM; t < finM; t += 60) horas.push(t);
+  const ahora = minutosAhora();
+  return '<div class="cal-nav"><button type="button" class="icono-btn" data-acc="hor-paso" data-n="-1" aria-label="Semana anterior">' + ico('i-izq') + '</button>' +
+      '<b>' + fmtCorta(dias[0], false) + ' – ' + fmtCorta(dias[6], false) + '</b><button type="button" class="icono-btn" data-acc="hor-paso" data-n="1" aria-label="Semana siguiente">' + ico('i-der') + '</button>' +
+      (dias.includes(h) ? '' : '<button type="button" class="btn chico" data-acc="hor-paso" data-n="0">Esta semana</button>') + '</div>' +
+    '<section class="horario" aria-label="Horario de la semana">' +
+      '<div class="hr-cab"><span></span>' + dias.map((d) => '<button type="button" class="' + (d === h ? 'hoy' : '') + '" data-acc="ir-dia" data-dia="' + d + '" aria-label="Ver ' + fmtLarga(d) + '"><small>' + DIAS3[diaSemana(d)] + '</small><b>' + +d.slice(8) + '</b></button>').join('') + '</div>' +
+      '<div class="hr-cuerpo" style="height:' + alto + 'px">' +
+        '<div class="hr-horas">' + horas.map((t) => '<span style="top:' + y(t) + 'px">' + fmtHora(String(t / 60).padStart(2, '0') + ':00', p.formatoHora).replace(':00', '').replace(' ', '\u00a0') + '</span>').join('') + '</div>' +
+        porDia.map((bs, i) => '<div class="hr-col' + (dias[i] === h ? ' hoy' : '') + '">' + horas.map((t) => '<i style="top:' + y(t) + 'px"></i>').join('') +
+          (dias[i] === h && ahora >= iniM && ahora <= finM ? '<em class="hr-ahora" style="top:' + y(ahora) + 'px"></em>' : '') +
+          bs.map((b) => '<button type="button" class="hr-bloque area-' + area(b.area).id + '" style="top:' + (y(b.ini) + 1) + 'px;height:' + Math.max(18, (b.fin - b.ini) / 60 * PX_H - 2) + 'px" data-acc="' + (b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '" aria-label="' + esc(b.titulo) + ', ' + fmtHora(b.hIni, p.formatoHora) + ' a ' + fmtHora(b.hFin, p.formatoHora) + '"><b>' + esc(b.titulo) + '</b><small>' + fmtHora(b.hIni, p.formatoHora) + '</small></button>').join('') + '</div>').join('') +
+      '</div></section>' +
+    (todos.length ? '' : vacio('Semana sin horario', 'Agrega tus clases en Estudios → Cursos, o un evento que se repita cada semana.')) +
+    '<div class="fila-botones izq"><button type="button" class="btn pri" data-acc="cal-nuevo" data-d="' + h + '">' + ico('i-plus') + 'Evento</button><a class="btn" href="#areas/estudios/cursos">' + ico('i-birrete') + 'Horario de clases</a></div>';
+}
+
 export function vistaAgenda() {
   const d = ui.dia || hoy();
   if (!preferencias().completo && (ui.modo === 'ano' || ui.modo === 'lista')) ui.modo = 'mes';
   const cuerpo = ui.modo === 'semana' ? vistaSemana(d) : ui.modo === 'mes' ? vistaMes(d) : ui.modo === 'ano' ? vistaAno(d) : ui.modo === 'lista' ? vistaLista() : vistaDia(d);
   return tarjeta({ titulo: 'Tu tiempo', clase: 'agenda',
     guia: '<b>Agenda = tu tiempo.</b> Eventos, clases, recordatorios y vencimientos (pagos, cobros, documentos y plazos) en vista de día, semana o mes. En la vista Día, <b>toca una hora vacía</b> para crear un evento ahí. Filtra por área con los botones de colores. <b>Año</b> muestra cumpleaños y plazos legales de cada mes; <b>Lista</b>, todo lo de los próximos 60 días.',
-    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['ano', 'Año'], ['lista', 'Lista']].filter((o) => preferencias().completo || o[0] === 'dia' || o[0] === 'semana' || o[0] === 'mes').map((o) =>
+    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['horario', 'Horario'], ['ano', 'Año'], ['lista', 'Lista']].filter((o) => preferencias().completo || o[0] !== 'ano' && o[0] !== 'lista').map((o) =>
       '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + filtroAreas() + cuerpo }) +
     (!preferencias().completo ? '' : '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
     '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>');
 }
 
 export const acciones = {
-  'cal-modo'(b) { ui.modo = b.dataset.v; return true; },
+  'cal-modo'(b) { if (b.dataset.v === 'horario') { location.hash = '#horario'; return; } ui.modo = b.dataset.v; return true; },
   'cal-area'(b) { ui.area = b.dataset.v; return true; },
   'cal-dia'(b) { ui.dia = b.dataset.dia; return true; },
   'cal-dia-ir'(b) { ui.dia = b.dataset.dia; ui.modo = 'dia'; return true; },
@@ -239,6 +268,7 @@ export const acciones = {
   },
   'cal-hueco'(b, ev, repintar) { const [hh, mm] = b.dataset.h.split(':'); nuevoEvento(repintar, { fecha: ui.dia || hoy(), hora: b.dataset.h, horaFin: b.dataset.hf || String((+hh + 1) % 24).padStart(2, '0') + ':' + mm, area: ui.area || 'personal' }); },
   'cal-libre'(b, ev, repintar) { acciones['cal-hueco'](b, ev, repintar); },
+  'hor-paso'(b) { const n = +b.dataset.n; ui.horario = n === 0 ? '' : sumarDias(ui.horario || hoy(), 7 * n); return true; },
   'cal-ir-mes'(b) { ui.dia = b.dataset.v + '-01'; ui.modo = 'mes'; return true; },
   'cal-nuevo'(b, ev, repintar) { nuevoEvento(repintar, { fecha: b.dataset.d, area: ui.area || 'personal' }); },
   'ev-editar'(b, ev, repintar) { editarEvento(b.dataset.id, repintar); },

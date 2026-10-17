@@ -8,13 +8,16 @@ import { guardarCopia, clavesAntiguas } from './copias.js';
 
 export const DIAS_PAPELERA = 30;
 let doc = null;
+/* Número que cambia con cada guardado: sirve para recordar cálculos hasta que algo cambie */
+let rev = 0;
+export const revision = () => rev + '|' + (doc ? doc.items.length : -1);   // también cambia si se reemplaza el documento
 const oyentes = [];
 export function alCambiarDatos(fn) { oyentes.push(fn); }
 function avisar() { oyentes.forEach((f) => { try { f(); } catch (e) { /* una vista que falla no tumba las demás */ } }); }
 
 export function hayDatosNuevos() { return !!leer(CLAVES.datos, null); }
 export function cargar() {
-  doc = normalizarDoc(leer(CLAVES.datos, null));
+  doc = normalizarDoc(leer(CLAVES.datos, null)); rev++;
   if (doc) purgarPapelera();
   return doc;
 }
@@ -24,6 +27,7 @@ export function documento() { return doc; }
    había: se avisa y se mantiene en memoria hasta que se libere espacio. */
 export function guardar() {
   if (!doc) return false;
+  rev++;
   const ok = escribir(CLAVES.datos, doc);
   avisar();
   return ok;
@@ -120,14 +124,14 @@ export async function migrarDesdeV45({ copiaObligatoria = true } = {}) {
   if (!escribir(CLAVES.datos, final)) return { ok: false, paso: 'guardar', error: new Error('No hay espacio en el navegador'), textos };
   const releido = normalizarDoc(leer(CLAVES.datos, null));
   if (!releido || releido.items.length !== final.items.length) return { ok: false, paso: 'guardar', error: new Error('Lo guardado no coincide al releerlo'), textos };
-  doc = releido;
+  doc = releido; rev++;
   avisar();
   return { ok: true, verificacion: v, copia, total: nuevo.items.length };
 }
 
 /* Sin datos de la v4.5: se empieza con el documento vacío */
 export function empezarVacio() {
-  doc = docVacio();
+  doc = docVacio(); rev++;
   guardar();
   return doc;
 }
@@ -135,7 +139,7 @@ export function empezarVacio() {
 /* Reemplaza o junta el documento entero (lo usa el respaldo) */
 export function juntarDocumento(otro) {
   const r = fusionar(doc || docVacio(), otro);
-  doc = r.doc;
+  doc = r.doc; rev++;
   guardar();
   return r;
 }

@@ -65,7 +65,7 @@ const cuenta = (f) => elementos(f).length;
 /* Cada mosaico: [ícono, color, descripción, () => [cifra, texto]] */
 const MOSAICO = {
   pendientes: ['i-tareas', 'rojo', 'Lo que tienes pendiente', (a) => [tareasDe(a), 'pendientes']],
-  eventos: ['i-cal', 'morado', 'Citas, salidas y todo lo que viene', (a) => [proximos(hoy(), 60, a).reduce((s, d) => s + d.bloques.filter((b) => b.tipo === 'evento').length + d.todoDia.length, 0), 'en 60 días']],
+  eventos: ['i-cal', 'morado', 'Citas, salidas y todo lo que viene', (a) => { const h = hoy(); let n = 0; for (let i = 0; i < 60; i++) { const d = sumarDias(h, i); n += bloquesDelDia(d).filter((b) => b.area === a && b.tipo === 'evento').length + todoElDia(d).filter((t) => t.area === a).length; } return [n, 'en 60 días']; }],
   notas: ['i-notas', 'ambar', 'Tus apuntes y listas para marcar', (a) => { const ids = new Set(listas().filter((l) => esChecklist(l) && l.area === a).map((l) => l.id)); return [cuenta((x) => x.tipo === 'nota' && x.area === a), 'notas · ' + cuenta((x) => x.tipo === 'pendiente' && ids.has(x.lista) && x.estado !== 'hecho') + ' por marcar']; }],
   dinero: ['i-grafica', 'verde', 'Lo que gastas en este espacio este mes', (a) => [solesCorto(gastosMes(a)), 'gastado']],
   casa: ['i-casa', 'naranja', 'Lo de la casa, cada cuántos días', () => [cuenta((x) => x.tipo === 'casa'), 'tareas de casa']],

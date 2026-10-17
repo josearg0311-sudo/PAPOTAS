@@ -806,3 +806,62 @@ body[data-seccion="recordatorios"] .pantalla { padding-bottom: 200px; }
 .cab .logo { width: 44px; height: 44px; border-radius: 12px; }
 .qh-fila .btn.chico { min-height: 44px; }
 .hab-tabla .t-cab h2 a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* ---------- Última mejora: anotar desde Hoy y entrada suave entre pantallas ---------- */
+.hoy-rapida { display: flex; align-items: center; gap: 8px; margin: 4px 16px 14px; padding: 4px 4px 4px 12px; border-radius: 14px; border: 1px solid var(--borde); background: var(--superficie); }
+.hoy-rapida > .i { color: var(--tinta-3); width: 18px; height: 18px; }
+.hoy-rapida .entrada { flex: 1; min-width: 0; border: 0; background: transparent; padding-left: 0; }
+.hoy-rapida .entrada:focus { outline: none; }
+.hoy-rapida:focus-within { border-color: var(--acento-txt); }
+.hoy-rapida .btn { min-height: 44px; border-radius: 11px; }
+@media (prefers-reduced-motion: no-preference) {
+  .pantalla.entra { animation: entrar .22s ease-out; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---------- Lo esencial: Listas para marcar, Horario y Cuentas en Hoy ---------- */
+.listas-grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 10px; }
+.lista-tarj { display: flex; flex-direction: column; gap: 8px; min-height: 130px; padding: 16px; border-radius: 20px; text-align: left; color: var(--tinta);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--a) 18%, var(--superficie)), var(--superficie) 65%); border: 1px solid color-mix(in srgb, var(--a) 30%, transparent); }
+.lt-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.lt-cab b { font-size: 18px; font-weight: 750; letter-spacing: -.02em; }
+.lt-cab small { font-size: 13px; font-weight: 700; color: var(--tinta-2); }
+.lt-barra { display: block; height: 4px; border-radius: 4px; background: color-mix(in srgb, var(--tinta) 12%, transparent); overflow: hidden; }
+.lt-barra i { display: block; height: 100%; background: var(--a); border-radius: 4px; }
+.lt-items { display: grid; gap: 2px; font-size: 13.5px; color: var(--tinta-2); }
+.lt-items .tenue { color: var(--tinta-3); }
+.hoy-listas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 16px 16px; }
+.hl { display: flex; flex-direction: column; gap: 4px; min-height: 76px; padding: 12px; border-radius: 14px; text-align: left; color: var(--tinta); background: var(--superficie); border: 1px solid var(--borde); border-left: 3px solid var(--a); }
+.hl b { font-size: 14.5px; }
+.hl small { font-size: 12px; color: var(--tinta-2); }
+.hl .lt-barra { margin-top: auto; }
+.hoy-cuentas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 0 16px 16px; }
+.hc-libro { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 12px; border-radius: 14px; background: var(--superficie); border: 1px solid color-mix(in srgb, var(--a) 30%, var(--borde)); }
+.hc-tit { display: flex; align-items: center; justify-content: space-between; min-height: 44px; font-size: 14px; font-weight: 750; color: var(--tinta); }
+.hc-tit .i { width: 16px; height: 16px; color: var(--tinta-3); }
+.hc-num { font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
+.hc-libro small { font-size: 12px; color: var(--tinta-2); }
+.hc-libro .hc-ing { color: var(--verde); font-weight: 650; }
+.hc-libro .btn { margin-top: 8px; min-height: 44px; }
+
+/* Horario: la semana en columnas */
+.horario { overflow: hidden; border-radius: 20px; border: 1px solid var(--borde); background: var(--w-fondo); }
+.hr-cab { display: grid; grid-template-columns: 38px repeat(7, minmax(0, 1fr)); border-bottom: 1px solid var(--borde); }
+.hr-cab button { display: flex; flex-direction: column; align-items: center; min-height: 52px; padding: 6px 0; border: 0; background: none; color: var(--tinta); }
+.hr-cab small { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--tinta-3); }
+.hr-cab b { font-size: 16px; font-weight: 750; }
+.hr-cab button.hoy b { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--acento); color: var(--sobre-acento); }
+.hr-cuerpo { position: relative; display: grid; grid-template-columns: 38px repeat(7, minmax(0, 1fr)); }
+.hr-horas { position: relative; }
+.hr-horas span { position: absolute; right: 4px; transform: translateY(-50%); font-size: 10.5px; color: var(--tinta-3); white-space: nowrap; }
+.hr-horas span:first-child { transform: none; }
+.hr-col { position: relative; border-left: 1px solid var(--borde); }
+.hr-col.hoy { background: color-mix(in srgb, var(--acento) 6%, transparent); }
+.hr-col > i { position: absolute; left: 0; right: 0; height: 1px; background: color-mix(in srgb, var(--borde) 60%, transparent); }
+.hr-ahora { position: absolute; left: 0; right: 0; height: 2px; background: var(--acento-txt); z-index: 2; }
+.hr-bloque { position: absolute; left: 2px; right: 2px; display: flex; flex-direction: column; gap: 1px; padding: 3px 4px; overflow: hidden; border: 0; border-left: 3px solid var(--a); border-radius: 6px; background: var(--as); color: var(--at); text-align: left; z-index: 1; }
+.hr-bloque b { font-size: 11.5px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; color: var(--tinta); }
+.hr-bloque small { font-size: 10px; opacity: .9; }
+@media (min-width: 760px) { .hr-cab, .hr-cuerpo { grid-template-columns: 54px repeat(7, minmax(0, 1fr)); } .hr-bloque b { font-size: 13px; } .hr-bloque { padding: 4px 6px; } }
+.hr-bloque b { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
+@media (max-width: 759px) { .hr-bloque { padding: 2px 3px; } .hr-bloque b { font-size: 10.5px; font-weight: 650; } .hr-bloque small { display: none; } }

@@ -138,12 +138,12 @@ export function editarPendiente(id, repintar, base = null) {
 }
 
 /* ---------- Listas: crear y editar ---------- */
-export function editarLista(id, repintar, alCrear) {
+export function editarLista(id, repintar, alCrear, claseFija = '') {
   const l = id ? buscarElemento(id) : null, sistema = l && l.extra.sistema;
   const hoja = abrirHoja(l ? 'Editar lista' : 'Nueva lista', '<form id="formLista" class="form" autocomplete="off">' +
     '<label class="campo"><span>Nombre</span><input class="entrada" name="titulo" required maxlength="60" value="' + esc(l ? l.titulo : '') + '" placeholder="ej. Trámites, Llamadas, Exp. 04521"></label>' +
     '<div class="campo"><span>Área</span>' + selector('area', AREAS.map((a) => [a.id, a.nombre]), l ? l.area : 'personal') + '</div>' +
-    (l ? '' : '<div class="campo"><span>Tipo de lista</span>' + selector('clase', [['recordatorios', 'Recordatorios (con días)'], ['checklist', 'Para marcar (compras, maleta)']], 'recordatorios') + '</div>') +
+    (l || claseFija ? '' : '<div class="campo"><span>Tipo de lista</span>' + selector('clase', [['recordatorios', 'Recordatorios (con días)'], ['checklist', 'Para marcar (compras, maleta)']], 'recordatorios') + '</div>') +
     '<div class="fila-botones">' + (l && !sistema ? '<button type="button" class="btn peligro" id="lBorrar">' + ico('i-basura') + 'Borrar lista</button>' : '') +
     '<button type="submit" class="btn pri">' + ico('i-check') + 'Guardar</button></div></form>');
   hoja.querySelectorAll('[data-sel] button').forEach((b) => b.addEventListener('click', () => b.parentNode.querySelectorAll('button').forEach((y) => y.setAttribute('aria-pressed', String(y === b)))));
@@ -153,7 +153,7 @@ export function editarLista(id, repintar, alCrear) {
     const t = f.titulo.value.trim(); if (!t) return;
     const leer = (n) => ((hoja.querySelector('[data-sel="' + n + '"] [aria-pressed="true"]') || {}).dataset || {}).v;
     if (l) { const y = JSON.parse(JSON.stringify(l)); y.titulo = t; y.area = leer('area') || y.area; poner(y); cerrarHoja(); repintar(); aviso('Lista guardada'); }
-    else { const n = crearLista({ titulo: t, area: leer('area'), clase: leer('clase') }); cerrarHoja(); if (alCrear) alCrear(n.id); repintar(); aviso('Lista creada: ' + t); }
+    else { const n = crearLista({ titulo: t, area: leer('area'), clase: claseFija || leer('clase') }); cerrarHoja(); if (alCrear) alCrear(n.id); repintar(); aviso('Lista creada: ' + t); }
   });
   const bb = hoja.querySelector('#lBorrar');
   if (bb) bb.addEventListener('click', async () => {

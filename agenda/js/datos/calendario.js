@@ -1,7 +1,7 @@
 /* LO QUE OCUPA CADA DÍA: eventos (con sus repeticiones y los de varios
    días), clases de los cursos y pendientes con hora. Lo usan Hoy (tu día en
    bloques y el balance) y, en la Fase 4, el calendario. */
-import { elementos } from './datos.js';
+import { elementos, revision } from './datos.js';
 import { diaSemana, esFecha, esHora, plazo, sumarDias } from '../util/fechas.js';
 
 const minDe = (h) => { const [a, b] = h.split(':').map(Number); return a * 60 + b; };
@@ -23,8 +23,21 @@ export function ocurre(base, rep, dia, hasta) {
   }
 }
 
+/* Lo de cada día se recuerda hasta que cambian tus datos (Hoy, la semana y
+   los espacios piden los mismos días muchas veces). Se entrega una copia. */
+const memo = { rev: -1, m: new Map() };
+function recordado(nombre, dia, fn) {
+  if (memo.rev !== revision()) { memo.rev = revision(); memo.m.clear(); }
+  const k = nombre + dia;
+  if (!memo.m.has(k)) memo.m.set(k, fn(dia));
+  return memo.m.get(k).slice();
+}
+export const bloquesDelDia = (dia) => recordado('b', dia, _bloquesDelDia);
+export const todoElDia = (dia) => recordado('t', dia, _todoElDia);
+export const vencenEl = (dia) => recordado('v', dia, _vencenEl);
+
 /* Bloques con hora de un día: [{ ini, fin, titulo, area, tipo, id, item }] */
-export function bloquesDelDia(dia) {
+function _bloquesDelDia(dia) {
   const out = [];
   elementos((x) => x.tipo === 'evento').forEach((e) => {
     const f = e.fechas;
@@ -49,7 +62,7 @@ export function bloquesDelDia(dia) {
 }
 
 /* Lo de todo el día (cumpleaños, viajes, feriados propios…) */
-export function todoElDia(dia) {
+function _todoElDia(dia) {
   return elementos((x) => x.tipo === 'evento' && (x.todoElDia || !esHora(x.fechas.hora)) && ocurre(x.fechas.inicio, x.repetir, dia, x.fechas.fin))
     .map((e) => ({ titulo: e.titulo, area: e.area, id: e.id, cumple: e.extra.tipoEvento === 'cumple' }));
 }
@@ -76,7 +89,7 @@ export function diaDePago(p, ym) {
 }
 export function pagado(p, ym) { return !!((p.extra && p.extra.pagados && p.extra.pagados[ym]) || (p.datos && p.datos.pagados && p.datos.pagados[ym])); }
 
-export function vencenEl(dia) {
+function _vencenEl(dia) {
   const out = [], ym = dia.slice(0, 7);
   elementos((x) => x.tipo === 'pago' && (x.extra.activo !== false)).forEach((p) => {
     const desde = (p.datos && p.datos.desde) || '';
