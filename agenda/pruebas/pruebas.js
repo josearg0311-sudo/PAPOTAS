@@ -24,6 +24,7 @@ import * as CO from '../js/datos/corrector.js';
 import { separarMonto } from '../js/piezas/dictado.js';
 import { enlaceWhatsApp } from '../js/piezas/compartir.js';
 import { sumarDias as SD } from '../js/util/fechas.js';
+import { entender } from '../js/datos/entender.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -529,6 +530,27 @@ tareas.push(prueba('Dinero: la categoría se deduce de la descripción, por libr
   igual([FI.categoriaDe('Almuerzo con Ana'), FI.categoriaDe('taxi a casa'), FI.categoriaDe('Recibo de luz'), FI.categoriaDe('Matrícula del ciclo'), FI.categoriaDe('cancha pichanga'), FI.categoriaDe('algo raro')], ['Comida', 'Transporte', 'Servicios', 'Estudios', 'Deporte', 'Otros']);
   igual([FI.categoriaDe('Sueldo de octubre', 'personal', true), FI.categoriaDe('Tinta para la impresora', 'oficina'), FI.categoriaDe('Pago a SUNAT', 'oficina'), FI.categoriaDe('Honorarios caso López', 'oficina', true)], ['Sueldo', 'Insumos', 'Impuestos', 'Honorarios']);
   igual(FI.areaDeCategoria(FI.categoriaDe('Matrícula del ciclo')), 'estudios');
+}));
+
+tareas.push(prueba('Agenda 6: un solo campo entiende gasto, ingreso, lista, evento, nota y recordatorio', () => {
+  const o = { hoy: '2026-10-17', ahoraMin: 600 };
+  const g = entender('almuerzo 25', o);
+  igual([g.tipo, g.monto, g.titulo, g.libro, g.categoria], ['gasto', 2500, 'Almuerzo', 'personal', FI.categoriaDe('Almuerzo')]);
+  const go = entender('taxi oficina 18.50', o);
+  igual([go.tipo, go.monto, go.libro, go.titulo], ['gasto', 1850, 'oficina', 'Taxi']);
+  igual([entender('S/ 1,250 laptop', o).monto, entender('s/.30 menú', o).titulo], [125000, 'Menú']);
+  const i = entender('cobré 1200 empresa ABC', o);
+  igual([i.tipo, i.monto, i.titulo], ['ingreso', 120000, 'Empresa ABC']);
+  const io = entender('cobré 1200 oficina', o);
+  igual([io.titulo, io.libro, io.categoria], ['Cobro', 'oficina', 'Honorarios']);
+  igual(entender('compras: leche, pan y café', o), { tipo: 'lista', titulo: 'Compras', cosas: ['leche', 'pan', 'café'] });
+  const e = entender('reunión viernes 4pm', o);
+  igual([e.tipo, e.fecha, e.hora], ['evento', '2026-10-23', '16:00']);
+  const r = entender('llamar a Ana mañana 10am', o);
+  igual([r.tipo, r.titulo, r.fecha, r.hora], ['recordatorio', 'Llamar a Ana', '2026-10-18', '10:00']);
+  igual([entender('comprar 3 panes', o).tipo, entender('pagar luz 95 mañana', o).tipo, entender('a las 10:30 llamar', o).tipo], ['recordatorio', 'recordatorio', 'recordatorio']);
+  igual(entender('nota: ideas para el viaje', o).tipo, 'nota');
+  igual([entender('', o), entender('regar plantas', o).fecha], [null, '2026-10-17']);
 }));
 
 Promise.all(tareas).then(() => {

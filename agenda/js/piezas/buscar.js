@@ -3,6 +3,8 @@
    cada una con el color de su área. Recuerda tus últimas búsquedas. */
 import { abrirHoja, cerrarHoja } from './hoja.js';
 import { abrirAgregar } from './agregar-rapido.js';
+import { abrirCaptura } from './captura.js';
+import { abrirMonto } from './teclado-monto.js';
 import { esc, ico } from '../util/dom.js';
 import { leer, escribir } from '../datos/almacen.js';
 import { elementos } from '../datos/datos.js';
@@ -25,12 +27,15 @@ const HACER = [
 /* A dónde ir */
 const IR = [
   ['#hoy', 'Hoy', 'Tu día de un vistazo', 'hoy dia resumen'],
-  ['#recordatorios', 'Recordatorios', 'Tus listas y pendientes', 'recordatorios tareas pendientes listas compras'],
-  ['#agenda', 'Agenda', 'Día, semana y mes', 'agenda calendario semana mes dia'],
+  ['#plan', 'Plan', 'Tu semana, horario, día y mes', 'plan agenda calendario semana mes dia horario clases'],
+  ['#listas', 'Listas', 'Recordatorios y listas para marcar', 'listas recordatorios tareas pendientes compras marcar'],
+  ['#plata', 'Plata · personal', 'Lo que te queda, gastos e ingresos', 'plata dinero cuentas gastos ingresos personal'],
+  ['#plata/oficina', 'Plata · oficina', 'Las cuentas de la oficina', 'plata oficina cuentas cobros'],
+  ['#agenda', 'Agenda en detalle', 'Año, lista, filtros y .ics', 'agenda calendario año lista ics'],
   ['#seguimiento', 'Seguimiento', 'Cómo vas en cada área', 'seguimiento progreso estadisticas habitos metas'],
   ['#seguimiento/revision', 'Revisión semanal', 'Mira tu semana y planea la próxima', 'revision semanal semana planear'],
-  ['#finanzas', 'Finanzas · libro personal', 'Gastos, ingresos y presupuesto', 'finanzas dinero gastos ingresos presupuesto libro personal'],
-  ['#finanzas/oficina', 'Finanzas · libro de la oficina', 'Las cuentas de la oficina', 'finanzas oficina libro cuentas facturas'],
+  ['#finanzas', 'Cuentas en detalle · personal', 'Categorías, presupuesto e informe', 'finanzas cuentas detalle presupuesto categorias informe excel'],
+  ['#finanzas/oficina', 'Cuentas en detalle · oficina', 'Categorías, informe y Excel de la oficina', 'finanzas oficina libro cuentas facturas detalle'],
   ['#notas', 'Notas', 'Tus apuntes por área', 'notas apuntes'],
   ['#notas/diario', 'Diario', 'Ánimo, agua y sueño', 'diario animo agua sueno'],
   ['#ajustes', 'Ajustes', 'Nube, respaldo, PIN, teclado', 'ajustes configuracion nube respaldo pin tema teclado'],
@@ -105,7 +110,7 @@ export function abrirBuscar() {
     const r = ev.target.closest('[data-busq]');
     if (r) { inp.value = r.dataset.busq; pintar(); inp.focus(); return; }
     const h = ev.target.closest('[data-bus-hacer]');
-    if (h) { recordar(inp.value); cerrarHoja(true); abrirAgregar(h.dataset.busHacer); return; }
+    if (h) { recordar(inp.value); cerrarHoja(true); const t = h.dataset.busHacer; if (t === 'gasto') abrirMonto(); else if (t === 'habito' || t === 'meta') abrirAgregar(t); else abrirCaptura(); return; }
     if (ev.target.closest('.bus-fila')) recordar(inp.value);
   });
 }

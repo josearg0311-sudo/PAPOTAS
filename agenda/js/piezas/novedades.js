@@ -8,12 +8,12 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Cara nueva', '⚡', 'Logo nuevo y un estilo moderno, oscuro como te gusta: negro con verde neón, letras nuevas y Hoy que se mueve contigo.', '#hoy'],
-  ['Recordatorios', '✅', 'Abajo, a un toque. Desliza una fila para moverla o terminarla.', '#recordatorios'],
-  ['Listas para marcar', '☑️', 'Compras, maleta, mochila… cada lista con su avance y lo que falta.', '#listas'],
-  ['Agenda y Horario', '📅', 'Tu día, semana y mes; y el Horario con tus clases y eventos de la semana por hora.', '#horario'],
-  ['Cuentas', '💰', 'Personal y Oficina separadas, con lo gastado y lo que ingresó; también en Hoy.', '#finanzas'],
-  ['Más simple', '✨', 'Sin espacios ni pasos de más: el + solo pregunta qué es (y en un gasto, si es personal u oficina). Los espacios siguen en Ajustes → «Mostrar todo».', 'agregar']
+  ['Un + que entiende todo', '⚡', 'Escribe como hablas: «almuerzo 25» es un gasto, «compras: leche, pan» una lista, «reunión viernes 4pm» un evento.', 'agregar'],
+  ['Hoy', '☀️', 'Lo que toca ahora en grande, con un botón para empezar 25 min de foco. Debajo, lo que te falta y tu día.', '#hoy'],
+  ['Plan', '📅', 'Agenda y Horario juntos: tu semana por horas, tu día y tu mes.', '#plan'],
+  ['Listas', '☑️', 'Recordatorios y listas para marcar en un solo lugar, cada una con su avance.', '#listas'],
+  ['Plata', '💰', 'Personal y Oficina: cuánto te queda, y un teclado de números grande para anotar en segundos.', '#plata'],
+  ['Lo demás, en Más', '✨', 'Notas, hábitos, ajustes y el detalle de la agenda y las cuentas. Nada se perdió.', '#mas']
 ];
 
 export function abrirNovedades() {

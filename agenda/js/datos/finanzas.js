@@ -34,7 +34,7 @@ const PALABRAS = {
     gasto: [['Insumos', /papel|tinta|t[oó]ner|impres|[uú]tiles|folder|archivador|lapicer|insumo/], ['Alquiler', /alquiler|local|oficina/],
       ['Servicios', /\bluz\b|agua|internet|tel[eé]fono|celular|software|hosting|dominio|licencia/], ['Impuestos', /sunat|impuesto|igv|renta|tributo|municipal|arbitrio/],
       ['Personal', /sueldo|planilla|practicante|asistente|honorarios de/], ['Transporte', /taxi|uber|pasaje|gasolin|movilidad|courier|env[ií]o/]],
-    ingreso: [['Honorarios', /honorario|asesor[ií]a|consulta|caso|audiencia|cliente/], ['Ventas', /venta|factura/]]
+    ingreso: [['Honorarios', /honorario|asesor[ií]a|consulta|caso|audiencia|cliente|cobro/], ['Ventas', /venta|factura/]]
   }
 };
 export function categoriaDe(texto, libro = 'personal', ingreso = false) {

@@ -32,7 +32,9 @@ export function filaPendiente(x, { acciones = true, verLista = false } = {}) {
   const g = grupo(x), a = area(x.area).id, hecho = x.estado === 'hecho';
   const lista = verLista && x.lista ? buscarElemento(x.lista) : null;
   const subs = (x.extra.subtareas || []).filter((s) => s && s.t);
-  const meta = [chipArea(a), '<span class="mono">' + esc(cuando(x)) + '</span>',
+  /* En una lista para marcar, sin fecha: ni área ni «algún día» (solo lo que importa) */
+  const deCheck = !x.fechas.inicio && x.lista && esChecklist(buscarElemento(x.lista));
+  const meta = [deCheck ? '' : chipArea(a), deCheck ? '' : '<span class="mono">' + esc(cuando(x)) + '</span>',
     lista ? '<span>' + esc(lista.titulo) + '</span>' : '', subs.length ? '<span>' + ico('i-rec') + subs.filter((s) => s.ok).length + '/' + subs.length + '</span>' : '',
     x.repetir ? '<span>' + ico('i-repetir') + esc((REPETIR.find((r) => r[0] === x.repetir) || ['', ''])[1].toLowerCase()) + '</span>' : '',
     (x.etiquetas || []).map((e) => '<span class="etiqueta">#' + esc(e) + '</span>').join(''), estadoPills(x)].filter(Boolean).join('');

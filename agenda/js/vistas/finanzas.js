@@ -218,6 +218,37 @@ function editarPresupuesto(libro, repintar) {
   } });
 }
 
+/* ---------- PLATA (Agenda 6, #plata y #plata/oficina) ----------
+   Lo esencial de tus dos libros: cuánto te queda, lo que gastaste y lo que
+   entró, los pagos fijos del mes y tus movimientos por día. Gasto e ingreso
+   se anotan con el teclado de monto. El detalle (categorías, presupuesto,
+   informe, Excel) sigue en «Ver todo el detalle». */
+export function vistaPlata(param) {
+  const libro = param === 'oficina' ? 'oficina' : 'personal', ym = hoy().slice(0, 7), todos = movs(libro), r = resumenMes(todos, ym);
+  const pres = presupuestoDe(libro), gHoy = todos.filter((x) => !esIngreso(x) && x.fechas.inicio === hoy()).reduce((t, x) => t + Math.abs(+x.monto || 0), 0);
+  const pagos = elementos((x) => x.tipo === 'pago' && libroDePago(x) === libro && x.extra.activo !== false).map((p) => ({ p, dia: diaDePago(p, ym), ok: pagado(p, ym) })).filter((x) => !(val(x.p, 'desde', '') > ym)).sort((a, b) => a.dia.localeCompare(b.dia));
+  const delM = todos.filter((x) => delMes(x, ym)).sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '') || b.actualizado - a.actualizado);
+  const porDia = []; delM.slice(0, 60).forEach((x) => { const d = x.fechas.inicio, g = porDia[porDia.length - 1]; if (g && g.d === d) g.l.push(x); else porDia.push({ d, l: [x] }); });
+  const tope = pres || r.ingresos, pct = tope ? Math.min(100, r.gastos / tope * 100) : 0;
+  return '<div class="plata6 area-' + libro + '">' +
+    '<nav class="seg6" aria-label="Libro"><a href="#plata"' + (libro === 'personal' ? ' aria-current="page"' : '') + '>Personal</a><a href="#plata/oficina"' + (libro === 'oficina' ? ' aria-current="page"' : '') + '>Oficina</a></nav>' +
+    '<section class="p6-heroe"><small>' + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda este mes') + '</small><b class="p6-queda' + (r.saldo < 0 ? ' neg' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b>' +
+      '<div class="p6-dos"><div><small>Gastaste' + (gHoy ? ' · ' + fmtSoles(gHoy) + ' hoy' : '') + '</small><b>' + fmtSoles(r.gastos) + '</b><span class="p6-barra rojo" aria-hidden="true"><i style="width:' + pct.toFixed(0) + '%"></i></span>' + (pres ? '<small>de ' + fmtSoles(pres) + ' de presupuesto</small>' : '') + '</div>' +
+      '<div><small>Entró</small><b class="ing">' + fmtSoles(r.ingresos) + '</b><span class="p6-barra verde" aria-hidden="true"><i style="width:' + (r.ingresos ? 100 : 0) + '%"></i></span></div></div>' +
+      '<div class="p6-btns"><button type="button" class="btn pri" data-acc="monto" data-libro="' + libro + '" data-ing="0">− Gasto</button><button type="button" class="btn" data-acc="monto" data-libro="' + libro + '" data-ing="1">+ Ingreso</button></div></section>' +
+    (pagos.length ? tarjeta({ titulo: 'Pagos fijos', n: pagos.filter((x) => x.ok).length + '/' + pagos.length,
+      cuerpo: filas(pagos.map(({ p, dia, ok }) => { const n = diasEntre(hoy(), dia);
+        return fila({ inicio: casilla(ok, 'cal-pago', p.id, (ok ? 'Desmarcar: ' : 'Pagado: ') + p.titulo, ' data-ym="' + ym + '"'), titulo: p.titulo, acc: 'pago-editar', id: p.id, clase: ok ? 'hecha' : '',
+          meta: '<b class="mono">' + fmtSoles(p.monto || 0) + '</b> · día ' + +dia.slice(8) + ' ' + (ok ? '<span class="pill">pagado</span>' : n < 0 ? pildora('vencido', 'venció') : n <= 3 ? pildora('pronto', n === 0 ? 'vence hoy' : 'en ' + n + ' días') : '') }); })) }) : '') +
+    tarjeta({ titulo: 'Movimientos', n: delM.length || null,
+      cuerpo: porDia.length ? porDia.map((g) => { const gd = g.l.reduce((t, x) => t + (esIngreso(x) ? 0 : Math.abs(+x.monto || 0)), 0);
+        return '<div class="p6-dia"><span>' + cap(g.d === hoy() ? 'hoy' : fmtCorta(g.d)) + '</span>' + (gd ? '<span class="mono">−' + fmtSoles(gd) + '</span>' : '') + '</div>' +
+          filas(g.l.map((x) => { const ing = esIngreso(x); return fila({ titulo: x.titulo || (ing ? 'Ingreso' : 'Gasto'), acc: 'fin-editar', id: x.id, meta: esc(x.extra.categoria || ''), final: '<b class="mono monto ' + (ing ? 'ingreso' : 'gasto') + '">' + (ing ? '+' : '−') + fmtSoles(Math.abs(+x.monto || 0)) + '</b>' }); })); }).join('')
+        : vacio('Aún nada este mes', 'Toca «− Gasto» o escribe en el + «almuerzo 25».') }) +
+    '<a class="btn p6-detalle" href="#finanzas' + (libro === 'oficina' ? '/oficina' : '') + '">Ver todo el detalle: categorías, presupuesto, informe y Excel</a>' +
+    '</div>';
+}
+
 export function vistaFinanzas(param) {
   const libro = param === 'oficina' ? 'oficina' : 'personal';
   return explica('<b>Tus dos libros de cuentas, cada uno por su lado.</b> El personal (con lo de Estudios y Deporte en su área) y el de la oficina. Los pagos fijos, cobros y préstamos se anotan aquí solos.') + vistaLibro(libro);

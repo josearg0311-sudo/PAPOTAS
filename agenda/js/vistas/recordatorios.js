@@ -68,6 +68,31 @@ export function vistaListas() {
     '<div class="fila-botones izq"><button type="button" class="btn pri" data-acc="r-nueva-checklist">' + ico('i-plus') + 'Nueva lista para marcar</button></div>';
 }
 
+/* LISTAS (Agenda 6, #listas): todas tus listas juntas —las de recordatorios y
+   las para marcar— cada una con su anillo de avance. Tocar una la abre
+   (#listas/<id>); «Todo lo pendiente» las junta por día. */
+export function vistaListas6(param) {
+  if (param) {
+    ui.lista = param === 'todos' ? '' : param;
+    const l = ui.lista ? buscarElemento(ui.lista) : null;
+    if (ui.lista && (!l || l.borrado)) ui.lista = '';
+    return '<div class="lista6-det"><a class="volver-panel" href="#listas">' + ico('i-izq') + 'Listas</a>' + vistaRecordatorios() + '</div>';
+  }
+  const anillo = (ok, tot) => { const c = 113.1, f = tot ? ok / tot : 0; return '<svg class="l6-anillo" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18"/><circle class="v" cx="22" cy="22" r="18" stroke-dasharray="' + c + '" stroke-dashoffset="' + (c * (1 - f)).toFixed(1) + '"/></svg>'; };
+  const todos = pendientesVisibles().filter((x) => x.estado !== 'hecho'), hoyN = todos.filter((x) => x.fechas.inicio && x.fechas.inicio <= hoy()).length;
+  const tarj = listas().map((l) => {
+    const p = pendientesDe(l.id), ok = p.filter((x) => x.estado === 'hecho').length, faltan = p.filter((x) => x.estado !== 'hecho');
+    return { l, p, ok, faltan, check: esChecklist(l) };
+  }).filter((x) => x.p.length || !x.l.extra.sistema)
+    .sort((a, b) => (b.faltan.length ? 1 : 0) - (a.faltan.length ? 1 : 0));
+  return '<div class="listas6">' +
+    '<a class="l6 l6-todo" href="#listas/todos"><span class="l6-n">' + todos.length + '</span><b>Todo lo pendiente</b><small>' + (hoyN ? hoyN + ' para hoy' : 'nada para hoy') + ' · ordenado por día</small></a>' +
+    tarj.map(({ l, p, ok, faltan, check }) => '<a class="l6" href="#listas/' + esc(l.id) + '">' + anillo(ok, p.length) +
+      '<b>' + esc(l.titulo) + '</b><small>' + (p.length ? ok + ' de ' + p.length + (faltan.length ? ' · ' + esc(faltan.slice(0, 2).map((x) => x.titulo).join(', ')) + (faltan.length > 2 ? '…' : '') : ' · todo listo ✓') : (check ? 'vacía' : 'sin recordatorios')) + '</small></a>').join('') +
+    '<button type="button" class="l6 l6-nueva" data-acc="r-nueva-checklist">' + ico('i-plus') + '<b>Nueva lista</b><small>o escribe en el + «compras: leche, pan»</small></button>' +
+    '</div>';
+}
+
 export function vistaRecordatorios() {
   const h = hoy(), l = ui.lista ? buscarElemento(ui.lista) : null;
   if (ui.lista && (!l || l.borrado)) ui.lista = '';
@@ -128,8 +153,8 @@ export function vistaRecordatorios() {
 
 export const acciones = {
   saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
-  'r-nueva-checklist'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; ui.ver = {}; location.hash = '#recordatorios'; }, 'checklist'); },
-  'r-lista-ir'(b) { ui.lista = b.dataset.id; ui.ver = {}; if (location.hash !== '#recordatorios') location.hash = '#recordatorios'; else return true; },
+  'r-nueva-checklist'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; ui.ver = {}; location.hash = '#listas/' + id; }, 'checklist'); },
+  'r-lista-ir'(b) { ui.lista = b.dataset.id; ui.ver = {}; location.hash = '#listas/' + b.dataset.id; },
   'r-lista'(b) { ui.lista = b.dataset.v; ui.ver = {}; ui.sel = null; return true; },
   'r-sel-ini'() { ui.sel = []; return true; },
   'r-sel-fin'() { ui.sel = null; return true; },
