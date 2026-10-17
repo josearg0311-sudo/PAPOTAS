@@ -35,6 +35,7 @@ const cambiar = (de, a) => { if (!html.includes(de)) throw new Error('No encontr
 cambiar('<link rel="icon" type="image/svg+xml" href="iconos/icono.svg">', '<link rel="icon" type="image/svg+xml" href="' + datos('iconos/icono.svg', 'image/svg+xml') + '">');
 cambiar('<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">', '<link rel="apple-touch-icon" href="' + datos('iconos/apple-touch-icon.png', 'image/png') + '">');
 cambiar('<link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>\n', '');
+cambiar('<link rel="preload" href="fuentes/fraunces.woff2" as="font" type="font/woff2" crossorigin>\n', '');
 cambiar(/<link rel="stylesheet" href="css\/tokens.css">\n<link rel="stylesheet" href="css\/base.css">\n<link rel="stylesheet" href="css\/componentes.css">\n<link rel="stylesheet" href="css\/vistas.css">/.exec(html)[0], '<style>\n' + css.replace(/<\/style/gi, '<\\/style') + '\n</style>');
 cambiar('<script type="module" src="js/app.js"></script>', '<!-- programa: va al final, ver abajo -->');
 const dic = leer('diccionario/palabras-es.txt');

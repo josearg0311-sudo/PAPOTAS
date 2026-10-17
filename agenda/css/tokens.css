@@ -1,53 +1,58 @@
 /* ==========================================================================
-   SISTEMA DE DISEÑO «SEÑAL» · Agenda 5
-   Tu estilo de la v4.5 (paleta «Negro»: negro puro, tarjetas #121214, azul
-   #1D45C4, letra Plus Jakarta, títulos grandes y gruesos, brillo de color en
-   la esquina de las tarjetas) + un toque técnico (cuadrícula tenue, etiquetas
-   y horas en Martian Mono) y didáctico (modo guía, recorrido).
+   IDENTIDAD «CUADERNO» · Agenda 5 (desde la 5.5)
+   La Agenda tiene su propia cara, distinta de PAPOTAS: una libreta.
+   - Tinta azul noche (oscuro) o papel crema (claro), con renglones tenues.
+   - Marcatextos amarillo como acento: lo de hoy y los botones principales.
+   - Títulos con serifa (Fraunces), texto en Plus Jakarta.
+   - Tarjetas lisas como hojas, sin brillos de color; el espacio se marca
+     con un punto de su color.
    Regla: todo color sale de estos tokens. Nada de colores sueltos.
    ========================================================================== */
 @font-face { font-family: 'Plus Jakarta Sans'; src: url('../fuentes/plus-jakarta.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: 'Fraunces'; src: url('../fuentes/fraunces.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
 
 :root {
   --f-texto: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --f-mono: var(--f-texto);   /* como la v4.5: las cifras también en Plus Jakarta (con números parejos) */
-  --radio: 20px; --radio-chico: 12px; --radio-btn: 12px;
+  --f-titulo: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --f-mono: var(--f-texto);   /* cifras en Plus Jakarta con números parejos */
+  --radio: 18px; --radio-chico: 12px; --radio-btn: 12px;
   --toque: 44px;                       /* tamaño mínimo para el dedo */
   --ancho-lateral: 248px;
 
-  /* Oscuro (por defecto) */
-  --fondo: #000000; --rejilla: rgba(255,255,255,.022);
-  --superficie: #121214; --superficie-2: #1C1C1E; --superficie-3: #26262A;
-  --tinta: #F5F5F7; --tinta-2: #A1A1A6; --tinta-3: #8A8A90;
-  --borde: #26262A; --brillo: rgba(255,255,255,.05);
-  --acento: #1D45C4; --acento-txt: #7B9AF2; --sobre-acento: #FFFFFF; --acento-suave: #0A1430;
-  --rojo: #FF6B61; --rojo-suave: #2B0F0D; --ambar: #FFD60A; --ambar-suave: #2A2406; --verde: #30D158; --verde-suave: #0E2415;
-  --velo: rgba(0,0,0,.66);
-  --sombra: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -18px rgba(0,0,0,.9);
-  --sombra-alta: 0 18px 50px -12px rgba(0,0,0,.85);
+  /* Oscuro (por defecto): tinta azul noche */
+  --fondo: #0D1322; --rejilla: rgba(160,180,230,.045);
+  --superficie: #151D30; --superficie-2: #1C263C; --superficie-3: #26324C;
+  --tinta: #EEF1F8; --tinta-2: #AEB7CA; --tinta-3: #8E99B0;
+  --borde: #263149; --brillo: rgba(255,255,255,.04);
+  --acento: #F6C945; --acento-txt: #F6C945; --sobre-acento: #1A1405; --acento-suave: #2E2813;
+  --rojo: #FF7A70; --rojo-suave: #34161A; --ambar: #FFA552; --ambar-suave: #33220F; --verde: #4ADE80; --verde-suave: #0F2A1F;
+  --velo: rgba(5,8,16,.7);
+  --sombra: 0 1px 0 rgba(255,255,255,.03) inset, 0 10px 26px -18px rgba(0,0,0,.8);
+  --sombra-alta: 0 18px 50px -12px rgba(0,0,0,.75);
 
-  /* Áreas (los colores de tus espacios en la v4.5) */
-  --a-personal: #5AA9FF; --a-personal-s: #0B1E33; --a-personal-t: #A9D1FF;
-  --a-estudios: #2DD4BF; --a-estudios-s: #0A2925; --a-estudios-t: #8BEDE0;
-  --a-oficina: #94A3B8;  --a-oficina-s: #1A1F27;  --a-oficina-t: #CBD5E1;
-  --a-deporte: #4ADE80;  --a-deporte-s: #0C2616;  --a-deporte-t: #9EF0B8;
+  /* Espacios */
+  --a-personal: #6CB2FF; --a-personal-s: #13243D; --a-personal-t: #B3D7FF;
+  --a-estudios: #3ED9C4; --a-estudios-s: #0F2A30; --a-estudios-t: #95EEE2;
+  --a-oficina: #A3B1C6;  --a-oficina-s: #1D2537;  --a-oficina-t: #D0D9E6;
+  --a-deporte: #5BE38E;  --a-deporte-s: #102B22;  --a-deporte-t: #A5F2C0;
   color-scheme: dark;
 }
 
 :root[data-tema="claro"] {
-  --fondo: #FFFFFF; --rejilla: rgba(0,0,0,.03);
-  --superficie: #F4F4F6; --superficie-2: #ECECEF; --superficie-3: #E3E3E7;
-  --tinta: #0A0A0A; --tinta-2: #5E5E63; --tinta-3: #636368;
-  --borde: #E3E3E7; --brillo: rgba(255,255,255,.7);
-  --acento: #1A3FB0; --acento-txt: #1A3FB0; --sobre-acento: #FFFFFF; --acento-suave: #E6ECFF;
-  --rojo: #C4271C; --rojo-suave: #FDECEA; --ambar: #8A6500; --ambar-suave: #FFF6D6; --verde: #137036; --verde-suave: #E6F6EB;
-  --velo: rgba(10,10,20,.45);
-  --sombra: 0 1px 2px rgba(0,0,0,.04), 0 10px 24px -18px rgba(0,0,0,.25);
-  --sombra-alta: 0 18px 50px -16px rgba(0,0,0,.35);
-  --a-personal: #1F6FEB; --a-personal-s: #E3EEFF; --a-personal-t: #144FB0;
-  --a-estudios: #0F8F80; --a-estudios-s: #DDF5F1; --a-estudios-t: #0A665E;
-  --a-oficina: #56606B;  --a-oficina-s: #E9ECF0;  --a-oficina-t: #3B434C;
-  --a-deporte: #1E8A4C;  --a-deporte-s: #E2F4E9;  --a-deporte-t: #146637;
+  /* Claro: papel crema y tinta */
+  --fondo: #F6F2E8; --rejilla: rgba(40,60,110,.06);
+  --superficie: #FFFDF7; --superficie-2: #F1ECDF; --superficie-3: #E6DFCF;
+  --tinta: #18203A; --tinta-2: #4C5470; --tinta-3: #596079;
+  --borde: #E3DCCB; --brillo: rgba(255,255,255,.7);
+  --acento: #F2C230; --acento-txt: #7A5300; --sobre-acento: #1A1405; --acento-suave: #FBEFC4;
+  --rojo: #B8261B; --rojo-suave: #FBE8E4; --ambar: #A04B00; --ambar-suave: #FDEBD8; --verde: #137036; --verde-suave: #E3F3E6;
+  --velo: rgba(24,32,58,.45);
+  --sombra: 0 1px 2px rgba(40,30,10,.05), 0 10px 24px -18px rgba(40,30,10,.3);
+  --sombra-alta: 0 18px 50px -16px rgba(40,30,10,.35);
+  --a-personal: #1F63D6; --a-personal-s: #E2ECFC; --a-personal-t: #144BA8;
+  --a-estudios: #0E8475; --a-estudios-s: #DCF2EE; --a-estudios-t: #0A625A;
+  --a-oficina: #545E6E;  --a-oficina-s: #E9EAEC;  --a-oficina-t: #39414E;
+  --a-deporte: #1C8048; --a-deporte-s: #E0F2E6;  --a-deporte-t: #146637;
   color-scheme: light;
 }
 

@@ -8,18 +8,12 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Se ve como tu Agenda de siempre', '🏠', 'Barra lateral con tus espacios, «Tus espacios» en Hoy, cada espacio con sus emojis, cifras y mosaicos, y Hábitos y Dinero como antes.', '#hoy'],
-  ['Hábitos', '🔥', 'Tus hábitos de hoy en anillos y los últimos 14 días, separados por espacio.', '#habitos'],
-  ['Buscar', '🔎', 'Toca la lupa (o la tecla /) y escribe lo que buscas o lo que quieres hacer.', 'buscar'],
-  ['Hoy', '☀️', '«Qué hacer ahora» por área, lo siguiente de tu día, cómo viene mañana y tus números al final del día.', '#hoy'],
-  ['Recordatorios', '✅', 'Ordena los atrasados uno por uno, elige varios a la vez, comparte y duplica listas.', '#recordatorios'],
-  ['Agenda', '📅', 'Vistas Año y Lista, huecos libres del día y traer eventos de otro calendario (.ics).', '#agenda'],
-  ['Finanzas', '💰', '«Cómo vas» frente al mes pasado, cuánto puedes gastar por día, gastos que se repiten e informe en PDF.', '#finanzas'],
-  ['Notas y diario', '📝', 'Pasa una nota a lista para marcar, compártela; el diario trae una pregunta del día y «Un día como hoy».', '#notas/diario'],
-  ['Personal', '🏠', 'Menú con ideas peruanas 🎲, saludar por cumpleaños y recordatorio del regalo.', '#areas/personal/menu'],
-  ['Oficina', '💼', 'Recuerda un cobro por WhatsApp con el mensaje ya escrito.', '#areas/oficina/cobros'],
-  ['Deporte', '🏃', 'Tu IMC con tu talla y un cronómetro de descanso entre series.', '#areas/deporte/peso'],
-  ['Agregar rápido', '🎤', 'Dicta con tu voz (en los teléfonos que lo permiten).', 'agregar']
+  ['Cara nueva, propia', '📒', 'La Agenda ahora es una libreta: tinta azul noche (o papel crema en claro), títulos con serifa y un marcatextos amarillo para lo de hoy.', '#hoy'],
+  ['Recordatorios', '✅', 'Abajo, a un toque. Desliza una fila para moverla o terminarla.', '#recordatorios'],
+  ['Listas para marcar', '☑️', 'Compras, maleta, mochila… cada lista con su avance y lo que falta.', '#listas'],
+  ['Agenda y Horario', '📅', 'Tu día, semana y mes; y el Horario con tus clases y eventos de la semana por hora.', '#horario'],
+  ['Cuentas', '💰', 'Personal y Oficina separadas, con lo gastado y lo que ingresó; también en Hoy.', '#cuentas'],
+  ['Añadir rápido en Hoy', '⚡', 'Escribe «llamar a Ana mañana 10am» y queda con fecha y hora.', '#hoy']
 ];
 
 export function abrirNovedades() {

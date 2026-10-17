@@ -12,7 +12,7 @@ export function aplicarTema() {
   const t = temaEfectivo();
   document.documentElement.setAttribute('data-tema', t);
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', t === 'claro' ? '#FFFFFF' : '#000000');
+  if (meta) meta.setAttribute('content', t === 'claro' ? '#F6F2E8' : '#0D1322');
 }
 if (medio && medio.addEventListener) medio.addEventListener('change', () => { if (preferencias().tema === 'auto') aplicarTema(); });
 alCambiarPref(aplicarTema);

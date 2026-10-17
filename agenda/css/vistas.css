@@ -865,3 +865,35 @@ body[data-seccion="recordatorios"] .pantalla { padding-bottom: 200px; }
 @media (min-width: 760px) { .hr-cab, .hr-cuerpo { grid-template-columns: 54px repeat(7, minmax(0, 1fr)); } .hr-bloque b { font-size: 13px; } .hr-bloque { padding: 4px 6px; } }
 .hr-bloque b { overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-hyphens: auto; }
 @media (max-width: 759px) { .hr-bloque { padding: 2px 3px; } .hr-bloque b { font-size: 10.5px; font-weight: 650; } .hr-bloque small { display: none; } }
+
+/* ==========================================================================
+   IDENTIDAD «CUADERNO» (5.5): la Agenda con cara propia, no la de PAPOTAS.
+   Hojas lisas sobre papel con renglones, títulos con serifa, marcatextos
+   amarillo para lo de hoy y lo principal, punto de color para cada espacio.
+   ========================================================================== */
+body { background-image: repeating-linear-gradient(to bottom, transparent 0 31px, var(--rejilla) 31px 32px); background-attachment: fixed; }
+.pag-cab h1, .encabezado h1, .heroe h2, .ph-saludo, .pe-nom, .area-cab h2, .herr-cab h1, .t-cab h2, .seccion-t,
+.hoja-cab h2, .tour-caja h2, .migracion-caja h2, .candado b, .grupo-ajustes, .lateral .marca b, .lt-cab b, .rep-q, .ord-tarjeta b {
+  font-family: var(--f-titulo); font-weight: 650; letter-spacing: -.015em; font-variation-settings: 'SOFT' 50, 'WONK' 0;
+}
+.ph-saludo, .pe-nom, .pag-cab h1, .area-cab h2, .herr-cab h1 { font-weight: 600; letter-spacing: -.02em; }
+.t-cab h2 { font-size: 21px; }
+
+/* Tarjetas = hojas lisas (sin brillos de color) */
+.tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: var(--radio); box-shadow: var(--sombra); }
+.t-cab h2::before { width: 10px; height: 10px; border-radius: 50%; }
+.mosaico, .mosaico.ancho, .area-tarjeta { background: var(--superficie); }
+.mosaico { border-top: 3px solid var(--m, var(--a, var(--acento))); }
+.siguiente { border-left: 0; border-top: 3px solid var(--a, var(--acento)); }
+
+/* Barra de abajo: el marcatextos marca dónde estás */
+.barra { background: color-mix(in srgb, var(--superficie) 96%, transparent); }
+.barra a[aria-current="page"] { color: var(--tinta); font-weight: 750; }
+.barra a[aria-current="page"] .i { background: var(--acento); color: var(--sobre-acento); }
+.fab { border-radius: 18px; box-shadow: 0 10px 24px -6px rgba(0, 0, 0, .45); }
+@media (min-width: 980px) {
+  .lateral { background: var(--superficie); }
+  .nav-lat a[aria-current="page"] { background: var(--acento-suave); }
+}
+.t-cab h2 .ver-link, .t-cab h2 .n { font-family: var(--f-texto); letter-spacing: 0; }
+.ver-link { white-space: nowrap; }

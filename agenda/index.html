@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#0D1322">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="Tu organizador personal: Personal, Estudios, Oficina y Deporte.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="iconos/icono.svg">
 <link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
 <link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fuentes/fraunces.woff2" as="font" type="font/woff2" crossorigin>
 <script>
 /* Tema ANTES de pintar, para que no parpadee. Lee la preferencia nueva y,
    si aún no existe, la que tenías en la versión anterior. */
@@ -141,12 +142,12 @@
   function falta(que) {
     if (document.getElementById('faltaPrograma')) return;
     var d = document.createElement('div'); d.id = 'faltaPrograma';
-    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#000;color:#F5F5F7;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
+    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#0D1322;color:#EEF1F8;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
     d.innerHTML = '<div style="max-width:520px;margin:0 auto"><h1 style="font-size:24px;margin:0 0 12px">La Agenda no se cargó completa</h1>' +
       '<p>Faltan archivos del programa (' + que + '). <b>Tus datos están a salvo</b> en este aparato: no se tocaron.</p>' +
       '<p><b>Si acabas de publicar:</b> en Netlify arrastra la <b>carpeta completa</b> (la que tiene dentro <code>index.html</code>, <code>css</code>, <code>js</code>, <code>fuentes</code>, <code>iconos</code> y <code>diccionario</code>), no solo el archivo index.html.</p>' +
       '<p>Para volver a la versión anterior: Netlify → Deploys → la publicación anterior → «Publish deploy».</p>' +
-      '<p><button type="button" onclick="location.reload()" style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#1D45C4;color:#fff;font:600 15px system-ui">Intentar de nuevo</button></p></div>';
+      '<p><button type="button" onclick="location.reload()" style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#F6C945;color:#1A1405;font:600 15px system-ui">Intentar de nuevo</button></p></div>';
     document.body.appendChild(d);
   }
   window.addEventListener('load', function () {
