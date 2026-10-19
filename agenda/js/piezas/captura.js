@@ -17,6 +17,7 @@ import { leerMonto, fmtSoles } from '../util/dinero.js';
 import { hoy, fmtCorta, fmtHora, sumarDias } from '../util/fechas.js';
 import { preferencias } from '../datos/preferencias.js';
 import { area } from '../datos/areas.js';
+import { filtro } from '../datos/filtro.js';   // sin #espacio en el texto, va al espacio elegido arriba
 import { puedeDictar, dictar } from './dictado.js';
 
 const EJEMPLOS = ['almuerzo 25; taxi 10', 'llamar a Ana mañana 10am', 'compras: leche, pan, café', 'gym cada lunes 7am', 'taxi 15 ayer', 'cobré 1200 oficina'];
@@ -58,7 +59,7 @@ function detalle(e) {
   if (e.tipo === 'gasto' || e.tipo === 'ingreso') return [SIGNO[e.tipo], NOMBRES[e.tipo] + (e.monto ? ' · ' + fmtSoles(e.monto) : ''), e.monto ? esc(e.titulo) + ' · ' + esc(e.categoria || 'Otros') + ' · ' + libro + (e.fecha && e.fecha !== hoy() ? ' · ' + cuando(e.fecha) : '') : 'Falta el monto (ej. «almuerzo 25»)'];
   if (e.tipo === 'lista') return [SIGNO.lista, (listaLlamada(e.titulo) ? 'Sumar a la lista · ' : 'Lista · ') + esc(e.titulo), e.cosas.length ? e.cosas.length + (e.cosas.length === 1 ? ' cosa: ' : ' cosas: ') + esc(e.cosas.join(', ')) : 'Escribe sus cosas después de «:», separadas por comas'];
   if (e.tipo === 'nota') return [SIGNO.nota, 'Nota', esc(e.titulo)];
-  return [SIGNO[e.tipo], NOMBRES[e.tipo] + ' · ' + cuando(e.fecha || (e.tipo === 'evento' ? hoy() : null), e.hora) + esc(rep(e.repetir)), esc(e.titulo) + (e.area && e.area !== 'personal' ? ' · ' + esc(area(e.area).nombre) : '')];
+  return [SIGNO[e.tipo], NOMBRES[e.tipo] + ' · ' + cuando(e.fecha || (e.tipo === 'evento' ? hoy() : null), e.hora) + esc(rep(e.repetir)), esc(e.titulo) + ((e.area || filtro()) && (e.area || filtro()) !== 'personal' ? ' · ' + esc(area(e.area || filtro()).nombre) : '')];
 }
 
 function pintarPrevia() {
@@ -116,15 +117,15 @@ function crear(e) {
     return [ids.concat(c.map((x) => x.id)), 'Lista ' + l.titulo + (c.length ? ' (+' + c.length + ')' : '')];
   }
   if (e.tipo === 'nota') {
-    const it = poner(base({ id: nuevoId('nota'), tipo: 'nota', area: 'personal', titulo: String(e.titulo).slice(0, 120), notas: e.notas || '', extra: { fija: false } }));
+    const it = poner(base({ id: nuevoId('nota'), tipo: 'nota', area: filtro() || 'personal', titulo: String(e.titulo).slice(0, 120), notas: e.notas || '', extra: { fija: false } }));
     return [[it.id], 'Nota'];
   }
   if (e.tipo === 'evento') {
     const fin = e.hora ? (+e.hora.slice(0, 2) >= 23 ? '23:59' : String(+e.hora.slice(0, 2) + 1).padStart(2, '0') + e.hora.slice(2)) : null;
-    const it = poner(base({ id: nuevoId('ev'), tipo: 'evento', area: e.area || 'personal', titulo: e.titulo, todoElDia: !e.hora, aviso: e.hora ? 15 : null, repetir: e.repetir || '', fechas: Object.assign(modeloVacio().fechas, { inicio: e.fecha || hoy(), hora: e.hora, horaFin: fin }), extra: { tipoEvento: /reuni/i.test(e.titulo) ? 'reunion' : /cita/i.test(e.titulo) ? 'cita' : 'evento', lugar: '' } }));
+    const it = poner(base({ id: nuevoId('ev'), tipo: 'evento', area: e.area || filtro() || 'personal', titulo: e.titulo, todoElDia: !e.hora, aviso: e.hora ? 15 : null, repetir: e.repetir || '', fechas: Object.assign(modeloVacio().fechas, { inicio: e.fecha || hoy(), hora: e.hora, horaFin: fin }), extra: { tipoEvento: /reuni/i.test(e.titulo) ? 'reunion' : /cita/i.test(e.titulo) ? 'cita' : 'evento', lugar: '' } }));
     return [[it.id], 'Evento ' + cuando(it.fechas.inicio, it.fechas.hora)];
   }
-  const it = poner(base({ id: nuevoId('pend'), tipo: 'pendiente', area: e.area || 'personal', titulo: e.titulo, prioridad: e.prioridad || 'baja', plazoLegal: !!e.plazoLegal, etiquetas: e.etiquetas || [], aviso: !!e.hora, repetir: e.repetir || '', lista: LISTA_RECORDATORIOS, fechas: Object.assign(modeloVacio().fechas, { inicio: e.algunDia ? null : (e.fecha || hoy()), hora: e.hora }) }));
+  const it = poner(base({ id: nuevoId('pend'), tipo: 'pendiente', area: e.area || filtro() || 'personal', titulo: e.titulo, prioridad: e.prioridad || 'baja', plazoLegal: !!e.plazoLegal, etiquetas: e.etiquetas || [], aviso: !!e.hora, repetir: e.repetir || '', lista: LISTA_RECORDATORIOS, fechas: Object.assign(modeloVacio().fechas, { inicio: e.algunDia ? null : (e.fecha || hoy()), hora: e.hora }) }));
   return [[it.id], 'Recordatorio ' + cuando(it.fechas.inicio, it.fechas.hora)];
 }
 

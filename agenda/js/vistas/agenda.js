@@ -1,6 +1,7 @@
 /* AGENDA: tu tiempo. Día (línea de tiempo con bloques a escala), Semana y
    Mes, con filtro por área, feriados del Perú y vencimientos (plazo legal
    primero, ⚠️ vence pronto, 🔴 vencido). Toca un hueco para crear un evento. */
+import { filtro } from '../datos/filtro.js';
 import { hoy, sumarDias, inicioSemana, diaSemana, DIAS3, MESES, fmtFecha, fmtCorta, fmtLarga, fmtHora, horaAhora, minutosAhora, relativo, plazo } from '../util/fechas.js';
 import { ico, vacio, esc } from '../util/dom.js';
 import { fmtSoles } from '../util/dinero.js';
@@ -217,7 +218,7 @@ function previaIcs(texto, nombre) {
 const PX_H = 44;   // alto de una hora
 export function vistaHorario() {
   const p = preferencias(), h = hoy(), ini = inicioSemana(ui.horario || h, p.semanaLunes), dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
-  const porDia = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente'));
+  const porDia = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente' && (!ui.area || b.area === ui.area)));
   const todos = porDia.flat(), m = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
   let iniM = m(p.vigilia.ini), finM = m(p.vigilia.fin) || 1440; if (finM <= iniM) finM = 1440;
   todos.forEach((b) => { iniM = Math.min(iniM, Math.floor(b.ini / 60) * 60); finM = Math.max(finM, Math.min(1440, Math.ceil(b.fin / 60) * 60)); });
@@ -237,13 +238,14 @@ export function vistaHorario() {
           bs.map((b) => '<button type="button" class="hr-bloque area-' + area(b.area).id + '" style="top:' + (y(b.ini) + 1) + 'px;height:' + Math.max(18, (b.fin - b.ini) / 60 * PX_H - 2) + 'px" data-acc="' + (b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '" aria-label="' + esc(b.titulo) + ', ' + fmtHora(b.hIni, p.formatoHora) + ' a ' + fmtHora(b.hFin, p.formatoHora) + '"><b>' + esc(b.titulo) + '</b><small>' + fmtHora(b.hIni, p.formatoHora) + '</small></button>').join('') + '</div>').join('') +
       '</div></section>' +
     (todos.length ? '' : vacio('Semana sin horario', 'Agrega tus clases en Estudios → Cursos, o un evento que se repita cada semana.')) +
-    '<div class="fila-botones izq"><button type="button" class="btn pri" data-acc="cal-nuevo" data-d="' + h + '">' + ico('i-plus') + 'Evento</button><a class="btn" href="#areas/estudios/cursos">' + ico('i-birrete') + 'Horario de clases</a></div>';
+    '<div class="fila-botones izq"><button type="button" class="btn pri" data-acc="cal-nuevo" data-d="' + h + '">' + ico('i-plus') + 'Evento</button><a class="btn" href="#calendario/clases">' + ico('i-birrete') + 'Horario de clases</a></div>';
 }
 
 /* ---------- PLAN (Agenda 6): Agenda y Horario juntos ----------
    Semana = tu horario por horas + lo que vence; Día = la línea de tiempo;
    Mes = el calendario. Un solo lugar para tu tiempo. */
 export function vistaPlan() {
+  ui.area = filtro();   // el filtro por espacio de arriba manda
   const d = ui.dia || hoy(), modo = ui.plan;
   const seg = '<div class="seg6" role="group" aria-label="Vista">' + [['semana', 'Semana'], ['dia', 'Día'], ['mes', 'Mes']].map((o) =>
     '<button type="button" data-acc="plan-modo" data-v="' + o[0] + '" aria-pressed="' + (modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>';
@@ -256,7 +258,7 @@ export function vistaPlan() {
 /* Tu semana en números: cuántas cosas, horas ocupadas y el día más cargado */
 function resumenSemana() {
   const p = preferencias(), ini = inicioSemana(ui.horario || hoy(), p.semanaLunes), dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
-  const bl = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente'));
+  const bl = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente' && (!ui.area || b.area === ui.area)));
   const n = bl.reduce((t, x) => t + x.length, 0), min = bl.reduce((t, x) => t + x.reduce((u, b) => u + (b.fin - b.ini), 0), 0);
   if (!n) return '';
   const top = bl.reduce((a, x, i) => (x.length > bl[a].length ? i : a), 0);
@@ -271,13 +273,13 @@ document.addEventListener('click', (ev) => {
   const min = +cuerpo.dataset.ini + Math.floor(y / PX_H) * 60, hh = Math.floor(min / 60);
   if (hh < 0 || hh > 23) return;
   const hora = String(hh).padStart(2, '0') + ':00', fin = String(Math.min(23, hh + 1)).padStart(2, '0') + ':00';
-  nuevoEvento(() => window.dispatchEvent(new Event('agenda:repintar')), { fecha: col.dataset.dia, hora, horaFin: fin, area: 'personal' });
+  nuevoEvento(() => window.dispatchEvent(new Event('agenda:repintar')), { fecha: col.dataset.dia, hora, horaFin: fin, area: filtro() || 'personal' });
 });
 
 /* Lo que vence esta semana (pagos, cobros, plazos; el plazo legal primero) */
 function venceSemana() {
   const p = preferencias(), ini = inicioSemana(ui.horario || hoy(), p.semanaLunes);
-  const v = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i)).flatMap((d) => delDia(d).vencen.filter((x) => !x.hecho).map((x) => Object.assign({ dia: d }, x)));
+  const v = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i)).flatMap((d) => delDia(d, ui.area).vencen.filter((x) => !x.hecho).map((x) => Object.assign({ dia: d }, x)));
   if (!v.length) return '';
   return tarjeta({ titulo: 'Vence esta semana', n: v.length, cuerpo: '<div class="vence6">' + v.slice(0, 8).map((x) =>
     '<div class="v6-fila' + (x.plazoLegal ? ' legal' : '') + '"><span class="dot6 area-' + area(x.area).id + '"></span><span class="v6-t"><b>' + (x.plazoLegal ? '⚖️ ' : '') + esc(x.titulo) + '</b><small>' + esc(cap(relativo(x.dia))) + (x.monto ? ' · ' + fmtSoles(Math.abs(x.monto)) : '') + '</small></span>' +
@@ -285,14 +287,14 @@ function venceSemana() {
 }
 
 export function vistaAgenda() {
+  ui.area = filtro();
+  if (ui.modo !== 'ano' && ui.modo !== 'lista') ui.modo = 'ano';
   const d = ui.dia || hoy();
-  if (!preferencias().completo && (ui.modo === 'ano' || ui.modo === 'lista')) ui.modo = 'mes';
   const cuerpo = ui.modo === 'semana' ? vistaSemana(d) : ui.modo === 'mes' ? vistaMes(d) : ui.modo === 'ano' ? vistaAno(d) : ui.modo === 'lista' ? vistaLista() : vistaDia(d);
-  return tarjeta({ titulo: 'Tu tiempo', clase: 'agenda',
-    guia: '<b>Agenda = tu tiempo.</b> Eventos, clases, recordatorios y vencimientos (pagos, cobros, documentos y plazos) en vista de día, semana o mes. En la vista Día, <b>toca una hora vacía</b> para crear un evento ahí. Filtra por área con los botones de colores. <b>Año</b> muestra cumpleaños y plazos legales de cada mes; <b>Lista</b>, todo lo de los próximos 60 días.',
-    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['horario', 'Horario'], ['ano', 'Año'], ['lista', 'Lista']].filter((o) => preferencias().completo || o[0] !== 'ano' && o[0] !== 'lista').map((o) =>
-      '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + filtroAreas() + cuerpo }) +
-    (!preferencias().completo ? '' : '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
+  return tarjeta({ titulo: ui.modo === 'ano' ? 'Tu año' : 'Lo que viene', clase: 'agenda', sub: ui.modo === 'ano' ? 'Cada mes con sus cumpleaños y plazos legales. Toca un día para verlo.' : 'Todo lo de los próximos 60 días, en orden.',
+    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['ano', 'Año'], ['lista', 'Próximos 60 días']].map((o) =>
+      '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + cuerpo }) +
+    ('<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
     '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>');
 }
 
@@ -301,7 +303,7 @@ export const acciones = {
   'cal-modo'(b) { if (b.dataset.v === 'horario') { location.hash = '#horario'; return; } ui.modo = b.dataset.v; return true; },
   'cal-area'(b) { ui.area = b.dataset.v; return true; },
   'cal-dia'(b) { ui.dia = b.dataset.dia; return true; },
-  'cal-dia-ir'(b) { ui.dia = b.dataset.dia; ui.modo = 'dia'; return true; },
+  'cal-dia-ir'(b) { irADia(b.dataset.dia); if (location.hash !== '#calendario') { location.hash = '#calendario'; return; } return true; },
   'cal-hoy'() { ui.dia = hoy(); return true; },
   'cal-paso'(b) {
     const n = +b.dataset.n, d = ui.dia || hoy();

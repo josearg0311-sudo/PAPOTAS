@@ -1,5 +1,5 @@
 /* ARRANQUE de la Agenda 5.
-   La navegación usa la dirección (#hoy, #recordatorios, #areas/estudios…),
+   La navegación usa la dirección (#hoy, #calendario, #tareas/compras, #cuentas/cobros…),
    así el botón «atrás» del celular funciona como se espera. */
 import { $, ico, esc } from './util/dom.js';
 import { hoy, fmtCorta, fmtFecha, horaAhora, fmtHora, relativo } from './util/fechas.js';
@@ -15,19 +15,19 @@ import { cuandoSeGuarde } from './piezas/agregar-rapido.js';
 import { abrirCaptura } from './piezas/captura.js';
 import { abrirMonto } from './piezas/teclado-monto.js';
 import { vistaHoy, acciones as accHoy, alCambiarPrioridad, actualizarPomo } from './vistas/hoy.js';
-import { vistaRecordatorios, vistaListas6, acciones as accRec, alEscribir as alEscribirRec, alEnviar as alEnviarRec } from './vistas/recordatorios.js';
+import { vistaListas6, acciones as accRec, alEscribir as alEscribirRec, alEnviar as alEnviarRec } from './vistas/recordatorios.js';
 import { acciones as accPend, iniciarDeslizar } from './piezas/pendientes-ui.js';
 import { tic as ticPomo, corriendo as pomoCorre, restante as pomoResta, mmss } from './piezas/pomodoro.js';
 import { revisarAvisos } from './piezas/avisos.js';
 import { marcar, delDia as pendientesDeHoy, crearDesdeTexto } from './datos/pendientes.js';
 import { aPapelera } from './datos/datos.js';
 import { editarEvento } from './piezas/eventos-ui.js';
-import { vistaAgenda, vistaHorario, vistaPlan, irADia, alElegirIcs, acciones as accAgenda } from './vistas/agenda.js';
-import { vistaAreas, vistaArea, acciones as accAreas } from './vistas/areas.js';
-import { vistaMas } from './vistas/mas.js';
-import { vistaHabitos, acciones as accHabitos } from './vistas/habitos.js';
-import { vistaSeguimiento, acciones as accSeg } from './vistas/seguimiento.js';
-import { vistaFinanzas, vistaPlata, acciones as accFin } from './vistas/finanzas.js';
+import { vistaPlan, irADia, alElegirIcs, acciones as accAgenda } from './vistas/agenda.js';
+import { acciones as accAreas } from './vistas/areas.js';
+import { SECCIONES, herramienta, rutaNueva, barraFiltro, barraHerramientas, vistaHerramienta, vistaTu, ponerFiltro } from './vistas/secciones.js';
+import { acciones as accHabitos } from './vistas/habitos.js';
+import { acciones as accSeg } from './vistas/seguimiento.js';
+import { vistaPlata, acciones as accFin } from './vistas/finanzas.js';
 import { vistaNotasSeccion, acciones as accNotas, alEscribirNotas, alCambiarNotas } from './vistas/notas.js';
 import { acciones as accAdmin } from './vistas/admin.js';
 import { iniciarNube, config as nubeConfig, estadoNube } from './datos/nube.js';
@@ -44,33 +44,36 @@ import { cargar, empezarVacio } from './datos/datos.js';
 import { resumenAntiguo } from './datos/almacen.js';
 import { mostrarMigracion } from './piezas/migracion-ui.js';
 
-/* ---------- Secciones (Agenda 6) ----------
-   Cuatro lugares y un + que entiende todo: Hoy · Plan · [+] · Listas · Plata.
-   Celular: barra flotante con el + al centro. Laptop: una sola fila con la
-   marca, las secciones en una pastilla y una barra para escribir lo que sea.
-   Lo demás (Notas, Hábitos, Ajustes, la Agenda y las Cuentas en detalle) en Más. */
-const PRINCIPALES = [['hoy', 'Hoy', 'i-hoy'], ['plan', 'Calendario', 'i-cal'], ['listas', 'Listas', 'i-listas'], ['plata', 'Cuentas', 'i-dinero']];
-const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', plan: 'Calendario', plata: 'Cuentas', recordatorios: 'Recordatorios', listas: 'Listas', agenda: 'Agenda', horario: 'Horario', areas: 'Espacios', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Cuentas', notas: 'Notas', papelera: 'Papelera', habitos: 'Hábitos' };
-const SUBTITULOS = { plan: 'Todo lo que tiene fecha u hora: tu semana, tu día y tu mes', plata: 'Tu plata personal y la de la oficina, siempre separadas', recordatorios: 'Lo que tienes que hacer, por día', listas: 'Lo que tienes que hacer y lo que tienes que marcar, en un solo lugar', agenda: 'Tu tiempo: día, semana y mes', horario: 'Tu semana hora por hora: clases, trabajo y lo que se repite', finanzas: 'Personal y oficina, cada una por su lado', notas: 'Tus apuntes, cada uno en su espacio', habitos: 'Lo que haces seguido, espacio por espacio', seguimiento: 'Cómo vas en cada espacio', ajustes: 'Tu agenda, tu nube y tus datos', papelera: 'Lo que borraste, por 30 días', datos: 'Todo lo que tienes guardado', mas: 'Notas, hábitos y ajustes', areas: 'Tus cuatro espacios' };
+/* ---------- Secciones (Agenda 7) ----------
+   Ordenado por lo que haces: Hoy · Calendario · [Agregar] · Tareas · Cuentas
+   abajo (celular), y Notas, Buscar y Tú arriba. Personal, Estudios, Oficina y
+   Deporte son un filtro dentro de cada sección (vistas/secciones.js); sus
+   herramientas viven en la sección que les toca. Ya no hay «Más» ni «Mostrar todo». */
+const PRINCIPALES = [['hoy', 'Hoy', 'i-hoy'], ['calendario', 'Calendario', 'i-cal'], ['tareas', 'Tareas', 'i-listas'], ['cuentas', 'Cuentas', 'i-dinero']];
+const TITULOS = { hoy: 'Hoy', calendario: 'Calendario', tareas: 'Tareas', cuentas: 'Cuentas', notas: 'Notas', tu: 'Tú', ajustes: 'Ajustes', papelera: 'Papelera', datos: 'Tus datos' };
+const SUBTITULOS = { ajustes: 'Tu agenda, tu nube y tus datos', papelera: 'Lo que borraste, por 30 días', datos: 'Todo lo que tienes guardado' };
+Object.keys(SECCIONES).forEach((k) => { SUBTITULOS[k] = SECCIONES[k].sub; });
+/* Secciones con filtro por espacio arriba */
+const CON_FILTRO = ['calendario', 'tareas', 'cuentas', 'notas'];
 
 function leerRuta() {
-  const h = decodeURIComponent((location.hash || '').slice(1));
-  const [sec0, param0, sub] = h.split('/'), sec1 = sec0 === 'dinero' || sec0 === 'cuentas' ? 'plata' : sec0 === 'calendario' ? 'plan' : sec0;
-  /* Una sola casa por cosa: Recordatorios vive en Listas; en modo simple, la Agenda y las Cuentas «en detalle» viven en Calendario y Cuentas */
-  const sec = sec1 === 'recordatorios' ? 'listas' : !preferencias().completo && sec1 === 'agenda' ? 'plan' : !preferencias().completo && sec1 === 'finanzas' ? 'plata' : sec1;
-  const param = sec1 === 'recordatorios' ? (param0 || 'todos') : param0;
-  if (sec === 'areas' && param && AREAS.some((a) => a.id === param)) return { sec, param, sub: sub || '' };
-  if ((sec === 'seguimiento' && param === 'revision') || ((sec === 'finanzas' || sec === 'plata') && param === 'oficina') || (sec === 'notas' && param === 'diario') || (sec === 'listas' && param)) return { sec, param };
-  if (TITULOS[sec]) return { sec, param: '' };
-  return null;
+  let h = decodeURIComponent((location.hash || '').slice(1));
+  /* Las direcciones viejas (#plan, #listas, #plata, #areas/oficina/cobros…) se traducen */
+  const nueva = rutaNueva(h);
+  if (nueva != null && nueva !== h) { h = nueva; try { history.replaceState(null, '', '#' + h); } catch (e) { /* nada */ } }
+  const [sec, param = '', sub = ''] = h.split('/');
+  if (!TITULOS[sec]) return null;
+  const herr = herramienta(sec, param) ? param : '';
+  return { sec, param, sub, herr };
 }
 /* Atajos del ícono instalado de la v4.5 (mantener pulsado el ícono):
    #gasto, #ingreso, #anadir siguen funcionando en la versión nueva */
 const ATAJO_V45 = { gasto: 'gasto', ingreso: 'ingreso', anadir: 'recordatorio', tarea: 'recordatorio' };
 const atajoInicial = ATAJO_V45[(location.hash || '').slice(1)] || '';
-if (atajoInicial) { try { history.replaceState(null, '', atajoInicial === 'ingreso' || atajoInicial === 'gasto' ? '#plata' : '#hoy'); } catch (e) { /* nada */ } }
-let ruta = leerRuta() || { sec: preferencias().inicio, param: '' };
-function padre(sec) { return sec === 'recordatorios' ? 'listas' : sec === 'horario' || sec === 'agenda' ? 'plan' : sec === 'finanzas' ? 'plata' : ['notas', 'areas', 'seguimiento', 'habitos', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
+if (atajoInicial) { try { history.replaceState(null, '', atajoInicial === 'ingreso' || atajoInicial === 'gasto' ? '#cuentas' : '#hoy'); } catch (e) { /* nada */ } }
+function rutaInicial() { const n = rutaNueva(preferencias().inicio || 'hoy'); const sec = (n || preferencias().inicio || 'hoy').split('/')[0]; return { sec: TITULOS[sec] ? sec : 'hoy', param: '', sub: '', herr: '' }; }
+let ruta = leerRuta() || rutaInicial();
+function padre(sec) { return ['ajustes', 'papelera', 'datos'].includes(sec) ? 'tu' : sec; }
 
 /* ---------- Indicador de la nube (solo si la conectaste) ---------- */
 function haceCuanto(t) {
@@ -104,52 +107,50 @@ function pintarNav() {
   const actual = (sec, param) => (ruta.sec === sec && (param === undefined || ruta.param === param) ? ' aria-current="page"' : '');
   const pest = (x, extra) => '<a href="#' + x[0] + '" class="pest" data-ir="' + x[0] + '"' + (p === x[0] ? ' aria-current="page"' : '') + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' + (extra || '') + '</a>';
   $('lateral').innerHTML =
-    '<a class="marca" href="#hoy"><i class="logo" aria-hidden="true"></i><div><b>Agenda</b><small>' + (nombre ? 'de ' + esc(nombre.split(/\s+/)[0]) : 'Mi organización') + '</small></div></a>' +
-    '<nav class="archivador" aria-label="Secciones">' + PRINCIPALES.map((x) => pest(x, x[0] === 'listas' ? cuentaHtml(pend.length, atras > 0) : '')).join('') +
-    (preferencias().completo ? '<span class="pest-sep" aria-hidden="true"></span>' + AREAS.map((a) => '<a href="#areas/' + a.id + '" class="pest pest-esp area-' + a.id + '"' + actual('areas', a.id) + ' title="' + esc(a.nombre) + '" aria-label="' + esc(a.nombre) + '"><i class="pest-emoji" aria-hidden="true">' + esc(a.emoji || '') + '</i><span>' + esc(a.nombre) + '</span></a>').join('') : '') +
-    '<a href="#mas" class="pest pest-chica" data-ir="mas"' + (p === 'mas' && !(ruta.sec === 'areas' && ruta.param) ? ' aria-current="page"' : '') + '>' + ico('i-mas') + '<span>Más</span></a></nav>' +
+    '<a class="marca" href="#hoy"><i class="logo" aria-hidden="true"></i><div><b>Agenda</b>' + (nombre ? '<small>de ' + esc(nombre.split(/\s+/)[0]) + '</small>' : '') + '</div></a>' +
+    '<nav class="archivador" aria-label="Secciones">' + PRINCIPALES.concat([['notas', 'Notas', 'i-notas']]).map((x) => pest(x, x[0] === 'tareas' && atras ? cuentaHtml(atras, true) : '')).join('') + '</nav>' +
     '<button type="button" class="cap-barra" data-acc="captura">' + ico('i-plus') + '<span><b>Agregar</b> · escribe «almuerzo 25», «llamar a Ana mañana 10am»…</span><kbd>N</kbd></button>' +
     /* A la derecha, en la misma fila (nada se encima): foco en marcha, nube, buscar y tú */
     '<div class="lat-der"><a class="lat-pomo" id="latPomo" href="#hoy"' + (pomoCorre() ? '' : ' hidden') + ' aria-label="Foco en marcha"><i aria-hidden="true"></i><span>' + mmss(pomoResta()) + '</span></a>' +
     '<button type="button" class="lat-nube" id="latNube" hidden data-acc="nube-ir"><i aria-hidden="true"></i><span></span></button>' +
     '<button type="button" class="btn lat-buscar" data-acc="buscar" title="Buscar (tecla /)">' + ico('i-buscar') + 'Buscar</button>' +
-    '<a class="perfil" href="#ajustes"' + actual('ajustes') + ' aria-label="Ajustes y respaldo" title="Ajustes y respaldo"><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span></a></div>';
+    '<a class="perfil" href="#tu"' + (p === 'tu' ? ' aria-current="page"' : '') + ' aria-label="Tú: hábitos, progreso y ajustes" title="Tú: hábitos, progreso y ajustes"><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : ico('i-estrella')) + '</span></a></div>';
+  /* Celular, arriba: Notas y Tú (marcados si estás ahí) */
+  const cn = document.getElementById('btnNotas'), ct = document.getElementById('btnTu');
+  if (cn) cn.toggleAttribute('aria-current', p === 'notas');
+  if (ct) { ct.toggleAttribute('aria-current', p === 'tu'); ct.querySelector('.avatar').innerHTML = nombre ? esc(nombre.charAt(0).toUpperCase()) : ico('i-estrella'); }
 }
 
 function pintarCab() {
-  $('cabTitulo').textContent = ruta.sec === 'areas' && ruta.param ? area(ruta.param).nombre : TITULOS[ruta.sec];
+  const hh = ruta.herr && herramienta(ruta.sec, ruta.herr);
+  $('cabTitulo').textContent = hh ? hh.nombre : TITULOS[ruta.sec];
   $('cabFecha').textContent = fmtCorta(hoy(), false) + ' · ' + fmtFecha(hoy());
   $('relojTxt').textContent = fmtHora(horaAhora(), preferencias().formatoHora);
   pintarNube();
 }
 
-/* Título grande de cada sección (Hoy y los espacios traen su propia portada) */
+/* Título grande de cada sección + el filtro por espacio y sus herramientas
+   (Hoy trae su propia portada; una herramienta o una lista, su propia cabecera) */
 function cabeceraSeccion() {
-  if (ruta.sec === 'hoy' || (ruta.sec === 'areas' && ruta.param) || (ruta.sec === 'listas' && ruta.param)) return '';
-  const V = { recordatorios: ['#listas', 'Listas'], horario: ['#plan', 'Calendario'], agenda: ['#plan', 'Calendario'], finanzas: ['#plata' + (ruta.param === 'oficina' ? '/oficina' : ''), 'Cuentas'] }[ruta.sec];
-  const volver = V ? '<a class="volver-panel" href="' + V[0] + '">' + ico('i-izq') + V[1] + '</a>' : padre(ruta.sec) === 'mas' && ruta.sec !== 'mas' ? '<a class="volver-panel" href="#mas">' + ico('i-izq') + 'Más</a>' : '';
-  return volver + '<header class="pag-cab"><h1>' + TITULOS[ruta.sec] + '</h1>' + (SUBTITULOS[ruta.sec] ? '<p>' + SUBTITULOS[ruta.sec] + '</p>' : '') + '</header>';
+  if (ruta.sec === 'hoy' || ruta.herr || (ruta.sec === 'tareas' && ruta.param)) return '';
+  const volver = padre(ruta.sec) === 'tu' && ruta.sec !== 'tu' ? '<a class="volver-panel" href="#tu">' + ico('i-izq') + 'Tú</a>' : '';
+  return volver + '<header class="pag-cab"><h1>' + TITULOS[ruta.sec] + '</h1>' + (SUBTITULOS[ruta.sec] ? '<p>' + SUBTITULOS[ruta.sec] + '</p>' : '') + '</header>' +
+    (CON_FILTRO.includes(ruta.sec) ? barraFiltro(ruta.sec) : '');
 }
 
 function contenido() {
+  if (ruta.herr) return vistaHerramienta(ruta.sec, ruta.herr, ruta.sub);
   switch (ruta.sec) {
     case 'hoy': return vistaHoy();
-    case 'recordatorios': return vistaRecordatorios();
-    case 'agenda': return vistaAgenda();
-    case 'areas': return ruta.param ? vistaArea(ruta.param, ruta.sub) : vistaAreas();
-    case 'mas': return vistaMas();
-    case 'habitos': return vistaHabitos();
-    case 'listas': return vistaListas6(ruta.param);
-    case 'plan': return vistaPlan();
-    case 'plata': return vistaPlata(ruta.param);
-    case 'horario': return vistaHorario();
+    case 'calendario': return vistaPlan();
+    case 'tareas': return vistaListas6(ruta.param);
+    case 'cuentas': return vistaPlata(ruta.param);
+    case 'notas': return vistaNotasSeccion('');
+    case 'tu': return vistaTu();
     case 'ajustes': return vistaAjustes();
     case 'datos': return vistaDatos();
     case 'papelera': return vistaPapelera();
-    case 'seguimiento': return vistaSeguimiento(ruta.param);
-    case 'finanzas': return vistaFinanzas(ruta.param);
-    case 'notas': return vistaNotasSeccion(ruta.param);
-    default: return vistaMas();
+    default: return vistaHoy();
   }
 }
 
@@ -172,7 +173,7 @@ export function pintar() {
     document.title = ruta.sec === 'hoy' ? 'Agenda' : $('cabTitulo').textContent + ' · Agenda';
     document.body.dataset.seccion = ruta.sec;
     const pan = $('pantalla'), clave = ruta.sec + '/' + (ruta.param || '') + '/' + (ruta.sub || '');
-    pan.innerHTML = cabeceraSeccion() + contenido();
+    pan.innerHTML = cabeceraSeccion() + contenido() + (CON_FILTRO.includes(ruta.sec) && !ruta.herr && !(ruta.sec === 'tareas' && ruta.param) ? barraHerramientas(ruta.sec) : '');
     /* Al cambiar de pantalla, una entrada suave (solo entonces, no en cada repintado) */
     if (clave !== ultimaPantalla) {
       ultimaPantalla = clave; pan.classList.remove('entra'); void pan.offsetWidth; pan.classList.add('entra');
@@ -188,7 +189,7 @@ export function pintar() {
 }
 
 function ir(sec, param = '') {
-  ruta = { sec, param };
+  ruta = { sec, param, sub: '', herr: herramienta(sec, param) ? param : '' };
   const h = '#' + sec + (param ? '/' + param : '');
   if (location.hash !== h) { try { history.pushState(null, '', h); } catch (e) { location.hash = h; } }
   cerrarHoja(true);
@@ -199,15 +200,15 @@ function ir(sec, param = '') {
 window.addEventListener('popstate', () => {
   if (atrasEsDeHoja()) return;
   const r = leerRuta();
-  ruta = r || { sec: 'hoy', param: '' };
+  ruta = r || rutaInicial();
   pintar();
 });
 window.addEventListener('hashchange', () => {
   const r = leerRuta();
   if (r && (r.sec !== ruta.sec || r.param !== ruta.param || (r.sub || '') !== (ruta.sub || ''))) {
-    const mismaArea = r.sec === 'areas' && r.sec === ruta.sec && r.param === ruta.param;
+    const misma = r.sec === ruta.sec && r.herr === 'metas' && ruta.herr === 'metas';
     ruta = r; cerrarHoja(true); pintar();
-    if (!mismaArea) window.scrollTo(0, 0);
+    if (!misma) window.scrollTo(0, 0);
   }
 });
 
@@ -220,7 +221,9 @@ const ACCIONES = Object.assign({}, accPend, accHoy, accHoyExtra, accRec, accAgen
   buscar() { abrirBuscar(); },
   'ev-editar'(b) { editarEvento(b.dataset.id, pintar); },
   reintentar() { return true; },
-  'ir-dia'(b) { irADia(b.dataset.dia); ir('plan'); }
+  'ir-dia'(b) { irADia(b.dataset.dia); ir('calendario'); },
+  /* Filtro por espacio: se recuerda y se aplica en todas las secciones */
+  filtro(b) { ponerFiltro(b.dataset.v); return true; }
 });
 
 document.addEventListener('click', (ev) => {
@@ -289,7 +292,7 @@ let migrando = false;
 if (!yaHabia) {
   if (resumenAntiguo().hay) {
     migrando = true;
-    despuesDeAbrir(() => mostrarMigracion().then((ok) => { migrando = false; if (ok) { const sec = preferencias().completo ? 'datos' : 'hoy'; ruta = { sec, param: '' }; try { history.replaceState(null, '', '#' + sec); } catch (e) { /* nada */ } } pintar(); arrancarRecorrido(); }));
+    despuesDeAbrir(() => mostrarMigracion().then((ok) => { migrando = false; if (ok) { const sec = 'hoy'; ruta = { sec, param: '', sub: '', herr: '' }; try { history.replaceState(null, '', '#' + sec); } catch (e) { /* nada */ } } pintar(); arrancarRecorrido(); }));
   } else { empezarVacio(); pintar(); }
 }
 document.getElementById('portada')?.remove();

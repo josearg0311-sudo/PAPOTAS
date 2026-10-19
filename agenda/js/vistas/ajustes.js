@@ -30,11 +30,7 @@ function grupo(titulo, html) { return '<h2 class="grupo-ajustes">' + titulo + '<
 export function vistaAjustes() {
   const p = preferencias(), ant = resumenAntiguo(), pin = hayPIN(), errores = leer(CLAVES.errores, []);
   const hora = fmtHora('14:30', p.formatoHora);
-  const todo = p.completo;
-  let html = grupo('Cómo se ve la agenda',
-    ajuste('Modo', todo ? 'Ves <b>todo</b>: prioridades, Pomodoro, balance, metas, informes y más.' : '<b>Modo simple</b>: solo lo esencial. Nada se borra: con «Mostrar todo» vuelve lo demás.',
-      selector('pref-completo', [['0', 'Simple'], ['1', 'Mostrar todo']], todo ? '1' : '0', 'Modo')));
-
+  let html = '';
   html += grupo('Preferencias',
     ajuste('Tema', 'Oscuro, claro o según tu celular.', selector('pref-tema', [['oscuro', 'Oscuro'], ['claro', 'Claro'], ['auto', 'Automático']], p.tema, 'Tema')) +
     ajuste('Formato de hora', 'Así se verá: <b class="mono">' + hora + '</b>', selector('pref-hora', [['24', '24 h'], ['12', '12 h']], p.formatoHora, 'Formato de hora')) +
@@ -146,7 +142,6 @@ export function alElegirArchivo(t) {
 }
 
 export const acciones = {
-  'pref-completo'(b) { cambiarPref({ completo: b.dataset.v === '1' }); aviso(b.dataset.v === '1' ? 'Ahora ves todo.' : 'Modo simple: solo lo esencial.'); return true; },
   'pref-feriados'(b) { cambiarPref({ feriados: b.dataset.v === '1' }); return true; },
   'ics-todo'() { import('../piezas/eventos-ui.js').then((m) => { const n = m.exportarTodo(); aviso(n ? 'Archivo con ' + n + ' cosas. Ábrelo para agregarlas a tu calendario.' : 'No hay nada próximo para pasar.'); }); },
   'pref-sonido'(b) { cambiarPref({ sonido: b.dataset.v === '1' }); return true; },

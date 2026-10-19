@@ -8,11 +8,11 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Nombres claros', '🧭', 'Las cuatro secciones se llaman por lo que son: Hoy, Calendario, Listas y Cuentas. Cada una dice arriba para qué sirve.', '#plan'],
+  ['Nombres claros', '🧭', 'Las cuatro secciones se llaman por lo que son: Hoy, Calendario, Listas y Cuentas. Cada una dice arriba para qué sirve.', '#calendario'],
   ['Botones que dicen lo que hacen', '👆', '«Agregar» en la barra, «Anotar gasto», «Concentrarme 25 min», «Marcar hecho». Y cada pendiente tiene ⋯ con sus opciones escritas.', '#hoy'],
   ['Agregar, explicado', '⚡', 'La hoja de Agregar te dice qué entiende, empieza en «Automático» y te deja elegir qué guardar con un toque.', 'agregar'],
-  ['Cuentas más completas', '💰', 'Presupuesto, Excel e informe en PDF ahí mismo. Toca una categoría de «Cómo vas» para ver solo esos gastos.', '#plata'],
-  ['Sin repetidos', '🧹', 'Cada cosa está en un solo lugar: Recordatorios ahora vive dentro de Listas y Agenda dentro de Calendario.', '#listas'],
+  ['Cuentas más completas', '💰', 'Presupuesto, Excel e informe en PDF ahí mismo. Toca una categoría de «Cómo vas» para ver solo esos gastos.', '#cuentas'],
+  ['Sin repetidos', '🧹', 'Cada cosa está en un solo lugar: Recordatorios ahora vive dentro de Listas y Agenda dentro de Calendario.', '#tareas'],
   ['Diseño parejo', '✨', 'Todas las tarjetas con la misma forma, sin bordes punteados y con títulos del mismo tamaño.', '#hoy']
 ];
 

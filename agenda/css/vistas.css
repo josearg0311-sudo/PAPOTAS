@@ -1225,3 +1225,62 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 /* En Cuentas el monto siempre a la derecha, también en celular */
 .plata6 .hf { flex-wrap: nowrap; }
 .plata6 .hf-fin { width: auto; padding: 0; justify-content: flex-end; }
+
+/* ==========================================================================
+   AGENDA 7 · ORDENADA POR LO QUE HACES
+   Filtro por espacio arriba de cada sección, herramientas como fichas
+   y «Tú» con tu constancia, tu progreso y lo de la app.
+   ========================================================================== */
+/* Filtro: Todo · Personal · Estudios · Oficina · Deporte (desliza en celular) */
+.filtro6 { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: -2px -16px 0; padding: 2px 16px; }
+.filtro6::-webkit-scrollbar { display: none; }
+.filtro6 button { flex: none; display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta-2); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.filtro6 button i { width: 8px; height: 8px; border-radius: 50%; background: var(--a); }
+.filtro6 button[aria-pressed="true"] { background: var(--tinta); border-color: var(--tinta); color: var(--fondo); }
+.filtro6 button[aria-pressed="true"] i { box-shadow: 0 0 0 2px var(--fondo); }
+@media (min-width: 980px) { .filtro6 { margin: 0; padding: 0; flex-wrap: wrap; overflow: visible; } }
+
+/* Herramientas de la sección, en una fila de fichas */
+.herr6-fila { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; }
+.herr6-fila::-webkit-scrollbar { display: none; }
+.herr6-chip { flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 12px; border-radius: 14px; border: 1px solid var(--borde); background: linear-gradient(180deg, var(--brillo), transparent 40px), var(--superficie); color: var(--tinta); font-size: 13.5px; font-weight: 600; text-decoration: none; }
+.herr6-chip .i { width: 18px; height: 18px; color: var(--acento-txt); }
+.herr6-chip[class*="area-"] .i { color: var(--a); }
+.herr6-chip:hover { border-color: var(--superficie-3); }
+@media (min-width: 980px) { .herr6-fila { margin: 0; padding: 0; flex-wrap: wrap; overflow: visible; } }
+
+/* Cabecera de una herramienta */
+.herr6-cab p { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+/* Botones grandes (Tú y Metas) */
+.tu6 { display: grid; gap: 6px; }
+.herr6 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+@media (min-width: 760px) { .herr6 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1180px) { .herr6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.herr6-btn { display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 14px 16px; border-radius: var(--radio); border: 1px solid var(--borde); background: linear-gradient(180deg, var(--brillo), transparent 80px), var(--superficie); color: var(--tinta); text-decoration: none; transition: transform .15s, border-color .15s; }
+.herr6-btn:hover { transform: translateY(-2px); border-color: var(--superficie-3); }
+.herr6-btn > span:nth-child(2) { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.herr6-btn b { font-family: var(--f-titulo); font-size: 17px; font-weight: 750; letter-spacing: -.02em; }
+.herr6-btn small { font-size: 13px; color: var(--tinta-2); line-height: 1.35; }
+.herr6-btn > .i { flex: none; width: 18px; height: 18px; color: var(--tinta-3); }
+.herr6-ico { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 14px; background: var(--acento-suave); color: var(--acento-txt); font-size: 22px; }
+.herr6-ico .i { width: 22px; height: 22px; }
+.herr6-btn[class*="area-"] .herr6-ico { background: color-mix(in srgb, var(--a) 16%, transparent); color: var(--a); }
+.tu6 .seccion-t { margin-top: 14px; }
+.tu6 .seccion-t:first-child { margin-top: 0; }
+.seg-esp { margin-bottom: 14px; overflow-x: auto; }
+.seg-esp > * { flex: 1 0 auto; padding: 0 12px; }
+
+/* Celular, arriba: Notas con su nombre y tu avatar (Tú) */
+.cab .cab-notas { min-height: 44px; padding: 0 14px; gap: 6px; border-radius: 99px; font-size: 14px; font-weight: 650; }
+.cab .cab-notas .i { width: 18px; height: 18px; }
+.cab .cab-notas[aria-current] { background: var(--acento-suave); border-color: var(--acento); }
+.cab .cab-tu { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; }
+.cab .cab-tu .avatar { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 15px; color: var(--sobre-acento); background: var(--acento); }
+.cab .cab-tu .avatar .i, .lateral .avatar .i { width: 18px; height: 18px; }
+.cab .cab-tu[aria-current] .avatar { box-shadow: 0 0 0 3px var(--fondo), 0 0 0 5px var(--acento); }
+@media (min-width: 980px) { .cab .cab-notas, .cab .cab-tu { display: none; } }
+/* Barra del presupuesto: lima normal, ámbar desde el 85 %, roja si te pasas */
+.p6-barra.lima i { background: var(--acento); }
+.p6-barra.ambar i { background: var(--ambar, #F5B83D); }
+.p6-dos b.neg { color: var(--rojo); }

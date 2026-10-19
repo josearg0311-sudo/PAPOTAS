@@ -4,7 +4,9 @@
 import { leer, escribir, CLAVES, ANTIGUAS } from './almacen.js';
 import { esHora } from '../util/fechas.js';
 
-export const PANTALLAS_INICIO = [['hoy', 'Hoy'], ['recordatorios', 'Recordatorios'], ['agenda', 'Agenda'], ['areas', 'Áreas']];
+export const PANTALLAS_INICIO = [['hoy', 'Hoy'], ['calendario', 'Calendario'], ['tareas', 'Tareas'], ['cuentas', 'Cuentas']];
+/* Lo que se elegía antes (Agenda 6 y anteriores) → su lugar nuevo */
+const INICIO_VIEJO = { recordatorios: 'tareas', listas: 'tareas', agenda: 'calendario', plan: 'calendario', plata: 'cuentas', finanzas: 'cuentas', areas: 'hoy' };
 export const OPCIONES_BLOQUEO = [[0, 'Solo al abrir'], [1, 'Tras 1 minuto'], [5, 'Tras 5 minutos'], [15, 'Tras 15 minutos'], [30, 'Tras 30 minutos']];
 
 const BASE = {
@@ -41,10 +43,12 @@ export function normalizarPref(x) {
   p.semanaLunes = p.semanaLunes !== false;
   const v = p.vigilia && typeof p.vigilia === 'object' ? p.vigilia : {};
   p.vigilia = { ini: esHora(v.ini) ? v.ini : BASE.vigilia.ini, fin: esHora(v.fin) ? v.fin : BASE.vigilia.fin };
+  if (INICIO_VIEJO[p.inicio]) p.inicio = INICIO_VIEJO[p.inicio];
   if (!PANTALLAS_INICIO.some((o) => o[0] === p.inicio)) p.inicio = 'hoy';
   if (!OPCIONES_BLOQUEO.some((o) => o[0] === +p.bloqueoMin)) p.bloqueoMin = 1;
   p.bloqueoMin = +p.bloqueoMin;
-  p.guia = !!p.guia; p.completo = !!p.completo; p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
+  p.guia = !!p.guia; p.completo = false;   // Agenda 7: ya no hay «Mostrar todo»; lo avanzado vive como herramienta en su sección
+  p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
   const dp = p.deporte && typeof p.deporte === 'object' ? p.deporte : {};
   /* Teclado: si no estaba, se toma lo que tenías en la v4.5 (teclado y autocorrector) */
   const tk = x && x.teclado && typeof x.teclado === 'object' ? x.teclado : (() => { const v = leer(ANTIGUAS.pref, {}) || {}; return { activo: v.teclado !== false, corrector: v.autocorr !== false }; })();

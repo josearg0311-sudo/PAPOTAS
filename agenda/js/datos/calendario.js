@@ -124,11 +124,12 @@ export function resumenDia(dia, area = '', hoy = '') {
 
 /* Lo siguiente: el bloque en curso o el próximo de hoy; si no hay, el primero
    de los próximos 7 días. { b, dia, enCurso, faltan (min, solo hoy) } */
-export function proximoBloque(hoy, ahoraMin) {
-  const deHoy = bloquesDelDia(hoy).filter((b) => b.fin > ahoraMin);
+export function proximoBloque(hoy, ahoraMin, soloArea = '') {
+  const deArea = (b) => !soloArea || b.area === soloArea;   // con el filtro por espacio de Hoy
+  const deHoy = bloquesDelDia(hoy).filter((b) => b.fin > ahoraMin && deArea(b));
   if (deHoy.length) { const b = deHoy[0]; return { b, dia: hoy, enCurso: b.ini <= ahoraMin, faltan: Math.max(0, b.ini - ahoraMin) }; }
   for (let i = 1; i <= 7; i++) {
-    const d = sumarDias(hoy, i), l = bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente');
+    const d = sumarDias(hoy, i), l = bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente' && deArea(b));
     if (l.length) return { b: l[0], dia: d, enCurso: false, faltan: null };
   }
   return null;

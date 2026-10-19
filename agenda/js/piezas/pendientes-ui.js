@@ -4,6 +4,7 @@
 import { buscarElemento, poner, aPapelera, restaurar } from '../datos/datos.js';
 import { grupo, marcar, mover, masTarde, restaurarVersion, nivelPlazo, listas, esChecklist, REPETIR, cerrarDia, paraCerrarDia, crearLista, pendientesVisibles } from '../datos/pendientes.js';
 import { AREAS, chipArea, area } from '../datos/areas.js';
+import { filtro } from '../datos/filtro.js';
 import { preferencias } from '../datos/preferencias.js';
 import { hoy, sumarDias, diaSemana, fmtCorta, fmtHora, relativo } from '../util/fechas.js';
 import { ico, esc, vibrar } from '../util/dom.js';
@@ -11,17 +12,20 @@ import { abrirHoja, cerrarHoja } from './hoja.js';
 import { aviso } from './aviso.js';
 import { confirmar } from './confirmar.js';
 
+const cap1 = (t) => t.charAt(0).toUpperCase() + t.slice(1);
 function cuando(x) {
   const f = x.fechas, p = preferencias();
-  if (x.estado === 'hecho') return 'hecho';
+  if (x.estado === 'hecho') return '';   // ya lo dicen el check y el tachado
   if (!f.inicio) return 'algún día';
+  /* Atrasado: la fecha ya va en la pastilla roja; aquí solo la hora */
+  if (f.inicio < hoy() && !f.vence) return f.hora ? fmtHora(f.hora, p.formatoHora) : '';
   return (f.inicio === hoy() ? 'hoy' : relativo(f.inicio).toLowerCase()) + (f.hora ? ' ' + fmtHora(f.hora, p.formatoHora) : '');
 }
 function estadoPills(x) {
   if (x.estado === 'hecho') return '';
   let s = x.plazoLegal ? '<span class="pill legal">PLAZO LEGAL</span>' : '';
   const n = nivelPlazo(x);
-  if (n.nivel === 'vencido') s += '<span class="pill venc">🔴 ' + (x.fechas.vence ? 'vencido · ' + fmtCorta(x.fechas.vence) : 'atrasado · ' + fmtCorta(x.fechas.inicio)) + '</span>';
+  if (n.nivel === 'vencido') s += '<span class="pill venc">🔴 ' + (x.fechas.vence ? 'vencido · ' + fmtCorta(x.fechas.vence) : 'atrasado · ' + (Math.abs(n.dias) === 1 ? 'ayer' : fmtCorta(x.fechas.inicio) + ' (' + Math.abs(n.dias) + ' días)')) + '</span>';
   else if (n.nivel === 'pronto') s += '<span class="pill pronto">⚠️ ' + esc(n.texto) + '</span>';
   else if (x.fechas.vence) s += '<span class="pill">vence ' + fmtCorta(x.fechas.vence) + '</span>';
   return s;
@@ -34,7 +38,8 @@ export function filaPendiente(x, { acciones = true, verLista = false } = {}) {
   const subs = (x.extra.subtareas || []).filter((s) => s && s.t);
   /* En una lista para marcar, sin fecha: ni área ni «algún día» (solo lo que importa) */
   const deCheck = !x.fechas.inicio && x.lista && esChecklist(buscarElemento(x.lista));
-  const meta = [deCheck ? '' : chipArea(a), deCheck ? '' : '<span class="mono">' + esc(cuando(x)) + '</span>',
+  const meta = [deCheck || filtro() === a ? '' : chipArea(a),   // con el filtro puesto, el espacio ya se sabe
+    deCheck || !cuando(x) ? '' : '<span class="mono">' + esc(cuando(x)) + '</span>',
     lista ? '<span>' + esc(lista.titulo) + '</span>' : '', subs.length ? '<span>' + ico('i-rec') + subs.filter((s) => s.ok).length + '/' + subs.length + '</span>' : '',
     x.repetir ? '<span>' + ico('i-repetir') + esc((REPETIR.find((r) => r[0] === x.repetir) || ['', ''])[1].toLowerCase()) + '</span>' : '',
     (x.etiquetas || []).map((e) => '<span class="etiqueta">#' + esc(e) + '</span>').join(''), estadoPills(x)].filter(Boolean).join('');
@@ -68,11 +73,14 @@ export const acciones = {
   'p-menu'(b, ev, repintar) {
     const x = buscarElemento(b.dataset.id); if (!x) return;
     const g = grupo(x), op = (acc, ic, txt) => '<button type="button" class="opcion-fila" data-op="' + acc + '">' + ico(ic) + '<span>' + txt + '</span></button>';
-    const hoja = abrirHoja(esc(x.titulo), '<div class="menu6">' +
+    const n = nivelPlazo(x), cu = cuando(x), man = sumarDias(hoy(), 1);
+    /* Contexto arriba: de qué área es y cuándo toca (o desde cuándo está atrasado) */
+    const ctx = '<p class="menu6-ctx">' + chipArea(area(x.area).id) + '<span>' + esc(n.nivel === 'vencido' && !x.fechas.vence ? 'Atrasado desde ' + fmtCorta(x.fechas.inicio) + (cu ? ' · ' + cu : '') : cu ? cap1(cu) : '') + '</span></p>';
+    const hoja = abrirHoja(esc(x.titulo), ctx + '<div class="menu6">' +
       op('p-marcar', 'i-check', 'Marcar hecho') +
-      (g === 'hoy' ? op('p-tarde', 'i-reloj', 'Más tarde (en 2 horas)') : '') +
-      (g !== 'manana' ? op('p-manana', 'i-der', 'Pasar a mañana') : '') +
-      op('p-dia', 'i-cal', 'Elegir otro día…') + op('p-editar', 'i-lapiz', 'Editar (nombre, hora, lista, repetir…)') +
+      (g === 'hoy' ? op('p-tarde', 'i-reloj', 'Más tarde <small>en 2 horas</small>') : '') +
+      (g !== 'manana' ? op('p-manana', 'i-der', 'Pasar a mañana <small>' + fmtCorta(man) + '</small>') : '') +
+      op('p-dia', 'i-cal', 'Elegir otro día…') + op('p-editar', 'i-lapiz', 'Editar <small>nombre, hora, lista, repetir</small>') +
       op('p-borrar', 'i-basura', 'Mandar a la papelera') + '</div>');
     hoja.querySelectorAll('[data-op]').forEach((o) => o.addEventListener('click', () => {
       const acc = o.dataset.op; cerrarHoja(true);

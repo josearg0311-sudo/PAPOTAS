@@ -23,7 +23,9 @@ import { tarjetaQueHacer, tarjetaManana, tarjetaNumeros } from './hoy-extra.js';
 import { tarjetaEspacios } from './espacios.js';
 import { listas, esChecklist, pendientesDe } from '../datos/pendientes.js';
 import { esDelLibro, esIngreso, resumenMes } from '../datos/finanzas.js';
-import { fmtSoles } from '../util/dinero.js';
+import { fmtSoles, solesCorto } from '../util/dinero.js';
+import { filtro, pasa } from '../datos/filtro.js';
+import { barraFiltro } from './filtro-ui.js';
 
 /* Una frase por día (las de tu versión anterior) */
 const FRASES = ['Lo que se agenda, se hace.', 'Hecho es mejor que perfecto.', 'Un paso pequeño cada día llega lejos.', 'Primero lo importante; lo urgente sabe esperar un poco.', 'La disciplina es elegir entre lo que quieres ahora y lo que más quieres.', 'No tienes que verlo todo: solo el siguiente paso.', 'Tu futuro se construye con lo que haces hoy, no mañana.', 'Empieza donde estás, usa lo que tienes, haz lo que puedas.', 'Menos pendientes en la cabeza, más espacio para vivir.', 'La constancia vence al talento cuando el talento no es constante.', 'Cuida los céntimos y los soles se cuidarán solos.', 'Si toma menos de dos minutos, hazlo ya.', 'Descansar también es parte del plan.', 'Celebra lo que ya lograste antes de ir por lo siguiente.', 'Un buen día empieza con tres prioridades claras.', 'Lo que no se mide, no se mejora.', 'Cada tarea tachada es una promesa cumplida contigo.', 'Enfócate en el progreso, no en la perfección.', 'Organizarse es regalarle tiempo a tu yo de mañana.', 'Hoy es un buen día para empezar eso que vienes posponiendo.', 'Ahorra primero, gasta después.', 'Tu energía es limitada: ponla donde importa.', 'Pequeños hábitos, grandes cambios.', 'La motivación te arranca; el hábito te mantiene.', 'Mejor un plan sencillo que se cumple que uno perfecto que no.', 'Termina lo que empiezas y empezarás menos cosas que no terminas.', 'El mejor momento fue ayer; el segundo mejor, ahora.', 'Di que sí a pocas cosas y hazlas muy bien.', 'Anota, suelta y confía en tu agenda.', 'Paso a paso también se llega.'];
@@ -93,13 +95,13 @@ export function pomoHTML() {
 }
 
 /* Hábitos de hoy, cada uno en su área (con su color) */
-function tarjetaHabitos() {
-  const h = hoy(), l = habitosDeHoy();
+function tarjetaHabitos(f) {
+  const h = hoy(), l = habitosDeHoy().filter((x) => !f || x.area === f);
   if (!l.length) return '';
   const ok = l.filter((x) => marcasHabito(x)[h]).length;
   return tarjeta({ eti: 'HÁBITOS', titulo: 'Hábitos de hoy', n: ok + '/' + l.length, guia: '<b>Cada hábito vive en su área</b> y lleva su color. Tócalo cuando lo cumplas: suma a su racha 🔥.',
     cuerpo: AREAS.map((a) => { const de = l.filter((x) => x.area === a.id); if (!de.length) return '';
-      return '<div class="habs-area area-' + a.id + '"><a class="habs-area-tit" href="#areas/' + a.id + '/constancia">' + a.nombre + '</a><div class="habs-hoy">' + de.map((x) => { const hecho = !!marcasHabito(x)[h], r = rachaHabito(x, h);
+      return '<div class="habs-area area-' + a.id + '"><a class="habs-area-tit" href="#tu/metas/' + a.id + '">' + a.nombre + '</a><div class="habs-hoy">' + de.map((x) => { const hecho = !!marcasHabito(x)[h], r = rachaHabito(x, h);
         return '<button type="button" class="hab-chip area-' + a.id + '" role="checkbox" aria-checked="' + hecho + '" data-acc="hab-marcar" data-id="' + esc(x.id) + '"><span class="em">' + esc((x.extra && x.extra.em) || (x.datos && x.datos.em) || '⭐') + '</span><span>' + esc(x.titulo) + '</span>' + (r ? '<small>🔥 ' + r + '</small>' : '') + '</button>'; }).join('') + '</div></div>'; }).join('') });
 }
 
@@ -111,9 +113,10 @@ const simple = () => !preferencias().completo;
 
 export function vistaHoy() {
   const p = preferencias(), h = hoy(), n = nombre(), doc = documento(), rs = diasSinRespaldo();
-  const delDiaL = delDia(h).sort(ordenar), hechos = hechosHoy(h), urg = urgentes(h);
+  const f = filtro();   // Todo o un espacio (Personal, Estudios, Oficina, Deporte)
+  const delDiaL = delDia(h).filter((x) => pasa(x, f)).sort(ordenar), hechos = hechosHoy(h).filter((x) => pasa(x, f)), urg = urgentes(h).filter((x) => pasa(x, f));
   const tot = delDiaL.length + hechos.length, pct = tot ? hechos.length / tot : 0;
-  const bloques = bloquesDelDia(h), tde = todoElDia(h), mins = minutosPorArea(bloques), vig = minutosVigilia(p), carga = mins.total / vig;
+  const bloques = bloquesDelDia(h).filter((b) => !f || b.area === f), tde = todoElDia(h).filter((x) => !f || area(x.area).id === f), mins = minutosPorArea(bloques), vig = minutosVigilia(p), carga = mins.total / vig;
   const fer = p.feriados === false ? '' : feriado(h);
   /* En modo simple lo urgente (plazo legal, vencido, vence pronto) va dentro de Pendientes, primero */
   const ids = new Set(delDiaL.map((x) => x.id)), pend = urg.filter((x) => !ids.has(x.id)).concat(delDiaL).sort((a, b) => (b.plazoLegal ? 1 : 0) - (a.plazoLegal ? 1 : 0));   // lo urgente siempre adentro, el plazo legal primero
@@ -124,29 +127,31 @@ export function vistaHoy() {
   const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
   /* Por hacer = lo de hoy sin hora (lo que tiene hora ya está en «Tu día»), lo atrasado y lo urgente */
   const porHacer = pend.filter((x) => !(x.fechas.hora && x.fechas.inicio === h));
+  const atr = porHacer.filter((x) => x.fechas.inicio && x.fechas.inicio < h).length;
   return '<div class="hoy hoy6">' +
     '<header class="hoy-cab"><div class="hc-fecha" aria-hidden="true"><b>' + (+h.slice(8, 10)) + '</b></div><div class="hc-txt"><small>' + cap(fmtLarga(h).split(' ')[0]) + ' · ' + MESES[+h.slice(5, 7) - 1] + '</small><h1 class="ph-saludo">' + (n ? 'Hola, ' + esc(n.split(/\s+/)[0]) : saludo()) + '</h1></div></header>' +
-    (tot ? '<div class="hc-avance" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><i style="--p:' + Math.round(pct * 100) + '%"></i><span><b>' + hechos.length + ' de ' + tot + '</b> ' + (hechos.length === tot ? '¡todo hecho! 🎉' : 'listas hoy') + '</span></div>' : '') +
+    (tot ? '<div class="hc-avance" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><i style="--p:' + Math.round(pct * 100) + '%"></i><span><b>' + hechos.length + ' de ' + tot + '</b> ' + (hechos.length === tot ? '¡todo hecho! 🎉' : 'hechas hoy') + '</span></div>' : '') +
     (fer || tde.length ? '<p class="hoy-extra">' + (fer ? '<span class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></span>' : '') + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') +
+    barraFiltro() +
     (n ? '' : '<section class="pide-nombre"><b>¿Cómo te llamas?</b><form class="pn-form"><label class="solo-lector" for="pnNombre">Tu nombre</label><input id="pnNombre" class="entrada" maxlength="40" autocomplete="given-name" placeholder="Tu nombre, ej. José"><button type="button" class="btn pri" data-acc="nombre-listo">Listo</button></form></section>') +
     (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
     (simple() ? '' : tarjetaEspacios()) +
     '<div class="hoy-col">' +
-      ahoraHTML(h, porHacer) +
+      ahoraHTML(h, porHacer, f) +
       (!porHacer.length ? '' : tarjeta({ eti: 'PENDIENTES', titulo: 'Pendientes de hoy', n: porHacer.length || null, sub: 'Sin hora fija. Marca el círculo cuando lo hagas o toca ⋯ para moverlo.',
-        cuerpo: (porHacer.length ? '<div class="pends">' + porHacer.slice(0, 10).map(fila).join('') + '</div>' + (porHacer.length > 10 ? '<div class="pie-tarjeta"><a class="btn" href="#listas">Ver ' + (porHacer.length - 10) + ' más</a></div>' : '') : vacio(tot ? 'Todo listo por hoy' : 'Nada pendiente', 'Toca + y escribe lo que tengas que hacer.')) })) +
+        cuerpo: (atr >= 2 ? '<div class="ordenar-cta"><span>🧹 <b>' + atr + ' atrasados</b>: decide qué hacer con cada uno</span><button type="button" class="btn chico pri" data-acc="ordenar">Ordenar</button></div>' : '') + (porHacer.length ? '<div class="pends">' + porHacer.slice(0, 10).map(fila).join('') + '</div>' + (porHacer.length > 10 ? '<div class="pie-tarjeta"><a class="btn" href="#tareas/todos">Ver los ' + (porHacer.length - 10) + ' que faltan</a></div>' : '') : vacio(tot ? 'Todo listo por hoy' : 'Nada pendiente', 'Toca «Agregar» y escribe lo que tengas que hacer.')) })) +
       cierreDia(h, porHacer) +
     '</div><div class="hoy-col">' +
       tarjeta({ eti: 'HORARIO', titulo: 'Horario de hoy', n: bloques.length || null, sub: 'Lo que tiene hora: clases, citas y recordatorios.', cuerpo: lineaDia(bloques) }) +
-      minis(h) +
-      (simple() ? '' : tarjetaHabitos() + tarjetaManana() + tarjetaNumeros() + (corriendo() ? '' : tarjeta({ eti: 'FOCO', titulo: 'Pomodoro', id: 'tarjetaPomo', cuerpo: pomoHTML() }))) +
+      minis(h, f) +
+      tarjetaHabitos(f) +
     '</div>' +
   '</div>';
 }
 
 /* Lo único grande de Hoy: lo que toca AHORA (o lo siguiente, o lo más importante) */
-function ahoraHTML(h, porHacer) {
-  const f = preferencias().formatoHora, ahora = minutosAhora(), s = proximoBloque(h, ahora);
+function ahoraHTML(h, porHacer, soloArea) {
+  const f = preferencias().formatoHora, ahora = minutosAhora(), s = proximoBloque(h, ahora, soloArea);
   const bt = (acc, id, txt, pri) => '<button type="button" class="btn' + (pri ? ' pri' : '') + '" data-acc="' + acc + '" data-id="' + esc(id) + '">' + txt + '</button>';
   /* Con el foco en marcha, Ahora ES el foco: la cuenta regresiva grande (se mueve sola cada segundo) */
   const stp = estadoPomo(), pausado = !corriendo() && stp.resta > 0 && stp.resta < totalMs();
@@ -159,7 +164,7 @@ function ahoraHTML(h, porHacer) {
   }
   if (s && s.dia === h) {
     const b = s.b, acc = b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver';
-    const desp = bloquesDelDia(h).filter((x) => x.ini > b.ini && x.id !== b.id)[0];
+    const desp = bloquesDelDia(h).filter((x) => x.ini > b.ini && x.id !== b.id && (!soloArea || x.area === soloArea))[0];
     const falta = b.fin - ahora, cuando = s.enCurso ? 'Ahora · ' + (falta < 60 ? 'quedan ' + falta + ' min' : 'hasta las ' + fmtHora(b.hFin, f)) : s.faltan < 60 ? 'En ' + s.faltan + ' min · ' + fmtHora(b.hIni, f) : 'Lo siguiente · ' + fmtHora(b.hIni, f);
     const prog = s.enCurso ? Math.min(100, Math.max(0, (ahora - b.ini) / Math.max(1, b.fin - b.ini) * 100)) : 0;
     return '<section class="ahora6 area-' + area(b.area).id + (s.enCurso ? ' en-curso' : '') + '" aria-label="Lo que toca ahora">' +
@@ -188,16 +193,18 @@ function cierreDia(h, porHacer) {
 }
 
 /* Dos cuadros chicos: la plata de hoy y la lista que tienes a medias (sin repetir sus pantallas) */
-function minis(h) {
-  const ym = h.slice(0, 7), mov = elementos((x) => x.tipo === 'movimiento');
-  const per = mov.filter((x) => esDelLibro(x, 'personal')), r = resumenMes(per, ym);
+function minis(h, f) {
+  /* Con Oficina elegido: el libro de la oficina; si no, el personal (y con un espacio, solo lo de ese espacio) */
+  const ym = h.slice(0, 7), mov = elementos((x) => x.tipo === 'movimiento'), libro = f === 'oficina' ? 'oficina' : 'personal';
+  const libroT = mov.filter((x) => esDelLibro(x, libro)), r = resumenMes(libroT, ym), per = libroT.filter((x) => !f || f === 'oficina' || x.area === f);
   const gHoy = per.filter((x) => !esIngreso(x) && x.fechas.inicio === h).reduce((t, x) => t + Math.abs(+x.monto || 0), 0);   // solo el libro personal, como «te quedan»
-  const ls = listas().filter(esChecklist).map((l) => { const p = pendientesDe(l.id); return { l, p, ok: p.filter((x) => x.estado === 'hecho').length }; }).filter((x) => x.p.length && x.ok < x.p.length);
+  const ls = listas().filter((l) => esChecklist(l) && (!f || l.area === f)).map((l) => { const p = pendientesDe(l.id); return { l, p, ok: p.filter((x) => x.estado === 'hecho').length }; }).filter((x) => x.p.length && x.ok < x.p.length);
   const l = ls[0];
   return '<div class="minis6">' +
-    '<a class="mini6" href="#plata"><small>Cuenta personal · gastaste hoy</small><b>' + fmtSoles(gHoy) + '</b><small>te quedan ' + fmtSoles(r.ingresos - r.gastos) + ' este mes</small></a>' +
-    (l ? '<a class="mini6" href="#listas/' + esc(l.l.id) + '"><small>Lista a medias · ' + esc(l.l.titulo) + '</small><b>' + l.ok + '/' + l.p.length + '</b><small>' + esc(l.p.filter((x) => x.estado !== 'hecho').slice(0, 3).map((x) => x.titulo).join(', ')) + '</small></a>'
-      : '<a class="mini6" href="#listas"><small>Listas</small><b>' + listas().filter(esChecklist).length + '</b><small>todo marcado</small></a>') +
+    '<a class="mini6" href="#cuentas' + (libro === 'oficina' ? '/oficina' : '') + '"><small>Gastaste hoy' + (libro === 'oficina' ? ' · oficina' : '') + '</small><b>' + fmtSoles(gHoy) + '</b><small>' + (r.ingresos || r.gastos ? (r.ingresos - r.gastos < 0 ? 'Este mes vas en rojo' : 'Te quedan ' + solesCorto(r.ingresos - r.gastos)) : 'Anota tu primer gasto') + '</small></a>' +
+    (l ? '<a class="mini6" href="#tareas/' + esc(l.l.id) + '"><small>' + esc(l.l.titulo) + '</small><b>' + l.ok + ' de ' + l.p.length + '</b><small>Falta: ' + esc(l.p.filter((x) => x.estado !== 'hecho').slice(0, 3).map((x) => x.titulo).join(', ')) + '</small></a>'
+      : listas().filter(esChecklist).length ? '<a class="mini6" href="#tareas"><small>Listas para marcar</small><b>✓</b><small>Todo marcado</small></a>'
+      : '<button type="button" class="mini6" data-acc="l6-nueva"><small>Listas para marcar</small><b>+</b><small>Crea tu primera lista</small></button>') +
     '</div>';
 }
 

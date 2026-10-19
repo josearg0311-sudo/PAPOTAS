@@ -30,13 +30,13 @@ export function vistaHabitos() {
     (deHoy.length ? '<h2 class="seccion-t">Hoy <small>' + ok + ' de ' + deHoy.length + '</small></h2><div class="hab-anillos">' + deHoy.map(anillo).join('') + '</div>' : '') +
     (todos.length ? '<h2 class="seccion-t">Seguimiento <small>últimos 14 días</small></h2>' : '') +
     AREAS.map((a) => { const l = todos.filter((x) => x.area === a.id); if (!l.length) return '';
-      return '<section class="tarjeta hab-tabla area-' + a.id + '"><header class="t-cab"><h2><a href="#areas/' + a.id + '/constancia">' + esc(a.emoji) + ' ' + esc(a.nombre) + '</a></h2><span class="n">' + esc(TEMAS[a.id].tab) + '</span></header>' +
+      return '<section class="tarjeta hab-tabla area-' + a.id + '"><header class="t-cab"><h2><a href="#tu/metas/' + a.id + '">' + esc(a.emoji) + ' ' + esc(a.nombre) + '</a></h2><span class="n">' + esc(TEMAS[a.id].tab) + '</span></header>' +
         '<div class="ht-dias" aria-hidden="true"><span></span><span class="ht-cuad">' + dias.map((d) => '<i' + (d === h ? ' class="hoy"' : '') + '>' + DIAS3[diaSemana(d)].charAt(0) + '<br>' + +d.slice(8) + '</i>').join('') + '</span><span>🔥</span></div>' +
         l.map((x) => { const m = marcasHabito(x), r = rachaHabito(x, h), c = cumplimiento(x, h, 30);
           return '<div class="ht-fila"><button type="button" class="ht-nom" data-acc="hab-editar" data-id="' + esc(x.id) + '"><span class="ht-em" aria-hidden="true">' + esc(em(x)) + '</span><span><b>' + esc(x.titulo) + '</b><small>' + frecuencia(x) + (c != null ? ' · ' + c + ' %' : '') + '</small></span></button>' +
             '<span class="ht-cuad" role="img" aria-label="Últimos 14 días: ' + dias.filter((d) => m[d]).length + ' hechos">' + dias.map((d) => '<i class="' + (m[d] ? 'si' : tocaHabito(x, d) ? 'no' : 'libre') + (d === h ? ' hoy' : '') + '"></i>').join('') + '</span>' +
             '<b class="ht-racha">' + r + '</b></div>'; }).join('') + '</section>'; }).join('') +
     '<div class="fila-botones izq">' + AREAS.map((a) => '<button type="button" class="btn area-' + a.id + '" data-acc="hab-nuevo" data-area="' + a.id + '">' + ico('i-plus') + 'Hábito en ' + esc(a.nombre) + '</button>').join('') + '</div>' +
-    (!preferencias().completo ? '' : '<h2 class="seccion-t">Metas</h2><div class="herr-botones">' + AREAS.map((a) => '<a class="herr-btn area-' + a.id + '" href="#areas/' + a.id + '/constancia"><b>' + esc(a.emoji) + ' ' + esc(TEMAS[a.id].tab) + '</b>' + ico('i-der') + '</a>').join('') + '</div>');
+    ('<h2 class="seccion-t">Metas</h2><div class="herr-botones">' + AREAS.map((a) => '<a class="herr-btn area-' + a.id + '" href="#tu/metas/' + a.id + '"><b>' + esc(a.emoji) + ' ' + esc(TEMAS[a.id].tab) + '</b>' + ico('i-der') + '</a>').join('') + '</div>');
 }
 export const acciones = {};
