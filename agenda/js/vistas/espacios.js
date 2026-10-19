@@ -134,7 +134,7 @@ function vistaPendientes(a) {
   const grupos = [['Atrasado', (x) => x.fechas.inicio && x.fechas.inicio < h], ['Hoy', (x) => x.fechas.inicio === h], ['Próximos', (x) => x.fechas.inicio > h], ['Sin fecha', (x) => !x.fechas.inicio]];
   return tarjeta({ eti: 'TAREAS', titulo: 'Tareas de ' + esc(a.nombre), n: l.length, clase: 'area-' + a.id,
     cuerpo: (l.length ? grupos.map(([t, f]) => { const g = l.filter(f); return g.length ? '<div class="pend-grupo">' + t + '</div><div class="pends">' + g.map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' : ''; }).join('') : vacio('Nada pendiente', 'Lo que agregues en ' + esc(a.nombre) + ' aparecerá aquí.')) +
-      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="esp-anadir-tipo" data-area="' + a.id + '" data-tipo="recordatorio">' + ico('i-plus') + 'Tarea en ' + esc(a.nombre) + '</button><a class="btn" href="#recordatorios">' + ico('i-tareas') + 'Todas mis listas</a></div>' });
+      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="esp-anadir-tipo" data-area="' + a.id + '" data-tipo="recordatorio">' + ico('i-plus') + 'Tarea en ' + esc(a.nombre) + '</button><a class="btn" href="#listas">' + ico('i-tareas') + 'Todas mis listas</a></div>' });
 }
 function vistaEventos(a) {
   const l = proximos(hoy(), 60, a.id).filter((d) => d.bloques.some((b) => b.tipo === 'evento') || d.todoDia.length);

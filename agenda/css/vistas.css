@@ -1164,3 +1164,64 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 .l6-plantillas { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 .l6-plantillas .cap-ej { display: grid; justify-items: start; min-height: 58px; padding: 8px 14px; border-radius: 16px; text-align: left; }
 .l6-plantillas small { font-size: 12px; color: var(--tinta-2); }
+
+/* ==========================================================================
+   AGENDA 6.2 · CLARIDAD: cada tarjeta dice para qué sirve, cada botón dice
+   lo que hace y todo usa la misma forma (mismo radio, borde y fondo).
+   ========================================================================== */
+/* Una línea bajo el título que explica la tarjeta */
+.t-sub { margin: -4px 16px 10px; font-size: 13px; line-height: 1.45; color: var(--tinta-2); }
+.ahora6 .t-sub, .p6-heroe .t-sub { margin: 0; }
+
+/* Barra de abajo: el + también dice «Agregar», como las demás pestañas */
+@media (max-width: 979px) {
+  .barra-mas { width: auto; height: auto; min-height: 56px; border-radius: 24px; background: transparent; box-shadow: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--tinta); font: inherit; font-size: 10.5px; font-weight: 700; cursor: pointer; }
+  .bm-circ { display: grid; place-items: center; width: 46px; height: 30px; border-radius: 99px; background: var(--acento); color: var(--sobre-acento); box-shadow: 0 6px 18px -4px var(--resplandor); }
+  .barra-mas .i { width: 20px; height: 20px; stroke-width: 2.8; }
+  .barra-mas:active .bm-circ { transform: scale(.93); }
+}
+/* Arriba en el celular: «Más» con su nombre */
+.cab .cab-mas { min-height: 44px; padding: 0 14px; gap: 6px; border-radius: 99px; font-size: 14px; font-weight: 650; }
+.cab .cab-mas .i { width: 18px; height: 18px; }
+/* Laptop: «Buscar» con su nombre */
+.lat-buscar { gap: 6px; padding: 0 14px; border-radius: 99px; font-size: 14px; }
+.lat-buscar .i { width: 18px; height: 18px; }
+@media (min-width: 980px) and (max-width: 1239px) { .lat-buscar { width: 44px; padding: 0; font-size: 0; justify-content: center; } }
+
+/* «⋯» de cada pendiente y su menú con palabras */
+.pend-menu { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent; color: var(--tinta-2); font-size: 20px; font-weight: 800; letter-spacing: .05em; cursor: pointer; }
+.pend-menu:hover, .pend-menu:focus-visible { background: var(--superficie-2); color: var(--tinta); }
+.menu6 { display: grid; gap: 8px; }
+.menu6 .opcion-fila { width: 100%; color: var(--tinta); font: inherit; font-size: 15px; cursor: pointer; }
+.menu6 .opcion-fila .i { width: 20px; height: 20px; color: var(--acento-txt); flex: none; }
+.menu6 .opcion-fila:last-child .i { color: var(--rojo); }
+
+/* Hoja de Agregar: una frase de ayuda arriba */
+.cap-ayuda { margin: 0; font-size: 14px; line-height: 1.5; color: var(--tinta-2); }
+.cap-ayuda b { color: var(--tinta); }
+
+/* Cuentas: herramientas del libro, con nombre */
+.p6-herr { display: flex; flex-wrap: wrap; gap: 8px; }
+.p6-herr .btn { gap: 8px; border-radius: 99px; }
+.p6-herr .i { width: 18px; height: 18px; color: var(--acento-txt); }
+.p6-todos { margin: 0 16px 6px; gap: 6px; border-radius: 99px; }
+.p6-btns .btn { gap: 8px; }
+.p6-btns .i { width: 18px; height: 18px; }
+.cv6-cat[aria-pressed="true"] { background: var(--acento-suave); }
+.cv6-cat[aria-pressed="true"] .cv6-cb i { background: var(--acento); }
+@media (min-width: 1180px) { .plata6 > .p6-herr { grid-column: 1 / -1; } }
+
+/* Diseño parejo: todas las cajas con la misma forma y sin bordes punteados */
+.ahora6, .p6-heroe, .mini6, .l6, .cierre6, .sem6-res > div { border-radius: var(--radio); }
+.cierre6, .l6-nueva, .cap-ej { border-style: solid; }
+.cierre6 { border-color: var(--borde); background: linear-gradient(180deg, var(--brillo), transparent 120px), var(--superficie); box-shadow: var(--sombra); }
+.l6-nueva { background: var(--superficie); border-color: var(--borde); }
+.cap-ej { border-color: var(--borde); background: var(--superficie-2); }
+.p6-heroe { background: linear-gradient(180deg, var(--brillo), transparent 120px), var(--superficie); }
+.mini6 b, .cv6-datos b, .sem6-res b { font-size: 24px; }
+.t-cab h2 { font-family: var(--f-titulo); font-size: 18px; font-weight: 750; letter-spacing: -.02em; }
+/* El «⋯» va a la derecha de la fila (no en una línea aparte) */
+.pend:has(> .pend-menu) { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+/* En Cuentas el monto siempre a la derecha, también en celular */
+.plata6 .hf { flex-wrap: nowrap; }
+.plata6 .hf-fin { width: auto; padding: 0; justify-content: flex-end; }

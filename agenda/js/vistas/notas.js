@@ -77,7 +77,7 @@ function editarNota(id, idArea, repintar) {
     const l = crearLista({ titulo: tit.value.trim() || 'Lista', area: n.area, clase: 'checklist' });
     const t0 = Date.now();
     ls.forEach((x, i) => poner(Object.assign(modeloVacio(), { id: nuevoId('pend'), tipo: 'pendiente', titulo: x.t, area: n.area, lista: l.id, estado: x.ok ? 'hecho' : 'pendiente', fechas: Object.assign(modeloVacio().fechas, { inicio: null }), extra: x.ok ? { hechoEn: Date.now() } : {}, creado: t0 + i })));
-    cerrarHoja(true); irALista(l.id); location.hash = '#recordatorios';
+    cerrarHoja(true); irALista(l.id); location.hash = '#listas/' + l.id;
     aviso('Lista «' + (tit.value.trim() || 'Lista') + '» con ' + ls.length + (ls.length === 1 ? ' cosa' : ' cosas') + '. Tu nota sigue igual.');
   });
 }
@@ -158,7 +158,7 @@ export const acciones = {
   'nota-nueva'(b, ev, rp) { editarNota(null, b.dataset.area, rp); },
   'nota-editar'(b, ev, rp) { editarNota(b.dataset.id, null, rp); },
   'nota-check'(b) { const n = buscarElemento(b.dataset.id); cambiarExtra(n.id, {}, { notas: alternarCasilla(n.notas, +b.dataset.i) }); return true; },
-  'notas-lista'(b) { irALista(b.dataset.id); location.hash = '#recordatorios'; },
+  'notas-lista'(b) { irALista(b.dataset.id); location.hash = '#listas/' + b.dataset.id; },
   'dia-animo'(b) {
     const v = +b.dataset.v, x = diarioDe(hoy()), t = document.getElementById('diarioTxt');
     ponerDiario(hoy(), { animo: x && animoDe(x) === v ? 0 : v }, t ? { notas: t.value.replace(/\s+$/, '') } : {}); return true;

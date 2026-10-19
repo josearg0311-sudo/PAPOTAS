@@ -27,15 +27,12 @@ const HACER = [
 /* A dónde ir */
 const IR = [
   ['#hoy', 'Hoy', 'Tu día de un vistazo', 'hoy dia resumen'],
-  ['#plan', 'Plan', 'Tu semana, horario, día y mes', 'plan agenda calendario semana mes dia horario clases'],
+  ['#plan', 'Calendario', 'Tu semana, horario, día y mes', 'plan agenda calendario semana mes dia horario clases'],
   ['#listas', 'Listas', 'Recordatorios y listas para marcar', 'listas recordatorios tareas pendientes compras marcar'],
-  ['#plata', 'Plata · personal', 'Lo que te queda, gastos e ingresos', 'plata dinero cuentas gastos ingresos personal'],
-  ['#plata/oficina', 'Plata · oficina', 'Las cuentas de la oficina', 'plata oficina cuentas cobros'],
-  ['#agenda', 'Agenda en detalle', 'Año, lista, filtros y .ics', 'agenda calendario año lista ics'],
+  ['#plata', 'Cuentas · personal', 'Lo que te queda, gastos e ingresos', 'plata dinero cuentas gastos ingresos personal presupuesto excel'],
+  ['#plata/oficina', 'Cuentas · oficina', 'Las cuentas de la oficina', 'plata oficina cuentas cobros'],
   ['#seguimiento', 'Seguimiento', 'Cómo vas en cada área', 'seguimiento progreso estadisticas habitos metas'],
   ['#seguimiento/revision', 'Revisión semanal', 'Mira tu semana y planea la próxima', 'revision semanal semana planear'],
-  ['#finanzas', 'Cuentas en detalle · personal', 'Categorías, presupuesto e informe', 'finanzas cuentas detalle presupuesto categorias informe excel'],
-  ['#finanzas/oficina', 'Cuentas en detalle · oficina', 'Categorías, informe y Excel de la oficina', 'finanzas oficina libro cuentas facturas detalle'],
   ['#notas', 'Notas', 'Tus apuntes por área', 'notas apuntes'],
   ['#notas/diario', 'Diario', 'Ánimo, agua y sueño', 'diario animo agua sueno'],
   ['#ajustes', 'Ajustes', 'Nube, respaldo, PIN, teclado', 'ajustes configuracion nube respaldo pin tema teclado'],

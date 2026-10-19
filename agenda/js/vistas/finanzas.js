@@ -18,7 +18,7 @@ import { guardarArchivo } from '../datos/respaldo.js';
 import { aviso } from '../piezas/aviso.js';
 import { cerrarHoja } from '../piezas/hoja.js';
 
-const ui = { mes: '', cat: '', ver: 30 };
+const ui = { mes: '', cat: '', ver: 30, catP: '' };
 const completo = () => preferencias().completo;   // modo simple: solo lo esencial
 const COLOR = { personal: 'personal', oficina: 'oficina' };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -227,14 +227,14 @@ function comoVas6(libro, todos, ym, r, pres) {
   const porDia = a.porDia != null ? a.porDia : r.saldo > 0 ? Math.floor(r.saldo / a.quedan) : null;
   const cats = r.porCategoria.slice(0, 3);
   if (!g.some(Boolean) && !cats.length) return '';
-  return tarjeta({ titulo: 'Cómo vas', cuerpo:
+  return tarjeta({ titulo: 'Cómo vas', sub: 'Tus últimos 7 días y en qué se te va más. Toca una categoría para ver solo esos gastos.', cuerpo:
     '<div class="cv6-barras" role="img" aria-label="Gastos de los últimos 7 días: ' + dias.map((d, i) => DIAS3F[diaSemanaF(d)] + ' ' + fmtSoles(g[i])).join(', ') + '">' +
       dias.map((d, i) => '<span class="cv6-dia' + (d === h ? ' hoy' : '') + '"><i style="height:' + Math.max(g[i] ? 6 : 2, g[i] / max * 100).toFixed(0) + '%"></i><small>' + (d === h ? 'hoy' : DIAS3F[diaSemanaF(d)]) + '</small></span>').join('') + '</div>' +
     '<div class="cv6-datos">' +
       (porDia != null ? '<div><b>' + fmtSoles(porDia) + '</b><small>' + (a.porDia != null ? 'por día para no pasarte del presupuesto' : 'por día para que te alcance el mes') + '</small></div>' : '') +
       (a.pct != null ? '<div><b class="' + (a.pct > 0 ? 'txt-aviso' : 'txt-ok') + '">' + (a.pct > 0 ? '+' : '') + a.pct + ' %</b><small>' + (a.pct > 0 ? 'más' : 'menos') + ' que el mes pasado a esta fecha</small></div>' : '') +
     '</div>' +
-    (cats.length ? '<div class="cv6-cats">' + cats.map((c) => '<button type="button" class="cv6-cat" data-acc="p6-cat" data-libro="' + libro + '" data-v="' + esc(c.cat) + '"><span>' + esc(c.cat) + '</span><span class="cv6-cb" aria-hidden="true"><i style="width:' + Math.max(3, c.monto / cats[0].monto * 100).toFixed(0) + '%"></i></span><b class="mono">' + fmtSoles(c.monto) + '</b></button>').join('') + '</div>' : '') });
+    (cats.length ? '<div class="cv6-cats">' + cats.map((c) => '<button type="button" class="cv6-cat" data-acc="p6-cat" data-v="' + esc(c.cat) + '" aria-pressed="' + (ui.catP === c.cat) + '"><span>' + esc(c.cat) + '</span><span class="cv6-cb" aria-hidden="true"><i style="width:' + Math.max(3, c.monto / cats[0].monto * 100).toFixed(0) + '%"></i></span><b class="mono">' + fmtSoles(c.monto) + '</b></button>').join('') + '</div>' : '') });
 }
 
 /* ---------- PLATA (Agenda 6, #plata y #plata/oficina) ----------
@@ -244,9 +244,10 @@ function comoVas6(libro, todos, ym, r, pres) {
    informe, Excel) sigue en «Ver todo el detalle». */
 export function vistaPlata(param) {
   const libro = param === 'oficina' ? 'oficina' : 'personal', ym = hoy().slice(0, 7), todos = movs(libro), r = resumenMes(todos, ym);
+  if (ui.libroP !== libro) { ui.libroP = libro; ui.catP = ''; }   // el filtro es de un libro
   const pres = presupuestoDe(libro), gHoy = todos.filter((x) => !esIngreso(x) && x.fechas.inicio === hoy()).reduce((t, x) => t + Math.abs(+x.monto || 0), 0);
   const pagos = elementos((x) => x.tipo === 'pago' && libroDePago(x) === libro && x.extra.activo !== false).map((p) => ({ p, dia: diaDePago(p, ym), ok: pagado(p, ym) })).filter((x) => !(val(x.p, 'desde', '') > ym)).sort((a, b) => a.dia.localeCompare(b.dia));
-  const delM = todos.filter((x) => delMes(x, ym)).sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '') || b.actualizado - a.actualizado);
+  const delM = todos.filter((x) => delMes(x, ym) && (!ui.catP || (!esIngreso(x) && (x.extra.categoria || 'Sin categoría') === ui.catP))).sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '') || b.actualizado - a.actualizado);
   const porDia = []; delM.slice(0, 60).forEach((x) => { const d = x.fechas.inicio, g = porDia[porDia.length - 1]; if (g && g.d === d) g.l.push(x); else porDia.push({ d, l: [x] }); });
   const tope = pres || r.ingresos, pct = tope ? Math.min(100, r.gastos / tope * 100) : 0;
   return '<div class="plata6 area-' + libro + '">' +
@@ -254,18 +255,23 @@ export function vistaPlata(param) {
     '<section class="p6-heroe"><small>' + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda este mes') + '</small><b class="p6-queda' + (r.saldo < 0 ? ' neg' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b>' +
       '<div class="p6-dos"><div><small>Gastaste' + (gHoy ? ' · ' + fmtSoles(gHoy) + ' hoy' : '') + '</small><b>' + fmtSoles(r.gastos) + '</b><span class="p6-barra rojo" aria-hidden="true"><i style="width:' + pct.toFixed(0) + '%"></i></span>' + (pres ? '<small>de ' + fmtSoles(pres) + ' de presupuesto</small>' : '') + '</div>' +
       '<div><small>Entró</small><b class="ing">' + fmtSoles(r.ingresos) + '</b><span class="p6-barra verde" aria-hidden="true"><i style="width:' + (r.ingresos ? 100 : 0) + '%"></i></span></div></div>' +
-      '<div class="p6-btns"><button type="button" class="btn pri" data-acc="monto" data-libro="' + libro + '" data-ing="0">− Gasto</button><button type="button" class="btn" data-acc="monto" data-libro="' + libro + '" data-ing="1">+ Ingreso</button></div></section>' +
+      '<div class="p6-btns"><button type="button" class="btn pri" data-acc="monto" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Anotar gasto</button><button type="button" class="btn" data-acc="monto" data-libro="' + libro + '" data-ing="1">' + ico('i-plus') + 'Anotar ingreso</button></div></section>' +
     comoVas6(libro, todos, ym, r, pres) +
-    (pagos.length ? tarjeta({ titulo: 'Pagos fijos', n: pagos.filter((x) => x.ok).length + '/' + pagos.length,
+    (pagos.length ? tarjeta({ titulo: 'Pagos fijos', sub: 'Lo que pagas cada mes. Marca el círculo cuando lo pagues y se anota solo.', n: pagos.filter((x) => x.ok).length + '/' + pagos.length,
       cuerpo: filas(pagos.map(({ p, dia, ok }) => { const n = diasEntre(hoy(), dia);
         return fila({ inicio: casilla(ok, 'cal-pago', p.id, (ok ? 'Desmarcar: ' : 'Pagado: ') + p.titulo, ' data-ym="' + ym + '"'), titulo: p.titulo, acc: 'pago-editar', id: p.id, clase: ok ? 'hecha' : '',
           meta: '<b class="mono">' + fmtSoles(p.monto || 0) + '</b> · día ' + +dia.slice(8) + ' ' + (ok ? '<span class="pill">pagado</span>' : n < 0 ? pildora('vencido', 'venció') : n <= 3 ? pildora('pronto', n === 0 ? 'vence hoy' : 'en ' + n + ' días') : '') }); })) }) : '') +
-    tarjeta({ titulo: 'Movimientos', n: delM.length || null,
-      cuerpo: porDia.length ? porDia.map((g) => { const gd = g.l.reduce((t, x) => t + (esIngreso(x) ? 0 : Math.abs(+x.monto || 0)), 0);
+    tarjeta({ titulo: ui.catP ? 'Movimientos · ' + esc(ui.catP) : 'Movimientos', sub: ui.catP ? '' : 'Todo lo que anotaste este mes, por día. Toca uno para cambiarlo.', n: delM.length || null,
+      cuerpo: (ui.catP ? '<button type="button" class="btn chico p6-todos" data-acc="p6-cat" data-v="">' + ico('i-x') + 'Quitar filtro: ver todos</button>' : '') + (porDia.length ? porDia.map((g) => { const gd = g.l.reduce((t, x) => t + (esIngreso(x) ? 0 : Math.abs(+x.monto || 0)), 0);
         return '<div class="p6-dia"><span>' + cap(g.d === hoy() ? 'hoy' : fmtCorta(g.d)) + '</span>' + (gd ? '<span class="mono">−' + fmtSoles(gd) + '</span>' : '') + '</div>' +
           filas(g.l.map((x) => { const ing = esIngreso(x); return fila({ titulo: x.titulo || (ing ? 'Ingreso' : 'Gasto'), acc: 'fin-editar', id: x.id, meta: esc(x.extra.categoria || ''), final: '<b class="mono monto ' + (ing ? 'ingreso' : 'gasto') + '">' + (ing ? '+' : '−') + fmtSoles(Math.abs(+x.monto || 0)) + '</b>' }); })); }).join('')
-        : vacio('Aún nada este mes', 'Toca «− Gasto» o escribe en el + «almuerzo 25».') }) +
-    '<a class="btn p6-detalle" href="#finanzas' + (libro === 'oficina' ? '/oficina' : '') + '">Ver el detalle: categorías, presupuesto e informe</a>' +
+        : vacio(ui.catP ? 'Nada en ' + ui.catP + ' este mes' : 'Aún nada este mes', ui.catP ? 'Toca «Quitar filtro».' : 'Toca «Anotar gasto» o escribe en Agregar «almuerzo 25».')) }) +
+    '<div class="p6-herr" role="group" aria-label="Herramientas del libro">' +
+      '<button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-diana') + (pres ? 'Cambiar presupuesto' : 'Poner presupuesto') + '</button>' +
+      '<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar a Excel</button>' +
+      '<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-recibo') + 'Informe en PDF</button>' +
+      (preferencias().completo ? '<a class="btn" href="#finanzas' + (libro === 'oficina' ? '/oficina' : '') + '">' + ico('i-grafica') + 'Cuentas avanzadas</a>' : '') +
+    '</div>' +
     '</div>';
 }
 
@@ -282,7 +288,7 @@ export function avisoPresupuesto(libro) {
 export const acciones = {
   'fin-mes'(b) { const n = +b.dataset.n, act = hoy().slice(0, 7); ui.mes = n === 0 ? '' : sumarMes(ui.mes || act, n) >= act ? '' : sumarMes(ui.mes || act, n); ui.cat = ''; ui.ver = 30; return true; },
   'fin-ir-mes'(b) { ui.mes = b.dataset.v === hoy().slice(0, 7) ? '' : b.dataset.v; ui.cat = ''; return true; },
-  'p6-cat'(b) { ui.cat = b.dataset.v; ui.mes = ''; location.hash = '#finanzas' + (b.dataset.libro === 'oficina' ? '/oficina' : ''); },
+  'p6-cat'(b) { ui.catP = !b.dataset.v || ui.catP === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-cat'(b) { ui.cat = ui.cat === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-mas'() { ui.ver += 30; return true; },
   'fin-nuevo'(b, ev, rp) { editarMov(null, rp, { libro: b.dataset.libro, ingreso: b.dataset.ing === '1', area: b.dataset.area || '' }); },

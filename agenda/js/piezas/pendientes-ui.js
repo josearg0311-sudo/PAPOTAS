@@ -38,6 +38,8 @@ export function filaPendiente(x, { acciones = true, verLista = false } = {}) {
     lista ? '<span>' + esc(lista.titulo) + '</span>' : '', subs.length ? '<span>' + ico('i-rec') + subs.filter((s) => s.ok).length + '/' + subs.length + '</span>' : '',
     x.repetir ? '<span>' + ico('i-repetir') + esc((REPETIR.find((r) => r[0] === x.repetir) || ['', ''])[1].toLowerCase()) + '</span>' : '',
     (x.etiquetas || []).map((e) => '<span class="etiqueta">#' + esc(e) + '</span>').join(''), estadoPills(x)].filter(Boolean).join('');
+  /* Sin botones a la vista (modo simple): un «⋯» claro con todas las opciones, para no depender de deslizar */
+  const menu = !acciones && !hecho ? '<button type="button" class="pend-menu" data-acc="p-menu" data-id="' + esc(x.id) + '" aria-label="Opciones de: ' + esc(x.titulo) + '">⋯</button>' : '';
   const botones = acciones && !hecho ? '<div class="pend-acc">' +
     (g === 'hoy' ? '<button type="button" class="mini-btn" data-acc="p-tarde" data-id="' + esc(x.id) + '">Más tarde</button>' : '') +
     (g !== 'manana' ? '<button type="button" class="mini-btn" data-acc="p-manana" data-id="' + esc(x.id) + '">Mañana</button>' : '') +
@@ -46,7 +48,7 @@ export function filaPendiente(x, { acciones = true, verLista = false } = {}) {
     '<div class="pend area-' + a + (hecho ? ' hecho' : '') + (x.prioridad === 'alta' && !hecho ? ' alta' : '') + '" data-desliza="' + esc(x.id) + '">' +
     '<button type="button" class="casilla" role="checkbox" aria-checked="' + hecho + '" data-acc="p-marcar" data-id="' + esc(x.id) + '" aria-label="' + (hecho ? 'Marcar pendiente' : 'Marcar como hecho') + ': ' + esc(x.titulo) + '"><span></span></button>' +
     '<button type="button" class="pend-txt" data-acc="p-editar" data-id="' + esc(x.id) + '"><b>' + esc(x.titulo || '(sin título)') + '</b><span class="pend-meta">' + meta + '</span></button>' +
-    botones + '</div></div>';
+    botones + menu + '</div></div>';
 }
 
 /* ---------- Acciones con «Deshacer» ---------- */
@@ -62,6 +64,22 @@ export const acciones = {
   'p-tarde'(b, ev, repintar) { const r = masTarde(b.dataset.id); repintar(); const x = buscarElemento(b.dataset.id); deshacible(r, 'Más tarde · ' + (x.fechas.inicio === hoy() ? 'hoy ' : 'mañana ') + fmtHora(x.fechas.hora, preferencias().formatoHora), repintar); },
   'p-manana'(b, ev, repintar) { const x = buscarElemento(b.dataset.id); const r = mover(b.dataset.id, sumarDias(hoy(), 1), x.fechas.hora); repintar(); deshacible(r, 'Pasado a mañana · ' + fmtCorta(sumarDias(hoy(), 1)), repintar); },
   'p-dia'(b, ev, repintar) { elegirDia(b.dataset.id, repintar); },
+  /* «⋯»: lo que puedes hacer con un pendiente, con palabras */
+  'p-menu'(b, ev, repintar) {
+    const x = buscarElemento(b.dataset.id); if (!x) return;
+    const g = grupo(x), op = (acc, ic, txt) => '<button type="button" class="opcion-fila" data-op="' + acc + '">' + ico(ic) + '<span>' + txt + '</span></button>';
+    const hoja = abrirHoja(esc(x.titulo), '<div class="menu6">' +
+      op('p-marcar', 'i-check', 'Marcar hecho') +
+      (g === 'hoy' ? op('p-tarde', 'i-reloj', 'Más tarde (en 2 horas)') : '') +
+      (g !== 'manana' ? op('p-manana', 'i-der', 'Pasar a mañana') : '') +
+      op('p-dia', 'i-cal', 'Elegir otro día…') + op('p-editar', 'i-lapiz', 'Editar (nombre, hora, lista, repetir…)') +
+      op('p-borrar', 'i-basura', 'Mandar a la papelera') + '</div>');
+    hoja.querySelectorAll('[data-op]').forEach((o) => o.addEventListener('click', () => {
+      const acc = o.dataset.op; cerrarHoja(true);
+      if (acc === 'p-borrar') { aPapelera(x.id); repintar(); aviso('A la papelera: ' + x.titulo, () => { restaurar(x.id); repintar(); }); return; }
+      acciones[acc]({ dataset: { id: x.id }, setAttribute() {}, classList: { add() {} } }, null, repintar);
+    }));
+  },
   'p-editar'(b, ev, repintar) { editarPendiente(b.dataset.id, repintar); },
   async 'cerrar-dia'(b, ev, repintar) {
     const l = paraCerrarDia();
@@ -155,7 +173,7 @@ export function editarLista(id, repintar, alCrear, claseFija = '') {
     const t = f.titulo.value.trim(); if (!t) return;
     const leer = (n) => ((hoja.querySelector('[data-sel="' + n + '"] [aria-pressed="true"]') || {}).dataset || {}).v;
     if (l) { const y = JSON.parse(JSON.stringify(l)); y.titulo = t; y.area = leer('area') || y.area; poner(y); cerrarHoja(); repintar(); aviso('Lista guardada'); }
-    else { const n = crearLista({ titulo: t, area: leer('area'), clase: claseFija || leer('clase') }); cerrarHoja(); if (alCrear) alCrear(n.id); repintar(); aviso('Lista creada: ' + t); }
+    else { const n = crearLista({ titulo: t, area: leer('area'), clase: claseFija || leer('clase') }); cerrarHoja(!!alCrear); if (alCrear) alCrear(n.id); repintar(); aviso('Lista creada: ' + t); }
   });
   const bb = hoja.querySelector('#lBorrar');
   if (bb) bb.addEventListener('click', async () => {

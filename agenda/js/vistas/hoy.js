@@ -133,11 +133,11 @@ export function vistaHoy() {
     (simple() ? '' : tarjetaEspacios()) +
     '<div class="hoy-col">' +
       ahoraHTML(h, porHacer) +
-      (!porHacer.length ? '' : tarjeta({ eti: 'POR HACER', titulo: 'Por hacer', n: porHacer.length || null,
+      (!porHacer.length ? '' : tarjeta({ eti: 'PENDIENTES', titulo: 'Pendientes de hoy', n: porHacer.length || null, sub: 'Sin hora fija. Marca el círculo cuando lo hagas o toca ⋯ para moverlo.',
         cuerpo: (porHacer.length ? '<div class="pends">' + porHacer.slice(0, 10).map(fila).join('') + '</div>' + (porHacer.length > 10 ? '<div class="pie-tarjeta"><a class="btn" href="#listas">Ver ' + (porHacer.length - 10) + ' más</a></div>' : '') : vacio(tot ? 'Todo listo por hoy' : 'Nada pendiente', 'Toca + y escribe lo que tengas que hacer.')) })) +
       cierreDia(h, porHacer) +
     '</div><div class="hoy-col">' +
-      tarjeta({ eti: 'TU DÍA', titulo: 'Tu día', n: bloques.length || null, cuerpo: lineaDia(bloques) }) +
+      tarjeta({ eti: 'HORARIO', titulo: 'Horario de hoy', n: bloques.length || null, sub: 'Lo que tiene hora: clases, citas y recordatorios.', cuerpo: lineaDia(bloques) }) +
       minis(h) +
       (simple() ? '' : tarjetaHabitos() + tarjetaManana() + tarjetaNumeros() + (corriendo() ? '' : tarjeta({ eti: 'FOCO', titulo: 'Pomodoro', id: 'tarjetaPomo', cuerpo: pomoHTML() }))) +
     '</div>' +
@@ -166,12 +166,12 @@ function ahoraHTML(h, porHacer) {
       '<p class="a6-cuando"><i aria-hidden="true"></i>' + cuando + '</p><h2 class="a6-tit">' + esc(b.titulo) + '</h2>' +
       (s.enCurso ? '<span class="f6-barra" role="img" aria-label="Va ' + Math.round(prog) + ' %"><i style="width:' + prog.toFixed(1) + '%"></i></span>' : '') +
       '<p class="a6-chips"><span class="chip area-' + area(b.area).id + '">' + (b.tipo === 'clase' ? 'Clase' : b.tipo === 'pendiente' ? 'Recordatorio' : 'Evento') + '</span>' + (b.lugar ? '<span class="chip-n">' + esc(b.lugar) + '</span>' : '') + '</p>' +
-      '<div class="a6-btns">' + (b.tipo === 'pendiente' ? bt('p-marcar', b.id, ico('i-check') + 'Listo', true) : bt('h6-foco', b.tipo === 'clase' ? '' : b.id, (corriendo() ? 'Foco en marcha' : 'Empezar foco 25 min'), true)) + bt(acc, b.id, 'Ver') + '</div>' +
+      '<div class="a6-btns">' + (b.tipo === 'pendiente' ? bt('p-marcar', b.id, ico('i-check') + 'Marcar hecho', true) : bt('h6-foco', b.tipo === 'clase' ? '' : b.id, ico('i-play') + 'Concentrarme 25 min', true)) + bt(acc, b.id, 'Abrir') + '</div>' +
       (desp ? '<p class="a6-desp">Después: <b>' + esc(desp.titulo) + '</b> a las ' + fmtHora(desp.hIni, f) + '</p>' : '') + '</section>';
   }
   const x = porHacer[0];
-  if (x) return '<section class="ahora6 area-' + area(x.area).id + '" aria-label="Lo más importante"><p class="a6-cuando"><i aria-hidden="true"></i>Lo primero de hoy</p><h2 class="a6-tit">' + esc(x.titulo) + '</h2>' +
-    '<div class="a6-btns">' + bt('p-marcar', x.id, ico('i-check') + 'Listo', true) + bt('h6-foco', x.id, corriendo() ? 'Foco en marcha' : 'Foco 25 min') + '</div>' +
+  if (x) return '<section class="ahora6 area-' + area(x.area).id + '" aria-label="Lo más importante"><p class="a6-cuando"><i aria-hidden="true"></i>Lo primero de tus pendientes</p><h2 class="a6-tit">' + esc(x.titulo) + '</h2>' +
+    '<div class="a6-btns">' + bt('p-marcar', x.id, ico('i-check') + 'Marcar hecho', true) + bt('h6-foco', x.id, ico('i-play') + 'Concentrarme 25 min') + '</div>' +
     (porHacer.length > 1 ? '<p class="a6-desp">Y ' + (porHacer.length - 1) + ' cosa' + (porHacer.length > 2 ? 's' : '') + ' más abajo.</p>' : '') + '</section>';
   return '<section class="ahora6 libre" aria-label="Día libre"><p class="a6-cuando"><i aria-hidden="true"></i>Nada más por hoy</p><h2 class="a6-tit">Día libre 🌿</h2><div class="a6-btns"><button type="button" class="btn pri" data-acc="captura">' + ico('i-plus') + 'Anotar algo</button></div></section>';
 }
@@ -195,8 +195,8 @@ function minis(h) {
   const ls = listas().filter(esChecklist).map((l) => { const p = pendientesDe(l.id); return { l, p, ok: p.filter((x) => x.estado === 'hecho').length }; }).filter((x) => x.p.length && x.ok < x.p.length);
   const l = ls[0];
   return '<div class="minis6">' +
-    '<a class="mini6" href="#plata"><small>Gastaste hoy</small><b>' + fmtSoles(gHoy) + '</b><small>te quedan ' + fmtSoles(r.ingresos - r.gastos) + ' este mes</small></a>' +
-    (l ? '<a class="mini6" href="#listas/' + esc(l.l.id) + '"><small>' + esc(l.l.titulo) + '</small><b>' + l.ok + '/' + l.p.length + '</b><small>' + esc(l.p.filter((x) => x.estado !== 'hecho').slice(0, 3).map((x) => x.titulo).join(', ')) + '</small></a>'
+    '<a class="mini6" href="#plata"><small>Cuenta personal · gastaste hoy</small><b>' + fmtSoles(gHoy) + '</b><small>te quedan ' + fmtSoles(r.ingresos - r.gastos) + ' este mes</small></a>' +
+    (l ? '<a class="mini6" href="#listas/' + esc(l.l.id) + '"><small>Lista a medias · ' + esc(l.l.titulo) + '</small><b>' + l.ok + '/' + l.p.length + '</b><small>' + esc(l.p.filter((x) => x.estado !== 'hecho').slice(0, 3).map((x) => x.titulo).join(', ')) + '</small></a>'
       : '<a class="mini6" href="#listas"><small>Listas</small><b>' + listas().filter(esChecklist).length + '</b><small>todo marcado</small></a>') +
     '</div>';
 }

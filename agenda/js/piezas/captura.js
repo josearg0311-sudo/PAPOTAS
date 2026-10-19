@@ -69,7 +69,7 @@ function pintarPrevia() {
   else el.innerHTML = (l.length > 1 ? '<p class="cap-varias">' + l.length + ' cosas a la vez</p>' : '') + l.slice(0, 6).map((e) => { const [s, t, d] = detalle(e);
     return '<div class="cap-una"><span class="cap-signo" aria-hidden="true">' + s + '</span><span class="cap-que"><b>' + t + '</b><small>' + d + '</small></span></div>'; }).join('') + (l.length > 6 ? '<p class="cap-varias">y ' + (l.length - 6) + ' más</p>' : '');
   el.classList.toggle('varias', l.length > 1);
-  document.querySelectorAll('[data-cap-tipo]').forEach((b) => b.setAttribute('aria-pressed', String(l.length === 1 && l[0].tipo === b.dataset.capTipo)));
+  document.querySelectorAll('[data-cap-tipo]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.capTipo === forzado)));
 }
 
 /* «Lo de siempre»: los gastos que más repites (últimos 90 días), con su último monto */
@@ -87,16 +87,17 @@ function frecuentes() {
 export function abrirCaptura(texto = '') {
   forzado = '';
   const fr = frecuentes();
-  abrirHoja('Escribe lo que sea',
+  abrirHoja('Agregar',
     '<form class="cap" id="capForm">' +
+    '<p class="cap-ayuda">Escribe lo que quieras guardar. Antes de guardar te muestro qué será; si no acierto, elige el tipo abajo.</p>' +
     '<div class="cap-fila"><label class="solo-lector" for="capTexto">Qué quieres anotar</label>' +
     '<input id="capTexto" class="entrada cap-entrada" autocomplete="off" enterkeyhint="done" maxlength="500" placeholder="almuerzo 25 · llamar a Ana mañana 10am" value="' + esc(texto) + '">' +
     (puedeDictar() ? '<button type="button" class="icono-btn cap-mic" id="capMic" aria-pressed="false" aria-label="Dictar con la voz">' + ico('i-mic') + '</button>' : '') + '</div>' +
     '<div class="cap-previa" id="capPrevia" aria-live="polite"></div>' +
-    '<div class="cap-tipos" role="group" aria-label="¿No es eso? Guardar como">' + Object.keys(NOMBRES).map((k) => '<button type="button" class="cap-tipo" data-cap-tipo="' + k + '" aria-pressed="false">' + NOMBRES[k].replace(' para marcar', '') + '</button>').join('') + '</div>' +
+    '<p class="cap-ej-tit">Guardar como:</p><div class="cap-tipos" role="group" aria-label="Guardar como"><button type="button" class="cap-tipo" data-cap-tipo="" aria-pressed="true">Automático</button>' + Object.keys(NOMBRES).map((k) => '<button type="button" class="cap-tipo" data-cap-tipo="' + k + '" aria-pressed="false">' + NOMBRES[k].replace(' para marcar', '') + '</button>').join('') + '</div>' +
     (fr.length ? '<p class="cap-ej-tit">Lo de siempre:</p><div class="cap-ejemplos">' + fr.map((x) => '<button type="button" class="cap-ej siempre" data-cap-ej="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' : '') +
-    '<p class="cap-ej-tit">Prueba:</p><div class="cap-ejemplos">' + EJEMPLOS.slice(0, fr.length ? 3 : 6).map((x) => '<button type="button" class="cap-ej" data-cap-ej="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
-    '<button type="submit" class="btn pri cap-guardar">Guardar</button></form>', { alCerrar: () => { if (pararDictado) { pararDictado(); pararDictado = null; } } });
+    '<p class="cap-ej-tit">Ejemplos (tócalos):</p><div class="cap-ejemplos">' + EJEMPLOS.slice(0, fr.length ? 3 : 6).map((x) => '<button type="button" class="cap-ej" data-cap-ej="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
+    '<button type="submit" class="btn pri cap-guardar">' + ico('i-check') + 'Guardar</button></form>', { alCerrar: () => { if (pararDictado) { pararDictado(); pararDictado = null; } } });
   pintarPrevia();
 }
 
@@ -147,7 +148,7 @@ document.addEventListener('click', (ev) => {
   const ej = ev.target.closest('[data-cap-ej]');
   if (ej) { const i = document.getElementById('capTexto'); i.value = ej.dataset.capEj; forzado = ''; pintarPrevia(); i.focus(); return; }
   const tp = ev.target.closest('[data-cap-tipo]');
-  if (tp) { forzado = forzado === tp.dataset.capTipo ? '' : tp.dataset.capTipo; pintarPrevia(); document.getElementById('capTexto').focus(); return; }
+  if (tp) { forzado = tp.dataset.capTipo; pintarPrevia(); document.getElementById('capTexto').focus(); return; }
   const mic = ev.target.closest('#capMic');
   if (mic) {
     if (pararDictado) { pararDictado(); pararDictado = null; mic.setAttribute('aria-pressed', 'false'); return; }
