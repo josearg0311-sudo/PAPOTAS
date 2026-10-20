@@ -9,7 +9,8 @@ import { AREAS, area } from './datos/areas.js';
 import { aplicarTema } from './piezas/tema.js';
 import { iniciarCandado, despuesDeAbrir } from './piezas/candado.js';
 import { aviso } from './piezas/aviso.js';
-import { cerrarHoja, atrasEsDeHoja } from './piezas/hoja.js';
+import { abrirHoja, cerrarHoja, atrasEsDeHoja } from './piezas/hoja.js';
+import { opcionesFiltro } from './vistas/filtro-ui.js';
 import { aplicarGuia, alternarGuia, iniciarRecorrido } from './piezas/guia.js';
 import { cuandoSeGuarde } from './piezas/agregar-rapido.js';
 import { abrirCaptura } from './piezas/captura.js';
@@ -223,7 +224,8 @@ const ACCIONES = Object.assign({}, accPend, accHoy, accHoyExtra, accRec, accAgen
   reintentar() { return true; },
   'ir-dia'(b) { irADia(b.dataset.dia); ir('calendario'); },
   /* Filtro por espacio: se recuerda y se aplica en todas las secciones */
-  filtro(b) { ponerFiltro(b.dataset.v); return true; }
+  'filtro-abrir'() { abrirHoja('Ver el espacio', opcionesFiltro()); },
+  filtro(b) { ponerFiltro(b.dataset.v); if (document.body.classList.contains('con-hoja')) cerrarHoja(); return true; }
 });
 
 document.addEventListener('click', (ev) => {

@@ -1309,3 +1309,67 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
   .hr-bloque { left: 2px !important; width: calc(100% - 4px) !important; hyphens: auto; -webkit-hyphens: auto; }
   .hr-bloque[data-c] { left: 38% !important; width: 62% !important; z-index: 2; box-shadow: -3px 0 0 var(--superficie); }
 }
+
+/* ==========================================================================
+   AGENDA 7.1 · HOY «TU DÍA, DE CORRIDO»: una sola línea de arriba abajo
+   (antes → lo que pasó → ahora → lo que viene → mañana). Sin plata en Hoy.
+   ========================================================================== */
+.rio6 { display: grid; padding: 4px 0 8px; }
+.rio-tit { margin: 0 0 10px; font: 700 12px var(--f-texto, inherit); letter-spacing: .14em; text-transform: uppercase; color: var(--tinta-2); }
+.rio-fila { display: grid; grid-template-columns: 52px 18px minmax(0, 1fr); column-gap: 8px; }
+.rio-h { padding-top: 14px; font-size: 13px; font-weight: 600; color: var(--tinta-2); font-variant-numeric: tabular-nums; }
+.rio-p { position: relative; display: flex; justify-content: center; }
+.rio-p::after { content: ''; position: absolute; top: 0; bottom: 0; width: 2px; background: var(--borde); }
+.rio-fila:first-of-type .rio-p::after { top: 18px; }
+.rio-fila:last-child .rio-p::after { bottom: calc(100% - 18px); }
+.rio-p i { position: relative; z-index: 1; width: 10px; height: 10px; margin-top: 17px; border-radius: 50%; background: var(--a, var(--tinta-3)); box-shadow: 0 0 0 4px var(--fondo); }
+.rio-p i.rojo { background: var(--rojo); }
+.rio-p i.gris { background: var(--superficie-3); }
+.rio-p i.ya { width: 14px; height: 14px; margin-top: 15px; background: var(--acento); box-shadow: 0 0 0 4px var(--fondo), 0 0 0 9px color-mix(in srgb, var(--acento) 22%, transparent); }
+.rio-c { min-width: 0; padding: 6px 0 10px; }
+.rio-fila.rio-ya .rio-h, .rio-ahora { color: var(--acento-txt); }
+.rio-ahora { margin: 8px 0 2px; font-size: 13px; font-weight: 700; }
+.rio-fila.urgente .rio-h, .rio-fila.antes .rio-h { color: var(--rojo); }
+.rio-b { display: flex; align-items: center; gap: 8px; padding: 4px 6px 4px 4px; border-radius: 16px; background: var(--superficie); border: 1px solid var(--borde); }
+.rio-t { flex: 1; min-width: 0; display: grid; gap: 2px; min-height: 44px; padding: 6px 8px; border: 0; background: transparent; color: var(--tinta); font: inherit; text-align: left; cursor: pointer; }
+.rio-t b { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.rio-t small { font-size: 12.5px; color: var(--tinta-2); }
+.rio-fila.pasado .rio-b { opacity: .55; }
+.rio-fila.pasado .rio-t b { text-decoration: line-through; }
+.rio-atras { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 16px; background: var(--rojo-suave); }
+.rio-atras > span { flex: 1 1 140px; font-size: 14px; }
+.rio-c .pends { border-radius: 16px; overflow: hidden; }
+.rio-fila.manana .rio-t { padding-left: 0; }
+@media (min-width: 1180px) { .hoy.hoy6 .rio6 { padding: 18px 18px 8px; border-radius: var(--radio); background: var(--superficie); border: 1px solid var(--borde); } }
+/* Filtro compacto «Todo ▾» */
+.filtro6-fila { display: flex; justify-content: flex-start; }
+.filtro6-btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 16px; border-radius: 99px; border: 1px solid var(--borde); background: var(--superficie); color: var(--tinta); font: inherit; font-size: 14px; font-weight: 650; cursor: pointer; }
+.filtro6-btn .i { width: 16px; height: 16px; color: var(--tinta-2); }
+.filtro6-btn i { width: 9px; height: 9px; border-radius: 50%; background: var(--a); }
+.filtro6-btn.puesto { border-color: var(--a); background: color-mix(in srgb, var(--a) 14%, var(--superficie)); }
+.filtro6-ops .opcion-fila { justify-content: flex-start; }
+.filtro6-ops .opcion-fila span { flex: 1; }
+.filtro6-ops .opcion-fila i { width: 10px; height: 10px; border-radius: 50%; background: var(--a); }
+.filtro6-ops .opcion-fila .i { width: 20px; height: 20px; color: var(--acento-txt); }
+.filtro6-ops .opcion-fila[aria-pressed="true"] { border-color: var(--acento); }
+/* En Hoy el filtro va a la derecha de la fecha */
+.hoy-cab .filtro6-fila { margin-left: auto; align-self: flex-start; }
+/* Cuentas: botón del ojo (montos ocultos hasta tocarlo) */
+.p6-ojo-fila { display: flex; justify-content: flex-end; }
+.p6-ojo { gap: 6px; border-radius: 99px; }
+.p6-ojo .i { width: 18px; height: 18px; }
+.plata6.ocultos .p6-queda { letter-spacing: .02em; }
+@media (min-width: 1180px) { .plata6 > .p6-ojo-fila { grid-column: 1 / -1; } }
+
+.rio-atras { flex-wrap: nowrap; }
+.rio-atras .btn.chico { padding: 0 12px; }
+@media (max-width: 380px) { .rio-atras { flex-wrap: wrap; } }
+.p6-heroe { position: relative; }
+.p6-heroe .p6-ojo { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; color: var(--tinta-2); border-color: transparent; background: transparent; }
+.p6-heroe > small:first-of-type { padding-right: 48px; }
+.hoy-fila2 { display: flex; align-items: center; gap: 12px; }
+.hoy-fila2 > .hc-avance { flex: 1; min-width: 0; margin: 0; }
+.hoy-fila2 > .hc-vacio { flex: 1; }
+.hoy-fila2 > .filtro6-fila { flex: none; }
+@media (min-width: 1180px) { .hoy.hoy6 > .hoy-fila2 { grid-column: 1 / -1; } }
+.selector button { min-width: 44px; }

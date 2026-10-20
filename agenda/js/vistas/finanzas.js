@@ -243,6 +243,9 @@ function comoVas6(libro, todos, ym, r, pres) {
    entró, los pagos fijos del mes y tus movimientos por día. Gasto e ingreso
    se anotan con el teclado de monto. El detalle (categorías, presupuesto,
    informe, Excel) sigue en «Ver todo el detalle». */
+let verMontos = false;
+/* Con los montos ocultos, cada «S/ 1,234.56» (también en las etiquetas para lectores de pantalla) se vuelve «S/ •••» */
+const ocultar = (html) => (verMontos ? html : html.replace(/[−+-]?S\/\s?\d[\d,]*(?:\.\d{1,2})?/g, 'S/ •••').replace(/\d+ % de S\/ •••/g, 'S/ •••'));
 export function vistaPlata(param) {
   /* El filtro de arriba decide el libro: Oficina → el de la oficina; Personal, Estudios o Deporte →
      el personal, solo con lo de ese espacio; Todo → eliges el libro aquí. Los libros nunca se mezclan. */
@@ -256,11 +259,13 @@ export function vistaPlata(param) {
   const porDia = []; delM.slice(0, 60).forEach((x) => { const d = x.fechas.inicio, g = porDia[porDia.length - 1]; if (g && g.d === d) g.l.push(x); else porDia.push({ d, l: [x] }); });
   /* La barra de lo gastado: lima normal, ámbar desde el 85 % del presupuesto y roja si te pasas */
   const tope = fa ? 0 : pres, pctR = tope ? r.gastos / tope * 100 : 0, pct = Math.min(100, pctR), nivel = pctR > 100 ? 'rojo' : pctR >= 85 ? 'ambar' : 'lima';
-  return '<div class="plata6 area-' + libro + '">' +
+  /* Montos ocultos hasta tocar el ojo (como en el banco); vuelven a ocultarse al abrir la app */
+  const ojo = '<button type="button" class="icono-btn p6-ojo" data-acc="p6-ver" aria-pressed="' + verMontos + '" aria-label="' + (verMontos ? 'Ocultar montos' : 'Ver montos') + '" title="' + (verMontos ? 'Ocultar montos' : 'Ver montos') + '">' + ico(verMontos ? 'i-ojo-no' : 'i-ojo') + '</button>';
+  return ocultar('<div class="plata6 area-' + libro + (verMontos ? '' : ' ocultos') + '">' +
     (f ? '' : '<nav class="seg6" aria-label="Libro"><a href="#cuentas"' + (libro === 'personal' ? ' aria-current="page"' : '') + '>Personal</a><a href="#cuentas/oficina"' + (libro === 'oficina' ? ' aria-current="page"' : '') + '>Oficina</a></nav>') +
-    (fa ? '<section class="p6-heroe"><small>Gastaste en ' + esc(area(fa).nombre) + ' este mes</small><b class="p6-queda">' + fmtSoles(r.gastos) + '</b>' +
+    (fa ? '<section class="p6-heroe">' + ojo + '<small>Gastaste en ' + esc(area(fa).nombre) + ' este mes</small><b class="p6-queda">' + fmtSoles(r.gastos) + '</b>' +
       '<div class="p6-dos"><div><small>Hoy</small><b>' + fmtSoles(gHoy) + '</b></div><div><small>Libro personal: te quedan</small><b' + (rLibro.saldo < 0 ? ' class="neg"' : '') + '>' + (rLibro.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(rLibro.saldo)) + '</b></div></div>'
-    : '<section class="p6-heroe"><small>' + (libro === 'oficina' ? 'Oficina · ' : '') + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda este mes') + '</small><b class="p6-queda' + (r.saldo < 0 ? ' neg' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b>' +
+    : '<section class="p6-heroe">' + ojo + '<small>' + (libro === 'oficina' ? 'Oficina · ' : '') + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda este mes') + '</small><b class="p6-queda' + (r.saldo < 0 ? ' neg' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b>' +
       '<div class="p6-dos"><div><small>Gastaste' + (gHoy ? ' · ' + fmtSoles(gHoy) + ' hoy' : '') + '</small><b>' + fmtSoles(r.gastos) + '</b>' + (pres ? '<span class="p6-barra ' + nivel + '" role="img" aria-label="' + Math.round(pctR) + ' % del presupuesto"><i style="width:' + pct.toFixed(0) + '%"></i></span><small>' + Math.round(pctR) + ' % de ' + fmtSoles(pres) + '</small>' : '') + '</div>' +
       '<div><small>Entró</small><b class="ing">' + fmtSoles(r.ingresos) + '</b></div></div>') +
       '<div class="p6-btns"><button type="button" class="btn pri" data-acc="monto" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Anotar gasto</button><button type="button" class="btn" data-acc="monto" data-libro="' + libro + '" data-ing="1">' + ico('i-plus') + 'Anotar ingreso</button></div></section>' +
@@ -279,7 +284,7 @@ export function vistaPlata(param) {
       (todosLibro.length ? '<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar a Excel</button>' +
       '<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-recibo') + 'Informe en PDF</button>' : '') +
     '</div>' +
-    '</div>';
+    '</div>');
 }
 
 export function vistaFinanzas(param) {
@@ -295,6 +300,7 @@ export function avisoPresupuesto(libro) {
 export const acciones = {
   'fin-mes'(b) { const n = +b.dataset.n, act = hoy().slice(0, 7); ui.mes = n === 0 ? '' : sumarMes(ui.mes || act, n) >= act ? '' : sumarMes(ui.mes || act, n); ui.cat = ''; ui.ver = 30; return true; },
   'fin-ir-mes'(b) { ui.mes = b.dataset.v === hoy().slice(0, 7) ? '' : b.dataset.v; ui.cat = ''; return true; },
+  'p6-ver'() { verMontos = !verMontos; return true; },
   'p6-cat'(b) { ui.catP = !b.dataset.v || ui.catP === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-cat'(b) { ui.cat = ui.cat === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-mas'() { ui.ver += 30; return true; },

@@ -8,11 +8,10 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Ordenada por lo que haces', '🧭', 'Abajo: Hoy, Calendario, Agregar, Tareas y Cuentas. Arriba: Notas, Buscar y Tú. Ya no hay «Más» ni «Mostrar todo».', '#hoy'],
-  ['Tus espacios, como filtro', '🎯', 'Arriba de cada sección eliges Personal, Estudios, Oficina o Deporte y ves solo lo de ese espacio. Se recuerda.', '#tareas'],
-  ['Cada herramienta en su lugar', '🧰', 'Cobros, horas y préstamos en Cuentas; clases, exámenes y cumpleaños en Calendario; plazos legales y la casa en Tareas; diario, fichas y actas en Notas.', '#cuentas'],
-  ['Tú', '⭐', 'Tus hábitos, metas, entrenos, peso, la revisión semanal y los ajustes, juntos.', '#tu'],
-  ['Más fino', '✨', 'Lo atrasado dice hace cuántos días, el menú ⋯ dice cuándo toca, el horario no se encima, gastos de otro día y plantillas para tu primera lista.', '#calendario']
+  ['Tu día, de corrido', '🌊', 'Hoy es una sola línea de arriba abajo: lo atrasado, lo que ya pasó, lo de ahora (con lo que no tiene hora) y lo que viene, hasta mañana.', '#hoy'],
+  ['Tu plata, en privado', '👁️', 'Hoy ya no muestra montos, y en Cuentas salen ocultos (S/ •••) hasta que tocas el ojo.', '#cuentas'],
+  ['Filtro más simple', '🎯', 'Un solo botón «Todo ▾» arriba de cada sección para elegir Personal, Estudios, Oficina o Deporte.', '#tareas'],
+  ['Arreglado', '🔧', 'Después de un foco, «Concentrarme 25 min» ya no arranca un descanso: Hoy te ofrece descansar o saltarlo.', '#hoy']
 ];
 
 export function abrirNovedades() {

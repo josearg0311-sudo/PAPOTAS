@@ -25,6 +25,8 @@ export function alternar() {
   guardar();
 }
 export function reiniciar() { st.fin = 0; st.resta = 0; guardar(); }
+/* Saltar el descanso: vuelve al foco (y «Concentrarme 25 min» siempre empieza un foco, no un descanso) */
+export function aFoco() { st.modo = 'foco'; st.fin = 0; st.resta = 0; guardar(); }
 export function modoRapido(on) { st.rapido = on; st.fin = 0; st.resta = 0; guardar(); }
 export function mmss(ms) { const s = Math.ceil(ms / 1000); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
 
@@ -45,7 +47,7 @@ export function minutosHoy() {
 
 function terminar() {
   const era = st.modo;
-  st.fin = 0; st.resta = 0;
+  st.fin = 0; st.resta = 0; st.termino = Date.now();   // para ofrecer el descanso solo un rato
   if (era === 'foco') {
     const it = st.item ? buscarElemento(st.item) : null, area = it ? it.area : 'personal', min = MODOS.foco.min;
     const id = 'enfoque_' + hoy(), e = buscarElemento(id);
