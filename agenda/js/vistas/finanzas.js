@@ -229,9 +229,9 @@ function comoVas6(libro, todos, ym, r, pres) {
   const cats = r.porCategoria.slice(0, 3);
   if (!g.some(Boolean) && !cats.length) return '';
   return tarjeta({ titulo: 'Cómo vas', sub: 'Tus últimos 7 días y en qué se te va más. Toca una categoría para ver solo esos gastos.', cuerpo:
-    '<div class="cv6-barras" role="img" aria-label="Gastos de los últimos 7 días: ' + dias.map((d, i) => DIAS3F[diaSemanaF(d)] + ' ' + fmtSoles(g[i])).join(', ') + '">' +
+    (!g.some(Boolean) ? '<p class="cv6-nada">Sin gastos en los últimos 7 días.</p>' : '<div class="cv6-barras" role="img" aria-label="Gastos de los últimos 7 días: ' + dias.map((d, i) => DIAS3F[diaSemanaF(d)] + ' ' + fmtSoles(g[i])).join(', ') + '">' +
       dias.map((d, i) => '<span class="cv6-dia' + (d === h ? ' hoy' : '') + '"><i style="height:' + Math.max(g[i] ? 6 : 2, g[i] / max * 100).toFixed(0) + '%"></i><small>' + (d === h ? 'hoy' : DIAS3F[diaSemanaF(d)]) + '</small></span>').join('') + '</div>' +
-    '<div class="cv6-datos">' +
+    '') + '<div class="cv6-datos">' +
       (porDia != null ? '<div><b>' + fmtSoles(porDia) + '</b><small>' + (a.porDia != null ? 'por día para no pasarte del presupuesto' : 'por día para que te alcance el mes') + '</small></div>' : '') +
       (a.pct != null ? '<div><b class="' + (a.pct > 0 ? 'txt-aviso' : 'txt-ok') + '">' + (a.pct > 0 ? '+' : '') + a.pct + ' %</b><small>' + (a.pct > 0 ? 'más' : 'menos') + ' que el mes pasado a esta fecha</small></div>' : '') +
     '</div>' +
@@ -276,8 +276,8 @@ export function vistaPlata(param) {
         : vacio(ui.catP ? 'Nada en ' + ui.catP + ' este mes' : 'Aún nada este mes', ui.catP ? 'Toca «Quitar filtro».' : 'Toca «Anotar gasto» o escribe en Agregar «almuerzo 25».')) }) +
     '<div class="p6-herr" role="group" aria-label="Herramientas del libro">' +
       '<button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-diana') + (pres ? 'Cambiar presupuesto' : 'Poner presupuesto') + '</button>' +
-      '<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar a Excel</button>' +
-      '<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-recibo') + 'Informe en PDF</button>' +
+      (todosLibro.length ? '<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar a Excel</button>' +
+      '<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-recibo') + 'Informe en PDF</button>' : '') +
     '</div>' +
     '</div>';
 }

@@ -93,10 +93,14 @@ export function vistaListas6(param) {
     '<div class="listas6">' +
     '<a class="l6 l6-todo" href="#tareas/todos"><span class="l6-n">' + todos.length + '</span><b>Todo lo pendiente</b><small>' + (hoyN ? hoyN + ' para hoy' : 'nada para hoy') + ' · ordenado por día</small></a>' +
     tarj.map(({ l, p, ok, faltan, check }) => '<a class="l6" href="#tareas/' + esc(l.id) + '" data-busca="' + esc((l.titulo + ' ' + p.map((x) => x.titulo).join(' ')).toLowerCase()) + '">' + anillo(ok, p.length) +
-      '<b>' + esc(l.titulo) + '</b><small>' + (p.length ? ok + ' de ' + p.length + (faltan.length ? ' · ' + esc(faltan.slice(0, 2).map((x) => x.titulo).join(', ')) + (faltan.length > 2 ? '…' : '') : ' · todo listo ✓') : (check ? 'vacía' : 'sin recordatorios')) + '</small></a>').join('') +
+      '<b>' + esc(nombreLista(l)) + '</b><small>' + (p.length ? ok + ' de ' + p.length + (faltan.length ? ' · ' + esc(faltan.slice(0, 2).map((x) => x.titulo).join(', ')) + (faltan.length > 2 ? '…' : '') : ' · todo listo ✓') : (check ? 'vacía' : 'sin recordatorios')) + '</small></a>').join('') +
+    (tarj.some((x) => !x.l.extra.sistema) ? '' : '<section class="l6-empieza"><h2 class="seccion-t">Empieza con una plantilla</h2><div class="l6-plantillas">' + PLANTILLAS.map((x, i) => '<button type="button" class="cap-ej siempre" data-acc="l6-plantilla" data-v="' + i + '"><b>' + esc(x[0]) + '</b><small>' + x[1].length + ' cosas</small></button>').join('') + '</div></section>') +
     '<button type="button" class="l6 l6-nueva" data-acc="l6-nueva">' + ico('i-plus') + '<b>Nueva lista</b><small>o en Agregar escribe «compras: leche, pan»</small></button>' +
     '</div>';
 }
+
+/* La lista «Tareas» de la versión anterior se ve como «Por hacer» (dentro de la sección Tareas confundía); el dato no cambia */
+const nombreLista = (l) => (l.id === 'lista_tareas' && l.titulo === 'Tareas' ? 'Por hacer' : l.titulo);
 
 /* Plantillas para empezar una lista para marcar en un toque */
 const PLANTILLAS = [
@@ -106,16 +110,21 @@ const PLANTILLAS = [
   ['Mudanza', ['Cajas', 'Cinta de embalaje', 'Plumón', 'Bolsas', 'Movilidad', 'Cambiar dirección en el banco', 'Luz y agua a mi nombre']],
   ['Cumpleaños / reunión', ['Invitaciones', 'Torta', 'Bebidas', 'Piqueos', 'Vasos y platos', 'Velas', 'Música', 'Hielo']]
 ];
+/* Crea una lista para marcar (con sus cosas) y la abre; se puede deshacer */
+function crearListaDe(titulo, cosas, repintar) {
+  const t = String(titulo || '').trim();
+  const l = crearLista({ titulo: t, clase: 'checklist', area: filtro() || undefined });
+  if (cosas && cosas.length) crearDesdeTexto(cosas.join('\n'), { lista: l.id });
+  location.hash = '#tareas/' + l.id; repintar();
+  aviso('Lista ' + t + (cosas && cosas.length ? ' con ' + cosas.length + ' cosas' : ''), () => { aPapelera(l.id); location.hash = '#tareas'; repintar(); });
+}
 function abrirNuevaLista(repintar) {
   const hoja = abrirHoja('Nueva lista para marcar', '<form class="cap" id="l6Form"><label class="campo"><span>Nombre</span><input id="l6Nombre" class="entrada" maxlength="60" placeholder="Ej. Compras, Maleta, Útiles" autocomplete="off"></label>' +
     '<p class="cap-ej-tit">O empieza con una plantilla:</p><div class="l6-plantillas">' + PLANTILLAS.map((x, i) => '<button type="button" class="cap-ej siempre" data-l6-p="' + i + '"><b>' + esc(x[0]) + '</b><small>' + x[1].length + ' cosas</small></button>').join('') + '</div>' +
     '<button type="submit" class="btn pri cap-guardar">Crear lista vacía</button></form>');
   const crear = (titulo, cosas) => {
-    const t = String(titulo || '').trim(); if (!t) { aviso('Ponle un nombre.'); hoja.querySelector('#l6Nombre').focus(); return; }
-    const l = crearLista({ titulo: t, clase: 'checklist' });
-    if (cosas && cosas.length) crearDesdeTexto(cosas.join('\n'), { lista: l.id });
-    cerrarHoja(true); location.hash = '#tareas/' + l.id; repintar();
-    aviso('Lista ' + t + (cosas && cosas.length ? ' con ' + cosas.length + ' cosas' : ''), () => { aPapelera(l.id); location.hash = '#tareas'; repintar(); });
+    if (!String(titulo || '').trim()) { aviso('Ponle un nombre.'); hoja.querySelector('#l6Nombre').focus(); return; }
+    cerrarHoja(true); crearListaDe(titulo, cosas, repintar);
   };
   hoja.querySelector('#l6Form').addEventListener('submit', (ev) => { ev.preventDefault(); crear(hoja.querySelector('#l6Nombre').value, []); });
   hoja.querySelectorAll('[data-l6-p]').forEach((b) => b.addEventListener('click', () => { const p = PLANTILLAS[+b.dataset.l6P], n = hoja.querySelector('#l6Nombre').value.trim(); crear(n || p[0], p[1]); }));
@@ -146,7 +155,7 @@ export function vistaRecordatorios() {
 
   html += tarjeta({
     eti: l ? (check ? 'LISTA PARA MARCAR' : 'LISTA') : 'TODAS LAS LISTAS',
-    titulo: l ? esc(l.titulo) + (l.extra.sistema ? '' : ' <button type="button" class="icono-btn mini" data-acc="r-editar-lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button>') : 'Todo lo pendiente' + (filtro() ? ' · ' + esc(area(filtro()).nombre) : ''),
+    titulo: l ? esc(nombreLista(l)) + (l.extra.sistema ? '' : ' <button type="button" class="icono-btn mini" data-acc="r-editar-lista" aria-label="Editar lista">' + ico('i-lapiz') + '</button>') : 'Todo lo pendiente' + (filtro() ? ' · ' + esc(area(filtro()).nombre) : ''),
     clase: l ? 'area-' + l.area : '',
     guia: check ? '<b>Lista para marcar:</b> toca la casilla de lo que ya tienes o ya hiciste. No usa días.' : '<b>Cómo funciona:</b> toca la casilla cuando lo hagas. Si hoy no da, usa <b>Más tarde</b>, <b>Mañana</b> o <b>Día…</b>, o desliza con el dedo: a la derecha lo marcas, a la izquierda pasa a mañana. Al final del día, <b>Cerrar el día</b> pasa lo pendiente a mañana.',
     cuerpo: (check || simple() ? '' : '<div class="medidor" role="group" aria-label="Cuántos hay en cada momento">' + GRUPOS.map((g) =>
@@ -177,8 +186,9 @@ export function vistaRecordatorios() {
       (g.length ? '<div class="pends">' + g.map((x) => (ui.sel && k !== 'hecho' ? filaSel(x) : filaPendiente(x, { verLista: !ui.lista && !simple(), acciones: !simple() }))).join('') + '</div>' : vacio('', VACIOS[k])) +
       masBoton(k, total, g.length) + '</section>';
   });
-  html += '<div class="fila-botones izq">' + (simple() ? '' : '<button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo pendiente a mañana</button>' +
-    '<button type="button" class="btn" data-acc="r-sel-ini">' + ico('i-check') + 'Elegir varios</button>') +
+  /* Elegir varios y Cerrar el día (ya no dependen de «Mostrar todo») */
+  html += '<div class="fila-botones izq">' + (ui.sel ? '' : '<button type="button" class="btn" data-acc="r-sel-ini">' + ico('i-check') + 'Elegir varios</button>' +
+    (cuenta.hoy ? '<button type="button" class="btn" data-acc="cerrar-dia">' + ico('i-luna2') + 'Cerrar el día: pasar lo de hoy a mañana</button>' : '')) +
     (l && ui.lista ? '<button type="button" class="btn" data-acc="r-compartir">' + ico('i-subir') + 'Compartir la lista</button>' : '') + '</div>';
   if (ui.sel) html += barraSel();
   return html;
@@ -187,6 +197,7 @@ export function vistaRecordatorios() {
 export const acciones = {
   saltar(b, ev) { ev.preventDefault(); const g = document.getElementById('g-' + b.dataset.v); if (g) g.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }); },
   'l6-nueva'(b, ev, repintar) { abrirNuevaLista(repintar); },
+  'l6-plantilla'(b, ev, repintar) { const p = PLANTILLAS[+b.dataset.v]; if (p) crearListaDe(p[0], p[1], repintar); },
   'r-nueva-checklist'(b, ev, repintar) { editarLista(null, repintar, (id) => { ui.lista = id; ui.ver = {}; location.hash = '#tareas/' + id; }, 'checklist'); },
   'r-lista-ir'(b) { ui.lista = b.dataset.id; ui.ver = {}; if (location.hash === '#tareas/' + b.dataset.id) return true; location.hash = '#tareas/' + b.dataset.id; },
   'r-lista'(b) { ui.lista = b.dataset.v; ui.ver = {}; ui.sel = null; return true; },

@@ -8,7 +8,8 @@ import { poner, aPapelera } from '../datos/datos.js';
 import { modeloVacio, nuevoId } from '../datos/modelo.js';
 import { CATEGORIAS, categoriaDe, areaDeCategoria } from '../datos/finanzas.js';
 import { fmtSoles } from '../util/dinero.js';
-import { hoy, sumarDias } from '../util/fechas.js';
+import { filtro } from '../datos/filtro.js';
+import { hoy, sumarDias, fmtCorta } from '../util/fechas.js';
 
 let st = null;
 /* 4×4 con «+» para sumar varias cosas («12.50 + 8») y C para empezar de nuevo */
@@ -50,7 +51,9 @@ function pintar() {
     '<label class="solo-lector" for="tmDesc">En qué</label><input id="tmDesc" class="entrada tm-desc" maxlength="80" autocomplete="off" placeholder="' + (st.ingreso ? 'De qué (ej. sueldo, cobro caso López)' : 'En qué (ej. almuerzo, taxi)') + '" value="' + esc(desc) + '">' +
     '<div class="tm-cats" role="group" aria-label="Categoría">' + sug.map((c) => '<button type="button" data-tm-cat="' + esc(c) + '" aria-pressed="' + (c === cat) + '">' + esc(c) + '</button>').join('') + '</div>' +
     '<div class="tm-teclas">' + TECLAS.map((t) => '<button type="button" data-tm-tecla="' + t + '"' + (t === '+' ? ' class="tm-op"' : t === 'C' ? ' class="tm-op"' : t === '00' ? ' class="tm-ancha"' : '') + ' aria-label="' + ({ '⌫': 'Borrar', '.': 'Punto', '+': 'Sumar otro monto', C: 'Borrar todo' }[t] || t) + '">' + t + '</button>').join('') + '</div>' +
-    '<div class="tm-pie"><div class="seg6 tm-dia" role="group" aria-label="Día">' + [[hoy(), 'Hoy'], [sumarDias(hoy(), -1), 'Ayer']].map(([d, n]) => '<button type="button" data-tm-dia="' + d + '" aria-pressed="' + (st.dia === d) + '">' + n + '</button>').join('') + '</div>' +
+    '<div class="tm-pie"><div class="seg6 tm-dia" role="group" aria-label="Día">' + [[hoy(), 'Hoy'], [sumarDias(hoy(), -1), 'Ayer']].map(([d, n]) => '<button type="button" data-tm-dia="' + d + '" aria-pressed="' + (st.dia === d) + '">' + n + '</button>').join('') +
+      /* Otro día: un calendario chiquito (se ve la fecha elegida) */
+      '<label class="tm-otro' + (st.dia !== hoy() && st.dia !== sumarDias(hoy(), -1) ? ' activo' : '') + '"><span>' + (st.dia !== hoy() && st.dia !== sumarDias(hoy(), -1) ? fmtCorta(st.dia) : 'Otro') + '</span><input type="date" id="tmFecha" max="' + hoy() + '" value="' + st.dia + '" aria-label="Otro día"></label></div>' +
     '<button type="button" class="btn pri tm-guardar" data-tm-guardar="1">Guardar ' + (st.ingreso ? 'ingreso' : 'gasto') + '</button></div>';
 }
 function soloMonto() { const o = document.getElementById('tmMonto'); if (o) o.textContent = 'S/ ' + visible(st.monto); }
@@ -60,7 +63,7 @@ function guardar() {
   if (m <= 0) { aviso('Escribe el monto con los números.'); return; }
   const desc = ((document.getElementById('tmDesc') || {}).value || '').trim();
   const cat = st.catAMano ? st.cat : categoriaDe(desc, st.libro, st.ingreso);
-  const area = st.libro === 'oficina' ? 'oficina' : areaDeCategoria(cat);
+  const f = filtro(), area = st.libro === 'oficina' ? 'oficina' : f && f !== 'oficina' ? f : areaDeCategoria(cat);   // con un espacio elegido arriba, el gasto es de ese espacio
   const it = poner(Object.assign(modeloVacio(), { id: nuevoId('mov'), tipo: 'movimiento', area, titulo: desc || (cat && cat !== 'Otros' ? cat : (st.ingreso ? 'Ingreso' : 'Gasto')), estado: 'hecho', monto: m,
     fechas: Object.assign(modeloVacio().fechas, { inicio: st.dia }), extra: { libro: st.libro, ingreso: st.ingreso, categoria: cat || 'Otros' } }));
   const txt = (st.ingreso ? '+' : '−') + fmtSoles(m) + ' · ' + it.titulo + (st.libro === 'oficina' ? ' · Oficina' : '');
@@ -82,6 +85,7 @@ document.addEventListener('click', (ev) => {
   else if (b.dataset.tmDia) { st.dia = b.dataset.tmDia; pintar(); }
   else if (b.dataset.tmGuardar) guardar();
 });
+document.addEventListener('change', (ev) => { if (st && ev.target.id === 'tmFecha' && ev.target.value) { st.dia = ev.target.value; pintar(); } });
 /* La categoría se elige sola mientras escribes (si no la cambiaste a mano) */
 document.addEventListener('input', (ev) => {
   if (!st || ev.target.id !== 'tmDesc' || st.catAMano) return;

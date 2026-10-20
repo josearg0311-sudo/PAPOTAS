@@ -1284,3 +1284,28 @@ body { background-image: radial-gradient(900px 420px at 10% -12%, var(--aurora-1
 .p6-barra.lima i { background: var(--acento); }
 .p6-barra.ambar i { background: var(--ambar, #F5B83D); }
 .p6-dos b.neg { color: var(--rojo); }
+/* Horario semanal en celular: el nombre se parte para que se lea entero (no «Mater…») */
+@media (max-width: 759px) { .hr-bloque { padding: 2px 3px; } .hr-bloque b { font-size: 10px; line-height: 1.15; overflow-wrap: anywhere; word-break: break-word; } .hr-bloque small { display: none; } }
+/* Un pago fijo ya pagado: se tacha el nombre, no el monto (el monto se sigue leyendo) */
+.hf.hecha .hf-txt small b { text-decoration: none; color: var(--tinta-2); }
+.cv6-nada { margin: 0 16px; padding: 14px 0 4px; font-size: 13.5px; color: var(--tinta-2); }
+.cap-ayudas { display: grid; gap: 12px; }
+.cap-ayudas[hidden] { display: none; }
+/* Buscar: un solo borde de foco (en la caja, no dos anidados) */
+.buscador:focus-within { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+.buscador .entrada:focus, .buscador .entrada:focus-visible { outline: none; box-shadow: none; border: 0; }
+/* Menú ⋯: de qué espacio es y cuándo toca */
+.menu6-ctx { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -4px 0 12px; font-size: 13.5px; color: var(--tinta-2); }
+.menu6 .opcion-fila small { display: inline; margin-left: 6px; font-family: inherit; font-size: 12.5px; color: var(--tinta-3); }
+.l6-empieza { grid-column: 1 / -1; display: grid; gap: 10px; }
+/* Teclado de monto: «Otro» día con su calendario */
+.tm-otro { position: relative; flex: 1; display: grid; place-items: center; min-height: 44px; border-radius: 99px; color: var(--tinta-2); font-size: 14px; font-weight: 600; cursor: pointer; }
+.tm-otro.activo { background: var(--acento); color: var(--sobre-acento); }
+.tm-otro input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.tm-pie { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.2fr); }
+.hueco span.tapada { visibility: hidden; }
+/* Celular: columnas angostas → lo que se pisa no se parte a la mitad; el de encima se corre a la derecha */
+@media (max-width: 759px) {
+  .hr-bloque { left: 2px !important; width: calc(100% - 4px) !important; hyphens: auto; -webkit-hyphens: auto; }
+  .hr-bloque[data-c] { left: 38% !important; width: 62% !important; z-index: 2; box-shadow: -3px 0 0 var(--superficie); }
+}

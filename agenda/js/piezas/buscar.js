@@ -84,6 +84,7 @@ export function resultadosHTML(q) {
   if (q.length < 2) {
     const r = recientes();
     return '<p class="ayuda">Escribe lo que buscas («luz», «examen») o lo que quieres hacer («gasto», «cita»).</p>' +
+      '<div class="bus-grupo"><small>Ir a</small>' + IR.slice(0, 7).map((x) => fila('href="' + x[0] + '"', '<span class="bus-ico">' + ico('i-der') + '</span>', x[1], x[2])).join('') + '</div>' +
       (r.length ? '<div class="bus-recientes"><small>Recientes</small>' + r.map((x) => '<button type="button" class="chip" data-busq="' + esc(x) + '">' + ico('i-buscar') + esc(x) + '</button>').join('') + '</div>' : '');
   }
   const hacer = HACER.filter((h) => coincide(h[1] + ' ' + h[3], q)).slice(0, 3);

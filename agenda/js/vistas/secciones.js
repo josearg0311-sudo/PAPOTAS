@@ -89,13 +89,19 @@ export function barraHerramientas(sec) {
     l.map((h) => '<a class="herr6-btn' + (h.area ? ' area-' + h.area : '') + '" href="#' + sec + '/' + h.id + '"><span class="herr6-ico" aria-hidden="true">' + ico(h.ico) + '</span><span><b>' + esc(h.nombre) + '</b><small>' + esc(h.desc) + '</small></span>' + ico('i-der') + '</a>').join('') + '</div></section>';
 }
 
+/* Si la primera tarjeta se llama igual que la herramienta («Cobros» / «Cobros»), su título sobra */
+const norm = (t) => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+function sinTituloRepetido(html, nombre) {
+  return html.replace(/<header class="t-cab">(?:<span class="eti">[^<]*<\/span>)?<h2>([^<]*)<\/h2>(?:<span class="n">[^<]*<\/span>)?<\/header>/, (m, t) =>
+    norm(t) === norm(nombre) || norm(nombre).startsWith(norm(t)) ? '' : m);
+}
 /* Una herramienta a pantalla completa, con «‹ Sección» y de qué espacio es */
 export function vistaHerramienta(sec, id, param) {
   const h = herramienta(sec, id); if (!h) return '';
   const a = h.area ? area(h.area) : null;
   return '<a class="volver-panel" href="#' + sec + '">' + ico('i-izq') + SECCIONES[sec].nombre + '</a>' +
     '<header class="pag-cab herr6-cab' + (a ? ' area-' + a.id : '') + '"><h1>' + esc(h.nombre) + '</h1><p>' + (a ? '<span class="chip area-' + a.id + '">' + esc(a.nombre) + '</span> ' : '') + esc(h.desc) + '</p></header>' +
-    '<div class="herramienta">' + h.vista(param) + '</div>';
+    '<div class="herramienta">' + sinTituloRepetido(h.vista(param), h.nombre) + '</div>';
 }
 
 /* ---------- Tú: tu constancia, tu progreso y lo de la app ---------- */

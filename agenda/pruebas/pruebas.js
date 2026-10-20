@@ -26,6 +26,8 @@ import { enlaceWhatsApp } from '../js/piezas/compartir.js';
 import { sumarDias as SD } from '../js/util/fechas.js';
 import { entender, entenderVarios } from '../js/datos/entender.js';
 import { teclear, centimos } from '../js/piezas/teclado-monto.js';
+import { rutaNueva, herramientasDe, HERRAMIENTAS } from '../js/vistas/secciones.js';
+import { filtro, ponerFiltro, pasa } from '../js/datos/filtro.js';
 
 const resultados = [];
 function prueba(nombre, fn) {
@@ -591,6 +593,31 @@ tareas.push(prueba('Agenda 6.1: el + no se confunde con frases de todos los día
   igual([tip('llamar a mamá 8'), tip('llamar a mamá s/ 8')], ['recordatorio', 'gasto']);
   igual(entenderVarios('nota: pan; leche', o).map((x) => x.tipo), ['nota']);
   igual(entender('15 de octubre cita médica', o).tipo, 'evento');
+}));
+
+tareas.push(prueba('Agenda 7: las direcciones viejas llevan a su lugar nuevo', () => {
+  const antes = filtro();
+  igual([rutaNueva('plan'), rutaNueva('listas/abc'), rutaNueva('recordatorios'), rutaNueva('plata/oficina'), rutaNueva('finanzas/oficina')],
+    ['calendario', 'tareas/abc', 'tareas/todos', 'cuentas/oficina', 'cuentas/informe/oficina']);
+  igual([rutaNueva('habitos'), rutaNueva('seguimiento/revision'), rutaNueva('mas'), rutaNueva('hoy'), rutaNueva('tareas')], ['tu/habitos', 'tu/revision', 'tu', null, null]);
+  /* un espacio viejo deja elegido su filtro y su herramienta va a su sección */
+  igual(rutaNueva('areas/oficina/cobros'), 'cuentas/cobros'); igual(filtro(), 'oficina');
+  igual([rutaNueva('areas/estudios/cursos'), rutaNueva('areas/personal/diario'), rutaNueva('areas/deporte/constancia'), rutaNueva('areas/oficina/pendientes'), rutaNueva('areas/estudios')],
+    ['calendario/clases', 'notas/diario', 'tu/metas/deporte', 'tareas', 'hoy']);
+  ponerFiltro(antes);
+}));
+
+tareas.push(prueba('Agenda 7: el filtro por espacio y las herramientas de cada sección', () => {
+  const antes = filtro();
+  ponerFiltro('inventado'); igual(filtro(), '');
+  ponerFiltro('estudios'); igual(filtro(), 'estudios');
+  igual([pasa({ area: 'estudios' }), pasa({ area: 'oficina' }), pasa({ area: 'oficina' }, '')], [true, false, true]);
+  igual(herramientasDe('calendario', 'estudios').map((h) => h.id), ['clases', 'examenes', 'ano']);
+  igual(herramientasDe('cuentas', 'oficina').map((h) => h.id), ['cobros', 'horas', 'clientes', 'informe']);
+  igual(herramientasDe('notas', '').length, 3);
+  /* ninguna herramienta repetida ni sin sección */
+  igual(new Set(HERRAMIENTAS.map((h) => h.sec + '/' + h.id)).size, HERRAMIENTAS.length);
+  ponerFiltro(antes);
 }));
 
 Promise.all(tareas).then(() => {

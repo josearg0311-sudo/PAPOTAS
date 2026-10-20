@@ -12,7 +12,7 @@ import { modeloVacio, nuevoId, LISTA_RECORDATORIOS } from '../datos/modelo.js';
 import { crearLista, crearDesdeTexto, esChecklist, REPETIR } from '../datos/pendientes.js';
 import { entenderVarios } from '../datos/entender.js';
 import { interpretar } from '../util/interpretar.js';
-import { categoriaDe, esIngreso } from '../datos/finanzas.js';
+import { categoriaDe, esIngreso, areaDeCategoria } from '../datos/finanzas.js';
 import { leerMonto, fmtSoles } from '../util/dinero.js';
 import { hoy, fmtCorta, fmtHora, sumarDias } from '../util/fechas.js';
 import { preferencias } from '../datos/preferencias.js';
@@ -65,7 +65,8 @@ function detalle(e) {
 function pintarPrevia() {
   const i = document.getElementById('capTexto'), el = document.getElementById('capPrevia');
   if (!i || !el) return;
-  const l = planes(i.value);
+  const l = planes(i.value), ay = document.getElementById('capAyudas');
+  if (ay) ay.hidden = !!i.value.trim();
   if (!l.length) el.innerHTML = '<span class="cap-signo" aria-hidden="true">?</span><span class="cap-que"><b>Escribe algo</b><small>Un gasto, una lista, un evento o un recordatorio. Varias cosas: sepáralas con «;».</small></span>';
   else el.innerHTML = (l.length > 1 ? '<p class="cap-varias">' + l.length + ' cosas a la vez</p>' : '') + l.slice(0, 6).map((e) => { const [s, t, d] = detalle(e);
     return '<div class="cap-una"><span class="cap-signo" aria-hidden="true">' + s + '</span><span class="cap-que"><b>' + t + '</b><small>' + d + '</small></span></div>'; }).join('') + (l.length > 6 ? '<p class="cap-varias">y ' + (l.length - 6) + ' más</p>' : '');
@@ -82,7 +83,9 @@ function frecuentes() {
     v.n++; if (x.fechas.inicio >= v.f) { v.f = x.fechas.inicio; v.monto = Math.abs(+x.monto || 0); }
   });
   return Object.values(g).filter((v) => v.n >= 2 && v.monto > 0).sort((a, b) => b.n - a.n || b.f.localeCompare(a.f)).slice(0, 5)
-    .map((v) => v.titulo.toLowerCase() + ' ' + (v.monto / 100).toFixed(v.monto % 100 ? 2 : 0) + (v.libro === 'oficina' ? ' oficina' : ''));
+    .map((v) => { const n = (v.monto / 100).toFixed(v.monto % 100 ? 2 : 0), of = v.libro === 'oficina', ya = /oficina/i.test(v.titulo);
+      /* texto = lo que se escribe; etq = lo que se ve en el botón (sin repetir «oficina») */
+      return { texto: v.titulo.toLowerCase() + ' ' + n + (of && !ya ? ' oficina' : ''), etq: v.titulo + ' · S/ ' + n + (of && !ya ? ' · Oficina' : '') }; });
 }
 
 export function abrirCaptura(texto = '') {
@@ -95,10 +98,11 @@ export function abrirCaptura(texto = '') {
     '<input id="capTexto" class="entrada cap-entrada" autocomplete="off" enterkeyhint="done" maxlength="500" placeholder="almuerzo 25 · llamar a Ana mañana 10am" value="' + esc(texto) + '">' +
     (puedeDictar() ? '<button type="button" class="icono-btn cap-mic" id="capMic" aria-pressed="false" aria-label="Dictar con la voz">' + ico('i-mic') + '</button>' : '') + '</div>' +
     '<div class="cap-previa" id="capPrevia" aria-live="polite"></div>' +
+    '<button type="submit" class="btn pri cap-guardar">' + ico('i-check') + 'Guardar</button>' +
     '<p class="cap-ej-tit">Guardar como:</p><div class="cap-tipos" role="group" aria-label="Guardar como"><button type="button" class="cap-tipo" data-cap-tipo="" aria-pressed="true">Automático</button>' + Object.keys(NOMBRES).map((k) => '<button type="button" class="cap-tipo" data-cap-tipo="' + k + '" aria-pressed="false">' + NOMBRES[k].replace(' para marcar', '') + '</button>').join('') + '</div>' +
-    (fr.length ? '<p class="cap-ej-tit">Lo de siempre:</p><div class="cap-ejemplos">' + fr.map((x) => '<button type="button" class="cap-ej siempre" data-cap-ej="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' : '') +
-    '<p class="cap-ej-tit">Ejemplos (tócalos):</p><div class="cap-ejemplos">' + EJEMPLOS.slice(0, fr.length ? 3 : 6).map((x) => '<button type="button" class="cap-ej" data-cap-ej="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div>' +
-    '<button type="submit" class="btn pri cap-guardar">' + ico('i-check') + 'Guardar</button></form>', { alCerrar: () => { if (pararDictado) { pararDictado(); pararDictado = null; } } });
+    /* Lo de siempre y los ejemplos: solo con el campo vacío (mientras escribes, estorban) */
+    '<div class="cap-ayudas" id="capAyudas">' + (fr.length ? '<p class="cap-ej-tit">Lo de siempre:</p><div class="cap-ejemplos">' + fr.map((x) => '<button type="button" class="cap-ej siempre" data-cap-ej="' + esc(x.texto) + '">' + esc(x.etq) + '</button>').join('') + '</div>' : '') +
+    '<p class="cap-ej-tit">Ejemplos (tócalos):</p><div class="cap-ejemplos">' + EJEMPLOS.slice(0, fr.length ? 3 : 6).map((x) => '<button type="button" class="cap-ej" data-cap-ej="' + esc(x) + '">' + esc(x) + '</button>').join('') + '</div></div></form>', { alCerrar: () => { if (pararDictado) { pararDictado(); pararDictado = null; } } });
   pintarPrevia();
 }
 
@@ -107,7 +111,7 @@ function crear(e) {
   const base = (extra) => Object.assign(modeloVacio(), extra);
   if (e.tipo === 'gasto' || e.tipo === 'ingreso') {
     const ing = e.tipo === 'ingreso';
-    const it = poner(base({ id: nuevoId('mov'), tipo: 'movimiento', area: e.libro === 'oficina' ? 'oficina' : 'personal', titulo: e.titulo, estado: 'hecho', monto: e.monto, fechas: Object.assign(modeloVacio().fechas, { inicio: e.fecha || hoy() }), extra: { libro: e.libro, ingreso: ing, categoria: e.categoria || 'Otros' } }));
+    const it = poner(base({ id: nuevoId('mov'), tipo: 'movimiento', area: e.libro === 'oficina' ? 'oficina' : filtro() && filtro() !== 'oficina' ? filtro() : areaDeCategoria(e.categoria || 'Otros'), titulo: e.titulo, estado: 'hecho', monto: e.monto, fechas: Object.assign(modeloVacio().fechas, { inicio: e.fecha || hoy() }), extra: { libro: e.libro, ingreso: ing, categoria: e.categoria || 'Otros' } }));
     return [[it.id], (ing ? '+' : '−') + fmtSoles(e.monto) + ' ' + e.titulo];
   }
   if (e.tipo === 'lista') {
