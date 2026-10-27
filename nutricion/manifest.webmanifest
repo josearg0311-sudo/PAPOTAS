@@ -1,13 +1,13 @@
 {
-  "name": "Balanza & Plato",
-  "short_name": "Balanza",
+  "name": "Kallpa",
+  "short_name": "Kallpa",
   "description": "Nutrición, comidas y control de peso para la casa.",
   "start_url": "./",
   "scope": "./",
   "id": "./",
   "display": "standalone",
-  "background_color": "#0E0A15",
-  "theme_color": "#0E0A15",
+  "background_color": "#0D1214",
+  "theme_color": "#0D1214",
   "lang": "es",
   "icons": [
     {"src": "icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},

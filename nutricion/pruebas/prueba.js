@@ -1,4 +1,4 @@
-/* Balanza & Plato · prueba completa en un navegador real.
+/* Kallpa · prueba completa en un navegador real.
    Uso (desde la raíz del repositorio):  node nutricion/pruebas/prueba.js
    Necesita Playwright con Chromium. Levanta solo un servidor web y una imitación de
    Supabase, simula dos celulares y falla con código 1 si algo no funciona. */
@@ -10,8 +10,8 @@ function web(){return new Promise(r=>{const s=http.createServer((q,res)=>{const 
   fs.readFile(fs.existsSync(f)&&fs.statSync(f).isDirectory()?path.join(f,'index.html'):f,(e,d)=>{if(e){res.writeHead(404);return res.end()}res.writeHead(200,{'Content-Type':TIPOS[path.extname(f)]||'application/octet-stream'});res.end(d)})});s.listen(0,()=>r(s))})}
 function supabaseFalso(){const filas=new Map();return new Promise(r=>{const s=http.createServer((q,res)=>{const H={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'*','Content-Type':'application/json'};
   if(q.method==='OPTIONS'){res.writeHead(204,H);return res.end()}let b='';q.on('data',c=>b+=c);q.on('end',()=>{const j=JSON.parse(b||'{}');
-  if(q.url.endsWith('/balanza_guardar')){const k=j.p_familia+'|'+j.p_clave,o=filas.get(k);if(!o||o.ts<j.p_ts)filas.set(k,{familia:j.p_familia,clave:j.p_clave,datos:j.p_datos,ts:j.p_ts,srv:Date.now()});res.writeHead(204,H);return res.end()}
-  if(q.url.endsWith('/balanza_leer')){res.writeHead(200,H);return res.end(JSON.stringify([...filas.values()].filter(f=>f.familia===j.p_familia&&f.srv>j.p_desde)))}
+  if(q.url.endsWith('/kallpa_guardar')){const k=j.p_familia+'|'+j.p_clave,o=filas.get(k);if(!o||o.ts<j.p_ts)filas.set(k,{familia:j.p_familia,clave:j.p_clave,datos:j.p_datos,ts:j.p_ts,srv:Date.now()});res.writeHead(204,H);return res.end()}
+  if(q.url.endsWith('/kallpa_leer')){res.writeHead(200,H);return res.end(JSON.stringify([...filas.values()].filter(f=>f.familia===j.p_familia&&f.srv>j.p_desde)))}
   res.writeHead(404,H);res.end('{}')})});s.listen(0,()=>r(s))})}
 let fallos=0;const ok=(cond,txt)=>{console.log((cond?'  ✓ ':'  ✗ ')+txt);if(!cond)fallos++};
 (async()=>{

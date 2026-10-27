@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="nutri-pwa" content="1">
-<meta name="theme-color" content="#0E0A15">
+<meta name="theme-color" content="#0D1214">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
 <!--APP-->
-<title>Balanza y Plato</title>
+<title>Kallpa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,12 +20,12 @@
    Un solo tema oscuro de alto contraste: morado de maíz morado, amarillo ají, rojo rocoto, verde palta. */
 :root{
   color-scheme:dark;
-  --bg:#0E0A15; --surface:#1A1326; --sunk:#271D37; --ink:#FBF8FF; --muted:#C7BCDB; --line:#40335A;
-  --brand:#4A1D6E; --accent:#FFC23D; --accent-soft:#3A2C10; --accent-ink:#17110A; --lila:#C9A6FF;
-  --sun:#FFC23D; --sun-ink:#17110A; --hi:#FFC23D; --warn:#FF6B6B; --ok:#4ADE80; --scrim:rgba(0,0,0,.75);
-  --mp:#FF6B6B; --mc:#FFC23D; --mg:#4ADE80; --agua:#6CB4FF;
-  --side:#4A1D6E; --side-2:#5E2A88; --side-ink:#FFFFFF; --side-mute:#D9C8EC;
-  --c0:#C9A6FF; --c1:#FFA552; --c2:#4ADE80; --c3:#FF6B6B; --c4:#6CB4FF; --c5:#FF8FC8;
+  --bg:#0D1214; --surface:#151E21; --sunk:#1F2B2F; --ink:#F4F8F7; --muted:#B3C3C1; --line:#2F3F44;
+  --brand:#0E3B39; --accent:#FF8A3D; --accent-soft:#3A2414; --accent-ink:#1A0E05; --lila:#4FD1C5;
+  --sun:#FF8A3D; --sun-ink:#1A0E05; --hi:#FFC23D; --warn:#FF6B6B; --ok:#7BD88F; --scrim:rgba(0,0,0,.75);
+  --mp:#FF6B6B; --mc:#FFC23D; --mg:#7BD88F; --agua:#6CB4FF;
+  --side:#0E3B39; --side-2:#165452; --side-ink:#FFFFFF; --side-mute:#BFE3DF;
+  --c0:#4FD1C5; --c1:#FFA552; --c2:#7BD88F; --c3:#FF6B6B; --c4:#6CB4FF; --c5:#FF8FC8;
   --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-disp:"Unbounded", "Figtree", system-ui, sans-serif;
   --f-mono:"Figtree", system-ui, sans-serif;
@@ -399,7 +399,7 @@ textarea.copy{min-height:180px;font-family:var(--f-mono);font-size:.82rem}
 .scanv{width:100%;max-height:50vh;background:#000;border-radius:8px}
 @media (prefers-reduced-motion:no-preference){.bar i{transition:width .35s ease}}
 
-/* ===== Identidad Balanza & Plato ===== */
+/* ===== Identidad Kallpa ===== */
 h1,h2{font-family:var(--f-disp);font-weight:600;letter-spacing:-.025em}
 h1{font-size:1.75rem} h2{font-size:1.35rem}
 h3{font-weight:700;font-size:1.02rem}
@@ -555,7 +555,7 @@ p.big{font:600 1.3rem var(--f-disp);letter-spacing:-.02em}
 <script>
 'use strict';
 /* =====================================================================
-   Balanza y Plato · nutrición y control de peso para la casa
+   Kallpa («fuerza» en quechua) · nutrición y control de peso para la familia
    Todo vive en este aparato: cuentas y datos en localStorage, fotos en
    IndexedDB. Las contraseñas se guardan cifradas (PBKDF2), nunca tal cual.
    ===================================================================== */
@@ -1574,14 +1574,14 @@ function recents(){const out=[],seen=new Set();Object.keys(U.dias).sort().revers
    Cada bloque de datos se guarda aparte: «g» (perfiles, alimentos y recetas de la casa),
    «u:<perfil>» (perfil, pesos, plan…) y «d:<perfil>:<mes>» (el diario de cada mes).
    Gana el cambio más reciente; las fotos se quedan en cada celular. */
-const NUBE_SQL=`-- Balanza & Plato · preparación de Supabase.
+const NUBE_SQL=`-- Kallpa · preparación de Supabase.
 -- Pégalo entero en SQL Editor y pulsa Run. Puede ser el mismo proyecto de PAPOTAS.
 --
 -- Los datos de cada familia se guardan en filas separadas por un «código de familia»
 -- largo y secreto. La tabla no se puede leer directamente con la clave pública:
 -- solo a través de estas dos funciones, que exigen ese código.
 
-create table if not exists public.balanza_datos (
+create table if not exists public.kallpa_datos (
   familia        text        not null,
   clave          text        not null,
   datos          jsonb       not null,
@@ -1590,30 +1590,30 @@ create table if not exists public.balanza_datos (
   primary key (familia, clave)
 );
 
-alter table public.balanza_datos enable row level security;
-revoke all on public.balanza_datos from anon, authenticated;
+alter table public.kallpa_datos enable row level security;
+revoke all on public.kallpa_datos from anon, authenticated;
 
-create or replace function public.balanza_guardar(p_familia text, p_clave text, p_datos jsonb, p_ts bigint)
+create or replace function public.kallpa_guardar(p_familia text, p_clave text, p_datos jsonb, p_ts bigint)
 returns void language plpgsql security definer set search_path = public as $$
 begin
   if length(p_familia) < 16 then raise exception 'codigo de familia demasiado corto'; end if;
-  insert into balanza_datos (familia, clave, datos, ts) values (p_familia, p_clave, p_datos, p_ts)
+  insert into kallpa_datos (familia, clave, datos, ts) values (p_familia, p_clave, p_datos, p_ts)
   on conflict (familia, clave) do update
     set datos = excluded.datos, ts = excluded.ts, actualizado_en = now()
-    where balanza_datos.ts < excluded.ts;
+    where kallpa_datos.ts < excluded.ts;
 end $$;
 
-create or replace function public.balanza_leer(p_familia text, p_desde bigint)
+create or replace function public.kallpa_leer(p_familia text, p_desde bigint)
 returns table (clave text, datos jsonb, ts bigint, srv bigint)
 language sql stable security definer set search_path = public as $$
   select clave, datos, ts, (extract(epoch from actualizado_en) * 1000)::bigint
-  from balanza_datos
+  from kallpa_datos
   where familia = p_familia and length(p_familia) >= 16
     and actualizado_en > to_timestamp(p_desde / 1000.0);
 $$;
 
-grant execute on function public.balanza_guardar(text, text, jsonb, bigint) to anon;
-grant execute on function public.balanza_leer(text, bigint) to anon;
+grant execute on function public.kallpa_guardar(text, text, jsonb, bigint) to anon;
+grant execute on function public.kallpa_leer(text, bigint) to anon;
 `;
 let NUBE=LS.get('nutri:nube');const NH=LS.get('nutri:nube:h')||{},NT=LS.get('nutri:nube:t')||{};
 let pushT=null,syncing=false,pendRender=false;
@@ -1641,7 +1641,7 @@ function applyPart(k,datos){
   LS.set('nutri:u:'+id,nd);if(mine)U=normData(nd);
 }
 async function pullNow(){
-  const rows=(await rpc('balanza_leer',{p_familia:NUBE.fam,p_desde:NUBE.since||0}))||[];let maxS=NUBE.since||0;const applied=[];
+  const rows=(await rpc('kallpa_leer',{p_familia:NUBE.fam,p_desde:NUBE.since||0}))||[];let maxS=NUBE.since||0;const applied=[];
   rows.sort((a,b)=>(a.clave==='g'?0:1)-(b.clave==='g'?0:1));
   for(const r of rows){maxS=Math.max(maxS,+r.srv);if((NT[r.clave]||0)>=+r.ts)continue;applyPart(r.clave,r.datos);NT[r.clave]=+r.ts;applied.push(r.clave)}
   if(applied.length){const P=partsAll();applied.forEach(k=>{if(P[k])NH[k]=hsh(JSON.stringify(P[k]))});LS.set('nutri:nube:h',NH);LS.set('nutri:nube:t',NT)}
@@ -1650,7 +1650,7 @@ async function pullNow(){
 async function pushNow(){
   const P=partsAll();let n=0;
   for(const k in P){const s=JSON.stringify(P[k]),h=hsh(s);if(NH[k]===h)continue;const ts=Math.max(Date.now(),(NT[k]||0)+1);
-    await rpc('balanza_guardar',{p_familia:NUBE.fam,p_clave:k,p_datos:P[k],p_ts:ts});NH[k]=h;NT[k]=ts;n++}
+    await rpc('kallpa_guardar',{p_familia:NUBE.fam,p_clave:k,p_datos:P[k],p_ts:ts});NH[k]=h;NT[k]=ts;n++}
   if(n){LS.set('nutri:nube:h',NH);LS.set('nutri:nube:t',NT)}return n;
 }
 async function syncNow(){
@@ -1736,7 +1736,7 @@ const ICONS={hoy:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 1
   mas:'<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'};
 const icon=k=>`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
 const LOGO=`<svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true"><rect width="32" height="32" rx="11" fill="var(--brand)"/><circle cx="16" cy="16" r="9" fill="none" stroke="var(--sun)" stroke-width="3.4"/><path d="M16 16 20.5 10.5" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/><circle cx="16" cy="16" r="2.2" fill="#FFFFFF"/></svg>`;
-const WORD=`${LOGO}<span>balanza<em>&amp;</em>plato</span>`;
+const WORD=`${LOGO}<span>kallpa<em>.</em></span>`;
 const ini=n=>esc(((n||'?').trim()[0]||'?').toUpperCase());
 
 /* =====================================================================
@@ -1745,7 +1745,7 @@ const ini=n=>esc(((n||'?').trim()[0]||'?').toUpperCase());
 function gateBrand(){
   return`<header class="gbrand"><div class="word">${WORD}</div>
     <h1>Come rico, <span>come justo.</span></h1>
-    <p>Tu plan de comidas, tus calorías y tu peso. Uno para cada persona de la casa.</p>
+    <p>Tu plan de comidas, tus calorías y tu peso, uno para cada persona de la casa. <b>Kallpa</b> es «fuerza» en quechua.</p>
     <ul><li>${RECIPES.length} recetas peruanas</li><li>Más de 500 alimentos</li><li>Plan semanal y lista de compras</li><li>Ejercicio y ayuno</li></ul></header>`;
 }
 function vPicker(){
@@ -1760,7 +1760,7 @@ function vPicker(){
     <div><h2>${none?'Crea el primer perfil':'¿Quién eres?'}</h2><p class="sub">${none?'Un perfil por persona. Luego puedes crear los demás.':'Toca tu perfil para entrar.'}</p></div>
     ${none?'':`<div class="pcards">${cards}${G.users.length<MAX_USERS&&!ui.creating?`<button class="pcard addc" data-a="newProfile"><span class="plus">+</span><b>Nuevo perfil</b></button>`:''}</div>`}
     ${none||ui.creating?profileForm():''}
-    ${!nubeOn()?`<div class="card row between"><div><b>¿Ya usan Balanza &amp; Plato en otro celular?</b><p class="sub">Conecta este celular a tu familia y aparecerán sus perfiles.</p></div><button class="btn" data-a="nubeOpen">Conectar con mi familia</button></div>`:''}
+    ${!nubeOn()?`<div class="card row between"><div><b>¿Ya usan Kallpa en otro celular?</b><p class="sub">Conecta este celular a tu familia y aparecerán sus perfiles.</p></div><button class="btn" data-a="nubeOpen">Conectar con mi familia</button></div>`:''}
     ${none?`<div class="card row between"><div><b>¿Solo quieres mirar?</b><p class="sub">Crea 3 perfiles de ejemplo (Ana, Luis y Marta) con datos inventados.</p></div><button class="btn" data-a="demo">Probar con ejemplo</button></div>`:''}
   </div></div></div>`;
 }
@@ -2716,7 +2716,7 @@ async function act(a,el){
     case'nubeOpen':ui.modal={type:'nube'};break;
     case'nubeGen':{const a=crypto.getRandomValues(new Uint8Array(18));document.getElementById('nb-fam').value=[...a].map(b=>'abcdefghijkmnpqrstuvwxyz23456789'[b%32]).join('');return}
     case'nubeSync':await syncNow();toast(NUBE.err?NUBE.err:'Sincronizado.');break;
-    case'nubeCopy':{const txt=`Balanza & Plato · datos de conexión\nURL: ${NUBE.url}\nClave: ${NUBE.key}\nFamilia: ${NUBE.fam}`;
+    case'nubeCopy':{const txt=`Kallpa · datos de conexión\nURL: ${NUBE.url}\nClave: ${NUBE.key}\nFamilia: ${NUBE.fam}`;
       try{navigator.clipboard.writeText(txt).then(()=>toast('Copiado. Mándalo por WhatsApp a la familia.'),()=>{ui.modal.txt=txt;render()})}catch(e){ui.modal.txt=txt;break}return}
     case'copySQL':try{navigator.clipboard.writeText(NUBE_SQL).then(()=>toast('Código SQL copiado.'),()=>toast('Selecciona el texto y cópialo.'))}catch(e){toast('Selecciona el texto y cópialo.')}return;
     case'nubeOff':ui.confirm='nubeoff';break;
@@ -2867,15 +2867,15 @@ async function infoSheet(id){try{const all=await PH.byUser(ME.id);const p=all.fi
   document.getElementById('sheet-img').src=PH.url(p);document.getElementById('sheet-info').textContent=`${fday(p.fecha)} · ${p.meal?MEALN[p.meal]:TIPON[p.tipo]}`}catch(e){}}
 
 async function exportar(){
-  const data={app:'balanza-y-plato',v:1,fecha:new Date().toISOString(),G,users:{},fotos:[]};
+  const data={app:'kallpa',v:1,fecha:new Date().toISOString(),G,users:{},fotos:[]};
   G.users.forEach(u=>data.users[u.id]=LS.get('nutri:u:'+u.id));
   try{for(const u of G.users)for(const p of await PH.byUser(u.id))data.fotos.push({...p,blob:await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(p.blob)})})}catch(e){}
   const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`balanza-y-plato-${todayISO()}.json`;document.body.appendChild(a);a.click();a.remove();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`kallpa-${todayISO()}.json`;document.body.appendChild(a);a.click();a.remove();
   toast('Copia preparada. Si no se descarga, ábrelo desde la app instalada.');
 }
 async function importar(file){
-  try{const data=JSON.parse(await file.text());if(data.app!=='balanza-y-plato')throw new Error('Ese archivo no es una copia de Balanza y Plato.');
+  try{const data=JSON.parse(await file.text());if(!['kallpa','balanza-y-plato'].includes(data.app))throw new Error('Ese archivo no es una copia de Kallpa.');
     G=data.G;saveG();for(const id in data.users)if(data.users[id])LS.set('nutri:u:'+id,data.users[id]);
     for(const p of data.fotos||[]){const[h,b]=p.blob.split(',');const bin=atob(b);const u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
       await PH.put({...p,blob:new Blob([u8],{type:(h.match(/data:([^;]+)/)||[])[1]||'image/jpeg'})})}
@@ -2983,7 +2983,7 @@ document.addEventListener('submit',async e=>{
     if(fam.length<16){ui.modal.err='El código de familia debe tener al menos 16 caracteres. Pulsa «Generar uno nuevo».';return render()}
     const prev=NUBE;NUBE={url,key,fam,since:0};ui.modal.busy=true;ui.modal.err='';render();
     if(!prev||prev.fam!==fam||prev.url!==url){for(const k in NH)delete NH[k];for(const k in NT)delete NT[k]}
-    try{await rpc('balanza_leer',{p_familia:fam,p_desde:Date.now()})}catch(e){NUBE=prev;ui.modal.busy=false;ui.modal.err=e.message;return render()}
+    try{await rpc('kallpa_leer',{p_familia:fam,p_desde:Date.now()})}catch(e){NUBE=prev;ui.modal.busy=false;ui.modal.err=e.message;return render()}
     LS.set('nutri:nube',NUBE);await syncNow();ui.modal=null;toast(G.users.length?'Conectado. Los datos de la familia ya se sincronizan.':'Conectado.');render();return}
   if(id==='f-code'){stopScan();found(v('code-in'));return}
   if(id==='f-scanprod'){const n=v('sp-n').trim();if(!n)return;const code=v('sp-code').replace(/\D/g,'');

@@ -1,4 +1,7 @@
-# Balanza & Plato
+# Kallpa
+
+«Kallpa» significa fuerza o energía en quechua.
+
 
 App de nutrición y control de peso para la familia: perfiles, cuestionario inicial,
 recetas peruanas, plan semanal, lista de compras con costo, ejercicio, ayuno,
