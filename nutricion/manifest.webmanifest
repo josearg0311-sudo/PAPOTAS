@@ -1,0 +1,17 @@
+{
+  "name": "Balanza y Plato",
+  "short_name": "Balanza",
+  "description": "Nutrición, comidas y control de peso para la casa.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#F1F5F2",
+  "theme_color": "#2C6A4D",
+  "lang": "es",
+  "icons": [
+    {"src": "icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

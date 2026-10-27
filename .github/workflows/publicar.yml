@@ -57,6 +57,9 @@ jobs:
           cp sw.js manifest.webmanifest sitio/
           cp icono.svg icon-192.png icon-512.png sitio/
           cp icon-maskable-192.png icon-maskable-512.png apple-touch-icon.png sitio/
+          # Balanza y Plato (nutrición y peso) va en su propia carpeta, con
+          # su propio manifiesto y trabajador de servicio: se instala aparte.
+          cp -r nutricion sitio/nutricion
           # El manifiesto debe arrancar en la portada, que ahora es el nuevo.
           sed -i 's#"start_url": "./papotas-nuevo.html"#"start_url": "./"#' sitio/manifest.webmanifest
           sed -i 's#"id": "./papotas-nuevo.html"#"id": "./"#' sitio/manifest.webmanifest
