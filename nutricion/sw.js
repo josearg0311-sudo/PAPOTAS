@@ -2,8 +2,8 @@
    Guarda el programa para que se instale y abra sin conexión. Primero la red
    (así las actualizaciones llegan en cuanto se publican) y, si no contesta,
    la copia guardada. Los datos y las fotos NO van aquí: viven en el navegador. */
-const CACHE = 'balanza-v4';
-const BASICOS = ['./', './index.html', './manifest.webmanifest', './icono.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
+const CACHE = 'balanza-v5';
+const BASICOS = ['./', './index.html', './manifest.webmanifest', './icono.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './zxing.min.js'];
 
 self.addEventListener('install', (ev) => {
   self.skipWaiting();
