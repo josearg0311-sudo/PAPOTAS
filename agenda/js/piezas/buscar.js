@@ -33,7 +33,7 @@ const IR = [
   ['#finanzas/oficina', 'Finanzas · libro de la oficina', 'Las cuentas de la oficina', 'finanzas oficina libro cuentas facturas'],
   ['#notas', 'Notas', 'Tus apuntes por área', 'notas apuntes'],
   ['#notas/diario', 'Diario', 'Ánimo, agua y sueño', 'diario animo agua sueno'],
-  ['#ajustes', 'Ajustes', 'Nube, respaldo, PIN, teclado', 'ajustes configuracion nube respaldo pin tema teclado'],
+  ['#ajustes', 'Ajustes', 'Nube, respaldo, PIN', 'ajustes configuracion nube respaldo pin tema'],
   ['#datos', 'Tus datos', 'Todo lo que tienes guardado', 'datos explorador todo'],
   ['#papelera', 'Papelera', 'Lo que borraste (30 días)', 'papelera borrado recuperar']
 ];

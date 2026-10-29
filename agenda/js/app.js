@@ -30,7 +30,6 @@ import { vistaNotasSeccion, acciones as accNotas, alEscribirNotas, alCambiarNota
 import { acciones as accAdmin } from './vistas/admin.js';
 import { iniciarNube, config as nubeConfig, estadoNube } from './datos/nube.js';
 import { aplicarAreas } from './datos/areas.js';
-import { iniciarTeclado } from './piezas/teclado.js';
 import { abrirBuscar } from './piezas/buscar.js';
 import { revisarNovedades } from './piezas/novedades.js';
 import { acciones as accHoyExtra } from './vistas/hoy-extra.js';
@@ -309,8 +308,6 @@ if (atajoInicial) despuesDeAbrir(() => setTimeout(() => {
 }, 300));
 /* La nube: solo si tú la conectaste en Ajustes (nunca sola) */
 despuesDeAbrir(() => iniciarNube());
-/* El teclado propio (solo en pantallas táctiles) */
-iniciarTeclado();
 $('btnNube').addEventListener('click', () => { ir('ajustes'); setTimeout(() => { const n = document.getElementById('nube'); if (n) n.scrollIntoView({ block: 'start' }); }, 60); });
 
 /* Para instalarla y abrirla sin internet. Solo en https o en el servidor local. */

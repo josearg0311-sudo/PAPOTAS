@@ -37,8 +37,8 @@ cambiar('<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">', '<li
 cambiar('<link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>\n', '');
 cambiar(/<link rel="stylesheet" href="css\/tokens.css">\n<link rel="stylesheet" href="css\/base.css">\n<link rel="stylesheet" href="css\/componentes.css">\n<link rel="stylesheet" href="css\/vistas.css">/.exec(html)[0], '<style>\n' + css.replace(/<\/style/gi, '<\\/style') + '\n</style>');
 cambiar('<script type="module" src="js/app.js"></script>', '<!-- programa: va al final, ver abajo -->');
-const dic = leer('diccionario/palabras-es.txt');
-cambiar('</body>', '<script type="text/plain" id="diccionario-incluido">' + dic.replace(/</g, '') + '</script>\n<script type="module">\n' + sinCerrarScript(js) + '\n</script>\n</body>');
+/* Sin teclado propio desde la 8.0: el diccionario ya no va adentro */
+cambiar('</body>', '<script type="module">\n' + sinCerrarScript(js) + '\n</script>\n</body>');
 
 /* 4) Carpeta de salida */
 fs.rmSync(SALIDA, { recursive: true, force: true });
