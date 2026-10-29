@@ -44,14 +44,17 @@ import { mostrarMigracion } from './piezas/migracion-ui.js';
 /* ---------- Secciones (como la v4.5) ----------
    Celular: Hoy · Agenda · Dinero · Notas · Más. Laptop: barra lateral con
    Hoy, Espacios (las 4 áreas), Organizar y tu perfil abajo. */
+/* Agenda 8 «Cancha»: abajo Hoy · Agenda · [+] · Espacios · Dinero (el + va al
+   centro); Notas, Buscar y Más (tu avatar) arriba. */
 const PRINCIPALES = [
   ['hoy', 'Hoy', 'i-hoy'],
   ['agenda', 'Agenda', 'i-cal'],
-  ['finanzas', 'Dinero', 'i-grafica'],
-  ['notas', 'Notas', 'i-notas'],
-  ['mas', 'Más', 'i-mas']
+  null,
+  ['areas', 'Espacios', 'i-espacios'],
+  ['finanzas', 'Dinero', 'i-grafica']
 ];
-const ORGANIZAR = [['agenda', 'Agenda', 'i-cal'], ['recordatorios', 'Recordatorios', 'i-tareas'], ['notas', 'Notas', 'i-notas'], ['habitos', 'Hábitos', 'i-habitos'], ['finanzas', 'Dinero', 'i-grafica'], ['seguimiento', 'Seguimiento', 'i-diana']];
+const LATERAL = [['hoy', 'Hoy', 'i-hoy'], ['agenda', 'Agenda', 'i-cal'], ['areas', 'Espacios', 'i-espacios'], ['finanzas', 'Dinero', 'i-grafica'], ['notas', 'Notas', 'i-notas']];
+const ORGANIZAR = [['recordatorios', 'Recordatorios', 'i-tareas'], ['habitos', 'Hábitos', 'i-habitos'], ['seguimiento', 'Seguimiento', 'i-diana'], ['mas', 'Más', 'i-mas']];
 const TITULOS = { datos: 'Tus datos', hoy: 'Hoy', recordatorios: 'Recordatorios', agenda: 'Agenda', areas: 'Espacios', mas: 'Más', ajustes: 'Ajustes', seguimiento: 'Seguimiento', finanzas: 'Dinero', notas: 'Notas', papelera: 'Papelera', habitos: 'Hábitos' };
 const SUBTITULOS = { recordatorios: 'Tus listas y lo que tienes pendiente', agenda: 'Tu tiempo: día, semana, mes y año', finanzas: 'Tus dos libros, cada uno por su lado', notas: 'Tus apuntes, cada uno en su espacio', habitos: 'Lo que haces seguido, espacio por espacio', seguimiento: 'Cómo vas en cada espacio', ajustes: 'Tu agenda, tu nube y tus datos', papelera: 'Lo que borraste, por 30 días', datos: 'Todo lo que tienes guardado', mas: 'Todo lo demás', areas: 'Tus cuatro espacios' };
 
@@ -71,7 +74,7 @@ const ATAJO_V45 = { gasto: 'gasto', ingreso: 'ingreso', anadir: 'recordatorio', 
 const atajoInicial = ATAJO_V45[(location.hash || '').slice(1)] || '';
 if (atajoInicial) { try { history.replaceState(null, '', atajoInicial === 'ingreso' ? '#finanzas' : '#hoy'); } catch (e) { /* nada */ } }
 let ruta = leerRuta() || { sec: preferencias().inicio, param: '' };
-function padre(sec) { return ['recordatorios', 'areas', 'seguimiento', 'habitos', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
+function padre(sec) { return ['recordatorios', 'seguimiento', 'habitos', 'ajustes', 'papelera', 'datos'].includes(sec) ? 'mas' : sec; }
 
 /* ---------- Indicador de la nube (solo si la conectaste) ---------- */
 function haceCuanto(t) {
@@ -96,10 +99,12 @@ function plegado(g) { try { return !!(JSON.parse(localStorage.getItem(NAV) || '{
 function cuentaHtml(n, alerta) { return n ? '<span class="cuenta' + (alerta ? ' alerta' : '') + '">' + n + '</span>' : ''; }
 function pintarNav() {
   const p = padre(ruta.sec), h = hoy();
-  $('barra').innerHTML = PRINCIPALES.map((x) =>
+  $('barra').innerHTML = PRINCIPALES.map((x) => !x ? '<span class="barra-hueco" aria-hidden="true"></span>' :
     '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + (p === x[0] ? ' aria-current="page"' : '') + '>' + ico(x[2]) + '<span>' + x[1] + '</span></a>').join('');
+  const al = $('avatarLetra'), dn = documento(), nom = dn && dn.perfil && dn.perfil.nombre ? String(dn.perfil.nombre).trim() : '';
+  if (al) al.textContent = nom ? nom.charAt(0).toUpperCase() : '✦';
+  const bn = $('btnNotas'); if (bn) { if (ruta.sec === 'notas') bn.setAttribute('aria-current', 'page'); else bn.removeAttribute('aria-current'); }
   const pend = documento() ? pendientesDeHoy() : [];
-  const porArea = (a) => pend.filter((x) => x.area === a).length;
   const atras = pend.filter((x) => x.fechas.inicio < h).length;
   const enAgenda = documento() ? (() => { const d = delDiaCal(h); return d.bloques.length + d.todoDia.length; })() : 0;
   const d = documento(), nombre = d && d.perfil && d.perfil.nombre ? String(d.perfil.nombre).trim() : '';
@@ -108,12 +113,11 @@ function pintarNav() {
   $('lateral').innerHTML =
     '<a class="marca" href="#hoy"><i class="logo" aria-hidden="true"></i><div><b>Agenda</b><small>' + (nombre ? 'de ' + esc(nombre.split(/\s+/)[0]) : 'Mi organización') + '</small></div></a>' +
     '<nav class="nav-lat">' +
-    '<a href="#hoy" data-ir="hoy"' + actual('hoy') + '>' + ico('i-hoy') + 'Hoy</a>' +
-    grupo('espacios', 'Espacios') + '<div class="nav-grupo"' + (plegado('espacios') ? ' hidden' : '') + '>' +
-    AREAS.map((a) => '<a href="#areas/' + a.id + '" class="nav-esp area-' + a.id + '"' + actual('areas', a.id) + '>' + ico(a.icono) + '<span>' + esc(a.nombre) + '</span>' + cuentaHtml(porArea(a.id)) + '</a>').join('') + '</div>' +
+    LATERAL.map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' +
+      (x[0] === 'agenda' ? cuentaHtml(enAgenda) : x[0] === 'areas' ? '<span class="lat-puntos" aria-hidden="true">' + AREAS.map((a) => '<i class="area-' + a.id + '"></i>').join('') + '</span>' : '') + '</a>').join('') +
     grupo('organizar', 'Organizar') + '<div class="nav-grupo"' + (plegado('organizar') ? ' hidden' : '') + '>' +
     ORGANIZAR.map((x) => '<a href="#' + x[0] + '" data-ir="' + x[0] + '"' + actual(x[0]) + '>' + ico(x[2]) + '<span>' + x[1] + '</span>' +
-      (x[0] === 'agenda' ? cuentaHtml(enAgenda) : x[0] === 'recordatorios' ? cuentaHtml(pend.length, atras > 0) : '') + '</a>').join('') + '</div>' +
+      (x[0] === 'recordatorios' ? cuentaHtml(pend.length, atras > 0) : '') + '</a>').join('') + '</div>' +
     '</nav>' +
     '<div class="pie"><a class="perfil" href="#ajustes"' + actual('ajustes') + '><span class="avatar" aria-hidden="true">' + (nombre ? esc(nombre.charAt(0).toUpperCase()) : '✦') + '</span>' +
     '<span class="perfil-txt"><b>' + (nombre ? esc(nombre.split(/\s+/)[0]) : 'Tu agenda') + '</b><small>Ajustes y respaldo</small></span>' + ico('i-ajustes') + '</a></div>';
@@ -128,7 +132,7 @@ function pintarCab() {
 
 /* Título grande de cada sección (Hoy y los espacios traen su propia portada) */
 function cabeceraSeccion() {
-  if (ruta.sec === 'hoy' || (ruta.sec === 'areas' && ruta.param)) return '';
+  if (ruta.sec === 'hoy' || ruta.sec === 'areas') return '';
   const volver = padre(ruta.sec) === 'mas' && ruta.sec !== 'mas' ? '<a class="volver-panel" href="#mas">' + ico('i-izq') + 'Más</a>' : '';
   return volver + '<header class="pag-cab"><h1>' + TITULOS[ruta.sec] + '</h1>' + (SUBTITULOS[ruta.sec] ? '<p>' + SUBTITULOS[ruta.sec] + '</p>' : '') + '</header>';
 }

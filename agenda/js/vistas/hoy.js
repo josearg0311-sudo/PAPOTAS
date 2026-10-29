@@ -8,10 +8,10 @@ import { documento, elementos, buscarElemento, poner, cambiarPerfil } from '../d
 import { modeloVacio } from '../datos/modelo.js';
 import { tocaRespaldar, diasSinRespaldo } from '../datos/respaldo.js';
 import { urgentes, delDia, hechosHoy, ordenar, grupo, marcar, pendientesVisibles } from '../datos/pendientes.js';
-import { bloquesDelDia, todoElDia, minutosPorArea } from '../datos/calendario.js';
+import { bloquesDelDia, todoElDia, minutosPorArea, proximoBloque } from '../datos/calendario.js';
 import { AREAS, area } from '../datos/areas.js';
 import { filaPendiente } from '../piezas/pendientes-ui.js';
-import { estadoPomo, restante, totalMs, mmss, corriendo, alternar, reiniciar, vincular, minutosHoy, MODOS, modoRapido } from '../piezas/pomodoro.js';
+import { estadoPomo, restante, totalMs, mmss, corriendo, alternar, reiniciar, vincular, minutosHoy, MODOS, modoRapido, aFoco } from '../piezas/pomodoro.js';
 import { abrirHoja, cerrarHoja } from '../piezas/hoja.js';
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
@@ -20,7 +20,6 @@ import { avisoDeporte } from './area-deporte.js';
 import { habitosDeHoy } from './area-constancia.js';
 import { marcasHabito, rachaHabito } from '../datos/seguimiento.js';
 import { tarjetaQueHacer, tarjetaSiguiente, tarjetaManana, tarjetaNumeros } from './hoy-extra.js';
-import { tarjetaEspacios } from './espacios.js';
 
 /* Una frase por día (las de tu versión anterior) */
 const FRASES = ['Lo que se agenda, se hace.', 'Hecho es mejor que perfecto.', 'Un paso pequeño cada día llega lejos.', 'Primero lo importante; lo urgente sabe esperar un poco.', 'La disciplina es elegir entre lo que quieres ahora y lo que más quieres.', 'No tienes que verlo todo: solo el siguiente paso.', 'Tu futuro se construye con lo que haces hoy, no mañana.', 'Empieza donde estás, usa lo que tienes, haz lo que puedas.', 'Menos pendientes en la cabeza, más espacio para vivir.', 'La constancia vence al talento cuando el talento no es constante.', 'Cuida los céntimos y los soles se cuidarán solos.', 'Si toma menos de dos minutos, hazlo ya.', 'Descansar también es parte del plan.', 'Celebra lo que ya lograste antes de ir por lo siguiente.', 'Un buen día empieza con tres prioridades claras.', 'Lo que no se mide, no se mejora.', 'Cada tarea tachada es una promesa cumplida contigo.', 'Enfócate en el progreso, no en la perfección.', 'Organizarse es regalarle tiempo a tu yo de mañana.', 'Hoy es un buen día para empezar eso que vienes posponiendo.', 'Ahorra primero, gasta después.', 'Tu energía es limitada: ponla donde importa.', 'Pequeños hábitos, grandes cambios.', 'La motivación te arranca; el hábito te mantiene.', 'Mejor un plan sencillo que se cumple que uno perfecto que no.', 'Termina lo que empiezas y empezarás menos cosas que no terminas.', 'El mejor momento fue ayer; el segundo mejor, ahora.', 'Di que sí a pocas cosas y hazlas muy bien.', 'Anota, suelta y confía en tu agenda.', 'Paso a paso también se llega.'];
@@ -100,6 +99,51 @@ function tarjetaHabitos() {
         return '<button type="button" class="hab-chip area-' + a.id + '" role="checkbox" aria-checked="' + hecho + '" data-acc="hab-marcar" data-id="' + esc(x.id) + '"><span class="em">' + esc((x.extra && x.extra.em) || (x.datos && x.datos.em) || '⭐') + '</span><span>' + esc(x.titulo) + '</span>' + (r ? '<small>🔥 ' + r + '</small>' : '') + '</button>'; }).join('') + '</div></div>'; }).join('') });
 }
 
+
+/* ---------- Agenda 8 «Cancha» ---------- */
+/* Lo hecho en un día concreto (para la racha de la semana) */
+function hechosEl(d) {
+  const ini = Date.parse(d + 'T00:00:00-05:00'), fin = ini + 864e5;
+  return pendientesVisibles().filter((x) => { const t = +(x.extra.hechoEn || 0); return (x.estado === 'hecho' && t >= ini && t < fin) || (x.extra.historial || []).includes(d); }).length;
+}
+/* Tu semana en barritas: rojo = días con algo hecho; hoy, según tu avance */
+function rachaSemana() {
+  const p = preferencias(), h = hoy(), ini = inicioSemana(h, p.semanaLunes);
+  const hechosH = hechosHoy(h).length, totH = hechosH + delDia(h).length;
+  return '<div class="c8-racha" role="group" aria-label="Tu semana">' + [0, 1, 2, 3, 4, 5, 6].map((i) => {
+    const d = sumarDias(ini, i), n = d < h ? hechosEl(d) : d === h ? hechosH : 0;
+    const pct = d < h ? (n ? 100 : 0) : d === h ? (totH ? Math.round(hechosH / totH * 100) : 0) : 0;
+    return '<button type="button" data-acc="ir-dia" data-dia="' + d + '" class="' + (d === h ? 'es-hoy' : d < h ? 'pasado' : '') + '" aria-label="' + fmtLarga(d) + (d <= h ? ': ' + n + (n === 1 ? ' cosa hecha' : ' cosas hechas') : '') + '">' +
+      '<i style="--p:' + pct + '%"></i><small>' + DIAS3[diaSemana(d)] + '</small></button>';
+  }).join('') + '</div>';
+}
+/* «En juego»: lo que pasa ahora (o lo que sigue), con foco de 25 min */
+function enJuego() {
+  const p = preferencias(), h = hoy(), ahora = minutosAhora(), s = proximoBloque(h, ahora);
+  if (!s) return '';
+  const b = s.b, a = area(b.area), acc = b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver';
+  const fh = (x) => fmtHora(x, p.formatoHora), dur = Math.max(1, b.fin - b.ini);
+  const quedan = s.enCurso ? b.fin - ahora : null, pct = s.enCurso ? Math.round((ahora - b.ini) / dur * 100) : 0;
+  const luego = s.enCurso && s.dia === h ? bloquesDelDia(h).find((x) => x.ini >= b.fin) : null;
+  const grande = s.enCurso ? (quedan >= 60 ? Math.floor(quedan / 60) + 'h' + (quedan % 60 ? String(quedan % 60).padStart(2, '0') : '') : quedan + "'") : s.dia === h ? fh(b.hIni) : '';
+  const eti = s.enCurso ? 'En juego' : s.dia === h ? (s.faltan < 60 ? 'Sigue en ' + s.faltan + ' min' : 'Lo que sigue') : 'Próximo · ' + relativoCorto(s.dia) + ' ' + fh(b.hIni);
+  return '<section class="c8-juego area-' + a.id + (s.enCurso ? ' vivo' : '') + '" aria-label="' + esc(eti) + '">' +
+    '<span class="cj-eti"><i aria-hidden="true"></i>' + esc(eti) + ' · ' + esc(a.nombre) + '</span>' +
+    '<button type="button" class="cj-tit" data-acc="' + acc + '" data-id="' + esc(b.id) + '"><b>' + esc(b.titulo) + '</b>' + (grande ? '<strong>' + grande + '</strong>' : '') + '</button>' +
+    (s.enCurso ? '<span class="cj-barra" role="progressbar" aria-valuenow="' + pct + '" aria-valuemin="0" aria-valuemax="100" aria-label="Avance"><i style="width:' + pct + '%"></i></span>' : '<span class="cj-hora">' + fh(b.hIni) + '–' + fh(b.hFin) + (b.lugar ? ' · ' + esc(b.lugar) : '') + '</span>') +
+    '<span class="cj-pie">' + (s.dia === h ? '<button type="button" class="btn cj-foco" data-acc="h8-foco"' + (b.tipo === 'pendiente' ? ' data-id="' + esc(b.id) + '"' : '') + '>' + (corriendo() ? 'Ver el foco' : "Modo foco 25'") + '</button>' : '') +
+      (luego ? '<small>Luego: ' + esc(luego.titulo) + '</small>' : '') + '</span></section>';
+}
+function relativoCorto(d) { const r = sumarDias(hoy(), 1) === d ? 'mañana' : fmtCorta(d); return r; }
+/* Marcador por espacio: tus cuatro espacios juegan juntos en Hoy */
+function marcadorEspacios() {
+  const h = hoy(), pend = delDia(h), hechos = hechosHoy(h);
+  return '<div class="c8-marcadores" role="group" aria-label="Hoy en cada espacio">' + AREAS.map((a) => {
+    const ok = hechos.filter((x) => x.area === a.id).length, tot = ok + pend.filter((x) => x.area === a.id).length;
+    return '<a class="c8-m area-' + a.id + '" href="#areas/' + a.id + '" aria-label="' + esc(a.nombre) + ': ' + ok + ' de ' + tot + ' hechas hoy"><i aria-hidden="true"></i><b>' + ok + '<span>/' + tot + '</span></b><small>' + esc(a.nombre) + '</small></a>';
+  }).join('') + '</div>';
+}
+
 /* Tu plata no se ve en la primera pantalla (pedido del usuario): se quitan los
    datos con «S/» de las tarjetas de los espacios y de las sugerencias. Los
    montos están en Dinero. */
@@ -119,13 +163,13 @@ export function vistaHoy() {
 
   const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
   return sinPlata('<div class="hoy">' +
-    '<header class="hoy-cab"><div class="hc-txt"><small>' + cap(fmtLarga(h)) + '</small><h1 class="ph-saludo">' + saludo() + (n ? ', ' + esc(n) : '') + '</h1><p class="hc-frase">' + esc(fraseDelDia(h)) + '</p></div>' +
-      '<div class="anillo-hoy" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><svg viewBox="0 0 74 74" aria-hidden="true"><circle class="fondo" cx="37" cy="37" r="32"/><circle class="valor" cx="37" cy="37" r="32" stroke-dasharray="' + (2 * Math.PI * 32).toFixed(1) + '" stroke-dashoffset="' + (2 * Math.PI * 32 * (1 - pct)).toFixed(1) + '"/></svg><span><b>' + hechos.length + '/' + tot + '</b>hechas</span></div></header>' +
-    franjaSemana() +
+    '<header class="hoy-cab c8-cab"><div class="hc-txt"><small>' + cap(fmtLarga(h)) + '</small><h1 class="ph-saludo">' + (n ? 'Vamos, ' + esc(n) : 'Vamos') + '</h1><p class="hc-frase">' + esc(fraseDelDia(h)) + '</p></div>' +
+      '<div class="c8-marcador" role="img" aria-label="' + hechos.length + ' de ' + tot + ' hechas hoy"><b>' + hechos.length + '<span>/' + tot + '</span></b><small>hechas</small></div></header>' +
+    rachaSemana() +
     (fer || tde.length ? '<p class="hoy-extra">' + (fer ? '<span class="feriado">' + ico('i-bandera') + 'Feriado: <b>' + esc(fer) + '</b></span>' : '') + tde.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</p>' : '') +
     (n ? '' : '<section class="pide-nombre"><b>¿Cómo te llamas?</b><span>Para saludarte por tu nombre cada día.</span><form class="pn-form"><label class="solo-lector" for="pnNombre">Tu nombre</label><input id="pnNombre" class="entrada" maxlength="40" autocomplete="given-name" placeholder="Tu nombre, ej. José"><button type="button" class="btn pri" data-acc="nombre-listo">Listo</button></form></section>') +
-    tarjetaEspacios() +
-    tarjetaQueHacer() + tarjetaSiguiente() +
+    enJuego() + marcadorEspacios() +
+    tarjetaQueHacer() +
     (tocaRespaldar() ? '<div class="nota-fase aviso-respaldo">' + ico('i-escudo') + '<span><b>' + (rs.nunca ? 'Aún no tienes un respaldo.' : 'Último respaldo: hace ' + rs.dias + ' días.') + '</b> Guarda uno para no perder nada.</span><button type="button" class="btn chico pri" data-acc="respaldo-bajar">Respaldar</button></div>' : '') +
     (avisoDeporte() ? '<a class="nota-fase aviso-carga" href="#areas/deporte/entrenos">' + ico('i-fuego') + '<span><b>Deporte:</b> ' + esc(avisoDeporte()) + '. Un entreno corto también cuenta: toca para anotarlo.</span></a>' : '') +
     (carga > SOBRECARGA ? '<div class="nota-fase aviso-carga">' + ico('i-info') + '<span><b>Día sobrecargado:</b> tienes ' + hh(mins.total) + ' planificadas de ' + hh(vig) + ' despierto (' + Math.round(carga * 100) + ' %). Considera mover algo a mañana.</span></div>' : '') +
@@ -167,6 +211,11 @@ export const acciones = {
     const i = document.getElementById('pnNombre'), v = i ? i.value.trim().slice(0, 40) : '';
     if (!v) { if (i) i.focus(); return false; }
     cambiarPerfil({ nombre: v }); aviso('¡Hola, ' + v.split(/\s+/)[0] + '!'); return true;
+  },
+  'h8-foco'(b) {
+    if (!corriendo()) { aFoco(); vincular(b.dataset.id || ''); alternar(); }
+    setTimeout(() => { const t = document.getElementById('tarjetaPomo'); if (t) t.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 80);
+    return true;
   },
   pomo() { const s = document.getElementById('pomoItem'); if (s) vincular(s.value); alternar(); return true; },
   'pomo-reiniciar'() { reiniciar(); return true; },

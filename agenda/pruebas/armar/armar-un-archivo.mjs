@@ -34,7 +34,7 @@ let html = leer('index.html');
 const cambiar = (de, a) => { if (!html.includes(de)) throw new Error('No encontré en index.html: ' + de); html = html.replace(de, () => a); };   // con función: el programa trae «$&» y no debe interpretarse
 cambiar('<link rel="icon" type="image/svg+xml" href="iconos/icono.svg">', '<link rel="icon" type="image/svg+xml" href="' + datos('iconos/icono.svg', 'image/svg+xml') + '">');
 cambiar('<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">', '<link rel="apple-touch-icon" href="' + datos('iconos/apple-touch-icon.png', 'image/png') + '">');
-cambiar('<link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>\n', '');
+cambiar('<link rel="preload" href="fuentes/barlowc-900i.woff2" as="font" type="font/woff2" crossorigin>\n', '');
 cambiar(/<link rel="stylesheet" href="css\/tokens.css">\n<link rel="stylesheet" href="css\/base.css">\n<link rel="stylesheet" href="css\/componentes.css">\n<link rel="stylesheet" href="css\/vistas.css">/.exec(html)[0], '<style>\n' + css.replace(/<\/style/gi, '<\\/style') + '\n</style>');
 cambiar('<script type="module" src="js/app.js"></script>', '<!-- programa: va al final, ver abajo -->');
 /* Sin teclado propio desde la 8.0: el diccionario ya no va adentro */

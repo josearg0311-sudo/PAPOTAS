@@ -28,7 +28,7 @@ export const COLORES = {
   ambar: ['Ámbar', ['#FBBF24', '#2B2008', '#FCDC86'], ['#A16207', '#FBF0D6', '#7A4A05']],
   rojo: ['Rojo', ['#F87171', '#2E1010', '#FCB4B4'], ['#C2302E', '#FBE3E3', '#902220']]
 };
-export const COLOR_ORIGINAL = { personal: 'azul', estudios: 'turquesa', oficina: 'pizarra', deporte: 'verde' };
+export const COLOR_ORIGINAL = { personal: 'morado', estudios: 'azul', oficina: 'ambar', deporte: 'verde' };
 export const ICONOS = [['i-casa', 'Casa'], ['i-birrete', 'Birrete'], ['i-maletin', 'Maletín'], ['i-balon', 'Balón'], ['i-pesa', 'Pesa'], ['i-nota', 'Nota'], ['i-fuego', 'Fuego'], ['i-meta', 'Meta'], ['i-dinero', 'Dinero'], ['i-agenda', 'Calendario'], ['i-bandera', 'Bandera'], ['i-campana', 'Campana'], ['i-escudo', 'Escudo']];
 const ORIGINAL = AREAS.map((a) => Object.assign({}, a));
 

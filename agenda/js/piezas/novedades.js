@@ -8,10 +8,10 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Tu diseño de siempre', '💙', 'Volvió la cara de tu Agenda publicada: negro y azul, barra lateral con Espacios y Organizar, y abajo Hoy · Agenda · Dinero · Notas · Más.', '#hoy'],
-  ['Tus espacios', '🏠', 'Personal, Estudios, Oficina y Deporte otra vez con su portada y sus herramientas.', '#areas/personal'],
-  ['Tu plata, en privado', '👁️', 'Hoy ya no muestra montos: tus cuentas se ven solo en Dinero.', '#finanzas'],
-  ['Nada se perdió', '✅', 'Todo lo que anotaste en las versiones nuevas sigue aquí.', '#recordatorios']
+  ['Diseño nuevo: Cancha', '🏁', 'Negro, rojo de carrera y letras de app deportiva. Logo nuevo: el check con estela.', '#hoy'],
+  ['Hoy en modo partido', '⏱️', '«En juego» con el tiempo que queda, tu racha de la semana y un marcador por espacio. Sin plata a la vista.', '#hoy'],
+  ['Tu equipo', '🤝', 'Personal, Estudios, Oficina y Deporte juntos en una sola pantalla: tu semana, lo importante y todas tus herramientas.', '#areas'],
+  ['Sin teclado propio', '⌨️', 'Ahora escribes con el teclado de tu celular. Todo lo demás sigue igual.', '#ajustes']
 ];
 
 export function abrirNovedades() {
