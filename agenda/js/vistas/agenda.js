@@ -1,13 +1,12 @@
 /* AGENDA: tu tiempo. Día (línea de tiempo con bloques a escala), Semana y
    Mes, con filtro por área, feriados del Perú y vencimientos (plazo legal
    primero, ⚠️ vence pronto, 🔴 vencido). Toca un hueco para crear un evento. */
-import { filtro } from '../datos/filtro.js';
 import { hoy, sumarDias, inicioSemana, diaSemana, DIAS3, MESES, fmtFecha, fmtCorta, fmtLarga, fmtHora, horaAhora, minutosAhora, relativo, plazo } from '../util/fechas.js';
 import { ico, vacio, esc } from '../util/dom.js';
 import { fmtSoles } from '../util/dinero.js';
 import { preferencias } from '../datos/preferencias.js';
 import { AREAS, area, chipArea } from '../datos/areas.js';
-import { delDia, resumenDia, huecosLibres, proximos, resumenAnio, bloquesDelDia } from '../datos/calendario.js';
+import { delDia, resumenDia, huecosLibres, proximos, resumenAnio } from '../datos/calendario.js';
 import { buscarElemento, poner, aPapelera } from '../datos/datos.js';
 import { modeloVacio } from '../datos/modelo.js';
 import { leerICS, idDeUid } from '../util/ics.js';
@@ -19,16 +18,16 @@ import { editarEvento, nuevoEvento, alternarPago, exportarTodo } from '../piezas
 import { aviso } from '../piezas/aviso.js';
 import { tarjeta } from './comun.js';
 
-const ui = { modo: 'dia', dia: null, area: '', horario: '', plan: 'semana' };
-export function irADia(d) { ui.dia = d; ui.modo = 'dia'; ui.plan = 'dia'; }
+const ui = { modo: 'dia', dia: null, area: '' };
+export function irADia(d) { ui.dia = d; ui.modo = 'dia'; }
 const PX_MIN = 0.8;   // 48 px por hora
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const ETQ = { pago: 'Pago fijo', cobro: 'Cobro', documento: 'Documento', prestamo: 'Préstamo', pendiente: 'Plazo' };
 
-function cabecera(titulo, esAhora) {   // «Hoy» solo si estás mirando otro día u otro mes
+function cabecera(titulo) {
   return '<div class="cal-nav"><button type="button" class="icono-btn" data-acc="cal-paso" data-n="-1" aria-label="Anterior">' + ico('i-izq') + '</button>' +
     '<b>' + titulo + '</b><button type="button" class="icono-btn" data-acc="cal-paso" data-n="1" aria-label="Siguiente">' + ico('i-der') + '</button>' +
-    (esAhora ? '' : '<button type="button" class="btn chico" data-acc="cal-hoy">Hoy</button>') + '</div>';
+    '<button type="button" class="btn chico" data-acc="cal-hoy">Hoy</button></div>';
 }
 function filtroAreas() {
   return '<div class="fichas" role="group" aria-label="Área"><button type="button" data-acc="cal-area" data-v="" aria-pressed="' + !ui.area + '">Todas</button>' +
@@ -59,10 +58,9 @@ function lineaTiempo(dia, bloques) {
   });
   cerrar();
   let html = '<div class="linea-tiempo" style="height:' + Math.round((fin - ini) * PX_MIN) + 'px">';
-  const ahoraM = dia === h ? minutosAhora() : -999;
   for (let m = ini; m < fin; m += 60) {
-    const hh = String(m / 60).padStart(2, '0') + ':00', tapada = Math.abs(ahoraM - m) < 20;   // la hora que tapa la línea de «ahora» no se escribe
-    html += '<button type="button" class="hueco" style="top:' + Math.round((m - ini) * PX_MIN) + 'px" data-acc="cal-hueco" data-h="' + hh + '" aria-label="Crear evento a las ' + fmtHora(hh, p.formatoHora) + '"><span' + (tapada ? ' class="tapada"' : '') + '>' + fmtHora(hh, p.formatoHora) + '</span></button>';
+    const hh = String(m / 60).padStart(2, '0') + ':00';
+    html += '<button type="button" class="hueco" style="top:' + Math.round((m - ini) * PX_MIN) + 'px" data-acc="cal-hueco" data-h="' + hh + '" aria-label="Crear evento a las ' + fmtHora(hh, p.formatoHora) + '"><span>' + fmtHora(hh, p.formatoHora) + '</span></button>';
   }
   bloques.forEach((b) => {
     const top = Math.round((b.ini - ini) * PX_MIN), alto = Math.max(26, Math.round((b.fin - b.ini) * PX_MIN) - 2);
@@ -93,16 +91,16 @@ function panelDia(d, conLinea) {
   if (fer) html += '<p class="feriado">' + ico('i-bandera') + 'Feriado nacional: <b>' + esc(fer) + '</b></p>';
   if (x.todoDia.length) html += '<div class="todo-dia">' + x.todoDia.map((t) => '<button type="button" class="chip area-' + area(t.area).id + '" data-acc="ev-editar" data-id="' + esc(t.id) + '">' + (t.cumple ? '🎂 ' : '') + esc(t.titulo) + '</button>').join('') + '</div>';
   if (x.vencen.length) html += '<div class="grupo-tit"><span>Vence este día</span><span class="linea"></span><span class="mono">' + x.vencen.length + '</span></div><div class="vencen">' + x.vencen.map((v) => filaVence(v, d)).join('') + '</div>';
-  if (conLinea) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div>' + (preferencias().completo ? huecosHTML(d, x.bloques) : '') + lineaTiempo(d, x.bloques);
+  if (conLinea) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div>' + huecosHTML(d, x.bloques) + lineaTiempo(d, x.bloques);
   else if (x.bloques.length) html += '<div class="grupo-tit"><span>Con hora</span><span class="linea"></span><span class="mono">' + x.bloques.length + '</span></div><div class="mini-bloques">' + x.bloques.map((b) => '<button type="button" class="mini-bloque area-' + area(b.area).id + '" data-acc="' + (b.tipo === 'pendiente' ? 'p-editar' : b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '"><span class="mono">' + fmtHora(b.hIni, preferencias().formatoHora) + '</span><b>' + esc(b.titulo) + '</b></button>').join('') + '</div>';
-  if (sinHora.length) html += '<div class="grupo-tit"><span>Sin hora</span><span class="linea"></span><span class="mono">' + sinHora.length + '</span></div>' +
-    '<div class="pends">' + sinHora.map((p) => filaPendiente(p, { verLista: true, acciones: false })).join('') + '</div>';
+  html += '<div class="grupo-tit"><span>Recordatorios sin hora</span><span class="linea"></span><span class="mono">' + sinHora.length + '</span></div>' +
+    (sinHora.length ? '<div class="pends">' + sinHora.map((p) => filaPendiente(p, { verLista: true })).join('') + '</div>' : vacio('', 'Nada sin hora este día.'));
   html += '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="cal-nuevo" data-d="' + d + '">' + ico('i-plus') + 'Evento este día</button></div>';
   return html;
 }
 
 function vistaDia(d) {
-  return '<div class="franja-cal">' + franjaCal(d) + '</div>' + cabecera(cap(relativo(d)) + ' · ' + fmtFecha(d), d === hoy()) + panelDia(d, true);
+  return '<div class="franja-cal">' + franjaCal(d) + '</div>' + cabecera(cap(relativo(d)) + ' · ' + fmtFecha(d)) + panelDia(d, true);
 }
 function franjaCal(diaSel) {
   const p = preferencias(), h = hoy(), ini = inicioSemana(diaSel, p.semanaLunes);
@@ -140,7 +138,7 @@ function vistaMes(d) {
       '<b>' + +x.slice(8) + '</b><span class="pts">' + (r.legal ? '<i class="legal"></i>' : r.alerta ? '<i class="alerta"></i>' : '') + r.areas.slice(0, 3).map((a) => '<i class="area-' + a + '"></i>').join('') + '</span></button>';
   }
   const [y, m] = d.split('-');
-  return cabecera(cap(MESES[+m - 1]) + ' ' + y, d.slice(0, 7) === h.slice(0, 7)) + '<div class="mes"><div class="mes-cab">' + cab + '</div><div class="mes-grilla">' + celdas + '</div></div>' +
+  return cabecera(cap(MESES[+m - 1]) + ' ' + y) + '<div class="mes"><div class="mes-cab">' + cab + '</div><div class="mes-grilla">' + celdas + '</div></div>' +
     '<div class="t-cab"><span class="eti">' + fmtFecha(d) + '</span><h2>' + cap(fmtLarga(d)) + '</h2></div>' + panelDia(d, false);
 }
 
@@ -213,112 +211,22 @@ function previaIcs(texto, nombre) {
   });
 }
 
-/* ---------- HORARIO (#horario): tu semana en columnas, hora por hora ----------
-   Clases de tus cursos, trabajo, partidos y todo lo que tiene hora. Cada
-   bloque con el color de su espacio; tócalo para abrirlo. */
-const PX_H = 44;   // alto de una hora
-/* Bloques que se pisan: cada uno en su carril, lado a lado ({ b, i: carril, n: carriles del grupo }) */
-function carriles(bs) {
-  const l = bs.slice().sort((a, b) => a.ini - b.ini || b.fin - a.fin), out = [];
-  let grupo = [], fin = -1;
-  const cerrar = () => { const n = Math.max(1, ...grupo.map((x) => x.i + 1)); grupo.forEach((x) => { x.n = n; out.push(x); }); grupo = []; };
-  l.forEach((b) => {
-    if (grupo.length && b.ini >= fin) cerrar();
-    const ocupados = grupo.filter((x) => x.b.fin > b.ini).map((x) => x.i);
-    let i = 0; while (ocupados.includes(i)) i++;
-    grupo.push({ b, i }); fin = Math.max(fin, b.fin);
-  });
-  if (grupo.length) cerrar();
-  return out;
-}
-export function vistaHorario() {
-  const p = preferencias(), h = hoy(), ini = inicioSemana(ui.horario || h, p.semanaLunes), dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
-  const porDia = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente' && (!ui.area || b.area === ui.area)));
-  const todos = porDia.flat(), m = (t) => +t.slice(0, 2) * 60 + +t.slice(3, 5);
-  let iniM = m(p.vigilia.ini), finM = m(p.vigilia.fin) || 1440; if (finM <= iniM) finM = 1440;
-  todos.forEach((b) => { iniM = Math.min(iniM, Math.floor(b.ini / 60) * 60); finM = Math.max(finM, Math.min(1440, Math.ceil(b.fin / 60) * 60)); });
-  iniM = Math.floor(iniM / 60) * 60;
-  const alto = (finM - iniM) / 60 * PX_H, y = (min) => (min - iniM) / 60 * PX_H;
-  const horas = []; for (let t = iniM; t < finM; t += 60) horas.push(t);
-  const ahora = minutosAhora();
-  return '<div class="cal-nav"><button type="button" class="icono-btn" data-acc="hor-paso" data-n="-1" aria-label="Semana anterior">' + ico('i-izq') + '</button>' +
-      '<b>' + fmtCorta(dias[0], false) + ' – ' + fmtCorta(dias[6], false) + '</b><button type="button" class="icono-btn" data-acc="hor-paso" data-n="1" aria-label="Semana siguiente">' + ico('i-der') + '</button>' +
-      (dias.includes(h) ? '' : '<button type="button" class="btn chico" data-acc="hor-paso" data-n="0">Esta semana</button>') + '</div>' +
-    '<section class="horario" aria-label="Horario de la semana">' +
-      '<div class="hr-cab"><span></span>' + dias.map((d) => '<button type="button" class="' + (d === h ? 'hoy' : '') + '" data-acc="ir-dia" data-dia="' + d + '" aria-label="Ver ' + fmtLarga(d) + '"><small>' + DIAS3[diaSemana(d)] + '</small><b>' + +d.slice(8) + '</b></button>').join('') + '</div>' +
-      '<div class="hr-cuerpo" data-ini="' + iniM + '" style="height:' + alto + 'px">' +
-        '<div class="hr-horas">' + horas.map((t) => '<span style="top:' + y(t) + 'px">' + fmtHora(String(t / 60).padStart(2, '0') + ':00', p.formatoHora).replace(':00', '').replace(' ', '\u00a0') + '</span>').join('') + '</div>' +
-        porDia.map((bs, i) => '<div class="hr-col' + (dias[i] === h ? ' hoy' : '') + '" data-dia="' + dias[i] + '" title="Toca una hora libre para crear un evento">' + horas.map((t) => '<i style="top:' + y(t) + 'px"></i>').join('') +
-          (dias[i] === h && ahora >= iniM && ahora <= finM ? '<em class="hr-ahora" style="top:' + y(ahora) + 'px"></em>' : '') +
-          carriles(bs).map(({ b, i: ln, n: nl }) => '<button type="button" class="hr-bloque area-' + area(b.area).id + '"' + (ln ? ' data-c="' + ln + '"' : '') + ' style="top:' + (y(b.ini) + 1) + 'px;left:calc(' + (ln / nl * 100).toFixed(2) + '% + 2px);right:auto;width:calc(' + (100 / nl).toFixed(2) + '% - 4px);height:' + Math.max(18, (b.fin - b.ini) / 60 * PX_H - 2) + 'px" data-acc="' + (b.tipo === 'evento' ? 'ev-editar' : 'dato-ver') + '" data-id="' + esc(b.id) + '" aria-label="' + esc(b.titulo) + ', ' + fmtHora(b.hIni, p.formatoHora) + ' a ' + fmtHora(b.hFin, p.formatoHora) + '"><b>' + esc(b.titulo) + '</b><small>' + fmtHora(b.hIni, p.formatoHora) + '</small></button>').join('') + '</div>').join('') +
-      '</div></section>' +
-    (todos.length ? '' : vacio('Semana sin horario', 'Agrega tus clases en «Clases y notas» (abajo) o un evento que se repita cada semana.')) +
-    '<div class="fila-botones izq"><button type="button" class="btn pri" data-acc="cal-nuevo" data-d="' + h + '">' + ico('i-plus') + 'Evento</button></div>';
-}
-
-/* ---------- PLAN (Agenda 6): Agenda y Horario juntos ----------
-   Semana = tu horario por horas + lo que vence; Día = la línea de tiempo;
-   Mes = el calendario. Un solo lugar para tu tiempo. */
-export function vistaPlan() {
-  ui.area = filtro();   // el filtro por espacio de arriba manda
-  const d = ui.dia || hoy(), modo = ui.plan;
-  const seg = '<div class="seg6" role="group" aria-label="Vista">' + [['semana', 'Semana'], ['dia', 'Día'], ['mes', 'Mes']].map((o) =>
-    '<button type="button" data-acc="plan-modo" data-v="' + o[0] + '" aria-pressed="' + (modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>';
-  let cuerpo;
-  if (modo === 'dia') { ui.modo = 'dia'; cuerpo = '<section class="tarjeta plan-card">' + vistaDia(d) + '</section>'; }
-  else if (modo === 'mes') { ui.modo = 'mes'; cuerpo = '<section class="tarjeta plan-card">' + vistaMes(d) + '</section>'; }
-  else cuerpo = resumenSemana() + vistaHorario() + venceSemana();
-  return '<div class="plan6">' + seg + cuerpo + '</div>';
-}
-/* Tu semana en números: cuántas cosas, horas ocupadas y el día más cargado */
-function resumenSemana() {
-  const p = preferencias(), ini = inicioSemana(ui.horario || hoy(), p.semanaLunes), dias = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i));
-  const bl = dias.map((d) => bloquesDelDia(d).filter((b) => b.tipo !== 'pendiente' && (!ui.area || b.area === ui.area)));
-  const n = bl.reduce((t, x) => t + x.length, 0), min = bl.reduce((t, x) => t + x.reduce((u, b) => u + (b.fin - b.ini), 0), 0);
-  if (!n) return '';
-  const top = bl.reduce((a, x, i) => (x.length > bl[a].length ? i : a), 0);
-  const horas = Math.round(min / 6) / 10;
-  return '<div class="sem6-res"><div><b>' + n + '</b><small>' + (n === 1 ? 'cosa' : 'cosas') + ' con hora</small></div><div><b>' + String(horas).replace('.', ',') + ' h</b><small>ocupadas</small></div><div><b>' + cap(fmtLarga(dias[top]).split(' ')[0]) + '</b><small>el día más cargado</small></div></div>';
-}
-/* Tocar una hora libre del horario crea un evento a esa hora (con mouse o dedo) */
-document.addEventListener('click', (ev) => {
-  const col = ev.target.closest && ev.target.closest('.hr-col');
-  if (!col || ev.target.closest('.hr-bloque')) return;
-  const cuerpo = col.closest('.hr-cuerpo'), y = ev.clientY - col.getBoundingClientRect().top;
-  const min = +cuerpo.dataset.ini + Math.floor(y / PX_H) * 60, hh = Math.floor(min / 60);
-  if (hh < 0 || hh > 23) return;
-  const hora = String(hh).padStart(2, '0') + ':00', fin = String(Math.min(23, hh + 1)).padStart(2, '0') + ':00';
-  nuevoEvento(() => window.dispatchEvent(new Event('agenda:repintar')), { fecha: col.dataset.dia, hora, horaFin: fin, area: filtro() || 'personal' });
-});
-
-/* Lo que vence esta semana (pagos, cobros, plazos; el plazo legal primero) */
-function venceSemana() {
-  const p = preferencias(), ini = inicioSemana(ui.horario || hoy(), p.semanaLunes);
-  const v = Array.from({ length: 7 }, (_, i) => sumarDias(ini, i)).flatMap((d) => delDia(d, ui.area).vencen.filter((x) => !x.hecho).map((x) => Object.assign({ dia: d }, x)));
-  if (!v.length) return '';
-  return tarjeta({ titulo: 'Vence esta semana', n: v.length, cuerpo: '<div class="vence6">' + v.slice(0, 8).map((x) =>
-    '<div class="v6-fila' + (x.plazoLegal ? ' legal' : '') + '"><span class="dot6 area-' + area(x.area).id + '"></span><span class="v6-t"><b>' + (x.plazoLegal ? '⚖️ ' : '') + esc(x.titulo) + '</b><small>' + esc(cap(relativo(x.dia))) + (x.monto ? ' · ' + fmtSoles(Math.abs(x.monto)) : '') + '</small></span>' +
-    (x.tipo === 'pago' ? '<button type="button" class="btn chico" data-acc="cal-pago" data-id="' + esc(x.id) + '" data-ym="' + esc(x.ym) + '">Pagado</button>' : '') + '</div>').join('') + '</div>' });
-}
-
 export function vistaAgenda() {
-  ui.area = filtro();
-  if (ui.modo !== 'ano' && ui.modo !== 'lista') ui.modo = 'ano';
   const d = ui.dia || hoy();
   const cuerpo = ui.modo === 'semana' ? vistaSemana(d) : ui.modo === 'mes' ? vistaMes(d) : ui.modo === 'ano' ? vistaAno(d) : ui.modo === 'lista' ? vistaLista() : vistaDia(d);
-  return tarjeta({ titulo: ui.modo === 'ano' ? 'Tu año' : 'Lo que viene', clase: 'agenda', sub: ui.modo === 'ano' ? 'Cada mes con sus cumpleaños y plazos legales. Toca un día para verlo.' : 'Todo lo de los próximos 60 días, en orden.',
-    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['ano', 'Año'], ['lista', 'Próximos 60 días']].map((o) =>
-      '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + cuerpo }) +
-    ('<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
-    '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>');
+  return tarjeta({ titulo: 'Tu tiempo', clase: 'agenda',
+    guia: '<b>Agenda = tu tiempo.</b> Eventos, clases, recordatorios y vencimientos (pagos, cobros, documentos y plazos) en vista de día, semana o mes. En la vista Día, <b>toca una hora vacía</b> para crear un evento ahí. Filtra por área con los botones de colores. <b>Año</b> muestra cumpleaños y plazos legales de cada mes; <b>Lista</b>, todo lo de los próximos 60 días.',
+    cuerpo: '<div class="segmento" role="group" aria-label="Vista">' + [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes'], ['ano', 'Año'], ['lista', 'Lista']].map((o) =>
+      '<button type="button" data-acc="cal-modo" data-v="' + o[0] + '" aria-pressed="' + (ui.modo === o[0]) + '">' + o[1] + '</button>').join('') + '</div>' + filtroAreas() + cuerpo }) +
+    '<div class="fila-botones izq"><button type="button" class="btn" data-acc="cal-exportar">' + ico('i-bajar') + 'Pasar lo que viene al calendario del teléfono (.ics)</button>' +
+    '<label class="btn" for="archivoIcs">' + ico('i-subir') + 'Traer de otro calendario (.ics)</label><input type="file" id="archivoIcs" accept=".ics,text/calendar" class="solo-lector"></div>';
 }
 
 export const acciones = {
-  'plan-modo'(b) { ui.plan = b.dataset.v; if (b.dataset.v !== 'semana' && !ui.dia) ui.dia = hoy(); return true; },
-  'cal-modo'(b) { if (b.dataset.v === 'horario') { location.hash = '#horario'; return; } ui.modo = b.dataset.v; return true; },
+  'cal-modo'(b) { ui.modo = b.dataset.v; return true; },
   'cal-area'(b) { ui.area = b.dataset.v; return true; },
   'cal-dia'(b) { ui.dia = b.dataset.dia; return true; },
-  'cal-dia-ir'(b) { irADia(b.dataset.dia); if (location.hash !== '#calendario') { location.hash = '#calendario'; return; } return true; },
+  'cal-dia-ir'(b) { ui.dia = b.dataset.dia; ui.modo = 'dia'; return true; },
   'cal-hoy'() { ui.dia = hoy(); return true; },
   'cal-paso'(b) {
     const n = +b.dataset.n, d = ui.dia || hoy();
@@ -330,7 +238,6 @@ export const acciones = {
   },
   'cal-hueco'(b, ev, repintar) { const [hh, mm] = b.dataset.h.split(':'); nuevoEvento(repintar, { fecha: ui.dia || hoy(), hora: b.dataset.h, horaFin: b.dataset.hf || String((+hh + 1) % 24).padStart(2, '0') + ':' + mm, area: ui.area || 'personal' }); },
   'cal-libre'(b, ev, repintar) { acciones['cal-hueco'](b, ev, repintar); },
-  'hor-paso'(b) { const n = +b.dataset.n; ui.horario = n === 0 ? '' : sumarDias(ui.horario || hoy(), 7 * n); return true; },
   'cal-ir-mes'(b) { ui.dia = b.dataset.v + '-01'; ui.modo = 'mes'; return true; },
   'cal-nuevo'(b, ev, repintar) { nuevoEvento(repintar, { fecha: b.dataset.d, area: ui.area || 'personal' }); },
   'ev-editar'(b, ev, repintar) { editarEvento(b.dataset.id, repintar); },

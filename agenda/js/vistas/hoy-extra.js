@@ -98,7 +98,7 @@ export function tarjetaNumeros(ahoraMin = minutosAhora()) {
   const ent = elementos((x) => x.tipo === 'entreno' && x.fechas.inicio === h);
   const cifra = (v, t, a) => '<div class="' + (a ? 'area-' + a : '') + '"><b>' + v + '</b><small>' + t + '</small></div>';
   return tarjeta({ eti: 'CIERRE', titulo: 'Tu día en números', guia: '<b>Un vistazo antes de dormir.</b> Si quieres, escribe cómo te fue en el diario.',
-    cuerpo: '<div class="num-dia">' + cifra(hechos.length, 'hechos hoy') + (habs.length ? cifra(habOk + '/' + habs.length, 'hábitos') : '') + cifra(fmtSoles(gasto), 'gastado', 'personal') +
+    cuerpo: '<div class="num-dia">' + cifra(hechos.length, 'hechos hoy') + (habs.length ? cifra(habOk + '/' + habs.length, 'hábitos') : '') + 
       (ent.length ? cifra(ent.length, ent.length === 1 ? 'entreno' : 'entrenos', 'deporte') : '') + '</div>' +
       '<div class="pie-tarjeta"><a class="btn chico" href="#notas/diario">' + ico('i-nota') + 'Contar cómo te fue</a></div>' });
 }

@@ -53,7 +53,7 @@ export function tarjetaEspacios() {
       '<span class="eh-cab"><span class="eh-em" aria-hidden="true">' + esc(a.emoji) + '</span><b>' + esc(a.nombre) + '</b>' + ico('i-der') + '</span>' +
       '<span class="eh-num"><strong>' + i.n + '</strong><em>' + (i.n === 1 ? 'cosa para hoy' : 'cosas para hoy') + '</em></span>' +
       '<span class="eh-prox"><i>' + (p ? 'Próximo' : 'Libre') + '</i>' + (p ? esc(p.titulo) + ' · ' + esc(p.cuando) : esc(a.lema)) + '</span>' +
-      (r.chips.length ? '<span class="eh-datos">' + r.chips.slice(0, preferencias().completo ? 4 : 2).map((c) => '<span class="eh-dato' + (c[3] === 'vencido' ? ' rojo' : '') + '"><b>' + esc(String(c[0])) + '</b> ' + esc(c[1]) + '</span>').join('') + '</span>' : '') +
+      (r.chips.length ? '<span class="eh-datos">' + r.chips.slice(0, 4).map((c) => '<span class="eh-dato' + (c[3] === 'vencido' ? ' rojo' : '') + '"><b>' + esc(String(c[0])) + '</b> ' + esc(c[1]) + '</span>').join('') + '</span>' : '') +
       '<span class="eh-barra" aria-hidden="true"><i style="width:' + i.pct + '%"></i></span>' +
       '<span class="eh-pie">' + (i.tareas ? i.tareas + (i.tareas === 1 ? ' tarea pendiente' : ' tareas pendientes') : 'Al día ✓') + '</span></a>';
   }).join('') + '</div></section>';
@@ -65,7 +65,7 @@ const cuenta = (f) => elementos(f).length;
 /* Cada mosaico: [ícono, color, descripción, () => [cifra, texto]] */
 const MOSAICO = {
   pendientes: ['i-tareas', 'rojo', 'Lo que tienes pendiente', (a) => [tareasDe(a), 'pendientes']],
-  eventos: ['i-cal', 'morado', 'Citas, salidas y todo lo que viene', (a) => { const h = hoy(); let n = 0; for (let i = 0; i < 60; i++) { const d = sumarDias(h, i); n += bloquesDelDia(d).filter((b) => b.area === a && b.tipo === 'evento').length + todoElDia(d).filter((t) => t.area === a).length; } return [n, 'en 60 días']; }],
+  eventos: ['i-cal', 'morado', 'Citas, salidas y todo lo que viene', (a) => [proximos(hoy(), 60, a).reduce((s, d) => s + d.bloques.filter((b) => b.tipo === 'evento').length + d.todoDia.length, 0), 'en 60 días']],
   notas: ['i-notas', 'ambar', 'Tus apuntes y listas para marcar', (a) => { const ids = new Set(listas().filter((l) => esChecklist(l) && l.area === a).map((l) => l.id)); return [cuenta((x) => x.tipo === 'nota' && x.area === a), 'notas · ' + cuenta((x) => x.tipo === 'pendiente' && ids.has(x.lista) && x.estado !== 'hecho') + ' por marcar']; }],
   dinero: ['i-grafica', 'verde', 'Lo que gastas en este espacio este mes', (a) => [solesCorto(gastosMes(a)), 'gastado']],
   casa: ['i-casa', 'naranja', 'Lo de la casa, cada cuántos días', () => [cuenta((x) => x.tipo === 'casa'), 'tareas de casa']],
@@ -125,7 +125,7 @@ export function portadaEspacio(a, herramientas, senales) {
     '<div class="pe-datos">' + r.datos.map((d) => '<a class="dato' + (d[3] === 'aviso' ? ' aviso' : '') + '" href="#areas/' + a.id + '/' + d[2] + '"><b>' + esc(String(d[0])) + '</b><span>' + esc(d[1]) + '</span></a>').join('') + '</div></header>' +
     '<button type="button" class="anadir-rapido" data-acc="esp-anadir" data-area="' + a.id + '">' + ico('i-plus') + '<span>Añadir en ' + esc(a.nombre) + '…</span></button>' +
     (senales || '') +
-    '<div class="mosaicos area-' + a.id + '">' + mosaicoSemana(a) + GENERICAS.filter((g) => g.id !== 'semana' && (preferencias().completo || g.id !== 'notas')).concat(herramientas.filter((h) => preferencias().completo || h.id !== 'constancia')).map((h) => mosaico(a, h)).join('') + '</div>';
+    '<div class="mosaicos area-' + a.id + '">' + mosaicoSemana(a) + GENERICAS.filter((g) => g.id !== 'semana').concat(herramientas).map((h) => mosaico(a, h)).join('') + '</div>';
 }
 
 /* ---------- Las herramientas comunes ---------- */
@@ -134,7 +134,7 @@ function vistaPendientes(a) {
   const grupos = [['Atrasado', (x) => x.fechas.inicio && x.fechas.inicio < h], ['Hoy', (x) => x.fechas.inicio === h], ['Próximos', (x) => x.fechas.inicio > h], ['Sin fecha', (x) => !x.fechas.inicio]];
   return tarjeta({ eti: 'TAREAS', titulo: 'Tareas de ' + esc(a.nombre), n: l.length, clase: 'area-' + a.id,
     cuerpo: (l.length ? grupos.map(([t, f]) => { const g = l.filter(f); return g.length ? '<div class="pend-grupo">' + t + '</div><div class="pends">' + g.map((x) => filaPendiente(x, { verLista: true })).join('') + '</div>' : ''; }).join('') : vacio('Nada pendiente', 'Lo que agregues en ' + esc(a.nombre) + ' aparecerá aquí.')) +
-      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="esp-anadir-tipo" data-area="' + a.id + '" data-tipo="recordatorio">' + ico('i-plus') + 'Tarea en ' + esc(a.nombre) + '</button><a class="btn" href="#tareas">' + ico('i-tareas') + 'Todas mis listas</a></div>' });
+      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="esp-anadir-tipo" data-area="' + a.id + '" data-tipo="recordatorio">' + ico('i-plus') + 'Tarea en ' + esc(a.nombre) + '</button><a class="btn" href="#recordatorios">' + ico('i-tareas') + 'Todas mis listas</a></div>' });
 }
 function vistaEventos(a) {
   const l = proximos(hoy(), 60, a.id).filter((d) => d.bloques.some((b) => b.tipo === 'evento') || d.todoDia.length);

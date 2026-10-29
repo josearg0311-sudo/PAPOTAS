@@ -87,7 +87,7 @@ function vistaPanorama() {
         cuerpo: PANELES[a.id].pulso() +
           '<div class="seg-mini">' + (hs.length ? '<p><b>' + plural(hs.length, 'hábito', 'hábitos') + '</b>' + (ph != null ? ' · ' + ph + ' % cumplido esta semana' : '') + '</p>' : '<p class="tenue">Sin hábitos en ' + a.nombre + '.</p>') +
             (ms.length ? ms.map(({ m, p }) => '<div class="meta-mini"><span>' + esc((m.extra.em || (m.datos && m.datos.em) || '🎯') + ' ' + m.titulo) + '</span><span class="progreso"><i style="width:' + p.pct + '%"></i></span><b class="mono">' + p.pct + ' %</b></div>').join('') : '<p class="tenue">Sin metas en ' + a.nombre + '.</p>') + '</div>' +
-          '<div class="pie-tarjeta"><a class="btn" href="#tu/metas/' + a.id + '">' + ico('i-meta') + TEMAS[a.id].tab + '</a><a class="btn" href="#areas/' + a.id + '">Ir a ' + a.nombre + ico('i-der') + '</a></div>' });
+          '<div class="pie-tarjeta"><a class="btn" href="#areas/' + a.id + '/constancia">' + ico('i-meta') + TEMAS[a.id].tab + '</a><a class="btn" href="#areas/' + a.id + '">Ir a ' + a.nombre + ico('i-der') + '</a></div>' });
     }).join('') + '</div>' +
     (revisiones.length ? tarjeta({ eti: 'HISTORIAL', titulo: 'Revisiones anteriores', n: revisiones.length,
       cuerpo: '<div class="hfs">' + revisiones.slice(0, 8).map((r) => { const ex = r.extra || {}, txt = (ex.respuestas && (ex.respuestas.bien || ex.respuestas.mejorar)) || Object.values(r.datos || {}).filter((v) => typeof v === 'string' && v && !/^\d{4}-/.test(v)).join(' · ');

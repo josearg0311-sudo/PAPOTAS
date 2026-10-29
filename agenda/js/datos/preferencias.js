@@ -4,9 +4,9 @@
 import { leer, escribir, CLAVES, ANTIGUAS } from './almacen.js';
 import { esHora } from '../util/fechas.js';
 
-export const PANTALLAS_INICIO = [['hoy', 'Hoy'], ['calendario', 'Calendario'], ['tareas', 'Tareas'], ['cuentas', 'Cuentas']];
-/* Lo que se elegía antes (Agenda 6 y anteriores) → su lugar nuevo */
-const INICIO_VIEJO = { recordatorios: 'tareas', listas: 'tareas', agenda: 'calendario', plan: 'calendario', plata: 'cuentas', finanzas: 'cuentas', areas: 'hoy' };
+export const PANTALLAS_INICIO = [['hoy', 'Hoy'], ['recordatorios', 'Recordatorios'], ['agenda', 'Agenda'], ['areas', 'Áreas']];
+/* Lo que se eligió en la Agenda 6/7 → su lugar en el diseño de la v4.5 */
+const INICIO_VIEJO = { tareas: 'recordatorios', listas: 'recordatorios', calendario: 'agenda', plan: 'agenda', cuentas: 'hoy', plata: 'hoy', finanzas: 'hoy' };
 export const OPCIONES_BLOQUEO = [[0, 'Solo al abrir'], [1, 'Tras 1 minuto'], [5, 'Tras 5 minutos'], [15, 'Tras 15 minutos'], [30, 'Tras 30 minutos']];
 
 const BASE = {
@@ -47,7 +47,7 @@ export function normalizarPref(x) {
   if (!PANTALLAS_INICIO.some((o) => o[0] === p.inicio)) p.inicio = 'hoy';
   if (!OPCIONES_BLOQUEO.some((o) => o[0] === +p.bloqueoMin)) p.bloqueoMin = 1;
   p.bloqueoMin = +p.bloqueoMin;
-  p.guia = !!p.guia; p.completo = false;   // Agenda 7: ya no hay «Mostrar todo»; lo avanzado vive como herramienta en su sección
+  p.guia = !!p.guia; p.completo = true;    // diseño de la v4.5: todo a la vista, como en tu versión publicada
   p.tourVisto = !!p.tourVisto; p.sonido = p.sonido !== false; p.feriados = p.feriados !== false;
   const dp = p.deporte && typeof p.deporte === 'object' ? p.deporte : {};
   /* Teclado: si no estaba, se toma lo que tenías en la v4.5 (teclado y autocorrector) */

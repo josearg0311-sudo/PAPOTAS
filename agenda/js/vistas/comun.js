@@ -2,10 +2,10 @@
 import { ico, explica } from '../util/dom.js';
 
 /* Tarjeta con su etiqueta técnica (01, 02…), título, contador y explicación */
-export function tarjeta({ eti = '', titulo, n = null, cuerpo = '', guia = '', clase = '', id = '', sub = '' }) {
+export function tarjeta({ eti = '', titulo, n = null, cuerpo = '', guia = '', clase = '', id = '' }) {
   return '<section class="tarjeta ' + clase + '"' + (id ? ' id="' + id + '"' : '') + '>' +
-    (titulo ? '<header class="t-cab">' + (eti ? '<span class="eti">' + eti + '</span>' : '') + '<h2>' + titulo + '</h2>' +
-    (n != null ? '<span class="n">' + n + '</span>' : '') + '</header>' : '') +   // sin título, sin cabecera (nunca «undefined») (sub ? '<p class="t-sub">' + sub + '</p>' : '') +
+    '<header class="t-cab">' + (eti ? '<span class="eti">' + eti + '</span>' : '') + (titulo ? '<h2>' + titulo + '</h2>' : '') +
+    (n != null ? '<span class="n">' + n + '</span>' : '') + '</header>' +
     (guia ? explica(guia) : '') + cuerpo + '</section>';
 }
 

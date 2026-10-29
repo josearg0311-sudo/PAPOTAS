@@ -1,7 +1,6 @@
 /* NOTAS (separadas por área, cada una con su color) y DIARIO (de Personal:
    ánimo del día, unas líneas, agua y sueño, como en la v4.5).
    Direcciones: #notas y #notas/diario (también en Personal → Diario). */
-import { filtro } from '../datos/filtro.js';
 import { elementos, buscarElemento, poner } from '../datos/datos.js';
 import { modeloVacio, nuevoId } from '../datos/modelo.js';
 import { AREAS, area } from '../datos/areas.js';
@@ -33,17 +32,23 @@ export function tarjetaNota(n) {
     '<small class="nota-pie">' + (n.actualizado ? 'editada ' + fmtCorta(hoy(new Date(n.actualizado))) : '') + '</small></article>';
 }
 function vistaNotas() {
-  ui.area = filtro();   // el filtro por espacio de arriba
   const q = sinTildes(ui.q.trim());
   const todas = elementos((x) => x.tipo === 'nota' && (!ui.area || x.area === ui.area) && (!q || sinTildes(x.titulo + ' ' + x.notas).includes(q)))
     .sort((a, b) => (+!!val(b, 'fija', false)) - (+!!val(a, 'fija', false)) || b.actualizado - a.actualizado);
+  const checks = listas().filter(esChecklist);
   return explica('<b>Tus notas, cada una en su área.</b> Escribe «[ ] algo» en una línea y se vuelve una casilla que marcas con un toque. 📌 Las fijadas van primero.') +
     '<section class="tarjeta"><div class="buscador"><label class="solo-lector" for="notasQ">Buscar en notas</label>' + ico('i-buscar') + '<input id="notasQ" class="entrada" type="search" placeholder="Buscar en tus notas…" value="' + esc(ui.q) + '" autocomplete="off"></div>' +
-      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="nota-nueva" data-area="' + (ui.area || 'personal') + '">' + ico('i-plus') + 'Nueva nota' + (ui.area ? ' de ' + area(ui.area).nombre : '') + '</button></div></section>' +
+      '<div class="fichas" role="group" aria-label="Área"><button type="button" data-acc="notas-area" data-v="" aria-pressed="' + !ui.area + '">Todas las áreas</button>' +
+      AREAS.map((a) => '<button type="button" class="area-' + a.id + ' ficha-area" data-acc="notas-area" data-v="' + a.id + '" aria-pressed="' + (ui.area === a.id) + '">' + a.nombre + '</button>').join('') + '</div>' +
+      '<div class="pie-tarjeta"><button type="button" class="btn pri" data-acc="nota-nueva" data-area="' + (ui.area || 'personal') + '">' + ico('i-plus') + 'Nueva nota' + (ui.area ? ' de ' + area(ui.area).nombre : '') + '</button>' +
+      '<a class="btn" href="#notas/diario">' + ico('i-nota') + 'Diario</a></div></section>' +
     (todas.length ? AREAS.filter((a) => todas.some((n) => n.area === a.id)).map((a) => { const de = todas.filter((n) => n.area === a.id);
-      return '<section class="grupo-notas area-' + a.id + '"><h2 class="grupo-notas-tit"><span>' + a.nombre + '</span><span class="mono">' + de.length + '</span></h2><div class="notas">' + de.slice(0, ui.ver[a.id] || TANDA_NOTAS).map(tarjetaNota).join('') + '</div>' +
+      return '<section class="grupo-notas area-' + a.id + '"><h2 class="grupo-notas-tit"><a href="#areas/' + a.id + '">' + a.nombre + '</a><span class="mono">' + de.length + '</span></h2><div class="notas">' + de.slice(0, ui.ver[a.id] || TANDA_NOTAS).map(tarjetaNota).join('') + '</div>' +
         (de.length > (ui.ver[a.id] || TANDA_NOTAS) ? '<div class="fila-botones izq"><button type="button" class="btn chico" data-acc="notas-mas" data-v="' + a.id + '">Ver más notas de ' + esc(a.nombre) + ' <span class="mono">(' + (ui.ver[a.id] || TANDA_NOTAS) + ' de ' + de.length + ')</span></button></div>' : '') + '</section>'; }).join('')
-      : tarjeta({ cuerpo: vacio(q ? 'Nada con «' + esc(ui.q) + '»' : 'Sin notas', q ? 'Prueba otra palabra.' : 'Crea una nota para guardar datos, ideas o listas.') }));
+      : tarjeta({ cuerpo: vacio(q ? 'Nada con «' + esc(ui.q) + '»' : 'Sin notas', q ? 'Prueba otra palabra.' : 'Crea una nota para guardar datos, ideas o listas.') })) +
+    (checks.length ? tarjeta({ eti: 'LISTAS', titulo: 'Listas para marcar', n: checks.length, guia: 'Tus listas de compras y checklists viven en Recordatorios.',
+      cuerpo: '<div class="herr-botones">' + checks.map((l) => { const p = pendientesDe(l.id), ok = p.filter((x) => x.estado === 'hecho').length;
+        return '<button type="button" class="herr-btn area-' + area(l.area).id + '" data-acc="notas-lista" data-id="' + esc(l.id) + '"><b>' + esc(l.titulo) + '</b><small class="mono">' + ok + '/' + p.length + '</small></button>'; }).join('') + '</div>' }) : '');
 }
 function editarNota(id, idArea, repintar) {
   const n = id ? buscarElemento(id) : null;
@@ -72,7 +77,7 @@ function editarNota(id, idArea, repintar) {
     const l = crearLista({ titulo: tit.value.trim() || 'Lista', area: n.area, clase: 'checklist' });
     const t0 = Date.now();
     ls.forEach((x, i) => poner(Object.assign(modeloVacio(), { id: nuevoId('pend'), tipo: 'pendiente', titulo: x.t, area: n.area, lista: l.id, estado: x.ok ? 'hecho' : 'pendiente', fechas: Object.assign(modeloVacio().fechas, { inicio: null }), extra: x.ok ? { hechoEn: Date.now() } : {}, creado: t0 + i })));
-    cerrarHoja(true); irALista(l.id); location.hash = '#tareas/' + l.id;
+    cerrarHoja(true); irALista(l.id); location.hash = '#recordatorios';
     aviso('Lista «' + (tit.value.trim() || 'Lista') + '» con ' + ls.length + (ls.length === 1 ? ' cosa' : ' cosas') + '. Tu nota sigue igual.');
   });
 }
@@ -153,7 +158,7 @@ export const acciones = {
   'nota-nueva'(b, ev, rp) { editarNota(null, b.dataset.area, rp); },
   'nota-editar'(b, ev, rp) { editarNota(b.dataset.id, null, rp); },
   'nota-check'(b) { const n = buscarElemento(b.dataset.id); cambiarExtra(n.id, {}, { notas: alternarCasilla(n.notas, +b.dataset.i) }); return true; },
-  'notas-lista'(b) { irALista(b.dataset.id); location.hash = '#tareas/' + b.dataset.id; },
+  'notas-lista'(b) { irALista(b.dataset.id); location.hash = '#recordatorios'; },
   'dia-animo'(b) {
     const v = +b.dataset.v, x = diarioDe(hoy()), t = document.getElementById('diarioTxt');
     ponerDiario(hoy(), { animo: x && animoDe(x) === v ? 0 : v }, t ? { notas: t.value.replace(/\s+$/, '') } : {}); return true;

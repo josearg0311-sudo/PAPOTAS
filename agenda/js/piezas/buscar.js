@@ -1,11 +1,8 @@
 /* BUSCAR (lupa de la cabecera o tecla /): escribe lo que buscas o lo que
    quieres hacer. Muestra 1) qué puedes hacer, 2) a dónde ir y 3) tus cosas,
    cada una con el color de su área. Recuerda tus últimas búsquedas. */
-import { HERRAMIENTAS } from '../vistas/secciones.js';
 import { abrirHoja, cerrarHoja } from './hoja.js';
 import { abrirAgregar } from './agregar-rapido.js';
-import { abrirCaptura } from './captura.js';
-import { abrirMonto } from './teclado-monto.js';
 import { esc, ico } from '../util/dom.js';
 import { leer, escribir } from '../datos/almacen.js';
 import { elementos } from '../datos/datos.js';
@@ -28,25 +25,18 @@ const HACER = [
 /* A dónde ir */
 const IR = [
   ['#hoy', 'Hoy', 'Tu día de un vistazo', 'hoy dia resumen'],
-  ['#calendario', 'Calendario', 'Tu semana, horario, día y mes', 'plan agenda calendario semana mes dia horario clases'],
-  ['#tareas', 'Tareas', 'Pendientes y listas para marcar', 'listas recordatorios tareas pendientes compras marcar'],
-  ['#cuentas', 'Cuentas · personal', 'Lo que te queda, gastos e ingresos', 'plata dinero cuentas gastos ingresos personal presupuesto excel'],
-  ['#cuentas/oficina', 'Cuentas · oficina', 'Las cuentas de la oficina', 'plata oficina cuentas cobros'],
-  ['#notas', 'Notas', 'Tus apuntes', 'notas apuntes'],
-  ['#tu', 'Tú', 'Hábitos, metas, progreso y ajustes', 'tu perfil yo habitos metas progreso'],
-  ['#tu/seguimiento', 'Cómo vas por espacio', 'Tu tiempo y tus hábitos por espacio', 'seguimiento progreso estadisticas habitos metas'],
-  ['#tu/revision', 'Revisión semanal', 'Mira tu semana y planea la próxima', 'revision semanal semana planear'],
+  ['#recordatorios', 'Recordatorios', 'Tus listas y pendientes', 'recordatorios tareas pendientes listas compras'],
+  ['#agenda', 'Agenda', 'Día, semana y mes', 'agenda calendario semana mes dia'],
+  ['#seguimiento', 'Seguimiento', 'Cómo vas en cada área', 'seguimiento progreso estadisticas habitos metas'],
+  ['#seguimiento/revision', 'Revisión semanal', 'Mira tu semana y planea la próxima', 'revision semanal semana planear'],
+  ['#finanzas', 'Finanzas · libro personal', 'Gastos, ingresos y presupuesto', 'finanzas dinero gastos ingresos presupuesto libro personal'],
+  ['#finanzas/oficina', 'Finanzas · libro de la oficina', 'Las cuentas de la oficina', 'finanzas oficina libro cuentas facturas'],
+  ['#notas', 'Notas', 'Tus apuntes por área', 'notas apuntes'],
   ['#notas/diario', 'Diario', 'Ánimo, agua y sueño', 'diario animo agua sueno'],
   ['#ajustes', 'Ajustes', 'Nube, respaldo, PIN, teclado', 'ajustes configuracion nube respaldo pin tema teclado'],
   ['#datos', 'Tus datos', 'Todo lo que tienes guardado', 'datos explorador todo'],
   ['#papelera', 'Papelera', 'Lo que borraste (30 días)', 'papelera borrado recuperar']
 ];
-/* Dirección nueva de una herramienta (Agenda 7: cada una vive en su sección) */
-function dondeHerr(id, idArea) {
-  if (id === 'constancia') return '#tu/metas' + (idArea ? '/' + idArea : '');
-  const h = HERRAMIENTAS.find((x) => x.id === (id === 'cursos' ? 'clases' : id));
-  return h ? '#' + h.sec + '/' + h.id : '#hoy';
-}
 const HERR = {
   personal: [['casa', 'Casa', 'limpieza sabanas plantas hogar'], ['menu', 'Menú de la semana', 'menu comida almuerzo cena'], ['documentos', 'Documentos', 'dni pasaporte soat vence'], ['cumpleanos', 'Cumpleaños', 'cumpleanos aniversario regalo'], ['prestamos', 'Préstamos', 'prestamo deuda debe']],
   estudios: [['cursos', 'Cursos y notas', 'cursos notas promedio faltas horario clases'], ['examenes', 'Exámenes', 'examen parcial final repaso'], ['fichas', 'Fichas de repaso', 'fichas repaso memorizar']],
@@ -68,10 +58,10 @@ function enlace(x) {
   if (x.tipo === 'nota') return 'data-acc="nota-editar" data-id="' + esc(x.id) + '"';
   if (x.tipo === 'lista') return 'data-acc="r-lista-ir" data-id="' + esc(x.id) + '"';
   if (x.tipo === 'diario' || x.tipo === 'bienestar') return 'href="#notas/diario"';
-  if (x.tipo === 'movimiento' || x.tipo === 'pago') return 'href="#cuentas/informe' + ((x.extra && x.extra.libro) === 'oficina' || a === 'oficina' ? '/oficina' : '') + '"';
-  if (x.tipo === 'revision') return 'href="#tu/revision"';
+  if (x.tipo === 'movimiento' || x.tipo === 'pago') return 'href="#finanzas' + ((x.extra && x.extra.libro) === 'oficina' || a === 'oficina' ? '/oficina' : '') + '"';
+  if (x.tipo === 'revision') return 'href="#seguimiento/revision"';
   const d = DONDE[x.tipo];
-  if (d) return 'href="' + dondeHerr(d[1], d[0] || a) + '"';
+  if (d) return 'href="#areas/' + (d[0] || a) + '/' + d[1] + '"';
   return 'data-acc="dato-ver" data-id="' + esc(x.id) + '"';
 }
 function fila(attrs, icono, titulo, sub, tag = 'a') {
@@ -84,18 +74,18 @@ export function resultadosHTML(q) {
   if (q.length < 2) {
     const r = recientes();
     return '<p class="ayuda">Escribe lo que buscas («luz», «examen») o lo que quieres hacer («gasto», «cita»).</p>' +
-      '<div class="bus-grupo"><small>Ir a</small>' + IR.slice(0, 7).map((x) => fila('href="' + x[0] + '"', '<span class="bus-ico">' + ico('i-der') + '</span>', x[1], x[2])).join('') + '</div>' +
       (r.length ? '<div class="bus-recientes"><small>Recientes</small>' + r.map((x) => '<button type="button" class="chip" data-busq="' + esc(x) + '">' + ico('i-buscar') + esc(x) + '</button>').join('') + '</div>' : '');
   }
   const hacer = HACER.filter((h) => coincide(h[1] + ' ' + h[3], q)).slice(0, 3);
   const ir = IR.filter((x) => coincide(x[1] + ' ' + x[3], q)).slice(0, 3);
   const herr = [];
   AREAS.forEach((a) => (HERR[a.id] || []).forEach((h) => { if (coincide(a.nombre + ' ' + h[1] + ' ' + h[2], q)) herr.push([a, h]); }));
+  AREAS.forEach((a) => { if (coincide(a.nombre + ' ' + (a.lema || ''), q)) herr.unshift([a, null]); });
   const cosas = buscarElementos(elementos(), q);
   let html = '';
   if (hacer.length || ir.length || herr.length) html += '<div class="bus-grupo"><small>Hacer o ir a</small>' +
     hacer.map((h) => fila('data-bus-hacer="' + h[0] + '"', '<span class="bus-ico">' + ico('i-plus') + '</span>', h[1], h[2])).join('') +
-    herr.slice(0, 4).map(([a, h]) => fila('href="' + dondeHerr(h[0], a.id) + '"', '<span class="bus-ico area-' + a.id + '"><i class="punto"></i></span>', h[1], a.nombre)).join('') +
+    herr.slice(0, 4).map(([a, h]) => fila('href="#areas/' + a.id + (h ? '/' + h[0] : '') + '"', '<span class="bus-ico area-' + a.id + '"><i class="punto"></i></span>', h ? h[1] : a.nombre, a.nombre + (h ? '' : ' · resumen del área'))).join('') +
     ir.map((x) => fila('href="' + x[0] + '"', '<span class="bus-ico">' + ico('i-der') + '</span>', x[1], x[2])).join('') + '</div>';
   html += '<div class="bus-grupo"><small>Tus cosas' + (cosas.length ? ' · ' + cosas.length + (cosas.length === 40 ? '+' : '') : '') + '</small>' +
     (cosas.length ? cosas.map((x) => fila(enlace(x), '<span class="bus-ico area-' + area(x.area).id + '"><i class="punto"></i></span>', esc(x.titulo || TIPOS[x.tipo]),
@@ -115,7 +105,7 @@ export function abrirBuscar() {
     const r = ev.target.closest('[data-busq]');
     if (r) { inp.value = r.dataset.busq; pintar(); inp.focus(); return; }
     const h = ev.target.closest('[data-bus-hacer]');
-    if (h) { recordar(inp.value); cerrarHoja(true); const t = h.dataset.busHacer; if (t === 'gasto') abrirMonto(); else if (t === 'habito' || t === 'meta') abrirAgregar(t); else abrirCaptura(); return; }
+    if (h) { recordar(inp.value); cerrarHoja(true); abrirAgregar(h.dataset.busHacer); return; }
     if (ev.target.closest('.bus-fila')) recordar(inp.value);
   });
 }

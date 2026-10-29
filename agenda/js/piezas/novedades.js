@@ -8,10 +8,10 @@ import { esc } from '../util/dom.js';
 
 const CLAVE = 'agenda5_version';
 export const NOVEDADES = [
-  ['Tu día, de corrido', '🌊', 'Hoy es una sola línea de arriba abajo: lo atrasado, lo que ya pasó, lo de ahora (con lo que no tiene hora) y lo que viene, hasta mañana.', '#hoy'],
-  ['Tu plata, en privado', '👁️', 'Hoy ya no muestra montos, y en Cuentas salen ocultos (S/ •••) hasta que tocas el ojo.', '#cuentas'],
-  ['Filtro más simple', '🎯', 'Un solo botón «Todo ▾» arriba de cada sección para elegir Personal, Estudios, Oficina o Deporte.', '#tareas'],
-  ['Arreglado', '🔧', 'Después de un foco, «Concentrarme 25 min» ya no arranca un descanso: Hoy te ofrece descansar o saltarlo.', '#hoy']
+  ['Tu diseño de siempre', '💙', 'Volvió la cara de tu Agenda publicada: negro y azul, barra lateral con Espacios y Organizar, y abajo Hoy · Agenda · Dinero · Notas · Más.', '#hoy'],
+  ['Tus espacios', '🏠', 'Personal, Estudios, Oficina y Deporte otra vez con su portada y sus herramientas.', '#areas/personal'],
+  ['Tu plata, en privado', '👁️', 'Hoy ya no muestra montos: tus cuentas se ven solo en Dinero.', '#finanzas'],
+  ['Nada se perdió', '✅', 'Todo lo que anotaste en las versiones nuevas sigue aquí.', '#recordatorios']
 ];
 
 export function abrirNovedades() {

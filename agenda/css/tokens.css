@@ -1,60 +1,53 @@
 /* ==========================================================================
-   IDENTIDAD «NEÓN» · Agenda 5 (desde la 5.5)
-   Moderna y juvenil, oscura siempre (preferencia del usuario), distinta de
-   PAPOTAS (marrón y carmesí) y de la v4.5 (negro y azul con Plus Jakarta):
-   - Negro profundo con un brillo de aurora (lima y violeta) arriba.
-   - Acento verde lima neón: lo de hoy, lo principal y la pestaña activa.
-   - Títulos en Bricolage Grotesque (gruesos y apretados), texto en Geist.
-   - Tarjetas de vidrio oscuro, redondeadas; navegación en pastilla.
+   SISTEMA DE DISEÑO «SEÑAL» · Agenda 5
+   Tu estilo de la v4.5 (paleta «Negro»: negro puro, tarjetas #121214, azul
+   #1D45C4, letra Plus Jakarta, títulos grandes y gruesos, brillo de color en
+   la esquina de las tarjetas) + un toque técnico (cuadrícula tenue, etiquetas
+   y horas en Martian Mono) y didáctico (modo guía, recorrido).
    Regla: todo color sale de estos tokens. Nada de colores sueltos.
    ========================================================================== */
-@font-face { font-family: 'Geist'; src: url('../fuentes/geist.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
-@font-face { font-family: 'Bricolage Grotesque'; src: url('../fuentes/bricolage.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
 @font-face { font-family: 'Plus Jakarta Sans'; src: url('../fuentes/plus-jakarta.woff2') format('woff2'); font-weight: 200 800; font-display: swap; }
 
 :root {
-  --f-texto: 'Geist', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --f-titulo: 'Bricolage Grotesque', 'Geist', -apple-system, 'Segoe UI', sans-serif;
-  --f-mono: var(--f-texto);   /* cifras con números parejos */
-  --radio: 24px; --radio-chico: 14px; --radio-btn: 14px;
+  --f-texto: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --f-mono: var(--f-texto);   /* como la v4.5: las cifras también en Plus Jakarta (con números parejos) */
+  --radio: 20px; --radio-chico: 12px; --radio-btn: 12px;
   --toque: 44px;                       /* tamaño mínimo para el dedo */
-  --ancho-lateral: 0px;
+  --ancho-lateral: 248px;
 
-  /* Oscuro (por defecto, SIEMPRE el preferido del usuario) */
-  --fondo: #07080A; --rejilla: rgba(255,255,255,.03);
-  --aurora-1: rgba(200,255,61,.10); --aurora-2: rgba(139,92,246,.13);
-  --superficie: #111318; --superficie-2: #191C22; --superficie-3: #23272F;
-  --tinta: #F4F6F8; --tinta-2: #A9B0BA; --tinta-3: #8C939E;
-  --borde: #20242B; --brillo: rgba(255,255,255,.05);
-  --acento: #C8FF3D; --acento-txt: #C8FF3D; --sobre-acento: #0A0D02; --acento-suave: #1B2410; --resplandor: rgba(200,255,61,.35);
-  --rojo: #FF6B6B; --rojo-suave: #2E1416; --ambar: #FFB547; --ambar-suave: #2E2210; --verde: #4ADE80; --verde-suave: #0E2617;
-  --velo: rgba(3,4,6,.72);
-  --sombra: 0 1px 0 rgba(255,255,255,.04) inset, 0 16px 40px -24px rgba(0,0,0,.9);
-  --sombra-alta: 0 24px 60px -16px rgba(0,0,0,.85);
+  /* Oscuro (por defecto) */
+  --fondo: #000000; --rejilla: rgba(255,255,255,.022);
+  --superficie: #121214; --superficie-2: #1C1C1E; --superficie-3: #26262A;
+  --tinta: #F5F5F7; --tinta-2: #A1A1A6; --tinta-3: #8A8A90;
+  --borde: #26262A; --brillo: rgba(255,255,255,.05);
+  --acento: #1D45C4; --acento-txt: #7B9AF2; --sobre-acento: #FFFFFF; --acento-suave: #0A1430;
+  --rojo: #FF6B61; --rojo-suave: #2B0F0D; --ambar: #FFD60A; --ambar-suave: #2A2406; --verde: #30D158; --verde-suave: #0E2415;
+  --velo: rgba(0,0,0,.66);
+  --sombra: 0 1px 0 rgba(255,255,255,.03) inset, 0 12px 30px -18px rgba(0,0,0,.9);
+  --sombra-alta: 0 18px 50px -12px rgba(0,0,0,.85);
 
-  /* Espacios: colores que combinan con el lima (violeta, celeste, gris claro, naranja) */
-  --a-personal: #B49CFF; --a-personal-s: #1D1833; --a-personal-t: #D9CCFF;
-  --a-estudios: #7DD3FC; --a-estudios-s: #0F2230; --a-estudios-t: #C4EBFF;
-  --a-oficina: #C4C9D1;  --a-oficina-s: #1E2228;  --a-oficina-t: #E3E6EA;
-  --a-deporte: #FDBA74;  --a-deporte-s: #2A1D10;  --a-deporte-t: #FFDDB8;
+  /* Áreas (los colores de tus espacios en la v4.5) */
+  --a-personal: #5AA9FF; --a-personal-s: #0B1E33; --a-personal-t: #A9D1FF;
+  --a-estudios: #2DD4BF; --a-estudios-s: #0A2925; --a-estudios-t: #8BEDE0;
+  --a-oficina: #94A3B8;  --a-oficina-s: #1A1F27;  --a-oficina-t: #CBD5E1;
+  --a-deporte: #4ADE80;  --a-deporte-s: #0C2616;  --a-deporte-t: #9EF0B8;
   color-scheme: dark;
 }
 
 :root[data-tema="claro"] {
-  --fondo: #F5F6F3; --rejilla: rgba(0,0,0,.04);
-  --aurora-1: rgba(160,220,20,.16); --aurora-2: rgba(139,92,246,.10);
-  --superficie: #FFFFFF; --superficie-2: #EEF0EB; --superficie-3: #E2E5DD;
-  --tinta: #0B0D10; --tinta-2: #49505A; --tinta-3: #58606A;
-  --borde: #E2E5DD; --brillo: rgba(255,255,255,.8);
-  --acento: #B8F02A; --acento-txt: #3D6600; --sobre-acento: #0A0D02; --acento-suave: #EDF7D4; --resplandor: rgba(140,200,10,.35);
-  --rojo: #C4271C; --rojo-suave: #FDECEA; --ambar: #A04B00; --ambar-suave: #FDEBD8; --verde: #137036; --verde-suave: #E3F3E6;
-  --velo: rgba(10,13,16,.45);
-  --sombra: 0 1px 2px rgba(0,0,0,.04), 0 12px 28px -20px rgba(0,0,0,.3);
-  --sombra-alta: 0 18px 50px -16px rgba(0,0,0,.3);
-  --a-personal: #6D28D9; --a-personal-s: #EFE9FF; --a-personal-t: #5B21B6;
-  --a-estudios: #0369A1; --a-estudios-s: #E0F2FE; --a-estudios-t: #075985;
-  --a-oficina: #4B5563;  --a-oficina-s: #EEF0F2;  --a-oficina-t: #374151;
-  --a-deporte: #C2410C;  --a-deporte-s: #FFEDD5;  --a-deporte-t: #9A3412;
+  --fondo: #FFFFFF; --rejilla: rgba(0,0,0,.03);
+  --superficie: #F4F4F6; --superficie-2: #ECECEF; --superficie-3: #E3E3E7;
+  --tinta: #0A0A0A; --tinta-2: #5E5E63; --tinta-3: #636368;
+  --borde: #E3E3E7; --brillo: rgba(255,255,255,.7);
+  --acento: #1A3FB0; --acento-txt: #1A3FB0; --sobre-acento: #FFFFFF; --acento-suave: #E6ECFF;
+  --rojo: #C4271C; --rojo-suave: #FDECEA; --ambar: #8A6500; --ambar-suave: #FFF6D6; --verde: #137036; --verde-suave: #E6F6EB;
+  --velo: rgba(10,10,20,.45);
+  --sombra: 0 1px 2px rgba(0,0,0,.04), 0 10px 24px -18px rgba(0,0,0,.25);
+  --sombra-alta: 0 18px 50px -16px rgba(0,0,0,.35);
+  --a-personal: #1F6FEB; --a-personal-s: #E3EEFF; --a-personal-t: #144FB0;
+  --a-estudios: #0F8F80; --a-estudios-s: #DDF5F1; --a-estudios-t: #0A665E;
+  --a-oficina: #56606B;  --a-oficina-s: #E9ECF0;  --a-oficina-t: #3B434C;
+  --a-deporte: #1E8A4C;  --a-deporte-s: #E2F4E9;  --a-deporte-t: #146637;
   color-scheme: light;
 }
 

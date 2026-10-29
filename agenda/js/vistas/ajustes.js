@@ -13,6 +13,7 @@ import { confirmar } from '../piezas/confirmar.js';
 import { permisoAvisos, pedirPermiso, notificar, sonar } from '../piezas/avisos.js';
 import { aviso } from '../piezas/aviso.js';
 import { iniciarRecorrido, alternarGuia } from '../piezas/guia.js';
+import { encabezado } from './comun.js';
 import { VERSION } from '../version.js';
 import { abrirNovedades } from '../piezas/novedades.js';
 import { grupoNube, grupoAreas, grupoEtiquetas, grupoTeclado } from './admin.js';
@@ -30,14 +31,15 @@ function grupo(titulo, html) { return '<h2 class="grupo-ajustes">' + titulo + '<
 export function vistaAjustes() {
   const p = preferencias(), ant = resumenAntiguo(), pin = hayPIN(), errores = leer(CLAVES.errores, []);
   const hora = fmtHora('14:30', p.formatoHora);
-  let html = '';
+  let html = encabezado('Ajustes', 'Preferencias, seguridad, nube, áreas y tus datos');
+
   html += grupo('Preferencias',
     ajuste('Tema', 'Oscuro, claro o según tu celular.', selector('pref-tema', [['oscuro', 'Oscuro'], ['claro', 'Claro'], ['auto', 'Automático']], p.tema, 'Tema')) +
     ajuste('Formato de hora', 'Así se verá: <b class="mono">' + hora + '</b>', selector('pref-hora', [['24', '24 h'], ['12', '12 h']], p.formatoHora, 'Formato de hora')) +
     ajuste('La semana empieza', '', selector('pref-semana', [['1', 'Lunes'], ['0', 'Domingo']], p.semanaLunes ? '1' : '0', 'Inicio de semana')) +
-    (ajuste('Horario despierto', 'Sirve para calcular si un día está sobrecargado.',
+    ajuste('Horario despierto', 'Sirve para calcular si un día está sobrecargado.',
       '<div class="horas-par"><label><span>Desde</span><input type="time" class="entrada" data-pref-vigilia="ini" value="' + p.vigilia.ini + '"></label>' +
-      '<label><span>Hasta</span><input type="time" class="entrada" data-pref-vigilia="fin" value="' + p.vigilia.fin + '"></label></div>')) +
+      '<label><span>Hasta</span><input type="time" class="entrada" data-pref-vigilia="fin" value="' + p.vigilia.fin + '"></label></div>') +
     ajuste('Feriados del Perú', 'Mostrarlos en Hoy y en la Agenda.', selector('pref-feriados', [['1', 'Mostrar'], ['0', 'Ocultar']], p.feriados ? '1' : '0', 'Feriados')) +
     ajuste('Pantalla de inicio', 'Lo primero que ves al abrir la app.', selector('pref-inicio', PANTALLAS_INICIO, p.inicio, 'Pantalla de inicio')));
 

@@ -36,8 +36,6 @@ const PH = {
   meta: 'Ej. Ahorrar para el viaje'
 };
 
-/* En modo simple no se eligen espacios */
-const sinEspacios = () => !preferencias().completo && !estado.fija;
 function pasos() { return '<div class="pasos" aria-hidden="true">' + [1, 2, 3].map((n) => '<i class="' + (n <= estado.paso ? 'si' : '') + '"></i>').join('') + '</div>'; }
 
 function campos() {
@@ -54,16 +52,16 @@ function pintar() {
   let html = pasos();
   if (estado.paso === 1) {
     html += '<p class="ayuda">' + (estado.fija ? '¿Qué quieres agregar en <b>' + esc(area(estado.fija).nombre) + '</b>?' : '<b>Paso 1 de 2 ·</b> ¿Qué quieres agregar?') + '</p><div class="opciones">' +
-      TIPOS.filter((t) => preferencias().completo || !['habito', 'meta'].includes(t[0])).map((t) => '<button type="button" class="opcion" data-qa-tipo="' + t[0] + '">' + ico(t[2]) + '<b>' + t[1] + '</b><small>' + t[3] + '</small></button>').join('') + '</div>';
+      TIPOS.map((t) => '<button type="button" class="opcion" data-qa-tipo="' + t[0] + '">' + ico(t[2]) + '<b>' + t[1] + '</b><small>' + t[3] + '</small></button>').join('') + '</div>';
   } else if (estado.paso === 2) {
     const ult = leer(CLAVE_ULT, '');
     const t = TIPOS.find((x) => x[0] === estado.tipo);
-    html += (sinEspacios() ? '<p class="ayuda"><b>¿De qué cuenta?</b></p><div class="opciones dos">' : '<p class="ayuda"><b>Paso 2 de 2 ·</b> ' + t[1] + ' de qué área?</p><div class="opciones dos">') +
-      AREAS.filter((a) => !sinEspacios() || a.id === 'personal' || a.id === 'oficina').map((a) => '<button type="button" class="opcion area-op area-' + a.id + (a.id === ult ? ' ultima' : '') + '" data-qa-area="' + a.id + '">' + ico(a.icono) + '<b>' + a.nombre + '</b>' + (a.id === ult ? '<small>La última que usaste</small>' : '<small>' + esc(a.lema) + '</small>') + '</button>').join('') +
+    html += '<p class="ayuda"><b>Paso 2 de 2 ·</b> ' + t[1] + ' de qué área?</p><div class="opciones dos">' +
+      AREAS.map((a) => '<button type="button" class="opcion area-op area-' + a.id + (a.id === ult ? ' ultima' : '') + '" data-qa-area="' + a.id + '">' + ico(a.icono) + '<b>' + a.nombre + '</b>' + (a.id === ult ? '<small>La última que usaste</small>' : '<small>' + esc(a.lema) + '</small>') + '</button>').join('') +
       '</div><div class="fila-botones"><button type="button" class="btn" data-qa-atras="1">' + ico('i-izq') + 'Atrás</button></div>';
   } else {
     const t = TIPOS.find((x) => x[0] === estado.tipo);
-    html += '<p class="ayuda">' + t[1] + (sinEspacios() && estado.tipo !== 'gasto' ? '' : ' en ' + chipArea(estado.area)) + '</p>' + campos() +
+    html += '<p class="ayuda">' + t[1] + ' en ' + chipArea(estado.area) + '</p>' + campos() +
       (puedeDictar() ? '<div class="fila-botones izq"><button type="button" class="btn" id="qaDictar" aria-pressed="false">🎤 Dictar</button></div>' : '') +
       '<div class="vista-previa" id="qaPrevia" aria-live="polite">Escribe y verás aquí cómo se guardará.</div>' +
       '<div class="fila-botones"><button type="button" class="btn" data-qa-atras="1">' + ico('i-izq') + 'Atrás</button><button type="button" class="btn pri" data-qa-guardar="1">' + ico('i-check') + 'Guardar</button></div>';
@@ -137,21 +135,15 @@ function guardar() {
 /* «Añadir en Personal…»: con el espacio ya elegido, solo se pregunta qué es */
 export function abrirAgregar(tipo, areaFija = '') {
   estado = { paso: tipo ? (areaFija ? 3 : 2) : 1, tipo: tipo || '', area: areaFija || '', fija: areaFija || '' };
-  if (tipo && tipo !== 'gasto' && sinEspacios()) { estado.area = leer(CLAVE_ULT, '') || 'personal'; estado.paso = 3; }
   pintar();
 }
 
 document.addEventListener('click', (ev) => {
   const t = ev.target.closest && ev.target.closest('[data-qa-tipo],[data-qa-area],[data-qa-atras],[data-qa-guardar]');
   if (!t) return;
-  if (t.dataset.qaTipo) {
-    estado.tipo = t.dataset.qaTipo; estado.paso = estado.fija ? 3 : 2;
-    /* Modo simple: sin elegir espacio (solo el gasto pregunta el libro: personal u oficina) */
-    if (sinEspacios() && estado.tipo !== 'gasto') { estado.area = estado.area || leer(CLAVE_ULT, '') || 'personal'; estado.paso = 3; }
-    pintar();
-  }
+  if (t.dataset.qaTipo) { estado.tipo = t.dataset.qaTipo; estado.paso = estado.fija ? 3 : 2; pintar(); }
   else if (t.dataset.qaArea) { estado.area = t.dataset.qaArea; estado.paso = 3; pintar(); }
-  else if (t.dataset.qaAtras) { estado.paso = (estado.fija || (sinEspacios() && estado.tipo !== 'gasto')) && estado.paso === 3 ? 1 : Math.max(1, estado.paso - 1); pintar(); }
+  else if (t.dataset.qaAtras) { estado.paso = estado.fija && estado.paso === 3 ? 1 : Math.max(1, estado.paso - 1); pintar(); }
   else if (t.dataset.qaGuardar) guardar();
 });
 /* Dictado: toca 🎤, habla y se escribe; en un gasto, el número va al monto */

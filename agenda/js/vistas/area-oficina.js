@@ -297,7 +297,7 @@ export const acciones = {
     else { const y = JSON.parse(JSON.stringify(x)); y.estado = a; if (x.estado === 'hecho') y.extra.hechoEn = 0; poner(y); }
     return true;
   },
-  'ir-lista'(b) { irALista(b.dataset.id); location.hash = '#tareas/' + b.dataset.id; }
+  'ir-lista'(b) { irALista(b.dataset.id); location.hash = '#recordatorios'; }
 };
 
 /* Resumen para «Tus espacios» y la portada del espacio (como la v4.5) */

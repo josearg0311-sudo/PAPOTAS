@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07080A">
+<meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark light">
 <meta name="description" content="Tu organizador personal: Personal, Estudios, Oficina y Deporte.">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -15,15 +15,14 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="iconos/icono.svg">
 <link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
-<link rel="preload" href="fuentes/geist.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fuentes/bricolage.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fuentes/plus-jakarta.woff2" as="font" type="font/woff2" crossorigin>
 <script>
 /* Tema ANTES de pintar, para que no parpadee. Lee la preferencia nueva y,
    si aún no existe, la que tenías en la versión anterior. */
 (function(){
   try{
     var p = JSON.parse(localStorage.getItem('agenda5_pref') || 'null'), t = p && p.tema;
-    if(!t) t = 'oscuro';   /* oscuro siempre por defecto */
+    if(!t){ var v = JSON.parse(localStorage.getItem('agenda_pref') || '{}') || {}; t = v.temaAuto ? 'auto' : (localStorage.getItem('agenda_tema') || 'auto'); }
     if(t === 'auto') t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'claro' : 'oscuro';
     document.documentElement.setAttribute('data-tema', t === 'claro' ? 'claro' : 'oscuro');
     if(p && p.guia) document.documentElement.classList.add('guia-previa');
@@ -61,9 +60,6 @@
   <symbol id="i-pausa" viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/></symbol>
   <symbol id="i-izq" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
   <symbol id="i-der" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-  <symbol id="i-abajo" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
-  <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
-  <symbol id="i-ojo-no" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.6 9.6 0 0 0 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></symbol>
@@ -115,16 +111,15 @@
   <div class="cuerpo">
     <header class="cab">
       <a class="logo solo-movil" href="#hoy" aria-label="Ir a Hoy"></a>
-      <div class="pasos" hidden><button type="button" class="icono-btn" id="btnAtras" aria-label="Atrás" title="Atrás"><svg class="i" aria-hidden="true"><use href="#i-izq"/></svg></button><button type="button" class="icono-btn" id="btnAdelante" aria-label="Adelante" title="Adelante"><svg class="i" aria-hidden="true"><use href="#i-der"/></svg></button></div>
+      <div class="pasos solo-escritorio"><button type="button" class="icono-btn" id="btnAtras" aria-label="Atrás" title="Atrás"><svg class="i" aria-hidden="true"><use href="#i-izq"/></svg></button><button type="button" class="icono-btn" id="btnAdelante" aria-label="Adelante" title="Adelante"><svg class="i" aria-hidden="true"><use href="#i-der"/></svg></button></div>
       <div class="cab-tit"><small id="cabFecha"></small><b id="cabTitulo">Agenda</b></div><span class="cab-esp"></span>
       <a class="pildora-pomo" id="pildoraPomo" href="#hoy" hidden aria-label="Pomodoro en curso"><i aria-hidden="true"></i><span>25:00</span></a>
       <button type="button" class="chip-nube" id="btnNube" hidden aria-label="Nube" title="Nube"><i aria-hidden="true"></i><span id="nubeTxt">ahora mismo</span></button>
       <span class="reloj" hidden><span id="relojTxt">--:--</span></span>
-      <a class="icono-btn" hidden href="#papelera" id="btnPapelera" aria-label="Papelera" title="Papelera"><svg class="i" aria-hidden="true"><use href="#i-basura"/></svg></a>
-      <a class="btn solo-movil cab-notas" href="#notas" id="btnNotas"><svg class="i" aria-hidden="true"><use href="#i-notas"/></svg>Notas</a>
+      <a class="icono-btn solo-escritorio" href="#papelera" id="btnPapelera" aria-label="Papelera" title="Papelera"><svg class="i" aria-hidden="true"><use href="#i-basura"/></svg></a>
       <button type="button" class="icono-btn" id="btnBuscar" aria-label="Buscar (tecla /)" title="Buscar (/)"><svg class="i" aria-hidden="true"><use href="#i-buscar"/></svg></button>
-      <button type="button" class="icono-btn" hidden id="btnTema" aria-label="Cambiar entre claro y oscuro" title="Claro u oscuro"><svg class="i" aria-hidden="true"><use href="#i-luna"/></svg></button>
-      <a class="perfil solo-movil cab-tu" href="#tu" id="btnTu" aria-label="Tú: hábitos, progreso y ajustes" title="Tú"><span class="avatar" aria-hidden="true"></span></a>
+      <button type="button" class="icono-btn solo-escritorio" id="btnTema" aria-label="Cambiar entre claro y oscuro" title="Claro u oscuro"><svg class="i" aria-hidden="true"><use href="#i-luna"/></svg></button>
+      <a class="icono-btn solo-movil" href="#ajustes" id="btnAjustes" aria-label="Ajustes y respaldo" title="Ajustes"><svg class="i" aria-hidden="true"><use href="#i-ajustes"/></svg></a>
     </header>
     <main id="pantalla" class="pantalla" tabindex="-1">
       <noscript><p class="vacio">La Agenda necesita JavaScript activado.</p></noscript>
@@ -146,12 +141,12 @@
   function falta(que) {
     if (document.getElementById('faltaPrograma')) return;
     var d = document.createElement('div'); d.id = 'faltaPrograma';
-    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#07080A;color:#F4F6F8;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
+    d.setAttribute('style', 'position:fixed;inset:0;z-index:99999;background:#000;color:#F5F5F7;font:16px/1.5 system-ui,sans-serif;padding:28px 20px;overflow:auto');
     d.innerHTML = '<div style="max-width:520px;margin:0 auto"><h1 style="font-size:24px;margin:0 0 12px">La Agenda no se cargó completa</h1>' +
       '<p>Faltan archivos del programa (' + que + '). <b>Tus datos están a salvo</b> en este aparato: no se tocaron.</p>' +
       '<p><b>Si acabas de publicar:</b> en Netlify arrastra la <b>carpeta completa</b> (la que tiene dentro <code>index.html</code>, <code>css</code>, <code>js</code>, <code>fuentes</code>, <code>iconos</code> y <code>diccionario</code>), no solo el archivo index.html.</p>' +
       '<p>Para volver a la versión anterior: Netlify → Deploys → la publicación anterior → «Publish deploy».</p>' +
-      '<p><button type="button" onclick="location.reload()" style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#C8FF3D;color:#0A0D02;font:600 15px system-ui">Intentar de nuevo</button></p></div>';
+      '<p><button type="button" onclick="location.reload()" style="min-height:44px;padding:0 18px;border-radius:12px;border:0;background:#1D45C4;color:#fff;font:600 15px system-ui">Intentar de nuevo</button></p></div>';
     document.body.appendChild(d);
   }
   window.addEventListener('load', function () {

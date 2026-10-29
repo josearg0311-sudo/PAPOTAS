@@ -2,13 +2,12 @@
    temática y su color: el PERSONAL (con lo de Estudios y Deporte, cada uno
    en su área) y el de la OFICINA. Nunca se mezclan.
    Direcciones: #finanzas (personal) y #finanzas/oficina */
-import { filtro } from '../datos/filtro.js';
 import { elementos, buscarElemento, documento, cambiarPerfil, aPapelera } from '../datos/datos.js';
 import { AREAS, area } from '../datos/areas.js';
 import { LIBROS, areaDeCategoria, categoriaDe, esDelLibro, esIngreso, delMes, resumenMes, historial, estadoPresupuesto, csv, analisisMes, repetidos } from '../datos/finanzas.js';
 import { diaDePago, pagado } from '../datos/calendario.js';
 import { val, resumenPrestamos } from '../datos/herramientas.js';
-import { hoy, fmtCorta, fmtFecha, MESES, diasEntre, inicioSemana, sumarDias as sumarDiasF, diaSemana as diaSemanaF, DIAS3 as DIAS3F } from '../util/fechas.js';
+import { hoy, fmtCorta, fmtFecha, MESES, diasEntre, inicioSemana } from '../util/fechas.js';
 import { preferencias } from '../datos/preferencias.js';
 import { fmtSoles, solesCorto } from '../util/dinero.js';
 import { esc, ico, vacio, plural, explica } from '../util/dom.js';
@@ -19,8 +18,7 @@ import { guardarArchivo } from '../datos/respaldo.js';
 import { aviso } from '../piezas/aviso.js';
 import { cerrarHoja } from '../piezas/hoja.js';
 
-const ui = { mes: '', cat: '', ver: 30, catP: '' };
-const completo = () => true;   // el libro en detalle (Cuentas → Informe y detalle) muestra todo
+const ui = { mes: '', cat: '', ver: 30 };
 const COLOR = { personal: 'personal', oficina: 'oficina' };
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 const nombreMes = (ym) => cap(MESES[+ym.slice(5) - 1]) + ' ' + ym.slice(0, 4);
@@ -72,7 +70,7 @@ function vistaLibro(libro) {
       '<div class="din-queda"><span>' + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda ' + (ym === h ? 'este mes' : 'de ese mes')) + '</span><b class="' + (r.saldo < 0 ? 'txt-aviso' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b></div>' +
       (pres ? '<div class="presupuesto ' + pres.nivel + '"><div class="pr-txt"><b>Presupuesto: ' + pres.pct + ' %</b><small>' + fmtSoles(r.gastos) + ' de ' + fmtSoles(presupuestoDe(libro)) + (pres.queda >= 0 ? ' · te quedan ' + fmtSoles(pres.queda) : ' · te pasaste por ' + fmtSoles(-pres.queda)) + '</small></div><span class="progreso"><i style="width:' + Math.min(100, pres.pct) + '%"></i></span></div>' : '') +
       '<div class="pie-tarjeta"><button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-meta') + (pres ? 'Presupuesto' : 'Poner presupuesto') + '</button></div>' +
-    '</section>' + (completo() ? tarjetaComoVas(libro, todos, ym, r) : '') +
+    '</section>' + tarjetaComoVas(libro, todos, ym, r) +
     '<div class="columnas"><div>' +
     tarjeta({ eti: 'PAGOS FIJOS', titulo: 'Pagos fijos de ' + MESES[+ym.slice(5) - 1], n: pagos.filter((x) => x.ok).length + '/' + pagos.length, clase: 'area-' + a,
       guia: 'Lo que pagas cada mes. Al marcarlo pagado se anota el gasto en este libro.',
@@ -83,19 +81,19 @@ function vistaLibro(libro) {
     tarjeta({ eti: 'EN QUÉ SE VA', titulo: 'Gastos por categoría', clase: 'area-' + a,
       guia: 'Toca una categoría para ver solo sus movimientos.',
       cuerpo: r.porCategoria.length ? barras(r.porCategoria, r.porCategoria[0].monto, 'fin-cat') + (ui.cat ? '<div class="pie-tarjeta"><button type="button" class="btn chico" data-acc="fin-cat" data-v="">Ver todas</button></div>' : '') : vacio('', 'Sin gastos este mes.') }) +
-    (completo() && libro === 'personal' && Object.keys(r.porArea).length > 1 ? tarjeta({ eti: 'POR ÁREA', titulo: 'Cada área con sus gastos', clase: 'area-personal',
+    (libro === 'personal' && Object.keys(r.porArea).length > 1 ? tarjeta({ eti: 'POR ÁREA', titulo: 'Cada área con sus gastos', clase: 'area-personal',
       guia: 'Lo de Estudios y Deporte se cuenta en su área, aunque salga de tu libro personal.',
       cuerpo: '<div class="barras">' + AREAS.filter((ar) => r.porArea[ar.id]).map((ar) => '<a class="barra-fila area-' + ar.id + '" href="#areas/' + ar.id + '"><span class="bf-nom">' + ar.nombre + '</span><span class="bf-barra" aria-hidden="true"><i style="width:' + (r.porArea[ar.id] / r.gastos * 100).toFixed(1) + '%"></i></span><span class="bf-val mono">' + fmtSoles(r.porArea[ar.id]) + '</span></a>').join('') + '</div>' }) : '') +
-    (completo() ? tarjetaRepetidos(libro, todos, ym) + enlaceTematico(libro) : '') +
+    tarjetaRepetidos(libro, todos, ym) + enlaceTematico(libro) +
     '</div><div>' +
     tarjeta({ eti: 'MOVIMIENTOS', titulo: ui.cat ? esc(ui.cat) : 'Movimientos de ' + MESES[+ym.slice(5) - 1], n: delM.length, clase: 'area-' + a,
       cuerpo: (delM.length ? filas(delM.slice(0, ui.ver).map(filaMov)) + (delM.length > ui.ver ? '<div class="pie-tarjeta"><button type="button" class="btn" data-acc="fin-mas">Ver más (' + (delM.length - ui.ver) + ')</button></div>' : '') : vacio('Sin movimientos', 'Anota un gasto o un ingreso con los botones de arriba.')) +
         pie('<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar el libro (Excel)</button>') }) +
-    (!completo() ? '' : tarjeta({ eti: 'INFORME', titulo: hist.length > 1 ? 'Últimos ' + hist.length + ' meses' : 'Este mes', clase: 'area-' + a,
+    tarjeta({ eti: 'INFORME', titulo: hist.length > 1 ? 'Últimos ' + hist.length + ' meses' : 'Este mes', clase: 'area-' + a,
       cuerpo: '<table class="informe"><thead><tr><th scope="col">Mes</th><th scope="col">Ingresos</th><th scope="col">Gastos</th><th scope="col">Saldo</th></tr></thead><tbody>' +
         hist.map((h) => '<tr' + (h.ym === ym ? ' class="actual"' : '') + '><th scope="row"><button type="button" class="enlace" data-acc="fin-ir-mes" data-v="' + h.ym + '">' + cap(MESES[+h.ym.slice(5) - 1]).slice(0, 3) + (h.ym.slice(0, 4) !== hoy().slice(0, 4) ? ' ' + h.ym.slice(2, 4) : '') + '</button></th>' +
           '<td class="mono">' + fmtSoles(h.ingresos) + '</td><td class="mono"><span class="mini-barra" aria-hidden="true"><i style="width:' + (h.gastos / maxH * 100).toFixed(0) + '%"></i></span>' + fmtSoles(h.gastos) + '</td><td class="mono ' + (h.saldo < 0 ? 'txt-aviso' : 'txt-ok') + '">' + (h.saldo < 0 ? '−' : '+') + fmtSoles(Math.abs(h.saldo)) + '</td></tr>').join('') + '</tbody></table>' +
-        pie('<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-bajar') + 'Imprimir o guardar en PDF</button>') })) +
+        pie('<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-bajar') + 'Imprimir o guardar en PDF</button>') }) +
     '</div></div>';
 }
 /* Cómo vas: comparado con el mes pasado al mismo día, mayor gasto, proyección,
@@ -153,10 +151,10 @@ function imprimirInforme(libro) {
 function enlaceTematico(libro) {
   if (libro === 'oficina') {
     const c = elementos((x) => x.tipo === 'cobro' && x.estado !== 'hecho'), t = c.reduce((s, x) => s + (+x.monto || 0), 0);
-    return t ? '<a class="nota-fase" href="#cuentas/cobros">' + ico('i-dinero') + '<span><b>Por cobrar: ' + fmtSoles(t) + '</b> en ' + plural(c.length, 'cobro', 'cobros') + '. Al cobrarlos en Oficina → Cobros se anotan aquí solos.</span></a>' : '';
+    return t ? '<a class="nota-fase" href="#areas/oficina/cobros">' + ico('i-dinero') + '<span><b>Por cobrar: ' + fmtSoles(t) + '</b> en ' + plural(c.length, 'cobro', 'cobros') + '. Al cobrarlos en Oficina → Cobros se anotan aquí solos.</span></a>' : '';
   }
   const r = resumenPrestamos(elementos((x) => x.tipo === 'prestamo'));
-  return r.meDeben || r.debo ? '<a class="nota-fase" href="#cuentas/prestamos">' + ico('i-dinero') + '<span><b>Préstamos:</b> te deben ' + fmtSoles(r.meDeben) + (r.debo ? ' y debes ' + fmtSoles(r.debo) : '') + '. Al saldarlos en Personal → Préstamos se anotan aquí solos.</span></a>' : '';
+  return r.meDeben || r.debo ? '<a class="nota-fase" href="#areas/personal/prestamos">' + ico('i-dinero') + '<span><b>Préstamos:</b> te deben ' + fmtSoles(r.meDeben) + (r.debo ? ' y debes ' + fmtSoles(r.debo) : '') + '. Al saldarlos en Personal → Préstamos se anotan aquí solos.</span></a>' : '';
 }
 
 /* ---------- Editores ---------- */
@@ -219,74 +217,6 @@ function editarPresupuesto(libro, repintar) {
   } });
 }
 
-/* Cómo vas (Plata 6.1): tus últimos 7 días en barras, cuánto puedes gastar por
-   día, cómo vas frente al mes pasado a esta fecha y en qué se te va más */
-function comoVas6(libro, todos, ym, r, pres) {
-  const h = hoy(), dias = Array.from({ length: 7 }, (_, i) => sumarDiasF(h, i - 6));
-  const g = dias.map((d) => todos.filter((x) => !esIngreso(x) && x.fechas.inicio === d).reduce((t, x) => t + Math.abs(+x.monto || 0), 0));
-  const max = Math.max(1, ...g), a = analisisMes(todos, ym, h, pres);
-  const porDia = a.porDia != null ? a.porDia : r.saldo > 0 ? Math.floor(r.saldo / a.quedan) : null;
-  const cats = r.porCategoria.slice(0, 3);
-  if (!g.some(Boolean) && !cats.length) return '';
-  return tarjeta({ titulo: 'Cómo vas', sub: 'Tus últimos 7 días y en qué se te va más. Toca una categoría para ver solo esos gastos.', cuerpo:
-    (!g.some(Boolean) ? '<p class="cv6-nada">Sin gastos en los últimos 7 días.</p>' : '<div class="cv6-barras" role="img" aria-label="Gastos de los últimos 7 días: ' + dias.map((d, i) => DIAS3F[diaSemanaF(d)] + ' ' + fmtSoles(g[i])).join(', ') + '">' +
-      dias.map((d, i) => '<span class="cv6-dia' + (d === h ? ' hoy' : '') + '"><i style="height:' + Math.max(g[i] ? 6 : 2, g[i] / max * 100).toFixed(0) + '%"></i><small>' + (d === h ? 'hoy' : DIAS3F[diaSemanaF(d)]) + '</small></span>').join('') + '</div>' +
-    '') + '<div class="cv6-datos">' +
-      (porDia != null ? '<div><b>' + fmtSoles(porDia) + '</b><small>' + (a.porDia != null ? 'por día para no pasarte del presupuesto' : 'por día para que te alcance el mes') + '</small></div>' : '') +
-      (a.pct != null ? '<div><b class="' + (a.pct > 0 ? 'txt-aviso' : 'txt-ok') + '">' + (a.pct > 0 ? '+' : '') + a.pct + ' %</b><small>' + (a.pct > 0 ? 'más' : 'menos') + ' que el mes pasado a esta fecha</small></div>' : '') +
-    '</div>' +
-    (cats.length ? '<div class="cv6-cats">' + cats.map((c) => '<button type="button" class="cv6-cat" data-acc="p6-cat" data-v="' + esc(c.cat) + '" aria-pressed="' + (ui.catP === c.cat) + '"><span>' + esc(c.cat) + '</span><span class="cv6-cb" aria-hidden="true"><i style="width:' + Math.max(3, c.monto / cats[0].monto * 100).toFixed(0) + '%"></i></span><b class="mono">' + fmtSoles(c.monto) + '</b></button>').join('') + '</div>' : '') });
-}
-
-/* ---------- PLATA (Agenda 6, #cuentas y #cuentas/oficina) ----------
-   Lo esencial de tus dos libros: cuánto te queda, lo que gastaste y lo que
-   entró, los pagos fijos del mes y tus movimientos por día. Gasto e ingreso
-   se anotan con el teclado de monto. El detalle (categorías, presupuesto,
-   informe, Excel) sigue en «Ver todo el detalle». */
-let verMontos = false;
-/* Con los montos ocultos, cada «S/ 1,234.56» (también en las etiquetas para lectores de pantalla) se vuelve «S/ •••» */
-const ocultar = (html) => (verMontos ? html : html.replace(/[−+-]?S\/\s?\d[\d,]*(?:\.\d{1,2})?/g, 'S/ •••').replace(/\d+ % de S\/ •••/g, 'S/ •••'));
-export function vistaPlata(param) {
-  /* El filtro de arriba decide el libro: Oficina → el de la oficina; Personal, Estudios o Deporte →
-     el personal, solo con lo de ese espacio; Todo → eliges el libro aquí. Los libros nunca se mezclan. */
-  const f = filtro(), fa = f && f !== 'oficina' ? f : '';
-  const libro = f === 'oficina' ? 'oficina' : f ? 'personal' : param === 'oficina' ? 'oficina' : 'personal', ym = hoy().slice(0, 7);
-  const todosLibro = movs(libro), todos = fa ? todosLibro.filter((x) => area(x.area).id === fa) : todosLibro, r = resumenMes(todos, ym), rLibro = fa ? resumenMes(todosLibro, ym) : r;
-  if (ui.libroP !== libro + fa) { ui.libroP = libro + fa; ui.catP = ''; }   // el filtro es de un libro
-  const pres = presupuestoDe(libro), gHoy = todos.filter((x) => !esIngreso(x) && x.fechas.inicio === hoy()).reduce((t, x) => t + Math.abs(+x.monto || 0), 0);
-  const pagos = elementos((x) => x.tipo === 'pago' && libroDePago(x) === libro && x.extra.activo !== false && (!fa || area(x.area).id === fa)).map((p) => ({ p, dia: diaDePago(p, ym), ok: pagado(p, ym) })).filter((x) => !(val(x.p, 'desde', '') > ym)).sort((a, b) => a.dia.localeCompare(b.dia));
-  const delM = todos.filter((x) => delMes(x, ym) && (!ui.catP || (!esIngreso(x) && (x.extra.categoria || 'Sin categoría') === ui.catP))).sort((a, b) => (b.fechas.inicio || '').localeCompare(a.fechas.inicio || '') || b.actualizado - a.actualizado);
-  const porDia = []; delM.slice(0, 60).forEach((x) => { const d = x.fechas.inicio, g = porDia[porDia.length - 1]; if (g && g.d === d) g.l.push(x); else porDia.push({ d, l: [x] }); });
-  /* La barra de lo gastado: lima normal, ámbar desde el 85 % del presupuesto y roja si te pasas */
-  const tope = fa ? 0 : pres, pctR = tope ? r.gastos / tope * 100 : 0, pct = Math.min(100, pctR), nivel = pctR > 100 ? 'rojo' : pctR >= 85 ? 'ambar' : 'lima';
-  /* Montos ocultos hasta tocar el ojo (como en el banco); vuelven a ocultarse al abrir la app */
-  const ojo = '<button type="button" class="icono-btn p6-ojo" data-acc="p6-ver" aria-pressed="' + verMontos + '" aria-label="' + (verMontos ? 'Ocultar montos' : 'Ver montos') + '" title="' + (verMontos ? 'Ocultar montos' : 'Ver montos') + '">' + ico(verMontos ? 'i-ojo-no' : 'i-ojo') + '</button>';
-  return ocultar('<div class="plata6 area-' + libro + (verMontos ? '' : ' ocultos') + '">' +
-    (f ? '' : '<nav class="seg6" aria-label="Libro"><a href="#cuentas"' + (libro === 'personal' ? ' aria-current="page"' : '') + '>Personal</a><a href="#cuentas/oficina"' + (libro === 'oficina' ? ' aria-current="page"' : '') + '>Oficina</a></nav>') +
-    (fa ? '<section class="p6-heroe">' + ojo + '<small>Gastaste en ' + esc(area(fa).nombre) + ' este mes</small><b class="p6-queda">' + fmtSoles(r.gastos) + '</b>' +
-      '<div class="p6-dos"><div><small>Hoy</small><b>' + fmtSoles(gHoy) + '</b></div><div><small>Libro personal: te quedan</small><b' + (rLibro.saldo < 0 ? ' class="neg"' : '') + '>' + (rLibro.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(rLibro.saldo)) + '</b></div></div>'
-    : '<section class="p6-heroe">' + ojo + '<small>' + (libro === 'oficina' ? 'Oficina · ' : '') + (r.saldo < 0 ? 'Gastaste más de lo que entró' : 'Te queda este mes') + '</small><b class="p6-queda' + (r.saldo < 0 ? ' neg' : '') + '">' + (r.saldo < 0 ? '−' : '') + fmtSoles(Math.abs(r.saldo)) + '</b>' +
-      '<div class="p6-dos"><div><small>Gastaste' + (gHoy ? ' · ' + fmtSoles(gHoy) + ' hoy' : '') + '</small><b>' + fmtSoles(r.gastos) + '</b>' + (pres ? '<span class="p6-barra ' + nivel + '" role="img" aria-label="' + Math.round(pctR) + ' % del presupuesto"><i style="width:' + pct.toFixed(0) + '%"></i></span><small>' + Math.round(pctR) + ' % de ' + fmtSoles(pres) + '</small>' : '') + '</div>' +
-      '<div><small>Entró</small><b class="ing">' + fmtSoles(r.ingresos) + '</b></div></div>') +
-      '<div class="p6-btns"><button type="button" class="btn pri" data-acc="monto" data-libro="' + libro + '" data-ing="0">' + ico('i-plus') + 'Anotar gasto</button><button type="button" class="btn" data-acc="monto" data-libro="' + libro + '" data-ing="1">' + ico('i-plus') + 'Anotar ingreso</button></div></section>' +
-    comoVas6(libro, todos, ym, r, pres) +
-    (pagos.length ? tarjeta({ titulo: 'Pagos fijos', sub: 'Lo que pagas cada mes. Marca el círculo cuando lo pagues y se anota solo.', n: pagos.filter((x) => x.ok).length + '/' + pagos.length,
-      cuerpo: filas(pagos.map(({ p, dia, ok }) => { const n = diasEntre(hoy(), dia);
-        return fila({ inicio: casilla(ok, 'cal-pago', p.id, (ok ? 'Desmarcar: ' : 'Pagado: ') + p.titulo, ' data-ym="' + ym + '"'), titulo: p.titulo, acc: 'pago-editar', id: p.id, clase: ok ? 'hecha' : '',
-          meta: '<b class="mono">' + fmtSoles(p.monto || 0) + '</b> · día ' + +dia.slice(8) + ' ' + (ok ? '<span class="pill">pagado</span>' : n < 0 ? pildora('vencido', 'venció') : n <= 3 ? pildora('pronto', n === 0 ? 'vence hoy' : 'en ' + n + ' días') : '') }); })) }) : '') +
-    tarjeta({ titulo: ui.catP ? 'Movimientos · ' + esc(ui.catP) : 'Movimientos', sub: ui.catP ? '' : 'Todo lo que anotaste este mes, por día. Toca uno para cambiarlo.', n: delM.length || null,
-      cuerpo: (ui.catP ? '<button type="button" class="btn chico p6-todos" data-acc="p6-cat" data-v="">' + ico('i-x') + 'Quitar filtro: ver todos</button>' : '') + (porDia.length ? porDia.map((g) => { const gd = g.l.reduce((t, x) => t + (esIngreso(x) ? 0 : Math.abs(+x.monto || 0)), 0);
-        return '<div class="p6-dia"><span>' + cap(g.d === hoy() ? 'hoy' : fmtCorta(g.d)) + '</span>' + (gd ? '<span class="mono">−' + fmtSoles(gd) + '</span>' : '') + '</div>' +
-          filas(g.l.map((x) => { const ing = esIngreso(x); return fila({ titulo: x.titulo || (ing ? 'Ingreso' : 'Gasto'), acc: 'fin-editar', id: x.id, meta: esc(x.extra.categoria || ''), final: '<b class="mono monto ' + (ing ? 'ingreso' : 'gasto') + '">' + (ing ? '+' : '−') + fmtSoles(Math.abs(+x.monto || 0)) + '</b>' }); })); }).join('')
-        : vacio(ui.catP ? 'Nada en ' + ui.catP + ' este mes' : 'Aún nada este mes', ui.catP ? 'Toca «Quitar filtro».' : 'Toca «Anotar gasto» o escribe en Agregar «almuerzo 25».')) }) +
-    '<div class="p6-herr" role="group" aria-label="Herramientas del libro">' +
-      '<button type="button" class="btn" data-acc="fin-presupuesto" data-libro="' + libro + '">' + ico('i-diana') + (pres ? 'Cambiar presupuesto' : 'Poner presupuesto') + '</button>' +
-      (todosLibro.length ? '<button type="button" class="btn" data-acc="fin-csv" data-libro="' + libro + '">' + ico('i-bajar') + 'Bajar a Excel</button>' +
-      '<button type="button" class="btn" data-acc="fin-imprimir" data-libro="' + libro + '">' + ico('i-recibo') + 'Informe en PDF</button>' : '') +
-    '</div>' +
-    '</div>');
-}
-
 export function vistaFinanzas(param) {
   const libro = param === 'oficina' ? 'oficina' : 'personal';
   return explica('<b>Tus dos libros de cuentas, cada uno por su lado.</b> El personal (con lo de Estudios y Deporte en su área) y el de la oficina. Los pagos fijos, cobros y préstamos se anotan aquí solos.') + vistaLibro(libro);
@@ -300,8 +230,6 @@ export function avisoPresupuesto(libro) {
 export const acciones = {
   'fin-mes'(b) { const n = +b.dataset.n, act = hoy().slice(0, 7); ui.mes = n === 0 ? '' : sumarMes(ui.mes || act, n) >= act ? '' : sumarMes(ui.mes || act, n); ui.cat = ''; ui.ver = 30; return true; },
   'fin-ir-mes'(b) { ui.mes = b.dataset.v === hoy().slice(0, 7) ? '' : b.dataset.v; ui.cat = ''; return true; },
-  'p6-ver'() { verMontos = !verMontos; return true; },
-  'p6-cat'(b) { ui.catP = !b.dataset.v || ui.catP === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-cat'(b) { ui.cat = ui.cat === b.dataset.v ? '' : b.dataset.v; return true; },
   'fin-mas'() { ui.ver += 30; return true; },
   'fin-nuevo'(b, ev, rp) { editarMov(null, rp, { libro: b.dataset.libro, ingreso: b.dataset.ing === '1', area: b.dataset.area || '' }); },

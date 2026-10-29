@@ -17,11 +17,11 @@ export function alternarGuia() {
 
 /* [título, texto, elemento a resaltar (varios por si uno está oculto)] */
 const PASOS = [
-  ['Bienvenido a tu Agenda', 'Está ordenada por lo que haces: Hoy, Calendario, Tareas y Cuentas abajo; Notas y Tú arriba. En 5 pasos te la muestro. Puedes repetirlo desde Ajustes.', []],
-  ['Agregar lo que sea', 'Toca «Agregar» y escribe como hablas: «almuerzo 25», «llamar a Ana mañana 10am», «compras: leche, pan». Yo entiendo qué es.', ['.barra-mas', '.cap-barra']],
-  ['Calendario y Tareas', 'Lo que tiene fecha u hora está en Calendario; lo que tienes que hacer y tus listas para marcar, en Tareas.', ['.barra [data-ir="calendario"]', '.lateral [data-ir="calendario"]']],
-  ['Tus espacios, como filtro', 'Arriba de cada sección eliges Personal, Estudios, Oficina o Deporte para ver solo lo de ese espacio, con sus herramientas propias.', ['.filtro6', '.barra [data-ir="tareas"]', '.lateral [data-ir="tareas"]']],
-  ['Tú', 'Tus hábitos, tus metas, tu progreso deportivo, tu PIN, la nube y el respaldo.', ['#btnTu', '.lateral .perfil']]
+  ['Bienvenido a tu nueva Agenda', 'Se ve como la que ya usabas, con tus cuatro espacios: Personal, Estudios, Oficina y Deporte. En 5 pasos te muestro lo nuevo. Puedes repetirlo desde Ajustes.', []],
+  ['Tus espacios', 'Cada espacio tiene su color, sus herramientas y lo que te toca hoy. Toca uno para entrar.', ['.esp-hoy', '.lateral .nav-esp']],
+  ['Agenda y Dinero', 'Tu tiempo (día, semana, mes y año) y tus dos libros de cuentas, siempre a un toque.', ['.barra [data-ir="agenda"]', '.lateral [data-ir="agenda"]']],
+  ['Agregar en 2 toques', 'El botón + pregunta qué es y de qué espacio. Luego lo escribes como lo dirías (o lo dictas).', ['#fab']],
+  ['Ajustes y respaldo', 'Tu PIN, tu nube, el respaldo y el modo guía (explicaciones en cada bloque) están aquí.', ['#btnAjustes', '.lateral .perfil']]
 ];
 let paso = 0;
 
