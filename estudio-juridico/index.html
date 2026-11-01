@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7a1f2b">
+<title>Causa · Gestión del estudio</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#f7f3f1; --panel:#ffffff; --panel-2:#fbf8f6; --line:#e8dfdb; --ink:#231b1c; --ink-2:#5f5354; --ink-3:#8d8182;
+  --brand:#7a1f2b; --brand-2:#9b2c3b; --brand-soft:#f6e7e9; --on-brand:#fff;
+  --ok:#1f7a4d; --ok-soft:#e3f3ea; --warn:#a46200; --warn-soft:#fdf0d9; --bad:#b3261e; --bad-soft:#fbe5e3; --info:#2d5b9a; --info-soft:#e5edf8;
+  --shadow:0 1px 2px rgba(40,20,20,.06),0 6px 18px rgba(40,20,20,.06);
+  --r:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#161213; --panel:#1f1a1b; --panel-2:#252021; --line:#3a3133; --ink:#f3ecea; --ink-2:#c3b6b5; --ink-3:#8f8382;
+    --brand:#c8505f; --brand-2:#d9707d; --brand-soft:#3a2125; --on-brand:#fff;
+    --ok:#5cc28d; --ok-soft:#1c3328; --warn:#e6a64a; --warn-soft:#3a2d17; --bad:#ef7a70; --bad-soft:#3d1f1d; --info:#7fa8e0; --info-soft:#1d2a3d;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#161213; --panel:#1f1a1b; --panel-2:#252021; --line:#3a3133; --ink:#f3ecea; --ink-2:#c3b6b5; --ink-3:#8f8382;
+  --brand:#c8505f; --brand-2:#d9707d; --brand-soft:#3a2125; --on-brand:#fff;
+  --ok:#5cc28d; --ok-soft:#1c3328; --warn:#e6a64a; --warn-soft:#3a2d17; --bad:#ef7a70; --bad-soft:#3d1f1d; --info:#7fa8e0; --info-soft:#1d2a3d;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--brand)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{margin:0;line-height:1.2}
+h1{font-size:22px;font-family:Georgia,"Times New Roman",serif;letter-spacing:-.01em}
+h2{font-size:16px}
+h3{font-size:14px}
+.muted{color:var(--ink-2)} .small{font-size:13px} .tiny{font-size:12px;color:var(--ink-3)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+
+/* Estructura */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:var(--panel);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
+.logo svg{width:34px;height:34px;flex:none}
+.logo b{font-family:Georgia,serif;font-size:21px;letter-spacing:.02em}
+.logo span{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--ink-2);text-decoration:none;font-weight:500}
+.nav a svg{width:19px;height:19px;flex:none}
+.nav a:hover{background:var(--panel-2);color:var(--ink)}
+.nav a.on{background:var(--brand-soft);color:var(--brand)}
+.side .sep{flex:1}
+main{padding:24px 28px 100px;max-width:1180px;width:100%;min-width:0}
+.top{display:none}
+.bottom{display:none}
+
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.head .sub{color:var(--ink-2);font-size:14px;margin-top:4px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+.card + .card{margin-top:14px}
+.grid > .card + .card{margin-top:0}
+.grid > *{min-width:0}
+.card h2{margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.stat{padding:14px 16px}
+.stat .k{font-size:12px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stat .v{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12px;color:var(--ink-3)}
+.stat.alert .v{color:var(--bad)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--panel);padding:8px 13px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;text-decoration:none;color:var(--ink);white-space:nowrap}
+.btn:hover{background:var(--panel-2)}
+.btn svg{width:16px;height:16px}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn.pri:hover{background:var(--brand-2)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:5px 9px;font-size:13px;border-radius:8px}
+.btn.wa{background:#1e8e4e;border-color:#1e8e4e;color:#fff}
+
+.list{display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-top:1px solid var(--line);cursor:pointer;min-width:0}
+.row:first-child{border-top:0}
+.row:hover{background:var(--panel-2)}
+.row .main{flex:1;min-width:0}
+.row .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .end{text-align:right;flex:none;font-variant-numeric:tabular-nums}
+.datebox{width:46px;flex:none;text-align:center;border-radius:10px;padding:4px 0;background:var(--panel-2);border:1px solid var(--line)}
+.datebox b{display:block;font-size:18px;line-height:1.1}
+.datebox span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
+.datebox.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.datebox.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+.datebox.bad span,.datebox.warn span{color:inherit}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--panel-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.b-warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.b-bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.b-info{background:var(--info-soft);color:var(--info);border-color:transparent}
+.b-brand{background:var(--brand-soft);color:var(--brand);border-color:transparent}
+
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.search{flex:1;min-width:200px;position:relative}
+.search input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--ink-3)}
+select.f,input.f{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:999px;font-size:13px;cursor:pointer;color:var(--ink-2);font-weight:500}
+.chip.on{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+
+.empty{text-align:center;padding:32px 16px;color:var(--ink-2)}
+.empty svg{width:42px;height:42px;color:var(--ink-3);margin-bottom:8px}
+
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 18px}
+.kv div span{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:600}
+.kv div b{font-weight:500;word-break:break-word}
+
+.timeline{position:relative;padding-left:18px}
+.timeline:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.tl{position:relative;padding:4px 0 12px}
+.tl:before{content:"";position:absolute;left:-17px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--brand);border:2px solid var(--panel)}
+.tl .x{float:right;opacity:.5;cursor:pointer;border:0;background:none;padding:0 4px}
+.tl .x:hover{opacity:1;color:var(--bad)}
+.inline-add{display:flex;gap:8px;margin-top:8px}
+.inline-add input{flex:1;min-width:0}
+
+.money{font-variant-numeric:tabular-nums;font-weight:600}
+.pos{color:var(--ok)} .neg{color:var(--bad)}
+.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--ok)}
+
+/* Calendario */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .dow{font-size:11px;text-align:center;color:var(--ink-3);font-weight:600;text-transform:uppercase;padding-bottom:2px}
+.cal .d{min-height:62px;border:1px solid var(--line);border-radius:9px;padding:4px 5px;cursor:pointer;background:var(--panel);display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.cal .d:hover{border-color:var(--brand)}
+.cal .d.out{opacity:.4}
+.cal .d.inh{background:var(--panel-2)}
+.cal .d.today .n{background:var(--brand);color:var(--on-brand);border-radius:6px;padding:0 5px}
+.cal .d.sel{outline:2px solid var(--brand);outline-offset:-1px}
+.cal .n{font-size:12px;font-weight:600;align-self:flex-start}
+.cal .ev{font-size:10.5px;border-radius:4px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--info-soft);color:var(--info)}
+.cal .ev.audiencia{background:var(--brand-soft);color:var(--brand)}
+.cal .ev.plazo{background:var(--warn-soft);color:var(--warn)}
+.cal .ev.hecho{text-decoration:line-through;opacity:.6}
+.cal .fer{font-size:9.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dots{display:none;gap:3px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--info)}
+.dots i.audiencia{background:var(--brand)} .dots i.plazo{background:var(--warn)}
+
+.check{width:22px;height:22px;border-radius:7px;border:2px solid var(--ink-3);flex:none;display:grid;place-items:center;background:transparent;cursor:pointer;padding:0}
+.check.on{background:var(--ok);border-color:var(--ok);color:#fff}
+.check svg{width:14px;height:14px}
+.done .t{text-decoration:line-through;color:var(--ink-3)}
+
+.portal{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:var(--ink)}
+.portal .ic{width:40px;height:40px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none;font-weight:800;font-size:13px}
+.portal:hover b{color:var(--brand)}
+
+/* Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(20,10,12,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;animation:fade .15s}
+.modal{background:var(--panel);border-radius:18px;width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal header{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.modal .body{padding:16px 18px;overflow:auto}
+.modal footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.modal footer .l{margin-right:auto}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form .full{grid-column:1/-1}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.form label.cb{flex-direction:row;align-items:center;gap:8px}
+.form input:not([type=checkbox]),.form select,.form textarea{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);font-weight:400;color:var(--ink);width:100%}
+.form textarea{min-height:80px;resize:vertical}
+.form input:focus,.form select:focus,.form textarea:focus,.search input:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:transparent}
+.form .hint{font-weight:400;font-size:12px;color:var(--ink-3)}
+.req{color:var(--bad)}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:60;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+
+.welcome{background:linear-gradient(135deg,var(--brand),#4b111a);color:#fff;border:0}
+.welcome h2{font-family:Georgia,serif;font-size:22px}
+.welcome p{color:#f3dfe2}
+.welcome .btn{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff}
+.welcome .btn.pri{background:#fff;color:var(--brand);border-color:#fff}
+
+#imprimir{display:none}
+
+/* Teléfono */
+@media (max-width:900px){
+  .app{display:block}
+  .side{display:none}
+  main{padding:12px 16px calc(96px + env(safe-area-inset-bottom))}
+  .top{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--brand);color:#fff;position:sticky;top:0;z-index:20}
+  .top b{font-family:Georgia,serif;font-size:19px;flex:1}
+  .top a{color:#fff;display:grid;place-items:center;width:36px;height:36px;border-radius:10px}
+  .top a svg{width:21px;height:21px}
+  .top svg.lg{width:28px;height:28px}
+  .bottom{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
+  .bottom a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:11px;color:var(--ink-3);text-decoration:none;font-weight:600}
+  .bottom a svg{width:22px;height:22px}
+  .bottom a.on{color:var(--brand)}
+  .g4{grid-template-columns:1fr 1fr} .g3,.g2{grid-template-columns:1fr}
+  .stat .v{font-size:21px}
+  h1{font-size:20px}
+  .form{grid-template-columns:1fr}
+  .modal-bg{align-items:flex-end;padding:0}
+  .modal{border-radius:18px 18px 0 0;max-height:94vh}
+  .modal footer{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
+  .cal .d{min-height:44px;align-items:center}
+  .cal .ev,.cal .fer{display:none}
+  .dots{display:flex}
+  .hide-m{display:none!important}
+  .inline-add{flex-wrap:wrap}
+  .inline-add input[name=texto],.inline-add input[name=motivo]{flex-basis:100%;order:-1}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+}
+
+@media print{
+  body{background:#fff;color:#000}
+  .app,.top,.bottom,.modal-bg,.toast{display:none!important}
+  #imprimir{display:block;font:12px/1.45 Georgia,serif;color:#000}
+  #imprimir h1{font-size:20px;margin-bottom:4px}
+  #imprimir table{width:100%;border-collapse:collapse;margin-top:12px}
+  #imprimir th,#imprimir td{border-bottom:1px solid #ccc;padding:6px 4px;text-align:left}
+  #imprimir td.r,#imprimir th.r{text-align:right}
+  #imprimir .tot{font-weight:bold;border-top:2px solid #000}
+  #imprimir .hdr{display:flex;justify-content:space-between;border-bottom:2px solid #7a1f2b;padding-bottom:8px;margin-bottom:12px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <svg class="lg" viewBox="0 0 512 512"><use href="#marca"/></svg>
+  <b>Causa</b>
+  <a href="#/buscar" aria-label="Buscar"><svg><use href="#i-search"/></svg></a>
+  <a href="#/portales" aria-label="Portales"><svg><use href="#i-globe"/></svg></a>
+  <a href="#/ajustes" aria-label="Ajustes"><svg><use href="#i-gear"/></svg></a>
+</header>
+
+<div class="app">
+  <aside class="side">
+    <div class="logo">
+      <svg viewBox="0 0 512 512"><use href="#marca"/></svg>
+      <div><b>Causa</b><span>GESTIÓN DEL ESTUDIO</span></div>
+    </div>
+    <nav class="nav" id="nav-side"></nav>
+    <div class="sep"></div>
+    <div class="tiny" style="padding:0 10px" id="side-estudio"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<nav class="bottom" id="nav-bottom"></nav>
+<div id="imprimir"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="marca" viewBox="0 0 512 512">
+      <rect width="512" height="512" rx="112" fill="#7a1f2b"/>
+      <g fill="none" stroke="#fff7f2" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M256 120v272"/><path d="M176 392h160"/><path d="M140 170h232"/>
+        <path d="M140 170l-48 104h96z"/><path d="M372 170l-48 104h96z"/>
+      </g>
+      <circle cx="256" cy="140" r="22" fill="#fff7f2"/>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M16 4.1a4 4 0 0 1 0 7.8"/><path d="M22 21c0-3-1.8-5.6-4.4-6.6"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13h8M8 16h5"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M8 14h3v3H8z"/></symbol>
+    <symbol id="i-money" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="13" rx="2"/><circle cx="12" cy="12.5" r="3"/><path d="M6 10v.01M18 15v.01"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-wa" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1 0-.3-.1-.5-.2z"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  </defs>
+</svg>
+
+<script>
+'use strict';
+/* =====================================================================
+   Causa · gestión para estudios jurídicos del Perú
+   Todo vive en este archivo y los datos en el navegador (localStorage).
+   ===================================================================== */
+
+const CLAVE = 'causa_datos_v1';
+const VERSION = 1;
+
+/* ---------- utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const pad = (n) => String(n).padStart(2, '0');
+const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const hoy = () => iso(new Date());
+const parse = (s) => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const sumar = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return iso(d); };
+const dias = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
+const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'set', 'oct', 'nov', 'dic'];
+const MESL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Setiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const DOW = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+const fFecha = (s) => { if (!s) return '—'; const d = parse(s); return `${d.getDate()} ${MES[d.getMonth()]} ${d.getFullYear()}`; };
+const fFechaL = (s) => { const d = parse(s); return `${['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'][d.getDay()]} ${d.getDate()} de ${MESL[d.getMonth()].toLowerCase()}`; };
+const nf = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const sol = (n) => 'S/ ' + nf.format(Number(n) || 0);
+const num = (v) => { const n = parseFloat(String(v ?? '').replace(/,/g, '')); return isFinite(n) ? Math.round(n * 100) / 100 : 0; };
+const norm = (s) => String(s ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const icon = (id) => `<svg><use href="#${id}"/></svg>`;
+
+/* ---------- datos ---------- */
+const VACIO = () => ({
+  version: VERSION,
+  clientes: [], expedientes: [], eventos: [], movimientos: [],
+  ajustes: { estudio: '', abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', inhabiles: [], tema: 'auto' }
+});
+let DB = cargar();
+function cargar() {
+  try {
+    const raw = localStorage.getItem(CLAVE);
+    if (raw) return arreglar(JSON.parse(raw));
+  } catch (e) { console.warn(e); }
+  return VACIO();
+}
+function arreglar(d) {
+  const base = VACIO();
+  if (!d || typeof d !== 'object') return base;
+  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
+  base.ajustes = Object.assign(base.ajustes, d.ajustes || {});
+  if (!Array.isArray(base.ajustes.inhabiles)) base.ajustes.inhabiles = [];
+  base.expedientes.forEach((e) => { if (!Array.isArray(e.actuaciones)) e.actuaciones = []; });
+  return base;
+}
+function guardar() {
+  try { localStorage.setItem(CLAVE, JSON.stringify(DB)); }
+  catch (e) { toast('No se pudo guardar: el almacenamiento del navegador está lleno o bloqueado.'); }
+}
+const cliente = (id) => DB.clientes.find((c) => c.id === id);
+const expediente = (id) => DB.expedientes.find((e) => e.id === id);
+const expsDe = (cid) => DB.expedientes.filter((e) => e.clienteId === cid);
+
+/* ---------- catálogos ---------- */
+const MATERIAS = ['Civil', 'Penal', 'Laboral', 'Familia', 'Constitucional', 'Contencioso administrativo', 'Comercial', 'Tributario', 'Administrativo', 'Arbitraje', 'Otro'];
+const ESTADOS = ['En trámite', 'Por presentar', 'En calificación', 'Sentenciado', 'Apelación', 'Casación', 'Ejecución', 'Conciliado', 'Archivado'];
+const ESTADO_COLOR = { 'En trámite': 'b-info', 'Por presentar': 'b-warn', 'En calificación': 'b-warn', 'Sentenciado': 'b-brand', 'Apelación': 'b-brand', 'Casación': 'b-brand', 'Ejecución': 'b-ok', 'Conciliado': 'b-ok', 'Archivado': '' };
+const CERRADOS = ['Archivado', 'Conciliado'];
+const TIPOS_EV = { audiencia: 'Audiencia', plazo: 'Plazo', tarea: 'Tarea', reunion: 'Reunión' };
+const TIPOS_MOV = { honorario: 'Honorario pactado', gasto: 'Gasto / tasa', pago: 'Pago recibido' };
+const MEDIOS = ['Efectivo', 'Transferencia', 'Yape', 'Plin', 'Depósito', 'Cheque', 'Otro'];
+
+/* ---------- días inhábiles (Perú) ---------- */
+function pascua(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+    g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4,
+    l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+    mes = Math.floor((h + l - 7 * m + 114) / 31), dia = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, mes - 1, dia);
+}
+const _fer = {};
+function feriados(y) {
+  if (_fer[y]) return _fer[y];
+  const m = new Map();
+  const fijo = [['01-01', 'Año Nuevo'], ['05-01', 'Día del Trabajo'], ['06-07', 'Batalla de Arica'], ['06-29', 'San Pedro y San Pablo'],
+    ['07-23', 'Día de la Fuerza Aérea'], ['07-28', 'Fiestas Patrias'], ['07-29', 'Fiestas Patrias'], ['08-06', 'Batalla de Junín'],
+    ['08-30', 'Santa Rosa de Lima'], ['10-08', 'Combate de Angamos'], ['11-01', 'Todos los Santos'], ['12-08', 'Inmaculada Concepción'],
+    ['12-09', 'Batalla de Ayacucho'], ['12-25', 'Navidad']];
+  fijo.forEach(([md, n]) => m.set(`${y}-${md}`, n));
+  const p = pascua(y);
+  const jue = new Date(p); jue.setDate(p.getDate() - 3);
+  const vie = new Date(p); vie.setDate(p.getDate() - 2);
+  m.set(iso(jue), 'Jueves Santo'); m.set(iso(vie), 'Viernes Santo');
+  return (_fer[y] = m);
+}
+function inhabil(s) {
+  const d = parse(s);
+  if (d.getDay() === 0 || d.getDay() === 6) return 'Fin de semana';
+  const f = feriados(d.getFullYear()).get(s);
+  if (f) return f;
+  const x = DB.ajustes.inhabiles.find((i) => i.fecha === s);
+  return x ? (x.motivo || 'Día inhábil') : '';
+}
+const nombreFeriado = (s) => { const f = feriados(parse(s).getFullYear()).get(s); if (f) return f; const x = DB.ajustes.inhabiles.find((i) => i.fecha === s); return x ? (x.motivo || 'Día inhábil') : ''; };
+/* El plazo empieza a correr el día siguiente de la notificación y sólo cuenta días hábiles. */
+function vencimientoHabiles(desde, n) {
+  let d = desde, c = 0, guard = 0;
+  while (c < n && guard++ < 2000) { d = sumar(d, 1); if (!inhabil(d)) c++; }
+  return d;
+}
+function vencimientoNaturales(desde, n) {
+  let d = sumar(desde, n), guard = 0;
+  while (inhabil(d) && guard++ < 60) d = sumar(d, 1); // si vence en inhábil, pasa al siguiente hábil
+  return d;
+}
+
+/* ---------- cálculos ---------- */
+function saldo(filtro) {
+  let cargo = 0, pagado = 0, honor = 0, gasto = 0;
+  DB.movimientos.filter(filtro).forEach((m) => {
+    if (m.tipo === 'pago') pagado += num(m.monto);
+    else { cargo += num(m.monto); if (m.tipo === 'gasto') gasto += num(m.monto); else honor += num(m.monto); }
+  });
+  return { cargo, pagado, honor, gasto, pend: Math.round((cargo - pagado) * 100) / 100 };
+}
+const saldoCliente = (cid) => saldo((m) => m.clienteId === cid);
+const saldoExp = (eid) => saldo((m) => m.expedienteId === eid);
+function urg(ev) {
+  if (ev.hecho) return '';
+  const d = dias(hoy(), ev.fecha);
+  if (d < 0) return 'bad';
+  if (d <= 1) return 'bad';
+  if (d <= 3) return 'warn';
+  return '';
+}
+function cuando(f) {
+  const d = dias(hoy(), f);
+  if (d === 0) return 'hoy';
+  if (d === 1) return 'mañana';
+  if (d === -1) return 'ayer';
+  if (d < 0) return `hace ${-d} días`;
+  return `en ${d} días`;
+}
+function caratula(e) {
+  const c = cliente(e.clienteId);
+  return [c ? c.nombre : '', e.contraparte].filter(Boolean).join(' vs. ') || e.materia || 'Expediente';
+}
+const ordenEv = (a, b) => (a.fecha + (a.hora || '99')).localeCompare(b.fecha + (b.hora || '99'));
+
+/* ---------- navegación ---------- */
+const NAV = [
+  ['inicio', 'Inicio', 'i-home'],
+  ['clientes', 'Clientes', 'i-users'],
+  ['expedientes', 'Expedientes', 'i-folder'],
+  ['agenda', 'Agenda', 'i-cal'],
+  ['honorarios', 'Honorarios', 'i-money'],
+];
+const NAV_EXTRA = [['portales', 'Portales', 'i-globe'], ['ajustes', 'Ajustes', 'i-gear']];
+function pintarNav(ruta) {
+  const base = { cliente: 'clientes', expediente: 'expedientes', buscar: '' }[ruta] ?? ruta;
+  const a = ([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`;
+  $('#nav-side').innerHTML = NAV.map(a).join('') + '<div style="height:10px"></div>' + NAV_EXTRA.map(a).join('');
+  $('#nav-bottom').innerHTML = NAV.map(a).join('');
+  const s = DB.ajustes;
+  $('#side-estudio').innerHTML = s.estudio ? `<b style="color:var(--ink-2)">${esc(s.estudio)}</b><br>${esc(s.abogado)}` : 'Configura tu estudio en Ajustes';
+}
+
+let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '' };
+
+function render() {
+  const [ruta, id] = (location.hash.replace(/^#\/?/, '') || 'inicio').split('/');
+  pintarNav(ruta);
+  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar };
+  const v = vistas[ruta] || vInicio;
+  $('#main').innerHTML = v(id ? decodeURIComponent(id) : '');
+  aplicarTema();
+}
+function reRender() { const y = window.scrollY; render(); window.scrollTo(0, y); }
+window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+
+/* ===================================================================
+   VISTAS
+   =================================================================== */
+function vInicio() {
+  const h = hoy();
+  const activos = DB.expedientes.filter((e) => !CERRADOS.includes(e.estado));
+  const pend = DB.eventos.filter((e) => !e.hecho);
+  const vencidos = pend.filter((e) => e.fecha < h).sort(ordenEv);
+  const prox = pend.filter((e) => e.fecha >= h && e.fecha <= sumar(h, 14)).sort(ordenEv);
+  const aud7 = pend.filter((e) => e.tipo === 'audiencia' && e.fecha >= h && e.fecha <= sumar(h, 7)).length;
+  const pla7 = pend.filter((e) => e.tipo === 'plazo' && e.fecha >= h && e.fecha <= sumar(h, 7)).length;
+  const total = saldo(() => true);
+  const deudores = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.pend > 0.004).sort((a, b) => b.s.pend - a.s.pend).slice(0, 5);
+  const nombre = DB.ajustes.abogado ? ', ' + esc(DB.ajustes.abogado.split(' ')[0]) : '';
+  const hora = new Date().getHours();
+  const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
+
+  const vacio = !DB.clientes.length && !DB.expedientes.length;
+  return `
+  <div class="head"><div><h1>${saludo}${nombre}</h1><div class="sub">${fFechaL(h)} · ${DB.ajustes.estudio ? esc(DB.ajustes.estudio) : 'tu estudio, en orden'}</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn hide-m" data-act="nuevoExp">${icon('i-plus')} Expediente</button></div></div>
+  ${vacio ? `<div class="card welcome" style="margin-bottom:14px"><h2>Bienvenido a Causa</h2>
+    <p>Lleva clientes, expedientes, audiencias, plazos y honorarios en un solo lugar. Todo se guarda en este aparato; puedes descargar un respaldo cuando quieras.</p>
+    <div class="actions"><button class="btn pri" data-act="nuevoCliente">Registrar mi primer cliente</button><button class="btn" data-act="ejemplo">Ver con datos de ejemplo</button></div></div>` : ''}
+  <div class="grid g4">
+    <a class="card stat" href="#/expedientes" style="text-decoration:none;color:inherit"><div class="k">Expedientes activos</div><div class="v">${activos.length}</div><div class="d">${DB.expedientes.length} en total</div></a>
+    <a class="card stat" href="#/agenda" style="text-decoration:none;color:inherit"><div class="k">Audiencias · 7 días</div><div class="v">${aud7}</div><div class="d">próxima semana</div></a>
+    <a class="card stat ${pla7 || vencidos.length ? 'alert' : ''}" href="#/agenda" style="text-decoration:none;color:inherit"><div class="k">Plazos · 7 días</div><div class="v">${pla7}</div><div class="d">${vencidos.length ? vencidos.length + ' vencido(s) sin marcar' : 'ninguno vencido'}</div></a>
+    <a class="card stat" href="#/honorarios" style="text-decoration:none;color:inherit"><div class="k">Por cobrar</div><div class="v">${sol(total.pend)}</div><div class="d">cobrado ${sol(total.pagado)}</div></a>
+  </div>
+  <div class="grid g2" style="margin-top:14px;align-items:start">
+    <div class="card"><h2>Próximos 14 días <a class="btn sm ghost" href="#/agenda">Ver agenda</a></h2>
+      ${vencidos.length ? `<div class="tiny" style="color:var(--bad);font-weight:700;margin:4px 0">VENCIDOS SIN MARCAR</div><div class="list">${vencidos.map(filaEvento).join('')}</div><div style="height:10px"></div>` : ''}
+      ${prox.length ? `<div class="list">${prox.map(filaEvento).join('')}</div>` : `<div class="empty">${icon('i-cal')}<div>Nada en agenda para las próximas dos semanas.</div></div>`}
+    </div>
+    <div>
+      <div class="card"><h2>Saldos por cobrar <a class="btn sm ghost" href="#/honorarios">Honorarios</a></h2>
+        ${deudores.length ? `<div class="list">${deudores.map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${expsDe(c.id).length} expediente(s) · pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div><div class="end money neg">${sol(s.pend)}</div></div>`).join('')}</div>` : `<div class="empty small">Nadie te debe nada. 👏</div>`}
+      </div>
+      <div class="card"><h2>Calculadora de plazos</h2>
+        <p class="small muted" style="margin:0 0 10px">Cuenta días hábiles desde el día siguiente a la notificación, sin fines de semana ni feriados.</p>
+        <button class="btn" data-act="calc">${icon('i-clock')} Calcular un vencimiento</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function filaEvento(ev, conExp = true) {
+  const d = parse(ev.fecha), u = urg(ev), e = expediente(ev.expedienteId);
+  const t = { audiencia: 'b-brand', plazo: 'b-warn', tarea: 'b-info', reunion: '' }[ev.tipo] || '';
+  return `<div class="row ${ev.hecho ? 'done' : ''}" data-act="editEvento" data-id="${ev.id}">
+    <button class="check ${ev.hecho ? 'on' : ''}" data-act="toggleEvento" data-id="${ev.id}" aria-label="Marcar como hecho">${ev.hecho ? icon('i-check') : ''}</button>
+    <div class="datebox ${u}"><b>${d.getDate()}</b><span>${MES[d.getMonth()]}</span></div>
+    <div class="main"><div class="t">${esc(ev.titulo || TIPOS_EV[ev.tipo])}</div>
+      <div class="s"><span class="badge ${t}">${TIPOS_EV[ev.tipo] || 'Evento'}</span> ${ev.hora ? esc(ev.hora) + ' · ' : ''}${conExp && e ? esc(e.numero || caratula(e)) : esc(ev.lugar || '')}</div></div>
+    <div class="end tiny hide-m">${cuando(ev.fecha)}</div></div>`;
+}
+
+/* ---------- clientes ---------- */
+function vClientes() {
+  const q = norm(estado.qCli);
+  const lista = DB.clientes.filter((c) => !q || norm([c.nombre, c.documento, c.telefono, c.email].join(' ')).includes(q)).sort((a, b) => a.nombre.localeCompare(b.nombre));
+  return `
+  <div class="head"><div><h1>Clientes</h1><div class="sub">${DB.clientes.length} registrado(s)</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoCliente">${icon('i-plus')} Nuevo cliente</button></div></div>
+  <div class="toolbar"><label class="search">${icon('i-search')}<input id="qCli" placeholder="Buscar por nombre, DNI, RUC o teléfono" value="${esc(estado.qCli)}"></label></div>
+  <div class="card">${lista.length ? `<div class="list">${lista.map((c) => {
+    const s = saldoCliente(c.id), n = expsDe(c.id).length;
+    return `<div class="row" data-go="cliente/${c.id}"><div class="datebox" style="background:var(--brand-soft);border:0;color:var(--brand)"><b style="font-size:15px;line-height:32px">${esc(iniciales(c.nombre))}</b></div>
+      <div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${esc(c.documento || 'Sin documento')} · ${esc(c.telefono || 'sin teléfono')} · ${n} expediente(s)</div></div>
+      <div class="end">${s.pend > 0.004 ? `<div class="money neg">${sol(s.pend)}</div><div class="tiny">por cobrar</div>` : s.cargo ? `<span class="badge b-ok">Al día</span>` : ''}</div></div>`;
+  }).join('')}</div>` : `<div class="empty">${icon('i-users')}<div>${q ? 'Ningún cliente coincide.' : 'Aún no tienes clientes.'}</div></div>`}</div>`;
+}
+const iniciales = (n) => String(n || '?').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+
+function vCliente(id) {
+  const c = cliente(id);
+  if (!c) return noExiste('Cliente');
+  const exps = expsDe(id), s = saldoCliente(id);
+  const movs = DB.movimientos.filter((m) => m.clienteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  return `
+  <div class="head"><div><a href="#/clientes" class="small" style="text-decoration:none">${'‹'} Clientes</a><h1 style="margin-top:4px">${esc(c.nombre)}</h1><div class="sub">${esc(c.tipo || 'Persona natural')}${c.documento ? ' · ' + esc(c.documento) : ''}</div></div>
+    <div class="actions">${c.telefono ? `<a class="btn wa" href="${waLink(c.telefono, `Hola ${c.nombre.split(' ')[0]}, le escribo de ${DB.ajustes.estudio || 'su estudio'}.`)}" target="_blank" rel="noopener">${icon('i-wa')} WhatsApp</a>` : ''}
+      <button class="btn" data-act="estadoCuenta" data-id="${id}">${icon('i-print')} Estado de cuenta</button>
+      <button class="btn" data-act="editCliente" data-id="${id}">Editar</button></div></div>
+  <div class="grid g3">
+    <div class="card stat"><div class="k">Pactado + gastos</div><div class="v">${sol(s.cargo)}</div></div>
+    <div class="card stat"><div class="k">Pagado</div><div class="v pos">${sol(s.pagado)}</div></div>
+    <div class="card stat ${s.pend > 0 ? 'alert' : ''}"><div class="k">Saldo</div><div class="v">${sol(s.pend)}</div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><h2>Datos</h2><div class="kv">
+    ${kv('Teléfono', c.telefono)}${kv('Correo', c.email)}${kv('Dirección', c.direccion)}${kv('Desde', fFecha(c.creado))}${c.notas ? `<div style="grid-column:1/-1"><span>Notas</span><b style="white-space:pre-wrap">${esc(c.notas)}</b></div>` : ''}</div></div>
+  <div class="card"><h2>Expedientes <button class="btn sm" data-act="nuevoExp" data-cliente="${id}">${icon('i-plus')} Nuevo</button></h2>
+    ${exps.length ? `<div class="list">${exps.map(filaExp).join('')}</div>` : `<div class="empty small">Sin expedientes.</div>`}</div>
+  <div class="card"><h2>Honorarios y pagos <span class="actions"><button class="btn sm" data-act="nuevoMov" data-tipo="honorario" data-cliente="${id}">+ Honorario</button><button class="btn sm pri" data-act="nuevoMov" data-tipo="pago" data-cliente="${id}">+ Pago</button></span></h2>
+    ${movs.length ? `<div class="list">${movs.map(filaMov).join('')}</div>` : `<div class="empty small">Sin movimientos.</div>`}</div>
+  <div style="margin-top:14px"><button class="btn danger" data-act="borrarCliente" data-id="${id}">Eliminar cliente</button></div>`;
+}
+const kv = (k, v) => `<div><span>${esc(k)}</span><b>${v ? esc(v) : '—'}</b></div>`;
+const noExiste = (q) => `<div class="card empty"><h2>${q} no encontrado</h2><p>Puede que se haya eliminado.</p><a class="btn" href="#/inicio">Volver al inicio</a></div>`;
+function waLink(tel, txt) {
+  let n = String(tel).replace(/\D/g, '');
+  if (n.length === 9 && n.startsWith('9')) n = '51' + n;
+  return `https://wa.me/${n}?text=${encodeURIComponent(txt || '')}`;
+}
+
+/* ---------- expedientes ---------- */
+function filaExp(e) {
+  const prox = DB.eventos.filter((v) => v.expedienteId === e.id && !v.hecho && v.fecha >= hoy()).sort(ordenEv)[0];
+  return `<div class="row" data-go="expediente/${e.id}"><div class="main">
+    <div class="t">${esc(caratula(e))}</div>
+    <div class="s"><span class="mono">${esc(e.numero || 'Sin número')}</span>${e.juzgado ? ' · ' + esc(e.juzgado) : ''}</div>
+    ${prox ? `<div class="s" style="color:var(--${urg(prox) || 'ink-2'})">${icon('i-clock').replace('<svg>', '<svg style="width:12px;height:12px;vertical-align:-1px">')} ${esc(TIPOS_EV[prox.tipo])}: ${fFecha(prox.fecha)} (${cuando(prox.fecha)})</div>` : ''}</div>
+    <div class="end"><span class="badge ${ESTADO_COLOR[e.estado] || ''}">${esc(e.estado || 'En trámite')}</span><div class="tiny" style="margin-top:4px">${esc(e.materia || '')}</div></div></div>`;
+}
+function vExpedientes() {
+  const q = norm(estado.qExp);
+  let lista = DB.expedientes.filter((e) => {
+    if (estado.fEstado === 'activos' && CERRADOS.includes(e.estado)) return false;
+    if (estado.fEstado === 'cerrados' && !CERRADOS.includes(e.estado)) return false;
+    if (estado.fMateria && e.materia !== estado.fMateria) return false;
+    if (!q) return true;
+    const c = cliente(e.clienteId);
+    return norm([e.numero, e.juzgado, e.materia, e.pretension, e.contraparte, e.juez, e.distrito, c && c.nombre].join(' ')).includes(q);
+  });
+  lista.sort((a, b) => (b.actualizado || '').localeCompare(a.actualizado || ''));
+  const mats = [...new Set(DB.expedientes.map((e) => e.materia).filter(Boolean))];
+  return `
+  <div class="head"><div><h1>Expedientes</h1><div class="sub">${DB.expedientes.length} en total</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoExp">${icon('i-plus')} Nuevo expediente</button></div></div>
+  <div class="toolbar"><label class="search">${icon('i-search')}<input id="qExp" placeholder="Número, cliente, juzgado, contraparte…" value="${esc(estado.qExp)}"></label>
+    <select class="f" id="fMateria"><option value="">Todas las materias</option>${mats.map((m) => `<option ${m === estado.fMateria ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
+  <div class="chips" style="margin-bottom:12px">${[['activos', 'Activos'], ['cerrados', 'Cerrados'], ['todos', 'Todos']].map(([k, t]) => `<button class="chip ${estado.fEstado === k ? 'on' : ''}" data-act="fEstado" data-v="${k}">${t}</button>`).join('')}</div>
+  <div class="card">${lista.length ? `<div class="list">${lista.map(filaExp).join('')}</div>` : `<div class="empty">${icon('i-folder')}<div>${DB.expedientes.length ? 'Ningún expediente coincide con el filtro.' : 'Aún no tienes expedientes.'}</div></div>`}</div>`;
+}
+function vExpediente(id) {
+  const e = expediente(id);
+  if (!e) return noExiste('Expediente');
+  const c = cliente(e.clienteId), s = saldoExp(id);
+  const evs = DB.eventos.filter((v) => v.expedienteId === id).sort(ordenEv);
+  const pend = evs.filter((v) => !v.hecho), hechos = evs.filter((v) => v.hecho).reverse();
+  const movs = DB.movimientos.filter((m) => m.expedienteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const acts = [...e.actuaciones].sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const pct = s.cargo ? Math.min(100, Math.round((s.pagado / s.cargo) * 100)) : 0;
+  return `
+  <div class="head"><div><a href="#/expedientes" class="small" style="text-decoration:none">‹ Expedientes</a>
+    <h1 style="margin-top:4px">${esc(caratula(e))}</h1>
+    <div class="sub"><span class="mono">${esc(e.numero || 'Sin número')}</span> · <span class="badge ${ESTADO_COLOR[e.estado] || ''}">${esc(e.estado || 'En trámite')}</span></div></div>
+    <div class="actions">${e.numero ? `<button class="btn" data-act="cej" data-id="${id}">${icon('i-ext')} Ver en CEJ</button>` : ''}
+      <button class="btn" data-act="editExp" data-id="${id}">Editar</button></div></div>
+  <div class="card"><div class="kv">
+    <div><span>Cliente</span><b>${c ? `<a href="#/cliente/${c.id}">${esc(c.nombre)}</a>` : '—'}</b></div>
+    ${kv('Condición', e.condicion)}${kv('Contraparte', e.contraparte)}${kv('Materia', e.materia)}${kv('Pretensión / delito', e.pretension)}
+    ${kv('Órgano jurisdiccional', e.juzgado)}${kv('Distrito judicial', e.distrito)}${kv('Juez', e.juez)}${kv('Especialista', e.especialista)}${kv('Inicio', fFecha(e.inicio))}
+    ${e.notas ? `<div style="grid-column:1/-1"><span>Notas</span><b style="white-space:pre-wrap">${esc(e.notas)}</b></div>` : ''}</div></div>
+  <div class="grid g2" style="margin-top:14px;align-items:start">
+    <div>
+      <div class="card"><h2>Audiencias y plazos <button class="btn sm pri" data-act="nuevoEvento" data-exp="${id}">${icon('i-plus')} Agregar</button></h2>
+        ${pend.length ? `<div class="list">${pend.map((v) => filaEvento(v, false)).join('')}</div>` : `<div class="empty small">Nada pendiente.</div>`}
+        ${hechos.length ? `<details style="margin-top:8px"><summary class="small muted" style="cursor:pointer">${hechos.length} realizado(s)</summary><div class="list">${hechos.map((v) => filaEvento(v, false)).join('')}</div></details>` : ''}
+      </div>
+      <div class="card"><h2>Honorarios <span class="actions"><button class="btn sm" data-act="nuevoMov" data-tipo="honorario" data-exp="${id}">+ Honorario</button><button class="btn sm" data-act="nuevoMov" data-tipo="gasto" data-exp="${id}">+ Gasto</button><button class="btn sm pri" data-act="nuevoMov" data-tipo="pago" data-exp="${id}">+ Pago</button></span></h2>
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Pagado ${sol(s.pagado)} de ${sol(s.cargo)}</span><b class="${s.pend > 0 ? 'neg' : 'pos'}">Saldo ${sol(s.pend)}</b></div>
+        <div class="bar"><i style="width:${pct}%"></i></div>
+        ${movs.length ? `<div class="list" style="margin-top:8px">${movs.map((m) => filaMov(m, false)).join('')}</div>` : `<div class="empty small">Sin movimientos.</div>`}
+      </div>
+    </div>
+    <div class="card"><h2>Seguimiento</h2>
+      <form class="inline-add" data-form="actuacion" data-id="${id}"><input class="f" type="date" name="fecha" value="${hoy()}" style="max-width:150px"><input class="f" name="texto" placeholder="Ej. Se notificó la resolución N.° 5" required><button class="btn pri">Anotar</button></form>
+      <div class="timeline" style="margin-top:14px">${acts.length ? acts.map((a) => `<div class="tl"><button class="x" data-act="borrarAct" data-exp="${id}" data-id="${a.id}" aria-label="Borrar">✕</button><div class="tiny">${fFecha(a.fecha)}</div><div style="white-space:pre-wrap">${esc(a.texto)}</div></div>`).join('') : `<div class="tiny">Anota aquí cada escrito, resolución o notificación.</div>`}</div>
+    </div>
+  </div>
+  <div style="margin-top:14px"><button class="btn danger" data-act="borrarExp" data-id="${id}">Eliminar expediente</button></div>`;
+}
+
+/* ---------- agenda ---------- */
+function vAgenda() {
+  const [y, m] = estado.mes.split('-').map(Number);
+  const primero = new Date(y, m - 1, 1);
+  const off = (primero.getDay() + 6) % 7; // semana empieza en lunes
+  const inicio = new Date(y, m - 1, 1 - off);
+  const evs = DB.eventos.filter((e) => (estado.verHechos || !e.hecho) && (!estado.fTipo || e.tipo === estado.fTipo));
+  const porDia = {};
+  evs.forEach((e) => (porDia[e.fecha] = porDia[e.fecha] || []).push(e));
+  const h = hoy();
+  let celdas = '';
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(inicio); d.setDate(inicio.getDate() + i);
+    const s = iso(d), lst = (porDia[s] || []).sort(ordenEv), fer = nombreFeriado(s), inh = inhabil(s);
+    if (i >= 35 && d.getMonth() !== m - 1) break;
+    celdas += `<div class="d ${d.getMonth() !== m - 1 ? 'out' : ''} ${inh ? 'inh' : ''} ${s === h ? 'today' : ''} ${s === estado.diaSel ? 'sel' : ''}" data-act="dia" data-v="${s}">
+      <span class="n">${d.getDate()}</span>${fer ? `<span class="fer">${esc(fer)}</span>` : ''}
+      ${lst.slice(0, 3).map((e) => `<span class="ev ${e.tipo} ${e.hecho ? 'hecho' : ''}">${e.hora ? esc(e.hora) + ' ' : ''}${esc(e.titulo || TIPOS_EV[e.tipo])}</span>`).join('')}
+      ${lst.length > 3 ? `<span class="tiny">+${lst.length - 3}</span>` : ''}
+      <span class="dots">${lst.slice(0, 4).map((e) => `<i class="${e.tipo}"></i>`).join('')}</span></div>`;
+  }
+  let lista, titulo;
+  if (estado.diaSel) {
+    lista = (porDia[estado.diaSel] || []).sort(ordenEv);
+    const f = nombreFeriado(estado.diaSel);
+    titulo = fFechaL(estado.diaSel) + (f ? ` · ${f}` : '');
+  } else {
+    lista = evs.filter((e) => e.fecha.startsWith(estado.mes)).sort(ordenEv);
+    titulo = `${MESL[m - 1]} ${y}`;
+  }
+  return `
+  <div class="head"><div><h1>Agenda</h1><div class="sub">Audiencias, plazos, tareas y reuniones</div></div>
+    <div class="actions"><button class="btn" data-act="calc">${icon('i-clock')} Calcular plazo</button><button class="btn hide-m" data-act="ics">Exportar a calendario</button><button class="btn pri" data-act="nuevoEvento" data-fecha="${estado.diaSel}">${icon('i-plus')} Nuevo</button></div></div>
+  <div class="chips" style="margin-bottom:12px">${[['', 'Todo'], ['audiencia', 'Audiencias'], ['plazo', 'Plazos'], ['tarea', 'Tareas'], ['reunion', 'Reuniones']].map(([k, t]) => `<button class="chip ${estado.fTipo === k ? 'on' : ''}" data-act="fTipo" data-v="${k}">${t}</button>`).join('')}
+    <button class="chip ${estado.verHechos ? 'on' : ''}" data-act="verHechos">Mostrar realizados</button></div>
+  <div class="grid" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start" id="ag">
+    <div class="card"><div class="cal-head"><button class="btn sm ghost" data-act="mes" data-v="-1" aria-label="Mes anterior">${icon('i-left')}</button>
+      <h2 style="margin:0">${MESL[m - 1]} ${y}</h2>
+      <span><button class="btn sm ghost" data-act="mesHoy">Hoy</button><button class="btn sm ghost" data-act="mes" data-v="1" aria-label="Mes siguiente">${icon('i-right')}</button></span></div>
+      <div class="cal">${['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'].map((d) => `<div class="dow">${d}</div>`).join('')}${celdas}</div></div>
+    <div class="card"><h2>${esc(titulo)} ${estado.diaSel ? `<button class="btn sm ghost" data-act="dia" data-v="">Ver mes</button>` : ''}</h2>
+      ${lista.length ? `<div class="list">${lista.map((e) => filaEvento(e)).join('')}</div>` : `<div class="empty small">Sin eventos${estado.diaSel ? ' este día' : ' este mes'}.</div>`}</div>
+  </div>
+  <style>@media(max-width:900px){#ag{grid-template-columns:1fr!important}}</style>`;
+}
+
+/* ---------- honorarios ---------- */
+function filaMov(m, conCliente = true) {
+  const c = cliente(m.clienteId), e = expediente(m.expedienteId), pago = m.tipo === 'pago';
+  const sub = [conCliente && c ? c.nombre : '', e ? e.numero || caratula(e) : '', m.medio].filter(Boolean).join(' · ');
+  return `<div class="row" data-act="editMov" data-id="${m.id}"><div class="datebox"><b>${parse(m.fecha).getDate()}</b><span>${MES[parse(m.fecha).getMonth()]}</span></div>
+    <div class="main"><div class="t">${esc(m.concepto || TIPOS_MOV[m.tipo])}</div><div class="s"><span class="badge ${pago ? 'b-ok' : m.tipo === 'gasto' ? 'b-warn' : 'b-brand'}">${TIPOS_MOV[m.tipo]}</span> ${esc(sub)}</div></div>
+    <div class="end money ${pago ? 'pos' : ''}">${pago ? '+ ' : ''}${sol(m.monto)}</div></div>`;
+}
+function vHonorarios() {
+  const t = saldo(() => true);
+  const mesAct = hoy().slice(0, 7);
+  const cobradoMes = DB.movimientos.filter((m) => m.tipo === 'pago' && m.fecha.startsWith(mesAct)).reduce((a, m) => a + num(m.monto), 0);
+  const movs = DB.movimientos.filter((m) => !estado.fMov || m.tipo === estado.fMov).sort((a, b) => b.fecha.localeCompare(a.fecha) || (b.creado || '').localeCompare(a.creado || '')).slice(0, 200);
+  const porCli = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.cargo || x.s.pagado).sort((a, b) => b.s.pend - a.s.pend);
+  return `
+  <div class="head"><div><h1>Honorarios y cobros</h1><div class="sub">Lo pactado, lo cobrado y lo que falta</div></div>
+    <div class="actions"><button class="btn" data-act="nuevoMov" data-tipo="honorario">+ Honorario</button><button class="btn hide-m" data-act="nuevoMov" data-tipo="gasto">+ Gasto</button><button class="btn pri" data-act="nuevoMov" data-tipo="pago">${icon('i-plus')} Registrar pago</button></div></div>
+  <div class="grid g4">
+    <div class="card stat"><div class="k">Pactado</div><div class="v">${sol(t.honor)}</div><div class="d">+ gastos ${sol(t.gasto)}</div></div>
+    <div class="card stat"><div class="k">Cobrado</div><div class="v pos">${sol(t.pagado)}</div></div>
+    <div class="card stat ${t.pend > 0 ? 'alert' : ''}"><div class="k">Por cobrar</div><div class="v">${sol(t.pend)}</div></div>
+    <div class="card stat"><div class="k">Cobrado este mes</div><div class="v">${sol(cobradoMes)}</div><div class="d">${MESL[new Date().getMonth()]}</div></div>
+  </div>
+  <div class="grid g2" style="margin-top:14px;align-items:start">
+    <div class="card"><h2>Movimientos</h2>
+      <div class="chips" style="margin-bottom:8px">${[['', 'Todos'], ['honorario', 'Honorarios'], ['gasto', 'Gastos'], ['pago', 'Pagos']].map(([k, tt]) => `<button class="chip ${estado.fMov === k ? 'on' : ''}" data-act="fMov" data-v="${k}">${tt}</button>`).join('')}</div>
+      ${movs.length ? `<div class="list">${movs.map((m) => filaMov(m)).join('')}</div>` : `<div class="empty">${icon('i-money')}<div>Sin movimientos.</div></div>`}</div>
+    <div class="card"><h2>Por cliente</h2>
+      ${porCli.length ? `<div class="list">${porCli.map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div>
+        <div class="end">${s.pend > 0.004 ? `<span class="money neg">${sol(s.pend)}</span>` : s.pend < -0.004 ? `<span class="money pos">a favor ${sol(-s.pend)}</span>` : '<span class="badge b-ok">Al día</span>'}</div></div>`).join('')}</div>` : `<div class="empty small">Registra honorarios para ver los saldos.</div>`}</div>
+  </div>`;
+}
+
+/* ---------- portales ---------- */
+const PORTALES = [
+  ['CEJ', 'Consulta de Expedientes Judiciales', 'Poder Judicial · seguimiento de expedientes', 'https://cej.pj.gob.pe/cej/forms/busquedaform.html'],
+  ['SN', 'SINOE · Casillas electrónicas', 'Notificaciones electrónicas del Poder Judicial', 'https://casillas.pj.gob.pe/sinoe/login.xhtml'],
+  ['MPE', 'Mesa de Partes Electrónica', 'Presentación de escritos al Poder Judicial', 'https://mpe.pj.gob.pe/'],
+  ['TC', 'Tribunal Constitucional', 'Jurisprudencia y seguimiento de causas', 'https://www.tc.gob.pe/'],
+  ['EP', 'El Peruano · Normas legales', 'Diario oficial', 'https://diariooficial.elperuano.pe/Normas'],
+  ['SPIJ', 'SPIJ · Legislación', 'Sistema Peruano de Información Jurídica', 'https://spij.minjus.gob.pe/'],
+  ['MP', 'Ministerio Público', 'Fiscalías y trámites', 'https://www.gob.pe/mpfn'],
+  ['SR', 'SUNARP', 'Registros públicos', 'https://www.sunarp.gob.pe/'],
+  ['ST', 'SUNAT', 'Consulta RUC y trámites tributarios', 'https://www.sunat.gob.pe/'],
+  ['IN', 'INDECOPI', 'Consumidor, marcas y concursal', 'https://www.indecopi.gob.pe/'],
+];
+function vPortales() {
+  return `<div class="head"><div><h1>Portales de revisión</h1><div class="sub">Accesos directos a las plataformas que más usas. Se abren en otra pestaña.</div></div></div>
+  <div class="grid g2">${PORTALES.map(([ab, n, d, u]) => `<a class="card portal" href="${u}" target="_blank" rel="noopener"><span class="ic">${ab}</span><span><b>${n}</b><br><span class="small muted">${d}</span></span></a>`).join('')}</div>
+  <p class="tiny" style="margin-top:14px">Causa no se conecta a estos portales ni guarda tus claves: sólo te lleva a ellos. En cada expediente, «Ver en CEJ» copia el número para que lo pegues en el buscador.</p>`;
+}
+
+/* ---------- buscar ---------- */
+let qGlobal = '';
+function vBuscar() {
+  const q = norm(qGlobal);
+  let res = '';
+  if (q.length >= 2) {
+    const cs = DB.clientes.filter((c) => norm([c.nombre, c.documento, c.telefono, c.email].join(' ')).includes(q));
+    const es = DB.expedientes.filter((e) => norm([e.numero, e.juzgado, e.contraparte, e.pretension, e.materia, (cliente(e.clienteId) || {}).nombre].join(' ')).includes(q));
+    const vs = DB.eventos.filter((v) => norm([v.titulo, v.lugar, v.notas].join(' ')).includes(q)).sort(ordenEv);
+    res = `${cs.length ? `<div class="card"><h2>Clientes</h2><div class="list">${cs.map((c) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${esc(c.documento || '')}</div></div></div>`).join('')}</div></div>` : ''}
+      ${es.length ? `<div class="card"><h2>Expedientes</h2><div class="list">${es.map(filaExp).join('')}</div></div>` : ''}
+      ${vs.length ? `<div class="card"><h2>Agenda</h2><div class="list">${vs.map((v) => filaEvento(v)).join('')}</div></div>` : ''}
+      ${!cs.length && !es.length && !vs.length ? `<div class="card empty">Sin resultados para «${esc(qGlobal)}».</div>` : ''}`;
+  }
+  return `<div class="head"><div><h1>Buscar</h1></div></div>
+  <div class="toolbar"><label class="search">${icon('i-search')}<input id="qGlobal" placeholder="Cliente, número de expediente, juzgado, audiencia…" value="${esc(qGlobal)}" autofocus></label></div><div id="resBuscar">${res}</div>`;
+}
+
+/* ---------- ajustes ---------- */
+function vAjustes() {
+  const s = DB.ajustes;
+  const extra = [...s.inhabiles].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const bytes = new Blob([JSON.stringify(DB)]).size;
+  return `<div class="head"><div><h1>Ajustes</h1><div class="sub">Tu estudio, tus datos y tus días inhábiles</div></div></div>
+  <div class="card"><h2>Datos del estudio</h2><p class="small muted" style="margin-top:-4px">Aparecen en los estados de cuenta que imprimes.</p>
+    <form class="form" data-form="ajustes">
+      <label>Nombre del estudio<input name="estudio" value="${esc(s.estudio)}" placeholder="Estudio Jurídico Ramírez & Asociados"></label>
+      <label>Abogado(a) responsable<input name="abogado" value="${esc(s.abogado)}" placeholder="Dra. Ana Ramírez"></label>
+      <label>Colegiatura<input name="colegiatura" value="${esc(s.colegiatura)}" placeholder="CAL 12345"></label>
+      <label>RUC<input name="ruc" value="${esc(s.ruc)}" inputmode="numeric"></label>
+      <label>Teléfono<input name="telefono" value="${esc(s.telefono)}" inputmode="tel"></label>
+      <label>Dirección<input name="direccion" value="${esc(s.direccion)}"></label>
+      <label>Apariencia<select name="tema">${[['auto', 'Según el aparato'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, t]) => `<option value="${k}" ${s.tema === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
+      <div class="full"><button class="btn pri">Guardar</button></div>
+    </form></div>
+  <div class="card"><h2>Días inhábiles adicionales</h2>
+    <p class="small muted" style="margin-top:-4px">Ya se descuentan los fines de semana y los feriados nacionales (incluidos Jueves y Viernes Santo). Agrega aquí feriados regionales, días no laborables o días que la Corte declare inhábiles; la calculadora de plazos los respetará.</p>
+    <form class="inline-add" data-form="inhabil"><input class="f" type="date" name="fecha" required style="max-width:160px"><input class="f" name="motivo" placeholder="Motivo (ej. Día del Juez)"><button class="btn">Agregar</button></form>
+    ${extra.length ? `<div class="list" style="margin-top:8px">${extra.map((i) => `<div class="row" style="cursor:default"><div class="main"><div class="t">${fFecha(i.fecha)}</div><div class="s">${esc(i.motivo || 'Día inhábil')}</div></div><button class="btn sm ghost danger" data-act="borrarInhabil" data-v="${i.fecha}">Quitar</button></div>`).join('')}</div>` : ''}
+  </div>
+  <div class="card"><h2>Tus datos</h2>
+    <p class="small muted" style="margin-top:-4px">Se guardan sólo en este navegador (${(bytes / 1024).toFixed(1)} KB). Descarga un respaldo con frecuencia: si borras los datos del navegador o cambias de celular, es lo que te permite recuperarlos.</p>
+    <div class="actions"><button class="btn pri" data-act="respaldo">Descargar respaldo</button>
+      <label class="btn">Cargar respaldo<input type="file" accept=".json,application/json" id="fileRespaldo" hidden></label>
+      <button class="btn" data-act="csv">Exportar a Excel (CSV)</button>
+      <button class="btn" data-act="ejemplo">Cargar datos de ejemplo</button>
+      <button class="btn danger" data-act="borrarTodo">Borrar todo</button></div></div>`;
+}
+
+/* ===================================================================
+   FORMULARIOS (modal)
+   =================================================================== */
+let modalCb = null;
+function abrirModal({ titulo, campos, valores = {}, guardar: alGuardar, borrar, extra = '', boton = 'Guardar' }) {
+  cerrarModal();
+  const html = campos.map((f) => {
+    const v = valores[f.k] ?? f.def ?? '';
+    const req = f.req ? ' required' : '';
+    const lab = `${esc(f.l)}${f.req ? ' <span class="req">*</span>' : ''}`;
+    const hint = f.hint ? `<span class="hint">${esc(f.hint)}</span>` : '';
+    const cls = f.full ? 'full' : '';
+    if (f.t === 'select') return `<label class="${cls}">${lab}<select name="${f.k}"${req}>${f.op.map((o) => { const [val, txt] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(val)}" ${String(val) === String(v) ? 'selected' : ''}>${esc(txt)}</option>`; }).join('')}</select>${hint}</label>`;
+    if (f.t === 'textarea') return `<label class="full">${lab}<textarea name="${f.k}" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>${hint}</label>`;
+    if (f.t === 'checkbox') return `<label class="cb ${cls}"><input type="checkbox" name="${f.k}" ${v ? 'checked' : ''}> ${lab}</label>`;
+    return `<label class="${cls}">${lab}<input name="${f.k}" type="${f.t || 'text'}" value="${esc(v)}" placeholder="${esc(f.ph || '')}"${req}${f.t === 'number' ? ' step="0.01" min="0" inputmode="decimal"' : ''}${f.list ? ` list="dl-${f.k}"` : ''}>${f.list ? `<datalist id="dl-${f.k}">${f.list.map((o) => `<option value="${esc(o)}">`).join('')}</datalist>` : ''}${hint}</label>`;
+  }).join('');
+  const bg = document.createElement('div');
+  bg.className = 'modal-bg';
+  bg.innerHTML = `<form class="modal" novalidate><header><h2>${esc(titulo)}</h2><button type="button" class="btn ghost sm" data-close aria-label="Cerrar">${icon('i-x')}</button></header>
+    <div class="body"><div class="form">${html}</div>${extra}</div>
+    <footer>${borrar ? `<button type="button" class="btn danger l" data-del>Eliminar</button>` : ''}<button type="button" class="btn" data-close>Cancelar</button><button class="btn pri">${esc(boton)}</button></footer></form>`;
+  document.body.appendChild(bg);
+  const form = bg.querySelector('form');
+  bg.addEventListener('mousedown', (ev) => { if (ev.target === bg) cerrarModal(); });
+  bg.querySelectorAll('[data-close]').forEach((b) => b.onclick = cerrarModal);
+  if (borrar) bg.querySelector('[data-del]').onclick = () => { if (borrar() !== false) cerrarModal(); };
+  form.onsubmit = (ev) => {
+    ev.preventDefault();
+    const datos = {};
+    for (const f of campos) {
+      const el = form.elements[f.k];
+      datos[f.k] = f.t === 'checkbox' ? el.checked : el.value.trim();
+      if (f.req && !datos[f.k]) { el.focus(); toast(`Falta: ${f.l}`); return; }
+      if (f.t === 'number' && f.req && !(num(datos[f.k]) > 0)) { el.focus(); toast(`${f.l}: escribe un monto mayor que cero`); return; }
+    }
+    if (alGuardar(datos, form) !== false) cerrarModal();
+  };
+  modalCb = bg;
+  const primero = form.querySelector('input:not([type=hidden]):not([type=checkbox]),select,textarea');
+  if (primero && window.innerWidth > 900) setTimeout(() => primero.focus(), 30);
+  return form;
+}
+function cerrarModal() { if (modalCb) { modalCb.remove(); modalCb = null; } }
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarModal(); });
+
+const opClientes = () => [['', '— Elige un cliente —'], ...[...DB.clientes].sort((a, b) => a.nombre.localeCompare(b.nombre)).map((c) => [c.id, c.nombre])];
+const opExps = (vacio = '— Sin expediente —') => [['', vacio], ...DB.expedientes.map((e) => [e.id, `${e.numero || 's/n'} · ${caratula(e)}`])];
+const ahora = () => new Date().toISOString();
+
+function formCliente(c) {
+  abrirModal({
+    titulo: c ? 'Editar cliente' : 'Nuevo cliente', valores: c || {},
+    campos: [
+      { k: 'nombre', l: 'Nombre o razón social', req: true, full: true, ph: 'Juan Pérez Quispe' },
+      { k: 'tipo', l: 'Tipo', t: 'select', op: ['Persona natural', 'Empresa'] },
+      { k: 'documento', l: 'DNI / RUC / CE', ph: '45678912' },
+      { k: 'telefono', l: 'Celular', t: 'tel', ph: '987 654 321' },
+      { k: 'email', l: 'Correo', t: 'email' },
+      { k: 'direccion', l: 'Dirección', full: true },
+      { k: 'notas', l: 'Notas', t: 'textarea' },
+    ],
+    guardar: (d) => {
+      if (c) Object.assign(c, d);
+      else { c = Object.assign({ id: uid(), creado: hoy() }, d); DB.clientes.push(c); }
+      guardar(); toast('Cliente guardado');
+      if (!location.hash.includes(c.id)) location.hash = '#/cliente/' + c.id; else reRender();
+    },
+  });
+}
+function formExp(e, clienteId) {
+  if (!DB.clientes.length) { toast('Primero registra un cliente'); formCliente(); return; }
+  abrirModal({
+    titulo: e ? 'Editar expediente' : 'Nuevo expediente', valores: e || { clienteId: clienteId || '', estado: 'En trámite', inicio: hoy(), materia: 'Civil' },
+    campos: [
+      { k: 'clienteId', l: 'Cliente', t: 'select', op: opClientes(), req: true },
+      { k: 'condicion', l: 'Tu cliente es', t: 'select', op: ['Demandante', 'Demandado', 'Denunciante / agraviado', 'Investigado / imputado', 'Tercero', 'Solicitante', 'Otro'] },
+      { k: 'numero', l: 'N.° de expediente', ph: '00123-2026-0-1801-JR-CI-01', hint: 'Tal como figura en el CEJ', full: true },
+      { k: 'contraparte', l: 'Contraparte', ph: 'Empresa XYZ S.A.C.' },
+      { k: 'materia', l: 'Materia', t: 'select', op: MATERIAS },
+      { k: 'pretension', l: 'Pretensión / delito', ph: 'Desalojo por ocupación precaria', full: true },
+      { k: 'juzgado', l: 'Órgano jurisdiccional', ph: '3.er Juzgado Civil de Lima', list: [...new Set(DB.expedientes.map((x) => x.juzgado).filter(Boolean))] },
+      { k: 'distrito', l: 'Distrito judicial', ph: 'Lima', list: ['Lima', 'Lima Norte', 'Lima Sur', 'Lima Este', 'Callao', 'Arequipa', 'Cusco', 'La Libertad', 'Lambayeque', 'Piura', 'Junín', 'Ica', 'Áncash', 'Cajamarca', 'Puno', 'Loreto', 'Tacna', 'Ucayali', 'San Martín', 'Huánuco', 'Ayacucho'] },
+      { k: 'juez', l: 'Juez' },
+      { k: 'especialista', l: 'Especialista legal' },
+      { k: 'estado', l: 'Estado', t: 'select', op: ESTADOS },
+      { k: 'inicio', l: 'Fecha de inicio', t: 'date' },
+      { k: 'notas', l: 'Notas', t: 'textarea' },
+    ],
+    guardar: (d) => {
+      d.actualizado = ahora();
+      if (e) {
+        if (e.clienteId !== d.clienteId) DB.movimientos.forEach((m) => { if (m.expedienteId === e.id) m.clienteId = d.clienteId; });
+        Object.assign(e, d);
+      } else { e = Object.assign({ id: uid(), actuaciones: [] }, d); DB.expedientes.push(e); }
+      guardar(); toast('Expediente guardado');
+      if (!location.hash.includes(e.id)) location.hash = '#/expediente/' + e.id; else reRender();
+    },
+    borrar: e ? () => borrarExp(e.id) : null,
+  });
+}
+function formEvento(ev, def = {}) {
+  const valores = ev || Object.assign({ tipo: 'audiencia', fecha: hoy() }, def);
+  const extra = ev && ev.expedienteId && (() => {
+    const x = expediente(ev.expedienteId), c = x && cliente(x.clienteId);
+    if (!c || !c.telefono) return '';
+    const msg = `Hola ${c.nombre.split(' ')[0]}, le recuerdo que tiene ${ev.tipo === 'audiencia' ? 'audiencia' : (TIPOS_EV[ev.tipo] || '').toLowerCase()}${ev.titulo ? ' («' + ev.titulo + '»)' : ''} el ${fFechaL(ev.fecha).toLowerCase()}${ev.hora ? ' a las ' + ev.hora : ''}${ev.lugar ? ', en ' + ev.lugar : ''}. Expediente ${x.numero || ''}. Saludos, ${DB.ajustes.abogado || DB.ajustes.estudio || ''}`.trim();
+    return `<div style="margin-top:14px"><a class="btn wa sm" href="${waLink(c.telefono, msg)}" target="_blank" rel="noopener">${icon('i-wa')} Avisar a ${esc(c.nombre.split(' ')[0])} por WhatsApp</a></div>`;
+  })();
+  abrirModal({
+    titulo: ev ? 'Editar evento' : 'Nueva audiencia o plazo', valores, extra: extra || '',
+    campos: [
+      { k: 'tipo', l: 'Tipo', t: 'select', op: Object.entries(TIPOS_EV) },
+      { k: 'expedienteId', l: 'Expediente', t: 'select', op: opExps() },
+      { k: 'titulo', l: 'Descripción', req: true, full: true, ph: 'Audiencia única / Vence plazo para apelar…', list: ['Audiencia única', 'Audiencia de pruebas', 'Audiencia de conciliación', 'Audiencia de juzgamiento', 'Audiencia de control de acusación', 'Audiencia de prisión preventiva', 'Informe oral', 'Lectura de sentencia', 'Vence plazo para contestar', 'Vence plazo para apelar', 'Vence plazo para absolver traslado', 'Presentar alegatos'] },
+      { k: 'fecha', l: 'Fecha', t: 'date', req: true },
+      { k: 'hora', l: 'Hora', t: 'time' },
+      { k: 'lugar', l: 'Lugar o enlace', full: true, ph: 'Sala 5 / enlace de Google Meet' },
+      { k: 'notas', l: 'Notas', t: 'textarea' },
+      ...(ev ? [{ k: 'hecho', l: 'Ya se realizó / cumplió', t: 'checkbox', full: true }] : []),
+    ],
+    guardar: (d) => {
+      const f = inhabil(d.fecha);
+      if (f && d.tipo !== 'reunion' && d.tipo !== 'tarea' && !confirm(`Ojo: el ${fFecha(d.fecha)} es inhábil (${f}). ¿Guardar igual?`)) return false;
+      if (ev) Object.assign(ev, d); else { ev = Object.assign({ id: uid(), hecho: false, creado: ahora() }, d); DB.eventos.push(ev); }
+      tocarExp(ev.expedienteId); guardar(); toast('Guardado en la agenda'); reRender();
+    },
+    borrar: ev ? () => { if (!confirm('¿Eliminar este evento?')) return false; DB.eventos = DB.eventos.filter((x) => x.id !== ev.id); guardar(); reRender(); } : null,
+  });
+}
+function formMov(m, def = {}) {
+  const valores = m || Object.assign({ fecha: hoy(), tipo: 'pago', medio: 'Transferencia' }, def);
+  if (!m && def.expedienteId) valores.clienteId = (expediente(def.expedienteId) || {}).clienteId;
+  if (!DB.clientes.length) { toast('Primero registra un cliente'); return; }
+  const form = abrirModal({
+    titulo: m ? 'Editar movimiento' : { pago: 'Registrar pago', honorario: 'Registrar honorario pactado', gasto: 'Registrar gasto' }[valores.tipo], valores,
+    campos: [
+      { k: 'tipo', l: 'Tipo', t: 'select', op: Object.entries(TIPOS_MOV) },
+      { k: 'fecha', l: 'Fecha', t: 'date', req: true },
+      { k: 'clienteId', l: 'Cliente', t: 'select', op: opClientes(), req: true },
+      { k: 'expedienteId', l: 'Expediente', t: 'select', op: opExps('— General / sin expediente —') },
+      { k: 'monto', l: 'Monto (S/)', t: 'number', req: true },
+      { k: 'medio', l: 'Medio de pago', t: 'select', op: MEDIOS },
+      { k: 'concepto', l: 'Concepto', full: true, ph: 'Primera cuota / Tasa judicial / Cédulas de notificación…' },
+    ],
+    guardar: (d) => {
+      if (d.expedienteId) { const x = expediente(d.expedienteId); if (x && x.clienteId !== d.clienteId) { toast('Ese expediente es de otro cliente'); return false; } }
+      d.monto = num(d.monto);
+      if (m) Object.assign(m, d); else { m = Object.assign({ id: uid(), creado: ahora() }, d); DB.movimientos.push(m); }
+      tocarExp(m.expedienteId); guardar(); toast('Movimiento guardado'); reRender();
+    },
+    borrar: m ? () => { if (!confirm('¿Eliminar este movimiento?')) return false; DB.movimientos = DB.movimientos.filter((x) => x.id !== m.id); guardar(); reRender(); } : null,
+  });
+  // el expediente rellena el cliente
+  form.elements.expedienteId.addEventListener('change', (ev) => { const x = expediente(ev.target.value); if (x) form.elements.clienteId.value = x.clienteId; });
+}
+function tocarExp(id) { const e = expediente(id); if (e) e.actualizado = ahora(); }
+
+function formCalc() {
+  const form = abrirModal({
+    titulo: 'Calculadora de plazos', boton: 'Agendar vencimiento',
+    valores: { desde: hoy(), dias: 3, modo: 'habiles' },
+    campos: [
+      { k: 'desde', l: 'Notificado el', t: 'date', req: true },
+      { k: 'dias', l: 'Plazo (días)', t: 'number', req: true },
+      { k: 'modo', l: 'Cómputo', t: 'select', op: [['habiles', 'Días hábiles'], ['naturales', 'Días calendario']], full: true },
+      { k: 'expedienteId', l: 'Expediente (para agendar)', t: 'select', op: opExps(), full: true },
+      { k: 'titulo', l: 'Descripción', full: true, def: 'Vence plazo', list: ['Vence plazo para apelar', 'Vence plazo para contestar', 'Vence plazo para absolver traslado', 'Vence plazo para subsanar'] },
+    ],
+    extra: `<div class="card" id="calcRes" style="margin-top:14px;background:var(--panel-2);box-shadow:none"></div>
+      <p class="tiny" style="margin-top:8px">Referencia general: el plazo corre desde el día siguiente de la notificación. Verifica siempre la norma aplicable y los días inhábiles de tu distrito judicial (agrégalos en Ajustes).</p>`,
+    guardar: (d) => {
+      const r = calcular(d);
+      if (!r) return false;
+      const ev = { id: uid(), tipo: 'plazo', hecho: false, creado: ahora(), fecha: r, hora: '', lugar: '', expedienteId: d.expedienteId, titulo: d.titulo || 'Vence plazo', notas: `Notificado el ${fFecha(d.desde)} · ${d.dias} días ${d.modo === 'habiles' ? 'hábiles' : 'calendario'}` };
+      DB.eventos.push(ev); tocarExp(d.expedienteId); guardar(); toast('Vencimiento agendado: ' + fFecha(r)); reRender();
+    },
+  });
+  const calcular = (d) => { const n = Math.floor(num(d.dias)); if (!d.desde || n < 1 || n > 3650) return null; return d.modo === 'habiles' ? vencimientoHabiles(d.desde, n) : vencimientoNaturales(d.desde, n); };
+  const pintar = () => {
+    const d = { desde: form.elements.desde.value, dias: form.elements.dias.value, modo: form.elements.modo.value };
+    const r = calcular(d), box = $('#calcRes');
+    if (!r) { box.innerHTML = '<span class="muted">Completa la fecha y el número de días.</span>'; return; }
+    const saltos = [];
+    for (let x = sumar(d.desde, 1); x <= r; x = sumar(x, 1)) { const f = nombreFeriado(x); if (f) saltos.push(`${fFecha(x)} (${f})`); }
+    box.innerHTML = `<div class="tiny">VENCE EL</div><div style="font-size:22px;font-weight:700;font-family:Georgia,serif">${fFechaL(r)} de ${parse(r).getFullYear()}</div>
+      <div class="small muted">${cuando(r)}${saltos.length ? ` · se saltaron: ${esc(saltos.join(', '))}` : ''}</div>`;
+  };
+  form.addEventListener('input', pintar);
+  pintar();
+}
+
+/* ---------- borrados ---------- */
+function borrarExp(id) {
+  const e = expediente(id); if (!e) return;
+  const nE = DB.eventos.filter((v) => v.expedienteId === id).length, nM = DB.movimientos.filter((m) => m.expedienteId === id).length;
+  if (!confirm(`¿Eliminar el expediente ${e.numero || caratula(e)}?\nTambién se borrarán ${nE} evento(s) de agenda.${nM ? `\nSus ${nM} movimiento(s) de honorarios se conservan en el cliente.` : ''}`)) return false;
+  DB.expedientes = DB.expedientes.filter((x) => x.id !== id);
+  DB.eventos = DB.eventos.filter((v) => v.expedienteId !== id);
+  DB.movimientos.forEach((m) => { if (m.expedienteId === id) m.expedienteId = ''; });
+  guardar(); cerrarModal(); toast('Expediente eliminado'); location.hash = '#/expedientes';
+}
+function borrarCliente(id) {
+  const c = cliente(id); if (!c) return;
+  const ex = expsDe(id), nM = DB.movimientos.filter((m) => m.clienteId === id).length;
+  if (!confirm(`¿Eliminar a ${c.nombre}?\nSe borrarán también ${ex.length} expediente(s), su agenda y ${nM} movimiento(s) de honorarios.\nEsto no se puede deshacer.`)) return;
+  const ids = new Set(ex.map((e) => e.id));
+  DB.clientes = DB.clientes.filter((x) => x.id !== id);
+  DB.expedientes = DB.expedientes.filter((e) => !ids.has(e.id));
+  DB.eventos = DB.eventos.filter((v) => !ids.has(v.expedienteId));
+  DB.movimientos = DB.movimientos.filter((m) => m.clienteId !== id);
+  guardar(); toast('Cliente eliminado'); location.hash = '#/clientes';
+}
+
+/* ===================================================================
+   ACCIONES
+   =================================================================== */
+const ACC = {
+  nuevoCliente: () => formCliente(),
+  editCliente: (d) => formCliente(cliente(d.id)),
+  borrarCliente: (d) => borrarCliente(d.id),
+  nuevoExp: (d) => formExp(null, d.cliente),
+  editExp: (d) => formExp(expediente(d.id)),
+  borrarExp: (d) => borrarExp(d.id),
+  nuevoEvento: (d) => formEvento(null, { expedienteId: d.exp || '', fecha: d.fecha || hoy() }),
+  editEvento: (d) => { const ev = DB.eventos.find((x) => x.id === d.id); if (ev) formEvento(ev); },
+  toggleEvento: (d) => { const ev = DB.eventos.find((x) => x.id === d.id); if (!ev) return; ev.hecho = !ev.hecho; guardar(); reRender(); toast(ev.hecho ? 'Marcado como realizado' : 'Marcado como pendiente'); },
+  nuevoMov: (d) => formMov(null, { tipo: d.tipo, clienteId: d.cliente || '', expedienteId: d.exp || '' }),
+  editMov: (d) => { const m = DB.movimientos.find((x) => x.id === d.id); if (m) formMov(m); },
+  borrarAct: (d) => { const e = expediente(d.exp); if (!e || !confirm('¿Borrar esta anotación?')) return; e.actuaciones = e.actuaciones.filter((a) => a.id !== d.id); guardar(); reRender(); },
+  fEstado: (d) => { estado.fEstado = d.v; reRender(); },
+  fTipo: (d) => { estado.fTipo = d.v; reRender(); },
+  fMov: (d) => { estado.fMov = d.v; reRender(); },
+  verHechos: () => { estado.verHechos = !estado.verHechos; reRender(); },
+  mes: (d) => { const [y, m] = estado.mes.split('-').map(Number); const n = new Date(y, m - 1 + Number(d.v), 1); estado.mes = iso(n).slice(0, 7); estado.diaSel = ''; reRender(); },
+  mesHoy: () => { estado.mes = hoy().slice(0, 7); estado.diaSel = hoy(); reRender(); },
+  dia: (d) => { estado.diaSel = estado.diaSel === d.v ? '' : d.v; if (d.v) estado.mes = d.v.slice(0, 7); reRender(); },
+  calc: () => formCalc(),
+  cej: async (d) => {
+    const e = expediente(d.id);
+    try { await navigator.clipboard.writeText(e.numero); toast('Número copiado. Pégalo en el buscador del CEJ.'); } catch { toast('Número: ' + e.numero); }
+    window.open(PORTALES[0][3], '_blank', 'noopener');
+  },
+  estadoCuenta: (d) => imprimirEstado(d.id),
+  respaldo: () => descargar(`causa-respaldo-${hoy()}.json`, JSON.stringify({ app: 'causa', version: VERSION, exportado: ahora(), datos: DB }, null, 1), 'application/json'),
+  csv: () => exportarCSV(),
+  ics: () => exportarICS(),
+  ejemplo: () => { if ((DB.clientes.length || DB.expedientes.length) && !confirm('Se agregarán clientes y expedientes de ejemplo a los que ya tienes. ¿Continuar?')) return; cargarEjemplo(); },
+  borrarTodo: () => { if (!confirm('¿Borrar TODOS los datos de este aparato? Descarga antes un respaldo.')) return; if (prompt('Escribe BORRAR para confirmar') !== 'BORRAR') return; const a = DB.ajustes; DB = VACIO(); DB.ajustes = a; guardar(); toast('Datos borrados'); location.hash = '#/inicio'; render(); },
+  borrarInhabil: (d) => { DB.ajustes.inhabiles = DB.ajustes.inhabiles.filter((i) => i.fecha !== d.v); guardar(); reRender(); },
+};
+document.addEventListener('click', (ev) => {
+  const el = ev.target.closest('[data-act],[data-go]');
+  if (!el || el.closest('.modal-bg')) return;
+  if (el.dataset.act) { ev.preventDefault(); ev.stopPropagation(); ACC[el.dataset.act] && ACC[el.dataset.act](el.dataset); }
+  else if (el.dataset.go) location.hash = '#/' + el.dataset.go;
+});
+document.addEventListener('input', (ev) => {
+  const id = ev.target.id;
+  if (id === 'qCli' || id === 'qExp') {
+    estado[id] = ev.target.value; const pos = ev.target.selectionStart; reRender();
+    const n = $('#' + id); n.focus(); n.setSelectionRange(pos, pos);
+  } else if (id === 'qGlobal') {
+    qGlobal = ev.target.value; const box = document.createElement('div'); box.innerHTML = vBuscar(); $('#resBuscar').innerHTML = box.querySelector('#resBuscar').innerHTML;
+  }
+});
+document.addEventListener('change', (ev) => {
+  if (ev.target.id === 'fMateria') { estado.fMateria = ev.target.value; reRender(); }
+  if (ev.target.id === 'fileRespaldo') cargarRespaldo(ev.target.files[0]);
+});
+document.addEventListener('submit', (ev) => {
+  const f = ev.target.closest('[data-form]');
+  if (!f) return;
+  ev.preventDefault();
+  const tipo = f.dataset.form, fd = Object.fromEntries(new FormData(f));
+  if (tipo === 'actuacion') {
+    const e = expediente(f.dataset.id); if (!e || !fd.texto.trim()) return;
+    e.actuaciones.push({ id: uid(), fecha: fd.fecha || hoy(), texto: fd.texto.trim() }); e.actualizado = ahora(); guardar(); reRender(); toast('Anotado');
+  } else if (tipo === 'ajustes') {
+    Object.assign(DB.ajustes, fd); guardar(); render(); toast('Ajustes guardados');
+  } else if (tipo === 'inhabil') {
+    if (!fd.fecha) return;
+    DB.ajustes.inhabiles = DB.ajustes.inhabiles.filter((i) => i.fecha !== fd.fecha);
+    DB.ajustes.inhabiles.push({ fecha: fd.fecha, motivo: fd.motivo.trim() }); guardar(); reRender(); toast('Día inhábil agregado');
+  }
+});
+
+/* ===================================================================
+   SALIDAS: respaldo, CSV, ICS, impresión
+   =================================================================== */
+function descargar(nombre, contenido, tipo) {
+  const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
+  const a = document.createElement('a'); a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function cargarRespaldo(file) {
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const j = JSON.parse(r.result);
+      const d = j && j.app === 'causa' ? j.datos : j;
+      if (!d || !Array.isArray(d.clientes)) throw new Error('formato');
+      const nuevo = arreglar(d);
+      if (!confirm(`El respaldo tiene ${nuevo.clientes.length} cliente(s) y ${nuevo.expedientes.length} expediente(s).\nReemplazará los datos de este aparato. ¿Continuar?`)) return;
+      DB = nuevo; guardar(); render(); toast('Respaldo cargado');
+    } catch { toast('Ese archivo no es un respaldo de Causa'); }
+  };
+  r.readAsText(file);
+}
+function exportarCSV() {
+  const q = (v) => { const s = String(v ?? ''); return /[",;\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const tabla = (cab, filas) => [cab, ...filas].map((f) => f.map(q).join(';')).join('\r\n');
+  const exp = tabla(['N.° expediente', 'Cliente', 'Condición', 'Contraparte', 'Materia', 'Pretensión', 'Órgano', 'Distrito', 'Juez', 'Especialista', 'Estado', 'Inicio', 'Pactado', 'Pagado', 'Saldo'],
+    DB.expedientes.map((e) => { const s = saldoExp(e.id); return [e.numero, (cliente(e.clienteId) || {}).nombre, e.condicion, e.contraparte, e.materia, e.pretension, e.juzgado, e.distrito, e.juez, e.especialista, e.estado, e.inicio, s.cargo.toFixed(2), s.pagado.toFixed(2), s.pend.toFixed(2)]; }));
+  const mov = tabla(['Fecha', 'Tipo', 'Cliente', 'Expediente', 'Concepto', 'Medio', 'Monto'],
+    DB.movimientos.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map((m) => [m.fecha, TIPOS_MOV[m.tipo], (cliente(m.clienteId) || {}).nombre, (expediente(m.expedienteId) || {}).numero, m.concepto, m.medio, (m.tipo === 'pago' ? -1 : 1) * num(m.monto)]));
+  const ag = tabla(['Fecha', 'Hora', 'Tipo', 'Descripción', 'Expediente', 'Lugar', 'Realizado'],
+    DB.eventos.slice().sort(ordenEv).map((v) => [v.fecha, v.hora, TIPOS_EV[v.tipo], v.titulo, (expediente(v.expedienteId) || {}).numero, v.lugar, v.hecho ? 'Sí' : 'No']));
+  const cli = tabla(['Nombre', 'Tipo', 'Documento', 'Teléfono', 'Correo', 'Dirección', 'Saldo'],
+    DB.clientes.map((c) => [c.nombre, c.tipo, c.documento, c.telefono, c.email, c.direccion, saldoCliente(c.id).pend.toFixed(2)]));
+  const bom = '﻿';
+  descargar(`causa-expedientes-${hoy()}.csv`, bom + exp, 'text/csv');
+  setTimeout(() => descargar(`causa-honorarios-${hoy()}.csv`, bom + mov, 'text/csv'), 300);
+  setTimeout(() => descargar(`causa-agenda-${hoy()}.csv`, bom + ag, 'text/csv'), 600);
+  setTimeout(() => descargar(`causa-clientes-${hoy()}.csv`, bom + cli, 'text/csv'), 900);
+  toast('Se descargan 4 archivos CSV (se abren en Excel)');
+}
+function exportarICS() {
+  const evs = DB.eventos.filter((v) => !v.hecho && v.fecha >= sumar(hoy(), -30));
+  if (!evs.length) { toast('No hay eventos pendientes para exportar'); return; }
+  const tx = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/[,;]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Causa//Agenda//ES', 'CALSCALE:GREGORIAN'];
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  evs.forEach((v) => {
+    const e = expediente(v.expedienteId), d = v.fecha.replace(/-/g, '');
+    L.push('BEGIN:VEVENT', `UID:${v.id}@causa`, `DTSTAMP:${stamp}`);
+    if (v.hora) { const [h, m] = v.hora.split(':'); const fin = new Date(parse(v.fecha).setHours(+h + 1, +m)); L.push(`DTSTART:${d}T${h}${m}00`, `DTEND:${iso(fin).replace(/-/g, '')}T${pad(fin.getHours())}${pad(fin.getMinutes())}00`); }
+    else L.push(`DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${sumar(v.fecha, 1).replace(/-/g, '')}`);
+    L.push(`SUMMARY:${tx(`[${TIPOS_EV[v.tipo]}] ${v.titulo || ''}`)}`);
+    if (v.lugar) L.push(`LOCATION:${tx(v.lugar)}`);
+    L.push(`DESCRIPTION:${tx([e ? `Expediente ${e.numero || ''} · ${caratula(e)}` : '', v.notas].filter(Boolean).join('\n'))}`);
+    L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Recordatorio', 'TRIGGER:-P1D', 'END:VALARM', 'END:VEVENT');
+  });
+  L.push('END:VCALENDAR');
+  descargar(`causa-agenda-${hoy()}.ics`, L.join('\r\n'), 'text/calendar');
+  toast(`${evs.length} evento(s) exportados. Ábrelo con Google Calendar o el calendario del celular.`);
+}
+function imprimirEstado(cid) {
+  const c = cliente(cid), s = saldoCliente(cid), a = DB.ajustes;
+  const movs = DB.movimientos.filter((m) => m.clienteId === cid).sort((x, y) => x.fecha.localeCompare(y.fecha));
+  let corr = 0;
+  $('#imprimir').innerHTML = `<div class="hdr"><div><h1>${esc(a.estudio || 'Estado de cuenta')}</h1><div>${esc([a.abogado, a.colegiatura].filter(Boolean).join(' · '))}</div><div>${esc([a.ruc && 'RUC ' + a.ruc, a.telefono, a.direccion].filter(Boolean).join(' · '))}</div></div>
+    <div style="text-align:right"><b>ESTADO DE CUENTA</b><br>${fFecha(hoy())}</div></div>
+    <p><b>Cliente:</b> ${esc(c.nombre)}${c.documento ? ' · ' + esc(c.documento) : ''}</p>
+    <table><thead><tr><th>Fecha</th><th>Concepto</th><th>Expediente</th><th class="r">Cargo</th><th class="r">Abono</th><th class="r">Saldo</th></tr></thead><tbody>
+    ${movs.map((m) => { const p = m.tipo === 'pago'; corr += p ? -num(m.monto) : num(m.monto); const e = expediente(m.expedienteId);
+      return `<tr><td>${fFecha(m.fecha)}</td><td>${esc(m.concepto || TIPOS_MOV[m.tipo])}${p && m.medio ? ' (' + esc(m.medio) + ')' : ''}</td><td>${esc(e ? e.numero || '' : '')}</td><td class="r">${p ? '' : sol(m.monto)}</td><td class="r">${p ? sol(m.monto) : ''}</td><td class="r">${sol(corr)}</td></tr>`; }).join('')}
+    <tr class="tot"><td colspan="3">Totales</td><td class="r">${sol(s.cargo)}</td><td class="r">${sol(s.pagado)}</td><td class="r">${sol(s.pend)}</td></tr></tbody></table>
+    <p style="margin-top:24px">Saldo pendiente: <b>${sol(s.pend)}</b></p>`;
+  window.print();
+}
+
+/* ---------- datos de ejemplo ---------- */
+function cargarEjemplo() {
+  const h = hoy(), Y = h.slice(0, 4);
+  const cA = { id: uid(), nombre: 'María Elena Quispe Huamán', tipo: 'Persona natural', documento: 'DNI 45781236', telefono: '987654321', email: 'mquispe@correo.pe', direccion: 'Av. Brasil 1450, Jesús María', creado: sumar(h, -120), notas: 'Prefiere que la contacten por WhatsApp en las tardes.' };
+  const cB = { id: uid(), nombre: 'Constructora Los Andes S.A.C.', tipo: 'Empresa', documento: 'RUC 20512345678', telefono: '956111222', email: 'legal@losandes.pe', direccion: 'Calle Las Begonias 441, San Isidro', creado: sumar(h, -300) };
+  const cC = { id: uid(), nombre: 'Jorge Luis Ramos Ccahua', tipo: 'Persona natural', documento: 'DNI 70123456', telefono: '912345678', creado: sumar(h, -40) };
+  const e1 = { id: uid(), clienteId: cA.id, condicion: 'Demandante', numero: `01234-${Y}-0-1801-JR-CI-03`, contraparte: 'Inversiones Miraflores E.I.R.L.', materia: 'Civil', pretension: 'Desalojo por ocupación precaria', juzgado: '3.er Juzgado Civil de Lima', distrito: 'Lima', juez: 'Dr. Carlos Medina', especialista: 'Lucía Torres', estado: 'En trámite', inicio: sumar(h, -110), actualizado: ahora(),
+    actuaciones: [{ id: uid(), fecha: sumar(h, -110), texto: 'Se presentó la demanda por Mesa de Partes Electrónica.' }, { id: uid(), fecha: sumar(h, -80), texto: 'Resolución N.° 1: se admite a trámite.' }, { id: uid(), fecha: sumar(h, -20), texto: 'Demandada contesta. Se fija fecha de audiencia única.' }] };
+  const e2 = { id: uid(), clienteId: cB.id, condicion: 'Demandado', numero: `04567-${Y}-0-1801-JR-LA-12`, contraparte: 'Pedro Sánchez Vílchez', materia: 'Laboral', pretension: 'Pago de beneficios sociales', juzgado: '12.° Juzgado Especializado de Trabajo', distrito: 'Lima', estado: 'Apelación', inicio: sumar(h, -280), actualizado: ahora(),
+    actuaciones: [{ id: uid(), fecha: sumar(h, -30), texto: 'Sentencia de primera instancia: fundada en parte.' }, { id: uid(), fecha: sumar(h, -3), texto: 'Se notifica la sentencia por SINOE.' }] };
+  const e3 = { id: uid(), clienteId: cC.id, condicion: 'Investigado / imputado', numero: `00891-${Y}-1-1826-JR-PE-02`, contraparte: 'Ministerio Público', materia: 'Penal', pretension: 'Hurto agravado', juzgado: '2.° Juzgado de Investigación Preparatoria', distrito: 'Lima', estado: 'En trámite', inicio: sumar(h, -35), actualizado: ahora(), actuaciones: [] };
+  const e4 = { id: uid(), clienteId: cA.id, condicion: 'Solicitante', numero: '', contraparte: '', materia: 'Familia', pretension: 'Divorcio por mutuo acuerdo (vía notarial)', estado: 'Por presentar', inicio: sumar(h, -5), actualizado: ahora(), actuaciones: [] };
+  const ev = (o) => Object.assign({ id: uid(), hecho: false, creado: ahora(), hora: '', lugar: '', notas: '' }, o);
+  const habil = (n) => { let d = sumar(h, n); while (inhabil(d)) d = sumar(d, 1); return d; };
+  const eventos = [
+    ev({ tipo: 'audiencia', expedienteId: e1.id, titulo: 'Audiencia única', fecha: habil(2), hora: '09:30', lugar: 'Google Meet (enlace en la resolución)' }),
+    ev({ tipo: 'plazo', expedienteId: e2.id, titulo: 'Vence plazo para apelar', fecha: vencimientoHabiles(sumar(h, -3), 5), notas: 'Notificado hace 3 días · 5 días hábiles' }),
+    ev({ tipo: 'audiencia', expedienteId: e3.id, titulo: 'Audiencia de prisión preventiva', fecha: habil(6), hora: '11:00', lugar: 'Sede Penal, sala 4' }),
+    ev({ tipo: 'tarea', expedienteId: e4.id, titulo: 'Reunir partidas y acta de separación', fecha: habil(4) }),
+    ev({ tipo: 'reunion', expedienteId: e2.id, titulo: 'Reunión con gerencia de Los Andes', fecha: habil(9), hora: '16:00', lugar: 'Oficina del cliente' }),
+    ev({ tipo: 'tarea', expedienteId: e1.id, titulo: 'Pagar tasa por ofrecimiento de pruebas', fecha: sumar(h, -12), hecho: true }),
+  ];
+  const mv = (o) => Object.assign({ id: uid(), creado: ahora(), medio: '' }, o);
+  const movs = [
+    mv({ tipo: 'honorario', clienteId: cA.id, expedienteId: e1.id, fecha: sumar(h, -112), monto: 3500, concepto: 'Honorarios primera instancia' }),
+    mv({ tipo: 'pago', clienteId: cA.id, expedienteId: e1.id, fecha: sumar(h, -110), monto: 1500, medio: 'Yape', concepto: 'Primera cuota' }),
+    mv({ tipo: 'gasto', clienteId: cA.id, expedienteId: e1.id, fecha: sumar(h, -109), monto: 186.4, concepto: 'Tasas judiciales y cédulas' }),
+    mv({ tipo: 'pago', clienteId: cA.id, expedienteId: e1.id, fecha: sumar(h, -50), monto: 1000, medio: 'Transferencia', concepto: 'Segunda cuota' }),
+    mv({ tipo: 'honorario', clienteId: cB.id, expedienteId: e2.id, fecha: sumar(h, -280), monto: 8000, concepto: 'Defensa laboral · igual mensual' }),
+    mv({ tipo: 'pago', clienteId: cB.id, expedienteId: e2.id, fecha: sumar(h, -250), monto: 8000, medio: 'Transferencia', concepto: 'Pago total' }),
+    mv({ tipo: 'honorario', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -35), monto: 2500, concepto: 'Defensa en investigación preparatoria' }),
+    mv({ tipo: 'pago', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -2), monto: 500, medio: 'Plin', concepto: 'Adelanto' }),
+  ];
+  DB.clientes.push(cA, cB, cC); DB.expedientes.push(e1, e2, e3, e4); DB.eventos.push(...eventos); DB.movimientos.push(...movs);
+  guardar(); toast('Datos de ejemplo cargados'); location.hash = '#/inicio'; render();
+}
+
+/* ---------- varios ---------- */
+let tToast;
+function toast(msg) {
+  let t = $('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg; clearTimeout(tToast); tToast = setTimeout(() => t.remove(), 2600);
+}
+function aplicarTema() {
+  const t = DB.ajustes.tema;
+  if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+}
+// Otro pestaña cambió los datos: recargar
+window.addEventListener('storage', (e) => { if (e.key === CLAVE) { DB = cargar(); reRender(); } });
+
+render();
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>

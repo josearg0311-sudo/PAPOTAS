@@ -65,6 +65,9 @@ jobs:
           sed -i 's#<meta name="pap-sitio" content="0">#<meta name="pap-sitio" content="1">#' \
             sitio/index.html sitio/papotas-nuevo.html
           grep -q '"pap-sitio" content="1"' sitio/index.html
+          # Causa, el programa para el estudio jurídico, va en su carpeta:
+          # queda en .../PAPOTAS/estudio-juridico/ con sus propios datos.
+          cp -r estudio-juridico sitio/estudio-juridico
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll
           ls -la sitio
