@@ -1,8 +1,8 @@
-/* Causa · trabajador de servicio
+/* Estudio Rodríguez y Rodríguez · trabajador de servicio
    Guarda el PROGRAMA para que abra sin internet. Los datos no pasan por
    aquí: viven en el navegador (localStorage).
    Primero la red, así una versión nueva llega en cuanto se publica. */
-const CACHE = 'causa-v1';
+const CACHE = 'rodriguez-v1';
 const BASICOS = ['./', './index.html', './manifest.webmanifest', './icono.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', (ev) => {

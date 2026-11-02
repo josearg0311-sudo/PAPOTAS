@@ -1,4 +1,4 @@
-# Causa · gestión para estudios jurídicos
+# Estudio Rodríguez y Rodríguez · gestión del estudio jurídico
 
 Programa para que un abogado o un estudio pequeño del Perú lleve en un
 solo sitio sus **clientes, expedientes, audiencias, plazos y honorarios**.

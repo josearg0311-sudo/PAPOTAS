@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#7a1f2b">
-<title>Causa · Gestión del estudio</title>
+<title>Estudio Rodríguez y Rodríguez</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -49,8 +49,8 @@ h3{font-size:14px}
 .side{background:var(--panel);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
 .logo{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
 .logo svg{width:34px;height:34px;flex:none}
-.logo b{font-family:Georgia,serif;font-size:21px;letter-spacing:.02em}
-.logo span{display:block;font-size:11px;color:var(--ink-3);letter-spacing:.04em}
+.logo b{display:block;font-family:Georgia,serif;font-size:17px;line-height:1.15;letter-spacing:.01em}
+.logo span{display:block;font-size:10.5px;color:var(--brand);letter-spacing:.18em;font-weight:700}
 .nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--ink-2);text-decoration:none;font-weight:500}
 .nav a svg{width:19px;height:19px;flex:none}
 .nav a:hover{background:var(--panel-2);color:var(--ink)}
@@ -202,7 +202,8 @@ select.f,input.f{padding:8px 10px;border:1px solid var(--line);border-radius:10p
   .side{display:none}
   main{padding:12px 16px calc(96px + env(safe-area-inset-bottom))}
   .top{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--brand);color:#fff;position:sticky;top:0;z-index:20}
-  .top b{font-family:Georgia,serif;font-size:19px;flex:1}
+  .top b{font-family:Georgia,serif;font-size:17px;flex:1;line-height:1.1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top b small{display:block;font-family:system-ui,sans-serif;font-size:9.5px;letter-spacing:.2em;opacity:.8;font-weight:700}
   .top a{color:#fff;display:grid;place-items:center;width:36px;height:36px;border-radius:10px}
   .top a svg{width:21px;height:21px}
   .top svg.lg{width:28px;height:28px}
@@ -242,7 +243,7 @@ select.f,input.f{padding:8px 10px;border:1px solid var(--line);border-radius:10p
 <body>
 <header class="top">
   <svg class="lg" viewBox="0 0 512 512"><use href="#marca"/></svg>
-  <b>Causa</b>
+  <b class="marca"><small>ESTUDIO</small>Rodríguez y Rodríguez</b>
   <a href="#/buscar" aria-label="Buscar"><svg><use href="#i-search"/></svg></a>
   <a href="#/portales" aria-label="Portales"><svg><use href="#i-globe"/></svg></a>
   <a href="#/ajustes" aria-label="Ajustes"><svg><use href="#i-gear"/></svg></a>
@@ -252,7 +253,7 @@ select.f,input.f{padding:8px 10px;border:1px solid var(--line);border-radius:10p
   <aside class="side">
     <div class="logo">
       <svg viewBox="0 0 512 512"><use href="#marca"/></svg>
-      <div><b>Causa</b><span>GESTIÓN DEL ESTUDIO</span></div>
+      <div><span>ESTUDIO</span><b>Rodríguez y Rodríguez</b></div>
     </div>
     <nav class="nav" id="nav-side"></nav>
     <div class="sep"></div>
@@ -297,11 +298,12 @@ select.f,input.f{padding:8px 10px;border:1px solid var(--line);border-radius:10p
 <script>
 'use strict';
 /* =====================================================================
-   Causa · gestión para estudios jurídicos del Perú
+   Estudio Rodríguez y Rodríguez · gestión del estudio jurídico
    Todo vive en este archivo y los datos en el navegador (localStorage).
    ===================================================================== */
 
 const CLAVE = 'causa_datos_v1';
+const MARCA = 'Estudio Rodríguez y Rodríguez';
 const VERSION = 1;
 
 /* ---------- utilidades ---------- */
@@ -329,7 +331,7 @@ const icon = (id) => `<svg><use href="#${id}"/></svg>`;
 const VACIO = () => ({
   version: VERSION,
   clientes: [], expedientes: [], eventos: [], movimientos: [],
-  ajustes: { estudio: '', abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', inhabiles: [], tema: 'auto' }
+  ajustes: { estudio: MARCA, abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', inhabiles: [], tema: 'auto' }
 });
 let DB = cargar();
 function cargar() {
@@ -345,6 +347,7 @@ function arreglar(d) {
   for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
   base.ajustes = Object.assign(base.ajustes, d.ajustes || {});
   if (!Array.isArray(base.ajustes.inhabiles)) base.ajustes.inhabiles = [];
+  if (!String(base.ajustes.estudio || '').trim()) base.ajustes.estudio = MARCA;
   base.expedientes.forEach((e) => { if (!Array.isArray(e.actuaciones)) e.actuaciones = []; });
   return base;
 }
@@ -494,7 +497,7 @@ function vInicio() {
   return `
   <div class="head"><div><h1>${saludo}${nombre}</h1><div class="sub">${fFechaL(h)} · ${DB.ajustes.estudio ? esc(DB.ajustes.estudio) : 'tu estudio, en orden'}</div></div>
     <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn hide-m" data-act="nuevoExp">${icon('i-plus')} Expediente</button></div></div>
-  ${vacio ? `<div class="card welcome" style="margin-bottom:14px"><h2>Bienvenido a Causa</h2>
+  ${vacio ? `<div class="card welcome" style="margin-bottom:14px"><h2>Bienvenido al Estudio Rodríguez y Rodríguez</h2>
     <p>Lleva clientes, expedientes, audiencias, plazos y honorarios en un solo lugar. Todo se guarda en este aparato; puedes descargar un respaldo cuando quieras.</p>
     <div class="actions"><button class="btn pri" data-act="nuevoCliente">Registrar mi primer cliente</button><button class="btn" data-act="ejemplo">Ver con datos de ejemplo</button></div></div>` : ''}
   <div class="grid g4">
@@ -743,7 +746,7 @@ const PORTALES = [
 function vPortales() {
   return `<div class="head"><div><h1>Portales de revisión</h1><div class="sub">Accesos directos a las plataformas que más usas. Se abren en otra pestaña.</div></div></div>
   <div class="grid g2">${PORTALES.map(([ab, n, d, u]) => `<a class="card portal" href="${u}" target="_blank" rel="noopener"><span class="ic">${ab}</span><span><b>${n}</b><br><span class="small muted">${d}</span></span></a>`).join('')}</div>
-  <p class="tiny" style="margin-top:14px">Causa no se conecta a estos portales ni guarda tus claves: sólo te lleva a ellos. En cada expediente, «Ver en CEJ» copia el número para que lo pegues en el buscador.</p>`;
+  <p class="tiny" style="margin-top:14px">Este programa no se conecta a estos portales ni guarda tus claves: sólo te lleva a ellos. En cada expediente, «Ver en CEJ» copia el número para que lo pegues en el buscador.</p>`;
 }
 
 /* ---------- buscar ---------- */
@@ -1039,7 +1042,7 @@ const ACC = {
     window.open(PORTALES[0][3], '_blank', 'noopener');
   },
   estadoCuenta: (d) => imprimirEstado(d.id),
-  respaldo: () => descargar(`causa-respaldo-${hoy()}.json`, JSON.stringify({ app: 'causa', version: VERSION, exportado: ahora(), datos: DB }, null, 1), 'application/json'),
+  respaldo: () => descargar(`rodriguez-respaldo-${hoy()}.json`, JSON.stringify({ app: 'causa', version: VERSION, exportado: ahora(), datos: DB }, null, 1), 'application/json'),
   csv: () => exportarCSV(),
   ics: () => exportarICS(),
   ejemplo: () => { if ((DB.clientes.length || DB.expedientes.length) && !confirm('Se agregarán clientes y expedientes de ejemplo a los que ya tienes. ¿Continuar?')) return; cargarEjemplo(); },
@@ -1101,7 +1104,7 @@ function cargarRespaldo(file) {
       const nuevo = arreglar(d);
       if (!confirm(`El respaldo tiene ${nuevo.clientes.length} cliente(s) y ${nuevo.expedientes.length} expediente(s).\nReemplazará los datos de este aparato. ¿Continuar?`)) return;
       DB = nuevo; guardar(); render(); toast('Respaldo cargado');
-    } catch { toast('Ese archivo no es un respaldo de Causa'); }
+    } catch { toast('Ese archivo no es un respaldo del estudio'); }
   };
   r.readAsText(file);
 }
@@ -1117,17 +1120,17 @@ function exportarCSV() {
   const cli = tabla(['Nombre', 'Tipo', 'Documento', 'Teléfono', 'Correo', 'Dirección', 'Saldo'],
     DB.clientes.map((c) => [c.nombre, c.tipo, c.documento, c.telefono, c.email, c.direccion, saldoCliente(c.id).pend.toFixed(2)]));
   const bom = '﻿';
-  descargar(`causa-expedientes-${hoy()}.csv`, bom + exp, 'text/csv');
-  setTimeout(() => descargar(`causa-honorarios-${hoy()}.csv`, bom + mov, 'text/csv'), 300);
-  setTimeout(() => descargar(`causa-agenda-${hoy()}.csv`, bom + ag, 'text/csv'), 600);
-  setTimeout(() => descargar(`causa-clientes-${hoy()}.csv`, bom + cli, 'text/csv'), 900);
+  descargar(`rodriguez-expedientes-${hoy()}.csv`, bom + exp, 'text/csv');
+  setTimeout(() => descargar(`rodriguez-honorarios-${hoy()}.csv`, bom + mov, 'text/csv'), 300);
+  setTimeout(() => descargar(`rodriguez-agenda-${hoy()}.csv`, bom + ag, 'text/csv'), 600);
+  setTimeout(() => descargar(`rodriguez-clientes-${hoy()}.csv`, bom + cli, 'text/csv'), 900);
   toast('Se descargan 4 archivos CSV (se abren en Excel)');
 }
 function exportarICS() {
   const evs = DB.eventos.filter((v) => !v.hecho && v.fecha >= sumar(hoy(), -30));
   if (!evs.length) { toast('No hay eventos pendientes para exportar'); return; }
   const tx = (s) => String(s || '').replace(/\\/g, '\\\\').replace(/[,;]/g, (c) => '\\' + c).replace(/\n/g, '\\n');
-  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Causa//Agenda//ES', 'CALSCALE:GREGORIAN'];
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Estudio Rodriguez y Rodriguez//Agenda//ES', 'CALSCALE:GREGORIAN'];
   const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
   evs.forEach((v) => {
     const e = expediente(v.expedienteId), d = v.fecha.replace(/-/g, '');
@@ -1140,7 +1143,7 @@ function exportarICS() {
     L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Recordatorio', 'TRIGGER:-P1D', 'END:VALARM', 'END:VEVENT');
   });
   L.push('END:VCALENDAR');
-  descargar(`causa-agenda-${hoy()}.ics`, L.join('\r\n'), 'text/calendar');
+  descargar(`rodriguez-agenda-${hoy()}.ics`, L.join('\r\n'), 'text/calendar');
   toast(`${evs.length} evento(s) exportados. Ábrelo con Google Calendar o el calendario del celular.`);
 }
 function imprimirEstado(cid) {
