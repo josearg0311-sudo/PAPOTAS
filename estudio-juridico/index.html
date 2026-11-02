@@ -249,6 +249,27 @@ select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:
 .grabando{background:var(--mal)!important;color:#fff!important;border-color:var(--mal)!important;animation:latido 1.2s infinite}
 @keyframes latido{50%{opacity:.6}}
 
+/* generador de documentos */
+.cat-titulo{font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta-2);margin:22px 0 10px;font-family:system-ui,sans-serif}
+.modelos{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.modelos > .card + .card{margin-top:0}
+.modelo{display:flex;flex-direction:column;gap:6px;border-top:3px solid var(--vino)}
+.modelo h3{font-size:17px}
+.modelo p{margin:0 0 6px;flex:1}
+.generador{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:20px;align-items:start}
+.gen-form .card + .card{margin-top:14px}
+.gen-prev{position:sticky;top:150px}
+.previa{white-space:pre-wrap;font:13px/1.65 Arial,Helvetica,sans-serif;text-align:justify;max-height:calc(100vh - 190px);overflow:auto;padding:36px 40px 36px 56px}
+.previa:before{left:36px}
+mark.falta{background:var(--ambar-suave);color:var(--ambar);padding:0 2px;border-radius:2px}
+.gen-form details summary{cursor:pointer;list-style:none}
+.gen-form details summary::-webkit-details-marker{display:none}
+.chips-ins{display:flex;flex-wrap:wrap;gap:6px}
+.chip-ins{border:1px solid var(--regla-2);background:var(--hoja-2);border-radius:2px;padding:3px 8px;font-size:12px;cursor:pointer;color:var(--tinta)}
+.chip-ins:hover{border-color:var(--vino);color:var(--vino)}
+.ayuda p{margin:0 0 8px}
+.ayuda code,#modDetect code{background:var(--hoja-2);border:1px solid var(--regla);padding:0 4px;font-size:12px;border-radius:2px;word-break:break-all}
+
 /* cronómetro flotante */
 #crono{position:fixed;right:18px;bottom:18px;z-index:40;background:var(--tinta);color:var(--papel);padding:8px 8px 8px 14px;border-radius:999px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
 #crono a{color:inherit;text-decoration:none;font-size:16px;font-weight:700}
@@ -344,6 +365,10 @@ select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:
   .titulo-edit{font-size:22px}
   #crono{right:12px;bottom:calc(12px + env(safe-area-inset-bottom))}
   .tablero .col{flex-basis:78vw}
+  .generador{grid-template-columns:1fr}
+  .gen-prev{position:static}
+  .previa{max-height:none;padding:22px 16px 22px 26px;font-size:12.5px}
+  .previa:before{left:14px}
   .inline-add input[name=texto],.inline-add input[name=motivo]{flex-basis:100%;order:-1}
 }
 @media (max-width:380px){ .marca em{display:none} }
@@ -578,26 +603,28 @@ const NAV = [
   ['expedientes', 'Expedientes', 'i-folder'],
   ['agenda', 'Agenda', 'i-cal'],
   ['honorarios', 'Honorarios', 'i-money'],
-  ['escritos', 'Escritos', 'i-doc'],
+  ['escritos', 'Documentos', 'i-doc'],
   ['reportes', 'Reportes', 'i-chart'],
 ];
 function pintarNav(ruta) {
-  const base = { cliente: 'clientes', expediente: 'expedientes', escrito: 'escritos' }[ruta] ?? ruta;
+  const base = { cliente: 'clientes', expediente: 'expedientes', escrito: 'escritos', generar: 'escritos', modelo: 'escritos' }[ruta] ?? ruta;
   $('#nav').innerHTML = NAV.map(([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`).join('');
   document.querySelectorAll('.cab-acc a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#/' + base));
   const on = $('#nav a.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
-let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '', vistaExp: 'lista' };
+let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '', vistaExp: 'lista', gen: null, qMod: '', verTodosEsc: false };
 
 function render() {
   const [ruta, id] = (location.hash.replace(/^#\/?/, '') || 'inicio').split('/');
   pintarNav(ruta);
-  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes };
+  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes, generar: vGenerar, modelo: vModelo };
   const v = vistas[ruta] || vInicio;
   $('#main').innerHTML = v(id ? decodeURIComponent(id) : '');
   aplicarTema();
   pintarCrono();
+  if (ruta === 'generar') pintarPrevia();
+  if (ruta === 'modelo') pintarDetectado();
 }
 function reRender() { const y = window.scrollY; render(); window.scrollTo(0, y); }
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
@@ -1289,8 +1316,17 @@ const ACC = {
   abrirArchivo: (d) => abrirArchivo(d.id),
   borrarArchivo: (d) => { const a = DB.archivos.find((x) => x.id === d.id); if (!a || !confirm(`¿Quitar «${a.nombre}» de este aparato?`)) return; idbDel(a.id).catch(() => {}); DB.archivos = DB.archivos.filter((x) => x.id !== a.id); guardar(); reRender(); },
   nuevoEscrito: (d) => formNuevoEscrito(d.exp),
-  usarPlantilla: (d) => { formNuevoEscrito(''); const f = $('.modal form, form.modal'); if (f && f.elements.plantilla) f.elements.plantilla.value = d.id; },
-  borrarPlantilla: (d) => { if (!confirm('¿Quitar esta plantilla?')) return; DB.plantillas = DB.plantillas.filter((x) => x.id !== d.id); guardar(); reRender(); },
+  usarPlantilla: (d) => ACC.genAbrir(d),
+  borrarPlantilla: (d) => { if (!confirm('¿Eliminar este modelo?')) return; DB.plantillas = DB.plantillas.filter((x) => x.id !== d.id); guardar(); if (location.hash.startsWith('#/modelo')) location.hash = '#/escritos'; else reRender(); },
+  genAbrir: (d) => { const prev = estado.gen || {}; estado.gen = { modelo: d.id, expedienteId: d.exp || prev.expedienteId || '', clienteId: prev.clienteId || '', vals: {}, ops: {} }; location.hash = '#/generar/' + d.id; },
+  genGuardar: () => { const { m, texto } = genTexto(), e = expediente(estado.gen.expedienteId); const es = { id: uid(), expedienteId: estado.gen.expedienteId, titulo: m.titulo + (e ? ' — ' + (e.numero || caratula(e)) : ''), texto, fecha: hoy(), actualizado: ahora() }; DB.escritos.push(es); tocarExp(es.expedienteId); guardar(); toast('Documento guardado'); location.hash = '#/escrito/' + es.id; },
+  genImprimir: () => imprimirEscrito({ texto: genTexto().texto }),
+  genWord: () => { const { m, texto } = genTexto(); wordEscrito({ titulo: m.titulo, texto }); },
+  genCopiar: async () => { try { await navigator.clipboard.writeText(genTexto().texto); toast('Texto copiado'); } catch { toast('No se pudo copiar'); } },
+  personalizar: (d) => { const m = modeloPorId(d.id); const n = { id: uid(), titulo: m.titulo + ' (mío)', texto: m.texto, cat: m.cat, desc: m.desc, campos: m.campos, op: m.op, propia: true }; DB.plantillas.push(n); guardar(); toast('Copia creada: cámbiala a tu gusto'); location.hash = '#/modelo/' + n.id; },
+  nuevoModelo: () => { const n = { id: uid(), titulo: 'Mi modelo', texto: MODELO_EJEMPLO, cat: 'Mis modelos', desc: '', propia: true }; DB.plantillas.push(n); guardar(); location.hash = '#/modelo/' + n.id; },
+  insertar: (d) => insertarEnModelo(d.v),
+  verTodosEsc: () => { estado.verTodosEsc = true; reRender(); },
   imprimirEscrito: (d) => { const s = DB.escritos.find((x) => x.id === d.id); if (s) imprimirEscrito(s); },
   wordEscrito: (d) => { const s = DB.escritos.find((x) => x.id === d.id); if (s) wordEscrito(s); },
   copiarEscrito: async (d) => { const s = DB.escritos.find((x) => x.id === d.id); try { await navigator.clipboard.writeText(s.texto); toast('Texto copiado'); } catch { toast('No se pudo copiar'); } },
@@ -1320,7 +1356,15 @@ document.addEventListener('click', (ev) => {
 let _tEsc;
 document.addEventListener('input', (ev) => {
   const id = ev.target.id;
-  if (id === 'qCli' || id === 'qExp') {
+  if (ev.target.dataset && ev.target.dataset.gcampo) { estado.gen.vals[ev.target.dataset.gcampo] = ev.target.value; pintarPrevia(); return; }
+  if (id === 'modTexto' || id === 'modTitulo' || id === 'modDesc') {
+    const pl = DB.plantillas.find((x) => x.id === ($('#modTexto') || {}).dataset?.id); if (!pl) return;
+    if (id === 'modTexto') { pl.texto = ev.target.value; pintarDetectado(); } else if (id === 'modTitulo') pl.titulo = ev.target.value || 'Mi modelo'; else pl.desc = ev.target.value;
+    const g = $('#guardadoMod'); if (g) g.textContent = 'guardando…';
+    clearTimeout(_tEsc); _tEsc = setTimeout(() => { guardar(); const g2 = $('#guardadoMod'); if (g2) g2.textContent = 'guardado'; }, 500);
+    return;
+  }
+  if (id === 'qCli' || id === 'qExp' || id === 'qMod') {
     estado[id] = ev.target.value; const pos = ev.target.selectionStart; reRender();
     const n = $('#' + id); n.focus(); n.setSelectionRange(pos, pos);
   } else if (id === 'textoEscrito' || id === 'tituloEscrito') {
@@ -1334,6 +1378,10 @@ document.addEventListener('input', (ev) => {
 });
 document.addEventListener('change', (ev) => {
   if (ev.target.id === 'fMateria') { estado.fMateria = ev.target.value; reRender(); }
+  if (ev.target.id === 'genExp') { estado.gen.expedienteId = ev.target.value; estado.gen.clienteId = ''; reRender(); }
+  if (ev.target.id === 'genCli') { estado.gen.clienteId = ev.target.value; reRender(); }
+  if (ev.target.dataset && ev.target.dataset.gop) { estado.gen.ops[ev.target.dataset.gop] = ev.target.type === 'checkbox' ? ev.target.checked : ev.target.value; pintarPrevia(); }
+  if (ev.target.id === 'modCat') { const pl = DB.plantillas.find((x) => x.id === $('#modTexto').dataset.id); if (pl) { pl.cat = ev.target.value; guardar(); } }
   if (ev.target.id === 'fileRespaldo') cargarRespaldo(ev.target.files[0]);
   if (ev.target.classList.contains('fileDocs')) subirArchivos(ev.target.dataset.exp, [...ev.target.files]);
   if (ev.target.classList.contains('mover')) moverExp(ev.target.dataset.id, ev.target.value);
@@ -1722,118 +1770,271 @@ function pintarCrono() {
 setInterval(() => { if (DB.timer) { const el = $('#crono a'); if (el) { const s = Math.floor((Date.now() - DB.timer.inicio) / 1000); el.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`; } else pintarCrono(); } }, 1000);
 
 /* ---------- escritos y plantillas ---------- */
+/* ===================================================================
+   GENERADOR DE DOCUMENTOS
+   Un modelo es texto con marcas:
+     {{dato}}                      → casilla que se llena (o sale sola del expediente)
+     {{DATO}}                      → el mismo dato en mayúsculas
+     {{monto_letras}}              → el monto «monto» escrito en letras
+     {{#si opcion}}…{{/si}}        → parte que se incluye si se marca la opción
+     {{#no opcion}}…{{/no}}        → parte que se incluye si NO se marca
+     {{#si forma=cuotas}}…{{/si}}  → parte según lo elegido en una lista
+     {{otrosi}}OTROSÍ DIGO         → numera solo: PRIMER, SEGUNDO… (o nada si es uno)
+   =================================================================== */
 const ENC = `Expediente   : {{numero}}
 Especialista : {{especialista}}
 Cuaderno     : Principal
 Escrito N.°  : ___
 Sumilla      : `;
-const FIRMA = `
-
-{{ciudad}}, {{fecha_larga}}
+const FIRMA = `{{ciudad}}, {{fecha_larga}}
 
 
 
 ______________________________          ______________________________
 {{cliente}}                              {{abogado}}
 {{documento}}                              {{colegiatura}}`;
-const PLANTILLAS = [
-  { id: 'p-aperso', titulo: 'Apersonamiento y domicilio procesal', texto: ENC + `APERSONAMIENTO Y SEÑALA DOMICILIO PROCESAL Y CASILLA ELECTRÓNICA
+const CABJ = `SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+`;
+const CATEGORIAS = ['Escritos judiciales', 'Cartas', 'Contratos', 'Poderes y declaraciones', 'Para el cliente', 'Mis modelos'];
+const FIRMA_CARTA = `Atentamente,
+
+
+
+______________________________
+{{#si firma=abogado}}{{abogado}}
+{{colegiatura}}
+{{estudio}}{{/si}}{{#si firma=cliente}}{{cliente}}
+{{documento}}{{/si}}`;
+const OP_FIRMA = { firma: { l: 'Firma la carta', valores: [['abogado', 'El abogado, en nombre del cliente'], ['cliente', 'El propio cliente']] } };
+
+const MODELOS = [
+  /* ---------- escritos judiciales ---------- */
+  { id: 'p-aperso', cat: 'Escritos judiciales', titulo: 'Apersonamiento', desc: 'Se apersona, señala domicilio procesal y casilla, otorga facultades.',
+    op: { casilla: { l: 'Señalar domicilio procesal y casilla SINOE', def: true }, facultades: { l: 'Otorgar facultades al abogado (art. 80 CPC)', def: true }, adjunta_dni: { l: 'Adjuntar copia del DNI', def: true } },
+    texto: ENC + `APERSONAMIENTO{{#si casilla}} Y SEÑALA DOMICILIO PROCESAL Y CASILLA ELECTRÓNICA{{/si}}
 
 SEÑOR JUEZ DEL {{JUZGADO}}:
 
 {{cliente}}, identificado(a) con {{documento}}, con domicilio real en {{direccion_cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
 
-Que, por convenir a mi derecho, me apersono a la presente causa y, para los efectos de las notificaciones, señalo domicilio procesal en {{domicilio_procesal}} y casilla electrónica N.° {{casilla}} del Sistema de Notificaciones Electrónicas (SINOE) del Poder Judicial, donde solicito se me haga llegar todas las resoluciones que se expidan en el proceso.
+Que, por convenir a mi derecho, me apersono a la presente causa{{#si casilla}} y, para los efectos de las notificaciones, señalo domicilio procesal en {{domicilio_procesal}} y casilla electrónica N.° {{casilla}} del Sistema de Notificaciones Electrónicas (SINOE) del Poder Judicial{{/si}}.
 
 POR TANTO:
 A usted, Señor Juez, pido tenerme por apersonado(a) y proveer conforme a ley.
 
-PRIMER OTROSÍ DIGO: Que, conforme al artículo 80 del Código Procesal Civil, otorgo las facultades generales de representación al letrado que autoriza el presente escrito, {{abogado}}, con registro {{colegiatura}}, declarando estar instruido(a) de la representación que otorgo y de sus alcances.
+{{#si facultades}}{{otrosi}}OTROSÍ DIGO: Que, conforme al artículo 80 del Código Procesal Civil, otorgo las facultades generales de representación al letrado que autoriza el presente escrito, {{abogado}}, con registro {{colegiatura}}, declarando estar instruido(a) de la representación que otorgo y de sus alcances.
 
-SEGUNDO OTROSÍ DIGO: Que, adjunto copia de mi documento de identidad.` + FIRMA },
-  { id: 'p-tenga', titulo: 'Téngase presente', texto: ENC + `TÉNGASE PRESENTE
+{{/si}}{{#si adjunta_dni}}{{otrosi}}OTROSÍ DIGO: Que, adjunto copia de mi documento de identidad.
 
-SEÑOR JUEZ DEL {{JUZGADO}}:
+{{/si}}` + FIRMA },
+  { id: 'p-tenga', cat: 'Escritos judiciales', titulo: 'Téngase presente', desc: 'Pone en conocimiento del juez hechos o argumentos.',
+    campos: { argumentos: { l: 'Lo que el juez debe tener presente', t: 'textarea' } },
+    texto: ENC + `TÉNGASE PRESENTE
 
-{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+` + CABJ + `Que, solicito a su Despacho se sirva tener presente lo siguiente al momento de resolver:
 
-Que, solicito a su Despacho se sirva tener presente lo siguiente al momento de resolver:
-
-1. ___
-
-2. ___
+{{argumentos}}
 
 POR TANTO:
-A usted, Señor Juez, pido tener presente lo expuesto.` + FIRMA },
-  { id: 'p-copias', titulo: 'Solicito copias certificadas', texto: ENC + `SOLICITO COPIAS CERTIFICADAS
+A usted, Señor Juez, pido tener presente lo expuesto.
 
-SEÑOR JUEZ DEL {{JUZGADO}}:
+` + FIRMA },
+  { id: 'p-copias', cat: 'Escritos judiciales', titulo: 'Solicito copias certificadas', desc: 'Pide copias de piezas del expediente; puede autorizar a quien las recoja.',
+    campos: { piezas: { l: 'Piezas procesales', ph: 'la demanda, la Resolución N.° 3 y sus cédulas' }, autorizado: { l: 'Persona autorizada' }, dni_autorizado: { l: 'DNI de la persona autorizada' } },
+    op: { recoge: { l: 'Autorizar a otra persona para recogerlas', def: false } },
+    texto: ENC + `SOLICITO COPIAS CERTIFICADAS
 
-{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
-
-Que, solicito se me expidan copias certificadas de las siguientes piezas procesales: ___, para lo cual adjunto el arancel judicial correspondiente.
+` + CABJ + `Que, solicito se me expidan copias certificadas de las siguientes piezas procesales: {{piezas}}, para lo cual adjunto el arancel judicial correspondiente.
 
 POR TANTO:
 A usted, Señor Juez, pido acceder a lo solicitado.
 
-OTROSÍ DIGO: Que, autorizo a ___, identificado(a) con DNI N.° ___, para que recabe las copias solicitadas.` + FIRMA },
-  { id: 'p-impulso', titulo: 'Solicito impulso / pronunciamiento', texto: ENC + `SOLICITO SE EMITA PRONUNCIAMIENTO
+{{#si recoge}}{{otrosi}}OTROSÍ DIGO: Que, autorizo a {{autorizado}}, identificado(a) con DNI N.° {{dni_autorizado}}, para que recabe las copias solicitadas.
 
-SEÑOR JUEZ DEL {{JUZGADO}}:
+{{/si}}` + FIRMA },
+  { id: 'p-impulso', cat: 'Escritos judiciales', titulo: 'Solicito pronunciamiento', desc: 'Impulso procesal cuando el juzgado demora en resolver.',
+    campos: { pedido_pendiente: { l: 'Qué está pendiente de resolver', ph: 'mi escrito de ofrecimiento de medios probatorios' }, fecha_pedido: { l: 'Fecha en que se presentó', t: 'date' } },
+    texto: ENC + `SOLICITO SE EMITA PRONUNCIAMIENTO
 
-{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
-
-Que, habiendo transcurrido en exceso el plazo para que su Despacho se pronuncie respecto de ___, presentado con fecha ___, solicito se sirva emitir el pronunciamiento correspondiente, en atención a los principios de celeridad y economía procesal.
-
-POR TANTO:
-A usted, Señor Juez, pido proveer conforme a lo solicitado.` + FIRMA },
-  { id: 'p-domic', titulo: 'Variación de domicilio procesal / casilla', texto: ENC + `VARÍO DOMICILIO PROCESAL Y CASILLA ELECTRÓNICA
-
-SEÑOR JUEZ DEL {{JUZGADO}}:
-
-{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
-
-Que, vario mi domicilio procesal al ubicado en {{domicilio_procesal}} y mi casilla electrónica a la N.° {{casilla}} del SINOE, donde solicito se me notifiquen en adelante las resoluciones del proceso.
+` + CABJ + `Que, habiendo transcurrido en exceso el plazo para que su Despacho se pronuncie respecto de {{pedido_pendiente}}, presentado con fecha {{fecha_pedido}}, solicito se sirva emitir el pronunciamiento correspondiente, en atención a los principios de celeridad y economía procesal.
 
 POR TANTO:
-A usted, Señor Juez, pido tener presente la variación y proveer conforme a ley.` + FIRMA },
-  { id: 'p-apela', titulo: 'Recurso de apelación (estructura)', texto: ENC + `INTERPONGO RECURSO DE APELACIÓN
+A usted, Señor Juez, pido proveer conforme a lo solicitado.
 
-SEÑOR JUEZ DEL {{JUZGADO}}:
+` + FIRMA },
+  { id: 'p-reprog', cat: 'Escritos judiciales', titulo: 'Reprogramación de audiencia', desc: 'Pide nueva fecha para una audiencia, con o sin sustento adjunto.',
+    campos: { tipo_audiencia: { l: 'Audiencia', ph: 'audiencia única' }, fecha_audiencia: { l: 'Fecha programada', t: 'date' }, hora_audiencia: { l: 'Hora', t: 'time' }, motivo: { l: 'Motivo', t: 'textarea', ph: 'el abogado patrocinante tiene programada otra audiencia a la misma hora…' }, sustento: { l: 'Documento que lo sustenta' } },
+    op: { adjunta: { l: 'Adjuntar documento que sustenta el pedido', def: true } },
+    texto: ENC + `SOLICITO REPROGRAMACIÓN DE AUDIENCIA
 
-{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+` + CABJ + `Que, encontrándose programada la {{tipo_audiencia}} para el día {{fecha_audiencia}} a las {{hora_audiencia}} horas, solicito a su Despacho se sirva reprogramarla, toda vez que {{motivo}}.
 
-Que, dentro del plazo de ley, interpongo RECURSO DE APELACIÓN contra la Resolución N.° ___, de fecha ___, notificada el ___, que ___, a fin de que el superior jerárquico la REVOQUE / ANULE, conforme a los fundamentos siguientes:
+Lo solicitado no tiene finalidad dilatoria alguna y se formula para garantizar el ejercicio del derecho de defensa.
 
-I. PETITORIO
-___
+POR TANTO:
+A usted, Señor Juez, pido acceder a lo solicitado y señalar nueva fecha.
 
-II. FUNDAMENTOS DE HECHO Y ERRORES DE LA RESOLUCIÓN IMPUGNADA
-1. ___
-2. ___
+{{#si adjunta}}{{otrosi}}OTROSÍ DIGO: Que, adjunto {{sustento}}, que acredita lo expuesto.
 
-III. FUNDAMENTOS DE DERECHO
-___
+{{/si}}` + FIRMA },
+  { id: 'p-autoriza', cat: 'Escritos judiciales', titulo: 'Autorizo revisión del expediente', desc: 'Autoriza a un practicante o asistente a leer el expediente.',
+    campos: { autorizado: { l: 'Persona autorizada' }, dni_autorizado: { l: 'DNI' } },
+    op: { cargo: { l: 'La persona es', valores: [['practicante', 'Practicante'], ['asistente', 'Asistente legal'], ['abogado', 'Abogado(a)']] }, copias: { l: 'También puede recabar copias simples', def: true } },
+    texto: ENC + `AUTORIZO REVISIÓN DEL EXPEDIENTE
 
-IV. NATURALEZA DEL AGRAVIO
-La resolución impugnada me causa agravio porque ___.
+` + CABJ + `Que, autorizo a {{autorizado}}, identificado(a) con DNI N.° {{dni_autorizado}}, {{#si cargo=practicante}}practicante de derecho{{/si}}{{#si cargo=asistente}}asistente legal{{/si}}{{#si cargo=abogado}}abogado(a){{/si}} de este estudio, para que pueda revisar y dar lectura al presente expediente{{#si copias}}, así como recabar copias simples de los actuados{{/si}}.
 
-V. ANEXOS
+POR TANTO:
+A usted, Señor Juez, pido tener presente la autorización.
+
+` + FIRMA },
+  { id: 'p-absuelve', cat: 'Escritos judiciales', titulo: 'Absuelvo traslado', desc: 'Responde un traslado conferido por el juzgado.',
+    campos: { resolucion: { l: 'Resolución que confiere el traslado', ph: 'Resolución N.° 7' }, que_se_absuelve: { l: 'Qué se absuelve', ph: 'el escrito de excepción de la demandada' }, fundamentos: { l: 'Fundamentos', t: 'textarea' } },
+    op: { pide_infundado: { l: 'Pedir que se declare infundado', def: true } },
+    texto: ENC + `ABSUELVO TRASLADO
+
+` + CABJ + `Que, dentro del plazo concedido mediante {{resolucion}}, absuelvo el traslado de {{que_se_absuelve}}, en los términos siguientes:
+
+{{fundamentos}}
+
+POR TANTO:
+A usted, Señor Juez, pido tener por absuelto el traslado{{#si pide_infundado}} y, en su oportunidad, declarar INFUNDADO lo solicitado por la contraparte{{/si}}.
+
+` + FIRMA },
+  { id: 'p-domic', cat: 'Escritos judiciales', titulo: 'Variación de domicilio procesal', desc: 'Cambia el domicilio procesal y/o la casilla electrónica.',
+    op: { que: { l: 'Se cambia', valores: [['ambos', 'Domicilio y casilla'], ['domicilio', 'Sólo domicilio procesal'], ['casilla', 'Sólo casilla SINOE']] } },
+    texto: ENC + `VARÍO {{#si que=ambos}}DOMICILIO PROCESAL Y CASILLA ELECTRÓNICA{{/si}}{{#si que=domicilio}}DOMICILIO PROCESAL{{/si}}{{#si que=casilla}}CASILLA ELECTRÓNICA{{/si}}
+
+` + CABJ + `Que, vario {{#si que=ambos}}mi domicilio procesal al ubicado en {{domicilio_procesal}} y mi casilla electrónica a la N.° {{casilla}} del SINOE{{/si}}{{#si que=domicilio}}mi domicilio procesal al ubicado en {{domicilio_procesal}}{{/si}}{{#si que=casilla}}mi casilla electrónica a la N.° {{casilla}} del SINOE{{/si}}, donde solicito se me notifiquen en adelante las resoluciones del proceso.
+
+POR TANTO:
+A usted, Señor Juez, pido tener presente la variación y proveer conforme a ley.
+
+` + FIRMA },
+  { id: 'p-apela', cat: 'Escritos judiciales', titulo: 'Recurso de apelación', desc: 'Estructura completa: petitorio, errores, agravio y anexos.',
+    campos: { resolucion: { l: 'Resolución apelada', ph: 'Resolución N.° 12 (sentencia)' }, fecha_resolucion: { l: 'Fecha de la resolución', t: 'date' }, fecha_notificacion: { l: 'Notificada el', t: 'date' }, que_resuelve: { l: 'Qué resolvió', ph: 'declaró infundada la demanda' }, errores: { l: 'Errores de hecho y de derecho', t: 'textarea' }, agravio: { l: 'Agravio que causa', t: 'textarea' } },
+    op: { pedido: { l: 'Se pide', valores: [['revoque', 'Que se revoque'], ['anule', 'Que se declare nula'], ['ambos', 'Nulidad y, subsidiariamente, revocatoria']] }, tasa: { l: 'Anexar arancel por apelación', def: true } },
+    texto: ENC + `INTERPONGO RECURSO DE APELACIÓN
+
+` + CABJ + `Que, dentro del plazo de ley, interpongo RECURSO DE APELACIÓN contra la {{resolucion}}, de fecha {{fecha_resolucion}}, notificada el {{fecha_notificacion}}, que {{que_resuelve}}, a fin de que el superior jerárquico {{#si pedido=revoque}}la REVOQUE{{/si}}{{#si pedido=anule}}la declare NULA{{/si}}{{#si pedido=ambos}}la declare NULA y, subsidiariamente, la REVOQUE{{/si}}, conforme a los fundamentos siguientes:
+
+I. ERRORES DE HECHO Y DE DERECHO
+{{errores}}
+
+II. NATURALEZA DEL AGRAVIO
+La resolución impugnada me causa agravio porque {{agravio}}.
+
+{{#si tasa}}III. ANEXOS
 1-A. Arancel judicial por apelación.
-1-B. Cédulas de notificación.
+1-B. Cédula de notificación de la resolución apelada.
 
-POR TANTO:
-A usted, Señor Juez, pido conceder el recurso y elevar los actuados al superior.` + FIRMA },
-  { id: 'p-contrato', titulo: 'Contrato de servicios profesionales', judicial: false, texto: `CONTRATO DE LOCACIÓN DE SERVICIOS PROFESIONALES
+{{/si}}POR TANTO:
+A usted, Señor Juez, pido conceder el recurso y elevar los actuados al superior.
+
+` + FIRMA },
+
+  /* ---------- cartas ---------- */
+  { id: 'c-pago', cat: 'Cartas', titulo: 'Carta notarial de requerimiento de pago', desc: 'Exige el pago de una deuda vencida dando un plazo.',
+    campos: { destinatario: { l: 'Deudor (destinatario)' }, direccion_destinatario: { l: 'Dirección del deudor' }, monto: { l: 'Monto adeudado (S/)', t: 'number' }, concepto: { l: 'Concepto de la deuda', ph: 'el saldo del precio de venta del vehículo…' }, plazo_dias: { l: 'Plazo para pagar (días)', ph: '5' }, forma_pago: { l: 'Forma de pago', ph: 'depósito en la cuenta N.° …' } },
+    op: Object.assign({}, OP_FIRMA, { intereses: { l: 'Reclamar también intereses legales', def: true }, acciones: { l: 'Advertir que se iniciarán acciones legales', def: true } }),
+    texto: `{{ciudad}}, {{fecha_larga}}
+
+CARTA NOTARIAL
+
+Señor(a):
+{{destinatario}}
+{{direccion_destinatario}}
+Presente.-
+
+Asunto: Requerimiento de pago
+
+De mi consideración:
+
+{{#si firma=abogado}}Me dirijo a usted en mi calidad de abogado de {{cliente}}, identificado(a) con {{documento}}, a fin de requerirle formalmente{{/si}}{{#si firma=cliente}}Me dirijo a usted a fin de requerirle formalmente{{/si}} el pago de la suma de {{monto}} ({{monto_letras}}), por concepto de {{concepto}}, obligación que a la fecha se encuentra vencida e impaga.
+
+En tal sentido, le otorgo un plazo de {{plazo_dias}} días calendario, contados desde la recepción de la presente, para que cumpla con cancelar dicho monto{{#si intereses}}, más los intereses legales que correspondan{{/si}}, mediante {{forma_pago}}.
+
+{{#si acciones}}De no cumplir con el pago dentro del plazo indicado, se iniciarán las acciones legales correspondientes para el cobro de lo adeudado, con los costos y costas que ello genere.
+
+{{/si}}Sin otro particular, quedo a la espera de su pronta respuesta.
+
+` + FIRMA_CARTA },
+  { id: 'c-inmueble', cat: 'Cartas', titulo: 'Carta notarial de devolución de inmueble', desc: 'Pide al inquilino devolver el inmueble al vencer el contrato.',
+    campos: { destinatario: { l: 'Inquilino (destinatario)' }, direccion_inmueble: { l: 'Dirección del inmueble' }, fecha_contrato: { l: 'Fecha del contrato de arrendamiento', t: 'date' }, fecha_vencimiento: { l: 'Fecha en que venció', t: 'date' }, plazo_dias: { l: 'Plazo para desocupar (días)', ph: '10' } },
+    op: Object.assign({}, OP_FIRMA, { rentas: { l: 'Reclamar además rentas impagas', def: false }, desalojo: { l: 'Advertir demanda de desalojo', def: true } }),
+    campos2: { rentas_adeudadas: { l: 'Rentas adeudadas (S/)', t: 'number' } },
+    texto: `{{ciudad}}, {{fecha_larga}}
+
+CARTA NOTARIAL
+
+Señor(a):
+{{destinatario}}
+{{direccion_inmueble}}
+Presente.-
+
+Asunto: Solicitud de devolución de inmueble
+
+De mi consideración:
+
+{{#si firma=abogado}}Me dirijo a usted en mi calidad de abogado de {{cliente}}, propietario(a) del inmueble ubicado en {{direccion_inmueble}}, para comunicarle{{/si}}{{#si firma=cliente}}Me dirijo a usted, en mi calidad de propietario(a) del inmueble ubicado en {{direccion_inmueble}}, para comunicarle{{/si}} que el contrato de arrendamiento celebrado el {{fecha_contrato}} venció el {{fecha_vencimiento}}.
+
+Por ello, conforme al artículo 1700 del Código Civil, solicito la devolución del inmueble, el cual deberá ser entregado desocupado y en buen estado de conservación, en un plazo de {{plazo_dias}} días calendario contados desde la recepción de la presente.
+
+{{#si rentas}}Asimismo, le requiero el pago de las rentas adeudadas, que ascienden a {{rentas_adeudadas}} ({{rentas_adeudadas_letras}}).
+
+{{/si}}{{#si desalojo}}De no cumplir con lo solicitado, se interpondrá la demanda de desalojo correspondiente, con los costos y costas del proceso.
+
+{{/si}}` + FIRMA_CARTA },
+  { id: 'c-cobro', cat: 'Cartas', titulo: 'Recordatorio de honorarios al cliente', desc: 'Carta cordial al cliente con su saldo pendiente.',
+    campos: { cuenta_bancaria: { l: 'Cuenta para el pago', ph: 'BCP Soles N.° … / CCI …' } },
+    op: { datos_pago: { l: 'Incluir datos para el pago', def: true }, tono: { l: 'Tono', valores: [['cordial', 'Cordial'], ['firme', 'Firme']] } },
+    texto: `{{ciudad}}, {{fecha_larga}}
+
+Señor(a):
+{{cliente}}
+{{direccion_cliente}}
+Presente.-
+
+Asunto: Honorarios pendientes — Expediente {{numero}}
+
+{{#si tono=cordial}}Estimado(a) cliente:
+
+Reciba un cordial saludo. Por medio de la presente le recordamos que, a la fecha, se encuentra pendiente de pago un saldo de {{saldo}} ({{saldo_letras}}) por concepto de honorarios profesionales del proceso sobre {{pretension}}.
+
+Le agradeceremos regularizar dicho pago a la brevedad posible, para continuar brindándole el servicio con la dedicación de siempre.{{/si}}{{#si tono=firme}}De nuestra consideración:
+
+Nos dirigimos a usted para comunicarle que mantiene un saldo vencido de {{saldo}} ({{saldo_letras}}) por concepto de honorarios profesionales del proceso sobre {{pretension}}, conforme a lo pactado.
+
+Le solicitamos cancelar dicho saldo en un plazo no mayor de cinco (5) días hábiles. Caso contrario, nos veremos en la necesidad de evaluar la continuidad del patrocinio, conforme a lo convenido.{{/si}}
+
+{{#si datos_pago}}Puede realizar el pago mediante: {{cuenta_bancaria}}.
+
+{{/si}}Atentamente,
+
+
+
+______________________________
+{{abogado}}
+{{colegiatura}}
+{{estudio}}` },
+
+  /* ---------- contratos ---------- */
+  { id: 'p-contrato', cat: 'Contratos', titulo: 'Contrato de servicios profesionales', desc: 'Patrocinio legal con honorario fijo, en cuotas o cuota litis.',
+    campos: { honorario: { l: 'Honorario (S/)', t: 'number', de: 'honorario_num' }, numero_cuotas: { l: 'Número de cuotas' }, porcentaje: { l: 'Porcentaje de cuota litis', ph: '20%' }, adelanto: { l: 'Adelanto (S/)', t: 'number' } },
+    op: { forma: { l: 'Forma de pago', valores: [['fijo', 'Pago único'], ['cuotas', 'En cuotas'], ['litis', 'Adelanto + cuota litis']] }, segunda: { l: 'Incluye segunda instancia', def: false }, gastos: { l: 'Los gastos del proceso los paga el cliente', def: true }, confidencial: { l: 'Cláusula de confidencialidad', def: true } },
+    texto: `CONTRATO DE LOCACIÓN DE SERVICIOS PROFESIONALES
 
 Conste por el presente documento el contrato de locación de servicios profesionales que celebran, de una parte, {{estudio}}, con RUC N.° {{ruc_estudio}}, con domicilio en {{direccion_estudio}}, representado por {{abogado}}, a quien en adelante se le denominará EL ESTUDIO; y, de la otra parte, {{cliente}}, identificado(a) con {{documento}}, con domicilio en {{direccion_cliente}}, a quien en adelante se le denominará EL CLIENTE; en los términos siguientes:
 
 PRIMERA.- OBJETO
-EL ESTUDIO se obliga a prestar a EL CLIENTE el servicio de patrocinio legal en el proceso sobre {{pretension}}, {{contra_frase_contrato}}, expediente N.° {{numero}}, tramitado ante el {{juzgado}}.
+EL ESTUDIO se obliga a prestar a EL CLIENTE el servicio de patrocinio legal en el proceso sobre {{pretension}}, {{contra_frase_contrato}}, expediente N.° {{numero}}, tramitado ante el {{juzgado}}, {{#si segunda}}en primera y segunda instancia{{/si}}{{#no segunda}}hasta la conclusión de la primera instancia{{/no}}.
 
 SEGUNDA.- HONORARIOS
-Las partes acuerdan como honorarios profesionales la suma de {{honorario_total}} ({{honorario_letras}}), que EL CLIENTE pagará de la forma siguiente: ___.
-Los gastos del proceso (tasas judiciales, cédulas, peritos, copias y similares) no están incluidos y serán asumidos por EL CLIENTE.
+{{#si forma=fijo}}Las partes acuerdan como honorarios profesionales la suma de {{honorario}} ({{honorario_letras}}), que EL CLIENTE pagará a la firma del presente contrato.{{/si}}{{#si forma=cuotas}}Las partes acuerdan como honorarios profesionales la suma de {{honorario}} ({{honorario_letras}}), que EL CLIENTE pagará en {{numero_cuotas}} cuotas mensuales, iguales y consecutivas, la primera a la firma del presente contrato.{{/si}}{{#si forma=litis}}EL CLIENTE pagará un adelanto de {{adelanto}} ({{adelanto_letras}}) a la firma del presente contrato y, adicionalmente, el {{porcentaje}} de lo que efectivamente obtenga como resultado del proceso, pagadero en la oportunidad en que lo perciba.{{/si}}
+{{#si gastos}}Los gastos del proceso (tasas judiciales, cédulas, peritos, copias y similares) no están incluidos y serán asumidos por EL CLIENTE.{{/si}}
 
 TERCERA.- OBLIGACIONES DE EL ESTUDIO
 Patrocinar diligentemente el proceso, mantener informado a EL CLIENTE del estado de la causa y guardar el secreto profesional.
@@ -1841,59 +2042,397 @@ Patrocinar diligentemente el proceso, mantener informado a EL CLIENTE del estado
 CUARTA.- OBLIGACIONES DE EL CLIENTE
 Proporcionar información veraz y oportuna, entregar los documentos que se le soliciten y pagar los honorarios en las fechas convenidas.
 
-QUINTA.- DURACIÓN
-El presente contrato rige desde su firma hasta la conclusión de la instancia contratada.
+{{#si confidencial}}QUINTA.- CONFIDENCIALIDAD
+Toda la información que EL CLIENTE proporcione será tratada como confidencial y utilizada únicamente para la prestación del servicio.
 
-Firmado en dos ejemplares en {{ciudad}}, {{fecha_larga}}.
+{{/si}}Firmado en dos ejemplares en {{ciudad}}, {{fecha_larga}}.
 
 
 
 ______________________________          ______________________________
 EL ESTUDIO                               EL CLIENTE
 {{abogado}}                              {{cliente}}` },
+  { id: 'k-arriendo', cat: 'Contratos', titulo: 'Contrato de arrendamiento', desc: 'Alquiler de vivienda o local, con cláusulas a elegir.',
+    campos: { arrendador: { l: 'Arrendador (propietario)', de: 'cliente' }, dni_arrendador: { l: 'DNI/RUC del arrendador', de: 'documento' }, arrendatario: { l: 'Arrendatario (inquilino)' }, dni_arrendatario: { l: 'DNI/RUC del arrendatario' }, direccion_inmueble: { l: 'Dirección del inmueble' }, renta: { l: 'Renta mensual (S/)', t: 'number' }, garantia: { l: 'Garantía (S/)', t: 'number' }, plazo_meses: { l: 'Plazo (meses)', ph: '12' }, fecha_inicio: { l: 'Inicio', t: 'date' }, dia_pago: { l: 'Día de pago de cada mes', ph: '5' } },
+    op: { uso: { l: 'Uso del inmueble', valores: [['vivienda', 'Vivienda'], ['comercial', 'Local comercial / oficina']] }, allanamiento: { l: 'Cláusula de allanamiento a futuro (art. 594 CPC)', def: true }, subarriendo: { l: 'Prohibir subarrendar', def: true }, servicios: { l: 'Servicios a cargo del inquilino', def: true } },
+    texto: `CONTRATO DE ARRENDAMIENTO
+
+Conste por el presente documento el contrato de arrendamiento que celebran, de una parte, {{arrendador}}, identificado(a) con {{dni_arrendador}}, a quien en adelante se le denominará EL ARRENDADOR; y, de la otra parte, {{arrendatario}}, identificado(a) con {{dni_arrendatario}}, a quien en adelante se le denominará EL ARRENDATARIO; en los términos siguientes:
+
+PRIMERA.- OBJETO
+EL ARRENDADOR da en arrendamiento a EL ARRENDATARIO el inmueble ubicado en {{direccion_inmueble}}, que será destinado exclusivamente a {{#si uso=vivienda}}casa habitación{{/si}}{{#si uso=comercial}}uso comercial u oficina{{/si}}.
+
+SEGUNDA.- PLAZO
+El plazo del arrendamiento es de {{plazo_meses}} meses, contados desde el {{fecha_inicio}}.
+
+TERCERA.- RENTA
+La renta mensual es de {{renta}} ({{renta_letras}}), que EL ARRENDATARIO pagará por adelantado a más tardar el día {{dia_pago}} de cada mes.
+
+CUARTA.- GARANTÍA
+EL ARRENDATARIO entrega la suma de {{garantia}} ({{garantia_letras}}) en calidad de garantía, que le será devuelta al término del contrato, previa verificación del estado del inmueble y del pago de servicios.
+
+{{#si servicios}}QUINTA.- SERVICIOS
+Los pagos por consumo de agua, luz, gas, internet y otros servicios del inmueble son de cargo de EL ARRENDATARIO.
+
+{{/si}}{{#si subarriendo}}SEXTA.- PROHIBICIÓN DE SUBARRENDAR
+EL ARRENDATARIO no podrá subarrendar ni ceder total o parcialmente el inmueble sin autorización escrita de EL ARRENDADOR.
+
+{{/si}}{{#si allanamiento}}SÉPTIMA.- ALLANAMIENTO A FUTURO
+EL ARRENDATARIO se allana desde ahora a la demanda judicial para desocupar el inmueble por las causales de vencimiento del plazo de contrato o resolución del arrendamiento por falta de pago, conforme al artículo 594 del Código Procesal Civil.
+
+{{/si}}Firmado en dos ejemplares en {{ciudad}}, {{fecha_larga}}.
+
+
+
+______________________________          ______________________________
+EL ARRENDADOR                            EL ARRENDATARIO
+{{arrendador}}                           {{arrendatario}}` },
+  { id: 'k-deuda', cat: 'Contratos', titulo: 'Reconocimiento de deuda y compromiso de pago', desc: 'El deudor reconoce lo que debe y fija cómo pagará.',
+    campos: { deudor: { l: 'Deudor' }, dni_deudor: { l: 'DNI del deudor' }, acreedor: { l: 'Acreedor', de: 'cliente' }, dni_acreedor: { l: 'DNI/RUC del acreedor', de: 'documento' }, monto: { l: 'Monto reconocido (S/)', t: 'number' }, concepto: { l: 'Origen de la deuda' }, forma_pago: { l: 'Cómo pagará', t: 'textarea', ph: 'en 6 cuotas mensuales de S/ 500.00 cada una, los días 10 de cada mes, a partir del…' } },
+    op: { aceleracion: { l: 'Si deja de pagar dos cuotas, vence todo lo adeudado', def: true }, intereses: { l: 'Intereses moratorios por retraso', def: false } },
+    texto: `RECONOCIMIENTO DE DEUDA Y COMPROMISO DE PAGO
+
+Conste por el presente documento que yo, {{deudor}}, identificado(a) con DNI N.° {{dni_deudor}}, declaro adeudar a {{acreedor}}, identificado(a) con {{dni_acreedor}}, la suma de {{monto}} ({{monto_letras}}), por concepto de {{concepto}}.
+
+Me comprometo a cancelar dicha suma de la forma siguiente: {{forma_pago}}.
+
+{{#si aceleracion}}El incumplimiento en el pago de dos (2) cuotas, consecutivas o no, dará por vencidos todos los plazos, pudiendo el acreedor exigir el pago total de lo adeudado.
+
+{{/si}}{{#si intereses}}En caso de retraso, se aplicarán los intereses moratorios a la tasa máxima permitida por ley.
+
+{{/si}}Firmo en señal de conformidad en {{ciudad}}, {{fecha_larga}}.
+
+
+
+______________________________          ______________________________
+EL DEUDOR                                EL ACREEDOR
+{{deudor}}                               {{acreedor}}` },
+
+  /* ---------- poderes y declaraciones ---------- */
+  { id: 'd-poder', cat: 'Poderes y declaraciones', titulo: 'Carta poder simple', desc: 'Autoriza a otra persona para un trámite ante una entidad.',
+    campos: { otorgante: { l: 'Quien otorga el poder', de: 'cliente' }, dni_otorgante: { l: 'DNI de quien otorga', de: 'documento' }, apoderado: { l: 'Apoderado(a)' }, dni_apoderado: { l: 'DNI del apoderado(a)' }, tramite: { l: 'Trámite', t: 'textarea', ph: 'recabar copias certificadas de la partida N.° …' }, entidad: { l: 'Entidad', ph: 'SUNARP — Zona Registral N.° IX' } },
+    op: { firma_legalizada: { l: 'Indicar que la firma se legaliza notarialmente', def: false } },
+    texto: `CARTA PODER
+
+{{ciudad}}, {{fecha_larga}}
+
+Señores:
+{{entidad}}
+Presente.-
+
+Yo, {{otorgante}}, identificado(a) con DNI N.° {{dni_otorgante}}, otorgo poder a {{apoderado}}, identificado(a) con DNI N.° {{dni_apoderado}}, para que en mi nombre y representación realice el siguiente trámite: {{tramite}}.
+
+Para tal efecto, queda facultado(a) para presentar y recabar documentos, firmar los cargos y formularios que sean necesarios.
+
+Atentamente,
+
+
+
+______________________________
+{{otorgante}}
+DNI N.° {{dni_otorgante}}{{#si firma_legalizada}}
+(Firma legalizada notarialmente){{/si}}` },
+  { id: 'd-dj', cat: 'Poderes y declaraciones', titulo: 'Declaración jurada', desc: 'Declaración simple bajo juramento.',
+    campos: { declarante: { l: 'Declarante', de: 'cliente' }, dni_declarante: { l: 'DNI', de: 'documento' }, domicilio: { l: 'Domicilio', de: 'direccion_cliente' }, declaracion: { l: 'Lo que se declara', t: 'textarea' } },
+    op: { advertencia: { l: 'Incluir advertencia de responsabilidad', def: true } },
+    texto: `DECLARACIÓN JURADA
+
+Yo, {{declarante}}, identificado(a) con DNI N.° {{dni_declarante}}, con domicilio en {{domicilio}}, DECLARO BAJO JURAMENTO:
+
+{{declaracion}}
+
+{{#si advertencia}}Formulo la presente declaración en honor a la verdad, sujetándome a las responsabilidades administrativas, civiles y penales que correspondan en caso de falsedad.
+
+{{/si}}{{ciudad}}, {{fecha_larga}}
+
+
+
+______________________________
+{{declarante}}
+DNI N.° {{dni_declarante}}` },
+
+  /* ---------- para el cliente ---------- */
+  { id: 'i-informe', cat: 'Para el cliente', titulo: 'Informe del estado del caso', desc: 'Resumen para el cliente: últimas actuaciones, próximas fechas y saldo, sacados del expediente.',
+    campos: { comentario: { l: 'Comentario y siguientes pasos', t: 'textarea', ph: 'Se espera que el juzgado fije fecha para la audiencia de pruebas…' } },
+    op: { honorarios: { l: 'Incluir el estado de los honorarios', def: true }, proximas: { l: 'Incluir próximas fechas', def: true } },
+    texto: `{{ciudad}}, {{fecha_larga}}
+
+Señor(a):
+{{cliente}}
+Presente.-
+
+Asunto: Informe del estado del proceso — Expediente {{numero}}
+
+Estimado(a) cliente:
+
+Por medio de la presente le informamos sobre el estado del proceso sobre {{pretension}}, {{contra_frase_contrato}}, que se tramita ante el {{juzgado}}.
+
+ESTADO ACTUAL: {{estado_caso}}
+
+ÚLTIMAS ACTUACIONES
+{{actuaciones_recientes}}
+
+{{#si proximas}}PRÓXIMAS FECHAS
+{{proximas_fechas}}
+
+{{/si}}COMENTARIO
+{{comentario}}
+
+{{#si honorarios}}HONORARIOS
+Total pactado: {{honorario_total}}. Pagado: {{pagado}}. Saldo pendiente: {{saldo}}.
+
+{{/si}}Quedamos a su disposición para cualquier consulta.
+
+Atentamente,
+
+
+
+______________________________
+{{abogado}}
+{{colegiatura}}
+{{estudio}}` },
 ];
-const todasPlantillas = () => [...PLANTILLAS, ...DB.plantillas];
-function datosEscrito(e) {
-  const a = DB.ajustes, c = e ? cliente(e.clienteId) || {} : {}, s = e ? saldoExp(e.id) : { honor: 0 };
-  const hoyD = parse(hoy()), raya = '________';
-  const contra = e && e.contraparte ? (/(demandad|investigad|imputad)/i.test(e.condicion || '') ? `por ${e.contraparte}` : `con ${e.contraparte}`) : 'en el presente proceso';
-  const v = {
-    numero: e && e.numero, especialista: e && e.especialista, juzgado: e && e.juzgado, JUZGADO: e && e.juzgado ? e.juzgado.toUpperCase() : '',
-    cliente: c.nombre, documento: c.documento, direccion_cliente: c.direccion, contraparte: e && e.contraparte, pretension: e && e.pretension, materia: e && e.materia,
-    condicion: e && e.condicion, contra_frase: contra, contra_frase_contrato: e && e.contraparte ? `seguido con ${e.contraparte}` : '',
-    abogado: a.abogado, colegiatura: a.colegiatura, estudio: a.estudio, ruc_estudio: a.ruc, direccion_estudio: a.direccion,
-    domicilio_procesal: a.domicilioProcesal || a.direccion, casilla: a.casilla, ciudad: a.ciudad || 'Lima',
-    fecha_larga: `${hoyD.getDate()} de ${MESL[hoyD.getMonth()].toLowerCase()} de ${hoyD.getFullYear()}`,
-    honorario_total: s.honor ? sol(s.honor) : '', honorario_letras: s.honor ? enLetras(s.honor) : '',
+MODELOS.forEach((m) => { if (m.campos2) Object.assign(m.campos = m.campos || {}, m.campos2); });
+const PLANTILLAS = MODELOS;
+const todasPlantillas = () => [...MODELOS, ...DB.plantillas.map((p) => Object.assign({ cat: 'Mis modelos', desc: 'Modelo tuyo' }, p, { cat: p.cat || 'Mis modelos' }))];
+const modeloPorId = (id) => todasPlantillas().find((m) => m.id === id);
+
+/* ---------- datos que se llenan solos ---------- */
+function contexto(e, c) {
+  const a = DB.ajustes, s = e ? saldoExp(e.id) : c ? saldoCliente(c.id) : null;
+  c = c || {};
+  const fl = (x) => { const d = parse(x); return `${d.getDate()} de ${MESL[d.getMonth()].toLowerCase()} de ${d.getFullYear()}`; };
+  const acts = e ? [...e.actuaciones].sort((x, y) => y.fecha.localeCompare(x.fecha)).slice(0, 5).map((x) => `• ${fFecha(x.fecha)}: ${x.texto}`).join('\n') : '';
+  const prox = e ? DB.eventos.filter((v) => v.expedienteId === e.id && !v.hecho && v.fecha >= hoy()).sort(ordenEv).slice(0, 5).map((v) => `• ${fFecha(v.fecha)}${v.hora ? ' ' + v.hora : ''}: ${TIPOS_EV[v.tipo]} — ${v.titulo || ''}`).join('\n') : '';
+  const contra = e && e.contraparte ? (/(demandad|investigad|imputad)/i.test(e.condicion || '') ? `por ${e.contraparte}` : `con ${e.contraparte}`) : '';
+  return {
+    numero: e && e.numero, especialista: e && e.especialista, juzgado: e && e.juzgado, juez: e && e.juez, distrito: e && e.distrito,
+    contraparte: e && e.contraparte, pretension: e && e.pretension, materia: e && e.materia, condicion: e && e.condicion, estado_caso: e && e.estado,
+    contra_frase: contra || (e ? 'en el presente proceso' : ''), contra_frase_contrato: e && e.contraparte ? `seguido con ${e.contraparte}` : '',
+    cliente: c.nombre, documento: c.documento, direccion_cliente: c.direccion, telefono_cliente: c.telefono, email_cliente: c.email,
+    abogado: a.abogado, colegiatura: a.colegiatura, estudio: a.estudio, ruc_estudio: a.ruc, direccion_estudio: a.direccion, telefono_estudio: a.telefono,
+    domicilio_procesal: a.domicilioProcesal || a.direccion, casilla: a.casilla, ciudad: a.ciudad || 'Lima', fecha_larga: fl(hoy()),
+    honorario_total: s && s.honor ? sol(s.honor) : '', honorario_num: s && s.honor ? String(s.honor) : '', honorario_letras: s && s.honor ? enLetras(s.honor) : '',
+    pagado: s ? sol(s.pagado) : '', saldo: s ? sol(Math.max(0, s.pend)) : '', saldo_letras: s ? enLetras(Math.max(0, s.pend)) : '',
+    actuaciones_recientes: acts, proximas_fechas: prox || (e ? '• No hay fechas programadas por ahora.' : ''),
   };
-  return (k) => (v[k] != null && String(v[k]).trim() ? String(v[k]) : raya);
 }
-const rellenar = (texto, e) => { const f = datosEscrito(e); return texto.replace(/\{\{(\w+)\}\}/g, (_, k) => f(k)); };
+const ETIQUETAS = { numero: 'N.° de expediente', especialista: 'Especialista', juzgado: 'Órgano jurisdiccional', juez: 'Juez', distrito: 'Distrito judicial', contraparte: 'Contraparte', pretension: 'Pretensión', materia: 'Materia', condicion: 'Condición', estado_caso: 'Estado del caso', contra_frase: 'Frase «en los seguidos…»', contra_frase_contrato: 'Frase «seguido con…»', cliente: 'Cliente', documento: 'Documento del cliente', direccion_cliente: 'Dirección del cliente', telefono_cliente: 'Teléfono del cliente', email_cliente: 'Correo del cliente', abogado: 'Abogado(a)', colegiatura: 'Colegiatura', estudio: 'Estudio', ruc_estudio: 'RUC del estudio', direccion_estudio: 'Dirección del estudio', telefono_estudio: 'Teléfono del estudio', domicilio_procesal: 'Domicilio procesal', casilla: 'Casilla SINOE', ciudad: 'Ciudad', fecha_larga: 'Fecha', honorario_total: 'Honorario total', pagado: 'Pagado', saldo: 'Saldo', actuaciones_recientes: 'Últimas actuaciones', proximas_fechas: 'Próximas fechas' };
+const humano = (k) => ETIQUETAS[k] || (k.charAt(0).toUpperCase() + k.slice(1)).replace(/_/g, ' ');
+
+/* ---------- motor ---------- */
+const ORD = ['PRIMER', 'SEGUNDO', 'TERCER', 'CUARTO', 'QUINTO', 'SEXTO', 'SÉPTIMO', 'OCTAVO', 'NOVENO', 'DÉCIMO'];
+function analizar(m) {
+  const campos = [], ops = {}, meta = m.campos || {};
+  const add = (k) => { if (!campos.includes(k)) campos.push(k); };
+  String(m.texto).replace(/\{\{#(?:si|no) (\w+)(?:=([^}]+))?\}\}/g, (_, k, v) => { ops[k] = ops[k] || { valores: [] }; if (v != null && !ops[k].valores.includes(v.trim())) ops[k].valores.push(v.trim()); });
+  String(m.texto).replace(/\{\{(?![#/])(\w+)\}\}/g, (_, k) => {
+    if (k === 'otrosi') return;
+    if (/^[A-Z][A-Z0-9_]*$/.test(k)) return add(k.toLowerCase());
+    if (/_letras$/.test(k)) return add(k.slice(0, -7));
+    add(k);
+  });
+  Object.keys(meta).forEach((k) => { if (!campos.includes(k) && String(m.texto).includes('{{' + k)) add(k); });
+  Object.entries(m.op || {}).forEach(([k, o]) => { ops[k] = ops[k] || { valores: [] }; if (o.valores) ops[k].valores = o.valores.map((x) => x[0]); });
+  return { campos, ops };
+}
+function tipoCampo(k, meta) {
+  if (meta && meta.t) return meta.t;
+  if (/fecha/.test(k) && k !== 'fecha_larga') return 'date';
+  if (/^(monto|renta|garantia|total|suma|importe|deuda|adelanto|honorario)(_|$)/.test(k)) return 'number';
+  if (/(motivo|detalle|hechos|fundamento|descripcion|texto|clausula|observ|declaracion|argument|comentario)/.test(k)) return 'textarea';
+  return 'text';
+}
+function generar(m, g) {
+  const e = expediente(g.expedienteId), c = e ? cliente(e.clienteId) : cliente(g.clienteId);
+  const ctx = contexto(e, c), meta = m.campos || {}, opsMeta = m.op || {};
+  const crudo = (k) => {
+    const v = g.vals[k];
+    if (v != null && String(v).trim() !== '') return String(v);
+    const md = meta[k] || {};
+    const x = md.de ? ctx[md.de] : ctx[k];
+    return x != null ? String(x) : '';
+  };
+  const formato = (k, v) => {
+    const t = tipoCampo(k, meta[k]);
+    if (t === 'date' && /^\d{4}-\d\d-\d\d$/.test(v)) { const d = parse(v); return `${d.getDate()} de ${MESL[d.getMonth()].toLowerCase()} de ${d.getFullYear()}`; }
+    if (t === 'number' && /^[\d.,\s]+$/.test(v)) return sol(num(v));
+    return v;
+  };
+  const salida = (k) => {
+    if (k === 'otrosi') return '{{otrosi}}';
+    if (/^[A-Z][A-Z0-9_]*$/.test(k)) { const b = crudo(k.toLowerCase()); return b ? formato(k.toLowerCase(), b).toUpperCase() : '________'; }
+    if (/_letras$/.test(k) && !(g.vals[k] && String(g.vals[k]).trim())) { const b = crudo(k.slice(0, -7)), n = num(String(b).replace(/[^\d.]/g, '')); if (n > 0) return enLetras(n); const x = crudo(k); return x || '________'; }
+    const v = crudo(k);
+    return v ? formato(k, v) : '________';
+  };
+  const an = analizar(m);
+  const opcion = (k) => {
+    if (g.ops && k in g.ops) return g.ops[k];
+    const o = opsMeta[k];
+    if (o && o.valores) return o.valores[0][0];
+    if (o) return o.def != null ? !!o.def : true;
+    return an.ops[k] && an.ops[k].valores.length ? an.ops[k].valores[0] : true;
+  };
+  let t = String(m.texto), prev;
+  const re = /\{\{#(si|no) (\w+)(?:=([^}]+))?\}\}((?:(?!\{\{#(?:si|no) )[\s\S])*?)\{\{\/\1\}\}/g;
+  do { prev = t; t = t.replace(re, (_, tipo, k, v, cuerpo) => { const val = opcion(k); const ok = v != null ? String(val) === v.trim() : !!val && val !== 'no'; return (tipo === 'si') === ok ? cuerpo : ''; }); } while (t !== prev);
+  t = t.replace(/\{\{(\w+)\}\}/g, (_, k) => salida(k));
+  const total = (t.match(/\{\{otrosi\}\}/g) || []).length; let i = 0;
+  t = t.replace(/\{\{otrosi\}\}/g, () => (total > 1 ? (ORD[i++] || '') + ' ' : ''));
+  return t.replace(/\n{5,}/g, '\n\n\n\n');
+}
+const rellenar = (texto, e) => generar({ texto }, { expedienteId: e ? e.id : '', vals: {}, ops: null });
+
+/* ---------- pantalla: catálogo de documentos ---------- */
 function formNuevoEscrito(expId) {
   abrirModal({
-    titulo: 'Nuevo escrito', boton: 'Crear y editar', valores: { expedienteId: expId || '', plantilla: 'p-aperso' },
+    titulo: 'Nuevo documento', boton: 'Continuar', valores: { expedienteId: expId || '', plantilla: 'p-aperso' },
     campos: [
-      { k: 'plantilla', l: 'Plantilla', t: 'select', op: [...todasPlantillas().map((p) => [p.id, p.titulo + (p.propia ? ' (tuya)' : '')]), ['', 'En blanco']], full: true },
+      { k: 'plantilla', l: 'Modelo', t: 'select', op: [...todasPlantillas().map((p) => [p.id, `${p.titulo} · ${p.cat}`]), ['', 'Documento en blanco']], full: true },
       { k: 'expedienteId', l: 'Expediente', t: 'select', op: opExps(), full: true, hint: 'Los datos del expediente, del cliente y del estudio se rellenan solos' },
     ],
     guardar: (d) => {
-      const p = todasPlantillas().find((x) => x.id === d.plantilla), e = expediente(d.expedienteId);
-      const es = { id: uid(), expedienteId: d.expedienteId, titulo: p ? p.titulo : 'Escrito', texto: p ? rellenar(p.texto, e) : '', fecha: hoy(), actualizado: ahora() };
-      DB.escritos.push(es); tocarExp(d.expedienteId); guardar(); location.hash = '#/escrito/' + es.id;
+      if (!d.plantilla) {
+        const es = { id: uid(), expedienteId: d.expedienteId, titulo: 'Documento', texto: '', fecha: hoy(), actualizado: ahora() };
+        DB.escritos.push(es); guardar(); location.hash = '#/escrito/' + es.id; return;
+      }
+      estado.gen = { modelo: d.plantilla, expedienteId: d.expedienteId, clienteId: '', vals: {}, ops: {} };
+      location.hash = '#/generar/' + d.plantilla;
     },
   });
 }
+function tarjetaModelo(m) {
+  const propio = !MODELOS.includes(m);
+  return `<div class="card modelo"><h3>${esc(m.titulo)}</h3><p class="small muted">${esc(m.desc || '')}</p>
+    <div class="actions"><button class="btn sm pri" data-act="genAbrir" data-id="${m.id}">Generar</button>${propio ? `<button class="btn sm" data-go="modelo/${m.id}">Editar modelo</button>` : `<button class="btn sm" data-act="personalizar" data-id="${m.id}">Personalizar</button>`}</div></div>`;
+}
 function vEscritos() {
   const lista = [...DB.escritos].sort((a, b) => (b.actualizado || '').localeCompare(a.actualizado || ''));
-  return `<div class="head"><div><h1>Escritos</h1><div class="sub">Redacta desde plantillas con los datos del expediente ya puestos</div></div>
-    <div class="actions"><button class="btn pri" data-act="nuevoEscrito">${icon('i-plus')} Nuevo escrito</button></div></div>
-  <div class="grid g2" style="align-items:start">
-    <div class="card"><h2>Tus escritos</h2>${lista.length ? `<div class="list">${lista.map(filaEscrito).join('')}</div>` : `<div class="empty">${icon('i-doc')}<div>Todavía no has redactado escritos.</div></div>`}</div>
-    <div class="card"><h2>Plantillas</h2><div class="list">${todasPlantillas().map((p) => `<div class="row" style="cursor:default"><div class="main"><div class="t">${esc(p.titulo)}</div><div class="s">${p.propia ? 'Plantilla tuya' : p.judicial === false ? 'Documento del estudio' : 'Escrito judicial'}</div></div>
-      <div class="end"><button class="btn sm" data-act="usarPlantilla" data-id="${p.id}">Usar</button>${p.propia ? ` <button class="btn sm danger" data-act="borrarPlantilla" data-id="${p.id}">Quitar</button>` : ''}</div></div>`).join('')}</div>
-      <p class="tiny" style="margin-top:10px">Las plantillas son modelos referenciales: revisa siempre el contenido antes de presentarlo. Puedes guardar cualquier escrito como plantilla tuya; usa marcas como {{cliente}}, {{numero}} o {{juzgado}} y se rellenarán solas.</p></div>
+  const q = norm(estado.qMod || ''), todos = todasPlantillas().filter((m) => !q || norm(m.titulo + ' ' + m.desc + ' ' + m.cat).includes(q));
+  const cats = CATEGORIAS.filter((c) => todos.some((m) => m.cat === c));
+  return `<div class="head"><div><h1>Documentos</h1><div class="sub">Escritos, cartas y contratos con tus datos ya puestos</div></div>
+    <div class="actions"><button class="btn" data-act="nuevoModelo">${icon('i-plus')} Crear mi modelo</button><button class="btn pri" data-act="nuevoEscrito">${icon('i-plus')} Nuevo documento</button></div></div>
+  ${lista.length ? `<div class="card" style="margin-bottom:22px"><h2>Tus documentos <span class="tiny">${lista.length}</span></h2><div class="list">${lista.slice(0, estado.verTodosEsc ? 999 : 5).map(filaEscrito).join('')}</div>
+    ${lista.length > 5 && !estado.verTodosEsc ? `<button class="btn ghost sm" data-act="verTodosEsc" style="padding-left:0;margin-top:6px">Ver los ${lista.length} →</button>` : ''}</div>` : ''}
+  <div class="toolbar"><label class="search">${icon('i-search')}<input id="qMod" placeholder="Buscar modelo: apelación, carta, arrendamiento…" value="${esc(estado.qMod || '')}"></label></div>
+  ${cats.map((c) => `<h2 class="cat-titulo">${esc(c)}</h2><div class="modelos">${todos.filter((m) => m.cat === c).map(tarjetaModelo).join('')}</div>`).join('') || '<div class="card empty">Ningún modelo coincide.</div>'}
+  <p class="tiny" style="margin-top:18px">Los modelos son referenciales: revisa el contenido y la norma vigente antes de presentar o firmar.</p>`;
+}
+
+/* ---------- pantalla: generador ---------- */
+function vGenerar(id) {
+  const m = modeloPorId(id);
+  if (!m) return noExiste('Modelo');
+  if (!estado.gen || estado.gen.modelo !== id) estado.gen = { modelo: id, expedienteId: (estado.gen && estado.gen.expedienteId) || '', clienteId: (estado.gen && estado.gen.clienteId) || '', vals: {}, ops: {} };
+  const g = estado.gen, e = expediente(g.expedienteId), c = e ? cliente(e.clienteId) : cliente(g.clienteId);
+  const ctx = contexto(e, c), meta = m.campos || {}, { campos, ops } = analizar(m);
+  const valorDe = (k) => g.vals[k] != null ? g.vals[k] : ((meta[k] && meta[k].de ? ctx[meta[k].de] : ctx[k]) || '');
+  const auto = campos.filter((k) => (meta[k] && meta[k].de ? ctx[meta[k].de] : ctx[k]));
+  const faltan = campos.filter((k) => !auto.includes(k));
+  const campoHTML = (k) => {
+    const md = meta[k] || {}, t = auto.includes(k) && !md.t ? (ctx[k] && String(ctx[k]).includes('\n') ? 'textarea' : 'text') : tipoCampo(k, md), v = valorDe(k);
+    const lab = `${esc(md.l || humano(k))}`;
+    if (t === 'textarea') return `<label class="full">${lab}<textarea data-gcampo="${k}" placeholder="${esc(md.ph || '')}" rows="3">${esc(v)}</textarea></label>`;
+    return `<label>${lab}<input data-gcampo="${k}" type="${t === 'number' ? 'text' : t}" ${t === 'number' ? 'inputmode="decimal"' : ''} value="${esc(v)}" placeholder="${esc(md.ph || '')}"></label>`;
+  };
+  const opsHTML = Object.entries(ops).map(([k, o]) => {
+    const md = (m.op || {})[k] || {}, actual = k in g.ops ? g.ops[k] : (md.valores ? md.valores[0][0] : o.valores.length ? o.valores[0] : (md.def != null ? md.def : true));
+    if (o.valores.length) {
+      const nombres = Object.fromEntries(md.valores || o.valores.map((v) => [v, humano(v)]));
+      return `<label class="full">${esc(md.l || humano(k))}<select data-gop="${k}">${o.valores.map((v) => `<option value="${esc(v)}" ${String(actual) === v ? 'selected' : ''}>${esc(nombres[v] || humano(v))}</option>`).join('')}</select></label>`;
+    }
+    return `<label class="cb full"><input type="checkbox" data-gop="${k}" ${actual ? 'checked' : ''}> ${esc(md.l || humano(k))}</label>`;
+  }).join('');
+  return `<div class="head"><div><a href="#/escritos" class="small" style="text-decoration:none">‹ Documentos</a><h1 style="margin-top:4px">${esc(m.titulo)}</h1><div class="sub">${esc(m.desc || m.cat)}</div></div>
+    <div class="actions"><button class="btn pri" data-act="genGuardar">Guardar y seguir editando</button><button class="btn" data-act="genImprimir">${icon('i-print')} PDF</button><button class="btn" data-act="genWord">Word</button><button class="btn" data-act="genCopiar">Copiar</button></div></div>
+  <div class="generador">
+    <div class="gen-form">
+      <div class="card"><h2>¿Para qué caso?</h2><div class="form">
+        <label class="full">Expediente<select id="genExp">${opExps('— Ninguno —').map(([v, t]) => `<option value="${esc(v)}" ${v === g.expedienteId ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>
+        ${!e ? `<label class="full">o sólo el cliente<select id="genCli">${opClientes().map(([v, t]) => `<option value="${esc(v)}" ${v === g.clienteId ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></label>` : ''}
+      </div></div>
+      ${opsHTML ? `<div class="card"><h2>Opciones</h2><div class="form">${opsHTML}</div></div>` : ''}
+      ${faltan.length ? `<div class="card"><h2>Por completar <span class="badge b-warn" id="genFaltan"></span></h2><div class="form">${faltan.map(campoHTML).join('')}</div></div>` : ''}
+      ${auto.length ? `<div class="card"><details><summary><b style="font-family:var(--serif);font-size:17px">Datos que se llenaron solos (${auto.length})</b><div class="tiny">Vienen del expediente, del cliente y de Ajustes. Puedes cambiarlos sólo para este documento.</div></summary><div class="form" style="margin-top:12px">${auto.map(campoHTML).join('')}</div></details></div>` : ''}
+    </div>
+    <div class="gen-prev"><div class="tiny" style="margin-bottom:6px">VISTA PREVIA · <span id="genFaltan2"></span></div><div class="hoja-a4 previa" id="genPrev"></div></div>
   </div>`;
 }
+function pintarPrevia() {
+  const m = modeloPorId(estado.gen && estado.gen.modelo), box = $('#genPrev');
+  if (!m || !box) return;
+  const t = generar(m, estado.gen), n = (t.match(/(?<!_)_{8}(?!_)/g) || []).length;
+  box.innerHTML = htmlEscrito({ texto: t }).replace(/(?<!_)_{8}(?!_)/g, '<mark class="falta">________</mark>');
+  const txt = n ? `${n} dato(s) por completar` : 'completo';
+  ['#genFaltan', '#genFaltan2'].forEach((s) => { const el = $(s); if (el) el.textContent = txt; });
+}
+function genTexto() { const m = modeloPorId(estado.gen.modelo); return { m, texto: generar(m, estado.gen) }; }
+
+/* ---------- pantalla: editor de modelos propios ---------- */
+function vModelo(id) {
+  const p = DB.plantillas.find((x) => x.id === id);
+  if (!p) return noExiste('Modelo');
+  const auto = Object.keys(contexto(null, null));
+  return `<div class="head"><div><a href="#/escritos" class="small" style="text-decoration:none">‹ Documentos</a>
+      <input id="modTitulo" class="titulo-edit" value="${esc(p.titulo)}" aria-label="Nombre del modelo"><div class="sub"><span id="guardadoMod">guardado</span></div></div>
+    <div class="actions"><button class="btn pri" data-act="genAbrir" data-id="${id}">Probar el modelo</button><button class="btn danger" data-act="borrarPlantilla" data-id="${id}">Eliminar</button></div></div>
+  <div class="generador">
+    <div class="gen-form" style="order:2">
+      <div class="card"><h2>Datos del modelo</h2><div class="form">
+        <label class="full">Categoría<select id="modCat">${CATEGORIAS.map((c) => `<option ${c === (p.cat || 'Mis modelos') ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
+        <label class="full">Descripción<input id="modDesc" value="${esc(p.desc || '')}" placeholder="Para qué sirve"></label></div></div>
+      <div class="card"><h2>Lo que detecté</h2><div id="modDetect" class="small"></div></div>
+      <div class="card"><h2>Datos que se llenan solos</h2><p class="tiny" style="margin-top:-4px">Toca uno para ponerlo donde está el cursor.</p>
+        <div class="chips-ins">${auto.filter((k) => !/_num$/.test(k)).map((k) => `<button class="chip-ins" data-act="insertar" data-v="{{${k}}}" title="${esc(humano(k))}">${esc(humano(k))}</button>`).join('')}</div></div>
+      <div class="card"><h2>Cómo se escribe un modelo</h2><div class="small ayuda">
+        <p><code>{{nombre_del_dato}}</code> crea una casilla para llenar. Si se llama como un dato del expediente, se llena sola.</p>
+        <p><code>{{MONTO}}</code> pone el dato en mayúsculas; <code>{{monto_letras}}</code> lo escribe en letras.</p>
+        <p><code>{{#si clausula}}…{{/si}}</code> crea una casilla para incluir o no ese texto. <code>{{#no clausula}}…{{/no}}</code> pone el texto si no se marca.</p>
+        <p><code>{{#si forma=contado}}…{{/si}}{{#si forma=cuotas}}…{{/si}}</code> crea una lista para elegir.</p>
+        <p><code>{{otrosi}}OTROSÍ DIGO</code> numera solo los otrosíes.</p>
+        <p>Los datos con «fecha» en el nombre piden una fecha; los que empiezan con «monto», «renta» o «total», un monto.</p>
+        <p><button class="btn sm" data-act="insertar" data-v="{{#si }}{{/si}}">Insertar opción</button> <button class="btn sm" data-act="insertar" data-v="{{otrosi}}OTROSÍ DIGO: ">Insertar otrosí</button></p></div></div>
+    </div>
+    <div class="gen-prev" style="order:1"><div class="hoja-a4"><textarea id="modTexto" data-id="${id}" spellcheck="true" placeholder="Escribe o pega aquí tu modelo…">${esc(p.texto)}</textarea></div></div>
+  </div>`;
+}
+function pintarDetectado() {
+  const box = $('#modDetect'), ta = $('#modTexto'); if (!box || !ta) return;
+  const { campos, ops } = analizar({ texto: ta.value }), ctx = contexto(null, null);
+  const llenos = campos.filter((k) => k in ctx), propios = campos.filter((k) => !(k in ctx));
+  const o = Object.entries(ops);
+  box.innerHTML = `<p><b>${propios.length}</b> casilla(s) para llenar${propios.length ? ': ' + propios.map((k) => `<code>${esc(k)}</code>`).join(' ') : ''}</p>
+    <p><b>${llenos.length}</b> dato(s) que se llenan solos${llenos.length ? ': ' + llenos.map((k) => esc(humano(k))).join(', ') : ''}</p>
+    <p><b>${o.length}</b> opción(es)${o.length ? ': ' + o.map(([k, x]) => `<code>${esc(k)}</code>${x.valores.length ? ' (' + x.valores.map(esc).join(' / ') + ')' : ''}`).join(' ') : ''}</p>`;
+}
+function insertarEnModelo(txt) {
+  const ta = $('#modTexto'); if (!ta) return;
+  const i = ta.selectionStart ?? ta.value.length, f = ta.selectionEnd ?? i;
+  ta.value = ta.value.slice(0, i) + txt + ta.value.slice(f);
+  const pos = txt.startsWith('{{#si ') ? i + 6 : i + txt.length;
+  ta.focus(); ta.setSelectionRange(pos, pos); ta.dispatchEvent(new Event('input', { bubbles: true }));
+}
+const MODELO_EJEMPLO = `{{ciudad}}, {{fecha_larga}}
+
+Señor(a):
+{{destinatario}}
+Presente.-
+
+Asunto: {{asunto}}
+
+Por medio de la presente, en representación de {{cliente}}, le comunico que {{detalle}}.
+
+{{#si plazo}}Le otorgo un plazo de {{dias}} días para responder.
+
+{{/si}}Atentamente,
+
+
+
+______________________________
+{{abogado}}
+{{colegiatura}}`;
+
 function filaEscrito(s) {
   const e = expediente(s.expedienteId);
   return `<div class="row" data-go="escrito/${s.id}"><div class="datebox"><b>${parse(s.fecha).getDate()}</b><span>${MES[parse(s.fecha).getMonth()]}</span></div>
@@ -1903,7 +2442,7 @@ function vEscrito(id) {
   const s = DB.escritos.find((x) => x.id === id);
   if (!s) return noExiste('Escrito');
   const e = expediente(s.expedienteId);
-  return `<div class="head"><div><a href="#/escritos" class="small" style="text-decoration:none">‹ Escritos</a>
+  return `<div class="head"><div><a href="#/escritos" class="small" style="text-decoration:none">‹ Documentos</a>
       <input id="tituloEscrito" class="titulo-edit" value="${esc(s.titulo)}" aria-label="Título del escrito">
       <div class="sub">${e ? `<a href="#/expediente/${e.id}">${esc(e.numero || caratula(e))}</a>` : 'Sin expediente'} · <span id="guardadoEsc">guardado</span></div></div>
     <div class="actions"><button class="btn pri" data-act="imprimirEscrito" data-id="${id}">${icon('i-print')} Imprimir / PDF</button>
@@ -1918,6 +2457,8 @@ function vEscrito(id) {
 function htmlEscrito(s) {
   return esc(s.texto).split('\n').map((l) => {
     const t = l.trim();
+    const o = l.match(/^(\s*(?:[A-ZÁÉÍÓÚÑ]+ )?OTROSÍ DIGO:)([\s\S]*)$/);
+    if (o) return `<b>${o[1]}</b>${o[2]}`;
     if (/^(SEÑOR|SEÑORA|POR TANTO|PRIMER|SEGUNDO|TERCER|OTROS|PRIMERA|SEGUNDA|TERCERA|CUARTA|QUINTA|SEXTA|[IVX]+\.\s)/.test(t) || (t.length > 6 && t === t.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{4}/.test(t))) return `<b>${l}</b>`;
     return l;
   }).join('\n');

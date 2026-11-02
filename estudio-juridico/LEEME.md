@@ -35,13 +35,22 @@ computadora, se instala como aplicación y no necesita servidor.
 
 ## Funciones avanzadas
 
-- **Escritos**: apersonamiento, téngase presente, copias certificadas,
-  impulso, variación de domicilio, apelación (estructura) y contrato de
-  servicios profesionales. Al elegir el expediente se rellenan solos el
-  número, juzgado, especialista, cliente, DNI, contraparte, abogado,
-  colegiatura, casilla SINOE, domicilio procesal, ciudad y fecha. Se
-  editan en una hoja A4, se guardan solos y salen a PDF o Word. Cualquier
-  escrito se puede guardar como plantilla propia.
+- **Generador de documentos** (pestaña Documentos): 18 modelos en cinco
+  grupos —escritos judiciales, cartas, contratos, poderes y declaraciones,
+  y documentos para el cliente—. Eliges el modelo y el expediente, marcas
+  las **opciones** (qué otrosíes van, qué cláusulas, forma de pago, quién
+  firma…), llenas sólo lo que falta y ves el documento armándose al lado.
+  Los datos del caso, del cliente y del estudio se ponen solos, los montos
+  salen también en letras y los otrosíes se numeran solos. Sale a PDF,
+  Word o se guarda para seguir editándolo.
+- **Tus propios modelos**: «Crear mi modelo» o «Personalizar» uno de
+  fábrica. Escribes el texto con marcas y el programa arma solo el
+  formulario:
+  - `{{dato}}` crea una casilla (si es un dato del expediente, se llena sola);
+  - `{{monto_letras}}` escribe en letras el monto `{{monto}}`;
+  - `{{#si opcion}}…{{/si}}` crea una casilla para incluir o no ese texto;
+  - `{{#si forma=cuotas}}…{{/si}}` crea una lista para elegir;
+  - `{{otrosi}}OTROSÍ DIGO` numera los otrosíes.
 - **Cuotas**: plan de pagos (mensual, quincenal o semanal) con el
   cronograma a la vista; avisa las vencidas, recuerda al cliente por
   WhatsApp y «Cobrar» registra el pago y marca la cuota.
