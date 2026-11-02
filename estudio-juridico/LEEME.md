@@ -51,6 +51,21 @@ computadora, se instala como aplicación y no necesita servidor.
   - `{{#si opcion}}…{{/si}}` crea una casilla para incluir o no ese texto;
   - `{{#si forma=cuotas}}…{{/si}}` crea una lista para elegir;
   - `{{otrosi}}OTROSÍ DIGO` numera los otrosíes.
+- **Asistente con IA** (Claude, de Anthropic): sube PDF, Word, fotos o
+  texto y pregúntale qué resolvió el juzgado, qué plazo corre y cuándo
+  vence, pídele un escrito, que revise uno tuyo o que le explique el caso
+  al cliente. Si eliges un expediente, conoce sus datos, el seguimiento,
+  la agenda y los honorarios. Las respuestas se copian, se guardan como
+  documento, se anotan en el seguimiento o se envían por WhatsApp.
+  Desde cada expediente: «Preguntar a la IA» y el botón «IA» de cada
+  documento; desde cada escrito: «Revisar con IA».
+  - Necesita una clave de la API de Anthropic (console.anthropic.com),
+    que se pega una vez y queda sólo en ese aparato. Se cobra por uso a
+    esa cuenta. Modelo y profundidad se eligen en Ajustes.
+  - El SDK oficial va empaquetado en `anthropic-sdk.js` (Apache 2.0).
+- **Subir tus modelos de Word**: en Documentos, «Subir mi modelo (Word)»
+  convierte un .docx en modelo, y «Poner marcas con IA» reemplaza los
+  datos concretos por marcas y opciones (se puede deshacer).
 - **Cuotas**: plan de pagos (mensual, quincenal o semanal) con el
   cronograma a la vista; avisa las vencidas, recuerda al cliente por
   WhatsApp y «Cobrar» registra el pago y marca la cuota.
