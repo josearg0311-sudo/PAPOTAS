@@ -1,6 +1,6 @@
 # Estudio Rodríguez y Rodríguez · gestión del estudio jurídico
 
-Programa para que un abogado o un estudio pequeño del Perú lleve en un
+Programa del Estudio Rodríguez y Rodríguez para que un abogado o un estudio pequeño del Perú lleve en un
 solo sitio sus **clientes, expedientes, audiencias, plazos y honorarios**.
 Es un solo archivo (`index.html`), funciona en el celular y en la
 computadora, se instala como aplicación y no necesita servidor.

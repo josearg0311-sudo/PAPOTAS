@@ -3,278 +3,319 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#7a1f2b">
+<meta name="theme-color" content="#fffaf2">
 <title>Estudio Rodríguez y Rodríguez</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{
-  --bg:#f7f3f1; --panel:#ffffff; --panel-2:#fbf8f6; --line:#e8dfdb; --ink:#231b1c; --ink-2:#5f5354; --ink-3:#8d8182;
-  --brand:#7a1f2b; --brand-2:#9b2c3b; --brand-soft:#f6e7e9; --on-brand:#fff;
-  --ok:#1f7a4d; --ok-soft:#e3f3ea; --warn:#a46200; --warn-soft:#fdf0d9; --bad:#b3261e; --bad-soft:#fbe5e3; --info:#2d5b9a; --info-soft:#e5edf8;
-  --shadow:0 1px 2px rgba(40,20,20,.06),0 6px 18px rgba(40,20,20,.06);
-  --r:14px;
+  --papel:#f3ebe0; --hoja:#fffaf2; --hoja-2:#f8f0e4; --regla:#e3d5c3; --regla-2:#cdb89f;
+  --tinta:#2b1d1a; --tinta-2:#6a5650; --tinta-3:#9a857c;
+  --vino:#7d1d2c; --vino-2:#5e1420; --vino-suave:#f1dfdc; --oro:#a8824c; --sobre-vino:#fff8ef;
+  --ok:#3d6b3f; --ok-suave:#e5ecd9; --ambar:#9a5b0e; --ambar-suave:#f6e6c9; --mal:#a3241b; --mal-suave:#f6dcd6; --azul:#35557a; --azul-suave:#e2e8ee;
+  --sombra:0 1px 0 rgba(90,50,30,.06),0 10px 24px -14px rgba(90,40,20,.35);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,"Times New Roman",serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#161213; --panel:#1f1a1b; --panel-2:#252021; --line:#3a3133; --ink:#f3ecea; --ink-2:#c3b6b5; --ink-3:#8f8382;
-    --brand:#c8505f; --brand-2:#d9707d; --brand-soft:#3a2125; --on-brand:#fff;
-    --ok:#5cc28d; --ok-soft:#1c3328; --warn:#e6a64a; --warn-soft:#3a2d17; --bad:#ef7a70; --bad-soft:#3d1f1d; --info:#7fa8e0; --info-soft:#1d2a3d;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+    --papel:#1d1512; --hoja:#271d19; --hoja-2:#2f2420; --regla:#433430; --regla-2:#5a4740;
+    --tinta:#f2e7da; --tinta-2:#c8b6a8; --tinta-3:#93807a;
+    --vino:#d77a84; --vino-2:#e6949c; --vino-suave:#40242a; --oro:#c9a46a; --sobre-vino:#1d1512;
+    --ok:#9cc49a; --ok-suave:#26331f; --ambar:#e2ae5c; --ambar-suave:#3b2d17; --mal:#ec8b80; --mal-suave:#43231f; --azul:#9ab6d6; --azul-suave:#1f2a36;
+    --sombra:0 10px 24px -14px rgba(0,0,0,.6);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#161213; --panel:#1f1a1b; --panel-2:#252021; --line:#3a3133; --ink:#f3ecea; --ink-2:#c3b6b5; --ink-3:#8f8382;
-  --brand:#c8505f; --brand-2:#d9707d; --brand-soft:#3a2125; --on-brand:#fff;
-  --ok:#5cc28d; --ok-soft:#1c3328; --warn:#e6a64a; --warn-soft:#3a2d17; --bad:#ef7a70; --bad-soft:#3d1f1d; --info:#7fa8e0; --info-soft:#1d2a3d;
-  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+  --papel:#1d1512; --hoja:#271d19; --hoja-2:#2f2420; --regla:#433430; --regla-2:#5a4740;
+  --tinta:#f2e7da; --tinta-2:#c8b6a8; --tinta-3:#93807a;
+  --vino:#d77a84; --vino-2:#e6949c; --vino-suave:#40242a; --oro:#c9a46a; --sobre-vino:#1d1512;
+  --ok:#9cc49a; --ok-suave:#26331f; --ambar:#e2ae5c; --ambar-suave:#3b2d17; --mal:#ec8b80; --mal-suave:#43231f; --azul:#9ab6d6; --azul-suave:#1f2a36;
+  --sombra:0 10px 24px -14px rgba(0,0,0,.6);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;-webkit-text-size-adjust:100%}
-a{color:var(--brand)}
+html,body{margin:0;background:var(--papel);color:var(--tinta);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--vino)}
 button,input,select,textarea{font:inherit;color:inherit}
-h1,h2,h3{margin:0;line-height:1.2}
-h1{font-size:22px;font-family:Georgia,"Times New Roman",serif;letter-spacing:-.01em}
-h2{font-size:16px}
-h3{font-size:14px}
-.muted{color:var(--ink-2)} .small{font-size:13px} .tiny{font-size:12px;color:var(--ink-3)}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px}
+h1,h2,h3{margin:0;line-height:1.15;font-family:var(--serif);font-weight:700}
+h1{font-size:30px;letter-spacing:-.01em}
+h2{font-size:19px}
+h3{font-size:15px}
+.muted{color:var(--tinta-2)} .small{font-size:13px} .tiny{font-size:12px;color:var(--tinta-3)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;letter-spacing:.02em}
+.versal{font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
 
-/* Estructura */
-.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
-.side{background:var(--panel);border-right:1px solid var(--line);padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
-.logo{display:flex;align-items:center;gap:10px;padding:4px 8px 18px}
-.logo svg{width:34px;height:34px;flex:none}
-.logo b{display:block;font-family:Georgia,serif;font-size:17px;line-height:1.15;letter-spacing:.01em}
-.logo span{display:block;font-size:10.5px;color:var(--brand);letter-spacing:.18em;font-weight:700}
-.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;color:var(--ink-2);text-decoration:none;font-weight:500}
-.nav a svg{width:19px;height:19px;flex:none}
-.nav a:hover{background:var(--panel-2);color:var(--ink)}
-.nav a.on{background:var(--brand-soft);color:var(--brand)}
-.side .sep{flex:1}
-main{padding:24px 28px 100px;max-width:1180px;width:100%;min-width:0}
-.top{display:none}
-.bottom{display:none}
+/* ---------- membrete y pestañas ---------- */
+.cab{background:var(--hoja);border-bottom:1px solid var(--regla);position:sticky;top:0;z-index:20;padding-top:env(safe-area-inset-top)}
+.cab:after{content:"";display:block;height:3px;background:linear-gradient(90deg,var(--vino) 0 70%,var(--oro) 70% 100%)}
+.cab-in{max-width:1180px;margin:0 auto;padding:14px 28px 0;display:flex;align-items:center;gap:14px}
+.marca{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--tinta);flex:1;min-width:0}
+.marca svg{width:46px;height:46px;flex:none}
+.marca b{display:block;font-family:var(--serif);font-size:21px;letter-spacing:.12em;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.marca b i{font-style:italic;letter-spacing:0;color:var(--vino);font-weight:400;padding:0 .1em}
+.marca em{display:block;font-family:var(--serif);font-style:italic;color:var(--tinta-2);font-size:14px;margin-top:1px}
+.cab-acc{display:flex;gap:4px}
+.cab-acc a{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;color:var(--tinta-2)}
+.cab-acc a:hover,.cab-acc a.on{background:var(--vino-suave);color:var(--vino)}
+.cab-acc svg{width:20px;height:20px}
+.pestanas{max-width:1180px;margin:0 auto;padding:14px 28px 0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.pestanas::-webkit-scrollbar{display:none}
+.pestanas a{display:flex;align-items:center;gap:7px;padding:9px 16px 8px;border:1px solid transparent;border-bottom:0;border-radius:9px 9px 0 0;text-decoration:none;color:var(--tinta-2);font-weight:600;font-size:14px;white-space:nowrap;position:relative;top:1px}
+.pestanas a svg{width:17px;height:17px}
+.pestanas a:hover{color:var(--vino)}
+.pestanas a.on{background:var(--papel);border-color:var(--regla);color:var(--vino)}
+.pestanas a.on:before{content:"";position:absolute;left:-1px;right:-1px;top:-1px;height:3px;background:var(--vino);border-radius:9px 9px 0 0}
 
-.head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.head .sub{color:var(--ink-2);font-size:14px;margin-top:4px}
+main{padding:28px 28px 80px;max-width:1180px;margin:0 auto;width:100%;min-width:0;overflow-x:clip}
+
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:20px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--regla)}
+.head .sub{color:var(--tinta-2);font-size:14px;margin-top:6px;font-family:var(--serif);font-style:italic}
 .actions{display:flex;gap:8px;flex-wrap:wrap}
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
-.card + .card{margin-top:14px}
+/* ---------- hojas ---------- */
+.card{background:var(--hoja);border:1px solid var(--regla);border-radius:4px;box-shadow:var(--sombra);padding:18px 20px}
+.card + .card{margin-top:18px}
 .grid > .card + .card{margin-top:0}
 .grid > *{min-width:0}
-.card h2{margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.grid{display:grid;gap:14px}
-.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
-.stat{padding:14px 16px}
-.stat .k{font-size:12px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.stat .v{font-size:26px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
-.stat .d{font-size:12px;color:var(--ink-3)}
-.stat.alert .v{color:var(--bad)}
+.card h2{margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding-bottom:10px;border-bottom:1px double var(--regla-2);border-bottom-width:3px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr} .g3{grid-template-columns:repeat(3,1fr)}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--panel);padding:8px 13px;border-radius:10px;cursor:pointer;font-weight:600;font-size:14px;text-decoration:none;color:var(--ink);white-space:nowrap}
-.btn:hover{background:var(--panel-2)}
-.btn svg{width:16px;height:16px}
-.btn.pri{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
-.btn.pri:hover{background:var(--brand-2)}
-.btn.ghost{border-color:transparent;background:transparent}
-.btn.danger{color:var(--bad)}
-.btn.sm{padding:5px 9px;font-size:13px;border-radius:8px}
-.btn.wa{background:#1e8e4e;border-color:#1e8e4e;color:#fff}
+/* sumario tipo libro mayor */
+.sumario{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));padding:0}
+.sumario .stat{padding:14px 18px;border-left:1px solid var(--regla)}
+.sumario .stat:first-child{border-left:0}
+.stat .k{font-size:10.5px;color:var(--tinta-3);text-transform:uppercase;letter-spacing:.18em;font-weight:700}
+.stat .v{font-family:var(--serif);font-size:25px;font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums lining-nums}
+.stat .d{font-size:12px;color:var(--tinta-3);font-style:italic;font-family:var(--serif)}
+.stat.alert .v{color:var(--mal)}
 
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--regla-2);background:var(--hoja);padding:8px 14px;border-radius:3px;cursor:pointer;font-weight:600;font-size:13.5px;text-decoration:none;color:var(--tinta);white-space:nowrap;letter-spacing:.01em}
+.btn:hover{border-color:var(--vino);color:var(--vino)}
+.btn svg{width:15px;height:15px}
+.btn.pri{background:var(--vino);border-color:var(--vino);color:var(--sobre-vino)}
+.btn.pri:hover{background:var(--vino-2);border-color:var(--vino-2);color:var(--sobre-vino)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--vino)}
+.btn.danger{color:var(--mal);border-color:transparent;background:transparent;text-decoration:underline;text-underline-offset:3px}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.btn.wa{background:#246b45;border-color:#246b45;color:#fff}
+
+/* renglones */
 .list{display:flex;flex-direction:column}
-.row{display:flex;align-items:center;gap:12px;padding:11px 4px;border-top:1px solid var(--line);cursor:pointer;min-width:0}
+.row{display:flex;align-items:center;gap:14px;padding:12px 2px;border-top:1px dashed var(--regla-2);cursor:pointer;min-width:0}
 .row:first-child{border-top:0}
-.row:hover{background:var(--panel-2)}
+.row:hover .t{color:var(--vino)}
 .row .main{flex:1;min-width:0}
 .row .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .s{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:13px;color:var(--tinta-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
 .row .end{text-align:right;flex:none;font-variant-numeric:tabular-nums}
-.datebox{width:46px;flex:none;text-align:center;border-radius:10px;padding:4px 0;background:var(--panel-2);border:1px solid var(--line)}
-.datebox b{display:block;font-size:18px;line-height:1.1}
-.datebox span{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-2)}
-.datebox.bad{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
-.datebox.warn{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
-.datebox.bad span,.datebox.warn span{color:inherit}
+/* hoja de calendario arrancable */
+.datebox{width:44px;flex:none;text-align:center;border:1px solid var(--regla-2);border-radius:3px;background:var(--hoja);overflow:hidden}
+.datebox span{display:block;background:var(--tinta-2);color:var(--hoja);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;padding:1px 0;order:-1}
+.datebox{display:flex;flex-direction:column}
+.datebox b{display:block;font-family:var(--serif);font-size:20px;line-height:1.25;padding:1px 0 2px}
+.datebox.bad{border-color:var(--mal)} .datebox.bad span{background:var(--mal)} .datebox.bad b{color:var(--mal)}
+.datebox.warn{border-color:var(--ambar)} .datebox.warn span{background:var(--ambar)}
+.inic{width:40px;height:40px;flex:none;border-radius:50%;border:1.5px solid var(--vino);color:var(--vino);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:.04em}
 
-.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--panel-2);color:var(--ink-2);border:1px solid var(--line);white-space:nowrap}
-.b-ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
-.b-warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
-.b-bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
-.b-info{background:var(--info-soft);color:var(--info);border-color:transparent}
-.b-brand{background:var(--brand-soft);color:var(--brand);border-color:transparent}
+.badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:2px;color:var(--tinta-2);border:1px solid var(--regla-2);white-space:nowrap;letter-spacing:.08em;text-transform:uppercase;vertical-align:1px}
+.b-ok{color:var(--ok);border-color:currentColor;background:var(--ok-suave)}
+.b-warn{color:var(--ambar);border-color:currentColor;background:var(--ambar-suave)}
+.b-bad{color:var(--mal);border-color:currentColor;background:var(--mal-suave)}
+.b-info{color:var(--azul);border-color:currentColor;background:var(--azul-suave)}
+.b-brand{color:var(--vino);border-color:currentColor;background:var(--vino-suave)}
 
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
 .search{flex:1;min-width:200px;position:relative}
-.search input{width:100%;padding:9px 12px 9px 36px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--ink-3)}
-select.f,input.f{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:999px;font-size:13px;cursor:pointer;color:var(--ink-2);font-weight:500}
-.chip.on{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.search input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--regla-2);border-radius:3px;background:var(--hoja)}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--tinta-3)}
+select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:3px;background:var(--hoja)}
+.chips{display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid var(--regla)}
+.chip{border:0;border-bottom:2px solid transparent;background:none;padding:7px 12px;font-size:13.5px;cursor:pointer;color:var(--tinta-2);font-weight:600;margin-bottom:-1px}
+.chip:hover{color:var(--vino)}
+.chip.on{color:var(--vino);border-bottom-color:var(--vino)}
 
-.empty{text-align:center;padding:32px 16px;color:var(--ink-2)}
-.empty svg{width:42px;height:42px;color:var(--ink-3);margin-bottom:8px}
+.empty{text-align:center;padding:30px 16px;color:var(--tinta-2);font-family:var(--serif);font-style:italic}
+.empty svg{width:40px;height:40px;color:var(--regla-2);margin-bottom:8px}
 
-.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 18px}
-.kv div span{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);font-weight:600}
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px 22px}
+.kv div span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.18em;color:var(--tinta-3);font-weight:700;margin-bottom:2px}
 .kv div b{font-weight:500;word-break:break-word}
 
-.timeline{position:relative;padding-left:18px}
-.timeline:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;background:var(--line)}
-.tl{position:relative;padding:4px 0 12px}
-.tl:before{content:"";position:absolute;left:-17px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--brand);border:2px solid var(--panel)}
-.tl .x{float:right;opacity:.5;cursor:pointer;border:0;background:none;padding:0 4px}
-.tl .x:hover{opacity:1;color:var(--bad)}
+.timeline{position:relative;padding-left:20px}
+.timeline:before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:1px;background:var(--regla-2)}
+.tl{position:relative;padding:4px 0 14px}
+.tl:before{content:"§";position:absolute;left:-21px;top:4px;width:13px;height:16px;line-height:16px;text-align:center;font-family:var(--serif);font-weight:700;color:var(--vino);background:var(--hoja);font-size:13px}
+.tl .x{float:right;opacity:.45;cursor:pointer;border:0;background:none;padding:0 4px}
+.tl .x:hover{opacity:1;color:var(--mal)}
+.tl .tiny{font-family:var(--serif);font-style:italic}
 .inline-add{display:flex;gap:8px;margin-top:8px}
 .inline-add input{flex:1;min-width:0}
 
-.money{font-variant-numeric:tabular-nums;font-weight:600}
-.pos{color:var(--ok)} .neg{color:var(--bad)}
-.bar{height:8px;border-radius:99px;background:var(--panel-2);overflow:hidden;border:1px solid var(--line)}
+.money{font-variant-numeric:tabular-nums;font-weight:700;font-family:var(--serif);font-size:15.5px}
+.pos{color:var(--ok)} .neg{color:var(--mal)}
+.bar{height:6px;background:var(--hoja-2);overflow:hidden;border:1px solid var(--regla)}
 .bar i{display:block;height:100%;background:var(--ok)}
 
-/* Calendario */
-.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal .dow{font-size:11px;text-align:center;color:var(--ink-3);font-weight:600;text-transform:uppercase;padding-bottom:2px}
-.cal .d{min-height:62px;border:1px solid var(--line);border-radius:9px;padding:4px 5px;cursor:pointer;background:var(--panel);display:flex;flex-direction:column;gap:2px;overflow:hidden}
-.cal .d:hover{border-color:var(--brand)}
-.cal .d.out{opacity:.4}
-.cal .d.inh{background:var(--panel-2)}
-.cal .d.today .n{background:var(--brand);color:var(--on-brand);border-radius:6px;padding:0 5px}
-.cal .d.sel{outline:2px solid var(--brand);outline-offset:-1px}
-.cal .n{font-size:12px;font-weight:600;align-self:flex-start}
-.cal .ev{font-size:10.5px;border-radius:4px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--info-soft);color:var(--info)}
-.cal .ev.audiencia{background:var(--brand-soft);color:var(--brand)}
-.cal .ev.plazo{background:var(--warn-soft);color:var(--warn)}
+/* calendario */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-head h2{font-size:22px;border:0;padding:0;margin:0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--regla);border-left:1px solid var(--regla)}
+.cal .dow{font-size:10.5px;text-align:center;color:var(--tinta-3);font-weight:700;text-transform:uppercase;letter-spacing:.14em;padding:6px 0;border-right:1px solid var(--regla);border-bottom:1px solid var(--regla);background:var(--hoja-2)}
+.cal .d{min-height:74px;border-right:1px solid var(--regla);border-bottom:1px solid var(--regla);padding:4px 5px;cursor:pointer;background:var(--hoja);display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.cal .d:hover{background:var(--vino-suave)}
+.cal .d.out{color:var(--tinta-3);background:var(--hoja-2)}
+.cal .d.out > *{opacity:.55}
+.cal .d.inh{background:repeating-linear-gradient(135deg,var(--hoja) 0 6px,var(--hoja-2) 6px 12px)}
+.cal .d.today .n{background:var(--vino);color:var(--sobre-vino);border-radius:50%;width:22px;height:22px;display:grid;place-items:center}
+.cal .d.sel{box-shadow:inset 0 0 0 2px var(--vino)}
+.cal .n{font-family:var(--serif);font-size:14px;font-weight:700;align-self:flex-start}
+.cal .ev{font-size:10.5px;padding:0 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid var(--azul);color:var(--azul);background:var(--azul-suave)}
+.cal .ev.audiencia{border-color:var(--vino);color:var(--vino);background:var(--vino-suave)}
+.cal .ev.plazo{border-color:var(--ambar);color:var(--ambar);background:var(--ambar-suave)}
 .cal .ev.hecho{text-decoration:line-through;opacity:.6}
-.cal .fer{font-size:9.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal .fer{font-size:9.5px;color:var(--tinta-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;font-family:var(--serif)}
 .dots{display:none;gap:3px}
-.dots i{width:6px;height:6px;border-radius:50%;background:var(--info)}
-.dots i.audiencia{background:var(--brand)} .dots i.plazo{background:var(--warn)}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--azul)}
+.dots i.audiencia{background:var(--vino)} .dots i.plazo{background:var(--ambar)}
 
-.check{width:22px;height:22px;border-radius:7px;border:2px solid var(--ink-3);flex:none;display:grid;place-items:center;background:transparent;cursor:pointer;padding:0}
+.check{width:20px;height:20px;border-radius:2px;border:1.5px solid var(--tinta-3);flex:none;display:grid;place-items:center;background:var(--hoja);cursor:pointer;padding:0}
 .check.on{background:var(--ok);border-color:var(--ok);color:#fff}
-.check svg{width:14px;height:14px}
-.done .t{text-decoration:line-through;color:var(--ink-3)}
+.check svg{width:13px;height:13px}
+.done .t{text-decoration:line-through;color:var(--tinta-3)}
 
-.portal{display:flex;gap:12px;align-items:flex-start;text-decoration:none;color:var(--ink)}
-.portal .ic{width:40px;height:40px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center;flex:none;font-weight:800;font-size:13px}
-.portal:hover b{color:var(--brand)}
+.portal{display:flex;gap:14px;align-items:flex-start;text-decoration:none;color:var(--tinta)}
+.portal .ic{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--vino);color:var(--vino);display:grid;place-items:center;flex:none;font-weight:700;font-size:12px;font-family:var(--serif);letter-spacing:.04em}
+.portal b{font-family:var(--serif);font-size:16px}
+.portal:hover b{color:var(--vino)}
 
-/* Modal */
-.modal-bg{position:fixed;inset:0;background:rgba(20,10,12,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;animation:fade .15s}
-.modal{background:var(--panel);border-radius:18px;width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.3)}
-.modal header{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
-.modal .body{padding:16px 18px;overflow:auto}
-.modal footer{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+/* ---------- portada del despacho ---------- */
+.portada{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:end;margin-bottom:26px}
+.cinta{display:inline-block;background:var(--vino);color:var(--sobre-vino);font-size:11.5px;letter-spacing:.26em;font-weight:700;padding:5px 14px 5px 16px;text-transform:uppercase;border-radius:2px}
+.titular{font-size:44px;line-height:1.02;margin:14px 0 10px;letter-spacing:-.02em}
+.titular em{color:var(--vino);font-style:normal}
+.resumen{font-family:var(--serif);font-size:18px;color:var(--tinta-2);margin:0 0 16px;max-width:36em}
+.resumen b{color:var(--tinta)}
+.nota-papel{background:var(--hoja);padding:18px 20px;border:1px solid var(--regla);box-shadow:var(--sombra);transform:rotate(-1.2deg);position:relative}
+.nota-papel:before{content:"";position:absolute;top:-9px;left:50%;width:70px;height:18px;margin-left:-35px;background:rgba(168,130,76,.35);transform:rotate(2deg)}
+.nota-papel .grande{font-family:var(--serif);font-size:38px;font-weight:700;color:var(--vino);line-height:1;font-variant-numeric:lining-nums}
+.nota-papel .linea{border-top:1px solid var(--regla-2);margin:10px 0 8px}
+.firma{font-family:var(--serif);font-style:italic;color:var(--vino);font-size:17px;transform:rotate(-6deg);display:inline-block}
+.fichas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:start}
+.fichas > *{min-width:0}
+.ficha{position:relative;margin-top:16px}
+.ficha .lengueta{position:absolute;top:-17px;left:16px;background:var(--hoja);border:1px solid var(--regla);border-bottom:0;border-radius:6px 6px 0 0;padding:2px 12px;font-size:10.5px;letter-spacing:.2em;font-weight:700;color:var(--vino);text-transform:uppercase}
+.ficha .dibujo{float:right;width:54px;height:54px;color:var(--vino);margin:-6px -4px 0 8px}
+.ficha h2{border:0;padding:0;display:block}
+.ficha .cuenta{font-family:var(--serif);font-style:italic;color:var(--tinta-2);font-size:14px;margin:2px 0 10px}
+
+/* ---------- ventanas ---------- */
+.modal-bg{position:fixed;inset:0;background:rgba(40,20,15,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;animation:fade .15s}
+.modal{background:var(--hoja);border-radius:4px;width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 30px 70px rgba(0,0,0,.35);border-top:4px solid var(--vino)}
+.modal header{padding:16px 20px;border-bottom:1px solid var(--regla);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.modal header h2{font-size:21px}
+.modal .body{padding:18px 20px;overflow:auto}
+.modal footer{padding:12px 20px;border-top:1px solid var(--regla);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;background:var(--hoja-2)}
 .modal footer .l{margin-right:auto}
 @keyframes fade{from{opacity:0}to{opacity:1}}
-.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form .full{grid-column:1/-1}
-.form label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600;color:var(--ink-2)}
-.form label.cb{flex-direction:row;align-items:center;gap:8px}
-.form input:not([type=checkbox]),.form select,.form textarea{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);font-weight:400;color:var(--ink);width:100%}
-.form textarea{min-height:80px;resize:vertical}
-.form input:focus,.form select:focus,.form textarea:focus,.search input:focus{outline:2px solid var(--brand);outline-offset:-1px;border-color:transparent}
-.form .hint{font-weight:400;font-size:12px;color:var(--ink-3)}
-.req{color:var(--bad)}
+.form label{display:flex;flex-direction:column;gap:5px;font-size:10.5px;font-weight:700;color:var(--tinta-2);letter-spacing:.16em;text-transform:uppercase}
+.form label.cb{flex-direction:row;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:14px}
+.form input:not([type=checkbox]),.form select,.form textarea{padding:8px 2px;border:0;border-bottom:1.5px solid var(--regla-2);border-radius:0;background:transparent;font-weight:400;color:var(--tinta);width:100%;font-size:15px;letter-spacing:0;text-transform:none}
+.form select{padding-right:0}
+.form textarea{min-height:80px;resize:vertical;border:1.5px solid var(--regla-2);padding:8px}
+.form input:focus,.form select:focus,.form textarea:focus{outline:0;border-color:var(--vino)}
+.search input:focus,input.f:focus,select.f:focus{outline:2px solid var(--vino);outline-offset:-1px}
+.form .hint{font-weight:400;font-size:12px;color:var(--tinta-3);letter-spacing:0;text-transform:none;font-style:italic;font-family:var(--serif)}
+.req{color:var(--mal)}
 
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:60;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--tinta);color:var(--papel);padding:10px 16px;border-radius:3px;z-index:60;font-weight:500;box-shadow:var(--sombra);max-width:calc(100% - 32px);border-left:4px solid var(--oro)}
 
-.welcome{background:linear-gradient(135deg,var(--brand),#4b111a);color:#fff;border:0}
-.welcome h2{font-family:Georgia,serif;font-size:22px}
-.welcome p{color:#f3dfe2}
-.welcome .btn{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff}
-.welcome .btn.pri{background:#fff;color:var(--brand);border-color:#fff}
+.welcome{background:var(--hoja);border:1px solid var(--regla);border-left:5px solid var(--vino);margin-bottom:24px}
+.welcome h2{border:0;padding:0;font-size:22px}
 
 #imprimir{display:none}
 
-/* Teléfono */
+/* ---------- teléfono ---------- */
+@media (max-width:1050px) and (min-width:901px){ .fichas{grid-template-columns:1fr 1fr} }
 @media (max-width:900px){
-  .app{display:block}
-  .side{display:none}
-  main{padding:12px 16px calc(96px + env(safe-area-inset-bottom))}
-  .top{display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--brand);color:#fff;position:sticky;top:0;z-index:20}
-  .top b{font-family:Georgia,serif;font-size:17px;flex:1;line-height:1.1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .top b small{display:block;font-family:system-ui,sans-serif;font-size:9.5px;letter-spacing:.2em;opacity:.8;font-weight:700}
-  .top a{color:#fff;display:grid;place-items:center;width:36px;height:36px;border-radius:10px}
-  .top a svg{width:21px;height:21px}
-  .top svg.lg{width:28px;height:28px}
-  .bottom{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);z-index:20}
-  .bottom a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:11px;color:var(--ink-3);text-decoration:none;font-weight:600}
-  .bottom a svg{width:22px;height:22px}
-  .bottom a.on{color:var(--brand)}
-  .g4{grid-template-columns:1fr 1fr} .g3,.g2{grid-template-columns:1fr}
-  .stat .v{font-size:21px}
-  h1{font-size:20px}
+  .cab-in{padding:10px 16px 0;gap:8px}
+  .marca{gap:9px}
+  .marca svg{width:36px;height:36px}
+  .marca b{font-size:14.5px;letter-spacing:.03em;white-space:normal;line-height:1.15}
+  .marca em{font-size:12.5px}
+  .cab-acc a{width:34px;height:34px}
+  .pestanas{padding:10px 8px 0;gap:0}
+  .pestanas a{padding:8px 8px 7px;font-size:12.5px;flex:1 0 auto;justify-content:center}
+  .pestanas a svg{display:none}
+  main{padding:18px 16px calc(60px + env(safe-area-inset-bottom))}
+  h1{font-size:25px}
+  .g3,.g2,.fichas,.portada{grid-template-columns:1fr}
+  .titular{font-size:34px}
+  .resumen{font-size:16.5px}
+  .nota-papel{transform:rotate(-.8deg);margin:6px 4px 0}
   .form{grid-template-columns:1fr}
   .modal-bg{align-items:flex-end;padding:0}
-  .modal{border-radius:18px 18px 0 0;max-height:94vh}
+  .modal{max-height:94vh;border-radius:6px 6px 0 0}
   .modal footer{padding-bottom:calc(12px + env(safe-area-inset-bottom))}
-  .cal .d{min-height:44px;align-items:center}
+  .cal .d{min-height:46px;align-items:center}
   .cal .ev,.cal .fer{display:none}
   .dots{display:flex}
   .hide-m{display:none!important}
+  .sumario{grid-template-columns:1fr 1fr}
+  .sumario .stat:nth-child(odd){border-left:0}
+  .sumario .stat:nth-child(n+3){border-top:1px solid var(--regla)}
+  .stat .v{font-size:21px}
   .inline-add{flex-wrap:wrap}
   .inline-add input[name=texto],.inline-add input[name=motivo]{flex-basis:100%;order:-1}
-  .toast{bottom:calc(84px + env(safe-area-inset-bottom))}
 }
+@media (max-width:380px){ .marca em{display:none} }
 
 @media print{
   body{background:#fff;color:#000}
-  .app,.top,.bottom,.modal-bg,.toast{display:none!important}
+  .cab,main,.modal-bg,.toast{display:none!important}
   #imprimir{display:block;font:12px/1.45 Georgia,serif;color:#000}
-  #imprimir h1{font-size:20px;margin-bottom:4px}
+  #imprimir h1{font-size:20px;margin-bottom:4px;letter-spacing:.08em}
   #imprimir table{width:100%;border-collapse:collapse;margin-top:12px}
   #imprimir th,#imprimir td{border-bottom:1px solid #ccc;padding:6px 4px;text-align:left}
   #imprimir td.r,#imprimir th.r{text-align:right}
   #imprimir .tot{font-weight:bold;border-top:2px solid #000}
-  #imprimir .hdr{display:flex;justify-content:space-between;border-bottom:2px solid #7a1f2b;padding-bottom:8px;margin-bottom:12px}
+  #imprimir .hdr{display:flex;justify-content:space-between;border-bottom:3px double #7d1d2c;padding-bottom:8px;margin-bottom:12px}
 }
 </style>
 </head>
 <body>
-<header class="top">
-  <svg class="lg" viewBox="0 0 512 512"><use href="#marca"/></svg>
-  <b class="marca"><small>ESTUDIO</small>Rodríguez y Rodríguez</b>
-  <a href="#/buscar" aria-label="Buscar"><svg><use href="#i-search"/></svg></a>
-  <a href="#/portales" aria-label="Portales"><svg><use href="#i-globe"/></svg></a>
-  <a href="#/ajustes" aria-label="Ajustes"><svg><use href="#i-gear"/></svg></a>
-</header>
-
-<div class="app">
-  <aside class="side">
-    <div class="logo">
-      <svg viewBox="0 0 512 512"><use href="#marca"/></svg>
-      <div><span>ESTUDIO</span><b>Rodríguez y Rodríguez</b></div>
+<header class="cab">
+  <div class="cab-in">
+    <a class="marca" href="#/inicio"><svg viewBox="0 0 512 512"><use href="#marca"/></svg>
+      <span style="min-width:0"><b>RODRÍGUEZ <i>y</i> RODRÍGUEZ</b><em>Estudio jurídico</em></span></a>
+    <div class="cab-acc">
+      <a href="#/buscar" aria-label="Buscar" title="Buscar"><svg><use href="#i-search"/></svg></a>
+      <a href="#/portales" aria-label="Portales judiciales" title="Portales judiciales"><svg><use href="#i-globe"/></svg></a>
+      <a href="#/ajustes" aria-label="Ajustes" title="Ajustes"><svg><use href="#i-gear"/></svg></a>
     </div>
-    <nav class="nav" id="nav-side"></nav>
-    <div class="sep"></div>
-    <div class="tiny" style="padding:0 10px" id="side-estudio"></div>
-  </aside>
-  <main id="main"></main>
-</div>
-
-<nav class="bottom" id="nav-bottom"></nav>
+  </div>
+  <nav class="pestanas" id="nav"></nav>
+</header>
+<main id="main"></main>
 <div id="imprimir"></div>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="marca" viewBox="0 0 512 512">
-      <rect width="512" height="512" rx="112" fill="#7a1f2b"/>
-      <g fill="none" stroke="#fff7f2" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M256 120v272"/><path d="M176 392h160"/><path d="M140 170h232"/>
-        <path d="M140 170l-48 104h96z"/><path d="M372 170l-48 104h96z"/>
-      </g>
-      <circle cx="256" cy="140" r="22" fill="#fff7f2"/>
+      <circle cx="256" cy="256" r="250" fill="#7d1d2c"/>
+      <circle cx="256" cy="256" r="216" fill="none" stroke="#f3e3cc" stroke-width="8"/>
+      <circle cx="256" cy="256" r="198" fill="none" stroke="#f3e3cc" stroke-width="3"/>
+      <text x="256" y="312" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="168" fill="#f3e3cc">R<tspan font-style="italic" font-weight="400" font-size="104" dx="4">y</tspan><tspan dx="4">R</tspan></text>
+      <path d="M170 360h172M200 160h112" stroke="#c9a46a" stroke-width="6" stroke-linecap="round"/>
     </symbol>
+    <symbol id="d-cal" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="12" width="48" height="44" rx="3"/><path d="M8 24h48"/><path d="M20 6v12M44 6v12"/><path d="M16 32h8v7h-8zM28 32h8v7h-8zM40 32h8v7h-8zM16 44h8v6h-8zM28 44h8v6h-8z"/><path d="M40 44h8v6h-8z" fill="currentColor" opacity=".35"/></symbol>
+    <symbol id="d-reloj" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6h32M16 58h32"/><path d="M20 6c0 14 12 18 12 26S20 44 20 58M44 6c0 14-12 18-12 26s12 12 12 26"/><path d="M24 52c2-6 6-9 8-10 2 1 6 4 8 10z" fill="currentColor" opacity=".35"/><path d="M26 16h12"/></symbol>
+    <symbol id="d-recibo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6h40v52l-6-4-7 4-7-4-7 4-7-4-6 4z"/><circle cx="32" cy="22" r="9"/><path d="M29.5 26l5-8M28 20.5c0-1.5 1.5-2.5 3-2.5M36 23.5c0 1.5-1.5 2.5-3 2.5"/><path d="M20 38h24M20 45h16"/></symbol>
     <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></symbol>
     <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M16 4.1a4 4 0 0 1 0 7.8"/><path d="M22 21c0-3-1.8-5.6-4.4-6.6"/></symbol>
     <symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 13h8M8 16h5"/></symbol>
@@ -453,14 +494,11 @@ const NAV = [
   ['agenda', 'Agenda', 'i-cal'],
   ['honorarios', 'Honorarios', 'i-money'],
 ];
-const NAV_EXTRA = [['portales', 'Portales', 'i-globe'], ['ajustes', 'Ajustes', 'i-gear']];
 function pintarNav(ruta) {
-  const base = { cliente: 'clientes', expediente: 'expedientes', buscar: '' }[ruta] ?? ruta;
-  const a = ([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`;
-  $('#nav-side').innerHTML = NAV.map(a).join('') + '<div style="height:10px"></div>' + NAV_EXTRA.map(a).join('');
-  $('#nav-bottom').innerHTML = NAV.map(a).join('');
-  const s = DB.ajustes;
-  $('#side-estudio').innerHTML = s.estudio ? `<b style="color:var(--ink-2)">${esc(s.estudio)}</b><br>${esc(s.abogado)}` : 'Configura tu estudio en Ajustes';
+  const base = { cliente: 'clientes', expediente: 'expedientes' }[ruta] ?? ruta;
+  $('#nav').innerHTML = NAV.map(([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`).join('');
+  document.querySelectorAll('.cab-acc a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#/' + base));
+  const on = $('#nav a.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '' };
@@ -484,42 +522,54 @@ function vInicio() {
   const activos = DB.expedientes.filter((e) => !CERRADOS.includes(e.estado));
   const pend = DB.eventos.filter((e) => !e.hecho);
   const vencidos = pend.filter((e) => e.fecha < h).sort(ordenEv);
-  const prox = pend.filter((e) => e.fecha >= h && e.fecha <= sumar(h, 14)).sort(ordenEv);
-  const aud7 = pend.filter((e) => e.tipo === 'audiencia' && e.fecha >= h && e.fecha <= sumar(h, 7)).length;
-  const pla7 = pend.filter((e) => e.tipo === 'plazo' && e.fecha >= h && e.fecha <= sumar(h, 7)).length;
+  const en = (e, n) => e.fecha >= h && e.fecha <= sumar(h, n);
+  const aud7 = pend.filter((e) => e.tipo === 'audiencia' && en(e, 7)).length;
+  const pla7 = pend.filter((e) => e.tipo === 'plazo' && en(e, 7)).length;
+  const auds = pend.filter((e) => e.tipo === 'audiencia' && en(e, 30)).sort(ordenEv);
+  const otros = pend.filter((e) => e.tipo !== 'audiencia' && en(e, 14)).sort(ordenEv);
   const total = saldo(() => true);
-  const deudores = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.pend > 0.004).sort((a, b) => b.s.pend - a.s.pend).slice(0, 5);
-  const nombre = DB.ajustes.abogado ? ', ' + esc(DB.ajustes.abogado.split(' ')[0]) : '';
+  const deudores = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.pend > 0.004).sort((a, b) => b.s.pend - a.s.pend);
+  const nombre = String(DB.ajustes.abogado || '').replace(/^(dra?|abog|lic)\.?\s+/i, '').split(' ')[0];
   const hora = new Date().getHours();
   const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
-
+  const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+  let frase = aud7 || pla7
+    ? `Esta semana tienes ${[aud7 && `<b>${pl(aud7, 'audiencia', 'audiencias')}</b>`, pla7 && `<b>${pl(pla7, 'plazo', 'plazos')}</b> por vencer`].filter(Boolean).join(' y ')}.`
+    : 'Esta semana no tienes audiencias ni plazos por vencer.';
+  if (vencidos.length) frase += ` <b class="neg">${pl(vencidos.length, 'pendiente quedó', 'pendientes quedaron')} atrás sin marcar.</b>`;
   const vacio = !DB.clientes.length && !DB.expedientes.length;
   return `
-  <div class="head"><div><h1>${saludo}${nombre}</h1><div class="sub">${fFechaL(h)} · ${DB.ajustes.estudio ? esc(DB.ajustes.estudio) : 'tu estudio, en orden'}</div></div>
-    <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn hide-m" data-act="nuevoExp">${icon('i-plus')} Expediente</button></div></div>
-  ${vacio ? `<div class="card welcome" style="margin-bottom:14px"><h2>Bienvenido al Estudio Rodríguez y Rodríguez</h2>
-    <p>Lleva clientes, expedientes, audiencias, plazos y honorarios en un solo lugar. Todo se guarda en este aparato; puedes descargar un respaldo cuando quieras.</p>
-    <div class="actions"><button class="btn pri" data-act="nuevoCliente">Registrar mi primer cliente</button><button class="btn" data-act="ejemplo">Ver con datos de ejemplo</button></div></div>` : ''}
-  <div class="grid g4">
-    <a class="card stat" href="#/expedientes" style="text-decoration:none;color:inherit"><div class="k">Expedientes activos</div><div class="v">${activos.length}</div><div class="d">${DB.expedientes.length} en total</div></a>
-    <a class="card stat" href="#/agenda" style="text-decoration:none;color:inherit"><div class="k">Audiencias · 7 días</div><div class="v">${aud7}</div><div class="d">próxima semana</div></a>
-    <a class="card stat ${pla7 || vencidos.length ? 'alert' : ''}" href="#/agenda" style="text-decoration:none;color:inherit"><div class="k">Plazos · 7 días</div><div class="v">${pla7}</div><div class="d">${vencidos.length ? vencidos.length + ' vencido(s) sin marcar' : 'ninguno vencido'}</div></a>
-    <a class="card stat" href="#/honorarios" style="text-decoration:none;color:inherit"><div class="k">Por cobrar</div><div class="v">${sol(total.pend)}</div><div class="d">cobrado ${sol(total.pagado)}</div></a>
-  </div>
-  <div class="grid g2" style="margin-top:14px;align-items:start">
-    <div class="card"><h2>Próximos 14 días <a class="btn sm ghost" href="#/agenda">Ver agenda</a></h2>
-      ${vencidos.length ? `<div class="tiny" style="color:var(--bad);font-weight:700;margin:4px 0">VENCIDOS SIN MARCAR</div><div class="list">${vencidos.map(filaEvento).join('')}</div><div style="height:10px"></div>` : ''}
-      ${prox.length ? `<div class="list">${prox.map(filaEvento).join('')}</div>` : `<div class="empty">${icon('i-cal')}<div>Nada en agenda para las próximas dos semanas.</div></div>`}
-    </div>
+  ${vacio ? `<div class="card welcome"><h2>Bienvenido al Estudio Rodríguez y Rodríguez</h2>
+    <p class="muted" style="font-family:var(--serif);font-size:16px">Clientes, expedientes, audiencias, plazos y honorarios en un solo cuaderno. Todo se guarda en este aparato; puedes descargar un respaldo cuando quieras.</p>
+    <div class="actions"><button class="btn pri" data-act="nuevoCliente">Registrar el primer cliente</button><button class="btn" data-act="ejemplo">Ver con datos de ejemplo</button></div></div>` : ''}
+  <section class="portada">
     <div>
-      <div class="card"><h2>Saldos por cobrar <a class="btn sm ghost" href="#/honorarios">Honorarios</a></h2>
-        ${deudores.length ? `<div class="list">${deudores.map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${expsDe(c.id).length} expediente(s) · pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div><div class="end money neg">${sol(s.pend)}</div></div>`).join('')}</div>` : `<div class="empty small">Nadie te debe nada. 👏</div>`}
-      </div>
-      <div class="card"><h2>Calculadora de plazos</h2>
-        <p class="small muted" style="margin:0 0 10px">Cuenta días hábiles desde el día siguiente a la notificación, sin fines de semana ni feriados.</p>
-        <button class="btn" data-act="calc">${icon('i-clock')} Calcular un vencimiento</button>
-      </div>
+      <span class="cinta">Despacho · ${esc(fFechaL(h))}</span>
+      <h1 class="titular">${saludo}${nombre ? `, <em>${esc(nombre)}</em>` : ''}.</h1>
+      <p class="resumen">${frase}</p>
+      <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn" data-act="nuevoExp">${icon('i-plus')} Expediente</button><button class="btn" data-act="calc">${icon('i-clock')} Calcular plazo</button></div>
     </div>
+    <a class="nota-papel" href="#/honorarios" style="text-decoration:none;color:inherit;display:block">
+      <div class="versal muted">Por cobrar</div>
+      <div class="grande">${sol(total.pend)}</div>
+      <div class="linea"></div>
+      <div class="small muted">Cobrado <b>${sol(total.pagado)}</b> · ${pl(activos.length, 'expediente activo', 'expedientes activos')}</div>
+      <div style="text-align:right;margin-top:8px"><span class="firma">Rodríguez y Rodríguez</span></div>
+    </a>
+  </section>
+  <div class="fichas">
+    <div class="card ficha"><span class="lengueta">Audiencias</span><svg class="dibujo"><use href="#d-cal"/></svg>
+      <h2>Próximas audiencias</h2><div class="cuenta">${auds.length ? pl(auds.length, 'en los próximos 30 días', 'en los próximos 30 días') : 'Ninguna en los próximos 30 días'}</div>
+      <div class="list" style="clear:both">${auds.slice(0, 6).map((e) => filaEvento(e)).join('')}</div>
+      <a class="btn ghost sm" href="#/agenda" style="margin-top:6px;padding-left:0">Ver agenda completa →</a></div>
+    <div class="card ficha"><span class="lengueta">Plazos</span><svg class="dibujo"><use href="#d-reloj"/></svg>
+      <h2>Plazos y tareas</h2><div class="cuenta">${vencidos.length ? `<span class="neg">${pl(vencidos.length, 'atrasado', 'atrasados')}</span> · ` : ''}${otros.length ? pl(otros.length, 'en dos semanas', 'en dos semanas') : 'Nada en dos semanas'}</div>
+      <div class="list" style="clear:both">${[...vencidos, ...otros].slice(0, 7).map((e) => filaEvento(e)).join('')}</div>
+      <button class="btn ghost sm" data-act="calc" style="margin-top:6px;padding-left:0">Calcular un vencimiento →</button></div>
+    <div class="card ficha"><span class="lengueta">Honorarios</span><svg class="dibujo"><use href="#d-recibo"/></svg>
+      <h2>Saldos pendientes</h2><div class="cuenta">${deudores.length ? pl(deudores.length, 'cliente debe', 'clientes deben') : 'Nadie debe nada'}</div>
+      <div class="list" style="clear:both">${deudores.slice(0, 6).map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div><div class="end money neg">${sol(s.pend)}</div></div>`).join('')}</div>
+      <button class="btn ghost sm" data-act="nuevoMov" data-tipo="pago" style="margin-top:6px;padding-left:0">Registrar un pago →</button></div>
   </div>`;
 }
 
@@ -544,7 +594,7 @@ function vClientes() {
   <div class="toolbar"><label class="search">${icon('i-search')}<input id="qCli" placeholder="Buscar por nombre, DNI, RUC o teléfono" value="${esc(estado.qCli)}"></label></div>
   <div class="card">${lista.length ? `<div class="list">${lista.map((c) => {
     const s = saldoCliente(c.id), n = expsDe(c.id).length;
-    return `<div class="row" data-go="cliente/${c.id}"><div class="datebox" style="background:var(--brand-soft);border:0;color:var(--brand)"><b style="font-size:15px;line-height:32px">${esc(iniciales(c.nombre))}</b></div>
+    return `<div class="row" data-go="cliente/${c.id}"><div class="inic">${esc(iniciales(c.nombre))}</div>
       <div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${esc(c.documento || 'Sin documento')} · ${esc(c.telefono || 'sin teléfono')} · ${n} expediente(s)</div></div>
       <div class="end">${s.pend > 0.004 ? `<div class="money neg">${sol(s.pend)}</div><div class="tiny">por cobrar</div>` : s.cargo ? `<span class="badge b-ok">Al día</span>` : ''}</div></div>`;
   }).join('')}</div>` : `<div class="empty">${icon('i-users')}<div>${q ? 'Ningún cliente coincide.' : 'Aún no tienes clientes.'}</div></div>`}</div>`;
@@ -561,10 +611,10 @@ function vCliente(id) {
     <div class="actions">${c.telefono ? `<a class="btn wa" href="${waLink(c.telefono, `Hola ${c.nombre.split(' ')[0]}, le escribo de ${DB.ajustes.estudio || 'su estudio'}.`)}" target="_blank" rel="noopener">${icon('i-wa')} WhatsApp</a>` : ''}
       <button class="btn" data-act="estadoCuenta" data-id="${id}">${icon('i-print')} Estado de cuenta</button>
       <button class="btn" data-act="editCliente" data-id="${id}">Editar</button></div></div>
-  <div class="grid g3">
-    <div class="card stat"><div class="k">Pactado + gastos</div><div class="v">${sol(s.cargo)}</div></div>
-    <div class="card stat"><div class="k">Pagado</div><div class="v pos">${sol(s.pagado)}</div></div>
-    <div class="card stat ${s.pend > 0 ? 'alert' : ''}"><div class="k">Saldo</div><div class="v">${sol(s.pend)}</div></div>
+  <div class="card sumario">
+    <div class="stat"><div class="k">Pactado + gastos</div><div class="v">${sol(s.cargo)}</div></div>
+    <div class="stat"><div class="k">Pagado</div><div class="v pos">${sol(s.pagado)}</div></div>
+    <div class="stat ${s.pend > 0 ? 'alert' : ''}"><div class="k">Saldo</div><div class="v">${sol(s.pend)}</div></div>
   </div>
   <div class="card" style="margin-top:14px"><h2>Datos</h2><div class="kv">
     ${kv('Teléfono', c.telefono)}${kv('Correo', c.email)}${kv('Dirección', c.direccion)}${kv('Desde', fFecha(c.creado))}${c.notas ? `<div style="grid-column:1/-1"><span>Notas</span><b style="white-space:pre-wrap">${esc(c.notas)}</b></div>` : ''}</div></div>
@@ -588,7 +638,7 @@ function filaExp(e) {
   return `<div class="row" data-go="expediente/${e.id}"><div class="main">
     <div class="t">${esc(caratula(e))}</div>
     <div class="s"><span class="mono">${esc(e.numero || 'Sin número')}</span>${e.juzgado ? ' · ' + esc(e.juzgado) : ''}</div>
-    ${prox ? `<div class="s" style="color:var(--${urg(prox) || 'ink-2'})">${icon('i-clock').replace('<svg>', '<svg style="width:12px;height:12px;vertical-align:-1px">')} ${esc(TIPOS_EV[prox.tipo])}: ${fFecha(prox.fecha)} (${cuando(prox.fecha)})</div>` : ''}</div>
+    ${prox ? `<div class="s" style="color:var(--${{ bad: 'mal', warn: 'ambar' }[urg(prox)] || 'tinta-2'})">${icon('i-clock').replace('<svg>', '<svg style="width:12px;height:12px;vertical-align:-1px">')} ${esc(TIPOS_EV[prox.tipo])}: ${fFecha(prox.fecha)} (${cuando(prox.fecha)})</div>` : ''}</div>
     <div class="end"><span class="badge ${ESTADO_COLOR[e.estado] || ''}">${esc(e.estado || 'En trámite')}</span><div class="tiny" style="margin-top:4px">${esc(e.materia || '')}</div></div></div>`;
 }
 function vExpedientes() {
@@ -714,11 +764,11 @@ function vHonorarios() {
   return `
   <div class="head"><div><h1>Honorarios y cobros</h1><div class="sub">Lo pactado, lo cobrado y lo que falta</div></div>
     <div class="actions"><button class="btn" data-act="nuevoMov" data-tipo="honorario">+ Honorario</button><button class="btn hide-m" data-act="nuevoMov" data-tipo="gasto">+ Gasto</button><button class="btn pri" data-act="nuevoMov" data-tipo="pago">${icon('i-plus')} Registrar pago</button></div></div>
-  <div class="grid g4">
-    <div class="card stat"><div class="k">Pactado</div><div class="v">${sol(t.honor)}</div><div class="d">+ gastos ${sol(t.gasto)}</div></div>
-    <div class="card stat"><div class="k">Cobrado</div><div class="v pos">${sol(t.pagado)}</div></div>
-    <div class="card stat ${t.pend > 0 ? 'alert' : ''}"><div class="k">Por cobrar</div><div class="v">${sol(t.pend)}</div></div>
-    <div class="card stat"><div class="k">Cobrado este mes</div><div class="v">${sol(cobradoMes)}</div><div class="d">${MESL[new Date().getMonth()]}</div></div>
+  <div class="card sumario">
+    <div class="stat"><div class="k">Pactado</div><div class="v">${sol(t.honor)}</div><div class="d">+ gastos ${sol(t.gasto)}</div></div>
+    <div class="stat"><div class="k">Cobrado</div><div class="v pos">${sol(t.pagado)}</div></div>
+    <div class="stat ${t.pend > 0 ? 'alert' : ''}"><div class="k">Por cobrar</div><div class="v">${sol(t.pend)}</div></div>
+    <div class="stat"><div class="k">Cobrado este mes</div><div class="v">${sol(cobradoMes)}</div><div class="d">${MESL[new Date().getMonth()]}</div></div>
   </div>
   <div class="grid g2" style="margin-top:14px;align-items:start">
     <div class="card"><h2>Movimientos</h2>
@@ -967,7 +1017,7 @@ function formCalc() {
       { k: 'expedienteId', l: 'Expediente (para agendar)', t: 'select', op: opExps(), full: true },
       { k: 'titulo', l: 'Descripción', full: true, def: 'Vence plazo', list: ['Vence plazo para apelar', 'Vence plazo para contestar', 'Vence plazo para absolver traslado', 'Vence plazo para subsanar'] },
     ],
-    extra: `<div class="card" id="calcRes" style="margin-top:14px;background:var(--panel-2);box-shadow:none"></div>
+    extra: `<div class="card" id="calcRes" style="margin-top:14px;background:var(--hoja-2);box-shadow:none"></div>
       <p class="tiny" style="margin-top:8px">Referencia general: el plazo corre desde el día siguiente de la notificación. Verifica siempre la norma aplicable y los días inhábiles de tu distrito judicial (agrégalos en Ajustes).</p>`,
     guardar: (d) => {
       const r = calcular(d);
