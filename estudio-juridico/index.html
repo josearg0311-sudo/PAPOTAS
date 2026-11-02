@@ -240,6 +240,73 @@ select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:
 
 #imprimir{display:none}
 
+/* escritos */
+.titulo-edit{display:block;width:100%;font-family:var(--serif);font-size:28px;font-weight:700;border:0;background:transparent;color:var(--tinta);padding:2px 0;margin-top:4px;border-bottom:1px dashed transparent}
+.titulo-edit:focus{outline:0;border-bottom-color:var(--vino)}
+.hoja-a4{background:#fffdf8;color:#1d1512;max-width:820px;margin:0 auto;box-shadow:var(--sombra);border:1px solid var(--regla);padding:56px 64px 56px 76px;position:relative}
+.hoja-a4:before{content:"";position:absolute;left:52px;top:0;bottom:0;border-left:1px solid #e9c9c5}
+.hoja-a4 textarea{width:100%;min-height:70vh;border:0;background:transparent;resize:vertical;font:15px/1.7 Arial,Helvetica,sans-serif;color:#1d1512;outline:0;text-align:justify}
+.grabando{background:var(--mal)!important;color:#fff!important;border-color:var(--mal)!important;animation:latido 1.2s infinite}
+@keyframes latido{50%{opacity:.6}}
+
+/* cronómetro flotante */
+#crono{position:fixed;right:18px;bottom:18px;z-index:40;background:var(--tinta);color:var(--papel);padding:8px 8px 8px 14px;border-radius:999px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+#crono a{color:inherit;text-decoration:none;font-size:16px;font-weight:700}
+#crono .punto{width:9px;height:9px;border-radius:50%;background:#e5484d;animation:latido 1s infinite}
+
+/* tablero */
+.tablero{display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;align-items:flex-start}
+.tablero .col{flex:0 0 240px;background:var(--hoja-2);border:1px solid var(--regla);border-radius:4px;padding:10px;min-height:120px}
+.tablero .col.sobre{outline:2px dashed var(--vino);outline-offset:-2px}
+.col-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tarjeta{background:var(--hoja);border:1px solid var(--regla);border-left:3px solid var(--vino);padding:9px 10px;margin-bottom:8px;cursor:grab;box-shadow:var(--sombra)}
+.tarjeta .t{font-weight:600;font-size:13.5px;line-height:1.3;margin-bottom:3px}
+.tarjeta.arrastrando{opacity:.4}
+.tarjeta .mover{margin-top:6px;width:100%;font-size:12px;padding:3px;border:1px solid var(--regla);background:var(--hoja-2);border-radius:2px}
+.col .vacio{text-align:center;padding:16px 0;font-style:italic}
+
+/* gráficos */
+.graf{width:100%;display:block}
+.graf .eje{stroke:var(--regla);stroke-width:1}
+.graf .et{fill:var(--tinta-3);font-size:11px;font-family:system-ui,sans-serif}
+.graf .et.fuerte{fill:var(--tinta);font-weight:700}
+.graf .barra{fill:var(--vino)}
+.graf .hov:hover .barra{fill:var(--vino-2)}
+.vbars{display:grid;grid-template-columns:auto 1fr;gap:8px;height:230px}
+.vb-ejes{display:flex;flex-direction:column;justify-content:space-between;font-size:11px;color:var(--tinta-3);text-align:right;padding-bottom:22px;margin-top:-6px}
+.vb-area{position:relative;display:flex;gap:2px;align-items:stretch}
+.vb-linea{position:absolute;left:0;right:0;border-top:1px solid var(--regla);margin-bottom:22px;bottom:0}
+.vb-area .vb-linea:nth-child(2){bottom:calc(50% + 11px)!important;margin:0}
+.vb-area .vb-linea:nth-child(3){bottom:auto!important;top:0;margin:0}
+.vb{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;z-index:1}
+.vb-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.vb-col i{display:block;width:62%;max-width:46px;background:var(--vino);border-radius:4px 4px 0 0;min-height:0}
+.vb:hover .vb-col i{background:var(--vino-2)}
+.vb-val{font-size:11px;font-weight:700;margin-bottom:3px;white-space:nowrap}
+.vb-et{height:22px;line-height:22px;text-align:center;font-size:11px;color:var(--tinta-3)}
+.hbars{display:flex;flex-direction:column;gap:8px}
+.hb{display:grid;grid-template-columns:minmax(0,38%) 1fr auto;gap:10px;align-items:center;font-size:13px}
+.hb .hl{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--tinta-2)}
+.hb .hv{height:14px;display:block}
+.hb .hv i{display:block;height:100%;background:var(--vino);border-radius:0 4px 4px 0}
+.hb:hover .hv i{background:var(--vino-2)}
+.hb .hn{font-variant-numeric:tabular-nums;font-weight:600;min-width:54px;text-align:right}
+#tip{position:fixed;z-index:70;background:var(--tinta);color:var(--papel);padding:5px 9px;font-size:12.5px;border-radius:3px;pointer-events:none;white-space:nowrap}
+.tabla-ver{margin-top:8px}
+.tabla{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.tabla th,.tabla td{border-bottom:1px solid var(--regla);padding:5px 4px;text-align:left}
+.tabla .r{text-align:right;font-variant-numeric:tabular-nums}
+
+/* candado */
+#candado{position:fixed;inset:0;z-index:100;background:var(--papel);display:grid;place-items:center;padding:20px}
+.candado-in{text-align:center;max-width:320px;width:100%}
+.candado-in h2{margin:12px 0 4px}
+#formPin{display:flex;gap:8px;margin:14px 0}
+#pinIn{flex:1;min-width:0;font-size:24px;letter-spacing:.4em;text-align:center;padding:8px;border:1px solid var(--regla-2);background:var(--hoja);border-radius:3px}
+.teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.teclado button{padding:14px 0;font-size:20px;font-family:var(--serif);background:var(--hoja);border:1px solid var(--regla);border-radius:3px;cursor:pointer}
+.teclado button:active{background:var(--vino-suave)}
+
 /* ---------- teléfono ---------- */
 @media (max-width:1050px) and (min-width:901px){ .fichas{grid-template-columns:1fr 1fr} }
 @media (max-width:900px){
@@ -271,10 +338,17 @@ select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:
   .sumario .stat:nth-child(n+3){border-top:1px solid var(--regla)}
   .stat .v{font-size:21px}
   .inline-add{flex-wrap:wrap}
+  .hoja-a4{padding:28px 18px 28px 30px;margin:0 -6px}
+  .hoja-a4:before{left:18px}
+  .hoja-a4 textarea{font-size:14px}
+  .titulo-edit{font-size:22px}
+  #crono{right:12px;bottom:calc(12px + env(safe-area-inset-bottom))}
+  .tablero .col{flex-basis:78vw}
   .inline-add input[name=texto],.inline-add input[name=motivo]{flex-basis:100%;order:-1}
 }
 @media (max-width:380px){ .marca em{display:none} }
 
+@page{size:A4;margin:2.5cm 2.5cm 2.5cm 3cm}
 @media print{
   body{background:#fff;color:#000}
   .cab,main,.modal-bg,.toast{display:none!important}
@@ -284,6 +358,8 @@ select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:
   #imprimir th,#imprimir td{border-bottom:1px solid #ccc;padding:6px 4px;text-align:left}
   #imprimir td.r,#imprimir th.r{text-align:right}
   #imprimir .tot{font-weight:bold;border-top:2px solid #000}
+  #imprimir .escrito-print{white-space:pre-wrap;font:12pt/1.5 Arial,Helvetica,sans-serif;text-align:justify}
+  #crono,#tip,#candado{display:none!important}
   #imprimir .hdr{display:flex;justify-content:space-between;border-bottom:3px double #7d1d2c;padding-bottom:8px;margin-bottom:12px}
 }
 </style>
@@ -332,6 +408,13 @@ select.f,input.f{padding:9px 10px;border:1px solid var(--regla-2);border-radius:
     <symbol id="i-wa" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1 0-.3-.1-.5-.2z"/></symbol>
     <symbol id="i-print" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+    <symbol id="i-timer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M9 2h6"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 11-8.5 8.5a5 5 0 0 1-7-7L14 4a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 7"/></symbol>
+    <symbol id="i-board" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="10" rx="1"/><rect x="17" y="4" width="4" height="13" rx="1"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
     <symbol id="i-ext" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
   </defs>
 </svg>
@@ -371,8 +454,8 @@ const icon = (id) => `<svg><use href="#${id}"/></svg>`;
 /* ---------- datos ---------- */
 const VACIO = () => ({
   version: VERSION,
-  clientes: [], expedientes: [], eventos: [], movimientos: [],
-  ajustes: { estudio: MARCA, abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', inhabiles: [], tema: 'auto' }
+  clientes: [], expedientes: [], eventos: [], movimientos: [], cuotas: [], horas: [], escritos: [], plantillas: [], archivos: [], timer: null,
+  ajustes: { estudio: MARCA, abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', ciudad: 'Lima', domicilioProcesal: '', casilla: '', tarifaHora: '', inhabiles: [], tema: 'auto', avisos: false, pin: null, bloqueoMin: '5', recibo: 0 }
 });
 let DB = cargar();
 function cargar() {
@@ -385,11 +468,13 @@ function cargar() {
 function arreglar(d) {
   const base = VACIO();
   if (!d || typeof d !== 'object') return base;
-  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
+  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos', 'cuotas', 'horas', 'escritos', 'plantillas', 'archivos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
   base.ajustes = Object.assign(base.ajustes, d.ajustes || {});
   if (!Array.isArray(base.ajustes.inhabiles)) base.ajustes.inhabiles = [];
   if (!String(base.ajustes.estudio || '').trim()) base.ajustes.estudio = MARCA;
   base.expedientes.forEach((e) => { if (!Array.isArray(e.actuaciones)) e.actuaciones = []; });
+  base.plantillas.forEach((x) => { x.propia = true; });
+  base.timer = d.timer && d.timer.inicio ? d.timer : null;
   return base;
 }
 function guardar() {
@@ -493,23 +578,26 @@ const NAV = [
   ['expedientes', 'Expedientes', 'i-folder'],
   ['agenda', 'Agenda', 'i-cal'],
   ['honorarios', 'Honorarios', 'i-money'],
+  ['escritos', 'Escritos', 'i-doc'],
+  ['reportes', 'Reportes', 'i-chart'],
 ];
 function pintarNav(ruta) {
-  const base = { cliente: 'clientes', expediente: 'expedientes' }[ruta] ?? ruta;
+  const base = { cliente: 'clientes', expediente: 'expedientes', escrito: 'escritos' }[ruta] ?? ruta;
   $('#nav').innerHTML = NAV.map(([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`).join('');
   document.querySelectorAll('.cab-acc a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#/' + base));
   const on = $('#nav a.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
-let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '' };
+let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '', vistaExp: 'lista' };
 
 function render() {
   const [ruta, id] = (location.hash.replace(/^#\/?/, '') || 'inicio').split('/');
   pintarNav(ruta);
-  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar };
+  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes };
   const v = vistas[ruta] || vInicio;
   $('#main').innerHTML = v(id ? decodeURIComponent(id) : '');
   aplicarTema();
+  pintarCrono();
 }
 function reRender() { const y = window.scrollY; render(); window.scrollTo(0, y); }
 window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
@@ -529,6 +617,7 @@ function vInicio() {
   const otros = pend.filter((e) => e.tipo !== 'audiencia' && en(e, 14)).sort(ordenEv);
   const total = saldo(() => true);
   const deudores = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.pend > 0.004).sort((a, b) => b.s.pend - a.s.pend);
+  const cuotasV = DB.cuotas.filter((q) => !q.pagada && q.fecha < h).sort((a, b) => a.fecha.localeCompare(b.fecha));
   const nombre = String(DB.ajustes.abogado || '').replace(/^(dra?|abog|lic)\.?\s+/i, '').split(' ')[0];
   const hora = new Date().getHours();
   const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
@@ -547,7 +636,7 @@ function vInicio() {
       <span class="cinta">Despacho · ${esc(fFechaL(h))}</span>
       <h1 class="titular">${saludo}${nombre ? `, <em>${esc(nombre)}</em>` : ''}.</h1>
       <p class="resumen">${frase}</p>
-      <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn" data-act="nuevoExp">${icon('i-plus')} Expediente</button><button class="btn" data-act="calc">${icon('i-clock')} Calcular plazo</button></div>
+      <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn" data-act="nuevoExp">${icon('i-plus')} Expediente</button><button class="btn" data-act="calc">${icon('i-clock')} Calcular plazo</button><button class="btn" data-act="resumen">${icon('i-wa')} Resumen del día</button></div>
     </div>
     <a class="nota-papel" href="#/honorarios" style="text-decoration:none;color:inherit;display:block">
       <div class="versal muted">Por cobrar</div>
@@ -567,7 +656,8 @@ function vInicio() {
       <div class="list" style="clear:both">${[...vencidos, ...otros].slice(0, 7).map((e) => filaEvento(e)).join('')}</div>
       <button class="btn ghost sm" data-act="calc" style="margin-top:6px;padding-left:0">Calcular un vencimiento →</button></div>
     <div class="card ficha"><span class="lengueta">Honorarios</span><svg class="dibujo"><use href="#d-recibo"/></svg>
-      <h2>Saldos pendientes</h2><div class="cuenta">${deudores.length ? pl(deudores.length, 'cliente debe', 'clientes deben') : 'Nadie debe nada'}</div>
+      <h2>Saldos pendientes</h2><div class="cuenta">${deudores.length ? pl(deudores.length, 'cliente debe', 'clientes deben') : 'Nadie debe nada'}${cuotasV.length ? ` · <span class="neg">${pl(cuotasV.length, 'cuota vencida', 'cuotas vencidas')}</span>` : ''}</div>
+      ${cuotasV.length ? `<div class="list" style="clear:both;margin-bottom:6px">${cuotasV.slice(0, 3).map((q) => filaCuota(q)).join('')}</div>` : ''}
       <div class="list" style="clear:both">${deudores.slice(0, 6).map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div><div class="end money neg">${sol(s.pend)}</div></div>`).join('')}</div>
       <button class="btn ghost sm" data-act="nuevoMov" data-tipo="pago" style="margin-top:6px;padding-left:0">Registrar un pago →</button></div>
   </div>`;
@@ -606,6 +696,7 @@ function vCliente(id) {
   if (!c) return noExiste('Cliente');
   const exps = expsDe(id), s = saldoCliente(id);
   const movs = DB.movimientos.filter((m) => m.clienteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const cuotasC = DB.cuotas.filter((q) => q.clienteId === id).sort((a, b) => a.fecha.localeCompare(b.fecha)), conf = conflictosDeCliente(c);
   return `
   <div class="head"><div><a href="#/clientes" class="small" style="text-decoration:none">${'‹'} Clientes</a><h1 style="margin-top:4px">${esc(c.nombre)}</h1><div class="sub">${esc(c.tipo || 'Persona natural')}${c.documento ? ' · ' + esc(c.documento) : ''}</div></div>
     <div class="actions">${c.telefono ? `<a class="btn wa" href="${waLink(c.telefono, `Hola ${c.nombre.split(' ')[0]}, le escribo de ${DB.ajustes.estudio || 'su estudio'}.`)}" target="_blank" rel="noopener">${icon('i-wa')} WhatsApp</a>` : ''}
@@ -622,6 +713,9 @@ function vCliente(id) {
     ${exps.length ? `<div class="list">${exps.map(filaExp).join('')}</div>` : `<div class="empty small">Sin expedientes.</div>`}</div>
   <div class="card"><h2>Honorarios y pagos <span class="actions"><button class="btn sm" data-act="nuevoMov" data-tipo="honorario" data-cliente="${id}">+ Honorario</button><button class="btn sm pri" data-act="nuevoMov" data-tipo="pago" data-cliente="${id}">+ Pago</button></span></h2>
     ${movs.length ? `<div class="list">${movs.map(filaMov).join('')}</div>` : `<div class="empty small">Sin movimientos.</div>`}</div>
+  <div class="card"><h2>Cuotas <button class="btn sm" data-act="nuevoPlan" data-cliente="${id}">${icon('i-plus')} Plan de cuotas</button></h2>
+    ${cuotasC.length ? `<div class="list">${cuotasC.map((q) => filaCuota(q, false)).join('')}</div>` : `<div class="empty small">Sin cronograma de cuotas.</div>`}</div>
+  ${conf.length ? `<div class="card" style="border-left:5px solid var(--mal)"><h2>Posible conflicto de intereses</h2><p class="small">Este cliente figura como <b>contraparte</b> en: ${conf.map((e) => `<a href="#/expediente/${e.id}">${esc(e.numero || caratula(e))}</a>`).join(', ')}.</p></div>` : ''}
   <div style="margin-top:14px"><button class="btn danger" data-act="borrarCliente" data-id="${id}">Eliminar cliente</button></div>`;
 }
 const kv = (k, v) => `<div><span>${esc(k)}</span><b>${v ? esc(v) : '—'}</b></div>`;
@@ -658,8 +752,9 @@ function vExpedientes() {
     <div class="actions"><button class="btn pri" data-act="nuevoExp">${icon('i-plus')} Nuevo expediente</button></div></div>
   <div class="toolbar"><label class="search">${icon('i-search')}<input id="qExp" placeholder="Número, cliente, juzgado, contraparte…" value="${esc(estado.qExp)}"></label>
     <select class="f" id="fMateria"><option value="">Todas las materias</option>${mats.map((m) => `<option ${m === estado.fMateria ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
-  <div class="chips" style="margin-bottom:12px">${[['activos', 'Activos'], ['cerrados', 'Cerrados'], ['todos', 'Todos']].map(([k, t]) => `<button class="chip ${estado.fEstado === k ? 'on' : ''}" data-act="fEstado" data-v="${k}">${t}</button>`).join('')}</div>
-  <div class="card">${lista.length ? `<div class="list">${lista.map(filaExp).join('')}</div>` : `<div class="empty">${icon('i-folder')}<div>${DB.expedientes.length ? 'Ningún expediente coincide con el filtro.' : 'Aún no tienes expedientes.'}</div></div>`}</div>`;
+  <div class="chips" style="margin-bottom:12px">${[['activos', 'Activos'], ['cerrados', 'Cerrados'], ['todos', 'Todos']].map(([k, t]) => `<button class="chip ${estado.fEstado === k ? 'on' : ''}" data-act="fEstado" data-v="${k}">${t}</button>`).join('')}
+    <span style="flex:1"></span>${[['lista', 'Lista', 'i-list'], ['tablero', 'Tablero', 'i-board']].map(([k, t, i]) => `<button class="chip ${estado.vistaExp === k ? 'on' : ''}" data-act="vistaExp" data-v="${k}">${icon(i).replace('<svg>', '<svg style="width:14px;height:14px;vertical-align:-2px">')} ${t}</button>`).join('')}</div>
+  ${estado.vistaExp === 'tablero' ? vTablero(lista) : `<div class="card">${lista.length ? `<div class="list">${lista.map(filaExp).join('')}</div>` : `<div class="empty">${icon('i-folder')}<div>${DB.expedientes.length ? 'Ningún expediente coincide con el filtro.' : 'Aún no tienes expedientes.'}</div></div>`}</div>`}`;
 }
 function vExpediente(id) {
   const e = expediente(id);
@@ -670,6 +765,13 @@ function vExpediente(id) {
   const movs = DB.movimientos.filter((m) => m.expedienteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
   const acts = [...e.actuaciones].sort((a, b) => b.fecha.localeCompare(a.fecha));
   const pct = s.cargo ? Math.min(100, Math.round((s.pagado / s.cargo) * 100)) : 0;
+  const cuotasE = DB.cuotas.filter((q) => q.expedienteId === id).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const horas = DB.horas.filter((h) => h.expedienteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const minTot = horas.reduce((a, h) => a + h.minutos, 0), pendH = horas.filter((h) => !h.facturado);
+  const minPend = pendH.reduce((a, h) => a + h.minutos, 0), montoPend = Math.round(pendH.reduce((a, h) => a + (h.minutos / 60) * num(h.tarifa), 0) * 100) / 100;
+  const corriendo = DB.timer && DB.timer.expedienteId === id;
+  const docs = DB.archivos.filter((a) => a.expedienteId === id).sort((a, b) => b.fecha.localeCompare(a.fecha));
+  const escs = DB.escritos.filter((x) => x.expedienteId === id).sort((a, b) => (b.actualizado || '').localeCompare(a.actualizado || ''));
   return `
   <div class="head"><div><a href="#/expedientes" class="small" style="text-decoration:none">‹ Expedientes</a>
     <h1 style="margin-top:4px">${esc(caratula(e))}</h1>
@@ -691,12 +793,26 @@ function vExpediente(id) {
         <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span>Pagado ${sol(s.pagado)} de ${sol(s.cargo)}</span><b class="${s.pend > 0 ? 'neg' : 'pos'}">Saldo ${sol(s.pend)}</b></div>
         <div class="bar"><i style="width:${pct}%"></i></div>
         ${movs.length ? `<div class="list" style="margin-top:8px">${movs.map((m) => filaMov(m, false)).join('')}</div>` : `<div class="empty small">Sin movimientos.</div>`}
+        <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><b class="versal muted">Cuotas</b><button class="btn sm" data-act="nuevoPlan" data-exp="${id}">${icon('i-plus')} Plan de cuotas</button></div>
+        ${cuotasE.length ? `<div class="list">${cuotasE.map((q) => filaCuota(q, false)).join('')}</div>` : ''}
+      </div>
+      <div class="card"><h2>Horas trabajadas <span class="actions">${corriendo ? `<button class="btn sm pri" data-act="pararCrono">${icon('i-timer')} Parar cronómetro</button>` : `<button class="btn sm pri" data-act="iniciarCrono" data-id="${id}">${icon('i-timer')} Iniciar cronómetro</button>`}<button class="btn sm" data-act="nuevaHora" data-exp="${id}">+ A mano</button></span></h2>
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:13px"><span>Total: <b>${fHoras(minTot)}</b></span>${minPend ? `<span>Sin cobrar: <b>${fHoras(minPend)}</b> · ${sol(montoPend)}</span>` : ''}</div>
+        ${horas.length ? `<div class="list" style="margin-top:6px">${horas.slice(0, 12).map((h) => `<div class="row ${h.facturado ? 'done' : ''}" data-act="editHora" data-id="${h.id}"><div class="datebox"><b>${parse(h.fecha).getDate()}</b><span>${MES[parse(h.fecha).getMonth()]}</span></div><div class="main"><div class="t">${esc(h.nota || 'Trabajo')}</div><div class="s">${fHoras(h.minutos)}${h.tarifa ? ' · ' + sol(h.tarifa) + '/h' : ''}${h.facturado ? ' · cobrado' : ''}</div></div><div class="end money">${h.tarifa ? sol((h.minutos / 60) * h.tarifa) : ''}</div></div>`).join('')}</div>` : `<div class="empty small">Usa el cronómetro mientras trabajas en el caso.</div>`}
+        ${montoPend > 0 ? `<button class="btn sm" data-act="facturarHoras" data-id="${id}" style="margin-top:8px">Pasar ${sol(montoPend)} a honorarios</button>` : ''}
       </div>
     </div>
     <div class="card"><h2>Seguimiento</h2>
-      <form class="inline-add" data-form="actuacion" data-id="${id}"><input class="f" type="date" name="fecha" value="${hoy()}" style="max-width:150px"><input class="f" name="texto" placeholder="Ej. Se notificó la resolución N.° 5" required><button class="btn pri">Anotar</button></form>
+      <form class="inline-add" data-form="actuacion" data-id="${id}"><input class="f" type="date" name="fecha" value="${hoy()}" style="max-width:150px"><input class="f" name="texto" id="textoAct" placeholder="Ej. Se notificó la resolución N.° 5" required><button class="btn pri">Anotar</button></form>
+      ${vozOK ? `<button class="btn sm ghost" data-act="dictar" data-target="#textoAct" style="padding-left:0;margin-top:4px">${icon('i-mic')} Dictar con la voz</button>` : ''}
       <div class="timeline" style="margin-top:14px">${acts.length ? acts.map((a) => `<div class="tl"><button class="x" data-act="borrarAct" data-exp="${id}" data-id="${a.id}" aria-label="Borrar">✕</button><div class="tiny">${fFecha(a.fecha)}</div><div style="white-space:pre-wrap">${esc(a.texto)}</div></div>`).join('') : `<div class="tiny">Anota aquí cada escrito, resolución o notificación.</div>`}</div>
     </div>
+  </div>
+  <div class="grid g2" style="margin-top:18px;align-items:start">
+    <div class="card"><h2>Documentos <label class="btn sm pri">${icon('i-clip')} Adjuntar<input type="file" multiple hidden class="fileDocs" data-exp="${id}"></label></h2>
+      ${docs.length ? `<div class="list">${docs.map((a) => `<div class="row" data-act="abrirArchivo" data-id="${a.id}"><div class="inic" style="border-radius:3px;font-size:10px">${esc((a.nombre.split('.').pop() || '').slice(0, 4).toUpperCase())}</div><div class="main"><div class="t">${esc(a.nombre)}</div><div class="s">${tamano(a.tam)} · ${fFecha(a.fecha)}</div></div><button class="btn sm danger" data-act="borrarArchivo" data-id="${a.id}">Quitar</button></div>`).join('')}</div>` : `<div class="empty small">Guarda aquí resoluciones, demandas, cédulas o fotos. Quedan en este aparato.</div>`}</div>
+    <div class="card"><h2>Escritos <button class="btn sm pri" data-act="nuevoEscrito" data-exp="${id}">${icon('i-plus')} Redactar</button></h2>
+      ${escs.length ? `<div class="list">${escs.map(filaEscrito).join('')}</div>` : `<div class="empty small">Redacta un escrito con los datos de este expediente ya puestos.</div>`}</div>
   </div>
   <div style="margin-top:14px"><button class="btn danger" data-act="borrarExp" data-id="${id}">Eliminar expediente</button></div>`;
 }
@@ -750,7 +866,7 @@ function vAgenda() {
 /* ---------- honorarios ---------- */
 function filaMov(m, conCliente = true) {
   const c = cliente(m.clienteId), e = expediente(m.expedienteId), pago = m.tipo === 'pago';
-  const sub = [conCliente && c ? c.nombre : '', e ? e.numero || caratula(e) : '', m.medio].filter(Boolean).join(' · ');
+  const sub = [conCliente && c ? c.nombre : '', e ? e.numero || caratula(e) : '', m.medio, pago && m.recibo ? 'Recibo ' + pad4(m.recibo) : ''].filter(Boolean).join(' · ');
   return `<div class="row" data-act="editMov" data-id="${m.id}"><div class="datebox"><b>${parse(m.fecha).getDate()}</b><span>${MES[parse(m.fecha).getMonth()]}</span></div>
     <div class="main"><div class="t">${esc(m.concepto || TIPOS_MOV[m.tipo])}</div><div class="s"><span class="badge ${pago ? 'b-ok' : m.tipo === 'gasto' ? 'b-warn' : 'b-brand'}">${TIPOS_MOV[m.tipo]}</span> ${esc(sub)}</div></div>
     <div class="end money ${pago ? 'pos' : ''}">${pago ? '+ ' : ''}${sol(m.monto)}</div></div>`;
@@ -761,15 +877,17 @@ function vHonorarios() {
   const cobradoMes = DB.movimientos.filter((m) => m.tipo === 'pago' && m.fecha.startsWith(mesAct)).reduce((a, m) => a + num(m.monto), 0);
   const movs = DB.movimientos.filter((m) => !estado.fMov || m.tipo === estado.fMov).sort((a, b) => b.fecha.localeCompare(a.fecha) || (b.creado || '').localeCompare(a.creado || '')).slice(0, 200);
   const porCli = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.cargo || x.s.pagado).sort((a, b) => b.s.pend - a.s.pend);
+  const cuotasP = DB.cuotas.filter((q) => !q.pagada).sort((a, b) => a.fecha.localeCompare(b.fecha));
   return `
   <div class="head"><div><h1>Honorarios y cobros</h1><div class="sub">Lo pactado, lo cobrado y lo que falta</div></div>
-    <div class="actions"><button class="btn" data-act="nuevoMov" data-tipo="honorario">+ Honorario</button><button class="btn hide-m" data-act="nuevoMov" data-tipo="gasto">+ Gasto</button><button class="btn pri" data-act="nuevoMov" data-tipo="pago">${icon('i-plus')} Registrar pago</button></div></div>
+    <div class="actions"><button class="btn" data-act="nuevoMov" data-tipo="honorario">+ Honorario</button><button class="btn hide-m" data-act="nuevoMov" data-tipo="gasto">+ Gasto</button><button class="btn" data-act="nuevoPlan">+ Plan de cuotas</button><button class="btn pri" data-act="nuevoMov" data-tipo="pago">${icon('i-plus')} Registrar pago</button></div></div>
   <div class="card sumario">
     <div class="stat"><div class="k">Pactado</div><div class="v">${sol(t.honor)}</div><div class="d">+ gastos ${sol(t.gasto)}</div></div>
     <div class="stat"><div class="k">Cobrado</div><div class="v pos">${sol(t.pagado)}</div></div>
     <div class="stat ${t.pend > 0 ? 'alert' : ''}"><div class="k">Por cobrar</div><div class="v">${sol(t.pend)}</div></div>
     <div class="stat"><div class="k">Cobrado este mes</div><div class="v">${sol(cobradoMes)}</div><div class="d">${MESL[new Date().getMonth()]}</div></div>
   </div>
+  ${cuotasP.length ? `<div class="card" style="margin-top:18px"><h2>Cuotas por cobrar <span class="tiny">${sol(cuotasP.reduce((a, q) => a + q.monto, 0))} en ${cuotasP.length}</span></h2><div class="list">${cuotasP.slice(0, 12).map((q) => filaCuota(q)).join('')}</div></div>` : ''}
   <div class="grid g2" style="margin-top:14px;align-items:start">
     <div class="card"><h2>Movimientos</h2>
       <div class="chips" style="margin-bottom:8px">${[['', 'Todos'], ['honorario', 'Honorarios'], ['gasto', 'Gastos'], ['pago', 'Pagos']].map(([k, tt]) => `<button class="chip ${estado.fMov === k ? 'on' : ''}" data-act="fMov" data-v="${k}">${tt}</button>`).join('')}</div>
@@ -808,10 +926,12 @@ function vBuscar() {
     const cs = DB.clientes.filter((c) => norm([c.nombre, c.documento, c.telefono, c.email].join(' ')).includes(q));
     const es = DB.expedientes.filter((e) => norm([e.numero, e.juzgado, e.contraparte, e.pretension, e.materia, (cliente(e.clienteId) || {}).nombre].join(' ')).includes(q));
     const vs = DB.eventos.filter((v) => norm([v.titulo, v.lugar, v.notas].join(' ')).includes(q)).sort(ordenEv);
+    const ws = DB.escritos.filter((x) => norm(x.titulo + ' ' + x.texto).includes(q));
     res = `${cs.length ? `<div class="card"><h2>Clientes</h2><div class="list">${cs.map((c) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${esc(c.documento || '')}</div></div></div>`).join('')}</div></div>` : ''}
       ${es.length ? `<div class="card"><h2>Expedientes</h2><div class="list">${es.map(filaExp).join('')}</div></div>` : ''}
       ${vs.length ? `<div class="card"><h2>Agenda</h2><div class="list">${vs.map((v) => filaEvento(v)).join('')}</div></div>` : ''}
-      ${!cs.length && !es.length && !vs.length ? `<div class="card empty">Sin resultados para «${esc(qGlobal)}».</div>` : ''}`;
+      ${ws.length ? `<div class="card"><h2>Escritos</h2><div class="list">${ws.map(filaEscrito).join('')}</div></div>` : ''}
+      ${!cs.length && !es.length && !vs.length && !ws.length ? `<div class="card empty">Sin resultados para «${esc(qGlobal)}».</div>` : ''}`;
   }
   return `<div class="head"><div><h1>Buscar</h1></div></div>
   <div class="toolbar"><label class="search">${icon('i-search')}<input id="qGlobal" placeholder="Cliente, número de expediente, juzgado, audiencia…" value="${esc(qGlobal)}" autofocus></label></div><div id="resBuscar">${res}</div>`;
@@ -831,6 +951,10 @@ function vAjustes() {
       <label>RUC<input name="ruc" value="${esc(s.ruc)}" inputmode="numeric"></label>
       <label>Teléfono<input name="telefono" value="${esc(s.telefono)}" inputmode="tel"></label>
       <label>Dirección<input name="direccion" value="${esc(s.direccion)}"></label>
+      <label>Ciudad (para los escritos)<input name="ciudad" value="${esc(s.ciudad)}" placeholder="Lima"></label>
+      <label>Domicilio procesal<input name="domicilioProcesal" value="${esc(s.domicilioProcesal)}" placeholder="Av. Abancay 123, of. 402, Lima"></label>
+      <label>Casilla electrónica SINOE<input name="casilla" value="${esc(s.casilla)}" inputmode="numeric"></label>
+      <label>Tarifa por hora (S/)<input name="tarifaHora" value="${esc(s.tarifaHora)}" inputmode="decimal" placeholder="150"></label>
       <label>Apariencia<select name="tema">${[['auto', 'Según el aparato'], ['light', 'Clara'], ['dark', 'Oscura']].map(([k, t]) => `<option value="${k}" ${s.tema === k ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
       <div class="full"><button class="btn pri">Guardar</button></div>
     </form></div>
@@ -839,9 +963,17 @@ function vAjustes() {
     <form class="inline-add" data-form="inhabil"><input class="f" type="date" name="fecha" required style="max-width:160px"><input class="f" name="motivo" placeholder="Motivo (ej. Día del Juez)"><button class="btn">Agregar</button></form>
     ${extra.length ? `<div class="list" style="margin-top:8px">${extra.map((i) => `<div class="row" style="cursor:default"><div class="main"><div class="t">${fFecha(i.fecha)}</div><div class="s">${esc(i.motivo || 'Día inhábil')}</div></div><button class="btn sm ghost danger" data-act="borrarInhabil" data-v="${i.fecha}">Quitar</button></div>`).join('')}</div>` : ''}
   </div>
+  <div class="card"><h2>Seguridad y avisos</h2>
+    <div class="list">
+      <div class="row" style="cursor:default"><div class="main"><div class="t">Bloqueo con PIN</div><div class="s">${s.pin ? `Activado · se bloquea ${num(s.bloqueoMin) ? 'tras ' + s.bloqueoMin + ' min sin uso' : 'sólo al abrir'}` : 'Pide un PIN al abrir el programa'}</div></div>
+        <div class="end">${s.pin ? `<button class="btn sm" data-act="bloquearYa">Bloquear ahora</button> <button class="btn sm" data-act="formPin">Cambiar</button> <button class="btn sm danger" data-act="quitarPin">Quitar</button>` : `<button class="btn sm pri" data-act="formPin">Activar</button>`}</div></div>
+      <div class="row" style="cursor:default"><div class="main"><div class="t">Avisos en el aparato</div><div class="s">Una hora antes de cada audiencia y el día antes de cada plazo, mientras el programa esté abierto o instalado</div></div>
+        <div class="end"><button class="btn sm ${s.avisos ? '' : 'pri'}" data-act="avisos">${s.avisos ? 'Desactivar' : 'Activar'}</button></div></div>
+    </div></div>
   <div class="card"><h2>Tus datos</h2>
-    <p class="small muted" style="margin-top:-4px">Se guardan sólo en este navegador (${(bytes / 1024).toFixed(1)} KB). Descarga un respaldo con frecuencia: si borras los datos del navegador o cambias de celular, es lo que te permite recuperarlos.</p>
+    <p class="small muted" style="margin-top:-4px">Se guardan sólo en este navegador (${(bytes / 1024).toFixed(1)} KB). Descarga un respaldo con frecuencia: si borras los datos del navegador o cambias de celular, es lo que te permite recuperarlos. El respaldo normal no lleva los documentos adjuntos; el «respaldo con documentos» sí, y pesa más.</p>
     <div class="actions"><button class="btn pri" data-act="respaldo">Descargar respaldo</button>
+      ${DB.archivos.length ? `<button class="btn" data-act="respaldoCompleto">Respaldo con documentos (${DB.archivos.length})</button>` : ''}
       <label class="btn">Cargar respaldo<input type="file" accept=".json,application/json" id="fileRespaldo" hidden></label>
       <button class="btn" data-act="csv">Exportar a Excel (CSV)</button>
       <button class="btn" data-act="ejemplo">Cargar datos de ejemplo</button>
@@ -892,7 +1024,13 @@ function abrirModal({ titulo, campos, valores = {}, guardar: alGuardar, borrar, 
   return form;
 }
 function cerrarModal() { if (modalCb) { modalCb.remove(); modalCb = null; } }
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarModal(); });
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') cerrarModal();
+  const escribiendo = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName);
+  if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') || (e.key === '/' && !escribiendo)) {
+    e.preventDefault(); cerrarModal(); location.hash = '#/buscar'; setTimeout(() => { const q = $('#qGlobal'); if (q) { q.focus(); q.select(); } }, 30);
+  }
+});
 
 const opClientes = () => [['', '— Elige un cliente —'], ...[...DB.clientes].sort((a, b) => a.nombre.localeCompare(b.nombre)).map((c) => [c.id, c.nombre])];
 const opExps = (vacio = '— Sin expediente —') => [['', vacio], ...DB.expedientes.map((e) => [e.id, `${e.numero || 's/n'} · ${caratula(e)}`])];
@@ -911,6 +1049,8 @@ function formCliente(c) {
       { k: 'notas', l: 'Notas', t: 'textarea' },
     ],
     guardar: (d) => {
+      const cf = conflictosDeCliente(Object.assign({}, c || {}, d, { id: c ? c.id : '' }));
+      if (cf.length && !confirm(`⚠ Posible conflicto de intereses\n«${d.nombre}» figura como CONTRAPARTE en:\n${cf.map((e) => '• ' + (e.numero || caratula(e))).join('\n')}\n\n¿Guardar igual?`)) return false;
       if (c) Object.assign(c, d);
       else { c = Object.assign({ id: uid(), creado: hoy() }, d); DB.clientes.push(c); }
       guardar(); toast('Cliente guardado');
@@ -938,6 +1078,8 @@ function formExp(e, clienteId) {
       { k: 'notas', l: 'Notas', t: 'textarea' },
     ],
     guardar: (d) => {
+      const cf = conflictosDeContraparte(d.contraparte, d.clienteId);
+      if (cf.length && (!e || e.contraparte !== d.contraparte) && !confirm(`⚠ Posible conflicto de intereses\nLa contraparte «${d.contraparte}» se parece a tu cliente:\n${cf.map((c) => '• ' + c.nombre).join('\n')}\n\n¿Guardar igual?`)) return false;
       d.actualizado = ahora();
       if (e) {
         if (e.clienteId !== d.clienteId) DB.movimientos.forEach((m) => { if (m.expedienteId === e.id) m.clienteId = d.clienteId; });
@@ -979,6 +1121,7 @@ function formEvento(ev, def = {}) {
   });
 }
 function formMov(m, def = {}) {
+  if (m && m.tipo === 'pago' && !m.recibo) { m.recibo = DB.ajustes.recibo = (num(DB.ajustes.recibo) || 0) + 1; guardar(); }
   const valores = m || Object.assign({ fecha: hoy(), tipo: 'pago', medio: 'Transferencia' }, def);
   if (!m && def.expedienteId) valores.clienteId = (expediente(def.expedienteId) || {}).clienteId;
   if (!DB.clientes.length) { toast('Primero registra un cliente'); return; }
@@ -996,11 +1139,17 @@ function formMov(m, def = {}) {
     guardar: (d) => {
       if (d.expedienteId) { const x = expediente(d.expedienteId); if (x && x.clienteId !== d.clienteId) { toast('Ese expediente es de otro cliente'); return false; } }
       d.monto = num(d.monto);
+      const nuevo = !m;
       if (m) Object.assign(m, d); else { m = Object.assign({ id: uid(), creado: ahora() }, d); DB.movimientos.push(m); }
-      tocarExp(m.expedienteId); guardar(); toast('Movimiento guardado'); reRender();
+      if (m.tipo === 'pago' && !m.recibo) m.recibo = DB.ajustes.recibo = (num(DB.ajustes.recibo) || 0) + 1;
+      if (nuevo && def.cuotaId) { const q = DB.cuotas.find((x) => x.id === def.cuotaId); if (q) { q.pagada = true; q.pagoId = m.id; } }
+      tocarExp(m.expedienteId); guardar(); reRender();
+      if (nuevo && m.tipo === 'pago') toast(`Pago guardado · Recibo N.° ${pad4(m.recibo)}`); else toast('Movimiento guardado');
     },
-    borrar: m ? () => { if (!confirm('¿Eliminar este movimiento?')) return false; DB.movimientos = DB.movimientos.filter((x) => x.id !== m.id); guardar(); reRender(); } : null,
+    borrar: m ? () => { if (!confirm('¿Eliminar este movimiento?')) return false; DB.movimientos = DB.movimientos.filter((x) => x.id !== m.id); DB.cuotas.forEach((q) => { if (q.pagoId === m.id) { q.pagada = false; q.pagoId = ''; } }); guardar(); reRender(); } : null,
+    extra: m && m.tipo === 'pago' ? `<div style="margin-top:14px"><button type="button" class="btn sm" id="btnRecibo">${icon('i-print')} Imprimir recibo N.° ${pad4(m.recibo)}</button></div>` : '',
   });
+  if (m && m.tipo === 'pago') form.querySelector('#btnRecibo').onclick = () => imprimirRecibo(m);
   // el expediente rellena el cliente
   form.elements.expedienteId.addEventListener('change', (ev) => { const x = expediente(ev.target.value); if (x) form.elements.clienteId.value = x.clienteId; });
 }
@@ -1011,6 +1160,7 @@ function formCalc() {
     titulo: 'Calculadora de plazos', boton: 'Agendar vencimiento',
     valores: { desde: hoy(), dias: 3, modo: 'habiles' },
     campos: [
+      { k: 'frecuente', l: 'Plazo frecuente (opcional)', t: 'select', full: true, op: [['', '— Escribe los días a mano —'], ...PLAZOS_FREC.map(([t, n], i) => [String(i), `${t} · ${n} días`])] },
       { k: 'desde', l: 'Notificado el', t: 'date', req: true },
       { k: 'dias', l: 'Plazo (días)', t: 'number', req: true },
       { k: 'modo', l: 'Cómputo', t: 'select', op: [['habiles', 'Días hábiles'], ['naturales', 'Días calendario']], full: true },
@@ -1018,7 +1168,7 @@ function formCalc() {
       { k: 'titulo', l: 'Descripción', full: true, def: 'Vence plazo', list: ['Vence plazo para apelar', 'Vence plazo para contestar', 'Vence plazo para absolver traslado', 'Vence plazo para subsanar'] },
     ],
     extra: `<div class="card" id="calcRes" style="margin-top:14px;background:var(--hoja-2);box-shadow:none"></div>
-      <p class="tiny" style="margin-top:8px">Referencia general: el plazo corre desde el día siguiente de la notificación. Verifica siempre la norma aplicable y los días inhábiles de tu distrito judicial (agrégalos en Ajustes).</p>`,
+      <p class="tiny" style="margin-top:8px">Los plazos frecuentes son referenciales: confírmalos con la norma vigente y la resolución que te notificaron. El plazo corre desde el día siguiente de la notificación. Verifica siempre la norma aplicable y los días inhábiles de tu distrito judicial (agrégalos en Ajustes).</p>`,
     guardar: (d) => {
       const r = calcular(d);
       if (!r) return false;
@@ -1037,8 +1187,26 @@ function formCalc() {
       <div class="small muted">${cuando(r)}${saltos.length ? ` · se saltaron: ${esc(saltos.join(', '))}` : ''}</div>`;
   };
   form.addEventListener('input', pintar);
+  form.elements.frecuente.addEventListener('change', (ev) => {
+    const p = PLAZOS_FREC[ev.target.value]; if (!p) return;
+    form.elements.dias.value = p[1]; form.elements.modo.value = 'habiles'; form.elements.titulo.value = 'Vence: ' + p[0].replace(/ \(.*\)$/, '').toLowerCase(); pintar();
+  });
   pintar();
 }
+const PLAZOS_FREC = [
+  ['Contestar demanda · proceso de conocimiento (CPC)', 30],
+  ['Contestar demanda · proceso abreviado (CPC)', 10],
+  ['Contestar demanda · proceso sumarísimo (CPC)', 5],
+  ['Apelar sentencia · proceso de conocimiento (CPC)', 10],
+  ['Apelar sentencia · proceso abreviado (CPC)', 5],
+  ['Apelar sentencia · proceso sumarísimo (CPC)', 3],
+  ['Apelar auto (CPC)', 3],
+  ['Recurso de reposición (CPC)', 3],
+  ['Recurso de casación (CPC)', 10],
+  ['Apelar sentencia · proceso laboral (NLPT)', 5],
+  ['Apelar sentencia (NCPP)', 5],
+  ['Apelar auto (NCPP)', 3],
+];
 
 /* ---------- borrados ---------- */
 function borrarExp(id) {
@@ -1048,6 +1216,12 @@ function borrarExp(id) {
   DB.expedientes = DB.expedientes.filter((x) => x.id !== id);
   DB.eventos = DB.eventos.filter((v) => v.expedienteId !== id);
   DB.movimientos.forEach((m) => { if (m.expedienteId === id) m.expedienteId = ''; });
+  DB.cuotas.forEach((q) => { if (q.expedienteId === id) q.expedienteId = ''; });
+  DB.horas = DB.horas.filter((h) => h.expedienteId !== id);
+  DB.escritos = DB.escritos.filter((x) => x.expedienteId !== id);
+  DB.archivos.filter((a) => a.expedienteId === id).forEach((a) => idbDel(a.id).catch(() => {}));
+  DB.archivos = DB.archivos.filter((a) => a.expedienteId !== id);
+  if (DB.timer && DB.timer.expedienteId === id) DB.timer = null;
   guardar(); cerrarModal(); toast('Expediente eliminado'); location.hash = '#/expedientes';
 }
 function borrarCliente(id) {
@@ -1059,6 +1233,12 @@ function borrarCliente(id) {
   DB.expedientes = DB.expedientes.filter((e) => !ids.has(e.id));
   DB.eventos = DB.eventos.filter((v) => !ids.has(v.expedienteId));
   DB.movimientos = DB.movimientos.filter((m) => m.clienteId !== id);
+  DB.cuotas = DB.cuotas.filter((q) => q.clienteId !== id);
+  DB.horas = DB.horas.filter((h) => !ids.has(h.expedienteId));
+  DB.escritos = DB.escritos.filter((x) => !ids.has(x.expedienteId));
+  DB.archivos.filter((a) => ids.has(a.expedienteId)).forEach((a) => idbDel(a.id).catch(() => {}));
+  DB.archivos = DB.archivos.filter((a) => !ids.has(a.expedienteId));
+  if (DB.timer && ids.has(DB.timer.expedienteId)) DB.timer = null;
   guardar(); toast('Cliente eliminado'); location.hash = '#/clientes';
 }
 
@@ -1097,19 +1277,57 @@ const ACC = {
   ics: () => exportarICS(),
   ejemplo: () => { if ((DB.clientes.length || DB.expedientes.length) && !confirm('Se agregarán clientes y expedientes de ejemplo a los que ya tienes. ¿Continuar?')) return; cargarEjemplo(); },
   borrarTodo: () => { if (!confirm('¿Borrar TODOS los datos de este aparato? Descarga antes un respaldo.')) return; if (prompt('Escribe BORRAR para confirmar') !== 'BORRAR') return; const a = DB.ajustes; DB = VACIO(); DB.ajustes = a; guardar(); toast('Datos borrados'); location.hash = '#/inicio'; render(); },
+  resumen: async () => { const t = textoResumen(); try { await navigator.clipboard.writeText(t); } catch {} window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); toast('Resumen listo (también se copió)'); },
+  vistaExp: (d) => { estado.vistaExp = d.v; reRender(); },
+  nuevoPlan: (d) => formPlan({ clienteId: d.cliente || '', expedienteId: d.exp || '' }),
+  cobrarCuota: (d) => { const q = DB.cuotas.find((x) => x.id === d.id); if (q) formMov(null, { tipo: 'pago', clienteId: q.clienteId, expedienteId: q.expedienteId, monto: q.monto, concepto: `Cuota ${q.n} de ${q.de}${q.concepto ? ' · ' + q.concepto : ''}`, cuotaId: q.id }); },
+  iniciarCrono: (d) => iniciarCrono(d.id),
+  pararCrono: () => pararCrono(),
+  nuevaHora: (d) => formHora(null, { expedienteId: d.exp }),
+  editHora: (d) => { const h = DB.horas.find((x) => x.id === d.id); if (h) formHora(h); },
+  facturarHoras: (d) => facturarHoras(d.id),
+  abrirArchivo: (d) => abrirArchivo(d.id),
+  borrarArchivo: (d) => { const a = DB.archivos.find((x) => x.id === d.id); if (!a || !confirm(`¿Quitar «${a.nombre}» de este aparato?`)) return; idbDel(a.id).catch(() => {}); DB.archivos = DB.archivos.filter((x) => x.id !== a.id); guardar(); reRender(); },
+  nuevoEscrito: (d) => formNuevoEscrito(d.exp),
+  usarPlantilla: (d) => { formNuevoEscrito(''); const f = $('.modal form, form.modal'); if (f && f.elements.plantilla) f.elements.plantilla.value = d.id; },
+  borrarPlantilla: (d) => { if (!confirm('¿Quitar esta plantilla?')) return; DB.plantillas = DB.plantillas.filter((x) => x.id !== d.id); guardar(); reRender(); },
+  imprimirEscrito: (d) => { const s = DB.escritos.find((x) => x.id === d.id); if (s) imprimirEscrito(s); },
+  wordEscrito: (d) => { const s = DB.escritos.find((x) => x.id === d.id); if (s) wordEscrito(s); },
+  copiarEscrito: async (d) => { const s = DB.escritos.find((x) => x.id === d.id); try { await navigator.clipboard.writeText(s.texto); toast('Texto copiado'); } catch { toast('No se pudo copiar'); } },
+  comoPlantilla: (d) => { const s = DB.escritos.find((x) => x.id === d.id); const t = s && prompt('Nombre de la plantilla', s.titulo); if (!t) return; DB.plantillas.push({ id: uid(), titulo: t, texto: s.texto, propia: true }); guardar(); toast('Plantilla guardada'); },
+  borrarEscrito: (d) => { if (!confirm('¿Eliminar este escrito?')) return; DB.escritos = DB.escritos.filter((x) => x.id !== d.id); guardar(); location.hash = '#/escritos'; },
+  dictar: (d, el) => dictar(d.target, el),
+  formPin: () => formPin(),
+  quitarPin: () => { if (!confirm('¿Quitar el bloqueo con PIN?')) return; DB.ajustes.pin = null; guardar(); reRender(); toast('PIN quitado'); },
+  bloquearYa: () => bloquear(),
+  avisos: async () => {
+    if (DB.ajustes.avisos) { DB.ajustes.avisos = false; guardar(); reRender(); return; }
+    if (!('Notification' in window)) { toast('Este navegador no permite avisos'); return; }
+    const p = await Notification.requestPermission();
+    if (p !== 'granted') { toast('No diste permiso para los avisos'); return; }
+    DB.ajustes.avisos = true; guardar(); reRender(); toast('Avisos activados'); revisarAvisos();
+  },
+  respaldoCompleto: () => respaldoCompleto(),
   borrarInhabil: (d) => { DB.ajustes.inhabiles = DB.ajustes.inhabiles.filter((i) => i.fecha !== d.v); guardar(); reRender(); },
 };
 document.addEventListener('click', (ev) => {
   const el = ev.target.closest('[data-act],[data-go]');
-  if (!el || el.closest('.modal-bg')) return;
-  if (el.dataset.act) { ev.preventDefault(); ev.stopPropagation(); ACC[el.dataset.act] && ACC[el.dataset.act](el.dataset); }
+  if (!el || el.closest('.modal-bg,#candado')) return;
+  if (!el.dataset.act && ev.target.closest('select,input,textarea,label')) return;
+  if (el.dataset.act) { ev.preventDefault(); ev.stopPropagation(); ACC[el.dataset.act] && ACC[el.dataset.act](el.dataset, el); }
   else if (el.dataset.go) location.hash = '#/' + el.dataset.go;
 });
+let _tEsc;
 document.addEventListener('input', (ev) => {
   const id = ev.target.id;
   if (id === 'qCli' || id === 'qExp') {
     estado[id] = ev.target.value; const pos = ev.target.selectionStart; reRender();
     const n = $('#' + id); n.focus(); n.setSelectionRange(pos, pos);
+  } else if (id === 'textoEscrito' || id === 'tituloEscrito') {
+    const s = DB.escritos.find((x) => x.id === ($('#textoEscrito') || {}).dataset?.id); if (!s) return;
+    if (id === 'textoEscrito') s.texto = ev.target.value; else s.titulo = ev.target.value || 'Escrito';
+    s.actualizado = ahora(); const g = $('#guardadoEsc'); if (g) g.textContent = 'guardando…';
+    clearTimeout(_tEsc); _tEsc = setTimeout(() => { guardar(); const g2 = $('#guardadoEsc'); if (g2) g2.textContent = 'guardado'; }, 500);
   } else if (id === 'qGlobal') {
     qGlobal = ev.target.value; const box = document.createElement('div'); box.innerHTML = vBuscar(); $('#resBuscar').innerHTML = box.querySelector('#resBuscar').innerHTML;
   }
@@ -1117,6 +1335,8 @@ document.addEventListener('input', (ev) => {
 document.addEventListener('change', (ev) => {
   if (ev.target.id === 'fMateria') { estado.fMateria = ev.target.value; reRender(); }
   if (ev.target.id === 'fileRespaldo') cargarRespaldo(ev.target.files[0]);
+  if (ev.target.classList.contains('fileDocs')) subirArchivos(ev.target.dataset.exp, [...ev.target.files]);
+  if (ev.target.classList.contains('mover')) moverExp(ev.target.dataset.id, ev.target.value);
 });
 document.addEventListener('submit', (ev) => {
   const f = ev.target.closest('[data-form]');
@@ -1154,6 +1374,9 @@ function cargarRespaldo(file) {
       const nuevo = arreglar(d);
       if (!confirm(`El respaldo tiene ${nuevo.clientes.length} cliente(s) y ${nuevo.expedientes.length} expediente(s).\nReemplazará los datos de este aparato. ¿Continuar?`)) return;
       DB = nuevo; guardar(); render(); toast('Respaldo cargado');
+      if (Array.isArray(j.documentos) && j.documentos.length) {
+        Promise.all(j.documentos.map((x) => idbPut(x.id, a64ABlob(x.data, x.tipo)).catch(() => {}))).then(() => toast(`${j.documentos.length} documento(s) restaurados`));
+      }
     } catch { toast('Ese archivo no es un respaldo del estudio'); }
   };
   r.readAsText(file);
@@ -1245,7 +1468,650 @@ function cargarEjemplo() {
     mv({ tipo: 'pago', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -2), monto: 500, medio: 'Plin', concepto: 'Adelanto' }),
   ];
   DB.clientes.push(cA, cB, cC); DB.expedientes.push(e1, e2, e3, e4); DB.eventos.push(...eventos); DB.movimientos.push(...movs);
+  movs.filter((m) => m.tipo === 'pago').forEach((m) => { m.recibo = DB.ajustes.recibo = (num(DB.ajustes.recibo) || 0) + 1; });
+  const plan = uid();
+  [[sumar(h, -10), 500], [sumar(h, 20), 500], [sumar(h, 50), 500], [sumar(h, 80), 500]].forEach(([fecha, monto], i) => DB.cuotas.push({ id: uid(), plan, clienteId: cC.id, expedienteId: e3.id, concepto: 'Defensa penal', n: i + 1, de: 4, fecha, monto, pagada: false, pagoId: '' }));
+  DB.horas.push({ id: uid(), expedienteId: e1.id, fecha: sumar(h, -21), minutos: 150, nota: 'Redacción de la demanda', tarifa: 150, facturado: false },
+    { id: uid(), expedienteId: e1.id, fecha: sumar(h, -6), minutos: 45, nota: 'Reunión con el cliente', tarifa: 150, facturado: false },
+    { id: uid(), expedienteId: e2.id, fecha: sumar(h, -2), minutos: 200, nota: 'Revisión de la sentencia y estrategia de apelación', tarifa: 200, facturado: false });
+  const pAp = PLANTILLAS.find((x) => x.id === 'p-aperso');
+  DB.escritos.push({ id: uid(), expedienteId: e3.id, titulo: pAp.titulo, texto: rellenar(pAp.texto, e3), fecha: sumar(h, -30), actualizado: ahora() });
   guardar(); toast('Datos de ejemplo cargados'); location.hash = '#/inicio'; render();
+}
+
+/* ===================================================================
+   FUNCIONES AVANZADAS
+   Escritos · cuotas y recibos · horas · documentos · reportes ·
+   tablero · bloqueo con PIN · dictado · avisos · conflicto de intereses
+   =================================================================== */
+
+/* ---------- monto en letras (para recibos y contratos) ---------- */
+function enLetras(n) {
+  const U = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+  const D = ['', '', '', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const C = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+  const cien = (x) => {
+    if (!x) return '';
+    if (x === 100) return 'cien';
+    const c = Math.floor(x / 100), r = x % 100;
+    const dec = r < 30 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ' y ' + U[r % 10] : '');
+    return [C[c], dec].filter(Boolean).join(' ');
+  };
+  const apocope = (s) => s.replace(/veintiuno$/, 'veintiún').replace(/uno$/, 'un');
+  const mil = (x) => {
+    const m = Math.floor(x / 1000), r = x % 1000;
+    const a = m ? (m === 1 ? 'mil' : apocope(cien(m)) + ' mil') : '';
+    return [a, cien(r)].filter(Boolean).join(' ');
+  };
+  const total = Math.round(Math.abs(Number(n) || 0) * 100), ent = Math.floor(total / 100), cent = total % 100;
+  let s = 'cero';
+  if (ent) {
+    const mm = Math.floor(ent / 1e6), r = ent % 1e6;
+    s = [mm ? (mm === 1 ? 'un millón' : apocope(mil(mm)) + ' millones') : '', mil(r)].filter(Boolean).join(' ');
+  }
+  return `${s} con ${pad(cent)}/100 soles`.toUpperCase();
+}
+
+/* ---------- documentos adjuntos (IndexedDB) ---------- */
+let _idb = null;
+function idb() {
+  if (!_idb) _idb = new Promise((res, rej) => {
+    const r = indexedDB.open('rr_documentos', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('archivos');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  return _idb;
+}
+async function idbHacer(modo, fn) {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const t = db.transaction('archivos', modo), req = fn(t.objectStore('archivos'));
+    t.oncomplete = () => res(req && req.result);
+    t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error);
+  });
+}
+const idbPut = (id, blob) => idbHacer('readwrite', (s) => s.put(blob, id));
+const idbGet = (id) => idbHacer('readonly', (s) => s.get(id));
+const idbDel = (id) => idbHacer('readwrite', (s) => s.delete(id));
+const tamano = (b) => b > 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+async function subirArchivos(expId, files) {
+  let ok = 0;
+  for (const f of files) {
+    if (f.size > 40 * 1048576) { toast(`«${f.name}» pesa más de 40 MB; no se guardó`); continue; }
+    const id = uid();
+    try {
+      await idbPut(id, f);
+      DB.archivos.push({ id, expedienteId: expId, nombre: f.name, tipo: f.type || '', tam: f.size, fecha: hoy() });
+      ok++;
+    } catch (e) { toast('No se pudo guardar el documento: el aparato no tiene espacio o lo bloquea'); break; }
+  }
+  if (ok) { tocarExp(expId); guardar(); reRender(); toast(ok === 1 ? 'Documento guardado' : `${ok} documentos guardados`); }
+}
+async function abrirArchivo(id) {
+  const meta = DB.archivos.find((a) => a.id === id);
+  const blob = meta && await idbGet(id).catch(() => null);
+  if (!blob) { toast('El documento no está en este aparato (¿se cargó desde un respaldo sin documentos?)'); return; }
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  if (!/^(application\/pdf|image\/|text\/)/.test(meta.tipo)) a.download = meta.nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+const blobA64 = (b) => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = rej; r.readAsDataURL(b); });
+const a64ABlob = (s, tipo) => { const bin = atob(s), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: tipo }); };
+async function respaldoCompleto() {
+  toast('Preparando el respaldo con documentos…');
+  const docs = [];
+  for (const a of DB.archivos) { const b = await idbGet(a.id).catch(() => null); if (b) docs.push({ id: a.id, tipo: a.tipo, data: await blobA64(b) }); }
+  descargar(`rodriguez-respaldo-completo-${hoy()}.json`, JSON.stringify({ app: 'causa', version: VERSION, exportado: ahora(), datos: DB, documentos: docs }), 'application/json');
+}
+
+/* ---------- conflicto de intereses ---------- */
+const limpio = (s) => norm(s).replace(/[^a-z0-9 ]/g, ' ').replace(/\b(sac|saa|srl|eirl|sa|s a c|s a)\b/g, ' ').replace(/\s+/g, ' ').trim();
+const digitos = (s) => String(s || '').replace(/\D/g, '');
+function seParecen(a, b) {
+  const x = limpio(a), y = limpio(b);
+  if (!x || !y || x.length < 5 || y.length < 5) return false;
+  return x === y || (x.length >= 8 && y.includes(x)) || (y.length >= 8 && x.includes(y));
+}
+function conflictosDeContraparte(contraparte, clienteId) {
+  if (!contraparte) return [];
+  const dig = digitos(contraparte);
+  return DB.clientes.filter((c) => c.id !== clienteId && (seParecen(c.nombre, contraparte) || (dig.length >= 8 && digitos(c.documento) === dig)));
+}
+function conflictosDeCliente(c) {
+  return DB.expedientes.filter((e) => e.clienteId !== c.id && e.contraparte && (seParecen(e.contraparte, c.nombre) || (digitos(c.documento).length >= 8 && digitos(e.contraparte).includes(digitos(c.documento)))));
+}
+
+/* ---------- cuotas y recibos ---------- */
+function estadoCuota(q) {
+  if (q.pagada) return ['Pagada', 'b-ok'];
+  const d = dias(hoy(), q.fecha);
+  if (d < 0) return [`Vencida hace ${-d} d`, 'b-bad'];
+  if (d <= 5) return [d === 0 ? 'Vence hoy' : `Vence en ${d} d`, 'b-warn'];
+  return ['Pendiente', ''];
+}
+function filaCuota(q, conCliente = true) {
+  const c = cliente(q.clienteId), [txt, cls] = estadoCuota(q), d = parse(q.fecha);
+  const msg = c && `Hola ${c.nombre.split(' ')[0]}, le recordamos la cuota ${q.n} de ${q.de} de sus honorarios (${sol(q.monto)}), con vencimiento el ${fFecha(q.fecha)}. Puede pagar por transferencia, Yape o Plin. Muchas gracias. ${DB.ajustes.estudio || ''}`;
+  return `<div class="row ${q.pagada ? 'done' : ''}" style="cursor:default"><div class="datebox ${q.pagada ? '' : urg({ fecha: q.fecha })}"><b>${d.getDate()}</b><span>${MES[d.getMonth()]}</span></div>
+    <div class="main"><div class="t">Cuota ${q.n} de ${q.de}${q.concepto ? ' · ' + esc(q.concepto) : ''}</div>
+      <div class="s"><span class="badge ${cls}">${txt}</span> ${conCliente && c ? esc(c.nombre) : ''}</div></div>
+    <div class="end"><div class="money">${sol(q.monto)}</div>
+      ${q.pagada ? '' : `<div style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px">${c && c.telefono ? `<a class="btn sm wa" href="${waLink(c.telefono, msg)}" target="_blank" rel="noopener" title="Recordar por WhatsApp">${icon('i-wa')}</a>` : ''}<button class="btn sm pri" data-act="cobrarCuota" data-id="${q.id}">Cobrar</button></div>`}</div></div>`;
+}
+function formPlan(def = {}) {
+  if (!DB.clientes.length) { toast('Primero registra un cliente'); return; }
+  const valores = Object.assign({ cuotas: 3, primera: sumar(hoy(), 30), cada: 'mensual', registrar: true, concepto: 'Honorarios' }, def);
+  if (def.expedienteId) valores.clienteId = (expediente(def.expedienteId) || {}).clienteId;
+  const form = abrirModal({
+    titulo: 'Plan de pagos en cuotas', boton: 'Crear cronograma', valores,
+    campos: [
+      { k: 'clienteId', l: 'Cliente', t: 'select', op: opClientes(), req: true },
+      { k: 'expedienteId', l: 'Expediente', t: 'select', op: opExps('— General —') },
+      { k: 'concepto', l: 'Concepto', full: true },
+      { k: 'total', l: 'Monto total (S/)', t: 'number', req: true },
+      { k: 'cuotas', l: 'Número de cuotas', t: 'number', req: true },
+      { k: 'primera', l: 'Primera cuota vence', t: 'date', req: true },
+      { k: 'cada', l: 'Frecuencia', t: 'select', op: [['mensual', 'Cada mes'], ['quincenal', 'Cada 15 días'], ['semanal', 'Cada semana']] },
+      { k: 'registrar', l: 'Registrar también el monto total como honorario pactado', t: 'checkbox', full: true },
+    ],
+    extra: '<div id="planPrev" class="small muted" style="margin-top:12px"></div>',
+    guardar: (d) => {
+      const n = Math.floor(num(d.cuotas)), total = num(d.total);
+      if (n < 1 || n > 60) { toast('Entre 1 y 60 cuotas'); return false; }
+      if (d.expedienteId) { const x = expediente(d.expedienteId); if (x && x.clienteId !== d.clienteId) { toast('Ese expediente es de otro cliente'); return false; } }
+      const plan = uid();
+      cronograma(d).forEach(([fecha, monto], i) => DB.cuotas.push({ id: uid(), plan, clienteId: d.clienteId, expedienteId: d.expedienteId, concepto: d.concepto, n: i + 1, de: n, fecha, monto, pagada: false, pagoId: '' }));
+      if (d.registrar) DB.movimientos.push({ id: uid(), creado: ahora(), tipo: 'honorario', clienteId: d.clienteId, expedienteId: d.expedienteId, fecha: hoy(), monto: total, medio: '', concepto: `${d.concepto || 'Honorarios'} (en ${n} cuotas)` });
+      tocarExp(d.expedienteId); guardar(); toast(`Cronograma de ${n} cuotas creado`); reRender();
+    },
+  });
+  const cronograma = (d) => {
+    const n = Math.floor(num(d.cuotas)), total = num(d.total);
+    if (!(n >= 1 && n <= 60 && total > 0 && d.primera)) return [];
+    const base = Math.floor((total / n) * 100) / 100, out = [];
+    for (let i = 0; i < n; i++) {
+      let f = d.primera;
+      if (d.cada === 'mensual') { const p = parse(d.primera), dia = p.getDate(), x = new Date(p.getFullYear(), p.getMonth() + i, 1); x.setDate(Math.min(dia, new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); f = iso(x); }
+      else f = sumar(d.primera, i * (d.cada === 'quincenal' ? 15 : 7));
+      out.push([f, i === n - 1 ? Math.round((total - base * (n - 1)) * 100) / 100 : base]);
+    }
+    return out;
+  };
+  form.elements.expedienteId.addEventListener('change', (ev) => { const x = expediente(ev.target.value); if (x) form.elements.clienteId.value = x.clienteId; });
+  const prev = () => {
+    const d = Object.fromEntries(['total', 'cuotas', 'primera', 'cada'].map((k) => [k, form.elements[k].value]));
+    const c = cronograma(d);
+    $('#planPrev').innerHTML = c.length ? '<b>Cronograma:</b> ' + c.map(([f, m], i) => `${i + 1}) ${fFecha(f)} · ${sol(m)}`).join(' &nbsp; ') : 'Escribe el monto y el número de cuotas para ver el cronograma.';
+  };
+  form.addEventListener('input', prev); prev();
+}
+function imprimirRecibo(m) {
+  const a = DB.ajustes, c = cliente(m.clienteId) || {}, e = expediente(m.expedienteId);
+  $('#imprimir').innerHTML = `<div style="border:2px solid #7d1d2c;padding:22px 26px;max-width:640px;margin:0 auto">
+    <div class="hdr"><div><h1>${esc(a.estudio || MARCA)}</h1><div>${esc([a.abogado, a.colegiatura].filter(Boolean).join(' · '))}</div><div>${esc([a.ruc && 'RUC ' + a.ruc, a.telefono, a.direccion].filter(Boolean).join(' · '))}</div></div>
+      <div style="text-align:right"><b>RECIBO DE PAGO</b><br><span style="font-size:18px">N.° ${pad4(m.recibo)}</span><br>${fFecha(m.fecha)}</div></div>
+    <p>Recibimos de <b>${esc(c.nombre || '')}</b>${c.documento ? ' (' + esc(c.documento) + ')' : ''} la suma de:</p>
+    <p style="font-size:22px;margin:6px 0"><b>${sol(m.monto)}</b></p>
+    <p style="font-style:italic">Son: ${esc(enLetras(m.monto))}</p>
+    <p>Por concepto de: <b>${esc(m.concepto || 'Honorarios profesionales')}</b>${e ? `<br>Expediente: ${esc(e.numero || caratula(e))}` : ''}${m.medio ? `<br>Medio de pago: ${esc(m.medio)}` : ''}</p>
+    <div style="display:flex;justify-content:flex-end;margin-top:56px"><div style="border-top:1px solid #000;padding-top:4px;min-width:220px;text-align:center">${esc(a.abogado || a.estudio || '')}<br><span style="font-size:11px">${esc(a.colegiatura || '')}</span></div></div>
+    <p style="font-size:10px;color:#555;margin-top:18px">Documento interno de control. No reemplaza al comprobante de pago electrónico de SUNAT.</p></div>`;
+  window.print();
+}
+const pad4 = (n) => String(n || 0).padStart(4, '0');
+
+/* ---------- horas trabajadas y cronómetro ---------- */
+const fHoras = (min) => { min = Math.round(min || 0); return `${Math.floor(min / 60)} h ${pad(min % 60)} min`; };
+const leerDuracion = (s) => { s = String(s || '').trim(); if (/^\d+:\d{1,2}$/.test(s)) { const [h, m] = s.split(':').map(Number); return h * 60 + m; } const n = num(s.replace(',', '.')); return Math.round(n * 60); };
+function iniciarCrono(expId) {
+  if (DB.timer && DB.timer.expedienteId === expId) return;
+  if (DB.timer) pararCrono(true);
+  DB.timer = { expedienteId: expId, inicio: Date.now() }; guardar(); reRender(); toast('Cronómetro en marcha');
+}
+function pararCrono(silencioso) {
+  const t = DB.timer; if (!t) return;
+  const min = Math.max(1, Math.round((Date.now() - t.inicio) / 60000));
+  DB.timer = null; guardar();
+  if (silencioso) { DB.horas.push({ id: uid(), expedienteId: t.expedienteId, fecha: hoy(), minutos: min, nota: 'Trabajo (cronómetro)', tarifa: num(DB.ajustes.tarifaHora), facturado: false }); guardar(); return; }
+  formHora(null, { expedienteId: t.expedienteId, minutos: min });
+}
+function formHora(h, def = {}) {
+  const valores = h ? Object.assign({}, h, { duracion: `${Math.floor(h.minutos / 60)}:${pad(h.minutos % 60)}` })
+    : Object.assign({ fecha: hoy(), tarifa: DB.ajustes.tarifaHora || '' }, def, { duracion: def.minutos ? `${Math.floor(def.minutos / 60)}:${pad(def.minutos % 60)}` : '' });
+  abrirModal({
+    titulo: h ? 'Editar horas' : 'Registrar horas trabajadas', valores,
+    campos: [
+      { k: 'expedienteId', l: 'Expediente', t: 'select', op: opExps('— Elige —'), req: true, full: true },
+      { k: 'fecha', l: 'Fecha', t: 'date', req: true },
+      { k: 'duracion', l: 'Duración', req: true, ph: '1:30', hint: 'Horas:minutos (1:30) o decimal (1.5)' },
+      { k: 'nota', l: 'Qué se hizo', full: true, ph: 'Redacción de la contestación', list: ['Redacción de escrito', 'Revisión del expediente', 'Asistencia a audiencia', 'Reunión con el cliente', 'Investigación jurídica', 'Llamadas y coordinaciones'] },
+      { k: 'tarifa', l: 'Tarifa por hora (S/)', t: 'number' },
+    ],
+    guardar: (d) => {
+      const minutos = leerDuracion(d.duracion);
+      if (!(minutos > 0)) { toast('Escribe una duración válida, por ejemplo 1:30'); return false; }
+      const o = { expedienteId: d.expedienteId, fecha: d.fecha, minutos, nota: d.nota, tarifa: num(d.tarifa) };
+      if (h) Object.assign(h, o); else DB.horas.push(Object.assign({ id: uid(), facturado: false }, o));
+      tocarExp(d.expedienteId); guardar(); toast('Horas registradas'); reRender();
+    },
+    borrar: h ? () => { if (!confirm('¿Eliminar este registro de horas?')) return false; DB.horas = DB.horas.filter((x) => x.id !== h.id); guardar(); reRender(); } : null,
+  });
+}
+function facturarHoras(expId) {
+  const e = expediente(expId), pend = DB.horas.filter((h) => h.expedienteId === expId && !h.facturado);
+  const monto = Math.round(pend.reduce((a, h) => a + (h.minutos / 60) * num(h.tarifa), 0) * 100) / 100, min = pend.reduce((a, h) => a + h.minutos, 0);
+  if (!pend.length || !(monto > 0)) { toast('No hay horas con tarifa por pasar a honorarios'); return; }
+  if (!confirm(`¿Pasar ${fHoras(min)} (${sol(monto)}) a honorarios del cliente?`)) return;
+  const m = { id: uid(), creado: ahora(), tipo: 'honorario', clienteId: e.clienteId, expedienteId: expId, fecha: hoy(), monto, medio: '', concepto: `Horas trabajadas (${fHoras(min)})` };
+  DB.movimientos.push(m); pend.forEach((h) => { h.facturado = true; h.movId = m.id; });
+  guardar(); reRender(); toast('Horas pasadas a honorarios');
+}
+let _crono = null;
+function pintarCrono() {
+  let el = $('#crono');
+  if (!DB.timer) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement('div'); el.id = 'crono'; document.body.appendChild(el); }
+  const e = expediente(DB.timer.expedienteId), s = Math.floor((Date.now() - DB.timer.inicio) / 1000);
+  el.innerHTML = `<span class="punto"></span><a href="#/expediente/${DB.timer.expedienteId}" class="mono">${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}</a>
+    <span class="small hide-m" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(e ? e.numero || caratula(e) : '')}</span><button class="btn sm pri" data-act="pararCrono">Parar</button>`;
+}
+setInterval(() => { if (DB.timer) { const el = $('#crono a'); if (el) { const s = Math.floor((Date.now() - DB.timer.inicio) / 1000); el.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`; } else pintarCrono(); } }, 1000);
+
+/* ---------- escritos y plantillas ---------- */
+const ENC = `Expediente   : {{numero}}
+Especialista : {{especialista}}
+Cuaderno     : Principal
+Escrito N.°  : ___
+Sumilla      : `;
+const FIRMA = `
+
+{{ciudad}}, {{fecha_larga}}
+
+
+
+______________________________          ______________________________
+{{cliente}}                              {{abogado}}
+{{documento}}                              {{colegiatura}}`;
+const PLANTILLAS = [
+  { id: 'p-aperso', titulo: 'Apersonamiento y domicilio procesal', texto: ENC + `APERSONAMIENTO Y SEÑALA DOMICILIO PROCESAL Y CASILLA ELECTRÓNICA
+
+SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, identificado(a) con {{documento}}, con domicilio real en {{direccion_cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+Que, por convenir a mi derecho, me apersono a la presente causa y, para los efectos de las notificaciones, señalo domicilio procesal en {{domicilio_procesal}} y casilla electrónica N.° {{casilla}} del Sistema de Notificaciones Electrónicas (SINOE) del Poder Judicial, donde solicito se me haga llegar todas las resoluciones que se expidan en el proceso.
+
+POR TANTO:
+A usted, Señor Juez, pido tenerme por apersonado(a) y proveer conforme a ley.
+
+PRIMER OTROSÍ DIGO: Que, conforme al artículo 80 del Código Procesal Civil, otorgo las facultades generales de representación al letrado que autoriza el presente escrito, {{abogado}}, con registro {{colegiatura}}, declarando estar instruido(a) de la representación que otorgo y de sus alcances.
+
+SEGUNDO OTROSÍ DIGO: Que, adjunto copia de mi documento de identidad.` + FIRMA },
+  { id: 'p-tenga', titulo: 'Téngase presente', texto: ENC + `TÉNGASE PRESENTE
+
+SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+Que, solicito a su Despacho se sirva tener presente lo siguiente al momento de resolver:
+
+1. ___
+
+2. ___
+
+POR TANTO:
+A usted, Señor Juez, pido tener presente lo expuesto.` + FIRMA },
+  { id: 'p-copias', titulo: 'Solicito copias certificadas', texto: ENC + `SOLICITO COPIAS CERTIFICADAS
+
+SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+Que, solicito se me expidan copias certificadas de las siguientes piezas procesales: ___, para lo cual adjunto el arancel judicial correspondiente.
+
+POR TANTO:
+A usted, Señor Juez, pido acceder a lo solicitado.
+
+OTROSÍ DIGO: Que, autorizo a ___, identificado(a) con DNI N.° ___, para que recabe las copias solicitadas.` + FIRMA },
+  { id: 'p-impulso', titulo: 'Solicito impulso / pronunciamiento', texto: ENC + `SOLICITO SE EMITA PRONUNCIAMIENTO
+
+SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+Que, habiendo transcurrido en exceso el plazo para que su Despacho se pronuncie respecto de ___, presentado con fecha ___, solicito se sirva emitir el pronunciamiento correspondiente, en atención a los principios de celeridad y economía procesal.
+
+POR TANTO:
+A usted, Señor Juez, pido proveer conforme a lo solicitado.` + FIRMA },
+  { id: 'p-domic', titulo: 'Variación de domicilio procesal / casilla', texto: ENC + `VARÍO DOMICILIO PROCESAL Y CASILLA ELECTRÓNICA
+
+SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+Que, vario mi domicilio procesal al ubicado en {{domicilio_procesal}} y mi casilla electrónica a la N.° {{casilla}} del SINOE, donde solicito se me notifiquen en adelante las resoluciones del proceso.
+
+POR TANTO:
+A usted, Señor Juez, pido tener presente la variación y proveer conforme a ley.` + FIRMA },
+  { id: 'p-apela', titulo: 'Recurso de apelación (estructura)', texto: ENC + `INTERPONGO RECURSO DE APELACIÓN
+
+SEÑOR JUEZ DEL {{JUZGADO}}:
+
+{{cliente}}, en los seguidos {{contra_frase}} sobre {{pretension}}; a usted, respetuosamente, digo:
+
+Que, dentro del plazo de ley, interpongo RECURSO DE APELACIÓN contra la Resolución N.° ___, de fecha ___, notificada el ___, que ___, a fin de que el superior jerárquico la REVOQUE / ANULE, conforme a los fundamentos siguientes:
+
+I. PETITORIO
+___
+
+II. FUNDAMENTOS DE HECHO Y ERRORES DE LA RESOLUCIÓN IMPUGNADA
+1. ___
+2. ___
+
+III. FUNDAMENTOS DE DERECHO
+___
+
+IV. NATURALEZA DEL AGRAVIO
+La resolución impugnada me causa agravio porque ___.
+
+V. ANEXOS
+1-A. Arancel judicial por apelación.
+1-B. Cédulas de notificación.
+
+POR TANTO:
+A usted, Señor Juez, pido conceder el recurso y elevar los actuados al superior.` + FIRMA },
+  { id: 'p-contrato', titulo: 'Contrato de servicios profesionales', judicial: false, texto: `CONTRATO DE LOCACIÓN DE SERVICIOS PROFESIONALES
+
+Conste por el presente documento el contrato de locación de servicios profesionales que celebran, de una parte, {{estudio}}, con RUC N.° {{ruc_estudio}}, con domicilio en {{direccion_estudio}}, representado por {{abogado}}, a quien en adelante se le denominará EL ESTUDIO; y, de la otra parte, {{cliente}}, identificado(a) con {{documento}}, con domicilio en {{direccion_cliente}}, a quien en adelante se le denominará EL CLIENTE; en los términos siguientes:
+
+PRIMERA.- OBJETO
+EL ESTUDIO se obliga a prestar a EL CLIENTE el servicio de patrocinio legal en el proceso sobre {{pretension}}, {{contra_frase_contrato}}, expediente N.° {{numero}}, tramitado ante el {{juzgado}}.
+
+SEGUNDA.- HONORARIOS
+Las partes acuerdan como honorarios profesionales la suma de {{honorario_total}} ({{honorario_letras}}), que EL CLIENTE pagará de la forma siguiente: ___.
+Los gastos del proceso (tasas judiciales, cédulas, peritos, copias y similares) no están incluidos y serán asumidos por EL CLIENTE.
+
+TERCERA.- OBLIGACIONES DE EL ESTUDIO
+Patrocinar diligentemente el proceso, mantener informado a EL CLIENTE del estado de la causa y guardar el secreto profesional.
+
+CUARTA.- OBLIGACIONES DE EL CLIENTE
+Proporcionar información veraz y oportuna, entregar los documentos que se le soliciten y pagar los honorarios en las fechas convenidas.
+
+QUINTA.- DURACIÓN
+El presente contrato rige desde su firma hasta la conclusión de la instancia contratada.
+
+Firmado en dos ejemplares en {{ciudad}}, {{fecha_larga}}.
+
+
+
+______________________________          ______________________________
+EL ESTUDIO                               EL CLIENTE
+{{abogado}}                              {{cliente}}` },
+];
+const todasPlantillas = () => [...PLANTILLAS, ...DB.plantillas];
+function datosEscrito(e) {
+  const a = DB.ajustes, c = e ? cliente(e.clienteId) || {} : {}, s = e ? saldoExp(e.id) : { honor: 0 };
+  const hoyD = parse(hoy()), raya = '________';
+  const contra = e && e.contraparte ? (/(demandad|investigad|imputad)/i.test(e.condicion || '') ? `por ${e.contraparte}` : `con ${e.contraparte}`) : 'en el presente proceso';
+  const v = {
+    numero: e && e.numero, especialista: e && e.especialista, juzgado: e && e.juzgado, JUZGADO: e && e.juzgado ? e.juzgado.toUpperCase() : '',
+    cliente: c.nombre, documento: c.documento, direccion_cliente: c.direccion, contraparte: e && e.contraparte, pretension: e && e.pretension, materia: e && e.materia,
+    condicion: e && e.condicion, contra_frase: contra, contra_frase_contrato: e && e.contraparte ? `seguido con ${e.contraparte}` : '',
+    abogado: a.abogado, colegiatura: a.colegiatura, estudio: a.estudio, ruc_estudio: a.ruc, direccion_estudio: a.direccion,
+    domicilio_procesal: a.domicilioProcesal || a.direccion, casilla: a.casilla, ciudad: a.ciudad || 'Lima',
+    fecha_larga: `${hoyD.getDate()} de ${MESL[hoyD.getMonth()].toLowerCase()} de ${hoyD.getFullYear()}`,
+    honorario_total: s.honor ? sol(s.honor) : '', honorario_letras: s.honor ? enLetras(s.honor) : '',
+  };
+  return (k) => (v[k] != null && String(v[k]).trim() ? String(v[k]) : raya);
+}
+const rellenar = (texto, e) => { const f = datosEscrito(e); return texto.replace(/\{\{(\w+)\}\}/g, (_, k) => f(k)); };
+function formNuevoEscrito(expId) {
+  abrirModal({
+    titulo: 'Nuevo escrito', boton: 'Crear y editar', valores: { expedienteId: expId || '', plantilla: 'p-aperso' },
+    campos: [
+      { k: 'plantilla', l: 'Plantilla', t: 'select', op: [...todasPlantillas().map((p) => [p.id, p.titulo + (p.propia ? ' (tuya)' : '')]), ['', 'En blanco']], full: true },
+      { k: 'expedienteId', l: 'Expediente', t: 'select', op: opExps(), full: true, hint: 'Los datos del expediente, del cliente y del estudio se rellenan solos' },
+    ],
+    guardar: (d) => {
+      const p = todasPlantillas().find((x) => x.id === d.plantilla), e = expediente(d.expedienteId);
+      const es = { id: uid(), expedienteId: d.expedienteId, titulo: p ? p.titulo : 'Escrito', texto: p ? rellenar(p.texto, e) : '', fecha: hoy(), actualizado: ahora() };
+      DB.escritos.push(es); tocarExp(d.expedienteId); guardar(); location.hash = '#/escrito/' + es.id;
+    },
+  });
+}
+function vEscritos() {
+  const lista = [...DB.escritos].sort((a, b) => (b.actualizado || '').localeCompare(a.actualizado || ''));
+  return `<div class="head"><div><h1>Escritos</h1><div class="sub">Redacta desde plantillas con los datos del expediente ya puestos</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoEscrito">${icon('i-plus')} Nuevo escrito</button></div></div>
+  <div class="grid g2" style="align-items:start">
+    <div class="card"><h2>Tus escritos</h2>${lista.length ? `<div class="list">${lista.map(filaEscrito).join('')}</div>` : `<div class="empty">${icon('i-doc')}<div>Todavía no has redactado escritos.</div></div>`}</div>
+    <div class="card"><h2>Plantillas</h2><div class="list">${todasPlantillas().map((p) => `<div class="row" style="cursor:default"><div class="main"><div class="t">${esc(p.titulo)}</div><div class="s">${p.propia ? 'Plantilla tuya' : p.judicial === false ? 'Documento del estudio' : 'Escrito judicial'}</div></div>
+      <div class="end"><button class="btn sm" data-act="usarPlantilla" data-id="${p.id}">Usar</button>${p.propia ? ` <button class="btn sm danger" data-act="borrarPlantilla" data-id="${p.id}">Quitar</button>` : ''}</div></div>`).join('')}</div>
+      <p class="tiny" style="margin-top:10px">Las plantillas son modelos referenciales: revisa siempre el contenido antes de presentarlo. Puedes guardar cualquier escrito como plantilla tuya; usa marcas como {{cliente}}, {{numero}} o {{juzgado}} y se rellenarán solas.</p></div>
+  </div>`;
+}
+function filaEscrito(s) {
+  const e = expediente(s.expedienteId);
+  return `<div class="row" data-go="escrito/${s.id}"><div class="datebox"><b>${parse(s.fecha).getDate()}</b><span>${MES[parse(s.fecha).getMonth()]}</span></div>
+    <div class="main"><div class="t">${esc(s.titulo)}</div><div class="s">${e ? esc(e.numero || caratula(e)) : 'Sin expediente'}</div></div></div>`;
+}
+function vEscrito(id) {
+  const s = DB.escritos.find((x) => x.id === id);
+  if (!s) return noExiste('Escrito');
+  const e = expediente(s.expedienteId);
+  return `<div class="head"><div><a href="#/escritos" class="small" style="text-decoration:none">‹ Escritos</a>
+      <input id="tituloEscrito" class="titulo-edit" value="${esc(s.titulo)}" aria-label="Título del escrito">
+      <div class="sub">${e ? `<a href="#/expediente/${e.id}">${esc(e.numero || caratula(e))}</a>` : 'Sin expediente'} · <span id="guardadoEsc">guardado</span></div></div>
+    <div class="actions"><button class="btn pri" data-act="imprimirEscrito" data-id="${id}">${icon('i-print')} Imprimir / PDF</button>
+      <button class="btn" data-act="wordEscrito" data-id="${id}">Word</button>
+      <button class="btn" data-act="copiarEscrito" data-id="${id}">Copiar</button>
+      ${vozOK ? `<button class="btn" data-act="dictar" data-target="#textoEscrito">${icon('i-mic')} Dictar</button>` : ''}
+      <button class="btn" data-act="comoPlantilla" data-id="${id}">Guardar como plantilla</button></div></div>
+  <div class="hoja-a4"><textarea id="textoEscrito" data-id="${id}" spellcheck="true">${esc(s.texto)}</textarea></div>
+  <div style="margin-top:14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px"><span class="tiny">Se guarda solo mientras escribes. Los espacios «________» son datos que faltan: complétalos aquí o en la ficha del expediente.</span>
+    <button class="btn danger" data-act="borrarEscrito" data-id="${id}">Eliminar escrito</button></div>`;
+}
+function htmlEscrito(s) {
+  return esc(s.texto).split('\n').map((l) => {
+    const t = l.trim();
+    if (/^(SEÑOR|SEÑORA|POR TANTO|PRIMER|SEGUNDO|TERCER|OTROS|PRIMERA|SEGUNDA|TERCERA|CUARTA|QUINTA|SEXTA|[IVX]+\.\s)/.test(t) || (t.length > 6 && t === t.toUpperCase() && /[A-ZÁÉÍÓÚÑ]{4}/.test(t))) return `<b>${l}</b>`;
+    return l;
+  }).join('\n');
+}
+function imprimirEscrito(s) {
+  $('#imprimir').innerHTML = `<div class="escrito-print">${htmlEscrito(s)}</div>`;
+  window.print();
+}
+function wordEscrito(s) {
+  const cuerpo = htmlEscrito(s).split('\n').map((l) => `<p style="margin:0 0 0 0;text-align:justify">${l || '&nbsp;'}</p>`).join('');
+  const doc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>${esc(s.titulo)}</title>
+    <style>@page{size:21cm 29.7cm;margin:2.5cm 2.5cm 2.5cm 3cm}body{font-family:Arial,sans-serif;font-size:12pt;line-height:1.5}</style></head><body>${cuerpo}</body></html>`;
+  descargar(`${s.titulo.replace(/[^\wáéíóúñÁÉÍÓÚÑ -]/g, '').slice(0, 60) || 'escrito'}.doc`, '﻿' + doc, 'application/msword');
+}
+
+/* ---------- dictado por voz ---------- */
+const Reco = window.SpeechRecognition || window.webkitSpeechRecognition;
+const vozOK = !!Reco;
+let _reco = null;
+function dictar(sel, boton) {
+  if (_reco) { _reco.stop(); return; }
+  const campo = $(sel); if (!campo) return;
+  const r = new Reco(); r.lang = 'es-PE'; r.continuous = true; r.interimResults = false;
+  r.onresult = (ev) => {
+    let t = '';
+    for (let i = ev.resultIndex; i < ev.results.length; i++) if (ev.results[i].isFinal) t += ev.results[i][0].transcript;
+    t = t.trim().replace(/\s+(punto y aparte)\s*/gi, '.\n').replace(/\s+(punto)\s*/gi, '. ').replace(/\s+(coma)\s*/gi, ', ').replace(/\s+(dos puntos)\s*/gi, ': ');
+    if (!t) return;
+    const ini = campo.selectionStart ?? campo.value.length, antes = campo.value.slice(0, ini), sep = antes && !/\s$/.test(antes) ? ' ' : '';
+    campo.value = antes + sep + t + campo.value.slice(campo.selectionEnd ?? ini);
+    const p = (antes + sep + t).length; campo.setSelectionRange(p, p);
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  r.onend = () => { _reco = null; document.querySelectorAll('[data-act=dictar]').forEach((b) => b.classList.remove('grabando')); };
+  r.onerror = (e) => { if (e.error === 'not-allowed') toast('Permite el micrófono para dictar'); };
+  r.start(); _reco = r; if (boton) boton.classList.add('grabando'); toast('Te escucho… di «punto», «coma» o «punto y aparte». Toca otra vez para parar.');
+}
+
+/* ---------- reportes ---------- */
+let _tipId = 0;
+function barrasV(datos, fmt) {
+  const max = Math.max(1, ...datos.map((d) => d.v));
+  const paso = Math.pow(10, Math.floor(Math.log10(max))), tope = Math.ceil(max / paso) * paso;
+  const ultimo = datos.length - 1;
+  return `<div class="vbars"><div class="vb-ejes">${[tope, tope / 2, 0].map((t) => `<span>${esc(fmt(t, true))}</span>`).join('')}</div>
+    <div class="vb-area">${[0, 50, 100].map((y) => `<i class="vb-linea" style="bottom:${y}%"></i>`).join('')}
+      ${datos.map((d, i) => `<div class="vb hov" data-tip="${esc(d.l)}: ${esc(fmt(d.v))}"><div class="vb-col">${i === ultimo && d.v ? `<span class="vb-val">${esc(fmt(d.v, true))}</span>` : ''}<i style="height:${(d.v / tope) * 100}%"></i></div><span class="vb-et">${esc(d.c)}</span></div>`).join('')}</div></div>`;
+}
+function barrasH(datos, fmt) {
+  if (!datos.length) return '<div class="empty small">Sin datos todavía.</div>';
+  const max = Math.max(1, ...datos.map((d) => d.v));
+  return `<div class="hbars">${datos.map((d) => `<div class="hb hov" data-tip="${esc(d.l)}: ${esc(fmt(d.v))}"><span class="hl">${esc(d.l)}</span><span class="hv"><i style="width:${Math.max(1.5, (d.v / max) * 100)}%"></i></span><span class="hn">${esc(fmt(d.v, true))}</span></div>`).join('')}</div>`;
+}
+const tabla = (cab, filas) => `<details class="tabla-ver"><summary class="small muted">Ver como tabla</summary><table class="tabla"><thead><tr>${cab.map((c, i) => `<th${i ? ' class="r"' : ''}>${esc(c)}</th>`).join('')}</tr></thead><tbody>${filas.map((f) => `<tr>${f.map((c, i) => `<td${i ? ' class="r"' : ''}>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
+function vReportes() {
+  const h = hoy(), Y = h.slice(0, 4), mesAct = h.slice(0, 7);
+  const meses = [];
+  for (let i = 11; i >= 0; i--) { const d = parse(h); d.setDate(1); d.setMonth(d.getMonth() - i); meses.push(iso(d).slice(0, 7)); }
+  const cobrado = meses.map((m) => ({ c: MES[Number(m.slice(5)) - 1], l: `${MESL[Number(m.slice(5)) - 1]} ${m.slice(0, 4)}`, v: DB.movimientos.filter((x) => x.tipo === 'pago' && x.fecha.startsWith(m)).reduce((a, x) => a + num(x.monto), 0) }));
+  const t = saldo(() => true);
+  const cobAnio = DB.movimientos.filter((x) => x.tipo === 'pago' && x.fecha.startsWith(Y)).reduce((a, x) => a + num(x.monto), 0);
+  const minMes = DB.horas.filter((x) => x.fecha.startsWith(mesAct)).reduce((a, x) => a + x.minutos, 0);
+  const nuevos = DB.expedientes.filter((e) => (e.inicio || '').startsWith(Y)).length;
+  const cuenta = (arr, k) => Object.entries(arr.reduce((o, x) => { const v = x[k] || 'Sin dato'; o[v] = (o[v] || 0) + 1; return o; }, {})).map(([l, v]) => ({ l, v })).sort((a, b) => b.v - a.v);
+  const activos = DB.expedientes.filter((e) => !CERRADOS.includes(e.estado));
+  const porMateria = cuenta(activos, 'materia'), porEstado = cuenta(DB.expedientes, 'estado');
+  const porCliente = DB.clientes.map((c) => ({ l: c.nombre, v: saldoCliente(c.id).honor })).filter((x) => x.v > 0).sort((a, b) => b.v - a.v).slice(0, 8);
+  const porHoras = DB.expedientes.map((e) => ({ l: e.numero || caratula(e), v: DB.horas.filter((x) => x.expedienteId === e.id).reduce((a, x) => a + x.minutos, 0) / 60 })).filter((x) => x.v > 0).sort((a, b) => b.v - a.v).slice(0, 8);
+  const fSol = (v, corto) => corto && v >= 1000 ? 'S/ ' + (v / 1000).toLocaleString('es-PE', { maximumFractionDigits: 1 }) + ' mil' : sol(v);
+  const fN = (v) => String(Math.round(v * 10) / 10);
+  const fH = (v, corto) => corto ? fN(v) + ' h' : fHoras(v * 60);
+  return `<div class="head"><div><h1>Reportes</h1><div class="sub">Cómo va el estudio en números</div></div><div class="actions"><button class="btn" data-act="csv">Exportar a Excel (CSV)</button></div></div>
+  <div class="card sumario">
+    <div class="stat"><div class="k">Cobrado en ${Y}</div><div class="v">${sol(cobAnio)}</div></div>
+    <div class="stat"><div class="k">Tasa de cobro</div><div class="v">${t.cargo ? Math.round((t.pagado / t.cargo) * 100) : 0}%</div><div class="d">de todo lo facturado</div></div>
+    <div class="stat"><div class="k">Horas este mes</div><div class="v">${fN(minMes / 60)}</div><div class="d">${MESL[new Date().getMonth()]}</div></div>
+    <div class="stat"><div class="k">Casos nuevos ${Y}</div><div class="v">${nuevos}</div><div class="d">${activos.length} activos hoy</div></div>
+  </div>
+  <div class="card" style="margin-top:18px"><h2>Cobrado por mes <span class="tiny">últimos 12 meses</span></h2>${barrasV(cobrado, fSol)}${tabla(['Mes', 'Cobrado'], cobrado.map((d) => [d.l, sol(d.v)]))}</div>
+  <div class="grid g2" style="margin-top:18px;align-items:start">
+    <div class="card"><h2>Casos activos por materia</h2>${barrasH(porMateria, (v) => v + (v === 1 ? ' caso' : ' casos'))}</div>
+    <div class="card"><h2>Expedientes por estado</h2>${barrasH(porEstado, (v) => v + (v === 1 ? ' expediente' : ' expedientes'))}</div>
+    <div class="card"><h2>Honorarios pactados por cliente</h2>${barrasH(porCliente, fSol)}</div>
+    <div class="card"><h2>Horas por expediente</h2>${barrasH(porHoras, fH)}</div>
+  </div>`;
+}
+document.addEventListener('mousemove', (ev) => {
+  const g = ev.target.closest && ev.target.closest('.hov'); let tip = $('#tip');
+  if (!g) { if (tip) tip.style.display = 'none'; return; }
+  if (!tip) { tip = document.createElement('div'); tip.id = 'tip'; document.body.appendChild(tip); }
+  tip.textContent = g.dataset.tip; tip.style.display = 'block';
+  const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8); tip.style.left = x + 'px'; tip.style.top = (ev.clientY - 36) + 'px';
+});
+
+/* ---------- tablero de expedientes ---------- */
+function vTablero(lista) {
+  const cols = ESTADOS.filter((s) => !(estado.fEstado === 'activos' && CERRADOS.includes(s)) && !(estado.fEstado === 'cerrados' && !CERRADOS.includes(s)));
+  return `<div class="tablero">${cols.map((s) => { const xs = lista.filter((e) => (e.estado || 'En trámite') === s);
+    return `<div class="col" data-estado="${esc(s)}"><div class="col-h"><span class="badge ${ESTADO_COLOR[s] || ''}">${esc(s)}</span><span class="tiny">${xs.length}</span></div>
+      ${xs.map((e) => `<div class="tarjeta" draggable="true" data-id="${e.id}" data-go="expediente/${e.id}"><div class="t">${esc(caratula(e))}</div><div class="mono tiny">${esc(e.numero || 'Sin número')}</div>
+        <select class="mover" data-id="${e.id}" aria-label="Mover a">${ESTADOS.map((o) => `<option ${o === s ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>`).join('') || '<div class="tiny vacio">Arrastra aquí</div>'}</div>`; }).join('')}</div>`;
+}
+function moverExp(id, nuevo) {
+  const e = expediente(id); if (!e || e.estado === nuevo) return;
+  e.actuaciones.push({ id: uid(), fecha: hoy(), texto: `Estado: ${e.estado || 'En trámite'} → ${nuevo}` });
+  e.estado = nuevo; e.actualizado = ahora(); guardar(); reRender(); toast(`Movido a «${nuevo}»`);
+}
+document.addEventListener('dragstart', (ev) => { const t = ev.target.closest && ev.target.closest('.tarjeta'); if (t) { ev.dataTransfer.setData('text/plain', t.dataset.id); t.classList.add('arrastrando'); } });
+document.addEventListener('dragend', () => document.querySelectorAll('.arrastrando,.col.sobre').forEach((x) => x.classList.remove('arrastrando', 'sobre')));
+document.addEventListener('dragover', (ev) => { const c = ev.target.closest && ev.target.closest('.col'); if (c) { ev.preventDefault(); document.querySelectorAll('.col.sobre').forEach((x) => x !== c && x.classList.remove('sobre')); c.classList.add('sobre'); } });
+document.addEventListener('drop', (ev) => { const c = ev.target.closest && ev.target.closest('.col'); if (c) { ev.preventDefault(); moverExp(ev.dataTransfer.getData('text/plain'), c.dataset.estado); } });
+
+/* ---------- resumen del día y avisos ---------- */
+function textoResumen() {
+  const h = hoy(), m = sumar(h, 1);
+  const linea = (v) => { const e = expediente(v.expedienteId); return `• ${v.hora ? v.hora + ' ' : ''}${TIPOS_EV[v.tipo]}: ${v.titulo || ''}${e ? ` (${e.numero || caratula(e)})` : ''}${v.lugar ? ' — ' + v.lugar : ''}`; };
+  const de = (f) => DB.eventos.filter((v) => !v.hecho && v.fecha === f).sort(ordenEv);
+  const atras = DB.eventos.filter((v) => !v.hecho && v.fecha < h);
+  const cuotas = DB.cuotas.filter((q) => !q.pagada && q.fecha <= h);
+  let t = `*${DB.ajustes.estudio || MARCA}*\n_Agenda — ${fFechaL(h)}_\n\n*HOY*\n${de(h).map(linea).join('\n') || '• Nada agendado'}\n\n*MAÑANA*\n${de(m).map(linea).join('\n') || '• Nada agendado'}`;
+  if (atras.length) t += `\n\n⚠️ ${atras.length} pendiente(s) atrasado(s) sin marcar`;
+  if (cuotas.length) t += `\n💰 ${cuotas.length} cuota(s) por cobrar vencidas: ${sol(cuotas.reduce((a, q) => a + q.monto, 0))}`;
+  return t;
+}
+let _avisados = new Set();
+try { _avisados = new Set(JSON.parse(localStorage.getItem('rr_avisados') || '[]')); } catch {}
+async function avisar(titulo, cuerpo, tag) {
+  if (_avisados.has(tag) || !('Notification' in window) || Notification.permission !== 'granted') return;
+  _avisados.add(tag); try { localStorage.setItem('rr_avisados', JSON.stringify([..._avisados].slice(-300))); } catch {}
+  try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) reg.showNotification(titulo, { body: cuerpo, tag, icon: 'icon-192.png' }); else new Notification(titulo, { body: cuerpo, tag }); } catch {}
+}
+function revisarAvisos() {
+  if (!DB.ajustes.avisos) return;
+  const h = hoy(), ahoraMin = new Date().getHours() * 60 + new Date().getMinutes();
+  DB.eventos.filter((v) => !v.hecho && v.fecha === h).forEach((v) => {
+    const e = expediente(v.expedienteId), donde = e ? ` · ${e.numero || caratula(e)}` : '';
+    if (v.hora) { const [hh, mm] = v.hora.split(':').map(Number), falta = hh * 60 + mm - ahoraMin; if (falta <= 60 && falta >= -5) avisar(`${TIPOS_EV[v.tipo]} a las ${v.hora}`, `${v.titulo || ''}${donde}${v.lugar ? ' — ' + v.lugar : ''}`, 'h-' + v.id + v.fecha + v.hora); }
+    else avisar(`Hoy: ${TIPOS_EV[v.tipo].toLowerCase()}`, `${v.titulo || ''}${donde}`, 'd-' + v.id + v.fecha);
+  });
+  const manana = DB.eventos.filter((v) => !v.hecho && v.tipo === 'plazo' && v.fecha === sumar(h, 1));
+  if (manana.length) avisar('Plazos que vencen mañana', manana.map((v) => v.titulo).join(' · '), 'm-' + h);
+}
+setInterval(revisarAvisos, 60000);
+
+/* ---------- bloqueo con PIN ---------- */
+async function hashPin(pin, sal) {
+  const txt = sal + ':' + pin;
+  if (window.crypto && crypto.subtle) {
+    const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+    return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
+  }
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < txt.length; i++) { const c = txt.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); }
+  return 'f' + ((h2 >>> 0).toString(16) + (h1 >>> 0).toString(16));
+}
+let _bloq = false, _activo = Date.now();
+function bloquear() {
+  if (!DB.ajustes.pin || _bloq) return;
+  _bloq = true; cerrarModal();
+  const d = document.createElement('div'); d.id = 'candado';
+  d.innerHTML = `<div class="candado-in"><svg viewBox="0 0 512 512" style="width:84px;height:84px"><use href="#marca"/></svg>
+    <h2>${esc(DB.ajustes.estudio || MARCA)}</h2><p class="muted" style="font-family:var(--serif);font-style:italic">Escribe tu PIN para entrar</p>
+    <form id="formPin"><input id="pinIn" type="password" inputmode="numeric" autocomplete="off" maxlength="8" aria-label="PIN"><button class="btn pri">Entrar</button></form>
+    <div class="teclado">${[1, 2, 3, 4, 5, 6, 7, 8, 9, '⌫', 0, '✓'].map((k) => `<button type="button" data-k="${k}">${k}</button>`).join('')}</div>
+    <p class="tiny" id="pinMsg"></p></div>`;
+  document.body.appendChild(d);
+  const inp = $('#pinIn');
+  const probar = async () => {
+    const p = DB.ajustes.pin;
+    if (await hashPin(inp.value, p.sal) === p.hash) { d.remove(); _bloq = false; _activo = Date.now(); }
+    else { inp.value = ''; $('#pinMsg').textContent = 'PIN incorrecto'; d.querySelector('.candado-in').animate([{ transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'none' }], 240); }
+  };
+  $('#formPin').onsubmit = (e) => { e.preventDefault(); probar(); };
+  d.querySelector('.teclado').onclick = (e) => { const k = e.target.dataset.k; if (k == null) return; if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '✓') probar(); else if (inp.value.length < 8) inp.value += k; };
+  setTimeout(() => inp.focus(), 50);
+}
+['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach((t) => addEventListener(t, () => { _activo = Date.now(); }, { passive: true }));
+setInterval(() => { const m = num(DB.ajustes.bloqueoMin); if (DB.ajustes.pin && m > 0 && Date.now() - _activo > m * 60000) bloquear(); }, 15000);
+function formPin() {
+  abrirModal({
+    titulo: DB.ajustes.pin ? 'Cambiar PIN' : 'Proteger con PIN', boton: 'Guardar PIN', valores: { bloqueoMin: DB.ajustes.bloqueoMin || 5 },
+    campos: [
+      { k: 'pin', l: 'PIN nuevo (4 a 8 números)', t: 'password', req: true },
+      { k: 'pin2', l: 'Repite el PIN', t: 'password', req: true },
+      { k: 'bloqueoMin', l: 'Bloquear tras minutos sin uso', t: 'select', op: [['1', '1 minuto'], ['5', '5 minutos'], ['15', '15 minutos'], ['30', '30 minutos'], ['0', 'Sólo al abrir']], full: true },
+    ],
+    extra: '<p class="tiny" style="margin-top:12px">El PIN evita que alguien que tome tu celular vea los casos. No cifra los datos: protege la vista, no el archivo. Si lo olvidas, sólo se puede entrar borrando los datos del navegador, así que descarga respaldos.</p>',
+    guardar: (d) => {
+      if (!/^\d{4,8}$/.test(d.pin)) { toast('El PIN debe tener de 4 a 8 números'); return false; }
+      if (d.pin !== d.pin2) { toast('Los dos PIN no coinciden'); return false; }
+      const sal = uid();
+      hashPin(d.pin, sal).then((hash) => { DB.ajustes.pin = { sal, hash }; DB.ajustes.bloqueoMin = d.bloqueoMin; guardar(); reRender(); toast('PIN activado'); });
+    },
+  });
 }
 
 /* ---------- varios ---------- */
@@ -1262,6 +2128,8 @@ function aplicarTema() {
 window.addEventListener('storage', (e) => { if (e.key === CLAVE) { DB = cargar(); reRender(); } });
 
 render();
+if (DB.ajustes.pin) bloquear();
+setTimeout(revisarAvisos, 3000);
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   navigator.serviceWorker.register('sw.js').catch(() => {});

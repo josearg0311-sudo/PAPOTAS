@@ -33,6 +33,40 @@ computadora, se instala como aplicación y no necesita servidor.
 - **Buscar** en todo, **respaldo** en JSON, exportación a **Excel (CSV)**,
   modo claro y oscuro, y **datos de ejemplo** para probarlo.
 
+## Funciones avanzadas
+
+- **Escritos**: apersonamiento, téngase presente, copias certificadas,
+  impulso, variación de domicilio, apelación (estructura) y contrato de
+  servicios profesionales. Al elegir el expediente se rellenan solos el
+  número, juzgado, especialista, cliente, DNI, contraparte, abogado,
+  colegiatura, casilla SINOE, domicilio procesal, ciudad y fecha. Se
+  editan en una hoja A4, se guardan solos y salen a PDF o Word. Cualquier
+  escrito se puede guardar como plantilla propia.
+- **Cuotas**: plan de pagos (mensual, quincenal o semanal) con el
+  cronograma a la vista; avisa las vencidas, recuerda al cliente por
+  WhatsApp y «Cobrar» registra el pago y marca la cuota.
+- **Recibos numerados** (N.° 0001, 0002…) con el monto en letras,
+  listos para imprimir. Son un control interno, no comprobante de SUNAT.
+- **Horas trabajadas**: cronómetro por expediente que sigue corriendo
+  aunque cierres el programa, o registro a mano; con tarifa por hora se
+  pasan a honorarios con un toque.
+- **Documentos** adjuntos a cada expediente (PDF, fotos, Word), guardados
+  en el aparato. Hay un «respaldo con documentos» aparte.
+- **Reportes**: cobrado por mes, tasa de cobro, casos por materia y por
+  estado, honorarios por cliente y horas por expediente.
+- **Tablero** de expedientes por estado: se arrastran de una columna a
+  otra (en el celular, con el selector de cada tarjeta) y el cambio queda
+  anotado en el seguimiento.
+- **Conflicto de intereses**: avisa si la contraparte de un caso nuevo se
+  parece a un cliente tuyo, o si un cliente nuevo ya es contraparte.
+- **Plazos frecuentes** en la calculadora (CPC, NLPT, NCPP), referenciales.
+- **Dictado por voz** en el seguimiento y en los escritos (Chrome).
+- **Resumen del día** por WhatsApp: hoy, mañana, atrasados y cuotas.
+- **Avisos** en el aparato una hora antes de cada audiencia.
+- **Bloqueo con PIN** con teclado, al abrir y tras minutos sin uso.
+  Protege la vista, no cifra los datos.
+- **Ctrl+K** o «/» abre el buscador, que ahora también busca en escritos.
+
 ## Dónde quedan los datos
 
 En el navegador del aparato donde se usa, como PAPOTAS. No salen de ahí.
