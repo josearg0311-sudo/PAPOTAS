@@ -561,6 +561,19 @@ main{padding-top:26px}
 .cuerpo h4{font-family:var(--serif)}
 #crono{border-radius:999px}
 
+/* equipo */
+.persona{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--c,#7a1f2e);color:#fff;font-size:9.5px;font-weight:700;vertical-align:middle;letter-spacing:0}
+.persona.grande{width:44px;height:44px;font-size:15px;flex:none}
+.equipo{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.equipo > .card + .card{margin-top:0}
+.miembro{cursor:pointer}
+.miembro .sumario{grid-template-columns:repeat(3,minmax(0,1fr))}
+.miembro .sumario .stat{border-left:1px solid var(--regla)}
+.miembro .sumario .stat:first-child{border-left:0}
+.cab-sync{text-decoration:none}
+.miembro:hover{border-color:var(--vino)}
+.cab-yo.on{background:#fff;color:var(--cab)}
+
 /* flujo del proceso */
 .flujo{margin-top:18px}
 .pasos-flujo{display:flex;gap:0;overflow-x:auto;padding:4px 0 12px;scrollbar-width:thin}
@@ -660,10 +673,12 @@ main{padding-top:26px}
   <div class="cab-banda"><div class="cab-in">
     <a class="marca" href="#/inicio"><svg viewBox="0 0 512 512"><use href="#marca"/></svg>
       <span style="min-width:0"><b>RODRÍGUEZ <i>y</i> RODRÍGUEZ</b><em>Estudio jurídico</em></span></a>
+    <a id="cabSync" class="cab-sync off" href="#/equipo"></a>
     <div class="cab-acc">
       <a href="#/buscar" aria-label="Buscar" title="Buscar"><svg><use href="#i-search"/></svg></a>
       <a href="#/portales" aria-label="Portales judiciales" title="Portales judiciales"><svg><use href="#i-globe"/></svg></a>
       <a href="#/ajustes" aria-label="Ajustes" title="Ajustes"><svg><use href="#i-gear"/></svg></a>
+      <a href="#/equipo" class="cab-yo" id="cabYo" title="Equipo"></a>
     </div>
   </div></div>
   <nav class="pestanas" id="nav"></nav>
@@ -746,7 +761,7 @@ const icon = (id) => `<svg><use href="#${id}"/></svg>`;
 /* ---------- datos ---------- */
 const VACIO = () => ({
   version: VERSION,
-  clientes: [], expedientes: [], eventos: [], movimientos: [], cuotas: [], horas: [], escritos: [], plantillas: [], archivos: [], prospectos: [], gastos: [], timer: null,
+  clientes: [], expedientes: [], eventos: [], movimientos: [], cuotas: [], horas: [], escritos: [], plantillas: [], archivos: [], prospectos: [], gastos: [], equipo: [], timer: null,
   ajustes: { estudio: MARCA, abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', ciudad: 'Lima', domicilioProcesal: '', casilla: '', tarifaHora: '', inhabiles: [], tema: 'auto', avisos: false, pin: null, bloqueoMin: '5', recibo: 0 }
 });
 let DB = cargar();
@@ -760,7 +775,7 @@ function cargar() {
 function arreglar(d) {
   const base = VACIO();
   if (!d || typeof d !== 'object') return base;
-  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos', 'cuotas', 'horas', 'escritos', 'plantillas', 'archivos', 'prospectos', 'gastos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
+  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos', 'cuotas', 'horas', 'escritos', 'plantillas', 'archivos', 'prospectos', 'gastos', 'equipo']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
   base.ajustes = Object.assign(base.ajustes, d.ajustes || {});
   if (!Array.isArray(base.ajustes.inhabiles)) base.ajustes.inhabiles = [];
   if (!String(base.ajustes.estudio || '').trim()) base.ajustes.estudio = MARCA;
@@ -769,10 +784,11 @@ function arreglar(d) {
   base.timer = d.timer && d.timer.inicio ? d.timer : null;
   return base;
 }
-function guardar() {
+function guardarLocal() {
   try { localStorage.setItem(CLAVE, JSON.stringify(DB)); }
   catch (e) { toast('No se pudo guardar: el almacenamiento del navegador está lleno o bloqueado.'); }
 }
+function guardar() { guardarLocal(); if (typeof programarSync === 'function') programarSync(); }
 const cliente = (id) => DB.clientes.find((c) => c.id === id);
 const expediente = (id) => DB.expedientes.find((e) => e.id === id);
 const expsDe = (cid) => DB.expedientes.filter((e) => e.clienteId === cid);
@@ -879,6 +895,8 @@ function pintarNav(ruta) {
   $('#nav').innerHTML = NAV.map(([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`).join('');
   document.querySelectorAll('.cab-acc a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#/' + base));
   const on = $('#nav a.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  const cy = $('#cabYo'); if (cy) { const y = typeof yo === 'function' && yo(); cy.textContent = y ? iniciales(y.nombre) : ''; cy.style.display = y ? '' : 'none'; cy.classList.toggle('on', ruta === 'equipo'); }
+  if (typeof pintarSync === 'function') pintarSync();
 }
 
 let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().slice(0, 7), diaSel: '', fTipo: '', verHechos: false, fMov: '', vistaExp: 'lista', gen: null, qMod: '', verTodosEsc: false };
@@ -886,7 +904,7 @@ let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().
 function render() {
   const [ruta, id] = (location.hash.replace(/^#\/?/, '') || 'inicio').split('/');
   pintarNav(ruta);
-  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes, generar: vGenerar, modelo: vModelo, asistente: vAsistente, prospectos: vProspectos, gastos: vGastos, flujo: vFlujo };
+  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes, generar: vGenerar, modelo: vModelo, asistente: vAsistente, prospectos: vProspectos, gastos: vGastos, flujo: vFlujo, equipo: vEquipo };
   const v = vistas[ruta] || vInicio;
   $('#main').innerHTML = v(id ? decodeURIComponent(id) : '');
   aplicarTema();
@@ -970,7 +988,7 @@ function filaEvento(ev, conExp = true) {
     <div class="datebox ${u}"><b>${d.getDate()}</b><span>${MES[d.getMonth()]}</span></div>
     <div class="main"><div class="t">${esc(ev.titulo || TIPOS_EV[ev.tipo])}</div>
       <div class="s"><span class="badge ${t}">${TIPOS_EV[ev.tipo] || 'Evento'}</span> ${ev.hora ? esc(ev.hora) + ' · ' : ''}${conExp && e ? esc(e.numero || caratula(e)) : esc(ev.lugar || '')}</div></div>
-    <div class="end tiny hide-m">${cuando(ev.fecha)}</div></div>`;
+    <div class="end tiny hide-m">${chipPersona(ev.asignado)} ${cuando(ev.fecha)}</div></div>`;
 }
 
 /* ---------- clientes ---------- */
@@ -1032,7 +1050,7 @@ function filaExp(e) {
     <div class="t">${esc(caratula(e))}</div>
     <div class="s"><span class="mono">${esc(e.numero || 'Sin número')}</span>${e.juzgado ? ' · ' + esc(e.juzgado) : ''}${etapaDe(e) ? ' · <b>' + esc(etapaDe(e).n) + '</b>' : ''}</div>
     ${prox ? `<div class="s" style="color:var(--${{ bad: 'mal', warn: 'ambar' }[urg(prox)] || 'tinta-2'})">${icon('i-clock').replace('<svg>', '<svg style="width:12px;height:12px;vertical-align:-1px">')} ${esc(TIPOS_EV[prox.tipo])}: ${fFecha(prox.fecha)} (${cuando(prox.fecha)})</div>` : ''}</div>
-    <div class="end"><span class="badge ${ESTADO_COLOR[e.estado] || ''}">${esc(e.estado || 'En trámite')}</span><div class="tiny" style="margin-top:4px">${esc(e.materia || '')}</div></div></div>`;
+    <div class="end"><span class="badge ${ESTADO_COLOR[e.estado] || ''}">${esc(e.estado || 'En trámite')}</span><div class="tiny" style="margin-top:4px">${chipPersona(e.responsable)} ${esc(e.materia || '')}</div></div></div>`;
 }
 function vExpedientes() {
   const q = norm(estado.qExp);
@@ -1040,6 +1058,7 @@ function vExpedientes() {
     if (estado.fEstado === 'activos' && CERRADOS.includes(e.estado)) return false;
     if (estado.fEstado === 'cerrados' && !CERRADOS.includes(e.estado)) return false;
     if (estado.fMateria && e.materia !== estado.fMateria) return false;
+    if (estado.soloMio && e.responsable !== yoId()) return false;
     if (!q) return true;
     const c = cliente(e.clienteId);
     return norm([e.numero, e.juzgado, e.materia, e.pretension, e.contraparte, e.juez, e.distrito, c && c.nombre].join(' ')).includes(q);
@@ -1051,7 +1070,7 @@ function vExpedientes() {
     <div class="actions"><button class="btn pri" data-act="nuevoExp">${icon('i-plus')} Nuevo expediente</button></div></div>
   <div class="toolbar"><label class="search">${icon('i-search')}<input id="qExp" placeholder="Número, cliente, juzgado, contraparte…" value="${esc(estado.qExp)}"></label>
     <select class="f" id="fMateria"><option value="">Todas las materias</option>${mats.map((m) => `<option ${m === estado.fMateria ? 'selected' : ''}>${esc(m)}</option>`).join('')}</select></div>
-  <div class="chips" style="margin-bottom:12px">${[['activos', 'Activos'], ['cerrados', 'Cerrados'], ['todos', 'Todos']].map(([k, t]) => `<button class="chip ${estado.fEstado === k ? 'on' : ''}" data-act="fEstado" data-v="${k}">${t}</button>`).join('')}
+  <div class="chips" style="margin-bottom:12px">${[['activos', 'Activos'], ['cerrados', 'Cerrados'], ['todos', 'Todos']].map(([k, t]) => `<button class="chip ${estado.fEstado === k ? 'on' : ''}" data-act="fEstado" data-v="${k}">${t}</button>`).join('')}${yo() ? `<button class="chip ${estado.soloMio ? 'on' : ''}" data-act="soloMio">Sólo los míos</button>` : ''}
     <span style="flex:1"></span>${[['lista', 'Lista', 'i-list'], ['tablero', 'Tablero', 'i-board']].map(([k, t, i]) => `<button class="chip ${estado.vistaExp === k ? 'on' : ''}" data-act="vistaExp" data-v="${k}">${icon(i).replace('<svg>', '<svg style="width:14px;height:14px;vertical-align:-2px">')} ${t}</button>`).join('')}</div>
   ${estado.vistaExp === 'tablero' ? vTablero(lista) : `<div class="card">${lista.length ? `<div class="list">${lista.map(filaExp).join('')}</div>` : `<div class="empty">${icon('i-folder')}<div>${DB.expedientes.length ? 'Ningún expediente coincide con el filtro.' : 'Aún no tienes expedientes.'}</div></div>`}</div>`}`;
 }
@@ -1079,7 +1098,7 @@ function vExpediente(id) {
       <button class="btn" data-act="editExp" data-id="${id}">Editar</button></div></div>
   <div class="card"><div class="kv">
     <div><span>Cliente</span><b>${c ? `<a href="#/cliente/${c.id}">${esc(c.nombre)}</a>` : '—'}</b></div>
-    ${kv('Condición', e.condicion)}${kv('Contraparte', e.contraparte)}${kv('Materia', e.materia)}${kv('Pretensión / delito', e.pretension)}
+    ${DB.equipo.length ? kv('Responsable', (miembro(e.responsable) || {}).nombre) : ''}${kv('Condición', e.condicion)}${kv('Contraparte', e.contraparte)}${kv('Materia', e.materia)}${kv('Pretensión / delito', e.pretension)}
     ${kv('Órgano jurisdiccional', e.juzgado)}${kv('Distrito judicial', e.distrito)}${kv('Juez', e.juez)}${kv('Especialista', e.especialista)}${kv('Inicio', fFecha(e.inicio))}
     ${e.notas ? `<div style="grid-column:1/-1"><span>Notas</span><b style="white-space:pre-wrap">${esc(e.notas)}</b></div>` : ''}</div></div>
   ${tarjetaFlujo(e)}
@@ -1123,7 +1142,7 @@ function vAgenda() {
   const primero = new Date(y, m - 1, 1);
   const off = (primero.getDay() + 6) % 7; // semana empieza en lunes
   const inicio = new Date(y, m - 1, 1 - off);
-  const evs = DB.eventos.filter((e) => (estado.verHechos || !e.hecho) && (!estado.fTipo || e.tipo === estado.fTipo));
+  const evs = DB.eventos.filter((e) => (estado.verHechos || !e.hecho) && (!estado.fTipo || e.tipo === estado.fTipo) && (!estado.soloMio || e.asignado === yoId()));
   const porDia = {};
   evs.forEach((e) => (porDia[e.fecha] = porDia[e.fecha] || []).push(e));
   const h = hoy();
@@ -1151,7 +1170,7 @@ function vAgenda() {
   <div class="head"><div><h1>Agenda</h1><div class="sub">Audiencias, plazos, tareas y reuniones</div></div>
     <div class="actions"><button class="btn" data-act="calc">${icon('i-clock')} Calcular plazo</button><button class="btn hide-m" data-act="ics">Exportar a calendario</button><button class="btn pri" data-act="nuevoEvento" data-fecha="${estado.diaSel}">${icon('i-plus')} Nuevo</button></div></div>
   <div class="chips" style="margin-bottom:12px">${[['', 'Todo'], ['audiencia', 'Audiencias'], ['plazo', 'Plazos'], ['tarea', 'Tareas'], ['reunion', 'Reuniones']].map(([k, t]) => `<button class="chip ${estado.fTipo === k ? 'on' : ''}" data-act="fTipo" data-v="${k}">${t}</button>`).join('')}
-    <button class="chip ${estado.verHechos ? 'on' : ''}" data-act="verHechos">Mostrar realizados</button></div>
+    <button class="chip ${estado.verHechos ? 'on' : ''}" data-act="verHechos">Mostrar realizados</button>${yo() ? `<button class="chip ${estado.soloMio ? 'on' : ''}" data-act="soloMio">Sólo lo mío</button>` : ''}</div>
   <div class="grid" style="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start" id="ag">
     <div class="card"><div class="cal-head"><button class="btn sm ghost" data-act="mes" data-v="-1" aria-label="Mes anterior">${icon('i-left')}</button>
       <h2 style="margin:0">${MESL[m - 1]} ${y}</h2>
@@ -1265,6 +1284,7 @@ function vAjustes() {
     <form class="inline-add" data-form="inhabil"><input class="f" type="date" name="fecha" required style="max-width:160px"><input class="f" name="motivo" placeholder="Motivo (ej. Día del Juez)"><button class="btn">Agregar</button></form>
     ${extra.length ? `<div class="list" style="margin-top:8px">${extra.map((i) => `<div class="row" style="cursor:default"><div class="main"><div class="t">${fFecha(i.fecha)}</div><div class="s">${esc(i.motivo || 'Día inhábil')}</div></div><button class="btn sm ghost danger" data-act="borrarInhabil" data-v="${i.fecha}">Quitar</button></div>`).join('')}</div>` : ''}
   </div>
+  <div class="card"><h2>Equipo y nube <a class="btn sm" href="#/equipo">Abrir</a></h2><p class="small muted" style="margin:0">${DB.equipo.length} persona(s) en el equipo · ${NUBE.sesion ? 'conectado a la nube como ' + esc(NUBE.sesion.email) : 'los datos están sólo en este aparato'}</p></div>
   <div class="card"><h2>Inteligencia artificial</h2>
     <p class="small muted" style="margin-top:-4px">El asistente usa Claude, de Anthropic, con tu propia clave de la API (<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">créala aquí</a>). Se cobra por uso a tu cuenta de Anthropic. La clave queda sólo en este aparato y no va en los respaldos.</p>
     <form class="form" data-form="ajustesIA">
@@ -1386,6 +1406,7 @@ function formExp(e, clienteId) {
       { k: 'especialista', l: 'Especialista legal' },
       { k: 'estado', l: 'Estado', t: 'select', op: ESTADOS },
       { k: 'inicio', l: 'Fecha de inicio', t: 'date' },
+      ...(DB.equipo.length ? [{ k: 'responsable', l: 'Responsable del caso', t: 'select', op: opEquipo(), full: true }] : []),
       { k: 'proceso', l: 'Tipo de proceso (flujo de etapas y plazos)', t: 'select', full: true, op: [['', '— Sin flujo —'], ...PROCESOS.map((x) => [x.id, x.nombre])] },
       { k: 'notas', l: 'Notas', t: 'textarea' },
     ],
@@ -1405,7 +1426,7 @@ function formExp(e, clienteId) {
   });
 }
 function formEvento(ev, def = {}) {
-  const valores = ev || Object.assign({ tipo: 'audiencia', fecha: hoy() }, def);
+  const valores = ev || Object.assign({ tipo: 'audiencia', fecha: hoy(), asignado: (expediente(def.expedienteId) || {}).responsable || yoId() }, def);
   const extra = ev && ev.expedienteId && (() => {
     const x = expediente(ev.expedienteId), c = x && cliente(x.clienteId);
     if (!c || !c.telefono) return '';
@@ -1421,6 +1442,7 @@ function formEvento(ev, def = {}) {
       { k: 'fecha', l: 'Fecha', t: 'date', req: true },
       { k: 'hora', l: 'Hora', t: 'time' },
       { k: 'lugar', l: 'Lugar o enlace', full: true, ph: 'Sala 5 / enlace de Google Meet' },
+      ...(DB.equipo.length ? [{ k: 'asignado', l: 'Asignado a', t: 'select', op: opEquipo(), full: true }] : []),
       { k: 'notas', l: 'Notas', t: 'textarea' },
       ...(ev ? [{ k: 'hecho', l: 'Ya se realizó / cumplió', t: 'checkbox', full: true }] : []),
     ],
@@ -1588,8 +1610,8 @@ const ACC = {
   respaldo: () => descargar(`rodriguez-respaldo-${hoy()}.json`, JSON.stringify({ app: 'causa', version: VERSION, exportado: ahora(), datos: DB }, null, 1), 'application/json'),
   csv: () => exportarCSV(),
   ics: () => exportarICS(),
-  ejemplo: () => { if ((DB.clientes.length || DB.expedientes.length) && !confirm('Se agregarán clientes y expedientes de ejemplo a los que ya tienes. ¿Continuar?')) return; cargarEjemplo(); },
-  borrarTodo: () => { if (!confirm('¿Borrar TODOS los datos de este aparato? Descarga antes un respaldo.')) return; if (prompt('Escribe BORRAR para confirmar') !== 'BORRAR') return; const a = DB.ajustes; DB = VACIO(); DB.ajustes = a; guardar(); toast('Datos borrados'); location.hash = '#/inicio'; render(); },
+  ejemplo: () => { if ((DB.clientes.length || DB.expedientes.length || NUBE.sesion) && !confirm('Se agregarán clientes y expedientes de ejemplo a los que ya tienes' + (NUBE.sesion ? ', y se subirán a la nube del equipo' : '') + '. ¿Continuar?')) return; cargarEjemplo(); },
+  borrarTodo: () => { if (!confirm(NUBE.sesion ? '¿Borrar TODOS los datos? Estás en la nube: también se borrarán para todo el equipo. Descarga antes un respaldo.' : '¿Borrar TODOS los datos de este aparato? Descarga antes un respaldo.')) return; if (prompt('Escribe BORRAR para confirmar') !== 'BORRAR') return; const a = DB.ajustes; DB = VACIO(); DB.ajustes = a; guardar(); toast('Datos borrados'); location.hash = '#/inicio'; render(); },
   resumen: async () => { const t = textoResumen(); try { await navigator.clipboard.writeText(t); } catch {} window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener'); toast('Resumen listo (también se copió)'); },
   vistaExp: (d) => { estado.vistaExp = d.v; reRender(); },
   nuevoPlan: (d) => formPlan({ clienteId: d.cliente || '', expedienteId: d.exp || '' }),
@@ -1654,6 +1676,13 @@ const ACC = {
   registrarHito: (d) => { const e = expediente(d.id); if (e) formHito(e, d.k != null ? Number(d.k) : null); },
   irEtapa: (d) => { const e = expediente(d.id), p = e && proceso(e.proceso), k = Number(d.k); if (!p || k === (e.etapa || 0) || !confirm(`¿Pasar el caso a la etapa «${p.etapas[k].n}»?`)) return; e.actuaciones.push({ id: uid(), fecha: hoy(), texto: `Etapa: ${p.etapas[e.etapa || 0].n} → ${p.etapas[k].n}` }); e.etapa = k; estadoSegunEtapa(e); e.actualizado = ahora(); guardar(); reRender(); },
   cambiarProceso: (d) => { const e = expediente(d.id); if (!e) return; abrirModal({ titulo: 'Tipo de proceso', valores: { proceso: e.proceso || '' }, campos: [{ k: 'proceso', l: 'Tipo de proceso', t: 'select', full: true, op: [['', '— Sin flujo —'], ...PROCESOS.map((x) => [x.id, x.nombre])] }], guardar: (v) => { if (v.proceso !== e.proceso) { e.proceso = v.proceso; e.etapa = 0; e.actualizado = ahora(); guardar(); reRender(); } } }); },
+  nuevoMiembro: () => formMiembro(),
+  editMiembro: (d) => { const m = miembro(d.id); if (m) formMiembro(m); },
+  soyYo: (d) => { try { localStorage.setItem('rr_yo', d.id); } catch {} reRender(); },
+  soloMio: () => { estado.soloMio = !estado.soloMio; reRender(); },
+  nubeSync: () => sincronizar('manual'),
+  nubeSalir: () => { if (confirm('¿Cerrar la sesión de la nube en este aparato? Los datos quedan aquí.')) salirNube().then(reRender); },
+  nubeOlvidar: () => { NUBE.conf = null; LS.del('rr_nube'); reRender(); },
   borrarInhabil: (d) => { DB.ajustes.inhabiles = DB.ajustes.inhabiles.filter((i) => i.fecha !== d.v); guardar(); reRender(); },
 };
 document.addEventListener('click', (ev) => {
@@ -1712,6 +1741,23 @@ document.addEventListener('submit', (ev) => {
   if (!f) return;
   ev.preventDefault();
   const tipo = f.dataset.form, fd = Object.fromEntries(new FormData(f));
+  if (tipo === 'nubeConf') {
+    const url = fd.url.trim().replace(/\/+$/, ''), clave = fd.clave.trim();
+    if (!/^https:\/\/[^ ]+$/.test(url)) { toast('La URL debe empezar con https://'); return; }
+    NUBE.conf = { url, clave }; LS.set('rr_nube', NUBE.conf); reRender(); return;
+  }
+  if (tipo === 'nubeEntrar') {
+    const crear = ev.submitter && ev.submitter.value === 'crear', btns = f.querySelectorAll('button'); btns.forEach((b) => (b.disabled = true));
+    entrarNube(fd.email, fd.clave, crear, fd.nombre).then(async (r) => {
+      if (r.confirmar) { toast('Te enviamos un correo para confirmar la cuenta. Confírmala y luego pulsa «Entrar».'); reRender(); return; }
+      const hayLocal = COLS_SINC.some((c) => c !== 'equipo' && DB[c].length), snapVacio = !Object.keys(LS.get('rr_sinc_snap', {})).length;
+      if (hayLocal && snapVacio && !confirm('Este aparato ya tiene datos. ¿Subirlos a la nube y juntarlos con los del equipo?\n\nAceptar: subir y juntar.\nCancelar: dejarlos de lado y usar sólo los de la nube.')) {
+        const a = DB.ajustes, eq = DB.equipo.filter((m) => m.email === NUBE.sesion.email); DB = VACIO(); DB.ajustes = a; DB.equipo = eq; guardarLocal();
+      }
+      toast('Conectado a la nube'); reRender(); await sincronizar('manual'); asegurarYo(r.email, r.nombre, r.rol); reRender();
+    }).catch((e) => { toast(e.message); btns.forEach((b) => (b.disabled = false)); });
+    return;
+  }
   if (tipo === 'claveIA' || tipo === 'ajustesIA') {
     const k = (fd.clave || '').trim();
     if (k) { if (!/^sk-ant-/.test(k) && !confirm('La clave no empieza con «sk-ant-». ¿Guardarla igual?')) return; try { localStorage.setItem(CLAVE_IA, k); } catch { toast('No se pudo guardar la clave'); return; } }
@@ -1747,7 +1793,7 @@ function cargarRespaldo(file) {
       const d = j && j.app === 'causa' ? j.datos : j;
       if (!d || !Array.isArray(d.clientes)) throw new Error('formato');
       const nuevo = arreglar(d);
-      if (!confirm(`El respaldo tiene ${nuevo.clientes.length} cliente(s) y ${nuevo.expedientes.length} expediente(s).\nReemplazará los datos de este aparato. ¿Continuar?`)) return;
+      if (!confirm(`El respaldo tiene ${nuevo.clientes.length} cliente(s) y ${nuevo.expedientes.length} expediente(s).\nReemplazará los datos de este aparato${NUBE.sesion ? ' y los de la nube de todo el equipo' : ''}. ¿Continuar?`)) return;
       DB = nuevo; guardar(); render(); toast('Respaldo cargado');
       if (Array.isArray(j.documentos) && j.documentos.length) {
         Promise.all(j.documentos.map((x) => idbPut(x.id, a64ABlob(x.data, x.tipo)).catch(() => {}))).then(() => toast(`${j.documentos.length} documento(s) restaurados`));
@@ -1846,6 +1892,12 @@ function cargarEjemplo() {
     mv({ tipo: 'honorario', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -35), monto: 2500, concepto: 'Defensa en investigación preparatoria' }),
     mv({ tipo: 'pago', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -2), monto: 500, medio: 'Plin', concepto: 'Adelanto' }),
   ];
+  if (!DB.equipo.length) {
+    const eq = [{ id: uid(), nombre: DB.ajustes.abogado || 'José Rodríguez', rol: 'Socio', color: '#7a1f2e', email: '' }, { id: uid(), nombre: 'Ana Rodríguez', rol: 'Abogado', color: '#2c5d9b', email: '' }, { id: uid(), nombre: 'Carlos Mendoza', rol: 'Practicante', color: '#1d7a4c', email: '' }];
+    DB.equipo.push(...eq); if (!yoId()) try { localStorage.setItem('rr_yo', eq[0].id); } catch {}
+    e1.responsable = eq[0].id; e2.responsable = eq[1].id; e3.responsable = eq[0].id; e4.responsable = eq[1].id;
+    eventos.forEach((v, i) => { v.asignado = [eq[0].id, eq[1].id, eq[0].id, eq[2].id, eq[1].id, eq[2].id][i] || ''; });
+  }
   Object.assign(e1, { proceso: 'civ-conocimiento', etapa: 3 }); Object.assign(e2, { proceso: 'lab-ordinario', etapa: 4 }); Object.assign(e3, { proceso: 'pen-comun', etapa: 1 }); Object.assign(e4, { proceso: 'generico', etapa: 0 });
   DB.clientes.push(cA, cB, cC); DB.expedientes.push(e1, e2, e3, e4); DB.eventos.push(...eventos); DB.movimientos.push(...movs);
   movs.filter((m) => m.tipo === 'pago').forEach((m) => { m.recibo = DB.ajustes.recibo = (num(DB.ajustes.recibo) || 0) + 1; });
@@ -2075,7 +2127,7 @@ function pararCrono(silencioso) {
   const t = DB.timer; if (!t) return;
   const min = Math.max(1, Math.round((Date.now() - t.inicio) / 60000));
   DB.timer = null; guardar();
-  if (silencioso) { DB.horas.push({ id: uid(), expedienteId: t.expedienteId, fecha: hoy(), minutos: min, nota: 'Trabajo (cronómetro)', tarifa: num(DB.ajustes.tarifaHora), facturado: false }); guardar(); return; }
+  if (silencioso) { DB.horas.push({ id: uid(), por: yoId(), expedienteId: t.expedienteId, fecha: hoy(), minutos: min, nota: 'Trabajo (cronómetro)', tarifa: num(DB.ajustes.tarifaHora), facturado: false }); guardar(); return; }
   formHora(null, { expedienteId: t.expedienteId, minutos: min });
 }
 function formHora(h, def = {}) {
@@ -2094,7 +2146,7 @@ function formHora(h, def = {}) {
       const minutos = leerDuracion(d.duracion);
       if (!(minutos > 0)) { toast('Escribe una duración válida, por ejemplo 1:30'); return false; }
       const o = { expedienteId: d.expedienteId, fecha: d.fecha, minutos, nota: d.nota, tarifa: num(d.tarifa) };
-      if (h) Object.assign(h, o); else DB.horas.push(Object.assign({ id: uid(), facturado: false }, o));
+      if (h) Object.assign(h, o); else DB.horas.push(Object.assign({ id: uid(), facturado: false, por: yoId() }, o));
       tocarExp(d.expedienteId); guardar(); toast('Horas registradas'); reRender();
     },
     borrar: h ? () => { if (!confirm('¿Eliminar este registro de horas?')) return false; DB.horas = DB.horas.filter((x) => x.id !== h.id); guardar(); reRender(); } : null,
@@ -3752,6 +3804,227 @@ function estadoSegunEtapa(e) {
   else if (!mapa[n] && e.estado === 'Por presentar') e.estado = 'En trámite';
 }
 
+/* ===================================================================
+   EQUIPO
+   =================================================================== */
+const ROLES = ['Socio', 'Abogado', 'Asistente', 'Practicante', 'Secretaria'];
+const COLORES_EQ = ['#7a1f2e', '#2c5d9b', '#1d7a4c', '#a35d00', '#6b3fa0', '#0f766e', '#b4235a', '#4b5563'];
+const miembro = (id) => DB.equipo.find((m) => m.id === id);
+const yoId = () => { try { return localStorage.getItem('rr_yo') || ''; } catch { return ''; } };
+const yo = () => miembro(yoId());
+const opEquipo = (vacio = '— Sin asignar —') => [['', vacio], ...DB.equipo.map((m) => [m.id, m.nombre + (m.id === yoId() ? ' (yo)' : '')])];
+const chipPersona = (id) => { const m = miembro(id); return m ? `<span class="persona" style="--c:${m.color || '#7a1f2e'}" title="${esc(m.nombre)}">${esc(iniciales(m.nombre))}</span>` : ''; };
+function vEquipo() {
+  const mes = hoy().slice(0, 7), h = hoy();
+  const datos = DB.equipo.map((m) => ({ m,
+    casos: DB.expedientes.filter((e) => e.responsable === m.id && !CERRADOS.includes(e.estado)).length,
+    pend: DB.eventos.filter((v) => v.asignado === m.id && !v.hecho && v.fecha <= sumar(h, 7)).length,
+    atras: DB.eventos.filter((v) => v.asignado === m.id && !v.hecho && v.fecha < h).length,
+    horas: DB.horas.filter((x) => x.por === m.id && x.fecha.startsWith(mes)).reduce((a, x) => a + x.minutos, 0) / 60 }));
+  const sinResp = DB.expedientes.filter((e) => !e.responsable && !CERRADOS.includes(e.estado)).length;
+  return `<div class="head"><div><h1>Equipo</h1><div class="sub">Quién lleva cada caso y quién tiene qué pendiente</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoMiembro">${icon('i-plus')} Agregar persona</button></div></div>
+  ${!yo() && DB.equipo.length ? `<div class="card" style="border-left:4px solid var(--ambar);margin-bottom:18px"><b>¿Quién eres en este aparato?</b> <span class="small muted">Elige tu nombre para ver «lo mío» y registrar tus horas.</span><div class="actions" style="margin-top:8px">${DB.equipo.map((m) => `<button class="btn sm" data-act="soyYo" data-id="${m.id}">${esc(m.nombre)}</button>`).join('')}</div></div>` : ''}
+  <div class="equipo">${datos.map(({ m, casos, pend, atras, horas }) => `<div class="card miembro" data-act="editMiembro" data-id="${m.id}">
+      <div style="display:flex;gap:12px;align-items:center"><span class="persona grande" style="--c:${m.color || '#7a1f2e'}">${esc(iniciales(m.nombre))}</span><div style="min-width:0"><div class="t" style="font-weight:700">${esc(m.nombre)}${m.id === yoId() ? ' <span class="badge b-brand">yo</span>' : ''}</div><div class="small muted">${esc(m.rol || '')}${m.email ? ' · ' + esc(m.email) : ''}</div></div></div>
+      <div class="sumario" style="border:0;box-shadow:none;margin-top:10px"><div class="stat" style="padding:6px 8px 0 0"><div class="k">Casos</div><div class="v" style="font-size:20px">${casos}</div></div><div class="stat ${atras ? 'alert' : ''}" style="padding:6px 8px 0"><div class="k">Pendientes</div><div class="v" style="font-size:20px">${pend}</div><div class="d">${atras ? atras + ' atrasado(s)' : '7 días'}</div></div><div class="stat" style="padding:6px 0 0 8px"><div class="k">Horas</div><div class="v" style="font-size:20px">${Math.round(horas * 10) / 10}</div><div class="d">este mes</div></div></div></div>`).join('') || `<div class="card empty">${icon('i-users')}<div>Agrega a las personas del estudio para asignarles casos y tareas.</div></div>`}</div>
+  ${sinResp && DB.equipo.length ? `<p class="small muted" style="margin-top:14px">${sinResp} caso(s) activo(s) sin responsable. Asígnalos desde «Editar» en cada expediente o en Expedientes → filtro.</p>` : ''}
+  <div class="card" style="margin-top:18px"><h2>Nube y acceso</h2>${tarjetaNube()}</div>`;
+}
+function formMiembro(m) {
+  abrirModal({
+    titulo: m ? m.nombre : 'Agregar persona', valores: m || { rol: 'Abogado', color: COLORES_EQ[DB.equipo.length % COLORES_EQ.length] },
+    campos: [
+      { k: 'nombre', l: 'Nombre', req: true, full: true },
+      { k: 'rol', l: 'Rol', t: 'select', op: ROLES },
+      { k: 'email', l: 'Correo', t: 'email', hint: 'Con la nube activa, con este correo podrá entrar' },
+      { k: 'telefono', l: 'Celular', t: 'tel' },
+      { k: 'color', l: 'Color', t: 'select', op: COLORES_EQ.map((c, i) => [c, ['Vino', 'Azul', 'Verde', 'Ámbar', 'Morado', 'Turquesa', 'Fucsia', 'Gris'][i]]) },
+    ],
+    extra: m && m.id !== yoId() ? `<div style="margin-top:12px"><button type="button" class="btn sm" id="esYo">Esta persona soy yo en este aparato</button></div>` : '',
+    guardar: (d) => {
+      d.email = (d.email || '').trim().toLowerCase();
+      if (m) Object.assign(m, d); else { m = Object.assign({ id: uid() }, d); DB.equipo.push(m); if (!yoId() && DB.equipo.length === 1) try { localStorage.setItem('rr_yo', m.id); } catch {} }
+      guardar(); reRender(); toast('Guardado');
+      if (d.email && NUBE.sesion && NUBE.admin) autorizarCorreo(d.email, d.nombre, d.rol);
+    },
+    borrar: m ? () => { if (!confirm(`¿Quitar a ${m.nombre} del equipo? Sus casos y tareas quedarán sin asignar.`)) return false; DB.equipo = DB.equipo.filter((x) => x.id !== m.id); DB.expedientes.forEach((e) => { if (e.responsable === m.id) e.responsable = ''; }); DB.eventos.forEach((v) => { if (v.asignado === m.id) v.asignado = ''; }); guardar(); reRender(); if (m.email && NUBE.sesion && NUBE.admin) quitarCorreo(m.email); } : null,
+  });
+  const b = $('#esYo'); if (b) b.onclick = () => { try { localStorage.setItem('rr_yo', m.id); } catch {} cerrarModal(); reRender(); toast('Listo: eres ' + m.nombre); };
+}
+function inicioEquipo() {
+  const y = yo(); if (!y) return '';
+  const h = hoy(), mios = DB.eventos.filter((v) => v.asignado === y.id && !v.hecho && v.fecha <= sumar(h, 7)).sort(ordenEv);
+  const casos = DB.expedientes.filter((e) => e.responsable === y.id && !CERRADOS.includes(e.estado)).length;
+  return `<div class="card"><h2>Lo mío, ${esc(y.nombre.split(' ')[0])} <span class="tiny">${casos} caso(s) a tu cargo</span></h2>${mios.length ? `<div class="list">${mios.slice(0, 8).map((e) => filaEvento(e)).join('')}</div>` : '<div class="empty small">No tienes pendientes asignados esta semana.</div>'}</div>`;
+}
+
+/* ===================================================================
+   NUBE (Supabase) · inicio de sesión y sincronización
+   - Cada registro de cada colección es una fila en rr_registros.
+   - Se sube lo que cambió desde la última vez (se compara una huella de
+     cada registro) y se baja lo que otros cambiaron desde la última hora
+     del servidor que vimos. Si dos personas tocan lo mismo, gana el
+     último que guardó.
+   - Los archivos adjuntos y la clave de la IA no viajan: quedan en el aparato.
+   =================================================================== */
+const COLS_SINC = ['clientes', 'expedientes', 'eventos', 'movimientos', 'cuotas', 'horas', 'escritos', 'plantillas', 'archivos', 'prospectos', 'gastos', 'equipo'];
+const AJUSTES_SINC = ['estudio', 'ruc', 'telefono', 'direccion', 'ciudad', 'domicilioProcesal', 'casilla', 'tarifaHora', 'inhabiles', 'recibo'];
+const LS = { get: (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }, del: (k) => { try { localStorage.removeItem(k); } catch {} } };
+const NUBE = { conf: LS.get('rr_nube', null), sesion: LS.get('rr_sesion', null), admin: false, estado: 'off', msg: '', corriendo: false, otraVez: false, miembros: [] };
+const huella = (o) => { const s = JSON.stringify(o); let h1 = 0xdeadbeef, h2 = 0x41c6ce57; for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 2654435761); h2 = Math.imul(h2 ^ c, 1597334677); } return (h2 >>> 0).toString(36) + (h1 >>> 0).toString(36); };
+const ajustesComp = () => Object.fromEntries(AJUSTES_SINC.map((k) => [k, DB.ajustes[k]]));
+function registrosLocales() {
+  const out = new Map();
+  for (const c of COLS_SINC) for (const r of DB[c] || []) if (r && r.id) out.set(c + '/' + r.id, { coleccion: c, id: r.id, datos: r });
+  out.set('ajustes/estudio', { coleccion: 'ajustes', id: 'estudio', datos: ajustesComp() });
+  return out;
+}
+async function pedir(ruta, { metodo = 'GET', cuerpo, auth = true, prefer, reintento = true } = {}) {
+  const c = NUBE.conf; if (!c) throw new Error('La nube no está configurada');
+  const h = { apikey: c.clave, 'Content-Type': 'application/json' };
+  if (auth && NUBE.sesion) h.Authorization = 'Bearer ' + NUBE.sesion.access_token;
+  if (prefer) h.Prefer = prefer;
+  let r;
+  try { r = await fetch(c.url.replace(/\/+$/, '') + ruta, { method: metodo, headers: h, body: cuerpo ? JSON.stringify(cuerpo) : undefined }); }
+  catch { throw Object.assign(new Error('Sin conexión con la nube'), { red: true }); }
+  if (r.status === 401 && auth && reintento && NUBE.sesion && NUBE.sesion.refresh_token) { if (await refrescar()) return pedir(ruta, { metodo, cuerpo, auth, prefer, reintento: false }); }
+  const txt = await r.text(); let j = null; try { j = txt ? JSON.parse(txt) : null; } catch {}
+  if (!r.ok) { const m = (j && (j.msg || j.message || j.error_description || j.error)) || ('Error ' + r.status); throw Object.assign(new Error(traducirError(m)), { status: r.status }); }
+  return j;
+}
+function traducirError(m) {
+  const t = { 'Invalid login credentials': 'Correo o contraseña incorrectos', 'Email not confirmed': 'Falta confirmar tu correo: revisa tu bandeja de entrada', 'User already registered': 'Ese correo ya tiene cuenta: usa «Entrar»', 'Password should be at least 6 characters.': 'La contraseña debe tener al menos 6 caracteres' };
+  return t[m] || m;
+}
+function guardarSesion(j) {
+  NUBE.sesion = j ? { access_token: j.access_token, refresh_token: j.refresh_token, expira: Date.now() + (j.expires_in || 3600) * 1000, email: (j.user && j.user.email || '').toLowerCase() } : null;
+  if (NUBE.sesion) LS.set('rr_sesion', NUBE.sesion); else LS.del('rr_sesion');
+}
+async function refrescar() {
+  try { const j = await pedir('/auth/v1/token?grant_type=refresh_token', { metodo: 'POST', cuerpo: { refresh_token: NUBE.sesion.refresh_token }, auth: false }); guardarSesion(j); return true; }
+  catch (e) { if (!e.red) { guardarSesion(null); NUBE.estado = 'off'; NUBE.msg = 'La sesión venció: vuelve a entrar'; pintarSync(); } return false; }
+}
+async function entrarNube(email, clave, crear, nombre) {
+  email = email.trim().toLowerCase();
+  if (crear) {
+    const j = await pedir('/auth/v1/signup', { metodo: 'POST', cuerpo: { email, password: clave, data: { nombre } }, auth: false });
+    if (!j || !j.access_token) return { confirmar: true };
+    guardarSesion(j);
+  } else guardarSesion(await pedir('/auth/v1/token?grant_type=password', { metodo: 'POST', cuerpo: { email, password: clave }, auth: false }));
+  const yoNube = await pedir('/rest/v1/rpc/rr_unirme', { metodo: 'POST', cuerpo: { p_nombre: nombre || null } });
+  if (!yoNube || !yoNube.length) { await salirNube(true); throw new Error('Tu correo no está autorizado. Pide a quien administra el estudio que te agregue en Equipo.'); }
+  NUBE.admin = !!yoNube[0].admin; NUBE.adminVisto = true;
+  return { ok: true, email, nombre: yoNube[0].nombre || nombre || email, rol: yoNube[0].rol || 'Abogado' };
+}
+/* Dos fichas con el mismo correo (dos aparatos que la crearon a la vez) se
+   juntan en una. Todos los aparatos se quedan con la misma: la de id menor. */
+function fusionarEquipo() {
+  const porCorreo = {}; let cambio = false;
+  for (const m of [...DB.equipo].sort((a, b) => a.id.localeCompare(b.id))) {
+    if (!m.email) continue;
+    const k = porCorreo[m.email];
+    if (!k) { porCorreo[m.email] = m; continue; }
+    DB.expedientes.forEach((e) => { if (e.responsable === m.id) e.responsable = k.id; });
+    DB.eventos.forEach((v) => { if (v.asignado === m.id) v.asignado = k.id; });
+    DB.horas.forEach((x) => { if (x.por === m.id) x.por = k.id; });
+    if (yoId() === m.id) try { localStorage.setItem('rr_yo', k.id); } catch {}
+    DB.equipo = DB.equipo.filter((x) => x.id !== m.id); cambio = true;
+  }
+  return cambio;
+}
+/* Después de bajar los datos: busca mi ficha en el equipo (por correo, o la mía sin correo, o por nombre) y si no existe la crea. */
+function asegurarYo(email, nombre, rol) {
+  const y = yo();
+  let m = DB.equipo.find((x) => x.email === email) || (y && !y.email ? y : null) || DB.equipo.find((x) => !x.email && norm(x.nombre) === norm(nombre));
+  if (m) { if (m.email !== email) { m.email = email; guardar(); } }
+  else { m = { id: uid(), nombre: nombre || email, email, rol: rol || 'Abogado', color: COLORES_EQ[DB.equipo.length % COLORES_EQ.length] }; DB.equipo.push(m); guardar(); }
+  try { localStorage.setItem('rr_yo', m.id); } catch {}
+}
+async function salirNube(silencioso) {
+  try { if (NUBE.sesion) await pedir('/auth/v1/logout', { metodo: 'POST' }); } catch {}
+  guardarSesion(null); NUBE.admin = false; NUBE.estado = 'off'; pintarSync();
+  if (!silencioso) toast('Sesión cerrada. Los datos siguen en este aparato.');
+}
+async function autorizarCorreo(email, nombre, rol) {
+  try { await pedir('/rest/v1/rr_miembros', { metodo: 'POST', cuerpo: [{ email, nombre, rol }], prefer: 'resolution=merge-duplicates,return=minimal' }); toast(email + ' ya puede entrar a la nube'); }
+  catch (e) { toast('No se pudo autorizar el correo: ' + e.message); }
+}
+async function quitarCorreo(email) { try { await pedir('/rest/v1/rr_miembros?email=eq.' + encodeURIComponent(email), { metodo: 'DELETE' }); } catch {} }
+
+async function sincronizar(motivo) {
+  if (!NUBE.conf || !NUBE.sesion) return;
+  if (NUBE.corriendo) { NUBE.otraVez = true; return; }
+  NUBE.corriendo = true; NUBE.estado = 'sync'; pintarSync();
+  try {
+    if (!NUBE.adminVisto) { const y = await pedir('/rest/v1/rr_miembros?select=email,admin&email=eq.' + encodeURIComponent(NUBE.sesion.email)); NUBE.admin = !!(y && y[0] && y[0].admin); NUBE.adminVisto = true; }
+    /* 1) subir lo que cambió aquí */
+    const snap = LS.get('rr_sinc_snap', {}), locales = registrosLocales(), subir = [];
+    for (const [k, r] of locales) { const hh = huella(r.datos); if (snap[k] !== hh) subir.push(Object.assign({}, r, { borrado: false, _h: hh, _k: k })); }
+    for (const k of Object.keys(snap)) if (!locales.has(k)) { const [coleccion, ...resto] = k.split('/'); subir.push({ coleccion, id: resto.join('/'), datos: {}, borrado: true, _k: k }); }
+    for (let i = 0; i < subir.length; i += 200) {
+      const lote = subir.slice(i, i + 200);
+      await pedir('/rest/v1/rr_registros?on_conflict=coleccion,id', { metodo: 'POST', cuerpo: lote.map(({ coleccion, id, datos, borrado }) => ({ coleccion, id, datos, borrado })), prefer: 'resolution=merge-duplicates,return=minimal' });
+      lote.forEach((r) => { if (r.borrado) delete snap[r._k]; else snap[r._k] = r._h; });
+      LS.set('rr_sinc_snap', snap);
+    }
+    /* 2) bajar lo que cambiaron los demás */
+    let desde = LS.get('rr_sinc_ts', ''), cambios = 0, pagina;
+    do {
+      pagina = await pedir('/rest/v1/rr_registros?select=coleccion,id,datos,borrado,actualizado&order=actualizado.asc,coleccion.asc,id.asc&limit=500' + (desde ? '&actualizado=gt.' + encodeURIComponent(desde) : ''));
+      for (const r of pagina) {
+        const k = r.coleccion + '/' + r.id;
+        if (r.coleccion === 'ajustes') { if (!r.borrado) { Object.assign(DB.ajustes, r.datos); snap[k] = huella(ajustesComp()); cambios++; } }
+        else if (COLS_SINC.includes(r.coleccion)) {
+          const arr = DB[r.coleccion], i = arr.findIndex((x) => x.id === r.id);
+          if (r.borrado) { if (i >= 0) { arr.splice(i, 1); cambios++; } delete snap[k]; }
+          else { const h2 = huella(r.datos); if (i < 0 || huella(arr[i]) !== h2) { if (i >= 0) arr[i] = r.datos; else arr.push(r.datos); cambios++; } snap[k] = h2; }
+        }
+        desde = r.actualizado;
+      }
+      LS.set('rr_sinc_ts', desde); LS.set('rr_sinc_snap', snap);
+    } while (pagina.length === 500);
+    if (cambios) { DB = arreglar(DB); if (fusionarEquipo()) programarSync(); guardarLocal(); refrescarSiSePuede(); }
+    NUBE.estado = 'ok'; NUBE.msg = ''; NUBE.ultima = Date.now();
+    if (motivo === 'manual') toast(subir.length || cambios ? `Sincronizado: ${subir.length} subido(s), ${cambios} recibido(s)` : 'Todo al día');
+  } catch (e) {
+    NUBE.estado = e.red ? 'offline' : 'err'; NUBE.msg = e.message;
+    if (motivo === 'manual' || !e.red) toast('Nube: ' + e.message);
+  } finally {
+    NUBE.corriendo = false; pintarSync();
+    if (NUBE.otraVez) { NUBE.otraVez = false; setTimeout(() => sincronizar('cambio'), 300); }
+  }
+}
+function refrescarSiSePuede() {
+  const a = document.activeElement, escribiendo = a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName);
+  if (!$('.modal-bg') && !escribiendo && !IA.cargando) reRender(); else NUBE.pendienteRender = true;
+}
+let _tSinc;
+function programarSync() { if (!NUBE.sesion || !NUBE.conf) return; clearTimeout(_tSinc); _tSinc = setTimeout(() => sincronizar('cambio'), 1500); }
+setInterval(() => { if (NUBE.sesion && document.visibilityState === 'visible') sincronizar('reloj'); if (NUBE.pendienteRender && !$('.modal-bg')) { NUBE.pendienteRender = false; reRender(); } }, 45000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && NUBE.sesion) sincronizar('volver'); });
+addEventListener('online', () => { if (NUBE.sesion) sincronizar('red'); });
+function pintarSync() {
+  const el = $('#cabSync'); if (!el) return;
+  if (!NUBE.sesion) { el.className = 'cab-sync off'; el.innerHTML = '<i></i><span>Sólo en este aparato</span>'; el.title = 'Conecta la nube en Equipo'; return; }
+  const t = { sync: 'Sincronizando…', ok: 'En la nube', offline: 'Sin conexión', err: 'Error de nube', off: 'En la nube' }[NUBE.estado] || 'En la nube';
+  el.className = 'cab-sync ' + (NUBE.estado === 'err' || NUBE.estado === 'offline' ? 'err' : ''); el.innerHTML = `<i></i><span>${t}</span>`; el.title = NUBE.msg || NUBE.sesion.email;
+}
+function tarjetaNube() {
+  const c = NUBE.conf;
+  if (!c) return `<p class="small muted" style="margin-top:-4px">Con la nube, todo el equipo trabaja sobre los mismos datos desde cualquier celular o computadora. Usa <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a> (tiene plan gratuito):</p>
+    <ol class="pasos" style="font-size:14px"><li>Crea un proyecto en supabase.com.</li><li>En <b>SQL Editor</b> pega el archivo <code>supabase.sql</code> de esta carpeta y pulsa <b>Run</b>.</li><li>En <b>Project Settings → API</b> copia la <b>URL</b> y la clave <b>anon public</b>, y pégalas aquí.</li><li>Crea tu cuenta: la primera persona queda como administradora.</li></ol>
+    <form class="form" data-form="nubeConf"><label class="full">URL del proyecto<input name="url" placeholder="https://xxxx.supabase.co" required></label><label class="full">Clave «anon public»<input name="clave" placeholder="eyJhbGciOi… o sb_publishable_…" required></label><div class="full"><button class="btn pri">Conectar</button></div></form>`;
+  if (!NUBE.sesion) return `<p class="small muted" style="margin-top:-4px">Proyecto: <b>${esc(c.url.replace(/^https?:\/\//, ''))}</b> · <button class="btn ghost sm" data-act="nubeOlvidar" style="padding:0">cambiar</button></p>
+    <form class="form" data-form="nubeEntrar"><label>Correo<input name="email" type="email" autocomplete="username" required></label><label>Contraseña<input name="clave" type="password" autocomplete="current-password" required></label>
+      <label class="full">Tu nombre (sólo para crear cuenta)<input name="nombre" placeholder="Dr. José Rodríguez"></label>
+      <div class="full actions"><button class="btn pri" name="modo" value="entrar">Entrar</button><button class="btn" name="modo" value="crear">Crear cuenta</button></div></form>
+    <p class="tiny" style="margin:10px 0 0">Solo pueden entrar los correos que un administrador agregue en Equipo (la primera cuenta del proyecto es la administradora).</p>`;
+  return `<div class="list"><div class="row" style="cursor:default"><div class="main"><div class="t">${esc(NUBE.sesion.email)} ${NUBE.admin ? '<span class="badge b-brand">administra</span>' : ''}</div><div class="s">${esc(c.url.replace(/^https?:\/\//, ''))} · ${NUBE.ultima ? 'sincronizado ' + new Date(NUBE.ultima).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : 'aún sin sincronizar'}${NUBE.msg ? ' · ' + esc(NUBE.msg) : ''}</div></div>
+    <div class="end actions"><button class="btn sm pri" data-act="nubeSync">Sincronizar ahora</button><button class="btn sm" data-act="nubeSalir">Salir</button></div></div></div>
+    <p class="tiny" style="margin:8px 0 0">${NUBE.admin ? 'Para dar acceso a alguien, agrégalo al equipo con su correo: podrá crear su cuenta y entrar. ' : ''}Los documentos adjuntos y la clave de la IA no se suben: quedan en cada aparato.</p>`;
+}
+
 /* ---------- varios ---------- */
 let tToast;
 function toast(msg) {
@@ -3766,6 +4039,7 @@ function aplicarTema() {
 window.addEventListener('storage', (e) => { if (e.key === CLAVE) { DB = cargar(); reRender(); } });
 
 render();
+if (NUBE.sesion) setTimeout(() => sincronizar('inicio'), 400);
 if (DB.ajustes.pin) bloquear();
 setTimeout(revisarAvisos, 3000);
 
