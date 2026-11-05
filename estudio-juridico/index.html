@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#fffaf2">
+<meta name="theme-color" content="#7a1f2e">
 <title>Estudio Rodríguez y Rodríguez</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
@@ -403,6 +403,7 @@ mark.falta{background:var(--ambar-suave);color:var(--ambar);padding:0 2px;border
   .titulo-edit{font-size:22px}
   #crono{right:12px;bottom:calc(12px + env(safe-area-inset-bottom))}
   .tablero .col{flex-basis:78vw}
+  .modal{border-radius:18px 18px 0 0}
   .generador{grid-template-columns:1fr}
   .asistente{grid-template-columns:1fr}
   .ia-lado{order:2}
@@ -415,6 +416,202 @@ mark.falta{background:var(--ambar-suave);color:var(--ambar);padding:0 2px;border
   .inline-add input[name=texto],.inline-add input[name=motivo]{flex-basis:100%;order:-1}
 }
 @media (max-width:380px){ .marca em{display:none} }
+
+
+/* =====================================================================
+   TEMA «VINO RENOVADO»
+   Cabecera vino, fondo claro, tarjetas limpias y letra moderna.
+   Va al final para mandar sobre los estilos anteriores.
+   ===================================================================== */
+:root{
+  --papel:#f4f1f2; --hoja:#ffffff; --hoja-2:#f8f5f6; --regla:#ebe4e6; --regla-2:#dcd2d5;
+  --tinta:#1f1a1c; --tinta-2:#5c5256; --tinta-3:#8d8387;
+  --vino:#7a1f2e; --vino-2:#962a3c; --vino-suave:#f8e9ec; --oro:#d6ae6b; --sobre-vino:#ffffff;
+  --cab:#7a1f2e; --cab-2:#5d1622;
+  --ok:#1d7a4c; --ok-suave:#e3f4ea; --ambar:#a35d00; --ambar-suave:#fdf0d9; --mal:#bd2a2a; --mal-suave:#fde6e4; --azul:#2c5d9b; --azul-suave:#e6eef9;
+  --morado:#6b3fa0; --morado-suave:#efe8f8;
+  --sombra:0 1px 2px rgba(60,20,30,.05),0 6px 20px -8px rgba(60,20,30,.12);
+  --serif:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --papel:#141113; --hoja:#1d191b; --hoja-2:#252022; --regla:#332c2f; --regla-2:#463d41;
+    --tinta:#f2edef; --tinta-2:#c1b6ba; --tinta-3:#8c8186;
+    --vino:#e2687b; --vino-2:#ee8494; --vino-suave:#3a1c23; --oro:#d9b578; --sobre-vino:#1a0a0e;
+    --cab:#4a1420; --cab-2:#360e17;
+    --ok:#5cc68f; --ok-suave:#173225; --ambar:#efae4f; --ambar-suave:#3a2a12; --mal:#f17c74; --mal-suave:#3f1b1a; --azul:#86aee6; --azul-suave:#18263a;
+    --morado:#b39ae3; --morado-suave:#2a2140;
+    --sombra:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"]{
+  --papel:#141113; --hoja:#1d191b; --hoja-2:#252022; --regla:#332c2f; --regla-2:#463d41;
+  --tinta:#f2edef; --tinta-2:#c1b6ba; --tinta-3:#8c8186;
+  --vino:#e2687b; --vino-2:#ee8494; --vino-suave:#3a1c23; --oro:#d9b578; --sobre-vino:#1a0a0e;
+  --cab:#4a1420; --cab-2:#360e17;
+  --ok:#5cc68f; --ok-suave:#173225; --ambar:#efae4f; --ambar-suave:#3a2a12; --mal:#f17c74; --mal-suave:#3f1b1a; --azul:#86aee6; --azul-suave:#18263a;
+  --morado:#b39ae3; --morado-suave:#2a2140;
+  --sombra:0 1px 2px rgba(0,0,0,.3),0 8px 24px -10px rgba(0,0,0,.5);
+}
+body{font:15px/1.5 var(--serif);letter-spacing:-.003em}
+h1,h2,h3{font-family:var(--serif);letter-spacing:-.015em}
+h1{font-size:26px;font-weight:750}
+.versal{letter-spacing:.08em;font-size:11px}
+
+/* cabecera */
+.cab{background:var(--hoja);border-bottom:1px solid var(--regla);box-shadow:0 2px 10px -6px rgba(60,20,30,.25)}
+.cab:after{display:none}
+.cab-banda{background:linear-gradient(100deg,var(--cab),var(--cab-2));color:#fff}
+.cab-in{padding:12px 28px}
+.marca{color:#fff}
+.marca svg{width:40px;height:40px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.marca b{font-family:var(--serif);font-size:17px;letter-spacing:.06em;font-weight:750}
+.marca b i{color:var(--oro);font-style:normal;font-weight:600;letter-spacing:0}
+.marca em{font-family:var(--serif);font-style:normal;color:rgba(255,255,255,.72);font-size:12.5px;letter-spacing:.02em}
+.cab-acc a{color:rgba(255,255,255,.9)}
+.cab-acc a:hover,.cab-acc a.on{background:rgba(255,255,255,.16);color:#fff}
+.cab-sync{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.85);padding:0 6px;white-space:nowrap}
+.cab-sync i{width:8px;height:8px;border-radius:50%;background:#9be3b9;box-shadow:0 0 0 3px rgba(155,227,185,.25)}
+.cab-sync.off i{background:rgba(255,255,255,.45);box-shadow:none}
+.cab-sync.err i{background:#ffb4a8;box-shadow:0 0 0 3px rgba(255,180,168,.25)}
+.cab-yo{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-weight:700;font-size:12.5px;text-decoration:none;margin-left:4px}
+.pestanas{padding:0 22px;gap:2px}
+.pestanas a{border:0;border-radius:0;padding:12px 12px 10px;color:var(--tinta-2);font-size:14px;font-weight:600;top:0;border-bottom:3px solid transparent}
+.pestanas a:hover{color:var(--vino)}
+.pestanas a.on{background:transparent;color:var(--vino);border-bottom-color:var(--vino)}
+.pestanas a.on:before{display:none}
+.pestanas a svg{opacity:.85}
+
+main{padding-top:26px}
+.head{border-bottom:0;padding-bottom:0;margin-bottom:22px;align-items:center}
+.head .sub{font-family:var(--serif);font-style:normal;font-size:14px;color:var(--tinta-3);margin-top:3px}
+
+/* tarjetas */
+.card{border-radius:var(--r);border:1px solid var(--regla);box-shadow:var(--sombra);padding:18px 20px}
+.card h2{border-bottom:0;padding-bottom:0;margin-bottom:12px;font-size:16px;font-weight:700}
+.sumario{border-radius:var(--r)}
+.stat .k{letter-spacing:.06em;font-size:11.5px}
+.stat .v{font-family:var(--serif);font-weight:750;letter-spacing:-.02em}
+.stat .d{font-family:var(--serif);font-style:normal}
+
+/* botones */
+.btn{border-radius:10px;border-color:var(--regla-2);padding:8px 14px;font-weight:600}
+.btn:hover{border-color:var(--vino);color:var(--vino);background:var(--hoja)}
+.btn.pri{box-shadow:0 2px 8px -3px rgba(122,31,46,.55)}
+.btn.sm{border-radius:8px;padding:5px 10px}
+.btn.danger{text-decoration:none}
+.btn.danger:hover{background:var(--mal-suave);color:var(--mal)}
+.btn.wa{border-radius:10px}
+
+/* renglones y etiquetas */
+.row{border-top:1px solid var(--regla);padding:11px 2px}
+.datebox{border:0;border-radius:11px;background:var(--vino-suave);color:var(--vino);width:46px;padding:5px 0 4px}
+.datebox b{font-family:var(--serif);font-size:18px;line-height:1.1;padding:0;order:1;font-weight:750}
+.datebox span{background:none;color:inherit;order:2;font-size:10px;letter-spacing:.08em;padding:0;opacity:.85}
+.datebox.bad{background:var(--mal-suave);color:var(--mal)} .datebox.bad span{background:none} .datebox.bad b{color:var(--mal)}
+.datebox.warn{background:var(--ambar-suave);color:var(--ambar)} .datebox.warn span{background:none}
+.inic{border:0;background:var(--vino-suave);font-family:var(--serif);font-size:14px}
+.badge{border-radius:999px;border:0;text-transform:none;letter-spacing:0;font-size:11.5px;font-weight:600;padding:2px 9px;background:var(--hoja-2)}
+.b-ok,.b-warn,.b-bad,.b-info,.b-brand{border:0}
+.chips{border-bottom:0;gap:6px}
+.chip{border:1px solid var(--regla-2);border-radius:999px;margin:0;padding:5px 13px;background:var(--hoja);font-size:13px}
+.chip.on{background:var(--vino);border-color:var(--vino);color:var(--sobre-vino)}
+.chip:hover{border-color:var(--vino)}
+.empty{font-family:var(--serif);font-style:normal;color:var(--tinta-3)}
+.kv div span{letter-spacing:.06em;font-size:11px}
+.tl:before{content:"";width:9px;height:9px;border-radius:50%;background:var(--vino);left:-19px;top:10px;box-shadow:0 0 0 3px var(--hoja)}
+.tl .tiny{font-family:var(--serif);font-style:normal}
+.search input,select.f,input.f{border-radius:10px;border-color:var(--regla-2)}
+.money{font-family:var(--serif);font-weight:700}
+.bar{border-radius:999px;border:0;height:8px}
+.bar i{border-radius:999px}
+.cal{border-radius:12px;overflow:hidden}
+.cal .n{font-family:var(--serif)}
+.cal .d.today .n{border-radius:8px;width:24px}
+.cal .fer{font-family:var(--serif);font-style:normal}
+.cal-head h2{font-size:20px}
+.portal .ic{border:0;background:var(--vino-suave);font-family:var(--serif);border-radius:12px}
+.portal b{font-family:var(--serif)}
+
+/* ventanas y formularios */
+.modal{border-radius:18px;border-top:0;overflow:hidden}
+.modal header{background:var(--hoja)}
+.modal header h2{font-size:19px}
+.form label{font-size:12.5px;letter-spacing:0;text-transform:none;font-weight:600;color:var(--tinta-2)}
+.form input:not([type=checkbox]),.form select,.form textarea{border:1px solid var(--regla-2);border-radius:10px;padding:9px 12px;background:var(--hoja);font-size:15px}
+.form input:focus,.form select:focus,.form textarea:focus{border-color:var(--vino);box-shadow:0 0 0 3px var(--vino-suave)}
+.form .hint{font-family:var(--serif);font-style:normal}
+.toast{border-radius:12px;border-left:0}
+.welcome{background:linear-gradient(120deg,var(--cab),var(--cab-2));border:0;color:#fff}
+.welcome h2{color:#fff}
+.welcome .muted,.welcome p,.welcome .tiny{color:rgba(255,255,255,.85)!important}
+.welcome a{color:#fff}
+.welcome .btn{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff}
+.welcome .btn.pri{background:#fff;color:var(--cab);border-color:#fff}
+.welcome input.f{background:rgba(255,255,255,.95);color:#1f1a1c}
+.hoja-a4{border-radius:10px}
+.titulo-edit{font-family:var(--serif)}
+.modelo{border-top:0;border-left:4px solid var(--vino)}
+.cat-titulo{letter-spacing:.08em;font-size:13px}
+.tarjeta{border-radius:10px}
+.tablero .col{border-radius:14px}
+.ia-chat{border-radius:var(--r)}
+.msg.yo .globo{border-radius:16px 16px 4px 16px;border:0}
+.cuerpo h4{font-family:var(--serif)}
+#crono{border-radius:999px}
+
+/* portada nueva */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.kpi{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;padding:16px 18px}
+.kpi:hover{border-color:var(--vino)}
+.kpi .ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;flex:none;background:var(--vino-suave);color:var(--vino)}
+.kpi .ico svg{width:22px;height:22px}
+.kpi .ico.az{background:var(--azul-suave);color:var(--azul)} .kpi .ico.am{background:var(--ambar-suave);color:var(--ambar)} .kpi .ico.ok{background:var(--ok-suave);color:var(--ok)} .kpi .ico.mo{background:var(--morado-suave);color:var(--morado)}
+.kpi .v{font-size:24px;font-weight:750;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .k{font-size:13px;color:var(--tinta-2);font-weight:600}
+.kpi .d{font-size:12px;color:var(--tinta-3)}
+.kpi.alerta .v{color:var(--mal)}
+.portada2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+.portada2 > *{min-width:0}
+.kpis > .card + .card{margin-top:0}
+.kpi > span{min-width:0}
+.portada2 > div > .card + .card{margin-top:18px}
+.hoy-lista{display:flex;flex-direction:column}
+.hoy-item{display:grid;grid-template-columns:54px 14px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--regla);cursor:pointer}
+.hoy-item:first-child{border-top:0}
+.hoy-item .h{font-weight:700;font-variant-numeric:tabular-nums;color:var(--tinta-2);font-size:14px}
+.hoy-item .p{width:10px;height:10px;border-radius:50%;background:var(--azul)}
+.hoy-item .p.audiencia{background:var(--vino)} .hoy-item .p.plazo{background:var(--ambar)} .hoy-item .p.tarea{background:var(--azul)} .hoy-item .p.reunion{background:var(--morado)}
+.hoy-item .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hoy-item .s{font-size:12.5px;color:var(--tinta-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hoy-item.hecho .t{text-decoration:line-through;color:var(--tinta-3)}
+.dia-t{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-3);margin:12px 0 2px}
+.dia-t:first-child{margin-top:0}
+.ia-rapida{display:flex;gap:8px}
+.ia-rapida input{flex:1;min-width:0}
+.leyenda{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--tinta-3)}
+.leyenda i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:1px}
+
+@media (max-width:1050px) and (min-width:901px){ .kpis{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:900px){
+  .cab-in{padding:10px 14px}
+  .marca svg{width:34px;height:34px}
+  .marca b{font-size:14px;letter-spacing:.03em}
+  .cab-sync span{display:none}
+  .pestanas{padding:0 6px}
+  .pestanas a{padding:11px 10px 9px;font-size:13px;flex:0 0 auto}
+  h1{font-size:23px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px;gap:10px}
+  .kpi .ico{width:36px;height:36px;border-radius:10px}
+  .kpi .v{font-size:20px}
+  .portada2{grid-template-columns:minmax(0,1fr)}
+  .kpi .v{font-size:18px;white-space:nowrap}
+  .leyenda{display:none}
+  .hoy-item{grid-template-columns:46px 12px minmax(0,1fr)}
+  .hoy-item .end{display:none}
+}
 
 @page{size:A4;margin:2.5cm 2.5cm 2.5cm 3cm}
 @media print{
@@ -434,7 +631,7 @@ mark.falta{background:var(--ambar-suave);color:var(--ambar);padding:0 2px;border
 </head>
 <body>
 <header class="cab">
-  <div class="cab-in">
+  <div class="cab-banda"><div class="cab-in">
     <a class="marca" href="#/inicio"><svg viewBox="0 0 512 512"><use href="#marca"/></svg>
       <span style="min-width:0"><b>RODRÍGUEZ <i>y</i> RODRÍGUEZ</b><em>Estudio jurídico</em></span></a>
     <div class="cab-acc">
@@ -442,7 +639,7 @@ mark.falta{background:var(--ambar-suave);color:var(--ambar);padding:0 2px;border
       <a href="#/portales" aria-label="Portales judiciales" title="Portales judiciales"><svg><use href="#i-globe"/></svg></a>
       <a href="#/ajustes" aria-label="Ajustes" title="Ajustes"><svg><use href="#i-gear"/></svg></a>
     </div>
-  </div>
+  </div></div>
   <nav class="pestanas" id="nav"></nav>
 </header>
 <main id="main"></main>
@@ -679,15 +876,14 @@ window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); }
    VISTAS
    =================================================================== */
 function vInicio() {
-  const h = hoy();
+  const h = hoy(), m = sumar(h, 1);
   const activos = DB.expedientes.filter((e) => !CERRADOS.includes(e.estado));
   const pend = DB.eventos.filter((e) => !e.hecho);
   const vencidos = pend.filter((e) => e.fecha < h).sort(ordenEv);
   const en = (e, n) => e.fecha >= h && e.fecha <= sumar(h, n);
   const aud7 = pend.filter((e) => e.tipo === 'audiencia' && en(e, 7)).length;
   const pla7 = pend.filter((e) => e.tipo === 'plazo' && en(e, 7)).length;
-  const auds = pend.filter((e) => e.tipo === 'audiencia' && en(e, 30)).sort(ordenEv);
-  const otros = pend.filter((e) => e.tipo !== 'audiencia' && en(e, 14)).sort(ordenEv);
+  const prox = pend.filter((e) => e.fecha > m && e.fecha <= sumar(h, 14)).sort(ordenEv);
   const total = saldo(() => true);
   const deudores = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.pend > 0.004).sort((a, b) => b.s.pend - a.s.pend);
   const cuotasV = DB.cuotas.filter((q) => !q.pagada && q.fecha < h).sort((a, b) => a.fecha.localeCompare(b.fecha));
@@ -695,44 +891,48 @@ function vInicio() {
   const hora = new Date().getHours();
   const saludo = hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches';
   const pl = (n, s, p) => `${n} ${n === 1 ? s : p}`;
-  let frase = aud7 || pla7
-    ? `Esta semana tienes ${[aud7 && `<b>${pl(aud7, 'audiencia', 'audiencias')}</b>`, pla7 && `<b>${pl(pla7, 'plazo', 'plazos')}</b> por vencer`].filter(Boolean).join(' y ')}.`
-    : 'Esta semana no tienes audiencias ni plazos por vencer.';
-  if (vencidos.length) frase += ` <b class="neg">${pl(vencidos.length, 'pendiente quedó', 'pendientes quedaron')} atrás sin marcar.</b>`;
   const vacio = !DB.clientes.length && !DB.expedientes.length;
+  const item = (v) => { const e = expediente(v.expedienteId);
+    return `<div class="hoy-item ${v.hecho ? 'hecho' : ''}" data-act="editEvento" data-id="${v.id}"><span class="h">${esc(v.hora || '—')}</span><i class="p ${v.tipo}"></i>
+      <div style="min-width:0"><div class="t">${esc(v.titulo || TIPOS_EV[v.tipo])}</div><div class="s">${esc(TIPOS_EV[v.tipo])}${e ? ' · ' + esc(e.numero || caratula(e)) : ''}${v.lugar ? ' · ' + esc(v.lugar) : ''}</div></div>
+      <span class="end"><button class="check ${v.hecho ? 'on' : ''}" data-act="toggleEvento" data-id="${v.id}" aria-label="Marcar como hecho">${v.hecho ? icon('i-check') : ''}</button></span></div>`; };
+  const deDia = (f) => DB.eventos.filter((v) => v.fecha === f && (!v.hecho || f === h)).sort(ordenEv);
+  const hoyL = deDia(h), manL = deDia(m);
+  const extra = typeof inicioExtra === 'function' ? inicioExtra() : '';
   return `
-  ${vacio ? `<div class="card welcome"><h2>Bienvenido al Estudio Rodríguez y Rodríguez</h2>
-    <p class="muted" style="font-family:var(--serif);font-size:16px">Clientes, expedientes, audiencias, plazos y honorarios en un solo cuaderno. Todo se guarda en este aparato; puedes descargar un respaldo cuando quieras.</p>
+  ${vacio ? `<div class="card welcome" style="margin-bottom:18px"><h2>Bienvenido al Estudio Rodríguez y Rodríguez</h2>
+    <p style="font-size:15px">Clientes, expedientes, audiencias, plazos, honorarios, documentos e IA en un solo lugar.</p>
     <div class="actions"><button class="btn pri" data-act="nuevoCliente">Registrar el primer cliente</button><button class="btn" data-act="ejemplo">Ver con datos de ejemplo</button></div></div>` : ''}
-  <section class="portada">
+  <div class="head"><div><h1>${saludo}${nombre ? ', ' + esc(nombre) : ''}</h1><div class="sub">${esc(fFechaL(h))} · ${esc(DB.ajustes.estudio || MARCA)}</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn" data-act="nuevoExp">${icon('i-plus')} Expediente</button><button class="btn hide-m" data-act="resumen">${icon('i-wa')} Resumen del día</button></div></div>
+  <div class="kpis">
+    <a class="card kpi" href="#/expedientes"><span class="ico">${icon('i-folder')}</span><span><div class="v">${activos.length}</div><div class="k">Casos activos</div><div class="d">${DB.expedientes.length} en total</div></span></a>
+    <a class="card kpi" href="#/agenda"><span class="ico mo">${icon('i-cal')}</span><span><div class="v">${aud7}</div><div class="k">Audiencias</div><div class="d">próximos 7 días</div></span></a>
+    <a class="card kpi ${vencidos.length ? 'alerta' : ''}" href="#/agenda"><span class="ico am">${icon('i-clock')}</span><span><div class="v">${pla7}</div><div class="k">Plazos por vencer</div><div class="d">${vencidos.length ? pl(vencidos.length, 'atrasado', 'atrasados') : 'ninguno atrasado'}</div></span></a>
+    <a class="card kpi ${cuotasV.length ? 'alerta' : ''}" href="#/honorarios"><span class="ico ok">${icon('i-money')}</span><span><div class="v">${sol(total.pend).replace('.00', '')}</div><div class="k">Por cobrar</div><div class="d">${cuotasV.length ? pl(cuotasV.length, 'cuota vencida', 'cuotas vencidas') : 'cobrado ' + sol(total.pagado).replace('.00', '')}</div></span></a>
+  </div>
+  <div class="portada2">
     <div>
-      <span class="cinta">Despacho · ${esc(fFechaL(h))}</span>
-      <h1 class="titular">${saludo}${nombre ? `, <em>${esc(nombre)}</em>` : ''}.</h1>
-      <p class="resumen">${frase}</p>
-      <div class="actions"><button class="btn pri" data-act="nuevoEvento">${icon('i-plus')} Audiencia o plazo</button><button class="btn" data-act="nuevoExp">${icon('i-plus')} Expediente</button><button class="btn" data-act="calc">${icon('i-clock')} Calcular plazo</button><button class="btn" data-act="resumen">${icon('i-wa')} Resumen del día</button></div>
+      <div class="card"><h2>Agenda <span class="leyenda"><span><i style="background:var(--vino)"></i>Audiencia</span><span><i style="background:var(--ambar)"></i>Plazo</span><span><i style="background:var(--azul)"></i>Tarea</span><span><i style="background:var(--morado)"></i>Reunión</span></span></h2>
+        ${vencidos.length ? `<div class="dia-t" style="color:var(--mal)">Atrasados sin marcar</div><div class="hoy-lista">${vencidos.slice(0, 5).map(item).join('')}</div>` : ''}
+        <div class="dia-t">Hoy · ${esc(fFechaL(h))}</div><div class="hoy-lista">${hoyL.length ? hoyL.map(item).join('') : '<div class="tiny" style="padding:8px 0">Nada agendado para hoy.</div>'}</div>
+        <div class="dia-t">Mañana</div><div class="hoy-lista">${manL.length ? manL.map(item).join('') : '<div class="tiny" style="padding:8px 0">Nada agendado.</div>'}</div>
+        ${prox.length ? `<div class="dia-t">Próximas dos semanas</div><div class="list">${prox.slice(0, 8).map((e) => filaEvento(e)).join('')}</div>` : ''}
+        <a class="btn ghost sm" href="#/agenda" style="margin-top:8px;padding-left:0">Ver agenda completa →</a></div>
+      ${extra}
     </div>
-    <a class="nota-papel" href="#/honorarios" style="text-decoration:none;color:inherit;display:block">
-      <div class="versal muted">Por cobrar</div>
-      <div class="grande">${sol(total.pend)}</div>
-      <div class="linea"></div>
-      <div class="small muted">Cobrado <b>${sol(total.pagado)}</b> · ${pl(activos.length, 'expediente activo', 'expedientes activos')}</div>
-      <div style="text-align:right;margin-top:8px"><span class="firma">Rodríguez y Rodríguez</span></div>
-    </a>
-  </section>
-  <div class="fichas">
-    <div class="card ficha"><span class="lengueta">Audiencias</span><svg class="dibujo"><use href="#d-cal"/></svg>
-      <h2>Próximas audiencias</h2><div class="cuenta">${auds.length ? pl(auds.length, 'en los próximos 30 días', 'en los próximos 30 días') : 'Ninguna en los próximos 30 días'}</div>
-      <div class="list" style="clear:both">${auds.slice(0, 6).map((e) => filaEvento(e)).join('')}</div>
-      <a class="btn ghost sm" href="#/agenda" style="margin-top:6px;padding-left:0">Ver agenda completa →</a></div>
-    <div class="card ficha"><span class="lengueta">Plazos</span><svg class="dibujo"><use href="#d-reloj"/></svg>
-      <h2>Plazos y tareas</h2><div class="cuenta">${vencidos.length ? `<span class="neg">${pl(vencidos.length, 'atrasado', 'atrasados')}</span> · ` : ''}${otros.length ? pl(otros.length, 'en dos semanas', 'en dos semanas') : 'Nada en dos semanas'}</div>
-      <div class="list" style="clear:both">${[...vencidos, ...otros].slice(0, 7).map((e) => filaEvento(e)).join('')}</div>
-      <button class="btn ghost sm" data-act="calc" style="margin-top:6px;padding-left:0">Calcular un vencimiento →</button></div>
-    <div class="card ficha"><span class="lengueta">Honorarios</span><svg class="dibujo"><use href="#d-recibo"/></svg>
-      <h2>Saldos pendientes</h2><div class="cuenta">${deudores.length ? pl(deudores.length, 'cliente debe', 'clientes deben') : 'Nadie debe nada'}${cuotasV.length ? ` · <span class="neg">${pl(cuotasV.length, 'cuota vencida', 'cuotas vencidas')}</span>` : ''}</div>
-      ${cuotasV.length ? `<div class="list" style="clear:both;margin-bottom:6px">${cuotasV.slice(0, 3).map((q) => filaCuota(q)).join('')}</div>` : ''}
-      <div class="list" style="clear:both">${deudores.slice(0, 6).map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div><div class="end money neg">${sol(s.pend)}</div></div>`).join('')}</div>
-      <button class="btn ghost sm" data-act="nuevoMov" data-tipo="pago" style="margin-top:6px;padding-left:0">Registrar un pago →</button></div>
+    <div>
+      <div class="card"><h2 style="justify-content:flex-start">${icon('i-spark').replace('<svg>', '<svg style="width:18px;height:18px;color:var(--vino)">')} Pregúntale a la IA</h2>
+        <form class="ia-rapida" id="iaRapidaForm"><input class="f" id="iaRapida" placeholder="Ej. ¿Qué plazos vencen esta semana?"><button class="btn pri">Ir</button></form>
+        <p class="tiny" style="margin:8px 0 0">También puede agendar, crear expedientes y registrar pagos por ti.</p></div>
+      <div class="card"><h2>Cobros pendientes <a class="btn ghost sm" href="#/honorarios">Ver todo</a></h2>
+        ${cuotasV.length ? `<div class="list" style="margin-bottom:6px">${cuotasV.slice(0, 3).map((q) => filaCuota(q)).join('')}</div>` : ''}
+        ${deudores.length ? `<div class="list">${deudores.slice(0, 5).map(({ c, s }) => `<div class="row" data-go="cliente/${c.id}"><div class="inic">${esc(iniciales(c.nombre))}</div><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">pagó ${sol(s.pagado)} de ${sol(s.cargo)}</div></div><div class="end money neg">${sol(s.pend)}</div></div>`).join('')}</div>` : '<div class="empty small">Nadie debe nada.</div>'}
+        <button class="btn sm" data-act="nuevoMov" data-tipo="pago" style="margin-top:10px">${icon('i-plus')} Registrar un pago</button></div>
+      <div class="card"><h2>Atajos</h2><div class="actions">
+        <button class="btn sm" data-act="calc">${icon('i-clock')} Calcular plazo</button><button class="btn sm" data-act="nuevoEscrito">${icon('i-doc')} Nuevo documento</button>
+        <button class="btn sm" data-act="nuevoCliente">${icon('i-users')} Cliente</button><a class="btn sm" href="#/portales">${icon('i-globe')} Portales</a></div></div>
+    </div>
   </div>`;
 }
 
@@ -1464,6 +1664,7 @@ document.addEventListener('change', (ev) => {
 });
 document.addEventListener('submit', (ev) => {
   if (ev.target.id === 'iaForm') { ev.preventDefault(); enviarIA(); return; }
+  if (ev.target.id === 'iaRapidaForm') { ev.preventDefault(); const t = $('#iaRapida').value.trim(); if (!t) return; IA.borrador = t; location.hash = '#/asistente'; if (claveIA()) setTimeout(() => enviarIA(t), 60); return; }
   const f = ev.target.closest('[data-form]');
   if (!f) return;
   ev.preventDefault();
