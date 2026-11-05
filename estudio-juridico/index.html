@@ -561,6 +561,17 @@ main{padding-top:26px}
 .cuerpo h4{font-family:var(--serif)}
 #crono{border-radius:999px}
 
+/* subnavegación */
+.subnav{display:inline-flex;gap:4px;background:var(--hoja);border:1px solid var(--regla);border-radius:12px;padding:4px;margin-bottom:18px;max-width:100%;overflow-x:auto}
+.subnav a{padding:6px 14px;border-radius:9px;text-decoration:none;color:var(--tinta-2);font-weight:600;font-size:13.5px;white-space:nowrap}
+.subnav a.on{background:var(--vino);color:var(--sobre-vino)}
+.subnav a:not(.on):hover{color:var(--vino)}
+.vb-col.doble{flex-direction:row;align-items:flex-end;justify-content:center;gap:3px}
+.vb-col.doble i{width:34%;max-width:22px}
+.vb-col.doble i.b2{background:var(--tinta-3);opacity:.6}
+.vb:hover .vb-col.doble i.b2{opacity:.85}
+.tarjeta .mover-p{margin-top:6px;width:100%;font-size:12px;padding:3px;border:1px solid var(--regla);background:var(--hoja-2);border-radius:6px}
+
 /* portada nueva */
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:18px}
 .kpi{display:flex;gap:14px;align-items:center;text-decoration:none;color:inherit;padding:16px 18px}
@@ -720,7 +731,7 @@ const icon = (id) => `<svg><use href="#${id}"/></svg>`;
 /* ---------- datos ---------- */
 const VACIO = () => ({
   version: VERSION,
-  clientes: [], expedientes: [], eventos: [], movimientos: [], cuotas: [], horas: [], escritos: [], plantillas: [], archivos: [], timer: null,
+  clientes: [], expedientes: [], eventos: [], movimientos: [], cuotas: [], horas: [], escritos: [], plantillas: [], archivos: [], prospectos: [], gastos: [], timer: null,
   ajustes: { estudio: MARCA, abogado: '', colegiatura: '', telefono: '', ruc: '', direccion: '', ciudad: 'Lima', domicilioProcesal: '', casilla: '', tarifaHora: '', inhabiles: [], tema: 'auto', avisos: false, pin: null, bloqueoMin: '5', recibo: 0 }
 });
 let DB = cargar();
@@ -734,7 +745,7 @@ function cargar() {
 function arreglar(d) {
   const base = VACIO();
   if (!d || typeof d !== 'object') return base;
-  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos', 'cuotas', 'horas', 'escritos', 'plantillas', 'archivos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
+  for (const k of ['clientes', 'expedientes', 'eventos', 'movimientos', 'cuotas', 'horas', 'escritos', 'plantillas', 'archivos', 'prospectos', 'gastos']) base[k] = Array.isArray(d[k]) ? d[k].filter((x) => x && x.id) : [];
   base.ajustes = Object.assign(base.ajustes, d.ajustes || {});
   if (!Array.isArray(base.ajustes.inhabiles)) base.ajustes.inhabiles = [];
   if (!String(base.ajustes.estudio || '').trim()) base.ajustes.estudio = MARCA;
@@ -843,13 +854,13 @@ const NAV = [
   ['clientes', 'Clientes', 'i-users'],
   ['expedientes', 'Expedientes', 'i-folder'],
   ['agenda', 'Agenda', 'i-cal'],
-  ['honorarios', 'Honorarios', 'i-money'],
+  ['honorarios', 'Finanzas', 'i-money'],
   ['escritos', 'Documentos', 'i-doc'],
   ['asistente', 'Asistente IA', 'i-spark'],
   ['reportes', 'Reportes', 'i-chart'],
 ];
 function pintarNav(ruta) {
-  const base = { cliente: 'clientes', expediente: 'expedientes', escrito: 'escritos', generar: 'escritos', modelo: 'escritos' }[ruta] ?? ruta;
+  const base = { cliente: 'clientes', prospectos: 'clientes', expediente: 'expedientes', escrito: 'escritos', generar: 'escritos', modelo: 'escritos', gastos: 'honorarios', flujo: 'honorarios' }[ruta] ?? ruta;
   $('#nav').innerHTML = NAV.map(([k, t, i]) => `<a href="#/${k}" class="${k === base ? 'on' : ''}">${icon(i)}<span>${t}</span></a>`).join('');
   document.querySelectorAll('.cab-acc a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#/' + base));
   const on = $('#nav a.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -860,7 +871,7 @@ let estado = { qCli: '', qExp: '', fEstado: 'activos', fMateria: '', mes: hoy().
 function render() {
   const [ruta, id] = (location.hash.replace(/^#\/?/, '') || 'inicio').split('/');
   pintarNav(ruta);
-  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes, generar: vGenerar, modelo: vModelo, asistente: vAsistente };
+  const vistas = { inicio: vInicio, clientes: vClientes, cliente: vCliente, expedientes: vExpedientes, expediente: vExpediente, agenda: vAgenda, honorarios: vHonorarios, portales: vPortales, ajustes: vAjustes, buscar: vBuscar, escritos: vEscritos, escrito: vEscrito, reportes: vReportes, generar: vGenerar, modelo: vModelo, asistente: vAsistente, prospectos: vProspectos, gastos: vGastos, flujo: vFlujo };
   const v = vistas[ruta] || vInicio;
   $('#main').innerHTML = v(id ? decodeURIComponent(id) : '');
   aplicarTema();
@@ -951,7 +962,7 @@ function filaEvento(ev, conExp = true) {
 function vClientes() {
   const q = norm(estado.qCli);
   const lista = DB.clientes.filter((c) => !q || norm([c.nombre, c.documento, c.telefono, c.email].join(' ')).includes(q)).sort((a, b) => a.nombre.localeCompare(b.nombre));
-  return `
+  return `${subnav(SUB_CLIENTES, 'clientes')}
   <div class="head"><div><h1>Clientes</h1><div class="sub">${DB.clientes.length} registrado(s)</div></div>
     <div class="actions"><button class="btn pri" data-act="nuevoCliente">${icon('i-plus')} Nuevo cliente</button></div></div>
   <div class="toolbar"><label class="search">${icon('i-search')}<input id="qCli" placeholder="Buscar por nombre, DNI, RUC o teléfono" value="${esc(estado.qCli)}"></label></div>
@@ -1151,8 +1162,8 @@ function vHonorarios() {
   const movs = DB.movimientos.filter((m) => !estado.fMov || m.tipo === estado.fMov).sort((a, b) => b.fecha.localeCompare(a.fecha) || (b.creado || '').localeCompare(a.creado || '')).slice(0, 200);
   const porCli = DB.clientes.map((c) => ({ c, s: saldoCliente(c.id) })).filter((x) => x.s.cargo || x.s.pagado).sort((a, b) => b.s.pend - a.s.pend);
   const cuotasP = DB.cuotas.filter((q) => !q.pagada).sort((a, b) => a.fecha.localeCompare(b.fecha));
-  return `
-  <div class="head"><div><h1>Honorarios y cobros</h1><div class="sub">Lo pactado, lo cobrado y lo que falta</div></div>
+  return `${subnav(SUB_FINANZAS, 'honorarios')}
+  <div class="head"><div><h1>Cobros y honorarios</h1><div class="sub">Lo pactado, lo cobrado y lo que falta</div></div>
     <div class="actions"><button class="btn" data-act="nuevoMov" data-tipo="honorario">+ Honorario</button><button class="btn hide-m" data-act="nuevoMov" data-tipo="gasto">+ Gasto</button><button class="btn" data-act="nuevoPlan">+ Plan de cuotas</button><button class="btn pri" data-act="nuevoMov" data-tipo="pago">${icon('i-plus')} Registrar pago</button></div></div>
   <div class="card sumario">
     <div class="stat"><div class="k">Pactado</div><div class="v">${sol(t.honor)}</div><div class="d">+ gastos ${sol(t.gasto)}</div></div>
@@ -1200,11 +1211,13 @@ function vBuscar() {
     const es = DB.expedientes.filter((e) => norm([e.numero, e.juzgado, e.contraparte, e.pretension, e.materia, (cliente(e.clienteId) || {}).nombre].join(' ')).includes(q));
     const vs = DB.eventos.filter((v) => norm([v.titulo, v.lugar, v.notas].join(' ')).includes(q)).sort(ordenEv);
     const ws = DB.escritos.filter((x) => norm(x.titulo + ' ' + x.texto).includes(q));
+    const ps = DB.prospectos.filter((x) => norm([x.nombre, x.asunto, x.telefono].join(' ')).includes(q));
     res = `${cs.length ? `<div class="card"><h2>Clientes</h2><div class="list">${cs.map((c) => `<div class="row" data-go="cliente/${c.id}"><div class="main"><div class="t">${esc(c.nombre)}</div><div class="s">${esc(c.documento || '')}</div></div></div>`).join('')}</div></div>` : ''}
       ${es.length ? `<div class="card"><h2>Expedientes</h2><div class="list">${es.map(filaExp).join('')}</div></div>` : ''}
       ${vs.length ? `<div class="card"><h2>Agenda</h2><div class="list">${vs.map((v) => filaEvento(v)).join('')}</div></div>` : ''}
       ${ws.length ? `<div class="card"><h2>Escritos</h2><div class="list">${ws.map(filaEscrito).join('')}</div></div>` : ''}
-      ${!cs.length && !es.length && !vs.length && !ws.length ? `<div class="card empty">Sin resultados para «${esc(qGlobal)}».</div>` : ''}`;
+      ${ps.length ? `<div class="card"><h2>Prospectos</h2><div class="list">${ps.map((x) => `<div class="row" data-act="editProspecto" data-id="${x.id}"><div class="main"><div class="t">${esc(x.nombre)}</div><div class="s">${esc(x.asunto || '')} · ${esc(x.etapa)}</div></div></div>`).join('')}</div></div>` : ''}
+      ${!cs.length && !es.length && !vs.length && !ws.length && !ps.length ? `<div class="card empty">Sin resultados para «${esc(qGlobal)}».</div>` : ''}`;
   }
   return `<div class="head"><div><h1>Buscar</h1></div></div>
   <div class="toolbar"><label class="search">${icon('i-search')}<input id="qGlobal" placeholder="Cliente, número de expediente, juzgado, audiencia…" value="${esc(qGlobal)}" autofocus></label></div><div id="resBuscar">${res}</div>`;
@@ -1615,11 +1628,17 @@ const ACC = {
   deshacerMarcas: (d) => { const p = DB.plantillas.find((x) => x.id === d.id); if (!p || !p.textoAnterior) return; p.texto = p.textoAnterior; delete p.textoAnterior; guardar(); reRender(); toast('Deshecho'); },
   iaProbar: async () => { toast('Probando…'); try { const c = await clienteIA(); await c.models.retrieve(DB.ajustes.iaModelo || 'claude-opus-5-5'); toast('Conexión correcta: la IA está lista'); } catch (e) { toast(mensajeErrorIA(e)); } },
   iaQuitarClave: () => { if (!confirm('¿Quitar la clave de la IA de este aparato?')) return; try { localStorage.removeItem(CLAVE_IA); } catch {} reRender(); toast('Clave quitada'); },
+  nuevoProspecto: () => formProspecto(),
+  editProspecto: (d) => { const p = DB.prospectos.find((x) => x.id === d.id); if (p) formProspecto(p); },
+  nuevoGasto: () => formGasto(),
+  editGasto: (d) => { const g = DB.gastos.find((x) => x.id === d.id); if (g) formGasto(g); },
+  generarFijos: () => generarFijos(),
   borrarInhabil: (d) => { DB.ajustes.inhabiles = DB.ajustes.inhabiles.filter((i) => i.fecha !== d.v); guardar(); reRender(); },
 };
 document.addEventListener('click', (ev) => {
   const el = ev.target.closest('[data-act],[data-go]');
   if (!el || el.closest('.modal-bg,#candado')) return;
+  if (ev.target.closest('.tarjeta select')) return;
   if (!el.dataset.act && ev.target.closest('select,input,textarea,label')) return;
   if (el.dataset.act) { ev.preventDefault(); ev.stopPropagation(); ACC[el.dataset.act] && ACC[el.dataset.act](el.dataset, el); }
   else if (el.dataset.go) location.hash = '#/' + el.dataset.go;
@@ -1636,7 +1655,7 @@ document.addEventListener('input', (ev) => {
     clearTimeout(_tEsc); _tEsc = setTimeout(() => { guardar(); const g2 = $('#guardadoMod'); if (g2) g2.textContent = 'guardado'; }, 500);
     return;
   }
-  if (id === 'qCli' || id === 'qExp' || id === 'qMod') {
+  if (id === 'qCli' || id === 'qExp' || id === 'qMod' || id === 'qPro') {
     estado[id] = ev.target.value; const pos = ev.target.selectionStart; reRender();
     const n = $('#' + id); n.focus(); n.setSelectionRange(pos, pos);
   } else if (id === 'textoEscrito' || id === 'tituloEscrito') {
@@ -1661,6 +1680,8 @@ document.addEventListener('change', (ev) => {
   if (ev.target.id === 'fileRespaldo') cargarRespaldo(ev.target.files[0]);
   if (ev.target.classList.contains('fileDocs')) subirArchivos(ev.target.dataset.exp, [...ev.target.files]);
   if (ev.target.classList.contains('mover')) moverExp(ev.target.dataset.id, ev.target.value);
+  if (ev.target.classList.contains('mover-p')) moverProspecto(ev.target.dataset.id, ev.target.value);
+  if (ev.target.id === 'fCat') { estado.fCat = ev.target.value; reRender(); }
 });
 document.addEventListener('submit', (ev) => {
   if (ev.target.id === 'iaForm') { ev.preventDefault(); enviarIA(); return; }
@@ -1729,7 +1750,11 @@ function exportarCSV() {
   setTimeout(() => descargar(`rodriguez-honorarios-${hoy()}.csv`, bom + mov, 'text/csv'), 300);
   setTimeout(() => descargar(`rodriguez-agenda-${hoy()}.csv`, bom + ag, 'text/csv'), 600);
   setTimeout(() => descargar(`rodriguez-clientes-${hoy()}.csv`, bom + cli, 'text/csv'), 900);
-  toast('Se descargan 4 archivos CSV (se abren en Excel)');
+  const gas = tabla(['Fecha', 'Categoría', 'Concepto', 'Medio', 'Monto', 'Fijo'], DB.gastos.slice().sort((a, b) => a.fecha.localeCompare(b.fecha)).map((g) => [g.fecha, g.categoria, g.concepto, g.medio, num(g.monto), g.fijo || g.origen ? 'Sí' : '']));
+  const pro = tabla(['Fecha', 'Nombre', 'Celular', 'Asunto', 'Materia', 'Origen', 'Etapa', 'Honorario estimado', 'Próximo seguimiento'], DB.prospectos.map((x) => [x.fecha, x.nombre, x.telefono, x.asunto, x.materia, x.origen, x.etapa, num(x.monto), x.proximo]));
+  setTimeout(() => descargar(`rodriguez-gastos-${hoy()}.csv`, bom + gas, 'text/csv'), 1200);
+  setTimeout(() => descargar(`rodriguez-prospectos-${hoy()}.csv`, bom + pro, 'text/csv'), 1500);
+  toast('Se descargan 6 archivos CSV (se abren en Excel)');
 }
 function exportarICS() {
   const evs = DB.eventos.filter((v) => !v.hecho && v.fecha >= sumar(hoy(), -30));
@@ -1806,7 +1831,26 @@ function cargarEjemplo() {
   DB.horas.push({ id: uid(), expedienteId: e1.id, fecha: sumar(h, -21), minutos: 150, nota: 'Redacción de la demanda', tarifa: 150, facturado: false },
     { id: uid(), expedienteId: e1.id, fecha: sumar(h, -6), minutos: 45, nota: 'Reunión con el cliente', tarifa: 150, facturado: false },
     { id: uid(), expedienteId: e2.id, fecha: sumar(h, -2), minutos: 200, nota: 'Revisión de la sentencia y estrategia de apelación', tarifa: 200, facturado: false });
+  const pr = (o) => Object.assign({ id: uid(), actualizado: ahora() }, o);
+  DB.prospectos.push(
+    pr({ nombre: 'Rosa Elvira Chávez', telefono: '944555666', asunto: 'Pensión de alimentos para sus dos hijos', materia: 'Familia', origen: 'Facebook', etapa: 'Nuevo', fecha: sumar(h, -1), proximo: h, monto: 1800 }),
+    pr({ nombre: 'Transportes El Sol E.I.R.L.', telefono: '955444333', asunto: 'Cobro de facturas impagas (S/ 48,000)', materia: 'Comercial', origen: 'Recomendación', etapa: 'Propuesta enviada', fecha: sumar(h, -9), proximo: sumar(h, 2), monto: 6000 }),
+    pr({ nombre: 'Luis Alberto Paredes', telefono: '966777888', asunto: 'Despido arbitrario', materia: 'Laboral', origen: 'TikTok', etapa: 'Consulta agendada', fecha: sumar(h, -3), proximo: sumar(h, 1), monto: 3000 }),
+    pr({ nombre: 'Carmen Soto Ríos', asunto: 'Sucesión intestada', materia: 'Civil', origen: 'Google', etapa: 'Negociación', fecha: sumar(h, -15), proximo: sumar(h, -2), monto: 2500 }),
+    pr({ nombre: 'Inmobiliaria Pacífico S.A.C.', asunto: 'Desalojo de local comercial', materia: 'Civil', origen: 'Cliente anterior', etapa: 'Perdido', fecha: sumar(h, -40), monto: 5000, motivo: 'Eligió otro estudio por precio' }),
+    pr({ nombre: 'María Elena Quispe Huamán', asunto: 'Desalojo por ocupación precaria', materia: 'Civil', origen: 'Facebook', etapa: 'Ganado', fecha: sumar(h, -125), monto: 3500, clienteId: cA.id }));
+  const gfijo = (concepto, categoria, monto, dia) => ({ id: uid(), concepto, categoria, monto, medio: 'Transferencia', fecha: h.slice(0, 8) + dia, fijo: true });
+  const fijosEj = [gfijo('Alquiler de oficina', 'Alquiler', 1500, '05'), gfijo('Internet y teléfono fijo', 'Servicios (luz, agua, internet)', 140, '10'), gfijo('Practicante', 'Sueldos y practicantes', 1130, '28'), gfijo('Software y nube', 'Software y suscripciones', 85, '02')];
+  DB.gastos.push(...fijosEj);
+  for (let i = 1; i <= 11; i++) { const d = parse(h); d.setDate(1); d.setMonth(d.getMonth() - i); const m = iso(d).slice(0, 7);
+    fijosEj.forEach((g) => DB.gastos.push({ id: uid(), origen: g.id, concepto: g.concepto, categoria: g.categoria, monto: g.monto, medio: g.medio, fecha: m + '-' + g.fecha.slice(8) }));
+    if (i % 2) DB.gastos.push({ id: uid(), concepto: 'Publicidad en Facebook', categoria: 'Publicidad y marketing', monto: 250 + i * 10, medio: 'Tarjeta', fecha: m + '-15' });
+    if (i % 3 === 0) DB.gastos.push({ id: uid(), concepto: 'Movilidad a juzgados', categoria: 'Movilidad', monto: 120, medio: 'Efectivo', fecha: m + '-20' }); }
+  for (let i = 0; i <= 11; i++) { const d = parse(h); d.setDate(1); d.setMonth(d.getMonth() - i); const m = iso(d).slice(0, 7);
+    DB.movimientos.push({ id: uid(), creado: ahora(), tipo: 'honorario', clienteId: cB.id, expedienteId: '', fecha: m + '-01', monto: 4000, medio: '', concepto: 'Iguala mensual de asesoría' });
+    if (i > 0 || parse(h).getDate() > 3) DB.movimientos.push({ id: uid(), creado: ahora(), tipo: 'pago', clienteId: cB.id, expedienteId: '', fecha: m + '-0' + (3 + (i % 5)), monto: 4000, medio: 'Transferencia', concepto: 'Iguala mensual de asesoría', recibo: DB.ajustes.recibo = (num(DB.ajustes.recibo) || 0) + 1 }); }
   const pAp = PLANTILLAS.find((x) => x.id === 'p-aperso');
+
   DB.escritos.push({ id: uid(), expedienteId: e3.id, titulo: pAp.titulo, texto: rellenar(pAp.texto, e3), fecha: sumar(h, -30), actualizado: ahora() });
   guardar(); toast('Datos de ejemplo cargados'); location.hash = '#/inicio'; render();
 }
@@ -2436,6 +2480,42 @@ ______________________________
 DNI N.° {{dni_declarante}}` },
 
   /* ---------- para el cliente ---------- */
+  { id: 'n-propuesta', cat: 'Para el cliente', titulo: 'Propuesta de honorarios', desc: 'Propuesta formal para un posible cliente: alcance, honorarios y forma de pago.',
+    campos: { destinatario: { l: 'Para' }, asunto: { l: 'Asunto del caso' }, alcance: { l: 'Qué incluye el servicio', t: 'textarea', ph: 'Elaboración y presentación de la demanda, asistencia a audiencias, seguimiento hasta la sentencia de primera instancia…' }, honorario: { l: 'Honorario (S/)', t: 'number' }, numero_cuotas: { l: 'Número de cuotas' }, validez_dias: { l: 'Validez de la propuesta (días)', ph: '15' } },
+    op: { forma: { l: 'Forma de pago', valores: [['unico', 'Pago único'], ['cuotas', 'En cuotas'], ['adelanto', '50% al inicio y 50% al terminar']] }, gastos: { l: 'Aclarar que los gastos del proceso no están incluidos', def: true } },
+    texto: `{{ciudad}}, {{fecha_larga}}
+
+Señor(a):
+{{destinatario}}
+Presente.-
+
+Asunto: Propuesta de servicios profesionales — {{asunto}}
+
+De nuestra consideración:
+
+Agradecemos la confianza depositada en {{estudio}}. Conforme a lo conversado, le presentamos nuestra propuesta para atender su caso.
+
+1. ALCANCE DEL SERVICIO
+{{alcance}}
+
+2. HONORARIOS
+Nuestros honorarios profesionales ascienden a {{honorario}} ({{honorario_letras}}), que podrán pagarse {{#si forma=unico}}en un solo pago al inicio del servicio{{/si}}{{#si forma=cuotas}}en {{numero_cuotas}} cuotas mensuales, la primera al inicio del servicio{{/si}}{{#si forma=adelanto}}el 50% al inicio del servicio y el 50% restante al concluir la instancia{{/si}}.
+{{#si gastos}}Los gastos del proceso (tasas judiciales, cédulas, copias, peritajes y similares) no están incluidos y serán asumidos por el cliente.
+{{/si}}
+3. VALIDEZ
+La presente propuesta tiene una validez de {{validez_dias}} días calendario.
+
+Quedamos atentos a sus comentarios.
+
+Atentamente,
+
+
+
+______________________________
+{{abogado}}
+{{colegiatura}}
+{{estudio}} · {{telefono_estudio}}` },
+
   { id: 'i-informe', cat: 'Para el cliente', titulo: 'Informe del estado del caso', desc: 'Resumen para el cliente: últimas actuaciones, próximas fechas y saldo, sacados del expediente.',
     campos: { comentario: { l: 'Comentario y siguientes pasos', t: 'textarea', ph: 'Se espera que el juzgado fije fecha para la audiencia de pruebas…' } },
     op: { honorarios: { l: 'Incluir el estado de los honorarios', def: true }, proximas: { l: 'Incluir próximas fechas', def: true } },
@@ -2857,7 +2937,7 @@ document.addEventListener('dragover', (ev) => { if (ev.target.closest && ev.targ
 document.addEventListener('dragleave', (ev) => { if (ev.target.id === 'iaChat') ev.target.classList.remove('soltando'); });
 document.addEventListener('drop', (ev) => { const c = ev.target.closest && ev.target.closest('#iaChat'); if (c && ev.dataTransfer.files.length) { ev.preventDefault(); c.classList.remove('soltando'); adjuntarIA([...ev.dataTransfer.files], !!($('#iaGuardarExp') || {}).checked); } });
 document.addEventListener('dragover', (ev) => { const c = ev.target.closest && ev.target.closest('.col'); if (c) { ev.preventDefault(); document.querySelectorAll('.col.sobre').forEach((x) => x !== c && x.classList.remove('sobre')); c.classList.add('sobre'); } });
-document.addEventListener('drop', (ev) => { const c = ev.target.closest && ev.target.closest('.col'); if (c) { ev.preventDefault(); moverExp(ev.dataTransfer.getData('text/plain'), c.dataset.estado); } });
+document.addEventListener('drop', (ev) => { const c = ev.target.closest && ev.target.closest('.col'); if (c) { ev.preventDefault(); const id = ev.dataTransfer.getData('text/plain'); if (c.dataset.etapa) moverProspecto(id, c.dataset.etapa); else moverExp(id, c.dataset.estado); } });
 
 /* ---------- resumen del día y avisos ---------- */
 function textoResumen() {
@@ -3272,6 +3352,220 @@ async function subirModelo(file) {
     const n = { id: uid(), titulo: file.name.replace(/\.[^.]+$/, ''), texto, cat: 'Mis modelos', desc: 'Subido desde ' + file.name, propia: true };
     DB.plantillas.push(n); guardar(); toast('Modelo subido. Ponle marcas a mano o con la IA.'); location.hash = '#/modelo/' + n.id;
   } catch (e) { toast(e.message || 'No se pudo leer el archivo'); }
+}
+
+/* ===================================================================
+   GESTIÓN DEL NEGOCIO
+   Prospectos (embudo de consultas) · gastos del estudio · flujo de caja
+   =================================================================== */
+const ETAPAS_P = ['Nuevo', 'Consulta agendada', 'Propuesta enviada', 'Negociación', 'Ganado', 'Perdido'];
+const ETAPA_P_COLOR = { 'Nuevo': 'b-info', 'Consulta agendada': 'b-brand', 'Propuesta enviada': 'b-warn', 'Negociación': 'b-warn', 'Ganado': 'b-ok', 'Perdido': '' };
+const ORIGENES = ['Facebook', 'Instagram', 'TikTok', 'WhatsApp', 'Google', 'Recomendación', 'Cliente anterior', 'Página web', 'Otro'];
+const CATS_GASTO = ['Alquiler', 'Sueldos y practicantes', 'Servicios (luz, agua, internet)', 'Telefonía', 'Software y suscripciones', 'Publicidad y marketing', 'Movilidad', 'Útiles y materiales', 'Colegio de Abogados', 'Impuestos', 'Otros'];
+const subnav = (items, actual) => `<div class="subnav">${items.map(([r, t]) => `<a href="#/${r}" class="${r === actual ? 'on' : ''}">${t}</a>`).join('')}</div>`;
+const SUB_CLIENTES = [['clientes', 'Clientes'], ['prospectos', 'Prospectos']];
+const SUB_FINANZAS = [['honorarios', 'Cobros'], ['gastos', 'Gastos del estudio'], ['flujo', 'Flujo de caja']];
+const mesesAtras = (n) => { const out = []; for (let i = n - 1; i >= 0; i--) { const d = parse(hoy()); d.setDate(1); d.setMonth(d.getMonth() - i); out.push(iso(d).slice(0, 7)); } return out; };
+const mesesAdelante = (n) => { const out = []; for (let i = 1; i <= n; i++) { const d = parse(hoy()); d.setDate(1); d.setMonth(d.getMonth() + i); out.push(iso(d).slice(0, 7)); } return out; };
+const nombreMes = (m) => `${MESL[Number(m.slice(5)) - 1]} ${m.slice(0, 4)}`;
+const ingresosMes = (m) => DB.movimientos.filter((x) => x.tipo === 'pago' && x.fecha.startsWith(m)).reduce((a, x) => a + num(x.monto), 0);
+const gastosMes = (m) => DB.gastos.filter((x) => x.fecha.startsWith(m)).reduce((a, x) => a + num(x.monto), 0);
+const fijos = () => DB.gastos.filter((g) => g.fijo && !g.origen);
+
+/* ---------- prospectos ---------- */
+function vProspectos() {
+  const h = hoy(), mes = h.slice(0, 7), P = DB.prospectos;
+  const ganados = P.filter((p) => p.etapa === 'Ganado').length, perdidos = P.filter((p) => p.etapa === 'Perdido').length;
+  const enJuego = P.filter((p) => ['Propuesta enviada', 'Negociación'].includes(p.etapa)).reduce((a, p) => a + num(p.monto), 0);
+  const seguir = P.filter((p) => p.proximo && p.proximo <= h && !['Ganado', 'Perdido'].includes(p.etapa));
+  const porOrigen = Object.entries(P.reduce((o, p) => { const k = p.origen || 'Otro'; o[k] = o[k] || { t: 0, g: 0 }; o[k].t++; if (p.etapa === 'Ganado') o[k].g++; return o; }, {})).sort((a, b) => b[1].t - a[1].t);
+  const q = norm(estado.qPro || '');
+  const lista = P.filter((p) => !q || norm([p.nombre, p.asunto, p.telefono, p.materia, p.origen].join(' ')).includes(q));
+  const tarjeta = (p) => {
+    const atraso = p.proximo && p.proximo <= h && !['Ganado', 'Perdido'].includes(p.etapa);
+    return `<div class="tarjeta" draggable="true" data-id="${p.id}" data-pro="1" data-act="editProspecto"><div class="t">${esc(p.nombre)}</div>
+      <div class="tiny">${esc(p.asunto || p.materia || '')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;gap:6px"><span class="badge">${esc(p.origen || 'Otro')}</span>${p.monto ? `<b class="small">${sol(p.monto).replace('.00', '')}</b>` : ''}</div>
+      ${p.proximo && !['Ganado', 'Perdido'].includes(p.etapa) ? `<div class="tiny" style="margin-top:4px;color:var(--${atraso ? 'mal' : 'tinta-3'})">${icon('i-clock').replace('<svg>', '<svg style="width:11px;height:11px;vertical-align:-1px">')} Seguimiento ${cuando(p.proximo)}</div>` : ''}
+      <select class="mover-p" data-id="${p.id}" aria-label="Mover a">${ETAPAS_P.map((o) => `<option ${o === p.etapa ? 'selected' : ''}>${o}</option>`).join('')}</select></div>`;
+  };
+  return `${subnav(SUB_CLIENTES, 'prospectos')}
+  <div class="head"><div><h1>Prospectos</h1><div class="sub">Consultas de posibles clientes, desde el primer mensaje hasta el contrato</div></div>
+    <div class="actions"><button class="btn pri" data-act="nuevoProspecto">${icon('i-plus')} Nueva consulta</button></div></div>
+  <div class="card sumario" style="margin-bottom:18px">
+    <div class="stat"><div class="k">Nuevos este mes</div><div class="v">${P.filter((p) => (p.fecha || '').startsWith(mes)).length}</div></div>
+    <div class="stat"><div class="k">Conversión</div><div class="v">${ganados + perdidos ? Math.round((ganados / (ganados + perdidos)) * 100) : 0}%</div><div class="d">${ganados} ganados · ${perdidos} perdidos</div></div>
+    <div class="stat"><div class="k">En propuesta</div><div class="v">${sol(enJuego).replace('.00', '')}</div><div class="d">honorarios por cerrar</div></div>
+    <div class="stat ${seguir.length ? 'alert' : ''}"><div class="k">Seguimientos</div><div class="v">${seguir.length}</div><div class="d">para hoy o atrasados</div></div>
+  </div>
+  <div class="toolbar"><label class="search">${icon('i-search')}<input id="qPro" placeholder="Buscar por nombre, asunto, teléfono…" value="${esc(estado.qPro || '')}"></label></div>
+  <div class="tablero">${ETAPAS_P.map((et) => { const xs = lista.filter((p) => (p.etapa || 'Nuevo') === et);
+    return `<div class="col" data-etapa="${esc(et)}"><div class="col-h"><span class="badge ${ETAPA_P_COLOR[et]}">${esc(et)}</span><span class="tiny">${xs.length}${xs.some((p) => p.monto) ? ' · ' + sol(xs.reduce((a, p) => a + num(p.monto), 0)).replace('.00', '') : ''}</span></div>
+      ${xs.map(tarjeta).join('') || '<div class="tiny vacio">Arrastra aquí</div>'}</div>`; }).join('')}</div>
+  ${porOrigen.length ? `<div class="card" style="margin-top:18px"><h2>¿De dónde llegan?</h2>${barrasH(porOrigen.map(([l, o]) => ({ l, v: o.t })), (v, c) => c ? String(v) : v + (v === 1 ? ' consulta' : ' consultas'))}
+    <p class="tiny" style="margin:10px 0 0">${porOrigen.map(([l, o]) => `${esc(l)}: ${o.g} de ${o.t} ganados`).join(' · ')}</p></div>` : ''}`;
+}
+function formProspecto(p) {
+  const valores = p || { etapa: 'Nuevo', fecha: hoy(), origen: 'Facebook', proximo: sumar(hoy(), 1) };
+  const form = abrirModal({
+    titulo: p ? p.nombre : 'Nueva consulta', valores,
+    campos: [
+      { k: 'nombre', l: 'Nombre', req: true, full: true },
+      { k: 'telefono', l: 'Celular', t: 'tel' },
+      { k: 'email', l: 'Correo', t: 'email' },
+      { k: 'asunto', l: 'Asunto / qué necesita', full: true, ph: 'Desalojo de inquilino que no paga' },
+      { k: 'materia', l: 'Materia', t: 'select', op: MATERIAS },
+      { k: 'origen', l: 'Cómo nos conoció', t: 'select', op: ORIGENES },
+      { k: 'etapa', l: 'Etapa', t: 'select', op: ETAPAS_P },
+      { k: 'monto', l: 'Honorario estimado (S/)', t: 'number' },
+      { k: 'fecha', l: 'Fecha de la consulta', t: 'date' },
+      { k: 'proximo', l: 'Próximo seguimiento', t: 'date' },
+      { k: 'notas', l: 'Notas', t: 'textarea' },
+    ],
+    extra: p ? `<div class="actions" style="margin-top:14px">
+      ${p.telefono ? `<a class="btn sm wa" href="${waLink(p.telefono, `Hola ${p.nombre.split(' ')[0]}, le escribe ${DB.ajustes.abogado || DB.ajustes.estudio || ''} sobre su consulta${p.asunto ? ' (' + p.asunto + ')' : ''}.`)}" target="_blank" rel="noopener">${icon('i-wa')} WhatsApp</a>` : ''}
+      <button type="button" class="btn sm" id="pConsulta">${icon('i-cal')} Agendar consulta</button>
+      <button type="button" class="btn sm" id="pPropuesta">${icon('i-doc')} Propuesta de honorarios</button>
+      ${p.clienteId && cliente(p.clienteId) ? `<a class="btn sm" href="#/cliente/${p.clienteId}">Ver cliente</a>` : `<button type="button" class="btn sm pri" id="pConvertir">Convertir en cliente</button>`}</div>` : '',
+    guardar: (d) => {
+      d.monto = num(d.monto) || '';
+      if (p) Object.assign(p, d); else { p = Object.assign({ id: uid() }, d); DB.prospectos.push(p); }
+      p.actualizado = ahora(); guardar(); toast('Guardado'); reRender();
+    },
+    borrar: p ? () => { if (!confirm('¿Eliminar esta consulta?')) return false; DB.prospectos = DB.prospectos.filter((x) => x.id !== p.id); guardar(); reRender(); } : null,
+  });
+  if (!p) return;
+  const q = (s) => form.querySelector(s);
+  if (q('#pConsulta')) q('#pConsulta').onclick = () => { cerrarModal(); formEvento(null, { tipo: 'reunion', titulo: 'Consulta: ' + p.nombre, fecha: p.proximo || hoy(), notas: [p.asunto, p.telefono].filter(Boolean).join(' · ') }); if (p.etapa === 'Nuevo') { p.etapa = 'Consulta agendada'; guardar(); } };
+  if (q('#pPropuesta')) q('#pPropuesta').onclick = () => { cerrarModal(); estado.gen = { modelo: 'n-propuesta', expedienteId: '', clienteId: p.clienteId || '', vals: { destinatario: p.nombre, asunto: p.asunto || p.materia || '', honorario: p.monto ? String(p.monto) : '' }, ops: {} }; location.hash = '#/generar/n-propuesta'; };
+  if (q('#pConvertir')) q('#pConvertir').onclick = () => { cerrarModal(); convertirProspecto(p); };
+}
+function convertirProspecto(p) {
+  abrirModal({
+    titulo: 'Convertir en cliente', boton: 'Crear cliente', valores: { nombre: p.nombre, telefono: p.telefono, email: p.email, crearExp: true, honorario: p.monto || '' },
+    campos: [
+      { k: 'nombre', l: 'Nombre o razón social', req: true, full: true },
+      { k: 'documento', l: 'DNI / RUC' },
+      { k: 'telefono', l: 'Celular', t: 'tel' },
+      { k: 'email', l: 'Correo', t: 'email', full: true },
+      { k: 'crearExp', l: 'Abrir también el expediente del caso', t: 'checkbox', full: true },
+      { k: 'honorario', l: 'Honorario pactado (S/)', t: 'number', full: true, hint: 'Se registra como honorario del caso' },
+    ],
+    guardar: (d) => {
+      const c = { id: uid(), creado: hoy(), nombre: d.nombre, documento: d.documento, telefono: d.telefono, email: d.email, tipo: /s\.?a\.?c|e\.?i\.?r\.?l|s\.?r\.?l|s\.a\./i.test(d.nombre) ? 'Empresa' : 'Persona natural', notas: [p.asunto, p.notas].filter(Boolean).join('\n') };
+      DB.clientes.push(c);
+      let e = null;
+      if (d.crearExp) { e = { id: uid(), clienteId: c.id, materia: p.materia || 'Civil', pretension: p.asunto || '', estado: 'Por presentar', inicio: hoy(), actualizado: ahora(), actuaciones: [{ id: uid(), fecha: hoy(), texto: 'Caso abierto desde la consulta del ' + fFecha(p.fecha || hoy()) + (p.origen ? ' (llegó por ' + p.origen + ')' : '') }] }; DB.expedientes.push(e); }
+      if (num(d.honorario) > 0) DB.movimientos.push({ id: uid(), creado: ahora(), tipo: 'honorario', clienteId: c.id, expedienteId: e ? e.id : '', fecha: hoy(), monto: num(d.honorario), medio: '', concepto: 'Honorarios pactados' });
+      p.etapa = 'Ganado'; p.clienteId = c.id; p.actualizado = ahora();
+      guardar(); toast('¡Cliente nuevo!'); location.hash = e ? '#/expediente/' + e.id : '#/cliente/' + c.id;
+    },
+  });
+}
+function moverProspecto(id, etapa) {
+  const p = DB.prospectos.find((x) => x.id === id); if (!p || p.etapa === etapa) return;
+  if (etapa === 'Ganado' && !p.clienteId) { p.etapa = 'Negociación'; guardar(); reRender(); convertirProspecto(p); return; }
+  if (etapa === 'Perdido') { const m = prompt('¿Por qué se perdió? (opcional)', p.motivo || ''); if (m === null) { reRender(); return; } p.motivo = m; }
+  p.etapa = etapa; p.actualizado = ahora(); guardar(); reRender(); toast(`Movido a «${etapa}»`);
+}
+
+/* ---------- gastos del estudio ---------- */
+function vGastos() {
+  const h = hoy(), mes = h.slice(0, 7), Y = h.slice(0, 4);
+  const delMes = gastosMes(mes), delAnio = DB.gastos.filter((g) => g.fecha.startsWith(Y)).reduce((a, g) => a + num(g.monto), 0);
+  const fj = fijos(), totalFijo = fj.reduce((a, g) => a + num(g.monto), 0);
+  const faltan = fj.filter((g) => !DB.gastos.some((x) => (x.origen === g.id || x.id === g.id) && x.fecha.startsWith(mes)));
+  const lista = DB.gastos.filter((g) => !estado.fCat || g.categoria === estado.fCat).sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 300);
+  const porMes = {}; lista.forEach((g) => (porMes[g.fecha.slice(0, 7)] = porMes[g.fecha.slice(0, 7)] || []).push(g));
+  const porCat = Object.entries(DB.gastos.filter((g) => g.fecha.startsWith(Y)).reduce((o, g) => { o[g.categoria || 'Otros'] = (o[g.categoria || 'Otros'] || 0) + num(g.monto); return o; }, {})).map(([l, v]) => ({ l, v })).sort((a, b) => b.v - a.v);
+  return `${subnav(SUB_FINANZAS, 'gastos')}
+  <div class="head"><div><h1>Gastos del estudio</h1><div class="sub">Alquiler, sueldos, servicios, publicidad… lo que cuesta mantener la oficina</div></div>
+    <div class="actions">${faltan.length ? `<button class="btn" data-act="generarFijos">Registrar ${faltan.length} gasto(s) fijo(s) de ${MESL[new Date().getMonth()].toLowerCase()}</button>` : ''}<button class="btn pri" data-act="nuevoGasto">${icon('i-plus')} Registrar gasto</button></div></div>
+  <div class="card sumario" style="margin-bottom:18px">
+    <div class="stat"><div class="k">Este mes</div><div class="v">${sol(delMes)}</div></div>
+    <div class="stat"><div class="k">En ${Y}</div><div class="v">${sol(delAnio)}</div></div>
+    <div class="stat"><div class="k">Gastos fijos al mes</div><div class="v">${sol(totalFijo)}</div><div class="d">${fj.length} fijo(s)</div></div>
+  </div>
+  <div class="grid g2" style="align-items:start">
+    <div class="card"><h2>Movimientos <select class="f" id="fCat" style="font-size:13px;padding:5px 8px"><option value="">Todas las categorías</option>${CATS_GASTO.map((c) => `<option ${c === estado.fCat ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></h2>
+      ${Object.keys(porMes).length ? Object.entries(porMes).map(([m, gs]) => `<div class="dia-t">${nombreMes(m)} · ${sol(gs.reduce((a, g) => a + num(g.monto), 0))}</div><div class="list">${gs.map((g) => `<div class="row" data-act="editGasto" data-id="${g.id}"><div class="datebox"><b>${parse(g.fecha).getDate()}</b><span>${MES[parse(g.fecha).getMonth()]}</span></div>
+        <div class="main"><div class="t">${esc(g.concepto || g.categoria)}</div><div class="s"><span class="badge">${esc(g.categoria || 'Otros')}</span> ${g.fijo || g.origen ? '· fijo ' : ''}${esc(g.medio || '')}</div></div><div class="end money">${sol(g.monto)}</div></div>`).join('')}</div>`).join('') : `<div class="empty">${icon('i-money')}<div>Todavía no registras gastos.</div></div>`}</div>
+    <div><div class="card"><h2>En qué se va el dinero <span class="tiny">${Y}</span></h2>${barrasH(porCat, (v, c) => c && v >= 1000 ? 'S/ ' + (v / 1000).toLocaleString('es-PE', { maximumFractionDigits: 1 }) + ' mil' : sol(v))}</div>
+      <div class="card"><h2>Gastos fijos</h2>${fj.length ? `<div class="list">${fj.map((g) => `<div class="row" data-act="editGasto" data-id="${g.id}"><div class="main"><div class="t">${esc(g.concepto || g.categoria)}</div><div class="s">${esc(g.categoria)}</div></div><div class="end money">${sol(g.monto)}</div></div>`).join('')}</div>` : '<div class="empty small">Marca un gasto como «fijo» para que se repita cada mes.</div>'}</div></div>
+  </div>`;
+}
+function formGasto(g) {
+  abrirModal({
+    titulo: g ? 'Editar gasto' : 'Registrar gasto', valores: g || { fecha: hoy(), categoria: 'Alquiler', medio: 'Transferencia' },
+    campos: [
+      { k: 'concepto', l: 'Concepto', req: true, full: true, ph: 'Alquiler de oficina — noviembre' },
+      { k: 'categoria', l: 'Categoría', t: 'select', op: CATS_GASTO },
+      { k: 'monto', l: 'Monto (S/)', t: 'number', req: true },
+      { k: 'fecha', l: 'Fecha', t: 'date', req: true },
+      { k: 'medio', l: 'Medio de pago', t: 'select', op: MEDIOS },
+      ...(g && g.origen ? [] : [{ k: 'fijo', l: 'Es un gasto fijo: se repite cada mes', t: 'checkbox', full: true }]),
+    ],
+    guardar: (d) => {
+      d.monto = num(d.monto);
+      if (g) Object.assign(g, d); else DB.gastos.push(Object.assign({ id: uid() }, d));
+      guardar(); toast('Gasto guardado'); reRender();
+    },
+    borrar: g ? () => { if (!confirm('¿Eliminar este gasto?')) return false; DB.gastos = DB.gastos.filter((x) => x.id !== g.id); guardar(); reRender(); } : null,
+  });
+}
+function generarFijos() {
+  const mes = hoy().slice(0, 7);
+  const faltan = fijos().filter((g) => !DB.gastos.some((x) => (x.origen === g.id || x.id === g.id) && x.fecha.startsWith(mes)));
+  faltan.forEach((g) => DB.gastos.push({ id: uid(), origen: g.id, concepto: g.concepto, categoria: g.categoria, monto: g.monto, medio: g.medio, fecha: mes + '-' + g.fecha.slice(8, 10).replace(/^(3[01]|29)$/, '28') }));
+  guardar(); reRender(); toast(`${faltan.length} gasto(s) fijo(s) registrados`);
+}
+
+/* ---------- flujo de caja ---------- */
+function barrasDobles(datos, fmt) {
+  const max = Math.max(1, ...datos.flatMap((d) => [d.a, d.b]));
+  const paso = Math.pow(10, Math.floor(Math.log10(max))), tope = Math.ceil(max / paso) * paso;
+  return `<div class="vbars"><div class="vb-ejes">${[tope, tope / 2, 0].map((t) => `<span>${esc(fmt(t, true))}</span>`).join('')}</div>
+    <div class="vb-area">${[0, 50, 100].map((y) => `<i class="vb-linea" style="bottom:${y}%"></i>`).join('')}
+      ${datos.map((d) => `<div class="vb hov" data-tip="${esc(d.l)} · ingresos ${esc(fmt(d.a))} · gastos ${esc(fmt(d.b))} · utilidad ${esc(fmt(d.a - d.b))}"><div class="vb-col doble"><i style="height:${(d.a / tope) * 100}%"></i><i class="b2 ${d.proy ? 'proy' : ''}" style="height:${(d.b / tope) * 100}%"></i></div><span class="vb-et">${esc(d.c)}</span></div>`).join('')}</div></div>`;
+}
+function vFlujo() {
+  const meses = mesesAtras(12), mes = hoy().slice(0, 7);
+  const filas = meses.map((m) => ({ m, a: ingresosMes(m), b: gastosMes(m) }));
+  const act = filas[filas.length - 1], conDatos = filas.filter((f) => f.a || f.b);
+  const prom = conDatos.length ? conDatos.reduce((s, f) => s + f.a, 0) / conDatos.length : 0;
+  const fijoMes = fijos().reduce((a, g) => a + num(g.monto), 0);
+  const proy = mesesAdelante(3).map((m) => ({ m, a: DB.cuotas.filter((q) => !q.pagada && q.fecha.startsWith(m)).reduce((s, q) => s + q.monto, 0), b: fijoMes }));
+  const atrasadas = DB.cuotas.filter((q) => !q.pagada && q.fecha < mes + '-01').reduce((s, q) => s + q.monto, 0);
+  const fS = (v, c) => c && Math.abs(v) >= 1000 ? 'S/ ' + (v / 1000).toLocaleString('es-PE', { maximumFractionDigits: 1 }) + ' mil' : sol(v);
+  const margen = act.a ? Math.round(((act.a - act.b) / act.a) * 100) : 0;
+  return `${subnav(SUB_FINANZAS, 'flujo')}
+  <div class="head"><div><h1>Flujo de caja</h1><div class="sub">Lo que entra, lo que sale y lo que queda</div></div></div>
+  <div class="card sumario" style="margin-bottom:18px">
+    <div class="stat"><div class="k">Ingresos de ${MESL[new Date().getMonth()].toLowerCase()}</div><div class="v pos">${sol(act.a)}</div></div>
+    <div class="stat"><div class="k">Gastos del mes</div><div class="v">${sol(act.b)}</div></div>
+    <div class="stat ${act.a - act.b < 0 ? 'alert' : ''}"><div class="k">Utilidad del mes</div><div class="v">${sol(act.a - act.b)}</div><div class="d">margen ${margen}%</div></div>
+    <div class="stat"><div class="k">Promedio de ingresos</div><div class="v">${sol(prom)}</div><div class="d">por mes con movimiento</div></div>
+  </div>
+  <div class="card"><h2>Últimos 12 meses <span class="leyenda"><span><i style="background:var(--vino)"></i>Ingresos (cobrado)</span><span><i style="background:var(--tinta-3)"></i>Gastos del estudio</span></span></h2>
+    ${barrasDobles(filas.map((f) => ({ c: MES[Number(f.m.slice(5)) - 1], l: nombreMes(f.m), a: f.a, b: f.b })), fS)}
+    <table class="tabla" style="margin-top:14px"><thead><tr><th>Mes</th><th class="r">Ingresos</th><th class="r">Gastos</th><th class="r">Utilidad</th></tr></thead><tbody>
+      ${[...filas].reverse().map((f) => `<tr><td>${nombreMes(f.m)}</td><td class="r">${sol(f.a)}</td><td class="r">${sol(f.b)}</td><td class="r ${f.a - f.b < 0 ? 'neg' : ''}"><b>${sol(f.a - f.b)}</b></td></tr>`).join('')}
+      <tr><td><b>Total</b></td><td class="r"><b>${sol(filas.reduce((s, f) => s + f.a, 0))}</b></td><td class="r"><b>${sol(filas.reduce((s, f) => s + f.b, 0))}</b></td><td class="r"><b>${sol(filas.reduce((s, f) => s + f.a - f.b, 0))}</b></td></tr></tbody></table></div>
+  <div class="card"><h2>Próximos 3 meses <span class="tiny">proyección</span></h2>
+    <table class="tabla"><thead><tr><th>Mes</th><th class="r">Cuotas por cobrar</th><th class="r">Gastos fijos</th><th class="r">Resultado esperado</th></tr></thead><tbody>
+      ${proy.map((f) => `<tr><td>${nombreMes(f.m)}</td><td class="r">${sol(f.a)}</td><td class="r">${sol(f.b)}</td><td class="r ${f.a - f.b < 0 ? 'neg' : ''}"><b>${sol(f.a - f.b)}</b></td></tr>`).join('')}</tbody></table>
+    <p class="tiny" style="margin:10px 0 0">Sólo cuenta las cuotas con fecha y los gastos fijos; los honorarios nuevos y los gastos variables no están incluidos.${atrasadas ? ` Además hay <b class="neg">${sol(atrasadas)}</b> en cuotas atrasadas por cobrar.` : ''}</p></div>`;
+}
+
+/* ---------- en la portada ---------- */
+function inicioExtra() {
+  const h = hoy(), mes = h.slice(0, 7);
+  const seguir = DB.prospectos.filter((p) => p.proximo && p.proximo <= sumar(h, 1) && !['Ganado', 'Perdido'].includes(p.etapa)).sort((a, b) => a.proximo.localeCompare(b.proximo));
+  const a = ingresosMes(mes), b = gastosMes(mes);
+  let html = '';
+  if (seguir.length) html += `<div class="card"><h2>Consultas por seguir <a class="btn ghost sm" href="#/prospectos">Prospectos</a></h2><div class="list">${seguir.slice(0, 5).map((p) => `<div class="row" data-act="editProspecto" data-id="${p.id}"><div class="inic">${esc(iniciales(p.nombre))}</div><div class="main"><div class="t">${esc(p.nombre)}</div><div class="s">${esc(p.asunto || p.materia || '')} · <span class="badge ${ETAPA_P_COLOR[p.etapa] || ''}">${esc(p.etapa)}</span></div></div><div class="end tiny" style="color:var(--${p.proximo < h ? 'mal' : 'tinta-3'})">${cuando(p.proximo)}</div></div>`).join('')}</div></div>`;
+  if (a || b) html += `<div class="card"><h2>${MESL[new Date().getMonth()]} en números <a class="btn ghost sm" href="#/flujo">Flujo de caja</a></h2><div class="sumario" style="border:0;box-shadow:none"><div class="stat" style="padding-left:0"><div class="k">Cobrado</div><div class="v pos" style="font-size:20px">${sol(a)}</div></div><div class="stat"><div class="k">Gastos</div><div class="v" style="font-size:20px">${sol(b)}</div></div><div class="stat"><div class="k">Utilidad</div><div class="v ${a - b < 0 ? 'neg' : ''}" style="font-size:20px">${sol(a - b)}</div></div></div></div>`;
+  return html + (typeof inicioEquipo === 'function' ? inicioEquipo() : '');
 }
 
 /* ---------- varios ---------- */
