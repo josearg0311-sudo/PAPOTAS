@@ -65,6 +65,9 @@ jobs:
           sed -i 's#<meta name="pap-sitio" content="0">#<meta name="pap-sitio" content="1">#' \
             sitio/index.html sitio/papotas-nuevo.html
           grep -q '"pap-sitio" content="1"' sitio/index.html
+          # El plan de alimentación de 90 días: una app aparte, un solo archivo.
+          mkdir -p sitio/plan-90-dias
+          cp plan-90-dias/index.html sitio/plan-90-dias/index.html
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll
           ls -la sitio
