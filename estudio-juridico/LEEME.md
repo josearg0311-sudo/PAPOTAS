@@ -5,6 +5,41 @@ solo sitio sus **clientes, expedientes, audiencias, plazos y honorarios**.
 Es un solo archivo (`index.html`), funciona en el celular y en la
 computadora, se instala como aplicación y no necesita servidor.
 
+## Lo más nuevo
+
+- **Diseño vino renovado**: cabecera vino, tarjetas limpias, portada con
+  indicadores (casos, audiencias, plazos, por cobrar), agenda de hoy y
+  mañana con colores por tipo, y modo oscuro.
+- **Equipo**: abogados, asistentes y practicantes con su color. Cada caso
+  tiene responsable y cada audiencia, plazo o tarea una persona asignada;
+  filtros «sólo lo mío», pendientes propios en la portada y la carga de
+  cada uno (casos, pendientes, horas) en la vista Equipo.
+- **Nube (Supabase)**: todo el equipo trabaja sobre los mismos datos desde
+  cualquier celular o computadora. Cada uno entra con su correo; sólo
+  entran los correos que un administrador agregue en Equipo.
+  1. Crea un proyecto gratis en supabase.com.
+  2. En «SQL Editor» pega `supabase.sql` (de esta carpeta) y pulsa «Run».
+  3. En «Project Settings → API» copia la URL y la clave «anon public».
+  4. En el programa: Equipo → Nube y acceso → pégalas y crea tu cuenta
+     (la primera cuenta del proyecto administra).
+  Se sincroniza sola al guardar, cada 45 segundos y al volver a la app.
+  Los documentos adjuntos y la clave de la IA no se suben.
+- **Flujos por tipo de proceso**: civil (conocimiento, abreviado,
+  sumarísimo, ejecución), laboral NLPT (ordinario y abreviado), penal NCPP,
+  alimentos y genérico. El expediente muestra sus etapas; al registrar un
+  hito («notificada la sentencia») se anota, se calcula y agenda el plazo
+  en días hábiles (o la audiencia) y el caso pasa de etapa. Plazos
+  referenciales y editables.
+- **IA que actúa**: además de responder, el asistente busca, crea clientes,
+  expedientes y prospectos, agenda audiencias y plazos (calculándolos con
+  los feriados), registra actuaciones, pagos y gastos, cambia la etapa y
+  genera documentos con los modelos. Cada respuesta muestra lo que hizo y
+  tiene un botón para deshacerlo todo.
+- **Gestión del negocio**: prospectos en tablero (con seguimiento, origen,
+  conversión, propuesta de honorarios y conversión a cliente), gastos del
+  estudio con gastos fijos mensuales, y flujo de caja con utilidad, margen
+  y proyección de tres meses.
+
 ## Qué hace
 
 - **Inicio**: expedientes activos, audiencias y plazos de los próximos 7
