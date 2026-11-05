@@ -561,6 +561,21 @@ main{padding-top:26px}
 .cuerpo h4{font-family:var(--serif)}
 #crono{border-radius:999px}
 
+/* flujo del proceso */
+.flujo{margin-top:18px}
+.pasos-flujo{display:flex;gap:0;overflow-x:auto;padding:4px 0 12px;scrollbar-width:thin}
+.paso{flex:1 0 auto;min-width:96px;display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:0;cursor:pointer;position:relative;padding:0 6px;color:var(--tinta-3);font-size:12px;font-weight:600}
+.paso:before{content:"";position:absolute;top:14px;left:-50%;right:50%;height:2px;background:var(--regla-2);z-index:0}
+.paso:first-child:before{display:none}
+.paso i{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--hoja);border:2px solid var(--regla-2);font-style:normal;font-size:12px;z-index:1;position:relative}
+.paso i svg{width:14px;height:14px}
+.paso span{text-align:center;max-width:110px;line-height:1.25}
+.paso.hecho{color:var(--tinta-2)} .paso.hecho i{background:var(--vino);border-color:var(--vino);color:var(--sobre-vino)} .paso.hecho:before,.paso.actual:before{background:var(--vino)}
+.paso.actual{color:var(--vino)} .paso.actual i{border-color:var(--vino);color:var(--vino);box-shadow:0 0 0 4px var(--vino-suave)}
+.que-sigue{border-top:1px solid var(--regla);padding-top:12px}
+.chip-ins.hito{border-radius:999px;padding:6px 12px;font-size:12.5px}
+.chip-ins.hito b{color:var(--vino)}
+
 /* subnavegación */
 .subnav{display:inline-flex;gap:4px;background:var(--hoja);border:1px solid var(--regla);border-radius:12px;padding:4px;margin-bottom:18px;max-width:100%;overflow-x:auto}
 .subnav a{padding:6px 14px;border-radius:9px;text-decoration:none;color:var(--tinta-2);font-weight:600;font-size:13.5px;white-space:nowrap}
@@ -1015,7 +1030,7 @@ function filaExp(e) {
   const prox = DB.eventos.filter((v) => v.expedienteId === e.id && !v.hecho && v.fecha >= hoy()).sort(ordenEv)[0];
   return `<div class="row" data-go="expediente/${e.id}"><div class="main">
     <div class="t">${esc(caratula(e))}</div>
-    <div class="s"><span class="mono">${esc(e.numero || 'Sin número')}</span>${e.juzgado ? ' · ' + esc(e.juzgado) : ''}</div>
+    <div class="s"><span class="mono">${esc(e.numero || 'Sin número')}</span>${e.juzgado ? ' · ' + esc(e.juzgado) : ''}${etapaDe(e) ? ' · <b>' + esc(etapaDe(e).n) + '</b>' : ''}</div>
     ${prox ? `<div class="s" style="color:var(--${{ bad: 'mal', warn: 'ambar' }[urg(prox)] || 'tinta-2'})">${icon('i-clock').replace('<svg>', '<svg style="width:12px;height:12px;vertical-align:-1px">')} ${esc(TIPOS_EV[prox.tipo])}: ${fFecha(prox.fecha)} (${cuando(prox.fecha)})</div>` : ''}</div>
     <div class="end"><span class="badge ${ESTADO_COLOR[e.estado] || ''}">${esc(e.estado || 'En trámite')}</span><div class="tiny" style="margin-top:4px">${esc(e.materia || '')}</div></div></div>`;
 }
@@ -1067,6 +1082,7 @@ function vExpediente(id) {
     ${kv('Condición', e.condicion)}${kv('Contraparte', e.contraparte)}${kv('Materia', e.materia)}${kv('Pretensión / delito', e.pretension)}
     ${kv('Órgano jurisdiccional', e.juzgado)}${kv('Distrito judicial', e.distrito)}${kv('Juez', e.juez)}${kv('Especialista', e.especialista)}${kv('Inicio', fFecha(e.inicio))}
     ${e.notas ? `<div style="grid-column:1/-1"><span>Notas</span><b style="white-space:pre-wrap">${esc(e.notas)}</b></div>` : ''}</div></div>
+  ${tarjetaFlujo(e)}
   <div class="grid g2" style="margin-top:14px;align-items:start">
     <div>
       <div class="card"><h2>Audiencias y plazos <button class="btn sm pri" data-act="nuevoEvento" data-exp="${id}">${icon('i-plus')} Agregar</button></h2>
@@ -1370,12 +1386,14 @@ function formExp(e, clienteId) {
       { k: 'especialista', l: 'Especialista legal' },
       { k: 'estado', l: 'Estado', t: 'select', op: ESTADOS },
       { k: 'inicio', l: 'Fecha de inicio', t: 'date' },
+      { k: 'proceso', l: 'Tipo de proceso (flujo de etapas y plazos)', t: 'select', full: true, op: [['', '— Sin flujo —'], ...PROCESOS.map((x) => [x.id, x.nombre])] },
       { k: 'notas', l: 'Notas', t: 'textarea' },
     ],
     guardar: (d) => {
       const cf = conflictosDeContraparte(d.contraparte, d.clienteId);
       if (cf.length && (!e || e.contraparte !== d.contraparte) && !confirm(`⚠ Posible conflicto de intereses\nLa contraparte «${d.contraparte}» se parece a tu cliente:\n${cf.map((c) => '• ' + c.nombre).join('\n')}\n\n¿Guardar igual?`)) return false;
       d.actualizado = ahora();
+      if (!e || e.proceso !== d.proceso) d.etapa = 0;
       if (e) {
         if (e.clienteId !== d.clienteId) DB.movimientos.forEach((m) => { if (m.expedienteId === e.id) m.clienteId = d.clienteId; });
         Object.assign(e, d);
@@ -1633,6 +1651,9 @@ const ACC = {
   nuevoGasto: () => formGasto(),
   editGasto: (d) => { const g = DB.gastos.find((x) => x.id === d.id); if (g) formGasto(g); },
   generarFijos: () => generarFijos(),
+  registrarHito: (d) => { const e = expediente(d.id); if (e) formHito(e, d.k != null ? Number(d.k) : null); },
+  irEtapa: (d) => { const e = expediente(d.id), p = e && proceso(e.proceso), k = Number(d.k); if (!p || k === (e.etapa || 0) || !confirm(`¿Pasar el caso a la etapa «${p.etapas[k].n}»?`)) return; e.actuaciones.push({ id: uid(), fecha: hoy(), texto: `Etapa: ${p.etapas[e.etapa || 0].n} → ${p.etapas[k].n}` }); e.etapa = k; estadoSegunEtapa(e); e.actualizado = ahora(); guardar(); reRender(); },
+  cambiarProceso: (d) => { const e = expediente(d.id); if (!e) return; abrirModal({ titulo: 'Tipo de proceso', valores: { proceso: e.proceso || '' }, campos: [{ k: 'proceso', l: 'Tipo de proceso', t: 'select', full: true, op: [['', '— Sin flujo —'], ...PROCESOS.map((x) => [x.id, x.nombre])] }], guardar: (v) => { if (v.proceso !== e.proceso) { e.proceso = v.proceso; e.etapa = 0; e.actualizado = ahora(); guardar(); reRender(); } } }); },
   borrarInhabil: (d) => { DB.ajustes.inhabiles = DB.ajustes.inhabiles.filter((i) => i.fecha !== d.v); guardar(); reRender(); },
 };
 document.addEventListener('click', (ev) => {
@@ -1681,6 +1702,7 @@ document.addEventListener('change', (ev) => {
   if (ev.target.classList.contains('fileDocs')) subirArchivos(ev.target.dataset.exp, [...ev.target.files]);
   if (ev.target.classList.contains('mover')) moverExp(ev.target.dataset.id, ev.target.value);
   if (ev.target.classList.contains('mover-p')) moverProspecto(ev.target.dataset.id, ev.target.value);
+  if (ev.target.id === 'elegirProceso' && ev.target.value) { const e = expediente(ev.target.dataset.id); if (e) { e.proceso = ev.target.value; e.etapa = 0; e.actuaciones.push({ id: uid(), fecha: hoy(), texto: 'Flujo: ' + proceso(e.proceso).nombre }); e.actualizado = ahora(); guardar(); reRender(); } }
   if (ev.target.id === 'fCat') { estado.fCat = ev.target.value; reRender(); }
 });
 document.addEventListener('submit', (ev) => {
@@ -1824,6 +1846,7 @@ function cargarEjemplo() {
     mv({ tipo: 'honorario', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -35), monto: 2500, concepto: 'Defensa en investigación preparatoria' }),
     mv({ tipo: 'pago', clienteId: cC.id, expedienteId: e3.id, fecha: sumar(h, -2), monto: 500, medio: 'Plin', concepto: 'Adelanto' }),
   ];
+  Object.assign(e1, { proceso: 'civ-conocimiento', etapa: 3 }); Object.assign(e2, { proceso: 'lab-ordinario', etapa: 4 }); Object.assign(e3, { proceso: 'pen-comun', etapa: 1 }); Object.assign(e4, { proceso: 'generico', etapa: 0 });
   DB.clientes.push(cA, cB, cC); DB.expedientes.push(e1, e2, e3, e4); DB.eventos.push(...eventos); DB.movimientos.push(...movs);
   movs.filter((m) => m.tipo === 'pago').forEach((m) => { m.recibo = DB.ajustes.recibo = (num(DB.ajustes.recibo) || 0) + 1; });
   const plan = uid();
@@ -3102,6 +3125,7 @@ function contextoExpIA(e) {
     `Número: ${e.numero || 'sin número'}`, `Carátula: ${caratula(e)}`, `Materia: ${e.materia || ''} · Pretensión/delito: ${e.pretension || ''}`,
     `Órgano jurisdiccional: ${e.juzgado || ''} · Distrito judicial: ${e.distrito || ''} · Juez: ${e.juez || ''} · Especialista: ${e.especialista || ''}`,
     `Estado: ${e.estado || ''} · Inicio: ${e.inicio ? fFecha(e.inicio) : ''}`,
+    proceso(e.proceso) ? `Tipo de proceso: ${proceso(e.proceso).nombre} · etapa actual: ${etapaDe(e).n}` : '',
     `Nuestro cliente: ${c.nombre || ''} (${c.documento || 'sin documento'}), condición: ${e.condicion || ''}, domicilio: ${c.direccion || ''}`,
     `Contraparte: ${e.contraparte || ''}`,
     e.notas ? `Notas internas: ${e.notas}` : '',
@@ -3566,6 +3590,166 @@ function inicioExtra() {
   if (seguir.length) html += `<div class="card"><h2>Consultas por seguir <a class="btn ghost sm" href="#/prospectos">Prospectos</a></h2><div class="list">${seguir.slice(0, 5).map((p) => `<div class="row" data-act="editProspecto" data-id="${p.id}"><div class="inic">${esc(iniciales(p.nombre))}</div><div class="main"><div class="t">${esc(p.nombre)}</div><div class="s">${esc(p.asunto || p.materia || '')} · <span class="badge ${ETAPA_P_COLOR[p.etapa] || ''}">${esc(p.etapa)}</span></div></div><div class="end tiny" style="color:var(--${p.proximo < h ? 'mal' : 'tinta-3'})">${cuando(p.proximo)}</div></div>`).join('')}</div></div>`;
   if (a || b) html += `<div class="card"><h2>${MESL[new Date().getMonth()]} en números <a class="btn ghost sm" href="#/flujo">Flujo de caja</a></h2><div class="sumario" style="border:0;box-shadow:none"><div class="stat" style="padding-left:0"><div class="k">Cobrado</div><div class="v pos" style="font-size:20px">${sol(a)}</div></div><div class="stat"><div class="k">Gastos</div><div class="v" style="font-size:20px">${sol(b)}</div></div><div class="stat"><div class="k">Utilidad</div><div class="v ${a - b < 0 ? 'neg' : ''}" style="font-size:20px">${sol(a - b)}</div></div></div></div>`;
   return html + (typeof inicioEquipo === 'function' ? inicioEquipo() : '');
+}
+
+/* ===================================================================
+   FLUJOS POR TIPO DE PROCESO
+   Cada hito: t (qué pasó), plazo (qué hay que hacer), dias, nat (días
+   calendario en vez de hábiles), aud (agendar una audiencia), sig (pasa
+   a la etapa siguiente), nota.
+   Los plazos son REFERENCIALES: se muestran y se pueden cambiar al registrar.
+   =================================================================== */
+const H = (t, o = {}) => Object.assign({ t }, o);
+const SEG_INST = (casacion = true) => ({ n: 'Segunda instancia', hitos: [H('Concedida la apelación'), H('Se fijó la vista de la causa', { aud: 'Vista de la causa / informe oral' }), ...(casacion ? [H('Notificada la sentencia de vista', { plazo: 'Interponer recurso de casación', dias: 10, sig: true })] : [H('Notificada la sentencia de vista', { sig: true })])] });
+const PROCESOS = [
+  { id: 'civ-conocimiento', nombre: 'Civil · Proceso de conocimiento', materia: 'Civil', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 10, nota: 'Lo fija el juez (máx. 10 días)' }), H('Notificado el admisorio · somos demandados', { plazo: 'Contestar la demanda / reconvenir', dias: 30, sig: true }), H('Notificado el admisorio · somos demandantes', { sig: true })] },
+    { n: 'Contestación y excepciones', hitos: [H('Notificadas excepciones o defensas previas', { plazo: 'Absolver las excepciones', dias: 10 }), H('Notificada la contestación', { sig: true })] },
+    { n: 'Saneamiento', hitos: [H('Notificado el auto de saneamiento', { plazo: 'Apelar el auto (si corresponde)', dias: 3 }), H('Notificada la fijación de puntos controvertidos', { sig: true })] },
+    { n: 'Pruebas', hitos: [H('Se fijó la audiencia de pruebas', { aud: 'Audiencia de pruebas' }), H('Realizada la audiencia de pruebas', { plazo: 'Presentar alegatos', dias: 5, sig: true })] },
+    { n: 'Sentencia', hitos: [H('Notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 10, sig: true })] },
+    SEG_INST(),
+    { n: 'Casación', hitos: [H('Casación interpuesta'), H('Notificada la resolución de casación', { sig: true })] },
+    { n: 'Ejecución', hitos: [H('Requerido el cumplimiento de la sentencia'), H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'civ-abreviado', nombre: 'Civil · Proceso abreviado', materia: 'Civil', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 10, nota: 'Lo fija el juez (máx. 10 días)' }), H('Notificado el admisorio · somos demandados', { plazo: 'Contestar la demanda', dias: 10, sig: true }), H('Notificado el admisorio · somos demandantes', { sig: true })] },
+    { n: 'Contestación y excepciones', hitos: [H('Notificadas excepciones o defensas previas', { plazo: 'Absolver las excepciones', dias: 5 }), H('Notificada la contestación', { sig: true })] },
+    { n: 'Audiencia', hitos: [H('Se fijó la audiencia', { aud: 'Audiencia de saneamiento, pruebas y sentencia' }), H('Realizada la audiencia', { sig: true })] },
+    { n: 'Sentencia', hitos: [H('Notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 5, sig: true })] },
+    SEG_INST(),
+    { n: 'Ejecución', hitos: [H('Requerido el cumplimiento de la sentencia'), H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'civ-sumarisimo', nombre: 'Civil · Proceso sumarísimo', materia: 'Civil', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 10, nota: 'Lo fija el juez (máx. 10 días)' }), H('Notificado el admisorio · somos demandados', { plazo: 'Contestar la demanda', dias: 5, sig: true }), H('Notificado el admisorio · somos demandantes', { sig: true })] },
+    { n: 'Audiencia única', hitos: [H('Se fijó la audiencia única', { aud: 'Audiencia única' }), H('Realizada la audiencia única', { sig: true })] },
+    { n: 'Sentencia', hitos: [H('Notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 3, sig: true })] },
+    SEG_INST(),
+    { n: 'Ejecución', hitos: [H('Requerido el cumplimiento (lanzamiento, pago, etc.)'), H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'ejecucion', nombre: 'Civil · Ejecución (obligación de dar suma de dinero)', materia: 'Civil', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda ejecutiva presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 10, nota: 'Lo fija el juez (máx. 10 días)' }), H('Notificado el mandato ejecutivo · somos ejecutados', { plazo: 'Contradecir la ejecución', dias: 5, sig: true }), H('Notificado el mandato ejecutivo · somos ejecutantes', { sig: true })] },
+    { n: 'Contradicción', hitos: [H('Notificada la contradicción', { plazo: 'Absolver la contradicción', dias: 3 }), H('Notificado el auto que resuelve la contradicción', { plazo: 'Apelar el auto', dias: 3, sig: true })] },
+    { n: 'Ejecución forzada', hitos: [H('Embargo trabado'), H('Tasación aprobada'), H('Se convocó a remate', { aud: 'Remate' }), H('Pago o adjudicación', { sig: true })] },
+    { n: 'Concluido', hitos: [H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'lab-ordinario', nombre: 'Laboral · Proceso ordinario (NLPT)', materia: 'Laboral', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 5 }), H('Notificado el admisorio con citación a conciliación', { sig: true, aud: 'Audiencia de conciliación', nota: 'La contestación se presenta en la audiencia de conciliación' })] },
+    { n: 'Conciliación', hitos: [H('Se fijó la audiencia de conciliación', { aud: 'Audiencia de conciliación' }), H('Sin conciliación: se fijó audiencia de juzgamiento', { aud: 'Audiencia de juzgamiento', sig: true }), H('Conciliación total', { sig: true })] },
+    { n: 'Juzgamiento', hitos: [H('Realizada la audiencia de juzgamiento', { sig: true })] },
+    { n: 'Sentencia', hitos: [H('Notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 5, sig: true })] },
+    SEG_INST(),
+    { n: 'Ejecución', hitos: [H('Liquidación presentada'), H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'lab-abreviado', nombre: 'Laboral · Proceso abreviado (NLPT)', materia: 'Laboral', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 5 }), H('Notificado el admisorio · somos demandados', { plazo: 'Contestar la demanda', dias: 10, sig: true }), H('Notificado el admisorio · somos demandantes', { sig: true })] },
+    { n: 'Audiencia única', hitos: [H('Se fijó la audiencia única', { aud: 'Audiencia única' }), H('Realizada la audiencia única', { sig: true })] },
+    { n: 'Sentencia', hitos: [H('Notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 5, sig: true })] },
+    SEG_INST(),
+    { n: 'Ejecución', hitos: [H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'pen-comun', nombre: 'Penal · Proceso común (NCPP)', materia: 'Penal', etapas: [
+    { n: 'Diligencias preliminares', hitos: [H('Denuncia presentada'), H('Citación a declarar', { aud: 'Declaración en fiscalía' }), H('Formalizada la investigación preparatoria', { plazo: 'Vence la investigación preparatoria', dias: 120, nat: true, sig: true, nota: '120 días naturales, prorrogables' }), H('Archivo fiscal notificado', { plazo: 'Pedir elevación de actuados', dias: 5 })] },
+    { n: 'Investigación preparatoria', hitos: [H('Se fijó audiencia (prisión preventiva u otra)', { aud: 'Audiencia' }), H('Notificado un auto (medida coercitiva, etc.)', { plazo: 'Apelar el auto', dias: 3 }), H('Concluida la investigación preparatoria', { sig: true })] },
+    { n: 'Etapa intermedia', hitos: [H('Notificada la acusación fiscal', { plazo: 'Observar la acusación / ofrecer pruebas', dias: 10 }), H('Notificado el requerimiento de sobreseimiento', { plazo: 'Oponerse al sobreseimiento', dias: 10 }), H('Se fijó la audiencia de control', { aud: 'Audiencia de control de acusación' }), H('Dictado el auto de enjuiciamiento', { sig: true })] },
+    { n: 'Juzgamiento', hitos: [H('Se fijó el juicio oral', { aud: 'Juicio oral' }), H('Concluido el juicio oral', { sig: true })] },
+    { n: 'Sentencia', hitos: [H('Leída / notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 5, sig: true })] },
+    SEG_INST(),
+    { n: 'Ejecución', hitos: [H('Sentencia firme'), H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'fam-alimentos', nombre: 'Familia · Alimentos', materia: 'Familia', etapas: [
+    { n: 'Postulatoria', hitos: [H('Demanda presentada'), H('Notificada la inadmisibilidad', { plazo: 'Subsanar la demanda', dias: 3, nota: 'Lo fija el juez' }), H('Notificado el admisorio · somos demandados', { plazo: 'Contestar la demanda', dias: 5, sig: true }), H('Notificado el admisorio · somos demandantes', { sig: true })] },
+    { n: 'Audiencia única', hitos: [H('Se fijó la audiencia única', { aud: 'Audiencia única' }), H('Realizada la audiencia única', { sig: true })] },
+    { n: 'Sentencia', hitos: [H('Notificada la sentencia', { plazo: 'Apelar la sentencia', dias: 3, sig: true })] },
+    SEG_INST(false),
+    { n: 'Ejecución', hitos: [H('Notificada la liquidación de pensiones devengadas', { plazo: 'Observar la liquidación', dias: 3 }), H('Requerido el pago'), H('Proceso concluido / archivado')] },
+  ] },
+  { id: 'generico', nombre: 'Proceso genérico', materia: '', etapas: [
+    { n: 'Inicio', hitos: [H('Escrito presentado'), H('Notificada una resolución con plazo', { plazo: 'Cumplir lo ordenado', dias: 3 }), H('Admitido / en trámite', { sig: true })] },
+    { n: 'Trámite', hitos: [H('Se fijó una audiencia', { aud: 'Audiencia' }), H('Notificada una resolución con plazo', { plazo: 'Cumplir lo ordenado', dias: 3 }), H('Pasa a resolver', { sig: true })] },
+    { n: 'Decisión', hitos: [H('Notificada la decisión', { plazo: 'Impugnar la decisión', dias: 5, sig: true })] },
+    { n: 'Impugnación', hitos: [H('Notificada la decisión de segunda instancia', { sig: true })] },
+    { n: 'Ejecución', hitos: [H('Proceso concluido / archivado')] },
+  ] },
+];
+const proceso = (id) => PROCESOS.find((p) => p.id === id);
+const etapaDe = (e) => { const p = proceso(e.proceso); return p ? p.etapas[Math.min(e.etapa || 0, p.etapas.length - 1)] : null; };
+
+function tarjetaFlujo(e) {
+  const p = proceso(e.proceso);
+  if (!p) return `<div class="card flujo"><h2>Flujo del proceso</h2><p class="small muted" style="margin:0 0 10px">Elige el tipo de proceso y el programa te irá diciendo qué sigue: al registrar cada notificación agenda el plazo y avanza la etapa.</p>
+    <div class="inline-add"><select class="f" id="elegirProceso" data-id="${e.id}" style="flex:1;min-width:0"><option value="">— Elige el tipo de proceso —</option>${PROCESOS.map((x) => `<option value="${x.id}">${esc(x.nombre)}</option>`).join('')}</select></div></div>`;
+  const i = Math.min(e.etapa || 0, p.etapas.length - 1), et = p.etapas[i];
+  return `<div class="card flujo"><h2>${esc(p.nombre)} <span class="actions"><button class="btn sm pri" data-act="registrarHito" data-id="${e.id}">${icon('i-plus')} Registrar hito</button><button class="btn sm" data-act="cambiarProceso" data-id="${e.id}">Cambiar</button></span></h2>
+    <div class="pasos-flujo">${p.etapas.map((x, k) => `<button class="paso ${k < i ? 'hecho' : k === i ? 'actual' : ''}" data-act="irEtapa" data-id="${e.id}" data-k="${k}" title="Pasar a «${esc(x.n)}»"><i>${k < i ? icon('i-check') : k + 1}</i><span>${esc(x.n)}</span></button>`).join('')}</div>
+    <div class="que-sigue"><div class="versal muted" style="margin-bottom:6px">Etapa actual: ${esc(et.n)} · ¿qué pasó?</div>
+      <div class="chips-ins">${et.hitos.map((h, k) => `<button class="chip-ins hito" data-act="registrarHito" data-id="${e.id}" data-k="${k}">${esc(h.t)}${h.dias ? ` <b>· ${h.dias} d${h.nat ? '' : 'h'}</b>` : h.aud ? ' <b>· agenda</b>' : ''}</button>`).join('')}</div></div>
+    <p class="tiny" style="margin:10px 0 0">Plazos referenciales (dh = días hábiles). Revisa siempre la resolución y la norma aplicable; puedes cambiar los días al registrar.</p></div>`;
+}
+function formHito(e, k) {
+  const p = proceso(e.proceso); if (!p) return;
+  const i = Math.min(e.etapa || 0, p.etapas.length - 1), et = p.etapas[i];
+  const todos = p.etapas.flatMap((x, ei) => x.hitos.map((h, hi) => [ei + ':' + hi, (ei === i ? '' : x.n + ' · ') + h.t]));
+  const ini = k != null ? i + ':' + k : i + ':0';
+  const form = abrirModal({
+    titulo: 'Registrar hito', boton: 'Registrar', valores: { hito: ini, fecha: hoy(), agendar: true, avanzar: true },
+    campos: [
+      { k: 'hito', l: '¿Qué pasó?', t: 'select', op: [...todos, ['otro', 'Otro (escribirlo)']], full: true },
+      { k: 'otro', l: 'Describe el hito', full: true, ph: 'Notificada la Resolución N.° 8 que…' },
+      { k: 'fecha', l: 'Fecha de notificación / del hecho', t: 'date', req: true },
+      { k: 'resolucion', l: 'Resolución (opcional)', ph: 'Resolución N.° 8' },
+      { k: 'tarea', l: 'Qué hay que hacer', full: true },
+      { k: 'dias', l: 'Plazo (días)', t: 'number' },
+      { k: 'modo', l: 'Cómputo', t: 'select', op: [['habiles', 'Días hábiles'], ['naturales', 'Días calendario']] },
+      { k: 'fecha_aud', l: 'Fecha de la audiencia', t: 'date' },
+      { k: 'hora_aud', l: 'Hora', t: 'time' },
+      { k: 'agendar', l: 'Agendar el vencimiento / la audiencia', t: 'checkbox', full: true },
+      { k: 'avanzar', l: 'Pasar a la etapa siguiente', t: 'checkbox', full: true },
+    ],
+    extra: '<div id="hitoInfo" class="card" style="margin-top:12px;background:var(--hoja-2);box-shadow:none"></div>',
+    guardar: (d) => {
+      const h = hitoSel(d.hito), desc = d.hito === 'otro' ? d.otro.trim() : h.t;
+      if (!desc) { toast('Describe el hito'); return false; }
+      const n = Math.floor(num(d.dias)), lab = [];
+      e.actuaciones.push({ id: uid(), fecha: d.fecha, texto: desc + (d.resolucion ? ` (${d.resolucion})` : '') });
+      if (d.agendar && n > 0 && d.tarea) {
+        const f = d.modo === 'naturales' ? vencimientoNaturales(d.fecha, n) : vencimientoHabiles(d.fecha, n);
+        DB.eventos.push({ id: uid(), tipo: 'plazo', hecho: false, creado: ahora(), fecha: f, hora: '', lugar: '', expedienteId: e.id, titulo: d.tarea, asignado: e.responsable || '', notas: `${desc} · notificado el ${fFecha(d.fecha)} · ${n} días ${d.modo === 'naturales' ? 'calendario' : 'hábiles'} (referencial)` });
+        lab.push(`plazo al ${fFecha(f)}`);
+      }
+      if (d.agendar && d.fecha_aud && h && h.aud) {
+        DB.eventos.push({ id: uid(), tipo: 'audiencia', hecho: false, creado: ahora(), fecha: d.fecha_aud, hora: d.hora_aud || '', lugar: '', expedienteId: e.id, titulo: h.aud, asignado: e.responsable || '', notas: desc });
+        lab.push(`audiencia el ${fFecha(d.fecha_aud)}`);
+      }
+      if (d.avanzar && h && h.sig) {
+        const [ei] = d.hito.split(':').map(Number), nueva = Math.min(ei + 1, p.etapas.length - 1);
+        if (nueva !== (e.etapa || 0)) { e.actuaciones.push({ id: uid(), fecha: d.fecha, texto: `Etapa: ${p.etapas[e.etapa || 0].n} → ${p.etapas[nueva].n}` }); e.etapa = nueva; lab.push('etapa: ' + p.etapas[nueva].n); }
+        estadoSegunEtapa(e);
+      }
+      e.actualizado = ahora(); guardar(); reRender(); toast('Registrado' + (lab.length ? ' · ' + lab.join(' · ') : ''));
+    },
+  });
+  const hitoSel = (v) => { if (v === 'otro') return null; const [ei, hi] = v.split(':').map(Number); return p.etapas[ei].hitos[hi]; };
+  const el = (n) => form.elements[n], lbl = (n) => el(n).closest('label');
+  const pintar = (rellenar) => {
+    const h = hitoSel(el('hito').value), otro = el('hito').value === 'otro';
+    lbl('otro').style.display = otro ? '' : 'none';
+    lbl('fecha_aud').style.display = lbl('hora_aud').style.display = h && h.aud ? '' : 'none';
+    lbl('avanzar').style.display = h && h.sig ? '' : 'none';
+    if (rellenar) { el('tarea').value = h ? (h.plazo || '') : ''; el('dias').value = h && h.dias ? h.dias : ''; el('modo').value = h && h.nat ? 'naturales' : 'habiles'; }
+    const n = Math.floor(num(el('dias').value)), f = el('fecha').value;
+    const venc = n > 0 && f ? (el('modo').value === 'naturales' ? vencimientoNaturales(f, n) : vencimientoHabiles(f, n)) : '';
+    $('#hitoInfo').innerHTML = `${venc && el('tarea').value ? `<div class="tiny">VENCE</div><div style="font-size:19px;font-weight:750">${esc(fFechaL(venc))} de ${venc.slice(0, 4)}</div><div class="small muted">${cuando(venc)} · ${esc(el('tarea').value)}</div>` : '<span class="small muted">Este hito no genera plazo.</span>'}${h && h.nota ? `<div class="tiny" style="margin-top:6px">${esc(h.nota)}</div>` : ''}${h && h.sig ? `<div class="tiny" style="margin-top:6px">Luego pasa a: <b>${esc((p.etapas[Number(el('hito').value.split(':')[0]) + 1] || {}).n || 'última etapa')}</b></div>` : ''}`;
+  };
+  el('hito').addEventListener('change', () => pintar(true));
+  form.addEventListener('input', (ev) => { if (ev.target.name !== 'hito') pintar(false); });
+  pintar(true);
+}
+function estadoSegunEtapa(e) {
+  const n = (etapaDe(e) || {}).n || '';
+  const mapa = { 'Sentencia': 'Sentenciado', 'Segunda instancia': 'Apelación', 'Casación': 'Casación', 'Ejecución': 'Ejecución', 'Ejecución forzada': 'Ejecución', 'Concluido': 'Archivado', 'Postulatoria': 'En trámite', 'Impugnación': 'Apelación' };
+  if (mapa[n] && e.estado !== mapa[n]) e.estado = mapa[n];
+  else if (!mapa[n] && e.estado === 'Por presentar') e.estado = 'En trámite';
 }
 
 /* ---------- varios ---------- */
