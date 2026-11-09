@@ -31,6 +31,16 @@ const mbar = (p, c, g) => { const kp = p * 4, kc = c * 4, kg = g * 9, t = kp + k
 
 /* ---------------- selección de contenido (general, sin datos de nadie) ---------------- */
 const R = D.todas;
+const LIB = JSON.parse(fs.readFileSync(__dirname + '/libros.json', 'utf8'));
+const ICONOS = [[/ensalada|salpic|solterito/, '🥗'], [/s[aá]nguche/, '🥪'], [/panqueque|crepe/, '🥞'], [/waffle/, '🧇'], [/tostada/, '🍞'], [/huevo|tortilla|omelette|bocadito/, '🍳'], [/quinua|avena|ca[ñn]ihua|mazamorra|kiwicha|trigo/, '🥣'], [/tamal|humita|choclo|mote/, '🌽'], [/pescado|bonito|jurel|caballa|trucha|merluza|pejerrey|at[uú]n|pota|choros/, '🐟'], [/pollo|gallina/, '🍗'], [/pav[oi]/, '🦃'], [/cerdo/, '🍖'], [/res|lomo|bistec|carne|asado/, '🥩'], [/tallar|fideo/, '🍝'], [/arroz|chaufa|tacu/, '🍚'], [/lenteja|frejol|pallar|haba|tarwi|garbanzo/, '🫘'], [/palta/, '🥑'], [/camote|papa|yuca|olluc/, '🥔'], [/br[oó]coli|coliflor/, '🥦'], [/zanahoria/, '🥕'], [/zapallo|locro/, '🎃'], [/queso|ricota/, '🧀'], [/rocoto|aj[ií]/, '🌶️']];
+const icono = t => { const x = String(t).toLowerCase(); for (const [re, e] of ICONOS) if (re.test(x)) return e; return '🍽️'; };
+const deR = code => R.find(r => r.code === code) || {};
+const BOOK = Object.entries(LIB).map(([code, x]) => ({code, title: x.titulo, grupo: x.libro === 1 ? 'des' : 'alm', libro: x.libro, num: x.num, cap: x.cap, capN: x.capN, kcal: x.kcal, prot: x.p, ficha: !x.sinFicha, pagina: x.pagina, ico: icono(x.titulo), adj: deR(code).adj, note: deR(code).note, snack: deR(code).snack}))
+  .sort((a, b) => a.libro - b.libro || a.num - b.num);
+const OTRAS = R.filter(r => r.grupo === 'cen' || r.grupo === 'ens');
+const TODO = [...BOOK, ...OTRAS];
+const CAPS = [1, 2].flatMap(L => [1, 2, 3, 4, 5].map(c => { const l = BOOK.filter(r => r.libro === L && r.cap === c); return {L, c, nombre: l[0].capN, l}; }));
+const COLCAP = [C.amarillo, C.menta, C.rosa, C.cielo, '#FFD8A8'];
 const conFicha = R.filter(r => r.ficha);
 // lecciones: texto general
 const GEN = [[/Tu base: 3 litros/g, 'Tu base: unos 35 ml por kilo'], [/12 vasos de 250 ml al día\. /g, 'Unos 8 a 14 vasos al día, según tu tamaño. '],
@@ -42,18 +52,18 @@ for (const l of D.lecciones) { l.pr = gen(l.pr); l.d.forEach(x => { x.h = gen(x.
 // tableros de comidas sugeridas
 const tiene = (r, re) => re.test(r.title.toLowerCase());
 const TABLEROS = [
-  {t: 'Desayunos con huevo', e: '🍳', col: '#FFE27A', l: R.filter(r => r.grupo === 'des' && tiene(r, /huevo|tortilla|omelette/))},
-  {t: 'Con granos andinos', e: '🥣', col: '#C8EEDB', l: R.filter(r => r.grupo === 'des' && tiene(r, /quinua|avena|ca[ñn]ihua/) && !tiene(r, /panqueque|waffle|crepe/))},
-  {t: 'Sánguches y tostadas para llevar', e: '🥪', col: '#FFC4D6', l: R.filter(r => r.grupo === 'des' && tiene(r, /s[aá]nguche|tostada/))},
-  {t: 'Panqueques, waffles y crepes', e: '🥞', col: '#CFE3F7', l: R.filter(r => r.grupo === 'des' && tiene(r, /panqueque|waffle|crepe/))},
-  {t: 'Criollos de la mañana', e: '🌽', col: '#FFE27A', l: R.filter(r => r.grupo === 'des' && tiene(r, /tamal|humita|tacu|mote|camote|papa|solterito|pastel|yuca|mazamorra|palta|queso fresco con/) && !tiene(r, /s[aá]nguche|tostada|tortilla/))},
-  {t: 'Almuerzos de olla', e: '🍲', col: '#FFC4D6', l: R.filter(r => r.grupo === 'alm' && tiene(r, /seco|estofado|guisad|ají de|picante|sudado|escabeche|ollita|tacu/))},
-  {t: 'Al horno o a la plancha', e: '🔥', col: '#C8EEDB', l: R.filter(r => r.grupo === 'alm' && tiene(r, /horno|plancha|brocheta|papillote|lim[oó]n/))},
-  {t: 'Salteados, chaufas y tallarines', e: '🍝', col: '#CFE3F7', l: R.filter(r => r.grupo === 'alm' && tiene(r, /saltad|chaufa|tallar|sillao|tapado/))},
-  {t: 'Pescados de nuestro mar', e: '🐟', col: '#CFE3F7', l: R.filter(r => r.grupo !== 'ens' && r.grupo !== 'des' && tiene(r, /bonito|jurel|caballa|trucha|merluza|pescado|at[uú]n/))},
-  {t: 'Cenas ligeras', e: '🌙', col: '#FFE27A', l: R.filter(r => r.grupo === 'cen' && (tiene(r, /tortilla|huevos|ensalada|zapallito|vapor|salpic/)))},
-  {t: 'Con menestras', e: '🫘', col: '#C8EEDB', l: R.filter(r => r.grupo !== 'ens' && tiene(r, /lenteja|frejol|pallar|tarwi|haba/))},
-  {t: 'Ensaladas para acompañar', e: '🥗', col: '#FFC4D6', l: R.filter(r => r.grupo === 'ens' && r.tag === 'Libre')},
+  {t: 'Desayunos con huevo', e: '🍳', col: '#FFE27A', l: TODO.filter(r => r.grupo === 'des' && tiene(r, /huevo|tortilla|omelette/))},
+  {t: 'Con granos andinos', e: '🥣', col: '#C8EEDB', l: TODO.filter(r => r.grupo === 'des' && tiene(r, /quinua|avena|ca[ñn]ihua/) && !tiene(r, /panqueque|waffle|crepe/))},
+  {t: 'Sánguches y tostadas para llevar', e: '🥪', col: '#FFC4D6', l: TODO.filter(r => r.grupo === 'des' && tiene(r, /s[aá]nguche|tostada/))},
+  {t: 'Panqueques, waffles y crepes', e: '🥞', col: '#CFE3F7', l: TODO.filter(r => r.grupo === 'des' && tiene(r, /panqueque|waffle|crepe/))},
+  {t: 'Criollos de la mañana', e: '🌽', col: '#FFE27A', l: TODO.filter(r => r.grupo === 'des' && tiene(r, /tamal|humita|tacu|mote|camote|papa|solterito|pastel|yuca|mazamorra|palta|queso fresco con/) && !tiene(r, /s[aá]nguche|tostada|tortilla/))},
+  {t: 'Almuerzos de olla', e: '🍲', col: '#FFC4D6', l: TODO.filter(r => r.grupo === 'alm' && tiene(r, /seco|estofado|guisad|ají de|picante|sudado|escabeche|ollita|tacu/))},
+  {t: 'Al horno o a la plancha', e: '🔥', col: '#C8EEDB', l: TODO.filter(r => r.grupo === 'alm' && tiene(r, /horno|plancha|brocheta|papillote|lim[oó]n/))},
+  {t: 'Salteados, chaufas y tallarines', e: '🍝', col: '#CFE3F7', l: TODO.filter(r => r.grupo === 'alm' && tiene(r, /saltad|chaufa|tallar|sillao|tapado/))},
+  {t: 'Pescados de nuestro mar', e: '🐟', col: '#CFE3F7', l: TODO.filter(r => r.grupo !== 'ens' && r.grupo !== 'des' && tiene(r, /bonito|jurel|caballa|trucha|merluza|pescado|at[uú]n/))},
+  {t: 'Cenas ligeras', e: '🌙', col: '#FFE27A', l: TODO.filter(r => r.grupo === 'cen' && (tiene(r, /tortilla|huevos|ensalada|zapallito|vapor|salpic/)))},
+  {t: 'Con menestras', e: '🫘', col: '#C8EEDB', l: TODO.filter(r => r.grupo !== 'ens' && tiene(r, /lenteja|frejol|pallar|tarwi|haba/))},
+  {t: 'Ensaladas para acompañar', e: '🥗', col: '#FFC4D6', l: TODO.filter(r => r.grupo === 'ens' && r.tag === 'Libre')},
 ];
 // fichas: 24 recetas variadas (una por tipo de plato, alternando desayuno y almuerzo)
 const FSEL = (() => {
@@ -67,20 +77,30 @@ const FSEL = (() => {
 })();
 
 const P = [];
-const ficha = (x, grande) => {
+const ficha = (x, grande, compacta) => {
   const {r, f} = x;
   const ings = f.ing.map(t => { if (t.startsWith('— ')) return `<li class="sec">${esc(t.slice(2))}</li>`; const m = t.match(/^([\d.,]+)\s*(g|ml)\s*(?:\([^)]*\))?\s*·\s*(.*)$/); if (m && f.n > 1) { const v = parseFloat(m[1].replace(',', '.')) / f.n; return `<li><b>${fmt(v >= 10 ? Math.round(v) : v, v < 10 ? 1 : 0)} ${m[2]}</b> ${esc(m[3].replace(/\s*\(.*?\)/g, ''))}</li>`; } const p = t.split('·'); return p.length > 1 ? `<li><b>${esc(p[0].trim())}</b> ${esc(p.slice(1).join('·').trim())}</li>` : `<li>${esc(t)}</li>`; }).join('');
-  return `<article class="ficha ${grande ? 'grande' : ''}">
+  return `<article class="ficha ${grande ? 'grande' : ''} ${compacta ? 'compacta' : ''}">
     <div class="f-cab"><span class="f-ico">${x.ico}</span><div><div class="f-cod">${esc(r.code)} · ${NT[r.grupo]} · ⏱ ${esc(f.prep)} + ${esc(f.coc)}${f.n > 1 ? ` · por porción (rinde ${f.n})` : ''}</div><h3>${esc(r.title)}</h3></div></div>
     <div class="f-num"><span><b>${r.kcal}</b> kcal</span><span style="color:#1F8F84"><b>${fmt(r.prot, 1)}</b> g P</span><span style="color:#B98410"><b>${fmt(f.c, 1)}</b> g C</span><span style="color:#B8487A"><b>${fmt(f.g, 1)}</b> g G</span></div>${mbar(r.prot, f.c, f.g)}
     ${r.adj && r.adj !== 'Tal cual' ? `<div class="f-plan">¿Día de entreno o más hambre? Súmale: <b>${esc(r.adj.replace(/^\+\s*/, ''))}</b></div>` : ''}
-    <div class="f-cuerpo"><ul class="f-ing">${ings}</ul><ol class="f-pasos">${f.pasos.map(p => `<li>${esc(p)}</li>`).join('')}</ol></div>
-    ${f.tip ? `<div class="f-tip">💡 ${esc(f.tip)}</div>` : ''}${r.note ? `<div class="f-tip">🔁 ${esc(r.note)}</div>` : ''}
+    <div class="f-cuerpo"><ul class="f-ing ${compacta && f.ing.length > 9 ? 'ing2' : ''}">${ings}</ul><ol class="f-pasos">${f.pasos.map(p => `<li>${esc(p)}</li>`).join('')}</ol></div>
+    ${f.tip ? `<div class="f-tip">💡 ${esc(f.tip)}</div>` : ''}${f.acomp ? `<div class="f-tip">🍽️ <b>Acompañamiento:</b> ${esc(f.acomp)}</div>` : ''}${f.sust ? `<div class="f-tip">🔁 <b>Cambios:</b> ${esc(f.sust)}</div>` : ''}${r.note ? `<div class="f-tip">🔁 ${esc(r.note)}</div>` : ''}${f.alerg ? `<div class="f-tip">⚠️ Alérgenos: ${esc(f.alerg)}</div>` : ''}
   </article>`;
 };
-const filaR = r => `<div class="rr ${r.ficha ? 'cf' : ''}"><span>${r.ico}</span><b>${esc(r.code)}</b> ${esc(r.title)}${r.snack ? ' 🎒' : ''}<em>${r.grupo === 'ens' ? `${r.kcal} kcal · ${esc(r.tag)}` : `${r.kcal} kcal · ${fmt(r.prot, 1)} g proteína`}</em></div>`;
-const htmlRRg = x => x.cab ? `<div class="rr-cab">${{des: '🍳 Desayunos', alm: '🍛 Almuerzos', cen: '🥗 Cenas', ens: '🥬 Ensaladas y acompañamientos'}[x.cab]}</div>` : filaR(x);
-const sug = (r, i) => `<div class="sug" style="transform:rotate(${giro(i) * .4}deg)"><span>${r.ico}</span><div><b>${esc(r.title)}</b><small>${esc(r.code)} · ${r.kcal} kcal · ${fmt(r.prot, 0)} g prot${r.snack ? ' · 🎒' : ''}</small></div></div>`;
+const fichaDe = r => ({code: r.code, r: {code: r.code, title: r.title, grupo: r.grupo, kcal: r.kcal, prot: r.prot, adj: r.adj, note: r.note}, f: LIB[r.code], ico: r.ico});
+// flujo del recetario de los libros: portadilla de capítulo + fichas + recetas sin ficha
+const FLUJO = [];
+for (const k of CAPS) {
+  FLUJO.push({tipo: 'cap', html: `<div class="cap-ab" style="background:${COLCAP[k.c - 1]}"><span class="cap-n">${k.L === 1 ? 'Libro 1 · Desayunos' : 'Libro 2 · Almuerzos'} · capítulo ${k.c}</span><h3>${esc(k.nombre)}</h3><span class="cap-l">${k.l.length} recetas · ${k.l.filter(r => r.ficha).length} con ficha completa${k.L === 2 ? ' · cantidades para 4 porciones, aquí divididas a 1' : ''}</span><div class="cap-ico">${[...new Set(k.l.map(r => r.ico))].slice(0, 6).join(' ')}</div></div>`});
+  for (const r of k.l.filter(r => r.ficha)) FLUJO.push({tipo: 'ficha', html: ficha(fichaDe(r), false, true)});
+  const sin = k.l.filter(r => !r.ficha);
+  if (sin.length) FLUJO.push({tipo: 'sin', html: `<div class="sin-ficha">${postit(`<b>Más ideas de este capítulo</b> (ficha completa en el Libro 2)<br>${sin.map(r => `${r.ico} ${esc(r.title)} <span class="mini">· p. ${r.pagina}</span>`).join('<br>')}`, {col: COLCAP[k.c - 1], rot: -1})}</div>`});
+}
+const filaR = r => `<div class="rr ${r.ficha && r.libro ? 'cf' : ''}"><span>${r.ico}</span><b>${esc(r.code)}</b> ${esc(r.title)}${r.snack ? ' 🎒' : ''}<em>${r.grupo === 'ens' ? `${r.kcal} kcal · ${esc(r.tag)}` : r.kcal ? `${r.kcal} kcal · ${fmt(r.prot, 1)} g proteína` : `ficha en el Libro 2, p. ${r.pagina}`}</em></div>`;
+const htmlRRg = x => x.cab ? `<div class="rr-cab">${x.cab}</div>` : filaR(x);
+const INDICE = [...CAPS.flatMap(k => [{cab: `${k.L === 1 ? '🍳 L1' : '🍛 L2'} · ${k.nombre}`}, ...k.l]), {cab: '🌙 Más ideas para la cena'}, ...OTRAS.filter(r => r.grupo === 'cen'), {cab: '🥬 Ensaladas y acompañamientos'}, ...OTRAS.filter(r => r.grupo === 'ens')];
+const sug = (r, i) => `<div class="sug" style="transform:rotate(${giro(i) * .4}deg)"><span>${r.ico}</span><div><b>${esc(r.title)}</b><small>${esc(r.code)} · ${r.kcal ? `${r.kcal} kcal · ${fmt(r.prot, 0)} g prot` : `ficha en el Libro 2, p. ${r.pagina}`}${r.snack ? ' · 🎒' : ''}</small></div></div>`;
 const tablero = (t, n, i) => `<div class="tablero" style="--c:${t.col}"><div class="tab-cab" style="transform:rotate(${giro(i) * .6}deg)">${t.e} ${esc(t.t)} <small>· ${t.l.length} ideas</small></div><div class="sugs">${t.l.slice(0, n).map(sug).join('')}</div></div>`;
 
 function construir() {
@@ -89,14 +109,14 @@ P.push(pag(`
   <div class="portada">
     <div class="kicker">Guía práctica · comida peruana</div>
     <h1 class="mega">Pro<br>gre<span style="color:${C.naranja}">sa</span></h1>
-    <p class="bajada">Qué comer, cuánto servir y 254 ideas peruanas para armar tus comidas, sin dietas estrictas.</p>
+    <p class="bajada">Qué comer, cuánto servir y ${TODO.length} ideas peruanas para armar tus comidas, sin dietas estrictas.</p>
     <div class="plato-portada">${plato(430)}</div>
     ${postit('<b class="g">½ · ¼ · ¼</b><br>el plato que funciona', {col: C.menta, rot: -5, estilo: 'position:absolute;left:4mm;top:150mm;width:46mm'})}
     ${postit('<b class="g">✋ ✊ 👍</b><br>porciones con tu mano, sin balanza', {col: C.rosa, rot: 3, estilo: 'position:absolute;left:62mm;top:166mm;width:52mm'})}
-    ${postit(`<b class="g">${R.length}</b> comidas sugeridas<br>desayunos, almuerzos, cenas`, {col: C.amarillo, rot: -2, estilo: 'position:absolute;left:18mm;top:204mm;width:54mm'})}
+    ${postit(`<b class="g">${BOOK.length}</b> recetas de 2 libros<br>+ ${OTRAS.length} ideas de cena y ensalada`, {col: C.amarillo, rot: -2, estilo: 'position:absolute;left:18mm;top:204mm;width:54mm'})}
     ${postit(`<b class="g">${D.alim.length}</b> alimentos<br>de los recetarios peruanos`, {col: C.cielo, rot: 4, estilo: 'position:absolute;right:8mm;top:196mm;width:50mm'})}
     <div class="sello" style="left:108mm;top:132mm">🍳 🍛 🐟 🥗 🍌</div>
-    <div class="indice-portada"><b>Adentro:</b> lo básico · calcula lo tuyo · el plato y la mano · el semáforo · comer y entrenar · ${D.alim.length} alimentos · combina a tu gusto · ideas por momento del día · despensa base · ${FSEL.length} recetas paso a paso · las ${R.length} del recetario · 9 lecciones en viñetas · hojas para registrar</div>
+    <div class="indice-portada"><b>Adentro:</b> lo básico · calcula lo tuyo · el plato y la mano · el semáforo · comer y entrenar · ${D.alim.length} alimentos · combina a tu gusto · ideas por momento del día · despensa base · los dos recetarios: medidas, conservación y las ${BOOK.length} recetas · índice de ${TODO.length} comidas · 9 lecciones en viñetas · hojas para registrar</div>
   </div>`, {folio: false}));
 
 // 2. intro + índice suelto
@@ -108,12 +128,12 @@ P.push(pag(`
       <p class="capitular">No hay menú obligatorio ni horario fijo. Aquí encuentras cómo armar un plato que te llene y te dé energía, cuánto servir sin pesar nada y un montón de ideas de comida peruana para escoger según lo que tengas, el tiempo que tengas y cómo te mueves ese día.</p>
       <p>La idea es simple: <b>proteína en cada comida, verduras en abundancia, carbo según tu actividad</b> y grasa medida. Con eso, cualquier receta de esta guía encaja.</p>
       <p>Si entrenas, la comida de antes y la de después llevan carbo y proteína. Si un día no te mueves, baja un poco el carbo. Si tienes una meta concreta, la página de «Calcula lo tuyo» te da un punto de partida.</p>
-      <p>Las recetas vienen de recetarios de desayunos y almuerzos peruanos saludables. Cada una trae sus calorías y proteína, y una sugerencia de qué sumarle cuando necesitas más energía.</p>
+      <p>Al final están completos los dos recetarios: 100 desayunos y 100 almuerzos peruanos saludables, con sus consejos de medidas, conservación y compra. Cada receta trae sus calorías y proteína, y muchas una sugerencia de qué sumarle cuando necesitas más energía.</p>
     </div>
     ${globo('Léela como una revista: salta a lo que necesites. Las hojas del final son para escribir encima. ✍️')}
   </div>
   <div class="mapa">
-    ${[['Lo básico', IDX.basico, C.amarillo], ['Calcula lo tuyo', IDX.calc, C.rosa], ['El plato y la mano', IDX.plato, C.menta], ['El semáforo', IDX.semaf, C.cielo], ['Comer y entrenar', IDX.dia, C.amarillo], [`${D.alim.length} alimentos`, IDX.alim, C.rosa], ['Combina a tu gusto', IDX.combina, C.menta], ['Ideas por momento', IDX.ideas, C.cielo], ['Despensa base', IDX.despensa, C.amarillo], [`${FSEL.length} recetas paso a paso`, IDX.fichas, C.rosa], ['Todo el recetario', IDX.rr, C.menta], ['9 lecciones', IDX.lec, C.cielo], ['Hojas para registrar', IDX.reg, C.amarillo]].map(([t, n, col], i) => postit(`<span class="num-g">${n ?? ''}</span>${t}`, {col, rot: giro(i), estilo: `display:inline-block;margin:2.2mm 2.5mm;padding:3mm 3.5mm;width:${[40, 36, 46, 38, 34, 42][i % 6]}mm`})).join('')}
+    ${[['Lo básico', IDX.basico, C.amarillo], ['Calcula lo tuyo', IDX.calc, C.rosa], ['El plato y la mano', IDX.plato, C.menta], ['El semáforo', IDX.semaf, C.cielo], ['Comer y entrenar', IDX.dia, C.amarillo], [`${D.alim.length} alimentos`, IDX.alim, C.rosa], ['Combina a tu gusto', IDX.combina, C.menta], ['Ideas por momento', IDX.ideas, C.cielo], ['Despensa base', IDX.despensa, C.amarillo], ['Lo que enseñan los libros', IDX.libros, C.rosa], [`${BOOK.length} recetas, capítulo por capítulo`, IDX.fichas, C.menta], ['Índice de todo', IDX.rr, C.cielo], ['9 lecciones', IDX.lec, C.cielo], ['Hojas para registrar', IDX.reg, C.amarillo]].map(([t, n, col], i) => postit(`<span class="num-g">${n ?? ''}</span>${t}`, {col, rot: giro(i), estilo: `display:inline-block;margin:2.2mm 2.5mm;padding:3mm 3.5mm;width:${[40, 36, 46, 38, 34, 42][i % 6]}mm`})).join('')}
   </div>`));
 
 // 3. lo básico
@@ -290,26 +310,86 @@ P.push(pag(`
     </div>
   </div>`));
 
-// fichas
+// lo que enseñan los libros
+marca('libros');
+P.push(pag(`
+  <div class="kicker">Los recetarios</div>
+  <h2 class="titular">Dos libros, <span class="subrayado">200 recetas</span>, una cocina</h2>
+  <div class="libros">
+    ${[1, 2].map(L => `<div class="libro-c" style="transform:rotate(${L === 1 ? -1.5 : 1.2}deg)"><div class="lomo" style="background:${L === 1 ? C.naranja : C.verde}">LIBRO ${L}</div><h3>${L === 1 ? '100 desayunos peruanos saludables' : '100 almuerzos peruanos saludables y económicos'}</h3><p class="mini">${L === 1 ? 'Huevo, granos andinos, sánguches, masas caseras y versiones de preparaciones criollas. La mayoría rinde 1 porción.' : 'Clásicos criollos, carnes magras, pescados, menestras y granos. Cada ficha rinde 4 porciones e incluye ensalada.'}</p>${CAPS.filter(k => k.L === L).map(k => `<div class="cap-li" style="border-left:5px solid ${COLCAP[k.c - 1]}"><b>${k.c}. ${esc(k.nombre)}</b><span>${k.l.length} recetas · ${[...new Set(k.l.map(r => r.ico))].slice(0, 5).join(' ')}</span></div>`).join('')}</div>`).join('')}
+  </div>
+  <div class="dos" style="margin-top:7mm">
+    ${postit('<b>Cómo leer una ficha</b><br><br>① Mira el rendimiento: desayunos casi siempre 1 porción; almuerzos, 4.<br>② Las calorías son de <u>una porción</u> (en almuerzos incluyen ensalada y acompañamiento).<br>③ Gramos y ml son la referencia; las medidas caseras son aproximadas.<br>④ Preparación y cocción pueden ir en paralelo; los reposos van aparte.<br>⑤ El acompañamiento opcional se cuenta aparte: no lo sumes dos veces.', {col: C.amarillo, rot: -1.5})}
+    <div>${postit('<b>Si cambias ingredientes</b><br><br>Las sustituciones ayudan a cocinar con lo que tienes, pero no conservan exactamente las mismas calorías. Cambia una proteína por otra del mismo tipo y peso limpio; una verdura por otra de cocción parecida.', {col: C.cielo, rot: 2})}
+      ${globo('Las fotos de los libros son referencias generadas: tu plato puede verse distinto y estar igual de rico.', 'coach', C.azul)}</div>
+  </div>`));
+P.push(pag(`
+  <div class="kicker">Medidas y porciones · de los libros</div>
+  <h2 class="titular" style="font-size:30pt">Una balanza ayuda, <span class="subrayado">pero no es obligatoria</span></h2>
+  <div class="medidas">
+    ${[['🥄', 'Volumen', '1 taza = 240 ml · 1 cucharada = 15 ml · 1 cucharadita = 5 ml. Usa cucharas medidoras rasas: los cubiertos comunes varían.'], ['⚖️', 'Gramos ≠ mililitros', 'El agua pesa 1 g por ml, pero harinas, aceite y semillas no. No conviertas una taza de cualquier cosa en 240 g.'], ['🥚', 'Huevo mediano', '50 g de parte comestible, sin cáscara. Si tus huevos son muy grandes o chicos, pesa su contenido.'], ['🍚', 'Crudo y cocido', 'El grano seco absorbe agua; la carne pierde agua al cocinarse. 40 g de quinua seca no son 40 g de quinua cocida.'], ['🥛', 'Lácteos y conservas', 'Leche al 1 %, yogur natural bajo en grasa sin azúcar. El atún y el jurel se pesan escurridos.'], ['👨‍👩‍👧', 'Para varias personas', 'Desayunos: multiplica por 2, 3 o 4. Almuerzos (rinden 4): para 1 persona usa ¼ de cada ingrediente; para 2, la mitad.']].map(([e, t, d], i) => `<div style="transform:rotate(${giro(i) * .5}deg)"><span>${e}</span><b>${t}</b><p>${d}</p></div>`).join('')}
+  </div>
+  <div class="dos" style="margin-top:6mm">
+    <div class="armar"><h3>🍳 Arma un desayuno que puedas sostener</h3>
+      <p><b>Una fuente de proteína:</b> huevos, yogur, leche, queso fresco, pollo, pescado o menestras. Alterna durante la semana.</p>
+      <p><b>Una base medida:</b> avena, quinua, kiwicha, pan integral, papa, choclo o camote. Decide la cantidad antes de servir.</p>
+      <p><b>Fruta o verdura:</b> entera o picada, tomate, hojas verdes, pepino. Cambia colores.</p>
+      <p><b>Mide aceite y untables:</b> aceite, palta, mantequilla de maní y frutos secos suman rápido.</p>
+      <p><b>Bebidas simples:</b> agua o infusión sin azúcar.</p></div>
+    <div class="armar"><h3>🍛 Arma un almuerzo equilibrado</h3>
+      <p><b>Verduras en el plato</b> y la ensalada indicada en la ficha.</p>
+      <p><b>Identifica proteína y carbo:</b> papa, camote, yuca, choclo, arroz, fideos y trigo son carbos; no los juntes todos.</p>
+      <p><b>Menestras:</b> aportan carbo, proteína y fibra. Algunas fichas les suman huevo, pescado, pollo o queso.</p>
+      <p><b>Cada persona es distinta:</b> los libros dan opciones de cocina, no una dieta con una meta de calorías.</p>
+      ${postit('Sin azúcar añadida no significa bajo en carbohidratos: las frutas, la leche y los cereales también los tienen.', {col: C.rosa, rot: 1.5})}</div>
+  </div>`));
+P.push(pag(`
+  <div class="kicker">Cocina, guarda y recalienta · de los libros</div>
+  <h2 class="titular" style="font-size:30pt">Seguro y <span style="color:${C.verde}">sin desperdicio</span></h2>
+  <div class="temps">${[['🍗', 'Pollo, pavo y gallina', '74 °C'], ['🥚', 'Mezclas con huevo y carne molida', '71 °C'], ['🐟', 'Pescado y cortes enteros', '63 °C'], ['♨️', 'Recalentar sobras', '74 °C'], ['❄️', 'Refrigerador', '4 °C o menos']].map(([e, t, v], i) => `<div style="transform:rotate(${giro(i) * .6}deg)"><span>${e}</span><b>${v}</b><small>${t}</small></div>`).join('')}</div>
+  <div class="dos" style="margin-top:6mm">
+    <div>
+      <div class="regla" style="background:${C.menta}"><span>🧼</span><div><b>Evita la contaminación cruzada</b><br>Manos limpias, agua potable y tablas separadas para lo crudo de origen animal y lo que se come listo.</div></div>
+      <div class="regla" style="background:${C.amarillo}"><span>⏱️</span><div><b>Refrigera antes de 2 horas</b><br>(1 hora si hace más de 32 °C) en recipientes bajos. Consume los platos cocidos dentro de 2–3 días.</div></div>
+      <div class="regla" style="background:${C.cielo}"><span>🧊</span><div><b>Descongela en la refri</b><br>y lleva lonchera con frío si tu comida tiene huevo, queso, yogur, pollo o pescado.</div></div>
+      <div class="regla" style="background:${C.rosa}"><span>⚠️</span><div><b>Dos ingredientes especiales</b><br>Tarwi siempre cocido y desamargado; yuca pelada, bien sancochada y sin su fibra central.</div></div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">Adelanta sin complicarte</h3>
+      <p><b>Antes de la semana:</b> elige tus comidas, anota qué se repite y qué necesita reposo.</p>
+      <p><b>Bases para 2–3 días:</b> quinua, menestras o tubérculos cocidos; enfría pronto y congela lo que no usarás.</p>
+      <p><b>Al momento:</b> corta la palta, arma tostadas y sánguches cerca de servir.</p>
+      <p><b>Etiqueta:</b> ingrediente, fecha y porciones. Usa primero lo más antiguo.</p>
+      <h3>Más sabor, menos desperdicio</h3>
+      <p>Compra según tu menú y revisa la despensa antes. El zapallo sirve para guisos y horneados; la zanahoria, para ensalada, estofado y albóndigas. Reparte el aceite entre sofrito, dorado y horno. Añade el limón justo antes de servir.</p>
+      ${postit('Lee los alérgenos de cada ficha y las etiquetas: avena, panes, polvo de hornear y lácteos pueden tener trazas.', {col: C.amarillo, rot: -2})}
+    </div>
+  </div>`));
+const SIETE = [['Lunes', 'L1·01', '40 g de pan integral', 315, 18.6], ['Martes', 'L1·26', '100 g de papaya', 310, 11.6], ['Miércoles', 'L1·46', '100 g de papaya', 360, 26.7], ['Jueves', 'L1·66', '120 g de yogur natural', 415, 22.2], ['Viernes', 'L1·22', '40 g de pan integral', 330, 14.0], ['Sábado', 'L1·41', '100 g de papaya', 350, 17.8], ['Domingo', 'L1·94', '100 g de papaya', 325, 13.5]];
+P.push(pag(`
+  <div class="kicker">Si quieres una idea de semana · Libro 1</div>
+  <h2 class="titular" style="font-size:30pt">Siete mañanas <span class="subrayado">ya organizadas</span></h2>
+  <p class="bajada-ch">Un ejemplo del libro de desayunos para 1 persona, no una obligación: cambia los días, repite tus favoritos o mézclalo con los tableros de ideas.</p>
+  <div class="siete">${SIETE.map(([d, code, ac, k, p], i) => { const r = BOOK.find(x => x.code === code); return `<div class="manana" style="transform:rotate(${giro(i) * .8}deg);background:${[C.amarillo, C.menta, C.rosa, C.cielo][i % 4]}"><b class="dia-m">${d}</b><span class="ic">${r.ico}</span><b>${esc(r.title)}</b><small>${code} · + ${ac}</small><em>${k} kcal · ${fmt(p, 1)} g prot</em></div>`; }).join('')}</div>
+  <div class="dos" style="margin-top:8mm">${postit('<b>Compra según el menú</b><br>Antes de ir al mercado, marca lo que ya tienes. No necesitas comprar los ingredientes de las 200 recetas: solo los de tus próximos días.', {col: C.menta, rot: -2})}${globo('Los totales incluyen la receta y su acompañamiento. Este menú organiza el desayuno, no el día completo.', 'coach', C.naranja)}</div>`));
+
+// recetario de los libros
 marca('fichas');
-const fichas = FSEL;
 const ALTO = 259 * 3.78;
 const M = globalThis.MEDIDAS;
-{ let paginas = [[]], usado = 125;
-  fichas.forEach((x, i) => { const h = M.fichas[i] + 20; if (usado + h > ALTO && paginas[paginas.length - 1].length) { paginas.push([]); usado = 0; } paginas[paginas.length - 1].push(i); usado += h; });
-  const ultUso = paginas[paginas.length - 1].reduce((a, i) => a + M.fichas[i] + 20, 0);
-  const relleno = ultUso < ALTO * .6 ? `<div class="mis-versiones"><div class="marco-notas"><b>Mis versiones · lo que cambié y me salió rico</b>${'<div class="renglon"></div>'.repeat(12)}</div><div>${postit('<b>Regla de oro al cambiar algo</b><br><br>Cambia una verdura por otra: libre.<br>Cambia una proteína por otra: misma palma.<br>Cambia el carbo: mira las equivalencias de la página ' + IDX.plato + '.', {col: C.amarillo, rot: 3})}</div></div>` : '';
-  paginas.forEach((ix, n) => P.push(pag(`${n === 0 ? `<div class="kicker">Recetas paso a paso</div><h2 class="titular" style="font-size:30pt">${fichas.length} recetas para empezar</h2><p class="bajada-ch">Cantidades por porción. La barra muestra de dónde vienen las calorías: proteína, carbo y grasa. Cuando necesites más energía, súmale lo que dice la franja verde.</p>` : ''}${ix.map(i => ficha(fichas[i], i === 0)).join('')}${n === paginas.length - 1 ? relleno : ''}`))); }
+{ let paginas = [[]], usado = 135;
+  FLUJO.forEach((x, i) => { const h = M.flujo[i] + 4; const sig = FLUJO[i + 1]; const extra = x.tipo === 'cap' && sig ? M.flujo[i + 1] + 4 : 0; if (usado + h + extra > ALTO && paginas[paginas.length - 1].length) { paginas.push([]); usado = 0; } paginas[paginas.length - 1].push(i); usado += h; });
+  paginas.forEach((ix, n) => P.push(pag(`${n === 0 ? `<div class="kicker">Los recetarios, completos</div><h2 class="titular" style="font-size:28pt">${BOOK.length} recetas peruanas, <span class="subrayado">capítulo por capítulo</span></h2><p class="bajada-ch">Las fichas de los dos libros con cantidades para 1 porción, pasos, consejos, acompañamiento sugerido y alérgenos. La franja verde dice qué sumar cuando necesitas más energía.</p>` : ''}${ix.map(i => FLUJO[i].html).join('')}`))); }
 
 // recetario
 marca('rr');
-const todas = ['des', 'alm', 'cen', 'ens'].flatMap(g => [{cab: g}, ...R.filter(r => r.grupo === g)]);
+const todas = INDICE;
 { const pags = []; let pg = null, col = 0, usado = 0, lim = 0;
-  const nueva = () => { pg = [[], [], []]; pags.push(pg); col = 0; usado = 0; lim = pags.length === 1 ? ALTO - 105 : ALTO - 6; };
+  const nueva = () => { pg = [[], [], []]; pags.push(pg); col = 0; usado = 0; lim = pags.length === 1 ? ALTO - 110 : ALTO - 16; };
   nueva();
   todas.forEach((x, i) => { const h = M.rr[i]; if (usado + h > lim) { col++; usado = 0; if (col > 2) nueva(); } pg[col].push(x); usado += h; });
   const rellenoRR = pg => !pg[1].length ? `<div class="rcol" style="grid-column:2/4">${postit('<b>Las que voy a probar esta semana</b>' + '<div class="renglon"></div>'.repeat(8), {col: C.amarillo, rot: 2, estilo: 'margin:8mm 6mm'})}${globo('Empieza por 2 o 3 recetas nuevas por semana. El resto, repite tus favoritas: así se vuelve costumbre.', 'coach', C.verde)}</div>` : '';
-  pags.forEach((pg, n) => P.push(pag(`${n === 0 ? `<div class="kicker">Todo el recetario</div><h2 class="titular" style="font-size:26pt">${R.length} comidas sugeridas</h2><p class="bajada-ch">Calorías y proteína de la receta base, por porción. En negrita las que tienen ficha completa en esta guía. 🎒 = fácil de llevar.</p>` : ''}<div class="recetario">${pg.filter((c, k) => c.length || k === 0).map(c => `<div class="rcol">${c.map(htmlRRg).join('')}</div>`).join('')}${rellenoRR(pg)}</div>`))); }
+  pags.forEach((pg, n) => P.push(pag(`${n === 0 ? `<div class="kicker">Todo el recetario</div><h2 class="titular" style="font-size:26pt">Índice: ${TODO.length} comidas</h2><p class="bajada-ch">Las ${BOOK.length} de los libros, por capítulo, más ${OTRAS.length} ideas de cena y ensalada. Calorías y proteína por porción. En negrita las que tienen ficha completa en esta guía. 🎒 = fácil de llevar.</p>` : ''}<div class="recetario">${pg.filter((c, k) => c.length || k === 0).map(c => `<div class="rcol">${c.map(htmlRRg).join('')}</div>`).join('')}${rellenoRR(pg)}</div>`))); }
 
 // lecciones
 const leccion = (l, i) => `<div class="lec" style="transform:rotate(${giro(i) * .35}deg)"><div class="lec-cab"><span class="lec-n">${i + 1}</span><b>${l.e} ${esc(l.t)}</b></div>
@@ -356,7 +436,7 @@ P.push(pag(`
   <div class="dos" style="margin-top:10mm">
     <div class="marco-notas"><b>Mis comidas favoritas de la guía</b>${'<div class="renglon"></div>'.repeat(9)}</div>
     <div>${postit('<b>Mi «por qué»</b><br><br>________________________<br><br>________________________<br><br>________________________', {col: C.amarillo, rot: 2.5, w: '74mm'})}
-      <div class="contra">Guía general de orientación para personas sanas y activas; no reemplaza a un profesional de salud. Si tienes una condición médica, estás embarazada o tienes una relación difícil con la comida, consulta antes con un profesional. Recetas basadas en recetarios de desayunos y almuerzos peruanos saludables.</div></div>
+      <div class="contra">Guía general de orientación para personas sanas y activas; no reemplaza a un profesional de salud. Si tienes una condición médica, estás embarazada o tienes una relación difícil con la comida, consulta antes con un profesional. Recetas y consejos de «100 desayunos peruanos saludables» (Libro 1) y «100 almuerzos peruanos saludables y económicos» (Libro 2).</div></div>
   </div>`));
 return P; }
 
@@ -605,20 +685,42 @@ p{margin:0 0 3mm}
 .insig{display:grid;grid-template-columns:repeat(5,1fr);gap:6mm 5mm;margin-top:3mm}
 .ins{border-radius:50%;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:2px dashed rgba(23,37,31,.5);box-shadow:0 1.5mm 3mm rgba(0,0,0,.12)}
 .ins span{font-size:22pt;line-height:1}.ins b{font-family:Poppins;font-size:9pt;margin-top:1mm}.ins small{font-size:7pt}
+.ficha.compacta{font-size:7.6pt;padding:3mm 4mm;margin:0 0 3.2mm!important;box-shadow:0 .6mm 2mm rgba(0,0,0,.09)}
+.ficha.compacta h3{font-size:10.5pt}.ficha.compacta .f-ico{width:10mm;height:10mm;font-size:16pt}.ficha.compacta .f-num{margin-top:1mm}.ficha.compacta .f-num b{font-size:9.5pt}
+.ficha.compacta .f-cuerpo{gap:4mm;grid-template-columns:1fr 1fr}
+.ficha.compacta .f-ing.ing2{column-count:2;column-gap:3mm}
+.ficha.compacta .f-ing li{padding:.25mm 0;break-inside:avoid}
+.ficha.compacta .f-pasos li{margin-bottom:.7mm}
+.ficha.compacta{line-height:1.3}.ficha.compacta .f-tip{font-size:7.2pt;margin-top:.8mm}.ficha.compacta .f-plan{padding:1mm 2mm;margin-bottom:1.5mm}
+.cap-ab{border-radius:3mm;padding:4mm 5mm;margin:1mm 0 4mm;position:relative;box-shadow:0 1.5mm 3.5mm rgba(0,0,0,.12)}
+.cap-ab h3{font-size:18pt;margin:.5mm 0}.cap-n{font-size:8pt;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.cap-l{font-size:8.5pt}
+.cap-ico{position:absolute;right:5mm;top:50%;transform:translateY(-50%) rotate(-4deg);font-size:20pt;letter-spacing:1mm}
+.sin-ficha{margin:2mm 0 5mm}.sin-ficha .postit{font-size:8.6pt;line-height:1.55}
+.libros{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:3mm}
+.libro-c{background:#fff;border-radius:2mm 4mm 4mm 2mm;padding:5mm 5mm 4mm 12mm;position:relative;box-shadow:0 2mm 5mm rgba(0,0,0,.15)}
+.lomo{position:absolute;left:0;top:0;bottom:0;width:8mm;color:#fff;writing-mode:vertical-rl;transform:rotate(180deg);text-align:center;font-family:Poppins;font-weight:700;font-size:9pt;letter-spacing:.2em;border-radius:0 2mm 2mm 0}
+.libro-c h3{margin:0 0 1.5mm;font-size:13pt}.cap-li{padding:1.5mm 0 1.5mm 3mm;margin:2mm 0;background:#FBF8F2;border-radius:0 2mm 2mm 0}.cap-li b{display:block;font-size:9.5pt}.cap-li span{font-size:8pt;color:#55655D}
+.medidas{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
+.medidas>div{background:#fff;border-radius:3mm;padding:3.5mm;box-shadow:0 1mm 3mm rgba(0,0,0,.1)}.medidas span{font-size:18pt}.medidas b{display:block;font-family:Poppins;font-size:10.5pt}.medidas p{font-size:8.5pt;margin:1mm 0 0}
+.armar{background:#fff;border-radius:3mm;padding:4mm;box-shadow:0 1mm 3mm rgba(0,0,0,.1);font-size:9pt}.armar h3{margin-top:0}.armar p{margin-bottom:2mm}
+.temps{display:grid;grid-template-columns:repeat(5,1fr);gap:4mm}
+.temps>div{background:#fff;border:2px solid #17251F;border-radius:3mm;padding:3mm;text-align:center;box-shadow:1.5mm 1.5mm 0 #17251F}.temps span{font-size:20pt;display:block}.temps b{font-family:Poppins;font-size:16pt;display:block;color:#D9692F}.temps small{font-size:8pt}
+.siete{display:grid;grid-template-columns:repeat(4,1fr);gap:6mm 5mm;margin-top:4mm}
+.manana{border-radius:3mm;padding:4mm 3.5mm;display:flex;flex-direction:column;gap:1mm;box-shadow:0 1.5mm 3.5mm rgba(0,0,0,.13);min-height:46mm}
+.manana .dia-m{font-family:Poppins;font-size:12pt}.manana .ic{font-size:22pt}.manana b{font-size:9.5pt;line-height:1.2}.manana small{font-size:7.6pt;color:#45554D}.manana em{font-style:normal;font-weight:700;font-size:8.6pt;margin-top:auto}
 .mis-versiones{margin-top:6mm;display:grid;grid-template-columns:1.4fr 1fr;gap:8mm;align-items:start}
 `;
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage();
   // 1ª pasada: medir fichas y filas del recetario con el ancho real
-  globalThis.MEDIDAS = {fichas: FSEL.map(() => 300), rr: []};
-  const todasM = ['des', 'alm', 'cen', 'ens'].flatMap(g => [{cab: g}, ...D.todas.filter(r => r.grupo === g)]);
-  globalThis.MEDIDAS.rr = todasM.map(() => 12);
+  globalThis.MEDIDAS = {flujo: FLUJO.map(() => 300), rr: INDICE.map(() => 12)};
+  const todasM = INDICE;
   construir(); P.length = 0; nPag = 0;
-  const med = `<!doctype html><html><head><meta charset="utf-8"><style>${CSS}</style></head><body><section class="pag" style="height:auto"><div id="mf">${FSEL.map((x, i) => ficha(x, i === 0)).join('')}</div><div class="recetario"><div class="rcol" id="mr">${todasM.map(htmlRRg).join('')}</div></div></section></body></html>`;
+  const med = `<!doctype html><html><head><meta charset="utf-8"><style>${CSS}</style></head><body><section class="pag" style="height:auto"><div id="mf">${FLUJO.map(x => x.html).join('')}</div><div class="recetario"><div class="rcol" id="mr">${todasM.map(htmlRRg).join('')}</div></div></section></body></html>`;
   await p.setContent(med); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(300);
-  globalThis.MEDIDAS = await p.evaluate(() => { const alto = e => { const cs = getComputedStyle(e); return e.getBoundingClientRect().height + parseFloat(cs.marginTop) + parseFloat(cs.marginBottom); }; return {fichas: [...document.querySelectorAll('#mf>.ficha')].map(alto), rr: [...document.querySelectorAll('#mr>*')].map(alto)}; });
+  globalThis.MEDIDAS = await p.evaluate(() => { const alto = e => { const cs = getComputedStyle(e); return e.getBoundingClientRect().height + parseFloat(cs.marginTop) + parseFloat(cs.marginBottom); }; return {flujo: [...document.querySelectorAll('#mf>*')].map(alto), rr: [...document.querySelectorAll('#mr>*')].map(alto)}; });
   IDX._pasada = true; construir(); P.length = 0; nPag = 0; construir();
-  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Progresa · tu plan</title><style>${CSS}</style></head><body>${P.join('\n')}</body></html>`;
+  const html = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Progresa · guía práctica</title><style>${CSS}</style></head><body>${P.join('\n')}</body></html>`;
   fs.writeFileSync(__dirname + '/guia.html', html);
   await p.goto('file://' + __dirname + '/guia.html'); await p.evaluate(() => document.fonts.ready); await p.waitForTimeout(500);
   // páginas cuyo contenido no cabe
