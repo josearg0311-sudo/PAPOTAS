@@ -1,7 +1,7 @@
 {
   "name": "Personal",
   "short_name": "Personal",
-  "description": "Tareas, hábitos y notas.",
+  "description": "Agenda y recordatorios personales.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

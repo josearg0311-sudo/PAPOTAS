@@ -1,6 +1,6 @@
 // Guarda la app en el teléfono para que abra sin internet.
 // Cambia VERSION cuando publiques una versión nueva.
-const VERSION = "personal-v1";
+const VERSION = "personal-v2";
 const ARCHIVOS = ["./", "index.html", "manifest.webmanifest", "icono.svg", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(ARCHIVOS))); self.skipWaiting(); });
 self.addEventListener("activate", e => {
@@ -16,4 +16,12 @@ self.addEventListener("fetch", e => {
     return;
   }
   e.respondWith(caches.match(r).then(x => x || fetch(r)));
+});
+// Al tocar un aviso, abre la app (o la trae al frente si ya está abierta).
+self.addEventListener("notificationclick", e => {
+  e.notification.close();
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(cs => {
+    for (const c of cs) if ("focus" in c) return c.focus();
+    return self.clients.openWindow("./");
+  }));
 });

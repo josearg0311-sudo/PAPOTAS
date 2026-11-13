@@ -1,7 +1,7 @@
 {
   "name": "Cuentas",
   "short_name": "Cuentas",
-  "description": "Ingresos, gastos, saldos y pendientes.",
+  "description": "Ingresos y gastos, personales y de oficina.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

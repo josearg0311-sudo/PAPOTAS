@@ -10,21 +10,26 @@ se publica tal cual y se instala como app por separado.
 
 Con Netlify Drop: arrastra la carpeta `cuentas` (o `personal`) entera.
 
-## Cuentas
-- **Cuentas**: efectivo, banco, tarjeta… con saldo inicial y color.
-- **Movimientos**: ingreso, gasto o transferencia entre cuentas, con categoría,
-  fecha y nota. Por meses, con filtros y buscador. Tocar uno lo edita.
-- **Pendientes**: lo que te deben y lo que debes, con fecha de vencimiento.
-  Al marcarlo como cobrado o pagado se anota solo como ingreso o gasto.
-- **Resumen**: saldo total, ingresos y gastos del mes, gráfico de 6 meses y
-  gastos por categoría.
-- **Ajustes**: moneda, tema claro u oscuro, categorías, respaldo y exportar a Excel (CSV).
+## Cuentas: ingresos y gastos, personales y de oficina
+- Cada movimiento se marca como **Personal** u **Oficina**. Arriba eliges ver
+  **Todo**, solo **Personal** o solo **Oficina**; resumen, movimientos,
+  pendientes y la exportación a Excel siguen esa elección.
+- En «Todo», una tabla compara este mes lo personal con la oficina: ingresos, gastos y resultado.
+- Categorías separadas para personal y oficina (oficina: alquiler, sueldos,
+  proveedores, impuestos…). Se editan en Ajustes.
+- Cuentas (efectivo, banco, caja de oficina…) marcadas como personales, de oficina o de las dos.
+- Transferencias entre cuentas, y pendientes por cobrar o por pagar.
 
-## Personal
-- **Hoy**: saludo, progreso del día, tareas de hoy y vencidas, hábitos que tocan hoy y notas fijadas.
-- **Tareas**: añadir rápido, fecha, prioridad, nota; agrupadas en Vencidas, Hoy, Mañana, Próximas y Sin fecha.
-- **Hábitos**: eliges qué días tocan, marcas los días y ves la racha y el % de los últimos 30 días.
-- **Notas**: con título, color, fijar arriba y buscador.
+## Personal: agenda y recordatorios
+- **Hoy**: agenda del día, recordatorios pendientes y atrasados, y lo que viene en los próximos 7 días.
+- **Agenda**: calendario del mes con puntos en los días ocupados. Eventos con
+  hora de inicio y fin, lugar, color, notas, aviso previo y repetición
+  (diaria, semanal, mensual o anual). En los que se repiten se puede borrar solo un día.
+- **Recordatorios**: con día, hora y repetición. Al marcar uno que se repite, pasa solo a la próxima vez.
+- **Avisos**: notificación a la hora de cada cosa mientras la app está abierta
+  o en segundo plano. Para que suene aunque la app esté cerrada, usa
+  **«Al calendario del teléfono»**: lo guarda en el calendario del móvil con su alarma.
+- **Notas**, que se pueden fijar en la pantalla Hoy.
 
 ## Los datos
 Se guardan en el navegador del teléfono, no en internet. Nadie más los ve, pero
