@@ -31,6 +31,23 @@ Con Netlify Drop: arrastra la carpeta `cuentas` (o `personal`) entera.
   **«Al calendario del teléfono»**: lo guarda en el calendario del móvil con su alarma.
 - **Notas**, que se pueden fijar en la pantalla Hoy.
 
+## Sincronización entre aparatos (opcional)
+En **Ajustes → Sincronización** de cada app:
+
+- Si en ese navegador ya tienes PAPOTAS conectado a Supabase, sale el botón
+  **«Usar la misma nube que PAPOTAS»**. Con un toque queda conectada.
+- Si no, pega la dirección del proyecto (`https://xxxx.supabase.co`) y la
+  clave pública (Supabase → Project Settings → API). Si la nube es nueva,
+  ejecuta antes `supabase.sql` en su SQL Editor.
+- Para el segundo aparato: **«Conectar otro aparato»** copia un enlace. Ábrelo
+  allí y queda conectado. Ese enlace lleva la clave de tu nube, así que no se lo pases a nadie.
+
+Las apps guardan sus datos en la misma tabla que PAPOTAS, cada una con sus
+propias colecciones (`cuentas.*` y `personal.*`). PAPOTAS no las mezcla con
+las suyas. Se sincroniza al guardar, al volver a la app y cada 30 segundos.
+Sin internet todo sigue funcionando y se sube al volver la conexión. Si dos
+aparatos tenían cosas distintas al conectarse, se juntan.
+
 ## Los datos
 Se guardan en el navegador del teléfono, no en internet. Nadie más los ve, pero
 si se borran los datos del navegador se pierden: usa **Ajustes → Descargar

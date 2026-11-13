@@ -113,6 +113,10 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 .tag button{border:0;background:none;color:var(--muted);width:22px;height:22px;border-radius:50%}
 .tag button:hover{background:var(--line);color:var(--out)}
 .hint{font-size:13px;color:var(--muted)}
+.nube-dot{width:9px;height:9px;border-radius:50%;margin-left:auto;background:var(--muted);flex:none}
+.nube-dot.ok{background:#2fbf71}.nube-dot.err{background:#f0574a}
+.nube-dot.sync{background:#e9a23b;animation:parpadeo 1s infinite}
+@keyframes parpadeo{50%{opacity:.3}}
 .seg.ver{max-width:340px;margin:0 0 16px}
 .seg.ver button[aria-pressed="true"]{color:var(--acc)}
 .amb{font-size:11px;font-weight:800;padding:1px 7px;border-radius:999px;vertical-align:1px;letter-spacing:.02em}
@@ -142,7 +146,7 @@ dialog::backdrop{background:rgba(0,0,0,.55)}
 <body>
 <div class="app">
   <nav class="side" aria-label="Secciones">
-    <div class="brand"><img src="icono.svg" alt=""> Cuentas</div>
+    <div class="brand"><img src="icono.svg" alt=""> Cuentas<span id="nubeDot" class="nube-dot hide"></span></div>
     <button class="tab" data-view="resumen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4v8H3zM10 3h4v18h-4zM17 9h4v12h-4z"/></svg>Resumen</button>
     <button class="tab" data-view="movs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg>Movimientos</button>
     <button class="tab" data-view="cuentas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg>Cuentas</button>
@@ -169,9 +173,9 @@ const AMB = {personal:"Personal", oficina:"Oficina"};
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
 function fresh(){
   return {v:2, moneda:"$", tema:"dark", ver:"todos", ult:"personal",
-    cuentas:[{id:uid(),nombre:"Efectivo",color:COLORS[1],inicial:0,ambito:"personal"},
-             {id:uid(),nombre:"Banco",color:COLORS[0],inicial:0,ambito:"personal"},
-             {id:uid(),nombre:"Caja de oficina",color:COLORS[3],inicial:0,ambito:"oficina"}],
+    cuentas:[{id:"c-efectivo",nombre:"Efectivo",color:COLORS[1],inicial:0,ambito:"personal"},
+             {id:"c-banco",nombre:"Banco",color:COLORS[0],inicial:0,ambito:"personal"},
+             {id:"c-oficina",nombre:"Caja de oficina",color:COLORS[3],inicial:0,ambito:"oficina"}],
     cats:JSON.parse(JSON.stringify(DEF_CATS)), movs:[], pend:[]};
 }
 let S;
@@ -197,7 +201,8 @@ function selectorVer(){
 }
 function enlazarVer(M){ M.querySelectorAll("[data-ver]").forEach(b=>b.onclick=()=>{S.ver=b.dataset.ver; save(); render();}); }
 const tagAmb = a => `<span class="amb amb-${a}">${AMB[a]}</span>`;
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("No se pudo guardar en este aparato"); } }
+function escribir(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast("No se pudo guardar en este aparato"); } }
+function save(){ escribir(); nubeProgramar(); }
 
 /* ---------- utilidades ---------- */
 const $ = (s,r=document)=>r.querySelector(s);
@@ -574,7 +579,8 @@ function vAjustes(M){
       <div class="row"><button class="btn pri" id="aExp">Descargar respaldo</button><button class="btn" id="aImp">Cargar respaldo</button><button class="btn" id="aCsv">Exportar a Excel (CSV)${S.ver==="todos"?"":" · "+AMB[S.ver]}</button></div>
       <input type="file" id="aFile" accept=".json,application/json" class="hide">
       <div class="row" style="margin-top:14px"><button class="btn danger" id="aBorrar">Borrar todo</button></div>
-    </div></div>`;
+    </div>${tarjetaNube()}</div>`;
+  enlazarNube(M);
   $("#aMon").onchange=e=>{S.moneda=e.target.value.trim()||"$";save();toast("Moneda cambiada");};
   $("#aTema").onchange=e=>{S.tema=e.target.value;save();tema();};
   M.querySelectorAll("[data-delcat]").forEach(b=>b.onclick=()=>{const[a,t,i]=b.dataset.delcat.split(":");S.cats[a][t].splice(+i,1);save();render();});
@@ -598,15 +604,164 @@ function vAjustes(M){
       (cuenta(m.cuenta)||{}).nombre,m.destino?(cuenta(m.destino)||{}).nombre:"",m.cat,m.nota].map(q).join(";")));
     bajar(new Blob(["﻿"+filas.join("\r\n")],{type:"text/csv"}),"movimientos-"+hoy()+".csv");
   };
-  $("#aBorrar").onclick=()=>{ if(confirm("Se borrarán todas las cuentas, movimientos y pendientes de este aparato. ¿Seguro?")){ const c=S; S=fresh(); S.tema=c.tema; save(); render(); toast("Todo borrado",()=>{S=c;save();render();}); } };
+  $("#aBorrar").onclick=()=>{ if(confirm("Se borrarán todas las cuentas, movimientos y pendientes de este aparato"+(conectada()?" Y DE TODOS TUS APARATOS SINCRONIZADOS":"")+". ¿Seguro?")){ const c=S; S=fresh(); S.tema=c.tema; save(); render(); toast("Todo borrado",()=>{S=c;save();render();}); } };
 }
 function bajar(blob,nombre){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
 function tema(){ document.documentElement.dataset.theme=S.tema==="light"?"light":"dark"; document.querySelector('meta[name="theme-color"]').content=S.tema==="light"?"#f4f5f8":"#0f1115"; }
 
+/* qué se sincroniza */
+const APP = "cuentas";
+const NUBE_COLS = {"cuentas.movs":"movs", "cuentas.cuentas":"cuentas", "cuentas.pend":"pend"};
+const nubeConfig = () => ({moneda:S.moneda, cats:S.cats});
+function nubeSetConfig(d){ if(d.moneda) S.moneda = d.moneda; if(d.cats) S.cats = d.cats; }
+/* ---------- nube: sincronización con Supabase ----------
+   Usa la misma tabla que PAPOTAS (papotas_sync_records), con colecciones
+   propias que empiezan por el nombre de la app. PAPOTAS las ignora.
+   Cada cosa (un movimiento, un evento…) es una fila. Para saber qué cambió
+   aquí se guarda la «firma» de lo último que se sabe que está en la nube:
+   si la firma de lo local no coincide, hay que subirlo; si en la nube hay
+   una fila nueva y aquí no se tocó, se baja. Lo cambiado aquí y aún no
+   subido gana. */
+const NUBE_KEY = KEY + "_nube", TABLA = "papotas_sync_records";
+let N = {};
+function leerN(){ try{ N = JSON.parse(localStorage.getItem(NUBE_KEY)) || {}; }catch(e){ N = {}; } if(!N.dev) N.dev = APP + "-" + uid(); N.firmas = N.firmas || {}; }
+function guardaN(){ try{ localStorage.setItem(NUBE_KEY, JSON.stringify(N)); }catch(e){} }
+leerN(); guardaN();
+const conectada = () => !!(N.url && N.key);
+function firma(o){ const s = JSON.stringify(o); let h = 5381; for(let i=0;i<s.length;i++) h = ((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36) + "." + s.length; }
+function limpiaUrl(u){ u = String(u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,""); if(u && !/^https?:\/\//.test(u)) u = "https://" + u; return u; }
+function cabeceras(k){ const h = {apikey:k, "Content-Type":"application/json"}; if(/^eyJ/.test(k)) h.Authorization = "Bearer " + k; return h; }
+async function pedir(ruta, op, url, key){
+  url = url || N.url; key = key || N.key;
+  const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), 15000);
+  let r;
+  try{ r = await fetch(url + "/rest/v1/" + ruta, Object.assign({headers:cabeceras(key), signal:ctl.signal}, op||{})); }
+  catch(e){ throw new Error(navigator.onLine===false ? "Sin internet ahora mismo." : "No se pudo llegar a la nube. Revisa la dirección."); }
+  finally{ clearTimeout(t); }
+  if(r.ok) return r.status===204 ? null : r.json().catch(()=>null);
+  let txt = ""; try{ txt = await r.text(); }catch(e){}
+  if(r.status===401 || r.status===403) throw new Error("La clave no es válida para esa nube.");
+  if(r.status===404 || /PGRST20|42P01|42883/.test(txt)) throw new Error("La nube no está preparada: falta ejecutar el SQL de PAPOTAS (supabase.sql) en Supabase.");
+  throw new Error("La nube respondió con un error (" + r.status + ").");
+}
+function registros(){ const m = new Map(); for(const [col,campo] of Object.entries(NUBE_COLS)) (S[campo]||[]).forEach(x=>m.set(col+"|"+x.id, x)); m.set(APP+".config|config", nubeConfig()); return m; }
+function aplicar(col, id, datos){
+  if(col === APP+".config"){ if(datos) nubeSetConfig(datos); return; }
+  const campo = NUBE_COLS[col]; if(!campo) return;
+  const arr = S[campo], i = arr.findIndex(x=>x.id===id);
+  if(datos===null){ if(i>=0) arr.splice(i,1); } else if(i>=0) arr[i] = datos; else arr.push(datos);
+}
+let nubeT = null, sincronizando = false, otraVez = false;
+function nubeProgramar(ms){ if(!conectada()) return; clearTimeout(nubeT); nubeT = setTimeout(sincronizar, ms==null?1500:ms); }
+async function sincronizar(){
+  if(!conectada()) return;
+  if(sincronizando){ otraVez = true; return; }
+  if(dlg.open){ nubeProgramar(4000); return; }   // no cambiar nada bajo un formulario abierto
+  sincronizando = true; leerN(); pintaEstado();
+  try{
+    /* 1. Bajar lo nuevo */
+    const primera = !N.cursor; let cambio = false, desde = N.cursor;
+    for(let vuelta=0; vuelta<50; vuelta++){
+      let q = `${TABLA}?select=coleccion,registro_id,datos,eliminado,actualizado_en&coleccion=like.${APP}.*&order=actualizado_en.asc&limit=1000`;
+      if(desde) q += "&actualizado_en=gte." + encodeURIComponent(desde);
+      const filas = await pedir(q) || [];
+      if(dlg.open){ otraVez = true; return; }
+      const locales = registros();
+      for(const f of filas){
+        const k = f.coleccion + "|" + f.registro_id, aqui = locales.get(k), fAqui = aqui ? firma(aqui) : undefined, sabida = N.firmas[k];
+        const pendiente = aqui ? sabida !== fAqui : sabida !== undefined;
+        const esConfig = f.coleccion === APP+".config";
+        if(pendiente && !primera) continue;   // la primera vez, si choca, manda la nube
+        if(f.eliminado){ if(aqui){ aplicar(f.coleccion, f.registro_id, null); cambio = true; } delete N.firmas[k]; }
+        else { const fr = firma(f.datos); if(fr !== fAqui){ aplicar(f.coleccion, f.registro_id, f.datos); cambio = true; } N.firmas[k] = esConfig ? firma(nubeConfig()) : fr; }
+        if(!N.cursor || f.actualizado_en > N.cursor) N.cursor = f.actualizado_en;
+      }
+      if(filas.length < 1000) break;
+      if(filas[filas.length-1].actualizado_en === desde) break;
+      desde = filas[filas.length-1].actualizado_en;
+    }
+    if(!N.cursor) N.cursor = "1970-01-01T00:00:00Z";
+    if(cambio){ S = normalizar(S); escribir(); if(!dlg.open) render(); }
+    guardaN();
+    /* 2. Subir lo cambiado aquí */
+    const regs = registros(), tareas = [];
+    for(const [k,d] of regs){ const fr = firma(d); if(N.firmas[k] !== fr) tareas.push(async()=>{ const [c,id] = k.split("|");
+      await pedir("rpc/papotas_upsert_record", {method:"POST", body:JSON.stringify({p_coleccion:c, p_registro_id:id, p_datos:d, p_dispositivo_id:N.dev})}); N.firmas[k] = fr; }); }
+    for(const k of Object.keys(N.firmas)) if(!regs.has(k)) tareas.push(async()=>{ const [c,id] = k.split("|");
+      await pedir("rpc/papotas_delete_record", {method:"POST", body:JSON.stringify({p_coleccion:c, p_registro_id:id, p_dispositivo_id:N.dev})}); delete N.firmas[k]; });
+    for(let i=0;i<tareas.length;i+=6){ await Promise.all(tareas.slice(i,i+6).map(f=>f())); guardaN(); }
+    N.ultima = Date.now(); N.error = ""; guardaN();
+  }catch(e){ N.error = e.message || String(e); guardaN(); }
+  finally{ sincronizando = false; pintaEstado(); if(otraVez){ otraVez = false; nubeProgramar(800); } }
+}
+function pintaEstado(){
+  const d = document.getElementById("nubeDot");
+  if(d){ d.className = "nube-dot " + (!conectada() ? "hide" : sincronizando ? "sync" : N.error ? "err" : "ok");
+    d.title = !conectada() ? "" : sincronizando ? "Sincronizando…" : N.error ? N.error : "Sincronizado"; }
+  const e = document.getElementById("nubeEstado"); if(e) e.innerHTML = textoEstado();
+}
+function textoEstado(){
+  if(!conectada()) return "";
+  if(sincronizando) return "Sincronizando…";
+  if(N.error) return `<span style="color:var(--out,var(--late))">${esc(N.error)}</span>`;
+  if(!N.ultima) return "Aún sin sincronizar.";
+  const s = Math.round((Date.now()-N.ultima)/1000);
+  return "✓ Sincronizado " + (s<60 ? "hace un momento" : s<3600 ? "hace " + Math.floor(s/60) + " min" : "a las " + new Date(N.ultima).toLocaleTimeString("es",{hour:"2-digit",minute:"2-digit"})) + ".";
+}
+async function conectar(url, key){
+  url = limpiaUrl(url); key = String(key||"").trim();
+  if(!/^https:\/\/[^/]+$/.test(url)) throw new Error("La dirección debe ser como https://xxxx.supabase.co");
+  if(key.length < 20) throw new Error("Falta la clave pública (anon o publishable).");
+  await pedir(`${TABLA}?select=registro_id&limit=1`, null, url, key);
+  N.url = url; N.key = key; N.cursor = ""; N.firmas = {}; N.error = ""; N.ultima = 0; guardaN();
+  await sincronizar();
+}
+function desconectar(){ N = {dev:N.dev, firmas:{}}; guardaN(); pintaEstado(); }
+function nubeDePapotas(){ try{ const a = JSON.parse(localStorage.getItem("pap_ajustes")||"null"); if(a && a.supabaseUrl && a.supabaseKey) return {url:a.supabaseUrl, key:a.supabaseKey}; }catch(e){} return null; }
+function enlaceNube(){ return location.origin + location.pathname + "#nube=" + btoa(unescape(encodeURIComponent(JSON.stringify({u:N.url,k:N.key})))); }
+function tarjetaNube(){
+  const pap = !conectada() && nubeDePapotas();
+  return `<div class="card"><h2>Sincronización</h2>
+    ${conectada() ? `<p style="margin-top:0">Conectada a <b>${esc(N.url.replace(/^https:\/\//,""))}</b></p><p class="hint" id="nubeEstado">${textoEstado()}</p>
+      <p class="hint">Todo lo que anotes aquí aparece en tus otros aparatos conectados a la misma nube, y al revés.</p>
+      <div class="row"><button class="btn pri" id="nAhora">Sincronizar ahora</button><button class="btn" id="nEnlace">Conectar otro aparato</button><button class="btn danger" id="nFuera">Desconectar</button></div>`
+    : `<p class="hint" style="margin-top:0">Conecta una nube (Supabase, gratis) para tener los mismos datos en el móvil, el ordenador o donde abras la app.</p>
+      ${pap ? `<div class="row" style="margin-bottom:6px"><button class="btn pri" id="nPap">Usar la misma nube que PAPOTAS</button></div><p class="hint">O escribe otra:</p>` : ""}
+      <label class="f" for="nUrl">Dirección del proyecto</label><input type="text" id="nUrl" placeholder="https://xxxx.supabase.co" autocomplete="off" spellcheck="false">
+      <label class="f" for="nKey">Clave pública (anon o publishable)</label><input type="text" id="nKey" placeholder="eyJ… o sb_publishable_…" autocomplete="off" spellcheck="false">
+      <p class="hint">Está en Supabase → Project Settings → API. Si es una nube nueva, ejecuta antes en su SQL Editor el archivo <b>supabase.sql</b> de PAPOTAS.</p>
+      <div class="row"><button class="btn pri" id="nConectar">Conectar</button></div>
+      <p class="hint" id="nErr" role="alert" style="color:var(--out,var(--late))"></p>`}
+  </div>`;
+}
+function enlazarNube(M){
+  const go = async (u,k)=>{ const err = $("#nErr",M); if(err) err.textContent = "Probando…";
+    try{ await conectar(u,k); toast("Nube conectada"); render(); }catch(e){ if(err) err.textContent = e.message; else toast(e.message); } };
+  const b = $("#nConectar",M); if(b) b.onclick = ()=>go($("#nUrl",M).value, $("#nKey",M).value);
+  const p = $("#nPap",M); if(p) p.onclick = ()=>{ const x = nubeDePapotas(); go(x.url, x.key); };
+  const a = $("#nAhora",M); if(a) a.onclick = ()=>sincronizar();
+  const f = $("#nFuera",M); if(f) f.onclick = ()=>{ if(confirm("Este aparato dejará de sincronizar. Los datos que tiene se quedan aquí. ¿Seguir?")){ desconectar(); render(); } };
+  const e = $("#nEnlace",M); if(e) e.onclick = async ()=>{ const l = enlaceNube();
+    try{ await navigator.clipboard.writeText(l); toast("Enlace copiado. Ábrelo en el otro aparato."); }
+    catch(_){ prompt("Abre este enlace en el otro aparato:", l); } };
+}
+async function nubeDesdeEnlace(){
+  const m = location.hash.match(/nube=([^&]+)/); if(!m) return;
+  history.replaceState(null, "", location.pathname);
+  try{ const x = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+    if(confirm("¿Conectar este aparato a tu nube para sincronizar los datos?")){ await conectar(x.u, x.k); toast("Nube conectada"); render(); }
+  }catch(e){ toast(e.message || "Ese enlace de conexión no es válido"); }
+}
+window.addEventListener("online", ()=>nubeProgramar(300));
+document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) nubeProgramar(300); });
+setInterval(()=>{ if(!document.hidden) sincronizar(); }, 30000);
+setInterval(pintaEstado, 30000);
+
 /* ---------- arranque ---------- */
 document.addEventListener("keydown",e=>{ if(e.key==="n"&&!dlg.open&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$("#fab").click();} });
-window.addEventListener("storage",e=>{ if(e.key===KEY){ load(); render(); } });
-load(); tema(); ir("resumen");
+window.addEventListener("storage",e=>{ if(e.key===KEY){ load(); if(!dlg.open) render(); } });
+load(); tema(); ir("resumen"); pintaEstado();
+nubeDesdeEnlace().then(()=>sincronizar());
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
