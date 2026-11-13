@@ -32,21 +32,28 @@ Con Netlify Drop: arrastra la carpeta `cuentas` (o `personal`) entera.
 - **Notas**, que se pueden fijar en la pantalla Hoy.
 
 ## Sincronización entre aparatos (opcional)
-En **Ajustes → Sincronización** de cada app:
+En **Ajustes → Sincronización** de cada app hay dos maneras:
 
-- Si en ese navegador ya tienes PAPOTAS conectado a Supabase, sale el botón
-  **«Usar la misma nube que PAPOTAS»**. Con un toque queda conectada.
-- Si no, pega la dirección del proyecto (`https://xxxx.supabase.co`) y la
-  clave pública (Supabase → Project Settings → API). Si la nube es nueva,
-  ejecuta antes `supabase.sql` en su SQL Editor.
-- Para el segundo aparato: **«Conectar otro aparato»** copia un enlace. Ábrelo
-  allí y queda conectado. Ese enlace lleva la clave de tu nube, así que no se lo pases a nadie.
+**jsonbin.io (X-Master-Key)**: la más sencilla.
+1. Entra en jsonbin.io → **API Keys** y copia tu **X-Master-Key**.
+2. Pégala en la app y pulsa **Conectar**. Se crea sola una caja privada
+   (`cuentas-sync` o `personal-sync`) con tus datos.
+3. En el otro aparato pega la misma X-Master-Key: encuentra la misma caja.
+   Si no la encuentra, usa **«Conectar otro aparato»** (copia un enlace para
+   abrir allí) o pega el **código de la caja** que aparece en Ajustes.
 
-Las apps guardan sus datos en la misma tabla que PAPOTAS, cada una con sus
-propias colecciones (`cuentas.*` y `personal.*`). PAPOTAS no las mezcla con
-las suyas. Se sincroniza al guardar, al volver a la app y cada 30 segundos.
-Sin internet todo sigue funcionando y se sube al volver la conexión. Si dos
-aparatos tenían cosas distintas al conectarse, se juntan.
+Con jsonbin se sincroniza al guardar, al volver a la app y cada 2 minutos,
+para gastar pocas peticiones del plan gratis. Ese plan limita las peticiones
+y el tamaño de cada caja; si se llega al límite, la app lo dice en Ajustes y
+todo sigue funcionando en el aparato.
+
+**Supabase**: la misma nube que PAPOTAS (botón «Usar la misma nube que
+PAPOTAS») u otra, en la tabla `papotas_sync_records` con colecciones
+`cuentas.*` y `personal.*`, que PAPOTAS ignora.
+
+En las dos maneras, sin internet todo sigue funcionando y se sube al volver
+la conexión. Si dos aparatos tenían cosas distintas al conectarse, se juntan.
+El enlace de «Conectar otro aparato» lleva tu clave: no se lo pases a nadie.
 
 ## Los datos
 Se guardan en el navegador del teléfono, no en internet. Nadie más los ve, pero

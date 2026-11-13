@@ -1,6 +1,6 @@
 // Guarda la app en el teléfono para que abra sin internet.
 // Cambia VERSION cuando publiques una versión nueva.
-const VERSION = "cuentas-v3";
+const VERSION = "cuentas-v4";
 const ARCHIVOS = ["./", "index.html", "manifest.webmanifest", "icono.svg", "icon-192.png", "icon-512.png", "icon-maskable-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(ARCHIVOS))); self.skipWaiting(); });
 self.addEventListener("activate", e => {

@@ -598,6 +598,7 @@ function vAjustes(M){
     <div class="card"><h2>General</h2><div class="grid g2" style="gap:10px">
       <div><label class="f" for="aN">Tu nombre (para el saludo)</label><input type="text" id="aN" maxlength="30" value="${esc(S.nombre)}"></div>
       <div><label class="f" for="aT">Tema</label><select id="aT"><option value="dark" ${S.tema!=="light"?"selected":""}>Oscuro</option><option value="light" ${S.tema==="light"?"selected":""}>Claro</option></select></div></div></div>
+    ${tarjetaNube()}
     <div class="card"><h2>Avisos</h2>
       <p style="margin-top:0">Estado: <b>${{granted:"activados",denied:"bloqueados en el navegador",default:"sin activar",unsupported:"este navegador no los permite"}[p]}</b></p>
       ${p==="default"?'<button class="btn pri" id="aOn">Activar avisos</button>':""}${p==="granted"?'<button class="btn" id="aPr">Probar un aviso</button>':""}
@@ -606,7 +607,7 @@ function vAjustes(M){
     <div class="card"><h2>Tus datos</h2><p class="hint" style="margin-top:0">${S.eventos.length} eventos · ${S.recs.length} recordatorios · ${S.notas.length} notas. Descarga un respaldo de vez en cuando: si borras los datos del navegador o cambias de teléfono, es lo único que los recupera.</p>
       <div class="row"><button class="btn pri" id="aE">Descargar respaldo</button><button class="btn" id="aI">Cargar respaldo</button></div>
       <input type="file" id="aF" accept=".json,application/json" class="hide">
-      <div class="row" style="margin-top:14px"><button class="btn danger" id="aB">Borrar todo</button></div></div>${tarjetaNube()}</div>`;
+      <div class="row" style="margin-top:14px"><button class="btn danger" id="aB">Borrar todo</button></div></div></div>`;
   enlazarNube(M);
   $("#aN").onchange=e=>{S.nombre=e.target.value.trim();save();toast("Guardado");};
   $("#aT").onchange=e=>{S.tema=e.target.value;save();tema();};
@@ -637,36 +638,22 @@ const APP = "personal";
 const NUBE_COLS = {"personal.eventos":"eventos", "personal.recs":"recs", "personal.notas":"notas"};
 const nubeConfig = () => ({nombre:S.nombre||""});
 function nubeSetConfig(d){ if(typeof d.nombre==="string") S.nombre = d.nombre; }
-/* ---------- nube: sincronización con Supabase ----------
-   Usa la misma tabla que PAPOTAS (papotas_sync_records), con colecciones
-   propias que empiezan por el nombre de la app. PAPOTAS las ignora.
-   Cada cosa (un movimiento, un evento…) es una fila. Para saber qué cambió
-   aquí se guarda la «firma» de lo último que se sabe que está en la nube:
-   si la firma de lo local no coincide, hay que subirlo; si en la nube hay
-   una fila nueva y aquí no se tocó, se baja. Lo cambiado aquí y aún no
-   subido gana. */
-const NUBE_KEY = KEY + "_nube", TABLA = "papotas_sync_records";
+/* ---------- nube: sincronización entre aparatos ----------
+   Dos maneras, a elegir en Ajustes:
+   · jsonbin.io con tu X-Master-Key: una «caja» privada por app con todo dentro.
+   · Supabase: la misma tabla que PAPOTAS (papotas_sync_records), con
+     colecciones propias que empiezan por el nombre de la app.
+   En las dos, cada cosa (un movimiento, un evento…) va por separado y lleva
+   su «firma»: si lo de aquí no coincide con lo último que se sabe que está
+   en la nube, se sube; si en la nube cambió algo que aquí no se tocó, se baja.
+   Lo cambiado aquí y aún no subido gana. La primera vez, si chocan, manda la nube. */
+const NUBE_KEY = KEY + "_nube", TABLA = "papotas_sync_records", JB = "https://api.jsonbin.io/v3/";
 let N = {};
-function leerN(){ try{ N = JSON.parse(localStorage.getItem(NUBE_KEY)) || {}; }catch(e){ N = {}; } if(!N.dev) N.dev = APP + "-" + uid(); N.firmas = N.firmas || {}; }
+function leerN(){ try{ N = JSON.parse(localStorage.getItem(NUBE_KEY)) || {}; }catch(e){ N = {}; } if(!N.dev) N.dev = APP + "-" + uid(); N.firmas = N.firmas || {}; if(!N.tipo && N.url) N.tipo = "supabase"; }
 function guardaN(){ try{ localStorage.setItem(NUBE_KEY, JSON.stringify(N)); }catch(e){} }
 leerN(); guardaN();
-const conectada = () => !!(N.url && N.key);
+const conectada = () => N.tipo==="jsonbin" ? !!(N.jkey && N.bin) : N.tipo==="supabase" ? !!(N.url && N.key) : false;
 function firma(o){ const s = JSON.stringify(o); let h = 5381; for(let i=0;i<s.length;i++) h = ((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36) + "." + s.length; }
-function limpiaUrl(u){ u = String(u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,""); if(u && !/^https?:\/\//.test(u)) u = "https://" + u; return u; }
-function cabeceras(k){ const h = {apikey:k, "Content-Type":"application/json"}; if(/^eyJ/.test(k)) h.Authorization = "Bearer " + k; return h; }
-async function pedir(ruta, op, url, key){
-  url = url || N.url; key = key || N.key;
-  const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), 15000);
-  let r;
-  try{ r = await fetch(url + "/rest/v1/" + ruta, Object.assign({headers:cabeceras(key), signal:ctl.signal}, op||{})); }
-  catch(e){ throw new Error(navigator.onLine===false ? "Sin internet ahora mismo." : "No se pudo llegar a la nube. Revisa la dirección."); }
-  finally{ clearTimeout(t); }
-  if(r.ok) return r.status===204 ? null : r.json().catch(()=>null);
-  let txt = ""; try{ txt = await r.text(); }catch(e){}
-  if(r.status===401 || r.status===403) throw new Error("La clave no es válida para esa nube.");
-  if(r.status===404 || /PGRST20|42P01|42883/.test(txt)) throw new Error("La nube no está preparada: falta ejecutar el SQL de PAPOTAS (supabase.sql) en Supabase.");
-  throw new Error("La nube respondió con un error (" + r.status + ").");
-}
 function registros(){ const m = new Map(); for(const [col,campo] of Object.entries(NUBE_COLS)) (S[campo]||[]).forEach(x=>m.set(col+"|"+x.id, x)); m.set(APP+".config|config", nubeConfig()); return m; }
 function aplicar(col, id, datos){
   if(col === APP+".config"){ if(datos) nubeSetConfig(datos); return; }
@@ -674,47 +661,135 @@ function aplicar(col, id, datos){
   const arr = S[campo], i = arr.findIndex(x=>x.id===id);
   if(datos===null){ if(i>=0) arr.splice(i,1); } else if(i>=0) arr[i] = datos; else arr.push(datos);
 }
+/* Mete en lo local una cosa que viene de la nube, si aquí no está a medio subir. */
+function recibir(locales, k, datos, borrado, primera){
+  const aqui = locales.get(k), fAqui = aqui ? firma(aqui) : undefined, sabida = N.firmas[k];
+  const pendiente = aqui ? sabida !== fAqui : sabida !== undefined;
+  if(pendiente && !primera) return false;
+  const i = k.indexOf("|"), col = k.slice(0,i), id = k.slice(i+1), esConfig = col === APP+".config";
+  if(borrado){ delete N.firmas[k]; if(aqui && !esConfig){ aplicar(col,id,null); return true; } return false; }
+  const fr = firma(datos); let cambio = false;
+  if(fr !== fAqui){ aplicar(col,id,datos); cambio = true; }
+  N.firmas[k] = esConfig ? firma(nubeConfig()) : fr;
+  return cambio;
+}
+/* Lo que hay que subir: cambios y borrados hechos aquí. */
+function pendientes(){
+  const regs = registros(), sub = [], bor = [];
+  for(const [k,d] of regs){ const fr = firma(d); if(N.firmas[k] !== fr) sub.push([k,d,fr]); }
+  for(const k of Object.keys(N.firmas)) if(!regs.has(k)) bor.push(k);
+  return {sub, bor};
+}
+async function conPlazo(url, op){
+  const ctl = new AbortController(), t = setTimeout(()=>ctl.abort(), 15000);
+  try{ return await fetch(url, Object.assign({signal:ctl.signal}, op)); }
+  catch(e){ throw new Error(navigator.onLine===false ? "Sin internet ahora mismo." : "No se pudo llegar a la nube."); }
+  finally{ clearTimeout(t); }
+}
+
+/* --- jsonbin --- */
+async function jb(ruta, op, key){
+  const h = {"X-Master-Key": key || N.jkey, "Content-Type":"application/json"};
+  const r = await conPlazo(JB + ruta, Object.assign({}, op, {headers:Object.assign(h, (op&&op.headers)||{})}));
+  if(r.ok) return r.json().catch(()=>null);
+  let m = ""; try{ m = (await r.json()).message || ""; }catch(e){}
+  if(r.status===401) throw new Error("La X-Master-Key no es válida.");
+  if(r.status===404) throw new Error("No se encuentra la caja en jsonbin. Puede que la hayan borrado.");
+  if(r.status===403 || r.status===429) throw new Error("jsonbin no deja más peticiones por ahora (límite de la cuenta gratis)." + (m ? " " + m : ""));
+  if(r.status===413 || /size|large|grande/i.test(m)) throw new Error("La caja está llena: el plan gratis de jsonbin admite poco tamaño.");
+  throw new Error("jsonbin respondió con un error (" + r.status + ")" + (m ? ": " + m : "") + ".");
+}
+const nombreCaja = () => APP + "-sync";
+async function buscarCaja(key){
+  try{ const l = await jb("c/uncategorized/bins", {method:"GET"}, key);
+    const x = (Array.isArray(l) ? l : []).find(b=>JSON.stringify(b.snippetMeta||b).includes(nombreCaja()));
+    return x ? (x.record || x.id) : null;
+  }catch(e){ if(/X-Master-Key/.test(e.message)) throw e; return null; }
+}
+async function sincJsonbin(){
+  const primera = !N.ultima;
+  const doc = await jb("b/" + N.bin + "/latest", {method:"GET", headers:{"X-Bin-Meta":"false"}}) || {};
+  const reg = (doc && doc.registros) || {};
+  if(dlg.open){ otraVez = true; return; }
+  const locales = registros(); let cambio = false;
+  for(const [k,r] of Object.entries(reg)) if(recibir(locales, k, r.d, !!r.b, primera)) cambio = true;
+  if(cambio){ S = normalizar(S); escribir(); if(!dlg.open) render(); }
+  guardaN();
+  const {sub, bor} = pendientes(); if(!sub.length && !bor.length) return;
+  const ahora = Date.now();
+  sub.forEach(([k,d])=>reg[k] = {d, t:ahora});
+  bor.forEach(k=>reg[k] = {b:true, t:ahora});
+  for(const k in reg) if(reg[k].b && ahora - reg[k].t > 90*864e5) delete reg[k];
+  await jb("b/" + N.bin, {method:"PUT", body:JSON.stringify({app:APP, v:1, registros:reg})});
+  sub.forEach(([k,,fr])=>N.firmas[k] = fr); bor.forEach(k=>delete N.firmas[k]);
+}
+async function conectarJsonbin(key, caja){
+  key = String(key||"").trim(); caja = String(caja||"").trim();
+  if(key.length < 20) throw new Error("Pega tu X-Master-Key completa (empieza por $2a$ o $2b$).");
+  let bin = caja || await buscarCaja(key);
+  if(bin) await jb("b/" + bin + "/latest", {method:"GET", headers:{"X-Bin-Meta":"false"}}, key);
+  else { const r = await jb("b", {method:"POST", headers:{"X-Bin-Private":"true", "X-Bin-Name":nombreCaja()}, body:JSON.stringify({app:APP, v:1, registros:{}})}, key);
+    bin = r && r.metadata && r.metadata.id; if(!bin) throw new Error("jsonbin no devolvió el código de la caja."); }
+  N = {dev:N.dev, tipo:"jsonbin", jkey:key, bin, firmas:{}, ultima:0, error:""}; guardaN();
+  await sincronizar();
+}
+
+/* --- Supabase --- */
+function limpiaUrl(u){ u = String(u||"").trim().replace(/\/+$/,"").replace(/\/rest\/v1$/,""); if(u && !/^https?:\/\//.test(u)) u = "https://" + u; return u; }
+async function sb(ruta, op, url, key){
+  url = url || N.url; key = key || N.key;
+  const h = {apikey:key, "Content-Type":"application/json"}; if(/^eyJ/.test(key)) h.Authorization = "Bearer " + key;
+  const r = await conPlazo(url + "/rest/v1/" + ruta, Object.assign({headers:h}, op||{}));
+  if(r.ok) return r.status===204 ? null : r.json().catch(()=>null);
+  let txt = ""; try{ txt = await r.text(); }catch(e){}
+  if(r.status===401 || r.status===403) throw new Error("La clave no es válida para esa nube.");
+  if(r.status===404 || /PGRST20|42P01|42883/.test(txt)) throw new Error("La nube no está preparada: falta ejecutar el SQL de PAPOTAS (supabase.sql) en Supabase.");
+  throw new Error("La nube respondió con un error (" + r.status + ").");
+}
+async function sincSupabase(){
+  const primera = !N.cursor; let cambio = false, desde = N.cursor;
+  for(let vuelta=0; vuelta<50; vuelta++){
+    let q = `${TABLA}?select=coleccion,registro_id,datos,eliminado,actualizado_en&coleccion=like.${APP}.*&order=actualizado_en.asc&limit=1000`;
+    if(desde) q += "&actualizado_en=gte." + encodeURIComponent(desde);
+    const filas = await sb(q) || [];
+    if(dlg.open){ otraVez = true; return; }
+    const locales = registros();
+    for(const f of filas){
+      if(recibir(locales, f.coleccion + "|" + f.registro_id, f.datos, f.eliminado, primera)) cambio = true;
+      if(!N.cursor || f.actualizado_en > N.cursor) N.cursor = f.actualizado_en;
+    }
+    if(filas.length < 1000 || filas[filas.length-1].actualizado_en === desde) break;
+    desde = filas[filas.length-1].actualizado_en;
+  }
+  if(!N.cursor) N.cursor = "1970-01-01T00:00:00Z";
+  if(cambio){ S = normalizar(S); escribir(); if(!dlg.open) render(); }
+  guardaN();
+  const {sub, bor} = pendientes(), tareas = [];
+  sub.forEach(([k,d,fr])=>tareas.push(async()=>{ const i=k.indexOf("|");
+    await sb("rpc/papotas_upsert_record", {method:"POST", body:JSON.stringify({p_coleccion:k.slice(0,i), p_registro_id:k.slice(i+1), p_datos:d, p_dispositivo_id:N.dev})}); N.firmas[k] = fr; }));
+  bor.forEach(k=>tareas.push(async()=>{ const i=k.indexOf("|");
+    await sb("rpc/papotas_delete_record", {method:"POST", body:JSON.stringify({p_coleccion:k.slice(0,i), p_registro_id:k.slice(i+1), p_dispositivo_id:N.dev})}); delete N.firmas[k]; }));
+  for(let i=0;i<tareas.length;i+=6){ await Promise.all(tareas.slice(i,i+6).map(f=>f())); guardaN(); }
+}
+async function conectarSupabase(url, key){
+  url = limpiaUrl(url); key = String(key||"").trim();
+  if(!/^https:\/\/[^/]+$/.test(url)) throw new Error("La dirección debe ser como https://xxxx.supabase.co");
+  if(key.length < 20) throw new Error("Falta la clave pública (anon o publishable).");
+  await sb(`${TABLA}?select=registro_id&limit=1`, null, url, key);
+  N = {dev:N.dev, tipo:"supabase", url, key, cursor:"", firmas:{}, ultima:0, error:""}; guardaN();
+  await sincronizar();
+}
+
+/* --- común --- */
 let nubeT = null, sincronizando = false, otraVez = false;
-function nubeProgramar(ms){ if(!conectada()) return; clearTimeout(nubeT); nubeT = setTimeout(sincronizar, ms==null?1500:ms); }
+function nubeProgramar(ms){ if(!conectada()) return; clearTimeout(nubeT); nubeT = setTimeout(sincronizar, ms!=null ? ms : N.tipo==="jsonbin" ? 4000 : 1500); }
 async function sincronizar(){
   if(!conectada()) return;
   if(sincronizando){ otraVez = true; return; }
   if(dlg.open){ nubeProgramar(4000); return; }   // no cambiar nada bajo un formulario abierto
   sincronizando = true; leerN(); pintaEstado();
-  try{
-    /* 1. Bajar lo nuevo */
-    const primera = !N.cursor; let cambio = false, desde = N.cursor;
-    for(let vuelta=0; vuelta<50; vuelta++){
-      let q = `${TABLA}?select=coleccion,registro_id,datos,eliminado,actualizado_en&coleccion=like.${APP}.*&order=actualizado_en.asc&limit=1000`;
-      if(desde) q += "&actualizado_en=gte." + encodeURIComponent(desde);
-      const filas = await pedir(q) || [];
-      if(dlg.open){ otraVez = true; return; }
-      const locales = registros();
-      for(const f of filas){
-        const k = f.coleccion + "|" + f.registro_id, aqui = locales.get(k), fAqui = aqui ? firma(aqui) : undefined, sabida = N.firmas[k];
-        const pendiente = aqui ? sabida !== fAqui : sabida !== undefined;
-        const esConfig = f.coleccion === APP+".config";
-        if(pendiente && !primera) continue;   // la primera vez, si choca, manda la nube
-        if(f.eliminado){ if(aqui){ aplicar(f.coleccion, f.registro_id, null); cambio = true; } delete N.firmas[k]; }
-        else { const fr = firma(f.datos); if(fr !== fAqui){ aplicar(f.coleccion, f.registro_id, f.datos); cambio = true; } N.firmas[k] = esConfig ? firma(nubeConfig()) : fr; }
-        if(!N.cursor || f.actualizado_en > N.cursor) N.cursor = f.actualizado_en;
-      }
-      if(filas.length < 1000) break;
-      if(filas[filas.length-1].actualizado_en === desde) break;
-      desde = filas[filas.length-1].actualizado_en;
-    }
-    if(!N.cursor) N.cursor = "1970-01-01T00:00:00Z";
-    if(cambio){ S = normalizar(S); escribir(); if(!dlg.open) render(); }
-    guardaN();
-    /* 2. Subir lo cambiado aquí */
-    const regs = registros(), tareas = [];
-    for(const [k,d] of regs){ const fr = firma(d); if(N.firmas[k] !== fr) tareas.push(async()=>{ const [c,id] = k.split("|");
-      await pedir("rpc/papotas_upsert_record", {method:"POST", body:JSON.stringify({p_coleccion:c, p_registro_id:id, p_datos:d, p_dispositivo_id:N.dev})}); N.firmas[k] = fr; }); }
-    for(const k of Object.keys(N.firmas)) if(!regs.has(k)) tareas.push(async()=>{ const [c,id] = k.split("|");
-      await pedir("rpc/papotas_delete_record", {method:"POST", body:JSON.stringify({p_coleccion:c, p_registro_id:id, p_dispositivo_id:N.dev})}); delete N.firmas[k]; });
-    for(let i=0;i<tareas.length;i+=6){ await Promise.all(tareas.slice(i,i+6).map(f=>f())); guardaN(); }
-    N.ultima = Date.now(); N.error = ""; guardaN();
-  }catch(e){ N.error = e.message || String(e); guardaN(); }
+  try{ await (N.tipo==="jsonbin" ? sincJsonbin() : sincSupabase()); N.ultima = Date.now(); N.error = ""; guardaN(); }
+  catch(e){ N.error = e.message || String(e); guardaN(); }
   finally{ sincronizando = false; pintaEstado(); if(otraVez){ otraVez = false; nubeProgramar(800); } }
 }
 function pintaEstado(){
@@ -731,53 +806,60 @@ function textoEstado(){
   const s = Math.round((Date.now()-N.ultima)/1000);
   return "✓ Sincronizado " + (s<60 ? "hace un momento" : s<3600 ? "hace " + Math.floor(s/60) + " min" : "a las " + new Date(N.ultima).toLocaleTimeString("es",{hour:"2-digit",minute:"2-digit"})) + ".";
 }
-async function conectar(url, key){
-  url = limpiaUrl(url); key = String(key||"").trim();
-  if(!/^https:\/\/[^/]+$/.test(url)) throw new Error("La dirección debe ser como https://xxxx.supabase.co");
-  if(key.length < 20) throw new Error("Falta la clave pública (anon o publishable).");
-  await pedir(`${TABLA}?select=registro_id&limit=1`, null, url, key);
-  N.url = url; N.key = key; N.cursor = ""; N.firmas = {}; N.error = ""; N.ultima = 0; guardaN();
-  await sincronizar();
-}
 function desconectar(){ N = {dev:N.dev, firmas:{}}; guardaN(); pintaEstado(); }
 function nubeDePapotas(){ try{ const a = JSON.parse(localStorage.getItem("pap_ajustes")||"null"); if(a && a.supabaseUrl && a.supabaseKey) return {url:a.supabaseUrl, key:a.supabaseKey}; }catch(e){} return null; }
-function enlaceNube(){ return location.origin + location.pathname + "#nube=" + btoa(unescape(encodeURIComponent(JSON.stringify({u:N.url,k:N.key})))); }
+function enlaceNube(){
+  const d = N.tipo==="jsonbin" ? {t:"jsonbin", k:N.jkey, b:N.bin} : {t:"supabase", u:N.url, k:N.key};
+  return location.origin + location.pathname + "#nube=" + btoa(unescape(encodeURIComponent(JSON.stringify(d))));
+}
+let pestanaNube = "jsonbin";
 function tarjetaNube(){
-  const pap = !conectada() && nubeDePapotas();
+  if(conectada()) return `<div class="card"><h2>Sincronización</h2>
+    <p style="margin-top:0">Conectada a <b>${N.tipo==="jsonbin" ? "jsonbin.io" : esc(N.url.replace(/^https:\/\//,""))}</b></p>
+    ${N.tipo==="jsonbin" ? `<p class="hint">Código de la caja: <code style="user-select:all">${esc(N.bin)}</code></p>` : ""}
+    <p class="hint" id="nubeEstado">${textoEstado()}</p>
+    <p class="hint">Todo lo que anotes aquí aparece en tus otros aparatos conectados, y al revés.</p>
+    <div class="row"><button class="btn pri" id="nAhora">Sincronizar ahora</button><button class="btn" id="nEnlace">Conectar otro aparato</button><button class="btn danger" id="nFuera">Desconectar</button></div></div>`;
+  const pap = nubeDePapotas();
   return `<div class="card"><h2>Sincronización</h2>
-    ${conectada() ? `<p style="margin-top:0">Conectada a <b>${esc(N.url.replace(/^https:\/\//,""))}</b></p><p class="hint" id="nubeEstado">${textoEstado()}</p>
-      <p class="hint">Todo lo que anotes aquí aparece en tus otros aparatos conectados a la misma nube, y al revés.</p>
-      <div class="row"><button class="btn pri" id="nAhora">Sincronizar ahora</button><button class="btn" id="nEnlace">Conectar otro aparato</button><button class="btn danger" id="nFuera">Desconectar</button></div>`
-    : `<p class="hint" style="margin-top:0">Conecta una nube (Supabase, gratis) para tener los mismos datos en el móvil, el ordenador o donde abras la app.</p>
-      ${pap ? `<div class="row" style="margin-bottom:6px"><button class="btn pri" id="nPap">Usar la misma nube que PAPOTAS</button></div><p class="hint">O escribe otra:</p>` : ""}
+    <p class="hint" style="margin-top:0">Para tener los mismos datos en el móvil, el ordenador o donde abras la app.</p>
+    <div class="seg" style="margin-bottom:6px">${[["jsonbin","jsonbin (X-Master-Key)"],["supabase","Supabase"]].map(([k,t])=>`<button type="button" data-pn="${k}" aria-pressed="${pestanaNube===k}">${t}</button>`).join("")}</div>
+    ${pestanaNube==="jsonbin" ? `
+      <label class="f" for="nJk">X-Master-Key</label><input type="text" id="nJk" placeholder="$2a$10$…" autocomplete="off" spellcheck="false">
+      <p class="hint">La de tu cuenta de jsonbin.io → API Keys. Usa la misma en todos tus aparatos.</p>
+      <label class="f" for="nJb">Código de la caja <span style="font-weight:400">(solo si ya la conectaste en otro aparato y aquí no la encuentra)</span></label><input type="text" id="nJb" placeholder="Opcional" autocomplete="off" spellcheck="false">`
+    : `${pap ? `<div class="row" style="margin:10px 0 6px"><button class="btn pri" id="nPap">Usar la misma nube que PAPOTAS</button></div><p class="hint">O escribe otra:</p>` : ""}
       <label class="f" for="nUrl">Dirección del proyecto</label><input type="text" id="nUrl" placeholder="https://xxxx.supabase.co" autocomplete="off" spellcheck="false">
       <label class="f" for="nKey">Clave pública (anon o publishable)</label><input type="text" id="nKey" placeholder="eyJ… o sb_publishable_…" autocomplete="off" spellcheck="false">
-      <p class="hint">Está en Supabase → Project Settings → API. Si es una nube nueva, ejecuta antes en su SQL Editor el archivo <b>supabase.sql</b> de PAPOTAS.</p>
-      <div class="row"><button class="btn pri" id="nConectar">Conectar</button></div>
-      <p class="hint" id="nErr" role="alert" style="color:var(--out,var(--late))"></p>`}
-  </div>`;
+      <p class="hint">Está en Supabase → Project Settings → API. Si es una nube nueva, ejecuta antes en su SQL Editor el archivo <b>supabase.sql</b> de PAPOTAS.</p>`}
+    <div class="row" style="margin-top:12px"><button class="btn pri" id="nConectar">Conectar</button></div>
+    <p class="hint" id="nErr" role="alert" style="color:var(--out,var(--late))"></p></div>`;
 }
 function enlazarNube(M){
-  const go = async (u,k)=>{ const err = $("#nErr",M); if(err) err.textContent = "Probando…";
-    try{ await conectar(u,k); toast("Nube conectada"); render(); }catch(e){ if(err) err.textContent = e.message; else toast(e.message); } };
-  const b = $("#nConectar",M); if(b) b.onclick = ()=>go($("#nUrl",M).value, $("#nKey",M).value);
-  const p = $("#nPap",M); if(p) p.onclick = ()=>{ const x = nubeDePapotas(); go(x.url, x.key); };
+  M.querySelectorAll("[data-pn]").forEach(b=>b.onclick=()=>{ pestanaNube = b.dataset.pn; render(); });
+  const go = async fn=>{ const err = $("#nErr",M); if(err){ err.style.color = ""; err.textContent = "Conectando…"; }
+    try{ await fn(); if(N.error) throw new Error(N.error); toast("Sincronización activada"); render(); }
+    catch(e){ if(err){ err.style.color = "var(--out,var(--late))"; err.textContent = e.message; } else toast(e.message); } };
+  const b = $("#nConectar",M); if(b) b.onclick = ()=> pestanaNube==="jsonbin" ? go(()=>conectarJsonbin($("#nJk",M).value, $("#nJb",M).value)) : go(()=>conectarSupabase($("#nUrl",M).value, $("#nKey",M).value));
+  const p = $("#nPap",M); if(p) p.onclick = ()=>{ const x = nubeDePapotas(); go(()=>conectarSupabase(x.url, x.key)); };
   const a = $("#nAhora",M); if(a) a.onclick = ()=>sincronizar();
   const f = $("#nFuera",M); if(f) f.onclick = ()=>{ if(confirm("Este aparato dejará de sincronizar. Los datos que tiene se quedan aquí. ¿Seguir?")){ desconectar(); render(); } };
   const e = $("#nEnlace",M); if(e) e.onclick = async ()=>{ const l = enlaceNube();
-    try{ await navigator.clipboard.writeText(l); toast("Enlace copiado. Ábrelo en el otro aparato."); }
-    catch(_){ prompt("Abre este enlace en el otro aparato:", l); } };
+    try{ await navigator.clipboard.writeText(l); toast("Enlace copiado. Ábrelo en el otro aparato (no se lo pases a nadie)."); }
+    catch(_){ prompt("Abre este enlace en el otro aparato (no se lo pases a nadie):", l); } };
 }
 async function nubeDesdeEnlace(){
   const m = location.hash.match(/nube=([^&]+)/); if(!m) return;
   history.replaceState(null, "", location.pathname);
   try{ const x = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-    if(confirm("¿Conectar este aparato a tu nube para sincronizar los datos?")){ await conectar(x.u, x.k); toast("Nube conectada"); render(); }
+    if(!confirm("¿Conectar este aparato para sincronizar los datos?")) return;
+    if(x.t==="jsonbin") await conectarJsonbin(x.k, x.b); else await conectarSupabase(x.u, x.k);
+    toast(N.error ? N.error : "Sincronización activada"); render();
   }catch(e){ toast(e.message || "Ese enlace de conexión no es válido"); }
 }
 window.addEventListener("online", ()=>nubeProgramar(300));
 document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) nubeProgramar(300); });
-setInterval(()=>{ if(!document.hidden) sincronizar(); }, 30000);
+setInterval(()=>{ if(!document.hidden && conectada() && (N.tipo!=="jsonbin" || Date.now()-(N.ultima||0) > 110000)) sincronizar(); }, 30000);
 setInterval(pintaEstado, 30000);
 
 /* ---------- arranque ---------- */
