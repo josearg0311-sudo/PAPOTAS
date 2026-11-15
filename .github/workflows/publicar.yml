@@ -69,7 +69,7 @@ jobs:
           # https://<usuario>.github.io/PAPOTAS/cuentas/
           mkdir -p sitio/cuentas
           cp cuentas/index.html cuentas/sw.js cuentas/manifest.webmanifest cuentas/icono.svg sitio/cuentas/
-          cp cuentas/icon-192.png cuentas/icon-512.png cuentas/icon-maskable-512.png cuentas/apple-touch-icon.png sitio/cuentas/
+          cp cuentas/icon-192.png cuentas/icon-512.png cuentas/icon-maskable-512.png cuentas/apple-touch-icon.png cuentas/favicon-32.png sitio/cuentas/
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll
           ls -la sitio

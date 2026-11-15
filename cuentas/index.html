@@ -9,9 +9,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icono.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest?v=10">
+<link rel="icon" href="icono.svg?v=10" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png?v=10" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=10">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Apuntado">
 <style>
@@ -93,7 +94,7 @@ button{cursor:pointer}
 /* ---------- Cabecera ---------- */
 .cab{display:flex;align-items:center;gap:12px;max-width:1320px;margin:0 auto;padding:20px max(18px,env(safe-area-inset-left)) 8px}
 .marca{display:flex;align-items:center;gap:12px;min-width:0}
-.marca svg{width:42px;height:42px;flex:none;filter:drop-shadow(0 8px 16px rgba(47,111,216,.45))}
+.marca svg{width:42px;height:42px;flex:none;filter:drop-shadow(0 6px 14px rgba(47,111,216,.35))}
 .marca h1{margin:0;font:700 22px/1.1 var(--display);letter-spacing:-.02em;white-space:nowrap}
 .marca small{display:block;font-size:13px;font-weight:600;color:var(--tinta3);margin-top:2px;white-space:nowrap}
 .cab .crece{flex:1}
@@ -901,13 +902,16 @@ html.modo-simple .libro{max-width:796px}
 <header class="cab">
   <div class="marca">
     <svg viewBox="0 0 64 64" aria-hidden="true">
-      <defs><linearGradient id="gMarca" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B2A44"/><stop offset="1" stop-color="#0B1220"/></linearGradient></defs>
-      <rect x="1" y="1" width="62" height="62" rx="15" fill="url(#gMarca)" stroke="rgba(170,200,235,.18)"/>
-      <path d="M17 50L29.6 17.5" fill="none" stroke="#5AA9F0" stroke-width="5.4" stroke-linecap="round"/>
-      <path d="M22.6 21.4l7.4-5.6 2.4 9" fill="none" stroke="#5AA9F0" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M34.4 17.5L46.6 49" fill="none" stroke="#F0954A" stroke-width="5.4" stroke-linecap="round"/>
-      <path d="M39.6 46.2l7.2 4.6 2.6-8.4" fill="none" stroke="#F0954A" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M23.5 37.5h17" fill="none" stroke="#EEF3F8" stroke-width="4.6" stroke-linecap="round"/>
+      <defs>
+        <linearGradient id="lgF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E2F4D"/><stop offset="1" stop-color="#0A111E"/></linearGradient>
+        <linearGradient id="lgB" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#2F7FE0"/><stop offset="1" stop-color="#7CC0FF"/></linearGradient>
+        <linearGradient id="lgO" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFB46A"/><stop offset="1" stop-color="#EE7424"/></linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="15" fill="url(#lgF)"/>
+      <rect x=".75" y=".75" width="62.5" height="62.5" rx="14.25" fill="none" stroke="#9FC3FF" stroke-opacity=".16" stroke-width="1.5"/>
+      <path d="M17.5 49L32 15" stroke="url(#lgB)" stroke-width="7.5" stroke-linecap="round" fill="none"/>
+      <path d="M32 15L46.5 49" stroke="url(#lgO)" stroke-width="7.5" stroke-linecap="round" fill="none"/>
+      <path d="M25 37.5h14" stroke="#F4F7FB" stroke-width="5" stroke-linecap="round"/>
     </svg>
     <div><h1 id="saludo">Apuntado</h1><small id="subSaludo">Todo lo que entra y sale, apuntado</small></div>
   </div>
@@ -1526,7 +1530,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v9</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v10</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
