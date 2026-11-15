@@ -70,6 +70,11 @@ jobs:
           mkdir -p sitio/cuentas
           cp cuentas/index.html cuentas/sw.js cuentas/manifest.webmanifest cuentas/icono.svg sitio/cuentas/
           cp cuentas/icon-192.png cuentas/icon-512.png cuentas/icon-maskable-512.png cuentas/apple-touch-icon.png cuentas/favicon-32.png sitio/cuentas/
+          # Apuntes: listas, recordatorios y agenda, en su propia carpeta:
+          # https://<usuario>.github.io/PAPOTAS/agenda/
+          mkdir -p sitio/agenda
+          cp agenda/index.html agenda/sw.js agenda/manifest.webmanifest agenda/icono.svg sitio/agenda/
+          cp agenda/icon-192.png agenda/icon-512.png agenda/icon-maskable-512.png agenda/apple-touch-icon.png agenda/favicon-32.png sitio/agenda/
           # Sin esto GitHub se salta los archivos que empiezan por guión bajo.
           touch sitio/.nojekyll
           ls -la sitio
