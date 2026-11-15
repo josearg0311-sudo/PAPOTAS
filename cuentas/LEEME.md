@@ -19,7 +19,28 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v2 · los detalles
+## v3 · moderna y vibrante (la actual)
+
+Para uso personal, no de oficina:
+
+- **Modo noche** por defecto (fondo oscuro profundo, con halos de color) y
+  **modo día** con el botón del sol. Letras Manrope y Space Grotesk.
+- **Saludo** según la hora (buenos días, buenas tardes, buenas noches).
+- Cada libro es una **tarjeta** con degradado de color, su saldo y una mini
+  línea de cómo va. Se deslizan de lado en el teléfono.
+- El saldo en **grande**, con una gráfica de su evolución y la ecuación
+  debajo («cómo sale ese número»).
+- **Acciones rápidas** redondas: Entró, Salió, Varios, Cuadrar, Asentar.
+- **Movimientos** agrupados por día (Hoy, Ayer, Vie 13 nov…), cada uno con el
+  **dibujito** de su categoría (🍔 🚌 🏠 💡 💼…), adivinado por su nombre.
+- Pestañas: Movimientos · Tabla (el diario contable completo) · Cuenta T · Análisis.
+- Análisis con gráfico mes a mes y una **dona** de a dónde se fue el dinero.
+- Cian para lo que entra y rosa para lo que sale: pareja comprobada para que se
+  distinga también con daltonismo.
+
+El PDF y el Excel se mantienen sobrios, pensados para imprimir.
+
+## v2 · los detalles (versión anterior)
 
 - Tipografía de imprenta: **Fraunces** para títulos, **IBM Plex** para texto y
   cifras (se guardan en el aparato la primera vez; sin internet usa las del sistema).
