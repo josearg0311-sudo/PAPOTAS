@@ -1,7 +1,7 @@
 {
-  "name": "Cuentas Claras",
-  "short_name": "Cuentas",
-  "description": "Libros de ingresos y gastos, con PDF, Excel y sincronización.",
+  "name": "Sencillo",
+  "short_name": "Sencillo",
+  "description": "Tus ingresos y gastos, fácil.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

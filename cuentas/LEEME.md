@@ -1,4 +1,8 @@
-# Cuentas Claras
+# Sencillo
+
+(Antes «Cuentas Claras».) «Sencillo» son las monedas sueltas, y también lo fácil.
+El logo es una S hecha con dos flechas: arriba sube (lo que entra, azul) y abajo
+baja (lo que sale, naranja).
 
 Libros de ingresos y gastos. Un solo archivo (`index.html`), sin librerías ni
 nada que se descargue de internet.
@@ -19,7 +23,21 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v5 · simple (la actual)
+## v6 · Sencillo (la actual)
+
+- **Nombre y logo nuevos.** La dirección sigue siendo la misma (`/cuentas/`) y
+  los datos guardados no se tocan: abres la app y está todo como lo dejaste.
+- **Ocultar el saldo** con el ojo 👁️ (para cuando alguien mira tu pantalla).
+- **Todo · Ingresos · Gastos**: filtro de un toque sobre la lista.
+- **¿En qué se fue el mes?**: una barra con tus categorías de gasto y cómo vas
+  comparado con el mismo día del mes pasado («vas 12 % menos que en octubre»).
+  Toca una categoría para ver solo esos gastos.
+- **Deslizar en el celular**: ← borra (con Deshacer), → repite ese movimiento hoy.
+- **Tu propio dibujito por categoría**: menú del libro → Categorías y medios →
+  toca el dibujito.
+- Una palomita animada (y una vibración corta) al guardar.
+
+## v5 · simple
 
 Lo principal es anotar un gasto en dos segundos, así que la app arranca en
 **modo simple**:

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Cuentas Claras</title>
+<title>Sencillo</title>
 <meta name="description" content="Libros de ingresos y gastos: varios libros a la vez, registro guiado, PDF, Excel y sincronización con JSONBin.">
 <meta name="theme-color" content="#0B0F15" id="metaTema">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <link rel="icon" href="icono.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Cuentas">
+<meta name="apple-mobile-web-app-title" content="Sencillo">
 <style>
 /* ==========================================================================
    CUENTAS CLARAS · v3 «Noche»
@@ -604,6 +604,34 @@ dialog.rapido .dlg-cab{padding-bottom:10px}
 dialog.rapido .alertas .alerta.bien{display:none}
 dialog.rapido .avanzado{display:none!important}
 
+/* Ojo, filtro rápido, tira del mes, deslizar, emoji, guardado */
+.ojo{border:0;background:transparent;padding:0 4px;font-size:14px;cursor:pointer;vertical-align:-1px;opacity:.8}
+.ojo:hover{opacity:1}
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--sup2);border:1px solid var(--borde)}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;color:var(--tinta3)}
+.seg button[aria-pressed="true"]{background:var(--tinta);color:var(--fondo)}
+.tira{display:flex;gap:2px;height:12px;border-radius:6px;overflow:hidden;margin:4px 0 12px}
+.tira i{display:block;min-width:3px}
+.tira-ley{display:flex;flex-wrap:wrap;gap:6px}
+.tl{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--borde);background:var(--sup2);border-radius:99px;padding:5px 10px;font-size:12.5px;font-weight:700;color:var(--tinta2);cursor:pointer}
+.tl b{color:var(--tinta)}
+.tl:hover{border-color:var(--borde2)}
+.comp{margin:12px 0 0;font-size:13px;color:var(--tinta2);font-weight:600}
+.mov{touch-action:pan-y;position:relative;will-change:transform}
+.mov.desliza{transition:none!important}
+.mov.vuelve{transition:transform .2s ease, background .2s}
+.emo-bt{border:1px solid var(--borde2);background:var(--sup);width:34px;height:34px;border-radius:10px;font-size:17px;padding:0;flex:none;cursor:pointer}
+.emo-rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:6px}
+.emo-rejilla button{font-size:22px;height:44px;border-radius:12px;border:1px solid var(--borde);background:var(--sup2);cursor:pointer}
+.emo-rejilla button.vivo{border-color:var(--entra);background:var(--entra-s);box-shadow:0 0 0 2px var(--entra-t)}
+.hecho{position:fixed;left:50%;top:42%;z-index:90;width:96px;height:96px;margin:-48px 0 0 -48px;border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;
+  animation:hecho .9s cubic-bezier(.2,.9,.3,1.3) forwards;box-shadow:0 20px 40px -10px rgba(0,0,0,.6)}
+.hecho.e{background:var(--entra-g)} .hecho.s{background:var(--sale-g)}
+.hecho svg{width:46px;height:46px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:traza .35s .12s ease-out forwards}
+@keyframes hecho{0%{transform:scale(.4);opacity:0}25%{transform:scale(1.06);opacity:1}70%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:0}}
+@keyframes traza{to{stroke-dashoffset:0}}
+.pista-desliza{font-size:12px;color:var(--tinta3);text-align:center;margin:10px 0 0;font-weight:600}
+
 /* ---------- Pantallas medianas y teléfonos ---------- */
 @media (max-width:1080px){
   .tablero{grid-template-columns:1fr}
@@ -672,6 +700,9 @@ dialog.rapido .avanzado{display:none!important}
   .simple-wrap .hero{padding:18px}
   .lista-cab{padding:12px 12px 10px 16px}
   .lista-cab .buscar{flex:1 1 100%;order:3}
+  .lista-cab h3{flex-basis:100%}
+  .lista-cab .seg{flex:1}
+  .lista-cab .seg button{flex:1}
 }
 @media (max-width:720px){ .solo-ancho{display:none!important} dialog.rapido .dlg-pie .bt.tinta{flex:1;padding:15px} }
 @media (max-width:440px){ .pastilla span{display:none} .pastilla{padding:10px} .marca small{display:none} }
@@ -714,14 +745,14 @@ dialog.rapido .avanzado{display:none!important}
 <header class="cab">
   <div class="marca">
     <svg viewBox="0 0 64 64" aria-hidden="true">
-      <defs><linearGradient id="gMarca" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A86E8"/><stop offset="1" stop-color="#173F80"/></linearGradient></defs>
-      <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#gMarca)"/>
-      <rect x="15" y="17" width="34" height="5.5" rx="2.75" fill="#fff"/>
-      <rect x="29.25" y="17" width="5.5" height="31" rx="2.75" fill="#fff"/>
-      <path d="M16 37l4.5-5 4.5 5" stroke="#fff" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
-      <path d="M39 32l4.5 5 4.5-5" stroke="#F0954A" stroke-width="3.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs><linearGradient id="gMarca" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B2A44"/><stop offset="1" stop-color="#0B1220"/></linearGradient></defs>
+      <rect x="1" y="1" width="62" height="62" rx="15" fill="url(#gMarca)" stroke="rgba(170,200,235,.18)"/>
+      <path d="M43 20.5c-2.6-3-6.4-4.5-11-4.5-6.6 0-11 3.4-11 8.3 0 4.6 3.8 6.6 11 7.7" fill="none" stroke="#5AA9F0" stroke-width="5.2" stroke-linecap="round"/>
+      <path d="M38.2 13.6l6.2 6.4-8.6 1.9" fill="none" stroke="#5AA9F0" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M32 32c7.2 1.1 11 3.1 11 7.7 0 4.9-4.4 8.3-11 8.3-4.6 0-8.4-1.5-11-4.5" fill="none" stroke="#F0954A" stroke-width="5.2" stroke-linecap="round"/>
+      <path d="M25.8 50.4l-6.2-6.4 8.6-1.9" fill="none" stroke="#F0954A" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
-    <div><h1 id="saludo">Cuentas Claras</h1><small id="subSaludo">Tus libros de dinero</small></div>
+    <div><h1 id="saludo">Sencillo</h1><small id="subSaludo">Tus cuentas, fácil</small></div>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
     <linearGradient id="gradLinea" x1="0" x2="1"><stop offset="0" stop-color="#2F6FD8"/><stop offset="1" stop-color="#5AA9F0"/></linearGradient>
@@ -1218,6 +1249,7 @@ function sanearLibro(l){
   l.med = l.med || MEDIOS.slice();
   l.pres = l.pres && typeof l.pres === 'object' ? l.pres : {};
   l.fijos = Array.isArray(l.fijos) ? l.fijos : [];
+  l.emo = l.emo && typeof l.emo === 'object' ? l.emo : {};
   l.movs = Array.isArray(l.movs) ? l.movs : [];
   l.ini = Math.round(+l.ini || 0);
   l.mon = l.mon || 'S/';
@@ -1309,13 +1341,20 @@ function pintar(){
   pintarSelbar();
   pintarPie();
 }
+function celebrar(t){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const d = document.createElement('div'); d.className = 'hecho ' + t;
+  d.innerHTML = '<svg viewBox="0 0 48 48"><path d="M13 25l7 7 15-16"/></svg>';
+  document.body.appendChild(d); setTimeout(() => d.remove(), 950);
+  if(navigator.vibrate) navigator.vibrate(12);
+}
 function pintarSaludo(){
   const hora = new Date().getHours(), nom = pref.nombre ? ', ' + pref.nombre : '';
   $('saludo').textContent = (hora < 6 ? 'Buenas noches' : hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches') + nom;
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' asientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Cuentas Claras v5</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Sencillo v6</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -1379,6 +1418,8 @@ const EMOJIS = [
 function iconoCat(nombre){
   const n = normal(nombre || '');
   if(!n) return '';
+  const l = activo();
+  if(l && l.emo && l.emo[nombre]) return l.emo[nombre];
   for(const [re, e] of EMOJIS) if(re.test(n)) return e;
   return '';
 }
@@ -1403,7 +1444,7 @@ function pintarEstante(){
     return '<button class="lomo' + (l.est === 'c' ? ' cerrado' : '') + '" role="tab" style="--c:' + esc(l.col) + '" data-libro="' + l.id + '" aria-current="' + (act && act.id === l.id) + '" title="' + esc(l.nom) + ' · ' + esc(dinero(saldo, l.mon)) + '">' +
       '<span class="ln"><span>' + esc(l.nom) + '</span></span><span class="lm">' + t.length + ' movimiento' + (t.length === 1 ? '' : 's') + '</span>' +
       miniLinea(l, t) +
-      '<span class="ls">' + (saldo < 0 ? '−' : '') + '<small>' + esc(l.mon) + '</small>' + esc(cifra(saldo)) + '</span>' +
+      '<span class="ls">' + (saldo < 0 && !pref.oculto ? '−' : '') + '<small>' + esc(l.mon) + '</small>' + (pref.oculto ? '••••' : esc(cifra(saldo))) + '</span>' +
       (l.est === 'c' ? '<span class="chip-est">Cerrado</span>' : '') + '</button>';
   }).join('') + '<button class="lomo-nuevo" id="btLomoNuevo" title="Agregar un libro"><svg><use href="#i-mas"/></svg>Nuevo libro</button>';
   $('btOrganizar').classList.toggle('oculto', ls.length < 2);
@@ -1411,7 +1452,7 @@ function pintarEstante(){
   ls.filter(l => l.est === 'a').forEach(l => { const t = diario(l); porMon.set(l.mon, (porMon.get(l.mon) || 0) + (t.length ? t[t.length-1].saldo : l.ini)); });
   const abiertos = ls.filter(l => l.est === 'a').length;
   $('placaTotal').innerHTML = abiertos > 1 ? '<span>En total, entre tus ' + abiertos + ' libros</span>' +
-    [...porMon.entries()].map(([m, c]) => '<b class="num' + (c < 0 ? ' neg' : '') + '">' + esc(dinero(c, m)) + '</b>').join('') : '';
+    [...porMon.entries()].map(([m, c]) => '<b class="num' + (c < 0 ? ' neg' : '') + '">' + (pref.oculto ? esc(m) + ' ••••' : esc(dinero(c, m))) + '</b>').join('') : '';
   if(act){ const el = est.querySelector('[aria-current="true"]'); if(el && est.scrollWidth > est.clientWidth){ const x = el.offsetLeft - 16; if(x < est.scrollLeft || x + el.offsetWidth > est.scrollLeft + est.clientWidth) est.scrollTo({ left:x, behavior:'smooth' }); } }
 }
 function miniLinea(l, t){
@@ -1524,10 +1565,10 @@ function pintarSimple(l, cont){
   h += '<section class="hero' + (abre ? ' abre' : '') + '" style="--c:' + esc(l.col) + '">' +
     '<div class="hero-top"><div class="hero-nom"><b><i></i>' + esc(l.nom) + (cerrado ? ' <span class="sello ce">Cerrado</span>' : '') + '</b></div>' +
     '<button class="bt icono" id="btMenuLibro" title="Opciones: exportar, categorías, renovar…" aria-label="Opciones del libro"><svg><use href="#i-puntos"/></svg></button></div>' +
-    '<div class="hero-et">Tienes</div>' +
-    '<div class="hero-num num' + (r.despues < 0 ? ' s' : '') + '">' + cifraTerm(r.despues, l.mon, 'desp') + '</div>' +
+    '<div class="hero-et">Tienes <button class="ojo" id="btOjo" title="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo" aria-label="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo">' + (pref.oculto ? '🙈' : '👁️') + '</button></div>' +
+    '<div class="hero-num num' + (r.despues < 0 ? ' s' : '') + '">' + (pref.oculto ? '<span class="mon">' + esc(l.mon) + '</span>••••••' : cifraTerm(r.despues, l.mon, 'desp')) + '</div>' +
     '<div class="mes-resumen"><em class="mes-et">En ' + MESES[+ym.slice(5) - 1] + '</em>' +
-      '<span class="e">↑ ' + esc(cifra(mes.e)) + ' <small>entró</small></span><span class="s">↓ ' + esc(cifra(mes.s)) + ' <small>salió</small></span></div>' +
+      '<span class="e">↑ ' + (pref.oculto ? '•••' : esc(cifra(mes.e))) + ' <small>entró</small></span><span class="s">↓ ' + (pref.oculto ? '•••' : esc(cifra(mes.s))) + ' <small>salió</small></span></div>' +
     '</section>';
   if(cerrado){
     h += '<div class="aviso-cerrado"><span>Este libro está cerrado.' + (sig ? ' Ahora anotas en <b>' + esc(sig.nom) + '</b>.' : '') + '</span>' +
@@ -1535,12 +1576,13 @@ function pintarSimple(l, cont){
   } else {
     h += '<div class="dos-botones"><button class="grande e" data-accion="entra"><b>+</b>Ingreso</button><button class="grande s" data-accion="sale"><b>−</b>Gasto</button></div>';
   }
-  h += tarjetaFijos(l);
+  h += tarjetaFijos(l) + tarjetaMes(l);
   h += '<div class="hoja principal' + (abre ? ' abre' : '') + '"><div class="lista-cab"><h3>Movimientos</h3>' +
+    '<div class="seg" role="group" aria-label="Qué ver">' + [['', 'Todo'], ['e', 'Ingresos'], ['s', 'Gastos']].map(x => '<button data-ftipo="' + x[0] + '" aria-pressed="' + (filtro.tipo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
     '<label class="buscar"><svg><use href="#i-buscar"/></svg><input class="campo" id="fQ" type="search" placeholder="Buscar…" value="' + esc(filtro.q) + '"></label>' +
     '<select class="campo" id="fPer" aria-label="Periodo">' + opcionesPeriodo(l) + '</select></div>';
   if(filtro.per === 'rango') h += '<div class="filtros"><input type="date" class="campo" id="fDesde" value="' + esc(filtro.desde) + '" aria-label="Desde"><input type="date" class="campo" id="fHasta" value="' + esc(filtro.hasta) + '" aria-label="Hasta"></div>';
-  if(hayFiltroLista()) h += '<div class="filtros-activos">' + (filtro.tipo ? chipF('tipo', filtro.tipo === 'e' ? 'Solo ingresos' : 'Solo gastos') : '') + (filtro.cat ? chipF('cat', filtro.cat) : '') + (filtro.med ? chipF('med', filtro.med) : '') + (filtro.q ? chipF('q', '«' + filtro.q + '»') : '') + '</div>';
+  if(filtro.cat || filtro.med || filtro.q) h += '<div class="filtros-activos">' + (filtro.cat ? chipF('cat', filtro.cat) : '') + (filtro.med ? chipF('med', filtro.med) : '') + (filtro.q ? chipF('q', '«' + filtro.q + '»') : '') + '</div>';
   if(!r.filas.length){
     h += '<div class="vacio"><div style="font-size:50px;line-height:1;margin-bottom:12px">👋</div><h3>Empieza anotando algo</h3><p>Toca <b>Gasto</b> cuando pagues algo e <b>Ingreso</b> cuando te paguen. Yo hago las cuentas.</p></div>';
   } else h += vistaLista(l, r, lista);
@@ -1548,6 +1590,30 @@ function pintarSimple(l, cont){
   cont.innerHTML = h;
   ultimoNuevo = null;
   animarCifras();
+}
+
+/* «¿En qué se fue este mes?»: una barra con las categorías y cómo vas
+   comparado con el mismo punto del mes pasado. */
+function tarjetaMes(l){
+  const h0 = hoy(), ym = h0.slice(0, 7), dia = +h0.slice(8);
+  const gm = vivos(l).filter(m => m.t === 's' && m.f.slice(0, 7) === ym && m.cat !== 'Transferencia');
+  if(gm.length < 2) return '';
+  const total = gm.reduce((s, m) => s + m.m, 0);
+  const g = new Map(); gm.forEach(m => g.set(m.cat || '', (g.get(m.cat || '') || 0) + m.m));
+  let arr = [...g.entries()].sort((a, b) => b[1] - a[1]);
+  if(arr.length > 5){ const resto = arr.slice(4).reduce((s, x) => s + x[1], 0); arr = arr.slice(0, 4).concat([['Otras', resto]]); }
+  const ant = new Date(+ym.slice(0, 4), +ym.slice(5) - 2, 1), yma = iso(ant).slice(0, 7);
+  const antHasta = vivos(l).filter(m => m.t === 's' && m.f.slice(0, 7) === yma && +m.f.slice(8) <= dia && m.cat !== 'Transferencia').reduce((s, m) => s + m.m, 0);
+  let comp = '';
+  if(antHasta > 0){
+    const pct = Math.round((total - antHasta) / antHasta * 100);
+    comp = pct === 0 ? 'Vas igual que el mes pasado a estas alturas.' : (pct < 0 ? '👏 Vas <b class="e">' + (-pct) + '% menos</b>' : '👀 Vas <b class="s">' + pct + '% más</b>') + ' que a estas alturas de ' + MESES[ant.getMonth()] + ' (' + esc(dinero(antHasta, l.mon)) + ').';
+  }
+  const col = k => k === 'Otras' ? 'var(--tinta3)' : colorCat(k);
+  return '<div class="tarjeta"><div class="tarjeta-cab"><b>¿En qué se fue ' + MESES[+ym.slice(5) - 1] + '?</b><span class="num faltan">' + (pref.oculto ? '•••' : esc(dinero(total, l.mon))) + '</span></div>' +
+    '<div class="tira" role="img" aria-label="Gastos del mes por categoría">' + arr.map(([k, v]) => '<i style="flex:' + v + ';background:' + col(k) + '" title="' + esc((k || 'Sin categoría') + ': ' + cifra(v)) + '"></i>').join('') + '</div>' +
+    '<div class="tira-ley">' + arr.map(([k, v]) => '<button ' + (k === 'Otras' ? '' : 'data-fcat="' + esc(k) + '" ') + 'class="tl"><span class="punto" style="--k:' + col(k) + '"></span>' + (iconoCat(k) ? iconoCat(k) + ' ' : '') + esc(k || 'Sin categoría') + ' <b>' + Math.round(v / total * 100) + '%</b></button>').join('') + '</div>' +
+    (comp ? '<p class="comp">' + comp + '</p>' : '') + '</div>';
 }
 
 /* ---------- Vista: Movimientos (por día, con su dibujito) ---------- */
@@ -1568,6 +1634,7 @@ function vistaLista(l, r, lista){
       '<span class="ss' + (x.saldo < 0 ? ' neg' : '') + '">saldo ' + esc(cifra(x.saldo)) + (x.saldo < 0 ? ' en contra' : '') + '</span></div>';
   });
   if(!hayFiltroLista()) h += '<div class="apertura-lista"><span>' + (r.lim ? 'Venías con' : 'Empezaste con') + '</span><b>' + esc(dinero(r.antes, l.mon)) + '</b></div>';
+  if(pref.modo !== 'completo') h += '<p class="pista-desliza solo-movil">Desliza un movimiento: ← lo borras, → lo repites hoy</p>';
   h += '<div class="pie-lista"><span>' + lista.length + ' movimientos</span><span><span class="e">+' + esc(cifra(t.e)) + '</span> &nbsp; <span class="s">−' + esc(cifra(t.s)) + '</span></span></div></div>';
   return h;
 }
@@ -1968,6 +2035,7 @@ function guardarAsiento(){
   }
   tocar(l); guardar();
   ultimoNuevo = m.id;
+  if(!as.id) celebrar(a.t);
   const otro = $('asOtro').checked && !as.id;
   const pasado = a.t === 's' && a.cat && l.pres[a.cat] && gastadoMes(l, a.cat, a.f.slice(0, 7)) > l.pres[a.cat];
   aviso(pasado ? '⚠ Anotado, pero ya pasaste el presupuesto de ' + a.cat + '.' : as.id ? 'Movimiento corregido.' : (a.t === 'e' ? 'Entrada' : 'Salida') + ' de ' + dinero(a.mo.c, l.mon) + ' anotada.' + ($('asFijo').checked ? ' Queda como fijo mensual.' : ''));
@@ -2037,7 +2105,7 @@ function borrarMovs(l, ids){
   ids.forEach(id => { const m = l.movs.find(x => x.id === id); if(m && !m.borr){ m.borr = 1; m.upd = t; n++; } });
   if(!n) return;
   tocar(l); guardar(); seleccion.clear(); pintar();
-  aviso(n === 1 ? 'Asiento borrado.' : n + ' asientos borrados.', () => {
+  aviso(n === 1 ? 'Movimiento borrado.' : n + ' movimientos borrados.', () => {
     const t2 = ahora(); ids.forEach(id => { const m = l.movs.find(x => x.id === id); if(m){ delete m.borr; m.upd = t2; } });
     tocar(l); guardar(); pintar(); aviso('Recuperado' + (n === 1 ? '.' : 's los ' + n + '.'));
   });
@@ -2295,7 +2363,7 @@ function pintarListas(){
   document.querySelectorAll('#listasTabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.l === listaVista));
   const usos = new Map();
   vivos(l).forEach(m => { const k = listaVista === 'm' ? m.med : (m.t === listaVista ? m.cat : null); if(k) usos.set(k, (usos.get(k) || 0) + 1); });
-  $('listasLista').innerHTML = arr.length ? arr.map((x, i) => '<label><input type="checkbox" class="ck" data-i="' + i + '"><span class="crece">' + esc(x) + '</span><small>' + (usos.get(x) ? usos.get(x) + ' asiento' + (usos.get(x) === 1 ? '' : 's') : 'sin usar') + '</small>' +
+  $('listasLista').innerHTML = arr.length ? arr.map((x, i) => '<label><input type="checkbox" class="ck" data-i="' + i + '">' + (listaVista !== 'm' ? '<button type="button" class="emo-bt" data-emo="' + i + '" title="Cambiar el dibujito">' + (iconoCat(x) || '＋') + '</button>' : '') + '<span class="crece">' + esc(x) + '</span><small>' + (usos.get(x) ? usos.get(x) + ' asiento' + (usos.get(x) === 1 ? '' : 's') : 'sin usar') + '</small>' +
     '<button type="button" class="mini" data-ren="' + i + '" title="Cambiar el nombre">✎</button></label>').join('') : '<div style="padding:14px" class="faltan">No hay ninguna. Agrégalas abajo.</div>';
   $('listasTodas').checked = false; $('listasBorrar').disabled = true;
 }
@@ -2319,6 +2387,16 @@ function initListas(){
     aviso(quitar.length + ' quitada' + (quitar.length === 1 ? '' : 's') + '. Los asientos que las usaban las conservan escritas.');
   };
   $('listasLista').addEventListener('click', async e => {
+    const eb = e.target.closest('[data-emo]');
+    if(eb){
+      e.preventDefault();
+      const l = activo(), nombre = arrLista(l)[+eb.dataset.emo];
+      const elegido = await elegirEmoji(nombre);
+      if(elegido === null) return;
+      if(elegido) l.emo[nombre] = elegido; else delete l.emo[nombre];
+      tocar(l); guardar(); pintarListas(); pintar();
+      return;
+    }
     const b = e.target.closest('[data-ren]'); if(!b) return;
     e.preventDefault();
     const l = activo(), arr = arrLista(l), viejo = arr[+b.dataset.ren];
@@ -2328,6 +2406,16 @@ function initListas(){
     const t = ahora();
     l.movs.forEach(m => { if(listaVista === 'm' ? m.med === viejo : (m.t === listaVista && m.cat === viejo)){ if(listaVista === 'm') m.med = nuevo; else m.cat = nuevo; m.upd = t; } });
     tocar(l); guardar(); pintarListas(); pintar(); aviso('Renombrada en todo el libro.');
+  });
+}
+
+/* Una rejilla de dibujitos para elegir el de una categoría */
+const PALETA_EMO = '🍔🍕🍜🥗☕🍺🛒🧺🏠🛋️💡💧📶📱🚌🚕🚗⛽🅿️✈️🏨🎬🎮🎧📚🎓💊🩺🏋️⚽👕👟💈🎁🐶👶💼🛍️🤝🏦💳📈💰🧾🔧🛠️⚖️✨🔸'.match(/\p{Extended_Pictographic}\uFE0F?/gu);
+function elegirEmoji(nombre){
+  return new Promise(res => {
+    let elegido = null;
+    confirmar('Dibujito de «' + nombre + '»', 'Toca el que más le pegue.', { si:'Listo', extra:'<div class="emo-rejilla">' + PALETA_EMO.map(e => '<button type="button" data-e="' + e + '">' + e + '</button>').join('') + '</div><button type="button" class="bt chico plano" data-e="" style="margin-top:10px">Volver al automático</button>' }).then(ok => res(ok ? elegido : null));
+    setTimeout(() => { $('cfExtra').onclick = ev => { const b = ev.target.closest('[data-e]'); if(!b) return; elegido = b.dataset.e; $('cfExtra').querySelectorAll('[data-e]').forEach(x => x.classList.toggle('vivo', x === b)); }; }, 0);
   });
 }
 
@@ -2611,7 +2699,7 @@ function descargar(blob, nombre){
 }
 function nombreArchivo(ls, ext){
   const base = ls.length === 1 ? ls[0].nom : 'libros';
-  return 'cuentas_' + normal(base).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '_' + hoy() + '.' + ext;
+  return 'sencillo_' + normal(base).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '_' + hoy() + '.' + ext;
 }
 /* El periodo visible se respeta solo al exportar el libro abierto */
 function datosExport(l, usarPeriodo){
@@ -2775,7 +2863,7 @@ function exportarExcel(ls, completos){
   const usados = new Set(), hojas = [];
   if(ls.length > 1){
     const T = (v, s) => ({ v, s }), N = (v, s) => ({ v, t:'n', s });
-    const filas = [[T('Cuentas Claras · tus libros', 5)], [T('Generado el ' + fCorta(hoy()) + '. Cada libro tiene su hoja con el diario completo.', 9)], [], ['Libro','Moneda','Estado','Abierto','Asientos','Saldo inicial','Entró','Salió','Saldo final'].map(x => T(x, 1))];
+    const filas = [[T('Sencillo · tus libros', 5)], [T('Generado el ' + fCorta(hoy()) + '. Cada libro tiene su hoja con el diario completo.', 9)], [], ['Libro','Moneda','Estado','Abierto','Asientos','Saldo inicial','Entró','Salió','Saldo final'].map(x => T(x, 1))];
     ls.forEach(l => { const r = datosExport(l, false); filas.push([T(l.nom), T(l.mon), T(l.est === 'c' ? 'Cerrado' : 'Abierto'), N(serieFecha(l.fa), 3), N(r.filas.length), N(C(r.antes), 2), N(C(r.e), 6), N(C(r.s), 7), N(C(r.despues), 10)]); });
     hojas.push({ nombre:nombreHoja('Resumen', usados), filas, anchos:[26,9,10,11,10,15,15,15,15], cab:4, activa:true });
   }
@@ -2824,7 +2912,7 @@ function armarPDF(lz, W, H){
   const ids = lz.pags.map(ops => { const s = ops.join('\n'); const c = add('<< /Length ' + s.length + ' >>\nstream\n' + s + '\nendstream'); return add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] /Resources << ' + res + ' >> /Contents ' + c + ' 0 R >>'); });
   obj[0] = '<< /Type /Catalog /Pages 2 0 R >>';
   obj[1] = '<< /Type /Pages /Count ' + ids.length + ' /Kids [' + ids.map(i => i + ' 0 R').join(' ') + '] >>';
-  const info = add('<< /Title (' + txtPDF('Cuentas Claras') + ') /Producer (Cuentas Claras) >>');
+  const info = add('<< /Title (' + txtPDF('Sencillo') + ') /Producer (Sencillo) >>');
   let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'; const pos = [];
   obj.forEach((o, i) => { pos.push(out.length); out += (i + 1) + ' 0 obj\n' + o + '\nendobj\n'; });
   const x = out.length;
@@ -2836,13 +2924,13 @@ function armarPDF(lz, W, H){
 function exportarPDF(ls, completos){
   ls = ls.filter(Boolean); if(!ls.length) return;
   const W = 595.28, H = 841.89, M = 36, lz = new Lienzo();
-  const K = { tinta:'#1D1B16', t2:'#514C44', t3:'#857E72', regla:'#DDD4C2', papel:'#F5F0E4', entra:'#1C4EA6', sale:'#B3311C' };
+  const K = { tinta:'#0F1722', t2:'#475467', t3:'#8391A3', regla:'#DCE2EA', papel:'#F1F4F8', entra:'#1F6FC5', sale:'#C76A12' };
   let y = H - M;
   const espacio = (alto, alNuevo) => { if(y - alto < 54){ lz.nueva(); y = H - M; if(alNuevo) alNuevo(); return true; } return false; };
 
   /* Portada de resumen si hay varios libros */
   if(ls.length > 1){
-    lz.texto('CUENTAS CLARAS', M, y - 10, 9, K.t3, true); y -= 40;
+    lz.texto('SENCILLO', M, y - 10, 9, K.t3, true); y -= 40;
     lz.texto('Tus libros', M, y, 26, K.tinta, true, null, true); y -= 18;
     lz.texto('Resumen generado el ' + fLarga(hoy()), M, y, 10, K.t3); y -= 30;
     const cols = [[M, 'Libro', 'izq'], [M + 200, 'Estado', 'izq'], [M + 250, 'Asientos', 'der2'], [M + 330, 'Inicial', 'der'], [M + 400, 'Entró', 'der'], [M + 465, 'Salió', 'der'], [W - M, 'Saldo final', 'der']];
@@ -2872,7 +2960,7 @@ function exportarPDF(ls, completos){
     const r = datosExport(l, !completos && ls.length === 1);
     /* Cabecera del libro */
     lz.rect(0, H - 8, W, 8, l.col);
-    lz.texto('CUENTAS CLARAS · LIBRO DE INGRESOS Y GASTOS', M, y - 8, 7.5, K.t3, true);
+    lz.texto('SENCILLO · INGRESOS Y GASTOS', M, y - 8, 7.5, K.t3, true);
     lz.texto('Generado el ' + fCorta(hoy()), W - M, y - 8, 7.5, K.t3, false, 'der');
     y -= 36;
     lz.texto(cortarPDF(l.nom, 24, W - 2 * M - 80, true), M, y, 24, K.tinta, true, null, true);
@@ -2970,14 +3058,14 @@ function exportarPDF(ls, completos){
   });
   /* Pie con numeración, ahora que se sabe cuántas páginas hay */
   const total = lz.pags.length;
-  lz.pags.forEach((p, i) => { lz.p = p; lz.linea(M, 38, W - M, 38, K.regla, .5); lz.texto(ls.length === 1 ? ls[0].nom : 'Cuentas Claras', M, 26, 7, K.t3); lz.texto('Página ' + (i + 1) + ' de ' + total, W - M, 26, 7, K.t3, false, 'der'); });
+  lz.pags.forEach((p, i) => { lz.p = p; lz.linea(M, 38, W - M, 38, K.regla, .5); lz.texto(ls.length === 1 ? ls[0].nom + ' · Sencillo' : 'Sencillo', M, 26, 7, K.t3); lz.texto('Página ' + (i + 1) + ' de ' + total, W - M, 26, 7, K.t3, false, 'der'); });
   descargar(armarPDF(lz, W, H), nombreArchivo(ls, 'pdf'));
   aviso('PDF descargado: ' + total + ' página' + (total === 1 ? '' : 's') + '.');
 }
 
 /* ---------- Respaldo ---------- */
 function respaldar(){
-  descargar(new Blob([JSON.stringify({ app:'cuentas-claras', v:1, fecha:new Date().toISOString(), libros:db.libros }, null, 1)], { type:'application/json' }), 'cuentas_respaldo_' + hoy() + '.json');
+  descargar(new Blob([JSON.stringify({ app:'cuentas-claras', v:1, fecha:new Date().toISOString(), libros:db.libros }, null, 1)], { type:'application/json' }), 'sencillo_respaldo_' + hoy() + '.json');
   aviso('Respaldo descargado. Guárdalo en un sitio seguro.');
 }
 async function restaurar(file){
@@ -2989,7 +3077,7 @@ async function restaurar(file){
     if(!ok) return;
     db = mezclar(db, { libros:d.libros.map(sanearLibro) });
     guardar(); pintar(); aviso('Respaldo cargado.');
-  }catch(e){ aviso('Ese archivo no es un respaldo de Cuentas Claras.'); }
+  }catch(e){ aviso('Ese archivo no es un respaldo de Sencillo.'); }
 }
 
 /* ==========================================================================
@@ -3124,7 +3212,7 @@ function pintarNube(){
       (kb > 80 ? '<div class="alerta" style="margin-top:12px">El plan gratis de JSONBin admite unos 100 KB por bin. Cuando te acerques, renueva los libros y borra los cerrados que ya tengas exportados.</div>' : '') +
       '<div class="fila-bt" style="justify-content:flex-start;margin-top:16px"><button class="bt tinta" id="nbAhora"><svg><use href="#i-renovar"/></svg>Sincronizar ahora</button><button class="bt" id="nbVerCodigo"><svg><use href="#i-movil"/></svg>Conectar otro aparato</button><button class="bt peligro" id="nbSalir">Desconectar</button></div>' +
       '<div id="nbCodigoCaja" class="oculto" style="margin-top:16px"><label class="et">Código de sincronización</label><div class="codigo" id="nbCodigo"></div>' +
-      '<p class="ayuda">En el otro aparato: abre Cuentas Claras → Sincronizar → «Ya tengo un código», y pega esto. <b>Es como una llave</b>: quien lo tenga puede ver y cambiar tus libros. No lo compartas.</p>' +
+      '<p class="ayuda">En el otro aparato: abre Sencillo → Sincronizar → «Ya tengo un código», y pega esto. <b>Es como una llave</b>: quien lo tenga puede ver y cambiar tus libros. No lo compartas.</p>' +
       '<button class="bt chico" id="nbCopiar"><svg><use href="#i-copia"/></svg>Copiar</button></div>';
     $('nbAhora').onclick = () => sincronizar('manual');
     $('nbVerCodigo').onclick = () => { $('nbCodigo').textContent = codigoSync(); $('nbCodigoCaja').classList.remove('oculto'); };
@@ -3154,7 +3242,7 @@ function pintarNube(){
     try{
       nube = { k, b:binA || 'x' };
       if(!binA){
-        const j = await pedir('POST', JSONBIN, compacto(db.libros.length ? db : { libros:[] }), { 'X-Bin-Name':'cuentas-claras', 'X-Bin-Private':'true' });
+        const j = await pedir('POST', JSONBIN, compacto(db.libros.length ? db : { libros:[] }), { 'X-Bin-Name':'sencillo', 'X-Bin-Private':'true' });
         if(!j || !j.metadata || !j.metadata.id) throw new Error('JSONBin respondió sin identificador de bin. Inténtalo otra vez.');
         nube.b = j.metadata.id;
       }
@@ -3265,6 +3353,8 @@ function init(){
     if(t.closest('#pastillaNube')){ abrirNube(); if(nube) sincronizar('manual'); return; }
     if(t.closest('#btTema')){ ponerTema(pref.tema === 'noche' ? 'dia' : 'noche'); return; }
     const fjb = t.closest('[data-fijo]'); if(fjb){ anotarFijo(fjb.dataset.fijo); return; }
+    if(t.closest('#btOjo')){ pref.oculto = !pref.oculto; guardarPref(); pintar(); return; }
+    const ft = t.closest('[data-ftipo]'); if(ft){ filtro.tipo = ft.dataset.ftipo; pintarLibro(); return; }
     if(t.closest('#btOrden')){ pref.orden = pref.orden === 'desc' ? 'asc' : 'desc'; guardarPref(); pintarLibro(); return; }
     const dup = t.closest('[data-dup]'); if(dup){ const l = activo(), m = l.movs.find(x => x.id === dup.dataset.dup); abrirAsiento(null, Object.assign({}, m, { f:hoy() })); return; }
     const bo = t.closest('[data-borra]'); if(bo){ borrarMovs(activo(), [bo.dataset.borra]); return; }
@@ -3278,6 +3368,7 @@ function init(){
     if(t.id === 'ckTodos'){ const l = activo(), lista = filtrar(resumen(l).dentro); if(t.checked) lista.forEach(x => seleccion.add(x.m.id)); else seleccion.clear(); pintarLibro(); pintarSelbar(); return; }
     const ck = t.closest('[data-ck]'); if(ck){ if(ck.checked) seleccion.add(ck.dataset.ck); else seleccion.delete(ck.dataset.ck); const fila = ck.closest('[data-mov]'); if(fila) fila.classList.toggle('sel', ck.checked); pintarSelbar(); return; }
     const fila = t.closest('[data-mov]');
+    if(fila && window.__deslizo && Date.now() - window.__deslizo < 400) return;
     if(fila && !t.closest('.ckc')){
       const l = activo();
       if(modoSel && fila.classList.contains('mov')){ const id = fila.dataset.mov; if(seleccion.has(id)) seleccion.delete(id); else seleccion.add(id); pintarLibro(); pintarSelbar(); return; }
@@ -3290,6 +3381,33 @@ function init(){
     if(t.closest('#selNada')){ seleccion.clear(); pintar(); return; }
     if(t.closest('#toastBt')){ const f = deshacerFn; deshacerFn = null; $('toast').classList.remove('ver'); if(f) f(); return; }
   });
+  /* Deslizar un movimiento: a la izquierda lo borra, a la derecha lo repite hoy */
+  let arrastre = null;
+  document.addEventListener('touchstart', e => {
+    const f = e.target.closest('.mov'); if(!f || modoSel || !activo() || activo().est === 'c') return;
+    arrastre = { f, x:e.touches[0].clientX, y:e.touches[0].clientY, dx:0, activo:false };
+  }, { passive:true });
+  document.addEventListener('touchmove', e => {
+    if(!arrastre) return;
+    const dx = e.touches[0].clientX - arrastre.x, dy = e.touches[0].clientY - arrastre.y;
+    if(!arrastre.activo){ if(Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.4){ arrastre.activo = true; arrastre.f.classList.add('desliza'); } else if(Math.abs(dy) > 10){ arrastre = null; return; } else return; }
+    arrastre.dx = dx;
+    const lejos = Math.abs(dx) > 90;
+    arrastre.f.style.transform = 'translateX(' + dx + 'px)';
+    arrastre.f.style.background = dx < 0 ? 'linear-gradient(90deg,transparent,' + (lejos ? 'var(--sale-t)' : 'var(--sale-s)') + ')' : 'linear-gradient(270deg,transparent,' + (lejos ? 'var(--entra-t)' : 'var(--entra-s)') + ')';
+  }, { passive:true });
+  document.addEventListener('touchend', () => {
+    if(!arrastre) return;
+    const { f, dx, activo:fue } = arrastre; arrastre = null;
+    if(!fue) return;
+    f.classList.remove('desliza'); f.classList.add('vuelve');
+    const id = f.dataset.mov, l = activo();
+    if(dx < -90){ f.style.transform = 'translateX(-110%)'; setTimeout(() => borrarMovs(l, [id]), 160); }
+    else if(dx > 90){ f.style.transform = ''; f.style.background = ''; const m = l.movs.find(x => x.id === id); if(m) abrirAsiento(null, Object.assign({}, m, { f:hoy() })); }
+    else { f.style.transform = ''; f.style.background = ''; }
+    window.__deslizo = Date.now();
+  });
+
   /* Pulsación larga en un renglón del teléfono = empezar a seleccionar */
   let tLargo = null;
   document.addEventListener('touchstart', e => { const f = e.target.closest('.mov'); if(!f || !activo() || activo().est === 'c') return; tLargo = setTimeout(() => { modoSel = true; seleccion.add(f.dataset.mov); pintar(); if(navigator.vibrate) navigator.vibrate(15); tLargo = 'hecho'; }, 550); }, { passive:true });
@@ -3336,7 +3454,7 @@ function init(){
   $('fechaHoy').textContent = fh;
   const hora = new Date().getHours();
   pintarSaludo();
-  $('subSaludo').textContent = 'Cuentas Claras · ' + fh;
+  $('subSaludo').textContent = 'Sencillo · ' + fh;
   document.addEventListener('pointermove', e => { if($('grafico')) tipGrafico(e); }, { passive:true });
   let tAncho = null, anchoAntes = innerWidth;
   window.addEventListener('resize', () => { clearTimeout(tAncho); tAncho = setTimeout(() => { if(innerWidth !== anchoAntes && pref.vista === 'mayor'){ anchoAntes = innerWidth; pintarLibro(); } }, 200); });
