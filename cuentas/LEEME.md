@@ -24,7 +24,26 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v8 · más funciones (la actual)
+## v9 · pasada final de diseño (la actual)
+
+- Todo en **una sola columna alineada**: cabecera, tarjetas y contenido miden
+  lo mismo en la computadora.
+- **Iconos de línea coherentes** en todos los botones (ojo, micrófono,
+  calendario, seleccionar, categoría, fecha, nube, candado). Los emojis quedan
+  solo donde dan personalidad: en las categorías.
+- Cabeceras de tarjeta con su icono en baldosa de color y contador de fijos
+  pendientes.
+- La fecha ya no sale dos veces; los días de la lista dicen solo «Vie 13 nov».
+- Modo día limpio (sin la mancha gris del saldo) y punto del libro visible
+  aunque su color sea oscuro.
+- Celular: cabecera de la lista en tres filas ordenadas, ayuda del apunte
+  rápido solo al escribir, formulario sin huecos y «Repetir» en una fila
+  deslizable, total del estante sin cortarse.
+- El estante se desvanece en el borde en lugar de cortar la última tarjeta, y
+  se oculta mientras no hay libros.
+- Barra de selección en una sola línea en pantallas anchas.
+
+## v8 · más funciones
 
 - **Seleccionar varios, a la vista**: botón «☑ Seleccionar» sobre la lista
   (también en modo simple). Tocas los movimientos o «Marcar los N», y la barra

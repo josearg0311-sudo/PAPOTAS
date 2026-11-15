@@ -676,6 +676,103 @@ dialog.rapido .avanzado{display:none!important}
 .ver-mas small{color:var(--tinta3);font-weight:600}
 .pista-desliza{font-size:12px;color:var(--tinta3);text-align:center;margin:10px 0 0;font-weight:600}
 
+
+/* ==========================================================================
+   PASADA FINAL · detalle por detalle
+   ========================================================================== */
+/* Una sola columna, alineada, en el modo simple */
+html.modo-simple .cab,html.modo-simple .estante-caja{max-width:796px}
+html.modo-simple .estante-caja{padding-left:18px;padding-right:18px}
+html.modo-simple .estante{padding-left:2px;padding-right:2px}
+html.modo-simple .libro{max-width:796px}
+.cab{padding-top:22px}
+.marca h1{font-size:21px}
+.marca small{font-size:12.5px}
+/* Nube: icono y punto de estado */
+.pastilla{position:relative;gap:7px}
+.pastilla svg{width:16px;height:16px}
+.pastilla i{width:7px;height:7px}
+.pastilla[data-e="off"] i{display:none}
+/* Botones con icono */
+.bt svg{width:16px;height:16px}
+.bt.icono-t{width:36px;padding:0;justify-content:center}
+.bt.icono svg{width:18px;height:18px}
+.ojo{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:8px;color:var(--tinta3);vertical-align:middle;margin-left:2px}
+.ojo:hover{background:var(--sup2);color:var(--tinta)}
+.ojo svg{width:16px;height:16px}
+/* El saldo: punto del libro visible, halo más limpio */
+.hero{background:radial-gradient(90% 80% at 100% 0%, color-mix(in srgb, var(--c) 26%, transparent), transparent 62%), linear-gradient(180deg, var(--sup2), var(--sup))}
+:root[data-tema="dia"] .hero{background:radial-gradient(90% 80% at 100% 0%, color-mix(in srgb, var(--c) 10%, transparent), transparent 60%), var(--sup)}
+.hero-nom b i{box-shadow:0 0 0 2px var(--sup), 0 0 0 3.5px color-mix(in srgb, var(--c) 70%, var(--tinta3))}
+.hero-et{display:flex;align-items:center;gap:2px;margin-top:16px}
+.hero-num{margin-top:2px}
+.mes-resumen{margin-top:14px}
+/* Tarjetas: cabecera con icono en baldosa */
+.tarjeta{padding:16px 18px}
+.tarjeta-cab b{display:flex;align-items:center;gap:10px}
+.tic{width:28px;height:28px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--entra-s);color:var(--entra);flex:none;font-style:normal}
+.tic svg{width:16px;height:16px}
+.tic.aviso{background:var(--aviso-s);color:var(--aviso)}
+.tic.ok{background:var(--ok-s);color:var(--ok)}
+.cuenta{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--aviso);color:#1A1205;font:800 11.5px var(--sans)}
+.comp{line-height:1.6}
+/* Apunte rápido */
+.apunte-ic{display:flex;align-items:center;justify-content:center;color:var(--tinta3)}
+.apunte-ic svg{width:17px;height:17px}
+.apunte-voz,.apunte-ok{display:flex;align-items:center;justify-content:center}
+.apunte-voz svg,.apunte-ok svg{width:18px;height:18px}
+.apunte-voz{color:var(--tinta2)}
+.apunte{transition:border-color .15s, box-shadow .15s}
+.apunte:focus-within{border-color:var(--entra-t);box-shadow:0 0 0 4px rgba(47,111,216,.14), var(--sombra)}
+.apunte-vista.vacia{display:none}
+.apunte:focus-within .apunte-vista.vacia{display:block}
+/* Lista */
+.lista-cab{gap:8px 10px}
+.grupo-dia{padding:18px 10px 6px}
+.grupo-dia b{font-size:13.5px}
+.mov{padding:10px}
+.mov .ico{border-radius:14px}
+/* Barra de selección en una sola línea en pantallas anchas */
+@media (min-width:721px){ .selbar{flex-wrap:nowrap;white-space:nowrap} .selbar .bt{padding:7px 11px} }
+.selbar .bt svg{width:15px;height:15px}
+/* Tarjeta «crear presupuesto» */
+.tarjeta-cta > span:first-child{display:flex}
+@media (max-width:720px){
+  .cab{padding:14px 14px 2px}
+  .estante-acc{flex-wrap:nowrap;gap:8px}
+  .placa-total{font-size:12px;gap:2px 8px;flex-wrap:nowrap;white-space:nowrap;overflow:hidden}
+  .placa-total span:first-child{overflow:hidden;text-overflow:ellipsis}
+  .placa-total b{font-size:12.5px}
+  #btOrganizar{font-size:12px;padding:6px 8px;flex:none}
+  html.modo-simple .libro{padding-bottom:150px}
+  html.modo-simple .pie{margin-top:-120px;padding-bottom:130px}
+  /* Cabecera de la lista: 3 filas ordenadas, no 4 */
+  .lista-cab h3{flex:1 1 auto;order:0}
+  .lista-cab #btCal{order:1}
+  .lista-cab #btModoSel{order:2}
+  .lista-cab .seg{order:3;flex:1 1 100%}
+  .lista-cab .buscar{order:4;flex:1 1 55%}
+  .lista-cab #fPer{order:5;flex:1 1 35%;min-width:0}
+  /* Formulario: sin huecos, «Repetir» en una sola fila deslizable */
+  dialog.rapido .letras{min-height:0;margin-top:6px}
+  dialog.rapido .paso{padding-bottom:12px}
+  dialog.rapido .sugerencias{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-16px;padding-right:16px}
+  dialog.rapido .sugerencias::-webkit-scrollbar{display:none}
+  dialog.rapido .sugerencias button,dialog.rapido .sugerencias span{flex:none;white-space:nowrap}
+  dialog.rapido .chip{padding:7px 12px;font-size:13px}
+  dialog.rapido .monto-caja input{font-size:36px;padding:10px 14px 10px 4px}
+}
+
+/* El estante se desvanece en el borde en vez de cortarse en seco */
+.estante{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}
+@media (max-width:720px){
+  .placa-total .largo{display:none}
+  html.modo-simple .lista-cab h3{flex:1 1 auto}
+  html.modo-simple .lista-cab .buscar{flex:1 1 52%;order:4}
+  html.modo-simple .lista-cab #fPer{flex:1 1 38%;order:5}
+  html.modo-simple .lista-cab .seg{order:3;flex:1 1 100%}
+}
+
 /* ---------- Pantallas medianas y teléfonos ---------- */
 @media (max-width:1080px){
   .tablero{grid-template-columns:1fr}
@@ -785,6 +882,18 @@ dialog.rapido .avanzado{display:none!important}
     <symbol id="i-movil" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M11 18h2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-mover" viewBox="0 0 24 24"><path d="M4 12h14m0 0l-5-5m5 5l-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ojo" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8" fill="none"/></symbol>
+    <symbol id="i-ojo-no" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.6A9.6 9.6 0 0112 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 01-3.2 4M6.3 6.9C3.9 8.6 2.5 12 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1M9.9 9.9a3 3 0 004.2 4.2" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
+    <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-lista2" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-marcar" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M8 12.2l2.8 2.8L16.2 9" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.6V4.5a1 1 0 011-1h8.1l8 8a1.4 1.4 0 010 2l-7 7a1.4 1.4 0 01-2 0z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21v-6M7 4h10l-1.5 5 3 3.5H5.5L8.5 9z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+    <symbol id="i-meta" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8" fill="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-dona" viewBox="0 0 24 24"><path d="M12 3a9 9 0 109 9h-9z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><path d="M15 3.5A9 9 0 0120.5 9H15z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></symbol>
+    <symbol id="i-escudo" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></symbol>
+    <symbol id="i-candado" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M8 10.5V8a4 4 0 018 0v2.5" stroke="currentColor" stroke-width="1.8" fill="none"/></symbol>
     <symbol id="i-ayuda" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M9.5 9.5a2.5 2.5 0 015 .5c0 1.7-2.5 2-2.5 4M12 17h.01" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></symbol>
   </defs>
 </svg>
@@ -807,8 +916,7 @@ dialog.rapido .avanzado{display:none!important}
     <linearGradient id="gradArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A8DDE" stop-opacity=".3"/><stop offset="1" stop-color="#3A8DDE" stop-opacity="0"/></linearGradient>
   </defs></svg>
   <div class="crece"></div>
-  <span class="fecha-hoy" id="fechaHoy"></span>
-  <button class="pastilla" id="pastillaNube" data-e="off" title="Sincronización entre dispositivos"><i></i><span id="pastillaTxt">Sin nube</span></button>
+  <button class="pastilla" id="pastillaNube" data-e="off" title="Sincronización entre dispositivos"><svg><use href="#i-nube"/></svg><i></i><span id="pastillaTxt">Sin nube</span></button>
   <button class="bt icono plano" id="btTema" title="Cambiar a modo día / noche" aria-label="Cambiar tema"><svg><use href="#i-luna"/></svg></button>
   <button class="bt icono plano" id="btMenuApp" title="Más opciones" aria-label="Más opciones"><svg><use href="#i-puntos"/></svg></button>
 </header>
@@ -1418,7 +1526,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v8</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v9</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -1503,6 +1611,7 @@ function diaSemana(f){ const [a,m,d] = f.split('-').map(Number); return DSEM[new
 function pintarEstante(){
   const ls = libros(), act = activo();
   const est = $('estante');
+  $('estanteCaja').classList.toggle('oculto', !ls.length);
   est.innerHTML = ls.map(l => {
     const t = diario(l), saldo = t.length ? t[t.length-1].saldo : l.ini;
     return '<button class="lomo' + (l.est === 'c' ? ' cerrado' : '') + '" role="tab" style="--c:' + esc(l.col) + '" data-libro="' + l.id + '" aria-current="' + (act && act.id === l.id) + '" title="' + esc(l.nom) + ' · ' + esc(dinero(saldo, l.mon)) + '">' +
@@ -1515,7 +1624,7 @@ function pintarEstante(){
   const porMon = new Map();
   ls.filter(l => l.est === 'a').forEach(l => { const t = diario(l); porMon.set(l.mon, (porMon.get(l.mon) || 0) + (t.length ? t[t.length-1].saldo : l.ini)); });
   const abiertos = ls.filter(l => l.est === 'a').length;
-  $('placaTotal').innerHTML = abiertos > 1 ? '<span>En total, entre tus ' + abiertos + ' libros</span>' +
+  $('placaTotal').innerHTML = abiertos > 1 ? '<span>En total<span class="largo">, entre tus ' + abiertos + ' libros</span></span>' +
     [...porMon.entries()].map(([m, c]) => '<b class="num' + (c < 0 ? ' neg' : '') + '">' + (pref.oculto ? esc(m) + ' ••••' : esc(dinero(c, m))) + '</b>').join('') : '';
   if(act){ const el = est.querySelector('[aria-current="true"]'); if(el && est.scrollWidth > est.clientWidth){ const x = el.offsetLeft - 16; if(x < est.scrollLeft || x + el.offsetWidth > est.scrollLeft + est.clientWidth) est.scrollTo({ left:x, behavior:'smooth' }); } }
 }
@@ -1629,7 +1738,7 @@ function pintarSimple(l, cont){
   h += '<section class="hero' + (abre ? ' abre' : '') + '" style="--c:' + esc(l.col) + '">' +
     '<div class="hero-top"><div class="hero-nom"><b><i></i>' + esc(l.nom) + (cerrado ? ' <span class="sello ce">Cerrado</span>' : '') + '</b></div>' +
     '<button class="bt icono" id="btMenuLibro" title="Opciones: exportar, categorías, renovar…" aria-label="Opciones del libro"><svg><use href="#i-puntos"/></svg></button></div>' +
-    '<div class="hero-et">Tienes <button class="ojo" id="btOjo" title="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo" aria-label="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo">' + (pref.oculto ? '🙈' : '👁️') + '</button></div>' +
+    '<div class="hero-et">Tienes <button class="ojo" id="btOjo" title="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo" aria-label="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo"><svg><use href="#i-' + (pref.oculto ? 'ojo-no' : 'ojo') + '"/></svg></button></div>' +
     '<div class="hero-num num' + (r.despues < 0 ? ' s' : '') + '">' + (pref.oculto ? '<span class="mon">' + esc(l.mon) + '</span>••••••' : cifraTerm(r.despues, l.mon, 'desp')) + '</div>' +
     '<div class="mes-resumen"><em class="mes-et">En ' + MESES[+ym.slice(5) - 1] + '</em>' +
       '<span class="e">↑ ' + (pref.oculto ? '•••' : esc(cifra(mes.e))) + ' <small>entró</small></span><span class="s">↓ ' + (pref.oculto ? '•••' : esc(cifra(mes.s))) + ' <small>salió</small></span></div>' +
@@ -1639,16 +1748,16 @@ function pintarSimple(l, cont){
       (sig ? '<button class="bt chico" data-ir="' + sig.id + '">Ir a ' + esc(sig.nom) + '</button>' : '') + '<button class="bt chico" id="btReabrir">Reabrir</button></div>';
   } else {
     h += '<div class="dos-botones"><button class="grande e" data-accion="entra"><b>+</b>Ingreso</button><button class="grande s" data-accion="sale"><b>−</b>Gasto</button></div>';
-    h += '<div class="apunte"><div class="apunte-fila"><span class="apunte-ic">✎</span><input id="apunteIn" class="apunte-in" autocomplete="off" enterkeyhint="done" placeholder="Apunta: -12.50 almuerzo" aria-label="Apunte rápido">' +
-      (Reconocer ? '<button class="apunte-voz" id="btVoz" title="Dictar" aria-label="Dictar por voz">🎙️</button>' : '') + '<button class="apunte-ok" id="btApunte" aria-label="Apuntar">↵</button></div><div class="apunte-vista" id="apunteVista"></div></div>';
+    h += '<div class="apunte"><div class="apunte-fila"><span class="apunte-ic"><svg><use href="#i-lapiz"/></svg></span><input id="apunteIn" class="apunte-in" autocomplete="off" enterkeyhint="done" placeholder="Apunta: -12.50 almuerzo" aria-label="Apunte rápido">' +
+      (Reconocer ? '<button class="apunte-voz" id="btVoz" title="Dictar" aria-label="Dictar por voz"><svg><use href="#i-mic"/></svg></button>' : '') + '<button class="apunte-ok" id="btApunte" aria-label="Apuntar"><svg><use href="#i-check"/></svg></button></div><div class="apunte-vista" id="apunteVista"></div></div>';
   }
   h += tarjetaRespaldo() + tarjetaFijos(l) + tarjetaMeta(l) + tarjetaMes(l);
   h += '<div class="hoja principal' + (abre ? ' abre' : '') + '"><div class="lista-cab"><h3>Movimientos</h3>' +
     '<div class="seg" role="group" aria-label="Qué ver">' + [['', 'Todo'], ['e', 'Ingresos'], ['s', 'Gastos']].map(x => '<button data-ftipo="' + x[0] + '" aria-pressed="' + (filtro.tipo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
     '<label class="buscar"><svg><use href="#i-buscar"/></svg><input class="campo" id="fQ" type="search" placeholder="Buscar…" value="' + esc(filtro.q) + '"></label>' +
     '<select class="campo" id="fPer" aria-label="Periodo">' + opcionesPeriodo(l) + '</select>' +
-    (r.filas.length ? '<button class="bt chico' + (pref.cal ? ' tinta' : '') + '" id="btCal" title="Ver como calendario">📅' + (pref.cal ? ' Lista' : '') + '</button>' : '') +
-    (cerrado || !r.filas.length || pref.cal ? '' : '<button class="bt chico' + (modoSel ? ' tinta' : '') + '" id="btModoSel" title="Marcar varios para borrarlos, moverlos o cambiarlos">' + (modoSel ? '✓ Listo' : '☑ Seleccionar') + '</button>') + '</div>';
+    (r.filas.length ? '<button class="bt chico icono-t" id="btCal" title="' + (pref.cal ? 'Ver como lista' : 'Ver como calendario') + '" aria-label="' + (pref.cal ? 'Ver como lista' : 'Ver como calendario') + '"><svg><use href="#i-' + (pref.cal ? 'lista2' : 'cal') + '"/></svg></button>' : '') +
+    (cerrado || !r.filas.length || pref.cal ? '' : '<button class="bt chico' + (modoSel ? ' tinta' : '') + '" id="btModoSel" title="Marcar varios para borrarlos, moverlos o cambiarlos"><svg><use href="#i-' + (modoSel ? 'check' : 'marcar') + '"/></svg>' + (modoSel ? 'Listo' : 'Seleccionar') + '</button>') + '</div>';
   if(modoSel && lista.length) h += '<div class="sel-ayuda"><span>Toca los movimientos que quieras marcar.</span><button class="bt chico plano" id="selTodoLista">' + (lista.every(x => seleccion.has(x.m.id)) ? 'Desmarcar todo' : 'Marcar los ' + lista.length) + '</button></div>';
   if(filtro.per === 'rango') h += '<div class="filtros"><input type="date" class="campo" id="fDesde" value="' + esc(filtro.desde) + '" aria-label="Desde"><input type="date" class="campo" id="fHasta" value="' + esc(filtro.hasta) + '" aria-label="Hasta"></div>';
   if(filtro.cat || filtro.med || filtro.q) h += '<div class="filtros-activos">' + (filtro.cat ? chipF('cat', filtro.cat) : '') + (filtro.med ? chipF('med', filtro.med) : '') + (filtro.q ? chipF('q', '«' + filtro.q + '»') : '') + '</div>';
@@ -1678,12 +1787,12 @@ function tarjetaMes(l){
   let comp = '';
   if(antHasta > 0){
     const pct = Math.round((total - antHasta) / antHasta * 100);
-    comp = pct === 0 ? 'Vas igual que el mes pasado a estas alturas.' : (pct < 0 ? '👏 Vas <b class="e">' + (-pct) + '% menos</b>' : '👀 Vas <b class="s">' + pct + '% más</b>') + ' que a estas alturas de ' + MESES[ant.getMonth()] + ' (' + esc(dinero(antHasta, l.mon)) + ').';
+    comp = pct === 0 ? 'Vas igual que el mes pasado a estas alturas.' : (pct < 0 ? 'Vas <b class="e">' + (-pct) + '% menos</b>' : 'Vas <b class="s">' + pct + '% más</b>') + ' que a estas alturas de ' + MESES[ant.getMonth()] + ' (' + esc(dinero(antHasta, l.mon)) + ').';
   }
   const dias = new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate();
-  if(dia >= 5 && dia < dias){ const proy = Math.round(total / dia * dias); comp += (comp ? '<br>' : '') + '📈 A este ritmo cerrarás ' + MESES[+ym.slice(5) - 1] + ' con unos <b>' + esc(dinero(proy, l.mon)) + '</b> de gastos.'; }
+  if(dia >= 5 && dia < dias){ const proy = Math.round(total / dia * dias); comp += (comp ? '<br>' : '') + 'A este ritmo cerrarás ' + MESES[+ym.slice(5) - 1] + ' con unos <b>' + esc(dinero(proy, l.mon)) + '</b> de gastos.'; }
   const col = k => k === 'Otras' ? 'var(--tinta3)' : colorCat(k);
-  return '<div class="tarjeta"><div class="tarjeta-cab"><b>¿En qué se fue ' + MESES[+ym.slice(5) - 1] + '?</b><span class="num faltan">' + (pref.oculto ? '•••' : esc(dinero(total, l.mon))) + '</span></div>' +
+  return '<div class="tarjeta"><div class="tarjeta-cab"><b><i class="tic"><svg><use href="#i-dona"/></svg></i>¿En qué se fue ' + MESES[+ym.slice(5) - 1] + '?</b><span class="num faltan">' + (pref.oculto ? '•••' : esc(dinero(total, l.mon))) + '</span></div>' +
     '<div class="tira" role="img" aria-label="Gastos del mes por categoría">' + arr.map(([k, v]) => '<i style="flex:' + v + ';background:' + col(k) + '" title="' + esc((k || 'Sin categoría') + ': ' + cifra(v)) + '"></i>').join('') + '</div>' +
     '<div class="tira-ley">' + arr.map(([k, v]) => '<button ' + (k === 'Otras' ? '' : 'data-fcat="' + esc(k) + '" ') + 'class="tl"><span class="punto" style="--k:' + col(k) + '"></span>' + (iconoCat(k) ? iconoCat(k) + ' ' : '') + esc(k || 'Sin categoría') + ' <b>' + Math.round(v / total * 100) + '%</b></button>').join('') + '</div>' +
     (comp ? '<p class="comp">' + comp + '</p>' : '') + '</div>';
@@ -1699,7 +1808,7 @@ function vistaLista(l, r, lista){
   const visibles = lista.slice(-limiteLista).reverse(), ocultos = lista.length - visibles.length;
   visibles.forEach(x => {
     const m = x.m, sel = seleccion.has(m.id);
-    if(m.f !== dia){ dia = m.f; const n = porDia.get(dia); h += '<div class="grupo-dia"><span><b>' + nombreDia(dia) + '</b>' + fCorta(dia) + '</span><span class="num ' + (n >= 0 ? 'e' : 's') + '">' + esc(dinero(n, '', true)) + '</span></div>'; }
+    if(m.f !== dia){ dia = m.f; const n = porDia.get(dia); h += '<div class="grupo-dia"><span><b>' + nombreDia(dia) + '</b></span><span class="num ' + (n >= 0 ? 'e' : 's') + '">' + esc(dinero(n, '', true)) + '</span></div>'; }
     h += '<div class="mov r' + m.t + (sel ? ' sel' : '') + (ultimoNuevo === m.id ? ' nuevo' : '') + '" data-mov="' + m.id + '">' +
       '<input type="checkbox" class="ck" data-ck="' + m.id + '"' + (sel ? ' checked' : '') + ' aria-label="Seleccionar">' + icoHtml(m) +
       '<span class="t1">' + esc(m.c || '(sin concepto)') + '</span>' +
@@ -1932,8 +2041,8 @@ function pintarSelbar(){
   const t = totales(movs);
   bar.innerHTML = '<span><b>' + movs.length + '</b> marcado' + (movs.length === 1 ? '' : 's') + ' · <span class="num">' + esc(dinero(t.neto, l.mon, true)) + '</span></span>' +
     '<button class="bt chico peligro" id="selBorrar"><svg><use href="#i-basura"/></svg>Borrar</button>' +
-    '<button class="bt chico" id="selCat">🏷️ Categoría</button>' +
-    '<button class="bt chico" id="selFecha">📅 Fecha</button>' +
+    '<button class="bt chico" id="selCat"><svg><use href="#i-tag"/></svg>Categoría</button>' +
+    '<button class="bt chico" id="selFecha"><svg><use href="#i-cal"/></svg>Fecha</button>' +
     '<button class="bt chico" id="selMover"><svg><use href="#i-mover"/></svg>Mover</button>' +
     '<button class="bt chico" id="selDup"><svg><use href="#i-copia"/></svg>Duplicar</button>' +
     '<button class="bt chico plano" id="selNada" title="Quitar marcas" aria-label="Quitar marcas">✕</button>';
@@ -2684,11 +2793,11 @@ function guardarPres(){
 /* Tarjeta de la columna: cómo vas este mes contra lo que te permitiste */
 function tarjetaPres(l){
   const ym = hoy().slice(0, 7), cats = Object.keys(l.pres);
-  if(!cats.length) return l.est === 'a' ? '<button class="tarjeta-cta" data-accion="pres"><span>🎯</span><span><b>Ponte un presupuesto</b><small>Cuánto quieres gastar al mes en comida, salidas…</small></span></button>' : '';
+  if(!cats.length) return l.est === 'a' ? '<button class="tarjeta-cta" data-accion="pres"><span><i class="tic"><svg><use href="#i-meta"/></svg></i></span><span><b>Ponte un presupuesto</b><small>Cuánto quieres gastar al mes en comida, salidas…</small></span></button>' : '';
   const filas = cats.map(c => ({ c, g:gastadoMes(l, c, ym), p:l.pres[c] })).sort((a, b) => b.g / b.p - a.g / a.p);
   const tg = filas.reduce((s, x) => s + x.g, 0), tp = filas.reduce((s, x) => s + x.p, 0);
   const dia = +hoy().slice(8), dias = new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate();
-  return '<div class="tarjeta"><div class="tarjeta-cab"><b>🎯 Presupuesto de ' + MESES[+ym.slice(5) - 1] + '</b><button class="bt chico plano" data-accion="pres">Editar</button></div>' +
+  return '<div class="tarjeta"><div class="tarjeta-cab"><b><i class="tic"><svg><use href="#i-check"/></svg></i>Presupuesto de ' + MESES[+ym.slice(5) - 1] + '</b><button class="bt chico plano" data-accion="pres">Editar</button></div>' +
     '<div class="pres-total"><span class="num">' + esc(dinero(tg, l.mon)) + '</span> de ' + esc(dinero(tp, l.mon)) + '<small>' + (tg <= tp ? 'te quedan ' + esc(dinero(tp - tg, l.mon)) + ' · día ' + dia + ' de ' + dias : 'te pasaste por ' + esc(dinero(tg - tp, l.mon))) + '</small></div>' +
     filas.slice(0, 5).map(x => {
       const pct = x.p ? x.g / x.p * 100 : 0, est = pct > 100 ? 'pasado' : pct >= 80 ? 'cerca' : 'bien';
@@ -2707,8 +2816,8 @@ function pendientesFijos(l){
 function tarjetaFijos(l){
   if(l.est !== 'a' || !l.fijos.length) return '';
   const pend = pendientesFijos(l), dia = +hoy().slice(8);
-  if(!pend.length) return '<div class="tarjeta"><div class="tarjeta-cab"><b>📌 Fijos del mes</b><button class="bt chico plano" data-accion="fijos">Ver</button></div><p class="faltan" style="margin:0">Todos anotados este mes ✓</p></div>';
-  return '<div class="tarjeta"><div class="tarjeta-cab"><b>📌 Fijos pendientes · ' + pend.length + '</b><button class="bt chico plano" data-accion="fijos">Editar</button></div>' +
+  if(!pend.length) return '<div class="tarjeta"><div class="tarjeta-cab"><b><i class="tic"><svg><use href="#i-pin"/></svg></i>Fijos del mes</b><button class="bt chico plano" data-accion="fijos">Ver</button></div><p class="faltan" style="margin:0">Todos anotados este mes ✓</p></div>';
+  return '<div class="tarjeta"><div class="tarjeta-cab"><b><i class="tic aviso"><svg><use href="#i-pin"/></svg></i>Fijos pendientes <span class="cuenta">' + pend.length + '</span></b><button class="bt chico plano" data-accion="fijos">Editar</button></div>' +
     pend.map(fj => '<div class="fijo-fila"><span class="fi">' + (iconoCat(fj.cat) || iconoCat(fj.c) || (fj.t === 'e' ? '↑' : '↓')) + '</span><span class="fn"><b>' + esc(fj.c) + '</b><small>' +
       (fj.dia < dia ? '<span class="s">venció el ' + fj.dia + '</span>' : fj.dia === dia ? 'toca hoy' : 'el día ' + fj.dia) + '</small></span><span class="fm num ' + fj.t + '">' + (fj.t === 'e' ? '+' : '−') + esc(cifra(fj.m)) + '</span>' +
       '<button class="bt chico" data-fijo="' + fj.id + '" title="Anotarlo ahora">Anotar</button></div>').join('') + '</div>';
@@ -2810,7 +2919,7 @@ function leerApunte(txt, l){
 function pintarApunte(){
   const i = $('apunteIn'), v = $('apunteVista'); if(!i) return;
   const l = activo(), a = leerApunte(i.value, l);
-  if(!a){ v.innerHTML = 'Escribe y pulsa Enter: <b>-12.50 almuerzo</b> · <b>+2500 sueldo</b> · <b>taxi 15 ayer</b>'; v.className = 'apunte-vista'; return; }
+  if(!a){ v.innerHTML = 'Ejemplos: <b>-12.50 almuerzo</b> · <b>+2500 sueldo</b> · <b>taxi 15 ayer</b>'; v.className = 'apunte-vista vacia'; return; }
   if(a.err){ v.textContent = a.err; v.className = 'apunte-vista mal'; return; }
   v.className = 'apunte-vista ok';
   v.innerHTML = '<span class="' + a.t + '">' + (a.t === 'e' ? 'Ingreso' : 'Gasto') + ' de <b>' + esc(dinero(a.m, l.mon)) + '</b></span> · ' + esc(a.c) +
@@ -2848,7 +2957,7 @@ function tarjetaRespaldo(){
   if(n < 10) return '';
   const hace = f => f ? Math.round((Date.parse(hoy()) - Date.parse(f)) / 864e5) : 999;
   if(hace(pref.respaldo) < 30 || hace(pref.avisoRespaldo) < 14) return '';
-  return '<div class="tarjeta aviso-resp"><div><b>🛟 Tus ' + n + ' apuntes solo están en este aparato</b><small>' + (pref.respaldo ? 'Tu último respaldo fue hace ' + hace(pref.respaldo) + ' días.' : 'Si se pierde o se borra el navegador, se van con él.') + '</small></div>' +
+  return '<div class="tarjeta aviso-resp"><div><b><i class="tic aviso"><svg><use href="#i-escudo"/></svg></i>Tus ' + n + ' apuntes solo están en este aparato</b><small>' + (pref.respaldo ? 'Tu último respaldo fue hace ' + hace(pref.respaldo) + ' días.' : 'Si se pierde o se borra el navegador, se van con él.') + '</small></div>' +
     '<div class="fila-bt" style="justify-content:flex-start"><button class="bt chico tinta" data-accion="nube">Sincronizar</button><button class="bt chico" data-accion="respaldo">Descargar respaldo</button><button class="bt chico plano" data-accion="luego">Luego</button></div></div>';
 }
 
@@ -2902,7 +3011,7 @@ function tarjetaMeta(l){
   for(let i = 1; i <= 3; i++){ const ym = iso(new Date(+h0.slice(0, 4), +h0.slice(5, 7) - 1 - i, 1)).slice(0, 7); const mv = vivos(l).filter(m => m.f.slice(0, 7) === ym); if(mv.length){ const t = totales(mv); suma += t.neto; n++; } }
   const ritmo = n ? suma / n : 0;
   const cuando = falta <= 0 ? '🎉 ¡Meta cumplida!' : ritmo > 0 ? 'A tu ritmo (' + esc(dinero(Math.round(ritmo), l.mon)) + ' al mes) llegas en ~' + Math.ceil(falta / ritmo) + ' mes' + (Math.ceil(falta / ritmo) === 1 ? '' : 'es') + '.' : 'Te faltan ' + esc(dinero(falta, l.mon)) + '.';
-  return '<div class="tarjeta"><div class="tarjeta-cab"><b>🎯 ' + esc(l.meta.nom) + '</b><button class="bt chico plano" data-accion="meta">Editar</button></div>' +
+  return '<div class="tarjeta"><div class="tarjeta-cab"><b><i class="tic ok"><svg><use href="#i-meta"/></svg></i>' + esc(l.meta.nom) + '</b><button class="bt chico plano" data-accion="meta">Editar</button></div>' +
     '<div class="meta-num"><span class="num">' + (pref.oculto ? '••••' : esc(dinero(Math.max(0, sal), l.mon))) + '</span> de ' + esc(dinero(l.meta.m, l.mon)) + ' <b>' + Math.round(pct) + '%</b></div>' +
     '<div class="meta-barra"><i style="width:' + pct.toFixed(1) + '%"></i></div><p class="comp">' + cuando + '</p></div>';
 }
@@ -3639,8 +3748,8 @@ function menuLibro(boton){
     { icono:'lista', txt:'Categorías y medios', sub:'Agregar o borrar varias a la vez', fn:abrirListas },
     { icono:'balanza', txt:'Cuadrar la caja', sub:'Comparar con el dinero real', fn:abrirCuadre },
     { icono:'check', txt:'Presupuesto del mes', sub:'Límite por categoría, con avisos', fn:abrirPres },
-    { icono:'check', txt:l.meta ? 'Meta: ' + l.meta.nom : 'Meta de ahorro', sub:'Cuánto quieres juntar en este libro', fn:editarMeta },
-    { icono:'renovar', txt:'Movimientos fijos', sub:'Lo que se repite cada mes', fn:abrirFijos },
+    { icono:'meta', txt:l.meta ? 'Meta: ' + l.meta.nom : 'Meta de ahorro', sub:'Cuánto quieres juntar en este libro', fn:editarMeta },
+    { icono:'pin', txt:'Movimientos fijos', sub:'Lo que se repite cada mes', fn:abrirFijos },
     { icono:'mover', txt:'Pasar dinero a otro libro', fn:abrirTransferir },
     '-',
     ab ? { icono:'renovar', txt:'Renovar el libro', sub:'Cerrar y abrir otro con el saldo', fn:() => abrirRenovar([l.id]) } : { icono:'renovar', txt:'Reabrir el libro', fn:() => reabrir(l) },
@@ -3659,7 +3768,7 @@ function menuApp(boton){
     '-',
     { icono:'estante', txt:'Ordenar o borrar libros', fn:abrirOrganizar, off:libros().length < 1 },
     { icono:'lapiz', txt:pref.nombre ? 'Tu nombre: ' + pref.nombre : 'Ponle tu nombre al saludo', fn:async () => { const v = await pedirTexto('¿Cómo te llamo?', 'Solo se guarda en este aparato, para saludarte.', pref.nombre || ''); if(v !== null){ pref.nombre = v; guardarPref(); pintarSaludo(); } } },
-    { icono:'check', txt:pref.pin ? '🔒 Quitar el candado' : '🔒 Candado con PIN', sub:'Pide 4 números al abrir la app', fn:configurarPin },
+    { icono:'candado', txt:pref.pin ? 'Quitar el candado' : 'Candado con PIN', sub:'Pide 4 números al abrir la app', fn:configurarPin },
     { icono:'movil', txt:'Instalar en este aparato', fn:instalar },
     { icono:'ayuda', txt:'Atajos de teclado', sub:'N asentar · V varios · / buscar · 1 2 3 vistas', fn:() => confirmar('Atajos de teclado', '<b>A</b> apunte rápido · <b>G</b> gasto · <b>I</b> ingreso · <b>N</b> anotar · <b>T</b> pasar a otro libro · <b>V</b> varios a la vez · <b>/</b> buscar · <b>1</b> Diario · <b>2</b> Cuenta T · <b>3</b> Mayor · <b>Esc</b> cerrar', { si:'Vale' }) }
   ]);
@@ -3821,7 +3930,6 @@ function init(){
   window.addEventListener('storage', e => { if(e.key === K_DATOS){ cargar(); pintar(); } });
 
   const fh = new Date().toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' });
-  $('fechaHoy').textContent = fh;
   const hora = new Date().getHours();
   pintarSaludo();
   $('subSaludo').textContent = 'Apuntado · ' + fh;
