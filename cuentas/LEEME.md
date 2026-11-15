@@ -19,7 +19,26 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v4 · sobria y fuerte (la actual)
+## v5 · simple (la actual)
+
+Lo principal es anotar un gasto en dos segundos, así que la app arranca en
+**modo simple**:
+
+- Una sola pantalla: **cuánto tienes**, lo que entró y salió **este mes**, dos
+  botones grandes **＋ Ingreso** y **－ Gasto**, y la lista de movimientos.
+  En el celular los dos botones quedan fijos abajo.
+- Formulario rápido: monto (grande), en qué, categoría con dibujito, **Hoy /
+  Ayer**, y Guardar. **Enter** guarda. Medio de pago, comprobante, nota y
+  «fijo cada mes» quedan plegados en «Más detalles».
+- Atajos: **G** gasto, **I** ingreso.
+- Todo lo demás (tabla contable, cuenta T, análisis, presupuestos, varios a la
+  vez…) sigue ahí: menú **⋯ → Modo completo**. Exportar PDF/Excel y pasar
+  dinero a otro libro están en el **⋯** de cada libro.
+
+Arreglado: el total de los movimientos marcados y el resumen del mes sumaban
+mal (salía «NaN»).
+
+## v4 · sobria y fuerte
 
 - Paleta **azul marino, acero y grafito**, con **naranja** de acento.
   **Azul = entra, naranja = sale**: la pareja que mejor se distingue con

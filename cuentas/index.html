@@ -548,6 +548,62 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
 .pie{max-width:1320px;margin:-90px auto 0;padding:0 18px 120px;display:flex;justify-content:center;gap:6px 16px;flex-wrap:wrap;font-size:12px;font-weight:600;color:var(--tinta3)}
 .pie span+span::before{content:"·";margin-right:16px;opacity:.5}
 
+/* ==========================================================================
+   MODO SIMPLE (el de siempre): saldo, dos botones y la lista. Nada más.
+   ========================================================================== */
+.simple-wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.simple-wrap .hero{padding:22px 24px 20px}
+.mes-resumen{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.mes-resumen span{display:inline-flex;align-items:center;gap:7px;padding:8px 12px;border-radius:12px;background:rgba(0,0,0,.18);font:700 14px var(--display);border:1px solid var(--borde)}
+:root[data-tema="dia"] .mes-resumen span{background:var(--sup2)}
+.mes-resumen small{font:600 12px var(--sans);color:var(--tinta3)}
+.mes-resumen .mes-et{width:100%;font:600 12.5px var(--sans);font-style:normal;color:var(--tinta3);margin-bottom:-2px}
+.mes-resumen .e{color:var(--entra)} .mes-resumen .s{color:var(--sale)}
+.dos-botones{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grande{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px 14px;border-radius:16px;border:0;font:700 17px var(--display);color:#fff;letter-spacing:-.01em;transition:transform .08s,filter .15s}
+.grande:hover{filter:brightness(1.08)} .grande:active{transform:scale(.97)}
+.grande b{font-size:26px;line-height:.8;font-weight:500}
+.grande.e{background:linear-gradient(135deg,#3A86E8,#1D4E9E);box-shadow:0 12px 24px -12px rgba(47,111,216,.8)}
+.grande.s{background:linear-gradient(135deg,#F0954A,#C2621A);box-shadow:0 12px 24px -12px rgba(240,149,74,.7)}
+.lista-cab{display:flex;align-items:center;gap:10px;padding:14px 16px 10px 20px;border-bottom:1px solid var(--borde);flex-wrap:wrap}
+.lista-cab h3{margin:0;font:700 17px var(--display);letter-spacing:-.01em;flex:1}
+.lista-cab .campo{padding:7px 30px 7px 11px;font-size:13px}
+.lista-cab .buscar{flex:0 1 200px}
+.lista-cab .buscar input{padding:7px 11px 7px 32px;font-size:13px}
+.barra-fija{display:none}
+html.modo-simple .fab{display:none!important}
+html.modo-simple .lomo{height:108px;width:208px;padding:14px 16px}
+html.modo-simple .lomo::before{display:none}
+html.modo-simple .lomo .ls{font-size:22px}
+html.modo-simple .lomo-nuevo{height:108px;width:130px}
+/* Formulario rápido */
+.fecha-fila{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.fecha-fila input{flex:1;min-width:150px}
+.mas-detalles{display:none;width:100%;text-align:left;border:1px dashed var(--borde2);background:transparent;border-radius:12px;padding:11px 14px;color:var(--tinta2);font-weight:700;font-size:13.5px;margin:2px 0 12px}
+.mas-detalles small{color:var(--tinta3);font-weight:600;margin-left:6px}
+.mas-detalles:hover{border-color:var(--entra);color:var(--tinta)}
+dialog.rapido .progreso,dialog.rapido .frase,dialog.rapido #asSub,dialog.rapido .paso .nro,dialog.rapido .paso::before,dialog.rapido .paso .exp,dialog.rapido #p1 h4,dialog.rapido #p4 h4,dialog.rapido #p5 h4{display:none}
+dialog.rapido .paso{display:block;padding:0 0 16px}
+dialog.rapido .paso h4{font:700 12.5px var(--sans);color:var(--tinta3);margin:0 0 8px}
+dialog.rapido .mas-detalles{display:block}
+dialog.rapido:not(.detalles) #p5,dialog.rapido:not(.detalles) #asFijoCaja,dialog.rapido:not(.detalles) #p4 .grid2 > div:last-child{display:none!important}
+dialog.rapido #asFaltan{visibility:hidden}
+dialog.rapido:not(.detalles) #p4 .grid2{grid-template-columns:1fr}
+dialog.rapido.detalles .mas-detalles{display:none}
+dialog.rapido .tipo-dos{background:var(--sup2);border:1px solid var(--borde);border-radius:14px;padding:4px;gap:4px}
+dialog.rapido .tipo-bt{border:0;background:transparent;padding:10px;justify-content:center;border-radius:11px;flex-direction:row}
+dialog.rapido .tipo-bt small{display:none}
+dialog.rapido .tipo-bt .flechon{width:28px;height:28px;font-size:15px;border-radius:9px}
+dialog.rapido .tipo-bt b{font-size:15px}
+dialog.rapido .tipo-bt.e[aria-pressed="true"]{background:var(--entra-s);box-shadow:inset 0 0 0 1.5px var(--entra)}
+dialog.rapido .tipo-bt.s[aria-pressed="true"]{background:var(--sale-s);box-shadow:inset 0 0 0 1.5px var(--sale)}
+dialog.rapido .monto-caja{max-width:none}
+dialog.rapido .monto-caja input{font-size:40px;padding:14px 16px 14px 6px}
+dialog.rapido #p2 h4,dialog.rapido #p3 h4{display:none}
+dialog.rapido .dlg-cab{padding-bottom:10px}
+dialog.rapido .alertas .alerta.bien{display:none}
+dialog.rapido .avanzado{display:none!important}
+
 /* ---------- Pantallas medianas y teléfonos ---------- */
 @media (max-width:1080px){
   .tablero{grid-template-columns:1fr}
@@ -603,6 +659,21 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
   .toast{bottom:calc(92px + env(safe-area-inset-bottom))}
   .pie{margin-top:-96px}
 }
+@media (max-width:720px){
+  html.modo-simple .barra-fija{display:grid;position:fixed;left:0;right:0;bottom:0;z-index:25;grid-template-columns:1fr 1fr;gap:10px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    background:color-mix(in srgb,var(--fondo) 82%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--borde)}
+  html.modo-simple .barra-fija .grande{padding:15px 10px}
+  html.modo-simple .dos-botones{display:none}
+  html.modo-simple .selbar{bottom:calc(86px + env(safe-area-inset-bottom))}
+  html.modo-simple .lomo{height:96px;width:184px}
+  html.modo-simple #btOrganizar{display:none}
+  html.modo-simple .estante-acc{padding-bottom:4px}
+  html.modo-simple .lomo-nuevo{height:96px;width:110px}
+  .simple-wrap .hero{padding:18px}
+  .lista-cab{padding:12px 12px 10px 16px}
+  .lista-cab .buscar{flex:1 1 100%;order:3}
+}
+@media (max-width:720px){ .solo-ancho{display:none!important} dialog.rapido .dlg-pie .bt.tinta{flex:1;padding:15px} }
 @media (max-width:440px){ .pastilla span{display:none} .pastilla{padding:10px} .marca small{display:none} }
 @media (min-width:721px){ .solo-movil{display:none!important} }
 @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
@@ -675,6 +746,7 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
 <footer class="pie" id="pie"></footer>
 
 <div class="selbar oculto" id="selbar"></div>
+<div class="barra-fija oculto" id="barraFija"><button class="grande e" data-accion="entra"><b>+</b>Ingreso</button><button class="grande s" data-accion="sale"><b>−</b>Gasto</button></div>
 <button class="fab oculto" id="fab"><svg><use href="#i-mas"/></svg>Asentar</button>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastTxt"></span><button id="toastBt" class="oculto">Deshacer</button></div>
 
@@ -727,7 +799,7 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
           <h4>¿Cuándo y por dónde?</h4>
           <p class="exp">La fecha en que pasó de verdad, no la de hoy si fue otro día. Y por dónde pasó el dinero.</p>
           <div class="grid2">
-            <div><label class="et" for="asFecha">Fecha</label><input type="date" class="campo lleno" id="asFecha"></div>
+            <div><label class="et" for="asFecha">Fecha</label><div class="fecha-fila"><span class="chips" id="asDias" style="margin:0"><button type="button" class="chip" data-dia="0">Hoy</button><button type="button" class="chip" data-dia="-1">Ayer</button></span><input type="date" class="campo" id="asFecha"></div></div>
             <div><label class="et">Medio</label><div class="chips" id="asMedios" style="margin-top:0"></div></div>
           </div>
         </div>
@@ -743,6 +815,7 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
           </div>
         </div>
       </div>
+      <button type="button" class="mas-detalles" id="asMas">＋ Más detalles <small>medio de pago, comprobante, nota, fijo</small></button>
       <div class="alertas" id="asAlertas"></div>
     </div>
     <div class="dlg-pie">
@@ -785,7 +858,7 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
 <dialog id="dlgLibro">
   <form class="dlg" method="dialog" id="formLibro" novalidate>
     <div class="dlg-cab">
-      <div class="crece"><h3 id="libTitulo">Libro nuevo</h3><p>Un libro por cada bolsillo de dinero que quieras llevar aparte: la casa, el negocio, un viaje, una obra.</p></div>
+      <div class="crece"><h3 id="libTitulo">Libro nuevo</h3><p>Ponle un nombre y, si ya tienes dinero, cuánto. Lo demás es opcional.</p></div>
       <button type="button" class="x" data-cerrar aria-label="Cerrar">×</button>
     </div>
     <div class="dlg-cuerpo">
@@ -798,14 +871,14 @@ table.lote{width:100%;border-collapse:collapse;font-size:13.5px;min-width:820px}
             <option value="Bs">Bs · Bolivianos</option><option value="MX$">MX$ · Pesos mexicanos</option><option value="COP">COP · Pesos colombianos</option>
             <option value="CLP">CLP · Pesos chilenos</option><option value="ARS">ARS · Pesos argentinos</option>
           </select></div>
-        <div><label class="et" for="libFecha">Se abre el</label><input type="date" class="campo lleno" id="libFecha"></div>
+        <div class="avanzado"><label class="et" for="libFecha">Se abre el</label><input type="date" class="campo lleno" id="libFecha"></div>
       </div>
       <div class="grupo"><label class="et" for="libIni">Saldo inicial</label>
         <div class="monto-caja"><span id="libMon">S/</span><input id="libIni" inputmode="decimal" placeholder="0.00"></div>
         <p class="ayuda">El dinero que <b>ya tenías</b> el día que abres el libro. Si empiezas de cero, déjalo en 0. Si debes, ponle un menos delante.</p>
         <div class="letras" id="libLetras"></div>
       </div>
-      <div class="grupo" id="libCopiarCaja"><label class="et" for="libCopiar">Categorías y medios</label>
+      <div class="grupo avanzado" id="libCopiarCaja"><label class="et" for="libCopiar">Categorías y medios</label>
         <select class="campo lleno" id="libCopiar"></select>
         <p class="ayuda">Puedes empezar con las de siempre o copiar las de otro libro tuyo.</p></div>
     </div>
@@ -1180,7 +1253,8 @@ function diario(l){
 }
 function totales(lista){
   let e = 0, s = 0;
-  lista.forEach(x => { const m = x.m || x; if(m.t === 'e') e += m.m; else s += m.m; });
+  /* Acepta filas del diario ({m, saldo}) o movimientos sueltos */
+  lista.forEach(x => { const m = x && typeof x.m === 'object' ? x.m : x; if(m.t === 'e') e += m.m; else s += m.m; });
   return { e, s, neto: e - s };
 }
 function limitesPeriodo(){
@@ -1241,7 +1315,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' asientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Cuentas Claras v4</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' asientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Cuentas Claras v5</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -1356,7 +1430,9 @@ function abreviar(c){
 function pintarLibro(){
   const l = activo(), cont = $('libro');
   $('fab').classList.toggle('oculto', !l || l.est === 'c');
+  $('barraFija').classList.toggle('oculto', !l || l.est === 'c' || pref.modo === 'completo');
   if(!l){ cont.innerHTML = bienvenida(); libroPintado = null; return; }
+  if(pref.modo !== 'completo') return pintarSimple(l, cont);
   if(!['lista','diario','t','mayor'].includes(pref.vista)) pref.vista = 'lista';
   const r = resumen(l);
   const lista = filtrar(r.dentro);
@@ -1438,6 +1514,42 @@ function pintarLibro(){
   ultimoNuevo = null;
   animarCifras();
 }
+/* ---------- La pantalla simple ---------- */
+function pintarSimple(l, cont){
+  const r = resumen(l), lista = filtrar(r.dentro), cerrado = l.est === 'c', sig = l.sig && libro(l.sig);
+  const abre = libroPintado !== l.id; libroPintado = l.id;
+  /* Lo de este mes, siempre: es lo que uno quiere saber de un vistazo */
+  const ym = hoy().slice(0, 7), mes = totales(vivos(l).filter(m => m.f.slice(0, 7) === ym));
+  let h = '<div class="simple-wrap">';
+  h += '<section class="hero' + (abre ? ' abre' : '') + '" style="--c:' + esc(l.col) + '">' +
+    '<div class="hero-top"><div class="hero-nom"><b><i></i>' + esc(l.nom) + (cerrado ? ' <span class="sello ce">Cerrado</span>' : '') + '</b></div>' +
+    '<button class="bt icono" id="btMenuLibro" title="Opciones: exportar, categorías, renovar…" aria-label="Opciones del libro"><svg><use href="#i-puntos"/></svg></button></div>' +
+    '<div class="hero-et">Tienes</div>' +
+    '<div class="hero-num num' + (r.despues < 0 ? ' s' : '') + '">' + cifraTerm(r.despues, l.mon, 'desp') + '</div>' +
+    '<div class="mes-resumen"><em class="mes-et">En ' + MESES[+ym.slice(5) - 1] + '</em>' +
+      '<span class="e">↑ ' + esc(cifra(mes.e)) + ' <small>entró</small></span><span class="s">↓ ' + esc(cifra(mes.s)) + ' <small>salió</small></span></div>' +
+    '</section>';
+  if(cerrado){
+    h += '<div class="aviso-cerrado"><span>Este libro está cerrado.' + (sig ? ' Ahora anotas en <b>' + esc(sig.nom) + '</b>.' : '') + '</span>' +
+      (sig ? '<button class="bt chico" data-ir="' + sig.id + '">Ir a ' + esc(sig.nom) + '</button>' : '') + '<button class="bt chico" id="btReabrir">Reabrir</button></div>';
+  } else {
+    h += '<div class="dos-botones"><button class="grande e" data-accion="entra"><b>+</b>Ingreso</button><button class="grande s" data-accion="sale"><b>−</b>Gasto</button></div>';
+  }
+  h += tarjetaFijos(l);
+  h += '<div class="hoja principal' + (abre ? ' abre' : '') + '"><div class="lista-cab"><h3>Movimientos</h3>' +
+    '<label class="buscar"><svg><use href="#i-buscar"/></svg><input class="campo" id="fQ" type="search" placeholder="Buscar…" value="' + esc(filtro.q) + '"></label>' +
+    '<select class="campo" id="fPer" aria-label="Periodo">' + opcionesPeriodo(l) + '</select></div>';
+  if(filtro.per === 'rango') h += '<div class="filtros"><input type="date" class="campo" id="fDesde" value="' + esc(filtro.desde) + '" aria-label="Desde"><input type="date" class="campo" id="fHasta" value="' + esc(filtro.hasta) + '" aria-label="Hasta"></div>';
+  if(hayFiltroLista()) h += '<div class="filtros-activos">' + (filtro.tipo ? chipF('tipo', filtro.tipo === 'e' ? 'Solo ingresos' : 'Solo gastos') : '') + (filtro.cat ? chipF('cat', filtro.cat) : '') + (filtro.med ? chipF('med', filtro.med) : '') + (filtro.q ? chipF('q', '«' + filtro.q + '»') : '') + '</div>';
+  if(!r.filas.length){
+    h += '<div class="vacio"><div style="font-size:50px;line-height:1;margin-bottom:12px">👋</div><h3>Empieza anotando algo</h3><p>Toca <b>Gasto</b> cuando pagues algo e <b>Ingreso</b> cuando te paguen. Yo hago las cuentas.</p></div>';
+  } else h += vistaLista(l, r, lista);
+  h += '</div></div>';
+  cont.innerHTML = h;
+  ultimoNuevo = null;
+  animarCifras();
+}
+
 /* ---------- Vista: Movimientos (por día, con su dibujito) ---------- */
 function vistaLista(l, r, lista){
   if(!lista.length) return '<div class="vacio"><div style="font-size:44px;margin-bottom:10px">🔍</div><h3>Nada por aquí</h3><p>Prueba con otro periodo o quita algún filtro.</p></div>';
@@ -1658,21 +1770,14 @@ function tipGrafico(e){
 }
 
 function bienvenida(){
-  return '<div class="hoja abre"><div class="vacio">' +
-    '<svg class="ilustra" viewBox="0 0 160 110" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<path d="M80 22c-14-9-34-11-58-7v80c24-4 44-2 58 7 14-9 34-11 58-7V15c-24-4-44-2-58 7z" fill="var(--hoja)"/><path d="M80 22v80"/>' +
-    '<path d="M32 36h36M32 46h30M32 56h36M32 66h24" opacity=".5"/><path d="M92 36h18M92 46h18M92 56h18" opacity=".5"/>' +
-    '<path d="M118 36h10M118 46h10M118 56h10" stroke="var(--entra)"/><path d="M92 74h36" /><path d="M92 77h36" />' +
-    '<path d="M124 8v26l5-4 5 4V8" fill="var(--sale)" stroke="var(--sale)"/></svg>' +
-    '<h3>Tu estante está vacío</h3>' +
-    '<p>Aquí llevas tus cuentas como en un libro de verdad, pero sin equivocarte al sumar. Puedes tener varios libros a la vez: uno para la casa, otro para el negocio, otro para un viaje.</p>' +
-    '<div class="pasos">' +
-    '<div><b>1</b><strong>Abre un libro</strong><span>Ponle nombre y di con cuánto dinero empiezas.</span></div>' +
-    '<div><b>2</b><strong>Asienta cada movimiento</strong><span>Te pregunto paso a paso: entra o sale, cuánto, por qué, cuándo, cómo.</span></div>' +
-    '<div><b>3</b><strong>Cuadra y llévatelo</strong><span>Compara con lo que tienes de verdad. Sácalo en PDF o Excel. Sincroniza tus aparatos.</span></div>' +
-    '</div><div class="fila-bt"><button class="bt tinta" data-accion="nuevoLibro"><svg><use href="#i-libro"/></svg>Abrir mi primer libro</button>' +
-    '<button class="bt" data-accion="ejemplo">Ver con un ejemplo</button>' +
-    '<button class="bt plano" data-accion="nube"><svg><use href="#i-nube"/></svg>Ya lo uso en otro aparato</button></div></div></div>';
+  return '<div class="simple-wrap"><div class="hoja abre"><div class="vacio">' +
+    '<div style="font-size:56px;line-height:1;margin-bottom:14px">💰</div>' +
+    '<h3>Lleva tus gastos e ingresos</h3>' +
+    '<p>Anota lo que gastas y lo que te pagan. Yo sumo y te digo cuánto tienes.</p>' +
+    '<div class="fila-bt"><button class="bt tinta" data-accion="nuevoLibro">Empezar</button>' +
+    '<button class="bt" data-accion="ejemplo">Ver un ejemplo</button></div>' +
+    '<p style="margin:22px auto 0;font-size:13px"><button class="bt plano chico" data-accion="nube"><svg><use href="#i-nube"/></svg>Ya lo uso en otro aparato</button></p>' +
+    '</div></div></div>';
 }
 
 function pintarSelbar(){
@@ -1741,11 +1846,16 @@ function abrirAsiento(id, base){
   const m = id ? l.movs.find(x => x.id === id) : null;
   const b = m || base || {};
   as = { libroId:l.id, id: m ? m.id : null, t: b.t || '', cat: b.cat || '', med: b.med || (m ? '' : (ultimoMedio(l) || l.med[0] || '')) };
+  const rapido = pref.modo !== 'completo';
+  $('dlgAsiento').classList.toggle('rapido', rapido);
+  $('dlgAsiento').classList.toggle('detalles', !rapido || !!(m && (m.doc || m.n)));
+  if(rapido && !as.t && !m) as.t = 's';
   $('asTitulo').textContent = m ? 'Corregir el asiento N° ' + (diario(l).findIndex(x => x.m.id === m.id) + 1) : (base && base.m ? 'Movimiento duplicado' : base && base.t === 'e' ? 'Entró dinero' : base && base.t === 's' ? 'Salió dinero' : 'Anotar un movimiento');
   $('asSub').textContent = m ? 'Cambia lo que haga falta. El saldo de todo el libro se recalcula solo.' : 'Cinco preguntas. Arriba ves cómo queda escrito antes de guardarlo.';
   $('asMon').textContent = l.mon;
   $('asMonto').value = b.m ? aTexto(b.m) : '';
   $('asConcepto').value = b.c || '';
+  $('asConcepto').placeholder = pref.modo !== 'completo' ? '¿En qué? Ej.: almuerzo, pasaje, sueldo…' : 'Concepto';
   $('asFecha').value = (m && m.f) || (base && base.f) || hoy();
   $('asDoc').value = m ? (m.doc || '') : '';
   $('asNota').value = b.n || '';
@@ -1775,6 +1885,12 @@ function pintarAsiento(){
   $('asMedios').innerHTML = meds.map(c => '<button type="button" class="chip" data-med="' + esc(c) + '" aria-pressed="' + (as.med === c) + '">' + esc(c) + '</button>').join('') +
     '<button type="button" class="chip mas" data-med-nuevo>+ otro</button>';
   document.querySelectorAll('.tipo-bt').forEach(b => b.setAttribute('aria-pressed', b.dataset.tipo === a.t));
+  if($('dlgAsiento').classList.contains('rapido') && !as.id){
+    $('asTitulo').textContent = a.t === 'e' ? 'Nuevo ingreso' : 'Nuevo gasto';
+    $('asGuardar').lastChild.textContent = a.t === 'e' ? 'Guardar ingreso' : 'Guardar gasto';
+  }
+  const hh = hoy(), ay = sumarDias(hh, -1);
+  document.querySelectorAll('#asDias [data-dia]').forEach(b => b.setAttribute('aria-pressed', (b.dataset.dia === '0' && a.f === hh) || (b.dataset.dia === '-1' && a.f === ay)));
 
   /* Monto en letras */
   const le = $('asLetras');
@@ -1833,8 +1949,8 @@ function pintarAsiento(){
   if(!as.id && !a.c){
     const cuenta = new Map();
     vivos(l).forEach(x => { if(!x.c) return; const k = x.t + '|' + x.c; const v = cuenta.get(k) || { n:0, x }; v.n++; v.x = x; cuenta.set(k, v); });
-    const top = [...cuenta.values()].filter(v => !a.t || v.x.t === a.t).sort((p, q) => q.n - p.n).slice(0, 5);
-    $('asSug').innerHTML = top.length ? '<span class="faltan" style="align-self:center">De siempre:</span>' + top.map(v => '<button type="button" data-sug="' + v.x.id + '">' + (v.x.t === 'e' ? '↑ ' : '↓ ') + esc(v.x.c) + ' · ' + esc(cifra(v.x.m)) + '</button>').join('') : '';
+    const top = [...cuenta.values()].filter(v => !a.t || v.x.t === a.t).sort((p, q) => q.n - p.n).slice(0, $('dlgAsiento').classList.contains('rapido') ? 3 : 5);
+    $('asSug').innerHTML = top.length ? '<span class="faltan" style="align-self:center">Repetir:</span>' + top.map(v => '<button type="button" data-sug="' + v.x.id + '">' + (v.x.t === 'e' ? '↑ ' : '↓ ') + esc(v.x.c) + ' · ' + esc(cifra(v.x.m)) + '</button>').join('') : '';
   } else $('asSug').innerHTML = '';
 }
 function guardarAsiento(){
@@ -1884,6 +2000,8 @@ function initAsiento(){
       if(v){ const l = libro(as.libroId); if(!l.med.includes(v)){ l.med.push(v); tocar(l); guardar(); } as.med = v; }
       pintarAsiento(); return;
     }
+    const dd = e.target.closest('[data-dia]'); if(dd){ $('asFecha').value = sumarDias(hoy(), +dd.dataset.dia); pintarAsiento(); return; }
+    if(e.target.closest('#asMas')){ d.classList.add('detalles'); return; }
     const s = e.target.closest('[data-sug]');
     if(s){ const x = libro(as.libroId).movs.find(m => m.id === s.dataset.sug); if(x){ as.t = x.t; as.cat = x.cat || ''; as.med = x.med || as.med; $('asConcepto').value = x.c; $('asMonto').value = aTexto(x.m); pintarAsiento(); $('asMonto').select(); } }
   });
@@ -1901,6 +2019,14 @@ function initAsiento(){
     pintarAsiento();
   });
   $('formAsiento').addEventListener('submit', e => { e.preventDefault(); guardarAsiento(); });
+  /* Enter guarda desde cualquier sitio del formulario, también tras tocar una categoría */
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Enter' || e.isComposing || !$('dlgAsiento').open || e.target.tagName === 'TEXTAREA') return;
+    if(e.target.closest && (e.target.closest('.x') || e.target.closest('#dlgConfirmar'))) return;
+    if($('dlgConfirmar').open) return;
+    e.preventDefault();
+    if(!$('asGuardar').disabled) guardarAsiento();
+  });
   $('asBorrar').onclick = () => { const id = as.id, l = libro(as.libroId); d.close(); borrarMovs(l, [id]); };
   $('asDuplicar').onclick = () => { const l = libro(as.libroId), m = l.movs.find(x => x.id === as.id); d.close(); abrirAsiento(null, Object.assign({}, m, { f:hoy() })); };
 }
@@ -2061,6 +2187,7 @@ function abrirLibro(id){
   $('libFecha').value = l ? l.fa : hoy();
   $('libIni').value = l ? (l.ini ? (l.ini < 0 ? '-' : '') + aTexto(l.ini) : '') : '';
   $('libCopiarCaja').classList.toggle('oculto', !!l);
+  $('dlgLibro').classList.toggle('rapido', pref.modo !== 'completo');
   $('libCopiar').innerHTML = '<option value="">Las de siempre (comida, transporte, sueldo…)</option>' + libros().map(x => '<option value="' + x.id + '">Copiar las de «' + esc(x.nom) + '»</option>').join('');
   $('libGuardar').textContent = l ? 'Guardar' : 'Poner en el estante';
   pintarColores(); revisarLibro();
@@ -3079,6 +3206,11 @@ function menuExportar(boton){
 function menuLibro(boton){
   const l = activo(), ab = l.est === 'a';
   abrirMenu(boton, [
+    ...(pref.modo !== 'completo' ? [
+      { icono:'pdf', txt:'Descargar en PDF', fn:() => exportarPDF([l]) },
+      { icono:'xls', txt:'Descargar en Excel', fn:() => exportarExcel([l]) },
+      ...(ab ? [{ icono:'mover', txt:'Pasar dinero a otro libro', fn:abrirTransferir }, { icono:'capas', txt:'Anotar varios a la vez', fn:abrirVarios }] : []),
+      '-'] : []),
     { icono:'lapiz', txt:'Nombre, color y saldo inicial', fn:() => abrirLibro(l.id) },
     { icono:'lista', txt:'Categorías y medios', sub:'Agregar o borrar varias a la vez', fn:abrirListas },
     { icono:'balanza', txt:'Cuadrar la caja', sub:'Comparar con el dinero real', fn:abrirCuadre },
@@ -3094,6 +3226,8 @@ function menuLibro(boton){
 }
 function menuApp(boton){
   abrirMenu(boton, [
+    { icono:'capas', txt:pref.modo === 'completo' ? 'Volver al modo simple' : 'Modo completo', sub:pref.modo === 'completo' ? 'Solo saldo, ingresos, gastos y la lista' : 'Tabla, cuenta T, análisis, presupuestos…', fn:() => { pref.modo = pref.modo === 'completo' ? 'simple' : 'completo'; guardarPref(); document.documentElement.classList.toggle('modo-simple', pref.modo !== 'completo'); libroPintado = null; pintar(); aviso(pref.modo === 'completo' ? 'Modo completo: todo a la vista.' : 'Modo simple.'); } },
+    '-',
     { icono:'nube', txt:'Sincronizar entre dispositivos', sub:nube ? 'Conectado a JSONBin' : 'Con JSONBin, gratis', fn:abrirNube },
     { icono:'guardar', txt:'Descargar respaldo', sub:'Un archivo con todos tus libros', fn:respaldar },
     { icono:'subir', txt:'Cargar un respaldo', sub:'Se mezcla con lo que ya tienes', fn:() => $('archivoRespaldo').click() },
@@ -3101,12 +3235,13 @@ function menuApp(boton){
     { icono:'estante', txt:'Organizar estante', fn:abrirOrganizar, off:libros().length < 1 },
     { icono:'lapiz', txt:pref.nombre ? 'Tu nombre: ' + pref.nombre : 'Ponle tu nombre al saludo', fn:async () => { const v = await pedirTexto('¿Cómo te llamo?', 'Solo se guarda en este aparato, para saludarte.', pref.nombre || ''); if(v !== null){ pref.nombre = v; guardarPref(); pintarSaludo(); } } },
     { icono:'movil', txt:'Instalar en este aparato', fn:instalar },
-    { icono:'ayuda', txt:'Atajos de teclado', sub:'N asentar · V varios · / buscar · 1 2 3 vistas', fn:() => confirmar('Atajos de teclado', '<b>N</b> asentar uno · <b>T</b> pasar a otro libro · <b>V</b> varios a la vez · <b>/</b> buscar · <b>1</b> Diario · <b>2</b> Cuenta T · <b>3</b> Mayor · <b>Esc</b> cerrar', { si:'Vale' }) }
+    { icono:'ayuda', txt:'Atajos de teclado', sub:'N asentar · V varios · / buscar · 1 2 3 vistas', fn:() => confirmar('Atajos de teclado', '<b>G</b> gasto · <b>I</b> ingreso · <b>N</b> anotar · <b>T</b> pasar a otro libro · <b>V</b> varios a la vez · <b>/</b> buscar · <b>1</b> Diario · <b>2</b> Cuenta T · <b>3</b> Mayor · <b>Esc</b> cerrar', { si:'Vale' }) }
   ]);
 }
 function init(){
   cargar(); cargarNube();
   ponerTema(pref.tema === 'dia' ? 'dia' : 'noche');
+  document.documentElement.classList.toggle('modo-simple', pref.modo !== 'completo');
   initAsiento(); initVarios(); initLibro(); initListas(); initOrganizar();
   $('renOk').onclick = hacerRenovar;
   initExtras();
@@ -3183,6 +3318,8 @@ function init(){
     if(e.ctrlKey || e.metaKey || e.altKey) return;
     const l = activo();
     if(e.key === 'n' || e.key === 'N'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(); } }
+    else if(e.key === 'g' || e.key === 'G'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(null, { t:'s' }); } }
+    else if(e.key === 'i' || e.key === 'I'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(null, { t:'e' }); } }
     else if(e.key === 't' || e.key === 'T'){ if(l){ e.preventDefault(); abrirTransferir(); } }
     else if(e.key === 'v' || e.key === 'V'){ if(l && l.est === 'a'){ e.preventDefault(); abrirVarios(); } }
     else if(e.key === '/'){ const i = $('fQ'); if(i){ e.preventDefault(); i.focus(); } }
