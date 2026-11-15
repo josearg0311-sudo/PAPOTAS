@@ -274,11 +274,168 @@ input[type="date"].campo,input[type="time"].campo{color-scheme:inherit}
   .dia-hero .gr{font-size:38px}
   .listas{grid-template-columns:repeat(2,1fr);gap:10px}
   .item .der{display:none}
+  .solo-ancho-t{display:none}
   .cal-d{height:auto;aspect-ratio:1/1;min-height:42px}
   dialog{width:100vw;max-width:100vw;max-height:100dvh;height:100dvh;margin:0;border-radius:0;border:0}
   .dlg{max-height:100dvh;height:100dvh} .dlg-cuerpo{flex:1} .dlg-pie{border-radius:0}
   .dlg-cab,.dlg-cuerpo,.dlg-pie{padding-left:16px;padding-right:16px}
 }
+
+/* ==========================================================================
+   ESTILO v2 · con carácter
+   ========================================================================== */
+body{background:
+  radial-gradient(700px 420px at 12% -8%, rgba(58,141,222,.20), transparent 60%),
+  radial-gradient(600px 380px at 95% 8%, rgba(240,149,74,.11), transparent 60%),
+  var(--fondo);background-attachment:fixed}
+:root[data-tema="dia"] body{background:radial-gradient(700px 420px at 12% -8%, rgba(58,141,222,.12), transparent 60%),radial-gradient(600px 380px at 95% 8%, rgba(240,149,74,.08), transparent 60%),var(--fondo);background-attachment:fixed}
+.tarjeta{border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,.025), transparent 40%), var(--sup)}
+:root[data-tema="dia"] .tarjeta{background:var(--sup)}
+main > *{animation:entra .35s cubic-bezier(.2,.8,.3,1) both}
+main > *:nth-child(2){animation-delay:.03s} main > *:nth-child(3){animation-delay:.06s} main > *:nth-child(4){animation-delay:.09s} main > *:nth-child(5){animation-delay:.12s}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}}
+.sec-t{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:2px 4px -4px}
+.sec-t h2{margin:0;font:700 13px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--tinta3)}
+.sec-t .bt{padding:5px 10px}
+
+/* ---------- Hoy: cabecera con anillo ---------- */
+.hoy-hero{display:flex;align-items:center;gap:18px;padding:20px 22px;border-radius:24px;border:1px solid var(--borde);
+  background:radial-gradient(120% 140% at 0% 0%, rgba(58,141,222,.22), transparent 55%), radial-gradient(90% 120% at 100% 100%, rgba(240,149,74,.14), transparent 55%), var(--sup);box-shadow:var(--sombra)}
+.hoy-hero .tx{flex:1;min-width:0}
+.hoy-hero .ds{font:800 12px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--azul)}
+.hoy-hero .fe{font:700 34px/1.05 var(--display);letter-spacing:-.035em;margin-top:4px}
+.hoy-hero .sl{font-size:14px;color:var(--tinta2);font-weight:600;margin-top:6px}
+.hoy-hero .sl b{color:var(--tinta)}
+.anillo{position:relative;width:92px;height:92px;flex:none}
+.anillo svg{width:92px;height:92px;transform:rotate(-90deg)}
+.anillo .fondo{stroke:var(--sup3)}
+.anillo .lleno{stroke:url(#gAnillo);transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.3,1)}
+.anillo .cifra{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:700 22px/1 var(--display)}
+.anillo .cifra small{font:700 10.5px var(--sans);color:var(--tinta3);margin-top:3px;letter-spacing:.02em}
+.anillo.completo .cifra{color:var(--ok)}
+
+/* Tira de la semana */
+.semana{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.semana button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 8px;border-radius:16px;border:1px solid var(--borde);background:var(--sup);color:var(--tinta2);font-weight:700}
+.semana button small{font:800 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--tinta3)}
+.semana button b{font:700 18px/1 var(--display);color:var(--tinta)}
+.semana button i{width:5px;height:5px;border-radius:50%;background:transparent}
+.semana button i.si{background:var(--nar)}
+.semana button.hoy{background:var(--tinta);border-color:var(--tinta)}
+.semana button.hoy small,.semana button.hoy b{color:var(--fondo)}
+.semana button.hoy i.si{background:var(--nar)}
+.semana button.pasado{opacity:.55}
+
+/* ---------- Línea de tiempo ---------- */
+.linea{position:relative;padding:4px 0 2px}
+.fila-t{display:grid;grid-template-columns:58px 1fr;gap:0 12px;position:relative}
+.fila-t .hr{font:700 13px var(--display);color:var(--tinta2);text-align:right;padding-top:14px;white-space:nowrap}
+.fila-t .hr small{display:block;font:600 10.5px var(--sans);color:var(--tinta3)}
+.fila-t .cu{position:relative;padding-left:18px;border-left:2px solid var(--sup3)}
+.fila-t .cu::before{content:"";position:absolute;left:-7px;top:18px;width:12px;height:12px;border-radius:50%;background:var(--sup);border:2.5px solid var(--k,var(--azul))}
+.fila-t.pasada .hr{color:var(--tinta3)}
+.fila-t.pasada .cu::before{background:var(--k,var(--azul))}
+.ahora{display:grid;grid-template-columns:58px 1fr;gap:0 12px;align-items:center;margin:2px 0}
+.ahora span{font:800 11px var(--display);color:var(--mal);text-align:right;letter-spacing:.02em}
+.ahora i{height:2px;background:var(--mal);border-radius:2px;position:relative;margin-left:-7px}
+.ahora i::before{content:"";position:absolute;left:0;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--mal);box-shadow:0 0 0 4px var(--mal-s)}
+
+/* ---------- Elementos ---------- */
+.item{padding:11px 10px;border-radius:16px;margin:2px 0}
+.item::after{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--k,transparent);opacity:.9}
+.fila-t .item::after{display:none}
+.item.evento{background:linear-gradient(90deg, color-mix(in srgb, var(--k,var(--azul)) 14%, transparent), transparent 70%)}
+.marca-ck{width:26px;height:26px;border:2px solid color-mix(in srgb, var(--k,var(--tinta3)) 70%, var(--borde2));position:relative;overflow:hidden}
+.marca-ck svg{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .3s ease .05s}
+.item.hecho .marca-ck{background:var(--k,var(--ok));border-color:var(--k,var(--ok));color:#fff}
+.item.hecho .marca-ck svg{stroke-dashoffset:0}
+.item.hecho .tx{color:var(--tinta3);text-decoration-thickness:2px;text-decoration-color:color-mix(in srgb, var(--tinta3) 70%, transparent)}
+.item.hecho{opacity:.75}
+.item .hora-ev{background:color-mix(in srgb, var(--k,var(--azul)) 18%, transparent);color:var(--k,var(--azul))}
+.item .tx{font-size:15.5px;letter-spacing:-.005em}
+.item .sub{margin-top:2px}
+.lst-dot{display:inline-flex;align-items:center;gap:5px}
+.lst-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--k)}
+.grupo-t{font:800 11.5px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--tinta3);padding:16px 10px 6px}
+.grupo-t.mal{color:var(--mal)}
+.vacio{padding:26px 16px}
+.vacio .ilu{font-size:40px;display:block;margin-bottom:6px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.3))}
+
+/* ---------- Listas ---------- */
+.listas{gap:14px}
+.lista-c{border-radius:22px;padding:18px;min-height:150px;gap:4px;background:linear-gradient(160deg, color-mix(in srgb, var(--c) 22%, var(--sup)) 0%, var(--sup) 65%)}
+.lista-c .em{width:48px;height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:25px;background:color-mix(in srgb, var(--c) 30%, transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent);margin-bottom:8px}
+.lista-c b{font-size:17px}
+.lista-c .pie-c{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.lista-c .mini-anillo{width:34px;height:34px;transform:rotate(-90deg)}
+.lista-c .mini-anillo .fondo{stroke:var(--sup3)}
+.lista-c .mini-anillo .lleno{stroke:var(--c)}
+.lista-c .barra{display:none}
+.lista-c.nueva{background:transparent;min-height:150px}
+.lista-c.nueva .em{background:var(--sup2);box-shadow:none;font-size:22px;color:var(--tinta2)}
+.lista-hero{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:24px;border:1px solid var(--borde);box-shadow:var(--sombra);
+  background:linear-gradient(140deg, color-mix(in srgb, var(--c) 26%, var(--sup)), var(--sup) 70%)}
+.lista-hero .em{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;background:color-mix(in srgb, var(--c) 32%, transparent);flex:none}
+.lista-hero .tx{flex:1;min-width:0}
+.lista-hero h2{margin:0;font:700 24px var(--display);letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lista-hero .prog-b{height:6px;border-radius:6px;background:var(--sup3);overflow:hidden;margin-top:8px;max-width:260px}
+.lista-hero .prog-b i{display:block;height:100%;background:var(--c);border-radius:6px;transition:width .5s}
+.lista-hero small{font-size:12.5px;color:var(--tinta2);font-weight:700}
+
+/* ---------- Agenda ---------- */
+.cal-d{flex-direction:column;align-items:stretch;justify-content:flex-start;gap:3px;padding:6px 6px;height:86px;border-radius:14px;border:1px solid var(--borde);background:var(--sup2);text-align:left;overflow:hidden}
+.cal-d .n{font:700 13px var(--display)}
+.cal-d.otro{background:transparent;opacity:.4}
+.cal-d.hoy .n{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:var(--azul-g);color:#fff;margin:-2px 0 0 -2px}
+.cal-d.vivo{background:var(--sup3);border-color:var(--azul);color:var(--tinta);box-shadow:0 0 0 2px var(--azul-t)}
+.cal-d .ev{display:block;font:700 10.5px/1.25 var(--sans);padding:2px 5px;border-radius:5px;background:color-mix(in srgb, var(--k) 24%, transparent);color:var(--tinta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:2px solid var(--k)}
+.cal-d .mas{font:700 10px var(--sans);color:var(--tinta3);padding-left:3px}
+.cal-d .pts{display:none}
+
+/* En la línea de tiempo la hora ya está a la izquierda: no se repite */
+.fila-t .item{grid-template-columns:auto 1fr auto}
+.fila-t .item.evento{grid-template-columns:1fr auto;padding-left:14px}
+.fila-t .item.evento .hora-ev{display:none}
+.fila-t .item.evento .tx,.fila-t .item.evento .sub{grid-column:1}
+.fila-t .item .sub .pronto{display:none}
+
+/* ---------- Barra de pestañas abajo (celular) ---------- */
+.tabbar{display:none}
+@media (max-width:720px){
+  .nav{display:none}
+  .barra-fija{display:none!important}
+  .tabbar{display:grid;grid-template-columns:1fr 1fr 76px 1fr 1fr;align-items:end;position:fixed;left:0;right:0;bottom:0;z-index:40;
+    padding:6px 8px calc(8px + env(safe-area-inset-bottom));background:color-mix(in srgb, var(--sup) 88%, transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--borde)}
+  .tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;font:700 11px var(--sans);color:var(--tinta3);position:relative}
+  .tabbar button svg{width:23px;height:23px}
+  .tabbar button[aria-selected="true"]{color:var(--tinta)}
+  .tabbar button[aria-selected="true"]::before{content:"";position:absolute;top:-7px;width:28px;height:3px;border-radius:3px;background:var(--azul)}
+  .tabbar .cnt{position:absolute;top:0;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:99px;background:var(--nar);color:#1A1205;font:800 10px var(--sans);display:flex;align-items:center;justify-content:center}
+  .tabbar .fab{width:58px;height:58px;border-radius:20px;margin:0 auto 4px;background:var(--degradado);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px -8px rgba(47,111,216,.8);transform:translateY(-10px)}
+  .tabbar .fab svg{width:26px;height:26px}
+  main{padding-bottom:120px}
+  .selbar{bottom:calc(96px + env(safe-area-inset-bottom))}
+  .toast{bottom:calc(96px + env(safe-area-inset-bottom))}
+  .hoy-hero{padding:18px;gap:14px}
+  .hoy-hero .fe{font-size:28px}
+  .anillo,.anillo svg{width:78px;height:78px}
+  .semana{gap:4px}
+  .semana button{padding:8px 0 7px;border-radius:13px}
+  .semana button b{font-size:16px}
+  .cal-d{height:auto;aspect-ratio:1/1.05;padding:4px;border-radius:11px;gap:2px}
+  .cal-d .ev{font-size:0;padding:0;height:4px;border-radius:2px;border:0;background:var(--k)}
+  .cal-d .mas{display:none}
+  .fila-t{grid-template-columns:48px 1fr;gap:0 8px}
+  .ahora{grid-template-columns:48px 1fr;gap:0 8px}
+  .lista-c{min-height:136px;padding:15px}
+  .lista-hero{padding:14px;gap:10px;flex-wrap:wrap}
+  .lista-hero .em{width:46px;height:46px;font-size:25px;border-radius:15px}
+  .lista-hero h2{font-size:21px;white-space:normal;line-height:1.15}
+  .lista-hero #btVolverListas{margin-right:-4px;width:32px}
+  .lista-hero .tx{flex:1 1 140px}
+  .lista-c.nueva{min-height:136px}
+}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -346,6 +503,14 @@ input[type="date"].campo,input[type="time"].campo{color-scheme:inherit}
 <main id="main"></main>
 
 <div class="selbar oculto" id="selbar"></div>
+<nav class="tabbar" id="tabbar">
+  <button data-vista="hoy" aria-selected="false"><svg><use href="#i-hoy"/></svg>Hoy</button>
+  <button data-vista="listas" aria-selected="false"><svg><use href="#i-lista"/></svg>Listas</button>
+  <button class="fab" id="btFab" aria-label="Nuevo"><svg><use href="#i-mas"/></svg></button>
+  <button data-vista="agenda" aria-selected="false"><svg><use href="#i-cal"/></svg>Agenda</button>
+  <button id="btTabMenu" aria-label="Más"><svg><use href="#i-puntos"/></svg>Más</button>
+</nav>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gAnillo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CC0FF"/><stop offset="1" stop-color="#2F7FE0"/></linearGradient></defs></svg>
 <div class="barra-fija" id="barraFija"><button class="bt tinta" id="btNuevo"><svg><use href="#i-mas"/></svg><span id="btNuevoTxt">Nuevo</span></button></div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="toastTxt"></span><button id="toastBt" class="oculto">Deshacer</button></div>
 
@@ -570,10 +735,11 @@ function leerFrase(txt){
    PINTAR
    ========================================================================== */
 function pintar(){
-  document.querySelectorAll('#pestanas [data-vista]').forEach(b => b.setAttribute('aria-selected', b.dataset.vista === pref.vista));
+  document.querySelectorAll('#pestanas [data-vista], #tabbar [data-vista]').forEach(b => b.setAttribute('aria-selected', b.dataset.vista === pref.vista));
   const atras = items().filter(i => i.tipo === 'tarea' && !i.hecho && i.fecha && i.fecha < hoy()).length;
   const b = document.querySelector('#pestanas [data-vista="hoy"]');
   b.innerHTML = '<svg><use href="#i-hoy"/></svg>Hoy' + (atras ? '<span class="cnt" title="Atrasadas">' + atras + '</span>' : '');
+  document.querySelector('#tabbar [data-vista="hoy"]').innerHTML = '<svg><use href="#i-hoy"/></svg>Hoy' + (atras ? '<span class="cnt">' + atras + '</span>' : '');
   const m = $('main');
   if(pref.vista === 'listas') m.innerHTML = pref.lista && lista(pref.lista) ? vistaLista(lista(pref.lista)) : vistaListas();
   else if(pref.vista === 'agenda') m.innerHTML = vistaAgenda();
@@ -587,6 +753,7 @@ function pintar(){
 let textoApunte = '', focoApunte = false;
 
 /* ---------- Un elemento (tarea o cita) ---------- */
+function colorItem(it){ const l = it.lista && lista(it.lista); return it.tipo === 'evento' ? 'var(--azul-g)' : l ? l.col : 'var(--tinta3)'; }
 function itemHtml(it, opc){
   opc = opc || {};
   const l = it.lista && lista(it.lista), sel = seleccion.has(it.id);
@@ -599,12 +766,12 @@ function itemHtml(it, opc){
   if(it.rep) sub.push('<span class="chipi"><svg><use href="#i-repite"/></svg>' + REP_TXT[it.rep] + '</span>');
   if(it.aviso !== '' && it.aviso != null && it.hora) sub.push('<span class="chipi"><svg><use href="#i-campana"/></svg>' + textoAviso(it.aviso) + '</span>');
   if(it.lugar) sub.push('<span class="chipi"><svg><use href="#i-lugar"/></svg>' + esc(it.lugar) + '</span>');
-  if(l && !opc.sinLista) sub.push('<span>' + esc(l.emo) + ' ' + esc(l.nom) + '</span>');
+  if(l && !opc.sinLista) sub.push('<span class="lst-dot" style="--k:' + esc(l.col) + '">' + esc(l.nom) + '</span>');
   if(it.nota) sub.push('<span>📎 nota</span>');
   const izq = it.tipo === 'evento'
     ? '<span class="hora-ev' + (it.hora ? '' : ' todo') + '">' + (it.hora ? hora12(it.hora).replace(/ (am|pm)/, '<small>$1</small>') : 'Todo<small>el día</small>') + '</span>'
     : '<button class="marca-ck" data-ck="' + it.id + '" aria-label="' + (it.hecho ? 'Desmarcar' : 'Marcar como hecha') + '"><svg><use href="#i-check"/></svg></button>';
-  return '<div class="item' + (it.hecho ? ' hecho' : '') + (sel ? ' sel' : '') + (ultimoNuevo === it.id ? ' nuevo' : '') + '" data-item="' + it.id + '">' + izq +
+  return '<div class="item ' + it.tipo + (it.hecho ? ' hecho' : '') + (sel ? ' sel' : '') + (ultimoNuevo === it.id ? ' nuevo' : '') + '" data-item="' + it.id + '" style="--k:' + colorItem(it) + '">' + izq +
     '<span class="tx">' + esc(it.txt || '(sin texto)') + '</span>' +
     (sub.length ? '<span class="sub">' + sub.join('') + '</span>' : '') +
     '<span class="der"><button data-borra="' + it.id + '" title="Borrar" aria-label="Borrar"><svg><use href="#i-basura"/></svg></button></span></div>';
@@ -655,68 +822,106 @@ function dictar(){
 }
 
 /* ---------- Vista: Hoy ---------- */
+function anillo(hechas, total){
+  const R = 40, C = 2 * Math.PI * R, pct = total ? hechas / total : 0;
+  return '<div class="anillo' + (total && hechas === total ? ' completo' : '') + '"><svg viewBox="0 0 92 92"><circle class="fondo" cx="46" cy="46" r="' + R + '" fill="none" stroke-width="9"/>' +
+    '<circle class="lleno" cx="46" cy="46" r="' + R + '" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
+    '<div class="cifra">' + (total && hechas === total ? '✓' : hechas + '/' + total) + '<small>' + (total ? (hechas === total ? '¡listo!' : 'hechas') : 'nada') + '</small></div></div>';
+}
+function tiraSemana(){
+  const h = hoy(), lunes = sumarDias(h, -((aFecha(h).getDay() + 6) % 7)), its = items();
+  let s = '<div class="semana">';
+  for(let k = 0; k < 7; k++){
+    const f = sumarDias(lunes, k), d = aFecha(f);
+    const hay = its.some(i => !(i.tipo === 'tarea' && i.hecho) && ocurrencias(i, f, f).length);
+    s += '<button class="' + (f === h ? 'hoy' : f < h ? 'pasado' : '') + '" data-ir-dia="' + f + '"><small>' + DIA3[d.getDay()] + '</small><b>' + d.getDate() + '</b><i class="' + (hay ? 'si' : '') + '"></i></button>';
+  }
+  return s + '</div>';
+}
+/* El día como línea de tiempo, con la marca roja de «ahora» */
+function lineaDia(lst, f){
+  const conHora = lst.filter(i => i.hora).sort((a, b) => a.hora < b.hora ? -1 : a.hora > b.hora ? 1 : 0);
+  const sinHora = lst.filter(i => !i.hora);
+  const ahoraHM = new Date().toTimeString().slice(0, 5), esHoy = f === hoy();
+  let h = '';
+  if(conHora.length){
+    h += '<div class="linea">';
+    let puesto = !esHoy;
+    conHora.forEach(i => {
+      if(!puesto && i.hora > ahoraHM){ h += '<div class="ahora"><span>' + hora12(ahoraHM) + '</span><i></i></div>'; puesto = true; }
+      const [hh, mm] = hora12(i.hora).split(' ');
+      h += '<div class="fila-t' + (esHoy && i.hora <= ahoraHM ? ' pasada' : '') + '" style="--k:' + colorItem(i) + '"><div class="hr">' + hh + '<small>' + mm + '</small></div><div class="cu">' + itemHtml(i, { sinFecha:true, fecha:f }) + '</div></div>';
+    });
+    if(!puesto) h += '<div class="ahora"><span>' + hora12(ahoraHM) + '</span><i></i></div>';
+    h += '</div>';
+  }
+  if(sinHora.length) h += (conHora.length ? '<div class="grupo-t">Cuando puedas</div>' : '') + sinHora.map(i => itemHtml(i, { sinFecha:true, fecha:f })).join('');
+  return h;
+}
 function vistaHoy(){
   const h = hoy(), ahoraHM = new Date().toTimeString().slice(0, 5);
   const todos = items();
   const atrasadas = todos.filter(i => i.tipo === 'tarea' && !i.hecho && i.fecha && i.fecha < h).sort(ordenFechaHora);
   const deHoy = [];
-  todos.forEach(i => { if(i.tipo === 'evento'){ if(ocurrencias(i, h, h).length) deHoy.push(i); } else if(i.fecha === h && (!i.hecho || pref.verHechas || i.hechoEn === h)) deHoy.push(i); });
-  deHoy.sort((a, b) => (a.hora || '99') < (b.hora || '99') ? -1 : (a.hora || '99') > (b.hora || '99') ? 1 : a.k - b.k);
+  todos.forEach(i => { if(i.tipo === 'evento'){ if(ocurrencias(i, h, h).length) deHoy.push(i); } else if(i.fecha === h && (!i.hecho || i.hechoEn === h)) deHoy.push(i); });
   const prox = [];
-  todos.forEach(i => { if(i.hecho) return; const oc = ocurrencias(i, sumarDias(h, 1), sumarDias(h, 7)); oc.forEach(f => prox.push({ i, f })); });
+  todos.forEach(i => { if(i.hecho) return; ocurrencias(i, sumarDias(h, 1), sumarDias(h, 7)).forEach(f => prox.push({ i, f })); });
   prox.sort((a, b) => a.f < b.f ? -1 : a.f > b.f ? 1 : (a.i.hora || '99') < (b.i.hora || '99') ? -1 : 1);
   const sinFecha = todos.filter(i => i.tipo === 'tarea' && !i.hecho && !i.fecha).length;
-  const pendHoy = deHoy.filter(i => i.tipo === 'tarea' && !i.hecho).length, citasHoy = deHoy.filter(i => i.tipo === 'evento').length;
-  const sigCita = deHoy.find(i => i.tipo === 'evento' && i.hora && i.hora >= ahoraHM);
-  const d = new Date();
-  let html = '<section class="dia-hero"><div class="gr">' + d.getDate() + ' ' + MES3[d.getMonth()] + '<small>' + DIAS[d.getDay()].replace(/^./, c => c.toUpperCase()) + ' · ' + saludoCorto() + '</small></div>' +
-    '<div class="resumen-dia">' + (atrasadas.length ? '<span class="nar"><b>' + atrasadas.length + '</b> atrasada' + (atrasadas.length === 1 ? '' : 's') + '</span>' : '') +
-    '<span><b>' + pendHoy + '</b> para hoy</span><span><b>' + citasHoy + '</b> cita' + (citasHoy === 1 ? '' : 's') + '</span>' +
-    (sigCita ? '<span>Próxima: <b>' + hora12(sigCita.hora) + '</b></span>' : '') + '</div></section>';
+  const tareasHoy = deHoy.filter(i => i.tipo === 'tarea'), hechasHoy = tareasHoy.filter(i => i.hecho).length;
+  const citasHoy = deHoy.filter(i => i.tipo === 'evento').length;
+  const sigCita = deHoy.filter(i => i.tipo === 'evento' && i.hora && i.hora >= ahoraHM).sort((a, b) => a.hora < b.hora ? -1 : 1)[0];
+  const d = new Date(), pend = tareasHoy.length - hechasHoy;
+  const frase = !tareasHoy.length && !citasHoy ? 'Día libre. Apunta lo que surja.' :
+    (pend ? 'Te quedan <b>' + pend + '</b> tarea' + (pend === 1 ? '' : 's') : '<b>Tareas de hoy, hechas</b> 🎉') + (sigCita ? ' · próxima cita a las <b>' + hora12(sigCita.hora) + '</b>' : citasHoy ? ' · ' + citasHoy + ' cita' + (citasHoy === 1 ? '' : 's') : '');
+  let html = '<section class="hoy-hero"><div class="tx"><div class="ds">' + DIAS[d.getDay()] + '</div><div class="fe">' + d.getDate() + ' de ' + MESES[d.getMonth()] + '</div><div class="sl">' + saludoCorto().replace(/^./, c => c.toUpperCase()) + '. ' + frase + '</div></div>' + anillo(hechasHoy, tareasHoy.length) + '</section>';
+  html += tiraSemana();
   html += apunteHtml('Apunta algo: «dentista mañana 10am»');
-  if(atrasadas.length) html += '<div class="tarjeta"><div class="t-cab"><h2><i class="tic mal"><svg><use href="#i-reloj"/></svg></i>Atrasadas</h2><button class="bt chico plano" id="btPasarHoy">Pasar todas a hoy</button></div>' + atrasadas.map(i => itemHtml(i)).join('') + '</div>';
-  html += '<div class="tarjeta' + (modoSel ? ' selmode' : '') + '"><div class="t-cab"><h2><i class="tic"><svg><use href="#i-hoy"/></svg></i>Hoy</h2></div>' +
-    (deHoy.length ? deHoy.map(i => itemHtml(i, { sinFecha:true, fecha:h })).join('') : '<div class="vacio">☀️<b>Día libre</b>Apunta arriba lo que tengas que hacer hoy.</div>') + '</div>';
+  if(atrasadas.length) html += '<div class="sec-t"><h2 style="color:var(--mal)">Atrasadas · ' + atrasadas.length + '</h2><button class="bt chico plano" id="btPasarHoy">Pasar todas a hoy</button></div><div class="tarjeta">' + atrasadas.map(i => itemHtml(i)).join('') + '</div>';
+  html += '<div class="sec-t"><h2>Tu día</h2></div><div class="tarjeta' + (modoSel ? ' selmode' : '') + '">' +
+    (deHoy.length ? lineaDia(deHoy, h) : '<div class="vacio"><span class="ilu">☀️</span><b>Día libre</b>Apunta arriba lo que tengas que hacer hoy.</div>') + '</div>';
   if(prox.length){
     let g = '', ult = '';
-    prox.slice(0, 40).forEach(({ i, f }) => { if(f !== ult){ ult = f; g += '<div class="grupo-t"><span>' + nombreDia(f) + '</span></div>'; } g += itemHtml(i, { fecha:f, sinFecha:true }); });
-    html += '<div class="tarjeta"><div class="t-cab"><h2><i class="tic nar"><svg><use href="#i-cal"/></svg></i>Próximos 7 días</h2></div>' + g + '</div>';
+    prox.slice(0, 40).forEach(({ i, f }) => { if(f !== ult){ ult = f; g += '<div class="grupo-t">' + nombreDia(f) + '</div>'; } g += itemHtml(i, { fecha:f, sinFecha:true }); });
+    html += '<div class="sec-t"><h2>Próximos 7 días</h2></div><div class="tarjeta">' + g + '</div>';
   }
-  if(sinFecha) html += '<button class="tarjeta" data-ir-lista="' + asegurarBandeja().id + '" style="text-align:left;cursor:pointer;color:var(--tinta)"><div class="t-cab" style="margin:0"><h3><i class="tic ok"><svg><use href="#i-lista"/></svg></i>Sin fecha</h3><span class="faltan">' + sinFecha + ' pendiente' + (sinFecha === 1 ? '' : 's') + ' en tus listas ›</span></div></button>';
+  if(sinFecha) html += '<button class="tarjeta" data-ir-lista="' + asegurarBandeja().id + '" style="text-align:left;cursor:pointer;color:var(--tinta);display:flex;align-items:center;gap:12px"><i class="tic ok"><svg><use href="#i-lista"/></svg></i><span style="flex:1;font-weight:700">Sin fecha</span><span class="faltan">' + sinFecha + ' en tus listas ›</span></button>';
   return html;
 }
 function ordenFechaHora(a, b){ return (a.fecha + (a.hora || '99')) < (b.fecha + (b.hora || '99')) ? -1 : 1; }
 function saludoCorto(){ const H = new Date().getHours(); return (H < 6 ? 'buenas noches' : H < 12 ? 'buenos días' : H < 19 ? 'buenas tardes' : 'buenas noches') + (pref.nombre ? ', ' + pref.nombre : ''); }
 
 /* ---------- Vista: Listas ---------- */
+function miniAnillo(h, t){ const R = 14, C = 2 * Math.PI * R; return '<svg class="mini-anillo" viewBox="0 0 34 34"><circle class="fondo" cx="17" cy="17" r="' + R + '" fill="none" stroke-width="4"/><circle class="lleno" cx="17" cy="17" r="' + R + '" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - (t ? h / t : 0))).toFixed(1) + '"/></svg>'; }
 function vistaListas(){
   asegurarBandeja();
   const ls = listas();
-  return apunteHtml('Apunta: «leche #compras»') + '<div class="listas">' + ls.map(l => {
+  return apunteHtml('Apunta: «leche #compras»') + '<div class="sec-t"><h2>Tus listas · ' + ls.length + '</h2></div><div class="listas">' + ls.map(l => {
     const its = items().filter(i => i.lista === l.id && i.tipo === 'tarea'), pend = its.filter(i => !i.hecho).length, tot = its.length;
     return '<button class="lista-c" style="--c:' + esc(l.col) + '" data-ir-lista="' + l.id + '"><span class="em">' + esc(l.emo) + '</span><b>' + esc(l.nom) + '</b>' +
-      '<small>' + (pend ? pend + ' pendiente' + (pend === 1 ? '' : 's') : tot ? 'Todo hecho ✓' : 'Vacía') + '</small><span class="barra"><i style="width:' + (tot ? Math.round((tot - pend) / tot * 100) : 0) + '%"></i></span></button>';
-  }).join('') + '<button class="lista-c nueva" id="btNuevaLista"><svg class="i"><use href="#i-mas"/></svg>Nueva lista</button></div>';
+      '<span class="pie-c"><small>' + (pend ? pend + ' pendiente' + (pend === 1 ? '' : 's') : tot ? 'Todo hecho ✓' : 'Vacía') + '</small>' + (tot ? miniAnillo(tot - pend, tot) : '') + '</span></button>';
+  }).join('') + '<button class="lista-c nueva" id="btNuevaLista"><span class="em">＋</span><b>Nueva lista</b></button></div>';
 }
 function vistaLista(l){
   const todas = items().filter(i => i.lista === l.id);
-  const pend = todas.filter(i => !i.hecho).sort((a, b) => (a.fecha || '9999') + (a.hora || '') < (b.fecha || '9999') + (b.hora || '') ? -1 : (a.fecha || '9999') + (a.hora || '') > (b.fecha || '9999') + (b.hora || '') ? 1 : a.k - b.k);
+  const clave = i => (i.fecha || '9999') + (i.hora || '');
+  const pend = todas.filter(i => !i.hecho).sort((a, b) => clave(a) < clave(b) ? -1 : clave(a) > clave(b) ? 1 : a.k - b.k);
   const hechas = todas.filter(i => i.hecho).sort((a, b) => (b.hechoEn || '') < (a.hechoEn || '') ? -1 : 1);
-  let h = '<div class="lista-cab"><button class="bt icono plano" id="btVolverListas" aria-label="Volver a las listas"><svg><use href="#i-atras"/></svg></button><span class="em">' + esc(l.emo) + '</span><h2>' + esc(l.nom) + '</h2>' +
-    '<span class="prog">' + (todas.length ? (todas.length - pend.length) + ' de ' + todas.length : '') + '</span>' +
-    (todas.length ? '<button class="bt chico' + (modoSel ? ' tinta' : '') + '" id="btModoSel"><svg><use href="#i-' + (modoSel ? 'check' : 'marcar') + '"/></svg>' + (modoSel ? 'Listo' : 'Seleccionar') + '</button>' : '') +
+  const pct = todas.length ? Math.round((todas.length - pend.length) / todas.length * 100) : 0;
+  let h = '<div class="lista-hero" style="--c:' + esc(l.col) + '"><button class="bt icono plano" id="btVolverListas" aria-label="Volver a las listas"><svg><use href="#i-atras"/></svg></button><span class="em">' + esc(l.emo) + '</span>' +
+    '<div class="tx"><h2>' + esc(l.nom) + '</h2><small>' + (todas.length ? (todas.length - pend.length) + ' de ' + todas.length + ' hechas' : 'Lista vacía') + '</small>' + (todas.length ? '<div class="prog-b"><i style="width:' + pct + '%"></i></div>' : '') + '</div>' +
+    (todas.length ? '<button class="bt chico' + (modoSel ? ' tinta' : '') + '" id="btModoSel"><svg><use href="#i-' + (modoSel ? 'check' : 'marcar') + '"/></svg><span class="solo-ancho-t">' + (modoSel ? 'Listo' : 'Seleccionar') + '</span></button>' : '') +
     '<button class="bt icono" id="btMenuLista" aria-label="Opciones de la lista"><svg><use href="#i-puntos"/></svg></button></div>';
-  h += apunteHtml('Añade a «' + l.nom + '» y pulsa Enter (puedes pegar varias líneas)');
-  h += '<div class="tarjeta' + (modoSel ? ' selmode' : '') + '">' + (pend.length ? pend.map(i => itemHtml(i, { sinLista:true })).join('') : '<div class="vacio">' + (hechas.length ? '🎉<b>¡Todo hecho!</b>' : '📝<b>Lista vacía</b>Escribe arriba lo primero.') + '</div>');
+  h += apunteHtml('Añade a «' + l.nom + '» y pulsa Enter');
+  h += '<div class="tarjeta' + (modoSel ? ' selmode' : '') + '">' + (pend.length ? pend.map(i => itemHtml(i, { sinLista:true })).join('') : '<div class="vacio"><span class="ilu">' + (hechas.length ? '🎉' : esc(l.emo)) + '</span><b>' + (hechas.length ? '¡Todo hecho!' : 'Lista vacía') + '</b>' + (hechas.length ? '' : 'Escribe arriba lo primero. Puedes pegar varias líneas.') + '</div>');
   if(hechas.length){
-    h += '<div class="grupo-t"><button class="bt chico plano" id="btVerHechas">' + (pref.verHechas ? 'Ocultar' : 'Ver') + ' hechas (' + hechas.length + ')</button>' +
+    h += '<div class="grupo-t" style="display:flex;justify-content:space-between;align-items:center"><button class="bt chico plano" id="btVerHechas">' + (pref.verHechas ? 'Ocultar' : 'Ver') + ' hechas (' + hechas.length + ')</button>' +
       (pref.verHechas ? '<button class="bt chico plano" id="btLimpiar"><svg><use href="#i-escoba"/></svg>Borrar hechas</button>' : '') + '</div>';
     if(pref.verHechas) h += hechas.map(i => itemHtml(i, { sinLista:true })).join('');
   }
   return h + '</div>';
 }
 
-/* ---------- Vista: Agenda ---------- */
 function vistaAgenda(){
   const h = hoy(); calDia = calDia || h;
   const ym = calMes || calDia.slice(0, 7), [a, m] = ym.split('-').map(Number);
@@ -731,14 +936,16 @@ function vistaAgenda(){
   for(let k = 0; k < 42; k++){
     const f = sumarDias(inicio, k), v = porDia.get(f) || [];
     const ev = v.filter(i => i.tipo === 'evento').length, ta = v.filter(i => i.tipo === 'tarea' && !i.hecho).length;
-    html += '<button class="cal-d' + (f.slice(0, 7) !== ym ? ' otro' : '') + (f === h ? ' hoy' : '') + (f === calDia ? ' vivo' : '') + '" data-caldia="' + f + '"><span>' + (+f.slice(8)) + '</span><span class="pts">' +
-      '<i></i>'.repeat(Math.min(ev, 3)).replace(/<i><\/i>/g, '<i></i>') + (ta ? '<i class="n"></i>' : '') + '</span></button>';
+    const vis = v.filter(i => !(i.tipo === 'tarea' && i.hecho)).sort((x, y) => (x.hora || '99') < (y.hora || '99') ? -1 : 1);
+    html += '<button class="cal-d' + (f.slice(0, 7) !== ym ? ' otro' : '') + (f === h ? ' hoy' : '') + (f === calDia ? ' vivo' : '') + '" data-caldia="' + f + '"><span class="n">' + (+f.slice(8)) + '</span>' +
+      vis.slice(0, 2).map(i => '<span class="ev" style="--k:' + colorItem(i) + '">' + (i.hora ? hora12(i.hora).replace(' ', '') + ' ' : '') + esc(i.txt) + '</span>').join('') +
+      (vis.length > 2 ? '<span class="mas">+' + (vis.length - 2) + ' más</span>' : '') + '</button>';
   }
-  html += '</div><p class="faltan" style="margin:10px 2px 0"><span style="color:var(--azul)">●</span> citas &nbsp; <span style="color:var(--nar)">●</span> tareas pendientes</p></div>';
+  html += '</div></div>';
   const delDia = (porDia.get(calDia) || []).slice().sort((x, y) => (x.hora || '00') < (y.hora || '00') ? -1 : 1);
-  html += apunteHtml('Apunta para el ' + nombreDia(calDia).toLowerCase() + ': «reunión 4pm»');
+  html += apunteHtml('Apunta para ' + (calDia === h ? 'hoy' : diasEntre(h, calDia) === 1 ? 'mañana' : 'el ' + nombreDia(calDia).toLowerCase()) + ': «reunión 4pm»');
   html += '<div class="tarjeta"><div class="t-cab"><h2><i class="tic"><svg><use href="#i-cal"/></svg></i>' + (calDia === h ? 'Hoy, ' : '') + fLarga(calDia) + '</h2><button class="bt chico" data-nueva-cita="' + calDia + '"><svg><use href="#i-mas"/></svg>Cita</button></div>' +
-    (delDia.length ? delDia.map(i => itemHtml(i, { fecha:calDia, sinFecha:true })).join('') : '<div class="vacio">🗓️<b>Nada este día</b>Toca «Cita» o escribe arriba.</div>') + '</div>';
+    (delDia.length ? lineaDia(delDia, calDia) : '<div class="vacio"><span class="ilu">🗓️</span><b>Nada este día</b>Toca «Cita» o escribe arriba.</div>') + '</div>';
   return html;
 }
 
@@ -1154,7 +1361,10 @@ function init(){
   document.addEventListener('click', e => {
     const t = e.target;
     if(t.closest('[data-cerrar]')){ t.closest('dialog').close(); return; }
-    const v = t.closest('#pestanas [data-vista]'); if(v){ pref.vista = v.dataset.vista; if(v.dataset.vista === 'listas' && pref.vista === 'listas' && !e.detail) pref.lista = null; seleccion.clear(); modoSel = false; guardarPref(); pintar(); scrollTo(0, 0); return; }
+    if(t.closest('#btFab')){ $('btNuevo').click(); return; }
+    if(t.closest('#btTabMenu')){ menuApp(t.closest('#btTabMenu')); return; }
+    const idia = t.closest('[data-ir-dia]'); if(idia){ pref.vista = 'agenda'; calDia = idia.dataset.irDia; calMes = calDia.slice(0, 7); guardarPref(); pintar(); scrollTo(0, 0); return; }
+    const v = t.closest('#pestanas [data-vista], #tabbar [data-vista]'); if(v){ pref.vista = v.dataset.vista; if(v.dataset.vista === 'listas' && pref.vista === 'listas' && !e.detail) pref.lista = null; seleccion.clear(); modoSel = false; guardarPref(); pintar(); scrollTo(0, 0); return; }
     if(t.closest('#btTema')){ ponerTema(pref.tema === 'noche' ? 'dia' : 'noche'); return; }
     if(t.closest('#btMenu')){ menuApp(t.closest('#btMenu')); return; }
     if(t.closest('#pastillaNube')){ abrirNube(); if(nube) sincronizar('manual'); return; }

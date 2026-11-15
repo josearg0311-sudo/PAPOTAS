@@ -1,6 +1,6 @@
 /* Apuntes · abre sin conexión. Primero la red (así llega la versión nueva) y,
    si no hay, la copia. No toca JSONBin ni ntfy: van siempre a la red. */
-const CACHE = 'apuntes-v1', FUENTES = 'apuntes-fuentes';
+const CACHE = 'apuntes-v2', FUENTES = 'apuntes-fuentes';
 const ARCHIVOS = ['./', './index.html', './manifest.webmanifest', './icono.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('apuntes-') && k !== CACHE && k !== FUENTES).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
