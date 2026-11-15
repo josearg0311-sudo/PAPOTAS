@@ -19,7 +19,23 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v3 · moderna y vibrante (la actual)
+## v4 · sobria y fuerte (la actual)
+
+- Paleta **azul marino, acero y grafito**, con **naranja** de acento.
+  **Azul = entra, naranja = sale**: la pareja que mejor se distingue con
+  daltonismo. Fondo con una rejilla técnica sutil; tarjetas de libro con chip
+  dorado y textura de fibra.
+- **Pasar dinero entre libros** (botón «Pasar» o tecla T): sale de uno y entra
+  en otro en un solo paso, con los saldos de antes y después.
+- **Presupuesto del mes** por categoría (menú Libro): tarjeta con barras de lo
+  que llevas, aviso al 80 % y al pasarte, y aviso dentro del formulario antes
+  de guardar.
+- **Movimientos fijos** (sueldo, alquiler, luz…): cada mes aparecen como
+  pendientes y se anotan con un toque. Se crean desde el menú Libro o marcando
+  «Fijo cada mes» al anotar.
+- **Tu nombre en el saludo** (menú ⋯), guardado solo en ese aparato.
+
+## v3 · moderna y vibrante
 
 Para uso personal, no de oficina:
 
