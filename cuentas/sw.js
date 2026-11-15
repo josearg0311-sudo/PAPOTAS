@@ -1,7 +1,7 @@
 /* Cuentas Claras · guarda el programa para abrirlo sin conexión.
    Primero la red (así siempre llega la versión nueva) y, si no hay, la copia.
    Nunca toca las peticiones a JSONBin: esas tienen que ir siempre a la red. */
-const CACHE = 'cuentas-claras-v10';
+const CACHE = 'cuentas-claras-v11';
 const FUENTES = 'cuentas-claras-fuentes';
 const ARCHIVOS = ['./', './index.html', './manifest.webmanifest', './icono.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon-32.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ARCHIVOS)).then(() => self.skipWaiting())); });

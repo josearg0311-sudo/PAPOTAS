@@ -662,7 +662,7 @@ dialog.rapido .avanzado{display:none!important}
 .meta-num b{color:var(--ok);margin-left:6px}
 .meta-barra{height:10px;border-radius:10px;background:var(--sup3);overflow:hidden;margin-top:10px}
 .meta-barra i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,var(--entra-g),var(--ok))}
-.candado{position:fixed;inset:0;z-index:200;background:var(--fondo);display:flex;align-items:center;justify-content:center;padding:20px}
+.candado{position:fixed;inset:0;z-index:300;background:var(--fondo);display:flex;align-items:center;justify-content:center;padding:20px}
 .candado-caja{text-align:center;width:min(320px,100%)}
 .candado-caja h3{font:700 24px var(--display);margin:12px 0 4px}
 .candado-caja p{color:var(--tinta3);font-weight:600;margin:0 0 18px;min-height:20px}
@@ -772,6 +772,18 @@ html.modo-simple .libro{max-width:796px}
   html.modo-simple .lista-cab .buscar{flex:1 1 52%;order:4}
   html.modo-simple .lista-cab #fPer{flex:1 1 38%;order:5}
   html.modo-simple .lista-cab .seg{order:3;flex:1 1 100%}
+}
+
+/* Navegadores antiguos sin color-mix(): colores de repuesto para que nada
+   quede transparente (tarjetas, saldo, iconos, calendario). */
+@supports not (color: color-mix(in srgb, red, blue)){
+  .lomo{background:linear-gradient(140deg, var(--c), #0A0F1A)}
+  .hero{background:linear-gradient(180deg, var(--sup2), var(--sup))}
+  .mov .ico{background:var(--sup2);box-shadow:inset 0 0 0 1px var(--borde2)}
+  .cal-d{background:var(--sup2)}
+  .cal-d.con{background:var(--sale-s)}
+  .colores button,.lib-fila .pin{background:var(--c)}
+  .term.res{background:var(--sup2)}
 }
 
 /* ---------- Pantallas medianas y teléfonos ---------- */
@@ -1530,7 +1542,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v10</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v11</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -1743,7 +1755,7 @@ function pintarSimple(l, cont){
     '<div class="hero-top"><div class="hero-nom"><b><i></i>' + esc(l.nom) + (cerrado ? ' <span class="sello ce">Cerrado</span>' : '') + '</b></div>' +
     '<button class="bt icono" id="btMenuLibro" title="Opciones: exportar, categorías, renovar…" aria-label="Opciones del libro"><svg><use href="#i-puntos"/></svg></button></div>' +
     '<div class="hero-et">Tienes <button class="ojo" id="btOjo" title="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo" aria-label="' + (pref.oculto ? 'Mostrar' : 'Ocultar') + ' el saldo"><svg><use href="#i-' + (pref.oculto ? 'ojo-no' : 'ojo') + '"/></svg></button></div>' +
-    '<div class="hero-num num' + (r.despues < 0 ? ' s' : '') + '">' + (pref.oculto ? '<span class="mon">' + esc(l.mon) + '</span>••••••' : cifraTerm(r.despues, l.mon, 'desp')) + '</div>' +
+    '<div class="hero-num num' + (saldoDe(l) < 0 ? ' s' : '') + '">' + (pref.oculto ? '<span class="mon">' + esc(l.mon) + '</span>••••••' : cifraTerm(saldoDe(l), l.mon, 'hoy')) + '</div>' +
     '<div class="mes-resumen"><em class="mes-et">En ' + MESES[+ym.slice(5) - 1] + '</em>' +
       '<span class="e">↑ ' + (pref.oculto ? '•••' : esc(cifra(mes.e))) + ' <small>entró</small></span><span class="s">↓ ' + (pref.oculto ? '•••' : esc(cifra(mes.s))) + ' <small>salió</small></span></div>' +
     '</section>';
@@ -1764,6 +1776,7 @@ function pintarSimple(l, cont){
     (cerrado || !r.filas.length || pref.cal ? '' : '<button class="bt chico' + (modoSel ? ' tinta' : '') + '" id="btModoSel" title="Marcar varios para borrarlos, moverlos o cambiarlos"><svg><use href="#i-' + (modoSel ? 'check' : 'marcar') + '"/></svg>' + (modoSel ? 'Listo' : 'Seleccionar') + '</button>') + '</div>';
   if(modoSel && lista.length) h += '<div class="sel-ayuda"><span>Toca los movimientos que quieras marcar.</span><button class="bt chico plano" id="selTodoLista">' + (lista.every(x => seleccion.has(x.m.id)) ? 'Desmarcar todo' : 'Marcar los ' + lista.length) + '</button></div>';
   if(filtro.per === 'rango') h += '<div class="filtros"><input type="date" class="campo" id="fDesde" value="' + esc(filtro.desde) + '" aria-label="Desde"><input type="date" class="campo" id="fHasta" value="' + esc(filtro.hasta) + '" aria-label="Hasta"></div>';
+  if(filtro.per === 'rango' && filtro.desde && filtro.desde === filtro.hasta) h += '<div class="filtros-activos">' + chipF('dia', 'Solo el ' + nombreDia(filtro.desde).toLowerCase()) + '</div>';
   if(filtro.cat || filtro.med || filtro.q) h += '<div class="filtros-activos">' + (filtro.cat ? chipF('cat', filtro.cat) : '') + (filtro.med ? chipF('med', filtro.med) : '') + (filtro.q ? chipF('q', '«' + filtro.q + '»') : '') + '</div>';
   if(!r.filas.length){
     h += '<div class="vacio"><div style="font-size:50px;line-height:1;margin-bottom:12px">👋</div><h3>Empieza anotando algo</h3><p>Toca <b>Gasto</b> cuando pagues algo e <b>Ingreso</b> cuando te paguen. Yo hago las cuentas.</p></div>';
@@ -1818,7 +1831,7 @@ function vistaLista(l, r, lista){
       '<span class="t1">' + esc(m.c || '(sin concepto)') + '</span>' +
       '<span class="mm">' + (m.t === 'e' ? '+' : '−') + esc(cifra(m.m)) + '</span>' +
       '<span class="t2">' + esc([m.cat, m.med, m.doc].filter(Boolean).join(' · ') || 'N° ' + x.n) + '</span>' +
-      '<span class="ss' + (x.saldo < 0 ? ' neg' : '') + '">saldo ' + esc(cifra(x.saldo)) + (x.saldo < 0 ? ' en contra' : '') + '</span></div>';
+      '<span class="ss' + (x.saldo < 0 && !pref.oculto ? ' neg' : '') + '">' + (pref.oculto ? 'saldo ••••' : 'saldo ' + esc(cifra(x.saldo)) + (x.saldo < 0 ? ' en contra' : '')) + '</span></div>';
   });
   if(ocultos) h += '<button class="bt ver-mas" id="btVerMas">Ver ' + Math.min(ocultos, 300) + ' más antiguos <small>(quedan ' + ocultos + ')</small></button>';
   else if(!hayFiltroLista()) h += '<div class="apertura-lista"><span>' + (r.lim ? 'Venías con' : 'Empezaste con') + '</span><b>' + esc(dinero(r.antes, l.mon)) + '</b></div>';
@@ -2110,7 +2123,7 @@ function abrirAsiento(id, base){
   $('dlgAsiento').classList.toggle('rapido', rapido);
   $('dlgAsiento').classList.toggle('detalles', !rapido || !!(m && (m.doc || m.n)));
   if(rapido && !as.t && !m) as.t = 's';
-  $('asTitulo').textContent = m ? 'Corregir el asiento N° ' + (diario(l).findIndex(x => x.m.id === m.id) + 1) : (base && base.m ? 'Movimiento duplicado' : base && base.t === 'e' ? 'Entró dinero' : base && base.t === 's' ? 'Salió dinero' : 'Anotar un movimiento');
+  $('asTitulo').textContent = m ? (pref.modo !== 'completo' ? 'Editar ' + (m.t === 'e' ? 'ingreso' : 'gasto') : 'Corregir el asiento N° ' + (diario(l).findIndex(x => x.m.id === m.id) + 1)) : (base && base.m ? 'Movimiento duplicado' : base && base.t === 'e' ? 'Entró dinero' : base && base.t === 's' ? 'Salió dinero' : 'Anotar un movimiento');
   $('asSub').textContent = m ? 'Cambia lo que haga falta. El saldo de todo el libro se recalcula solo.' : 'Cinco preguntas. Arriba ves cómo queda escrito antes de guardarlo.';
   $('asMon').textContent = l.mon;
   $('asMonto').value = b.m ? aTexto(b.m) : '';
@@ -2122,7 +2135,7 @@ function abrirAsiento(id, base){
   $('asBorrar').classList.toggle('oculto', !m);
   $('asFijoCaja').classList.toggle('oculto', !!m); $('asFijo').checked = false;
   $('asDuplicar').classList.toggle('oculto', !m);
-  $('asGuardar').lastChild.textContent = m ? 'Guardar cambios' : 'Asentar';
+  $('asGuardar').lastChild.textContent = m ? 'Guardar cambios' : pref.modo !== 'completo' ? 'Guardar' : 'Asentar';
   $('dlConceptos').innerHTML = [...new Set(vivos(l).map(x => x.c).filter(Boolean))].slice(-200).map(c => '<option value="' + esc(c) + '">').join('');
   pintarAsiento();
   $('dlgAsiento').showModal();
@@ -2288,7 +2301,7 @@ function initAsiento(){
   $('formAsiento').addEventListener('submit', e => { e.preventDefault(); guardarAsiento(); });
   /* Enter guarda desde cualquier sitio del formulario, también tras tocar una categoría */
   document.addEventListener('keydown', e => {
-    if(e.key !== 'Enter' || e.isComposing || !$('dlgAsiento').open || e.target.tagName === 'TEXTAREA') return;
+    if(e.key !== 'Enter' || e.isComposing || !$('dlgAsiento').open || e.target.tagName === 'TEXTAREA' || document.querySelector('.candado')) return;
     if(e.target.closest && (e.target.closest('.x') || e.target.closest('#dlgConfirmar'))) return;
     if($('dlgConfirmar').open) return;
     e.preventDefault();
@@ -2904,8 +2917,13 @@ function leerApunte(txt, l){
   const nt = normal(t);
   if(!tipo && /\b(ingreso|ingres[eé]|cobr[eé]|me pagaron|me pag[oó]|sueldo|salario|vend[ií]|gan[eé]|me depositaron|me yapearon|recib[ií])\b/.test(nt)) tipo = 'e';
   if(!tipo) tipo = 's';
-  const mNum = t.match(/[+\-−]?\s*(?:S\/\s*)?(\d[\d.,]*)/i);
-  if(!mNum) return { err:'Falta el monto. Ejemplo: -12.50 almuerzo' };
+  /* Si hay varios números («2 empanadas 9.50»), el monto es el que lleva
+     signo o S/; si ninguno, el mayor. Los demás se quedan en el concepto. */
+  const todos = [...t.matchAll(/([+\-−]\s*|S\/\s*)?(\d[\d.,]*)/gi)];
+  if(!todos.length) return { err:'Falta el monto. Ejemplo: -12.50 almuerzo' };
+  const valor = x => { const mo = leerMonto(x[2]); return mo.ok ? mo.c : -1; };
+  const mNum = todos.find(x => x[1]) || todos.slice().sort((a, b) => valor(b) - valor(a))[0];
+  mNum[1] = mNum[2];
   const mo = leerMonto(mNum[1]);
   if(!mo.ok) return { err:mo.err || 'No entiendo el monto.' };
   let f = hoy();
@@ -3744,8 +3762,8 @@ function menuLibro(boton){
   abrirMenu(boton, [
     { tit:'«' + l.nom + '»' },
     ...(pref.modo !== 'completo' ? [
-      { icono:'pdf', txt:'Descargar en PDF', fn:() => exportarPDF([l]) },
-      { icono:'xls', txt:'Descargar en Excel', fn:() => exportarExcel([l]) },
+      { icono:'pdf', txt:'Descargar en PDF', sub:'El libro entero', fn:() => exportarPDF([l], true) },
+      { icono:'xls', txt:'Descargar en Excel', sub:'El libro entero', fn:() => exportarExcel([l], true) },
       ...(ab ? [{ icono:'mover', txt:'Pasar dinero a otro libro', fn:abrirTransferir }, { icono:'capas', txt:'Anotar varios a la vez', fn:abrirVarios }] : []),
       '-'] : []),
     { icono:'lapiz', txt:'Nombre, color y saldo inicial', fn:() => abrirLibro(l.id) },
@@ -3789,7 +3807,7 @@ function init(){
     const t = e.target;
     if(t.closest('[data-cerrar]')){ t.closest('dialog').close(); return; }
     const lomo = t.closest('[data-libro]');
-    if(lomo){ if(pref.libro !== lomo.dataset.libro){ pref.libro = lomo.dataset.libro; guardarPref(); seleccion.clear(); limiteLista = 150; filtro = { per:'todo', desde:'', hasta:'', tipo:'', cat:'', med:'', q:'' }; pintar(); } return; }
+    if(lomo){ if(pref.libro !== lomo.dataset.libro){ pref.libro = lomo.dataset.libro; guardarPref(); seleccion.clear(); modoSel = false; limiteLista = 150; calMes = null; filtro = { per:'todo', desde:'', hasta:'', tipo:'', cat:'', med:'', q:'' }; pintar(); } return; }
     if(t.closest('#btLomoNuevo')){ abrirLibro(); return; }
     const ir = t.closest('[data-ir]'); if(ir){ pref.libro = ir.dataset.ir; guardarPref(); pintar(); return; }
     const acc = t.closest('[data-accion]');
@@ -3818,7 +3836,7 @@ function init(){
     const bo = t.closest('[data-borra]'); if(bo){ borrarMovs(activo(), [bo.dataset.borra]); return; }
     if(t.closest('#btModoSel')){ modoSel = !modoSel; if(!modoSel) seleccion.clear(); pintar(); return; }
     const v = t.closest('[data-vista]'); if(v){ pref.vista = v.dataset.vista; guardarPref(); seleccion.clear(); pintar(); return; }
-    const q = t.closest('[data-quitar]'); if(q){ filtro[q.dataset.quitar] = ''; pintarLibro(); return; }
+    const q = t.closest('[data-quitar]'); if(q){ if(q.dataset.quitar === 'dia'){ filtro.per = 'todo'; filtro.desde = filtro.hasta = ''; } else filtro[q.dataset.quitar] = ''; pintarLibro(); return; }
     const fc = t.closest('[data-fcat]'); if(fc){ filtro.cat = fc.dataset.fcat.startsWith('(sin') ? '' : fc.dataset.fcat; pref.vista = 'diario'; pintarLibro(); return; }
     const fm = t.closest('[data-fmed]'); if(fm){ filtro.med = fm.dataset.fmed.startsWith('(sin') ? '' : fm.dataset.fmed; pref.vista = 'diario'; pintarLibro(); return; }
     const fms = t.closest('[data-fmes]'); if(fms){ filtro.per = fms.dataset.fmes; pref.vista = 'diario'; pintarLibro(); return; }
@@ -3847,7 +3865,7 @@ function init(){
     const l = libro(el.dataset.libro); if(!l) return;
     abrirMenu(el, [
       { tit:'«' + l.nom + '»' },
-      { icono:'libro', txt:'Abrir', fn:() => { pref.libro = l.id; guardarPref(); limiteLista = 150; pintar(); } },
+      { icono:'libro', txt:'Abrir', fn:() => { pref.libro = l.id; guardarPref(); seleccion.clear(); modoSel = false; limiteLista = 150; filtro = { per:'todo', desde:'', hasta:'', tipo:'', cat:'', med:'', q:'' }; pintar(); } },
       { icono:'lapiz', txt:'Nombre, color y saldo inicial', fn:() => abrirLibro(l.id) },
       l.est === 'a' ? { icono:'renovar', txt:'Renovar', fn:() => abrirRenovar([l.id]) } : { icono:'renovar', txt:'Reabrir', fn:() => reabrir(l) },
       { icono:'pdf', txt:'Descargar en PDF', fn:() => exportarPDF([l], true) },
@@ -3914,7 +3932,7 @@ function init(){
   });
   document.addEventListener('keydown', e => {
     ultimaActividad = ahora();
-    if(document.querySelector('dialog[open]') || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
+    if(document.querySelector('.candado') || document.querySelector('dialog[open]') || /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)) return;
     if(e.ctrlKey || e.metaKey || e.altKey) return;
     const l = activo();
     if(e.key === 'n' || e.key === 'N'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(); } }
@@ -3928,7 +3946,11 @@ function init(){
     else if(e.key === 'Escape'){ if(seleccion.size){ seleccion.clear(); modoSel = false; pintar(); } }
   });
   ['pointerdown','scroll'].forEach(ev => document.addEventListener(ev, () => { const antes = ultimaActividad; ultimaActividad = ahora(); if(nube && ahora() - antes > 180000) sincronizar('vuelta'); }, { passive:true }));
-  document.addEventListener('visibilitychange', () => { if(!document.hidden && nube){ ultimaActividad = ahora(); sincronizar('vuelta'); } });
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden) return;
+    pintarSaludo(); $('subSaludo').textContent = 'Apuntado · ' + new Date().toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' });
+    if(nube){ ultimaActividad = ahora(); sincronizar('vuelta'); }
+  });
   window.addEventListener('online', () => nube && sincronizar('red'));
   /* Otra pestaña del mismo aparato cambió algo */
   window.addEventListener('storage', e => { if(e.key === K_DATOS){ cargar(); pintar(); } });
