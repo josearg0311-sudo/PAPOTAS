@@ -1,8 +1,9 @@
-# Sencillo
+# Apuntado
 
-(Antes «Cuentas Claras».) «Sencillo» son las monedas sueltas, y también lo fácil.
-El logo es una S hecha con dos flechas: arriba sube (lo que entra, azul) y abajo
-baja (lo que sale, naranja).
+Todo lo que entra y sale, apuntado. (Antes «Sencillo» y «Cuentas Claras».)
+El logo es una A hecha con dos flechas: sube por la izquierda (lo que entra,
+azul), baja por la derecha (lo que sale, naranja), y el travesaño es la raya
+de apuntar.
 
 Libros de ingresos y gastos. Un solo archivo (`index.html`), sin librerías ni
 nada que se descargue de internet.
@@ -23,7 +24,24 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v6 · Sencillo (la actual)
+## v7 · Apuntado (la actual)
+
+- **Apunte rápido**: una barra donde escribes «-12.50 almuerzo», «+2500
+  sueldo», «taxi 15 ayer» o «gasté 30 soles en pizza» y pulsas Enter. Debajo
+  se ve cómo va a quedar antes de guardarlo. Entiende «ayer», «me pagaron»,
+  «cobré», «12 con 50»… Tecla **A** para ir directo a la barra.
+- **🎙️ Dictar por voz** en esa barra (donde el navegador lo permita, sobre todo
+  Chrome en Android).
+- **Categoría automática**: por lo que ya apuntaste con ese nombre y, si es
+  nuevo, por palabras (taxi → Transporte, pizza → Comida, netflix → Servicios).
+  También en el formulario normal, mientras escribes.
+- **Más rápida**: con 5.000 movimientos cada pantalla pasa de ~470 ms a ~20 ms.
+  El libro se suma una vez por cambio (caché) y la lista dibuja 150 y ofrece
+  «Ver más».
+- **Recordatorio de respaldo** si tus datos solo viven en ese aparato (sin nube
+  y sin respaldo en 30 días). «Luego» lo calla dos semanas.
+
+## v6 · Sencillo
 
 - **Nombre y logo nuevos.** La dirección sigue siendo la misma (`/cuentas/`) y
   los datos guardados no se tocan: abres la app y está todo como lo dejaste.

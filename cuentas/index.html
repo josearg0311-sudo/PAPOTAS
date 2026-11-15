@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Sencillo</title>
+<title>Apuntado</title>
 <meta name="description" content="Libros de ingresos y gastos: varios libros a la vez, registro guiado, PDF, Excel y sincronización con JSONBin.">
 <meta name="theme-color" content="#0B0F15" id="metaTema">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
 <link rel="icon" href="icono.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Sencillo">
+<meta name="apple-mobile-web-app-title" content="Apuntado">
 <style>
 /* ==========================================================================
    CUENTAS CLARAS · v3 «Noche»
@@ -630,6 +630,23 @@ dialog.rapido .avanzado{display:none!important}
 .hecho svg{width:46px;height:46px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:traza .35s .12s ease-out forwards}
 @keyframes hecho{0%{transform:scale(.4);opacity:0}25%{transform:scale(1.06);opacity:1}70%{transform:scale(1);opacity:1}100%{transform:scale(.9);opacity:0}}
 @keyframes traza{to{stroke-dashoffset:0}}
+.apunte{border-radius:var(--radio);background:var(--sup);border:1px solid var(--borde);box-shadow:var(--sombra);padding:6px 6px 8px}
+.apunte-fila{display:flex;align-items:center;gap:6px}
+.apunte-ic{width:36px;text-align:center;color:var(--tinta3);font-size:17px}
+.apunte-in{flex:1;min-width:0;border:0;background:transparent;font:600 16px var(--sans);padding:10px 4px;outline:none}
+.apunte-in::placeholder{color:var(--tinta3)}
+.apunte-voz,.apunte-ok{width:40px;height:40px;border-radius:12px;border:1px solid var(--borde);background:var(--sup2);font-size:17px;flex:none;color:var(--tinta)}
+.apunte-ok{background:var(--degradado);border:0;color:#fff;font-weight:800}
+.apunte-voz.oyendo{background:var(--sale-s);border-color:var(--sale);animation:late 1s infinite}
+.apunte-vista{font-size:12.5px;color:var(--tinta3);padding:2px 10px 2px 46px;font-weight:600;min-height:18px}
+.apunte-vista b{color:var(--tinta2)}
+.apunte-vista.ok{color:var(--tinta2)} .apunte-vista.mal{color:var(--sale)}
+.apunte-vista kbd{font:700 10.5px var(--mono);border:1px solid var(--borde2);border-radius:5px;padding:0 5px;margin-left:4px;color:var(--tinta3)}
+.aviso-resp{display:flex;flex-direction:column;gap:10px;border-color:color-mix(in srgb,var(--aviso) 35%,transparent);background:linear-gradient(180deg,var(--aviso-s),var(--sup))}
+.aviso-resp b{display:block;font-size:14px}
+.aviso-resp small{display:block;color:var(--tinta3);font-size:12.5px;font-weight:600;margin-top:2px}
+.ver-mas{display:flex;margin:14px auto 4px;gap:8px}
+.ver-mas small{color:var(--tinta3);font-weight:600}
 .pista-desliza{font-size:12px;color:var(--tinta3);text-align:center;margin:10px 0 0;font-weight:600}
 
 /* ---------- Pantallas medianas y teléfonos ---------- */
@@ -747,12 +764,13 @@ dialog.rapido .avanzado{display:none!important}
     <svg viewBox="0 0 64 64" aria-hidden="true">
       <defs><linearGradient id="gMarca" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1B2A44"/><stop offset="1" stop-color="#0B1220"/></linearGradient></defs>
       <rect x="1" y="1" width="62" height="62" rx="15" fill="url(#gMarca)" stroke="rgba(170,200,235,.18)"/>
-      <path d="M43 20.5c-2.6-3-6.4-4.5-11-4.5-6.6 0-11 3.4-11 8.3 0 4.6 3.8 6.6 11 7.7" fill="none" stroke="#5AA9F0" stroke-width="5.2" stroke-linecap="round"/>
-      <path d="M38.2 13.6l6.2 6.4-8.6 1.9" fill="none" stroke="#5AA9F0" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M32 32c7.2 1.1 11 3.1 11 7.7 0 4.9-4.4 8.3-11 8.3-4.6 0-8.4-1.5-11-4.5" fill="none" stroke="#F0954A" stroke-width="5.2" stroke-linecap="round"/>
-      <path d="M25.8 50.4l-6.2-6.4 8.6-1.9" fill="none" stroke="#F0954A" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M17 50L29.6 17.5" fill="none" stroke="#5AA9F0" stroke-width="5.4" stroke-linecap="round"/>
+      <path d="M22.6 21.4l7.4-5.6 2.4 9" fill="none" stroke="#5AA9F0" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M34.4 17.5L46.6 49" fill="none" stroke="#F0954A" stroke-width="5.4" stroke-linecap="round"/>
+      <path d="M39.6 46.2l7.2 4.6 2.6-8.4" fill="none" stroke="#F0954A" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M23.5 37.5h17" fill="none" stroke="#EEF3F8" stroke-width="4.6" stroke-linecap="round"/>
     </svg>
-    <div><h1 id="saludo">Sencillo</h1><small id="subSaludo">Tus cuentas, fácil</small></div>
+    <div><h1 id="saludo">Apuntado</h1><small id="subSaludo">Todo lo que entra y sale, apuntado</small></div>
   </div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
     <linearGradient id="gradLinea" x1="0" x2="1"><stop offset="0" stop-color="#2F6FD8"/><stop offset="1" stop-color="#5AA9F0"/></linearGradient>
@@ -1117,6 +1135,7 @@ let filtro = { per:'todo', desde:'', hasta:'', tipo:'', cat:'', med:'', q:'' };
 let seleccion = new Set();
 let modoSel = false;
 let ultimoNuevo = null;
+let limiteLista = 150;   /* cuántos movimientos se dibujan; «Ver más» suma */
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1236,8 +1255,10 @@ function cargar(){
   try{ const d = JSON.parse(localStorage.getItem(K_DATOS) || 'null'); if(d && Array.isArray(d.libros)) db = d; }catch(e){}
   try{ Object.assign(pref, JSON.parse(localStorage.getItem(K_PREF) || '{}')); }catch(e){}
   db.libros.forEach(sanearLibro);
+  versionDatos++;
 }
 function guardar(sinSubir){
+  versionDatos++;
   try{ localStorage.setItem(K_DATOS, JSON.stringify(db)); }
   catch(e){ aviso('No se pudo guardar en este aparato: el almacenamiento está lleno.'); }
   if(!sinSubir && typeof nubeCambio === 'function') nubeCambio();
@@ -1272,16 +1293,29 @@ function nuevoLibro(datos){
 }
 
 /* ---------- Cálculo ---------- */
+/* Caché: el libro se ordena y se suma una sola vez por cambio, no en cada
+   pintada. Con miles de movimientos es la diferencia entre fluido y lento.
+   La clave cambia con cualquier guardado (versionDatos) o cambio del libro. */
+let versionDatos = 0;
+const cacheLibro = new Map();
+function claveCache(l){ return versionDatos + '|' + l.upd + '|' + l.movs.length + '|' + l.ini; }
+function enCache(l){
+  const k = claveCache(l); let c = cacheLibro.get(l.id);
+  if(!c || c.k !== k){ c = { k }; cacheLibro.set(l.id, c); }
+  return c;
+}
 function vivos(l){
-  return l.movs.filter(m => !m.borr).sort((a,b) => a.f < b.f ? -1 : a.f > b.f ? 1 : a.k - b.k);
+  const c = enCache(l);
+  if(!c.vivos) c.vivos = l.movs.filter(m => !m.borr).sort((a,b) => a.f < b.f ? -1 : a.f > b.f ? 1 : a.k - b.k);
+  return c.vivos;
 }
 /* Recorre el libro entero en orden y apunta el saldo después de cada
    asiento. El saldo de una fila es SIEMPRE el del libro, filtres lo que
    filtres: así la columna Saldo nunca miente. */
 function diario(l){
-  let saldo = l.ini, n = 0;
-  const filas = vivos(l).map(m => { saldo += m.t === 'e' ? m.m : -m.m; return { m, saldo, n: ++n }; });
-  return filas;
+  const c = enCache(l);
+  if(!c.diario){ let saldo = l.ini, n = 0; c.diario = vivos(l).map(m => { saldo += m.t === 'e' ? m.m : -m.m; return { m, saldo, n: ++n }; }); }
+  return c.diario;
 }
 function totales(lista){
   let e = 0, s = 0;
@@ -1354,7 +1388,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Sencillo v6</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v7</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -1409,10 +1443,10 @@ const DSEM = ['dom','lun','mar','mié','jue','vie','sáb'];
 const EMOJIS = [
   [/sueldo|salario|n[oó]mina|pago mensual/, '💼'], [/venta|vend/, '🛍️'], [/cobro|cobra|cliente/, '🤝'], [/pr[eé]stamo|deuda|cr[eé]dito|cuota/, '🏦'],
   [/regalo|propina|bono/, '🎁'], [/inter[eé]s|inversi|ahorro/, '📈'], [/ajuste|cuadre/, '⚖️'], [/otros ingresos/, '✨'],
-  [/comida|aliment|restaur|almuerzo|cena|desayuno|men[uú]/, '🍔'], [/mercado|super|abarrot|bodega|despensa/, '🛒'], [/transporte|pasaje|taxi|uber|bus|movilidad|peaje/, '🚌'],
-  [/gasolina|combustible|grifo/, '⛽'], [/vivienda|alquiler|renta|hipoteca|casa|depa/, '🏠'], [/servicio|luz|agua|internet|tel[eé]fono|gas\b|cable/, '💡'],
-  [/compra|ropa|tienda/, '🛍️'], [/salud|m[eé]dic|farmacia|doctor|cl[ií]nica/, '💊'], [/educaci|colegio|curso|universidad|libro|estudio/, '🎓'],
-  [/ocio|cine|diversi|salida|fiesta|juego/, '🎬'], [/viaje|hotel|vuelo|vacacion/, '✈️'], [/mascota|perro|gato|veterin/, '🐾'], [/gimnasio|deporte|gym/, '🏋️'],
+  [/comida|aliment|restaur|almuerzo|cena|desayuno|men[uú]|pizza|pollo|chifa|cevich|hamburg|caf[eé]|pan\b|panader|helado|snack|lonche|delivery|rappi|polleria|comi/, '🍔'], [/mercado|super|abarrot|bodega|despensa|plaza vea|tottus|metro |wong|makro|mass\b/, '🛒'], [/transporte|pasaje|taxi|uber|bus|movilidad|peaje|cabify|didi|indriver|metro|combi|colectivo|tren/, '🚌'],
+  [/gasolina|combustible|grifo/, '⛽'], [/vivienda|alquiler|renta|hipoteca|casa|depa/, '🏠'], [/servicio|luz|agua|internet|tel[eé]fono|gas\b|cable|celular|recarga|netflix|spotify|plan /, '💡'],
+  [/compra|ropa|tienda/, '🛍️'], [/salud|m[eé]dic|farmacia|doctor|cl[ií]nica|pastilla|dentista|consulta|inkafarma|mifarma/, '💊'], [/educaci|colegio|curso|universidad|libro|estudio/, '🎓'],
+  [/ocio|cine|diversi|salida|fiesta|juego|cerveza|trago|bar\b|discoteca|concierto/, '🎬'], [/viaje|hotel|vuelo|vacacion/, '✈️'], [/mascota|perro|gato|veterin/, '🐾'], [/gimnasio|deporte|gym/, '🏋️'],
   [/mercader[ií]a|insumo|proveedor|distribuidor/, '📦'], [/sueldos|personal|planilla|empleado/, '👥'], [/impuesto|sunat|tributo/, '🧾'], [/otros gastos/, '🔸']
 ];
 function iconoCat(nombre){
@@ -1575,8 +1609,10 @@ function pintarSimple(l, cont){
       (sig ? '<button class="bt chico" data-ir="' + sig.id + '">Ir a ' + esc(sig.nom) + '</button>' : '') + '<button class="bt chico" id="btReabrir">Reabrir</button></div>';
   } else {
     h += '<div class="dos-botones"><button class="grande e" data-accion="entra"><b>+</b>Ingreso</button><button class="grande s" data-accion="sale"><b>−</b>Gasto</button></div>';
+    h += '<div class="apunte"><div class="apunte-fila"><span class="apunte-ic">✎</span><input id="apunteIn" class="apunte-in" autocomplete="off" enterkeyhint="done" placeholder="Apunta: -12.50 almuerzo" aria-label="Apunte rápido">' +
+      (Reconocer ? '<button class="apunte-voz" id="btVoz" title="Dictar" aria-label="Dictar por voz">🎙️</button>' : '') + '<button class="apunte-ok" id="btApunte" aria-label="Apuntar">↵</button></div><div class="apunte-vista" id="apunteVista"></div></div>';
   }
-  h += tarjetaFijos(l) + tarjetaMes(l);
+  h += tarjetaRespaldo() + tarjetaFijos(l) + tarjetaMes(l);
   h += '<div class="hoja principal' + (abre ? ' abre' : '') + '"><div class="lista-cab"><h3>Movimientos</h3>' +
     '<div class="seg" role="group" aria-label="Qué ver">' + [['', 'Todo'], ['e', 'Ingresos'], ['s', 'Gastos']].map(x => '<button data-ftipo="' + x[0] + '" aria-pressed="' + (filtro.tipo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
     '<label class="buscar"><svg><use href="#i-buscar"/></svg><input class="campo" id="fQ" type="search" placeholder="Buscar…" value="' + esc(filtro.q) + '"></label>' +
@@ -1587,8 +1623,10 @@ function pintarSimple(l, cont){
     h += '<div class="vacio"><div style="font-size:50px;line-height:1;margin-bottom:12px">👋</div><h3>Empieza anotando algo</h3><p>Toca <b>Gasto</b> cuando pagues algo e <b>Ingreso</b> cuando te paguen. Yo hago las cuentas.</p></div>';
   } else h += vistaLista(l, r, lista);
   h += '</div></div>';
+  const textoApunte = $('apunteIn') ? $('apunteIn').value : '', conFoco = document.activeElement && document.activeElement.id === 'apunteIn';
   cont.innerHTML = h;
   ultimoNuevo = null;
+  if($('apunteIn')){ $('apunteIn').value = textoApunte; pintarApunte(); if(conFoco) $('apunteIn').focus(); }
   animarCifras();
 }
 
@@ -1623,7 +1661,8 @@ function vistaLista(l, r, lista){
   const porDia = new Map();
   lista.forEach(x => { const v = porDia.get(x.m.f) || 0; porDia.set(x.m.f, v + (x.m.t === 'e' ? x.m.m : -x.m.m)); });
   let h = '<div class="lista' + (modoSel ? ' selmode' : '') + '">', dia = '';
-  lista.slice().reverse().forEach(x => {
+  const visibles = lista.slice(-limiteLista).reverse(), ocultos = lista.length - visibles.length;
+  visibles.forEach(x => {
     const m = x.m, sel = seleccion.has(m.id);
     if(m.f !== dia){ dia = m.f; const n = porDia.get(dia); h += '<div class="grupo-dia"><span><b>' + nombreDia(dia) + '</b>' + fCorta(dia) + '</span><span class="num ' + (n >= 0 ? 'e' : 's') + '">' + esc(dinero(n, '', true)) + '</span></div>'; }
     h += '<div class="mov r' + m.t + (sel ? ' sel' : '') + (ultimoNuevo === m.id ? ' nuevo' : '') + '" data-mov="' + m.id + '">' +
@@ -1633,7 +1672,8 @@ function vistaLista(l, r, lista){
       '<span class="t2">' + esc([m.cat, m.med, m.doc].filter(Boolean).join(' · ') || 'N° ' + x.n) + '</span>' +
       '<span class="ss' + (x.saldo < 0 ? ' neg' : '') + '">saldo ' + esc(cifra(x.saldo)) + (x.saldo < 0 ? ' en contra' : '') + '</span></div>';
   });
-  if(!hayFiltroLista()) h += '<div class="apertura-lista"><span>' + (r.lim ? 'Venías con' : 'Empezaste con') + '</span><b>' + esc(dinero(r.antes, l.mon)) + '</b></div>';
+  if(ocultos) h += '<button class="bt ver-mas" id="btVerMas">Ver ' + Math.min(ocultos, 300) + ' más antiguos <small>(quedan ' + ocultos + ')</small></button>';
+  else if(!hayFiltroLista()) h += '<div class="apertura-lista"><span>' + (r.lim ? 'Venías con' : 'Empezaste con') + '</span><b>' + esc(dinero(r.antes, l.mon)) + '</b></div>';
   if(pref.modo !== 'completo') h += '<p class="pista-desliza solo-movil">Desliza un movimiento: ← lo borras, → lo repites hoy</p>';
   h += '<div class="pie-lista"><span>' + lista.length + ' movimientos</span><span><span class="e">+' + esc(cifra(t.e)) + '</span> &nbsp; <span class="s">−' + esc(cifra(t.s)) + '</span></span></div></div>';
   return h;
@@ -1658,7 +1698,8 @@ function vistaDiario(l, r, lista){
   const t = totales(lista);
   const todosSel = lista.length && lista.every(x => seleccion.has(x.m.id));
   const desc = pref.orden === 'desc';
-  const orden = desc ? lista.slice().reverse() : lista;
+  const recorte = lista.slice(-limiteLista), faltanT = lista.length - recorte.length;
+  const orden = desc ? recorte.slice().reverse() : recorte;
   /* Subtotales por mes, para la fila que abre cada mes */
   const porMes = new Map();
   lista.forEach(x => { const k = x.m.f.slice(0, 7); const v = porMes.get(k) || { e:0, s:0, n:0 }; v[x.m.t] += x.m.m; v.n++; porMes.set(k, v); });
@@ -1670,7 +1711,8 @@ function vistaDiario(l, r, lista){
   let h = '<div class="diario-env"><table class="diario"><thead><tr>' +
     (cerrado ? '' : '<th class="ckc"><input type="checkbox" class="ck" id="ckTodos" aria-label="Seleccionar todo"' + (todosSel ? ' checked' : '') + '></th>') +
     '<th class="der">N°</th><th>Fecha</th><th>Concepto</th><th>Categoría</th><th>Medio</th><th>Comprobante</th><th class="der">Entra</th><th class="der">Sale</th><th class="der">Saldo</th><th></th></tr></thead><tbody>';
-  if(mostrarApertura && !desc) h += filaApertura();
+  if(faltanT && !desc) h += '<tr class="apertura"><td colspan="11" style="text-align:center"><button class="bt chico" id="btVerMas">Ver ' + Math.min(faltanT, 300) + ' más antiguos (quedan ' + faltanT + ')</button></td></tr>';
+  else if(mostrarApertura && !desc) h += filaApertura();
   let mes = '';
   orden.forEach(x => {
     const m = x.m, sel = seleccion.has(m.id), km = m.f.slice(0, 7);
@@ -1686,7 +1728,8 @@ function vistaDiario(l, r, lista){
       '<td class="sal' + (x.saldo < 0 ? ' neg' : '') + '">' + esc(dinero(x.saldo)) + '</td>' +
       '<td class="acc-fila">' + (cerrado ? '' : '<button data-dup="' + m.id + '" title="Duplicar con fecha de hoy" aria-label="Duplicar"><svg><use href="#i-copia"/></svg></button><button class="b" data-borra="' + m.id + '" title="Borrar" aria-label="Borrar"><svg><use href="#i-basura"/></svg></button>') + '</td></tr>';
   });
-  if(mostrarApertura && desc) h += filaApertura();
+  if(faltanT && desc) h += '<tr class="apertura"><td colspan="11" style="text-align:center"><button class="bt chico" id="btVerMas">Ver ' + Math.min(faltanT, 300) + ' más antiguos (quedan ' + faltanT + ')</button></td></tr>';
+  else if(mostrarApertura && desc) h += filaApertura();
   h += '</tbody><tfoot><tr>' + (cerrado ? '' : '<td></td>') + '<td colspan="6" class="l">Sumas · ' + lista.length + ' asientos</td>' +
     '<td class="e"><span>' + esc(cifra(t.e)) + '</span></td><td class="s"><span>' + esc(cifra(t.s)) + '</span></td>' +
     '<td>' + (mostrarApertura ? '<span>' + esc(dinero(lista[lista.length-1].saldo)) + '</span>' : '') + '</td><td></td></tr></tfoot></table></div>';
@@ -2056,7 +2099,7 @@ function initAsiento(){
   d.addEventListener('click', async e => {
     const t = e.target.closest('[data-tipo]');
     if(t){ if(as.t !== t.dataset.tipo){ as.t = t.dataset.tipo; if(as.cat && !libro(as.libroId).cats[as.t].includes(as.cat)) as.cat = ''; } pintarAsiento(); $('asMonto').focus(); return; }
-    const c = e.target.closest('[data-cat]'); if(c){ as.cat = as.cat === c.dataset.cat ? '' : c.dataset.cat; pintarAsiento(); return; }
+    const c = e.target.closest('[data-cat]'); if(c){ as.cat = as.cat === c.dataset.cat ? '' : c.dataset.cat; as.catManual = true; pintarAsiento(); return; }
     const md = e.target.closest('[data-med]'); if(md){ as.med = md.dataset.med; pintarAsiento(); return; }
     if(e.target.closest('[data-cat-nueva]')){
       const v = await pedirTexto('Categoría nueva', 'Para ' + (as.t === 'e' ? 'entradas' : 'salidas') + ' de este libro.');
@@ -2085,6 +2128,12 @@ function initAsiento(){
     if(!as.cat && prev.t === as.t) as.cat = prev.cat || '';
     if(!$('asMonto').value) $('asMonto').value = aTexto(prev.m);
     pintarAsiento();
+  });
+  /* Sin historial, adivina por palabras mientras escribes (taxi → Transporte) */
+  let tCat = null;
+  $('asConcepto').addEventListener('input', () => {
+    clearTimeout(tCat);
+    tCat = setTimeout(() => { if(as && !as.id && !as.catManual && as.t){ const g = adivinarCat(libro(as.libroId), $('asConcepto').value, as.t); if(g !== as.cat){ as.cat = g; pintarAsiento(); } } }, 250);
   });
   $('formAsiento').addEventListener('submit', e => { e.preventDefault(); guardarAsiento(); });
   /* Enter guarda desde cualquier sitio del formulario, también tras tocar una categoría */
@@ -2650,6 +2699,97 @@ function initExtras(){
   });
 }
 
+
+/* ==========================================================================
+   APUNTE RÁPIDO
+   «-12.50 almuerzo», «+2500 sueldo», «taxi 15 ayer». Una línea y Enter.
+   ========================================================================== */
+/* La categoría que más pega: primero lo que ya apuntaste con ese nombre,
+   después por palabras (taxi → Transporte, pizza → Comida). */
+function adivinarCat(l, concepto, t){
+  const n = normal(concepto).trim(); if(!n) return '';
+  const prev = vivos(l).slice().reverse().find(m => normal(m.c) === n && (!t || m.t === t) && m.cat);
+  if(prev) return prev.cat;
+  const parecido = vivos(l).slice().reverse().find(m => m.cat && (!t || m.t === t) && normal(m.c).split(/\s+/)[0] === n.split(/\s+/)[0] && n.length > 3);
+  if(parecido) return parecido.cat;
+  let emo = '';
+  for(const [re, e] of EMOJIS) if(re.test(n)){ emo = e; break; }
+  if(!emo) return '';
+  const tipos = t ? [t] : ['s', 'e'];
+  for(const tt of tipos){ const c = l.cats[tt].find(c => iconoCat(c) === emo); if(c) return c; }
+  return '';
+}
+function leerApunte(txt, l){
+  let t = String(txt || '').trim();
+  if(!t) return null;
+  t = t.replace(/(\d+)\s*(?:con|punto|coma)\s*(\d{1,2})\b/gi, '$1.$2');
+  let tipo = null;
+  if(/^\s*\+/.test(t)) tipo = 'e';
+  else if(/^\s*[-−]/.test(t)) tipo = 's';
+  const nt = normal(t);
+  if(!tipo && /\b(ingreso|ingres[eé]|cobr[eé]|me pagaron|me pag[oó]|sueldo|salario|vend[ií]|gan[eé]|me depositaron|me yapearon|recib[ií])\b/.test(nt)) tipo = 'e';
+  if(!tipo) tipo = 's';
+  const mNum = t.match(/[+\-−]?\s*(?:S\/\s*)?(\d[\d.,]*)/i);
+  if(!mNum) return { err:'Falta el monto. Ejemplo: -12.50 almuerzo' };
+  const mo = leerMonto(mNum[1]);
+  if(!mo.ok) return { err:mo.err || 'No entiendo el monto.' };
+  let f = hoy();
+  if(/\bayer\b/.test(nt)) f = sumarDias(hoy(), -1);
+  else if(/\banteayer\b/.test(nt)) f = sumarDias(hoy(), -2);
+  let c = t.replace(mNum[0], ' ')
+    .replace(/\b(soles?|s\/|d[oó]lares?|lucas?|hoy|ayer|anteayer)\b/gi, ' ')
+    .replace(/^\s*(gast[eé]|pagu[eé]|compr[eé]|ingreso|gasto|cobr[eé]|me pagaron|me pag[oó]|recib[ií]|me depositaron|me yapearon)\s+/i, '')
+    .replace(/^\s*(en|de|por|del|el|la|un|una|a|al)\s+/i, '')
+    .replace(/\s+/g, ' ').replace(/^[\s+\-−:,.]+|[\s,.:]+$/g, '').trim();
+  if(!c) c = tipo === 'e' ? 'Ingreso' : 'Gasto';
+  c = c.charAt(0).toUpperCase() + c.slice(1);
+  return { t:tipo, m:mo.c, c, f, cat:adivinarCat(l, c, tipo), med:ultimoMedio(l) || '' };
+}
+function pintarApunte(){
+  const i = $('apunteIn'), v = $('apunteVista'); if(!i) return;
+  const l = activo(), a = leerApunte(i.value, l);
+  if(!a){ v.innerHTML = 'Escribe y pulsa Enter: <b>-12.50 almuerzo</b> · <b>+2500 sueldo</b> · <b>taxi 15 ayer</b>'; v.className = 'apunte-vista'; return; }
+  if(a.err){ v.textContent = a.err; v.className = 'apunte-vista mal'; return; }
+  v.className = 'apunte-vista ok';
+  v.innerHTML = '<span class="' + a.t + '">' + (a.t === 'e' ? 'Ingreso' : 'Gasto') + ' de <b>' + esc(dinero(a.m, l.mon)) + '</b></span> · ' + esc(a.c) +
+    (a.cat ? ' · ' + (iconoCat(a.cat) || '') + ' ' + esc(a.cat) : ' · <i>sin categoría</i>') + ' · ' + (a.f === hoy() ? 'hoy' : nombreDia(a.f).toLowerCase()) + ' <kbd>Enter</kbd>';
+}
+function guardarApunte(){
+  const l = activo(), i = $('apunteIn'); if(!l || l.est !== 'a' || !i) return;
+  const a = leerApunte(i.value, l);
+  if(!a || a.err){ pintarApunte(); i.focus(); return; }
+  const t = ahora();
+  if(a.cat && !l.cats[a.t].includes(a.cat)) l.cats[a.t].push(a.cat);
+  const m = { id:uid(), k:t, upd:t, f:a.f, t:a.t, m:a.m, c:a.c, cat:a.cat, med:a.med, doc:'', n:'' };
+  l.movs.push(m); tocar(l); guardar(); ultimoNuevo = m.id;
+  celebrar(a.t);
+  pintar();
+  const ni = $('apunteIn'); if(ni){ ni.value = ''; ni.focus(); pintarApunte(); }
+  aviso((a.t === 'e' ? 'Ingreso' : 'Gasto') + ' apuntado: ' + a.c + ' · ' + dinero(a.m, l.mon), () => { m.borr = 1; m.upd = ahora(); tocar(l); guardar(); pintar(); });
+}
+/* Dictar por voz, donde el navegador sepa hacerlo (Chrome en Android, sobre todo) */
+const Reconocer = window.SpeechRecognition || window.webkitSpeechRecognition;
+function dictar(){
+  if(!Reconocer){ aviso('Este navegador no sabe dictar. Prueba con Chrome.'); return; }
+  const rec = new Reconocer(); rec.lang = 'es-PE'; rec.interimResults = false; rec.maxAlternatives = 1;
+  const b = $('btVoz'); if(b) b.classList.add('oyendo');
+  rec.onresult = e => { const txt = e.results[0][0].transcript; const i = $('apunteIn'); if(i){ i.value = txt; pintarApunte(); i.focus(); } };
+  rec.onerror = () => aviso('No te escuché bien. Inténtalo otra vez.');
+  rec.onend = () => { const b2 = $('btVoz'); if(b2) b2.classList.remove('oyendo'); };
+  try{ rec.start(); }catch(e){}
+}
+
+/* ¿Tus datos solo viven aquí? Un recordatorio amable, no un sermón. */
+function tarjetaRespaldo(){
+  if(nube) return '';
+  const n = libros().reduce((s, l) => s + vivos(l).length, 0);
+  if(n < 10) return '';
+  const hace = f => f ? Math.round((Date.parse(hoy()) - Date.parse(f)) / 864e5) : 999;
+  if(hace(pref.respaldo) < 30 || hace(pref.avisoRespaldo) < 14) return '';
+  return '<div class="tarjeta aviso-resp"><div><b>🛟 Tus ' + n + ' apuntes solo están en este aparato</b><small>' + (pref.respaldo ? 'Tu último respaldo fue hace ' + hace(pref.respaldo) + ' días.' : 'Si se pierde o se borra el navegador, se van con él.') + '</small></div>' +
+    '<div class="fila-bt" style="justify-content:flex-start"><button class="bt chico tinta" data-accion="nube">Sincronizar</button><button class="bt chico" data-accion="respaldo">Descargar respaldo</button><button class="bt chico plano" data-accion="luego">Luego</button></div></div>';
+}
+
 /* ---------- Ejemplo ---------- */
 function cargarEjemplo(){
   const a = new Date(), t = ahora();
@@ -2699,7 +2839,7 @@ function descargar(blob, nombre){
 }
 function nombreArchivo(ls, ext){
   const base = ls.length === 1 ? ls[0].nom : 'libros';
-  return 'sencillo_' + normal(base).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '_' + hoy() + '.' + ext;
+  return 'apuntado_' + normal(base).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '_' + hoy() + '.' + ext;
 }
 /* El periodo visible se respeta solo al exportar el libro abierto */
 function datosExport(l, usarPeriodo){
@@ -2863,7 +3003,7 @@ function exportarExcel(ls, completos){
   const usados = new Set(), hojas = [];
   if(ls.length > 1){
     const T = (v, s) => ({ v, s }), N = (v, s) => ({ v, t:'n', s });
-    const filas = [[T('Sencillo · tus libros', 5)], [T('Generado el ' + fCorta(hoy()) + '. Cada libro tiene su hoja con el diario completo.', 9)], [], ['Libro','Moneda','Estado','Abierto','Asientos','Saldo inicial','Entró','Salió','Saldo final'].map(x => T(x, 1))];
+    const filas = [[T('Apuntado · tus libros', 5)], [T('Generado el ' + fCorta(hoy()) + '. Cada libro tiene su hoja con el diario completo.', 9)], [], ['Libro','Moneda','Estado','Abierto','Asientos','Saldo inicial','Entró','Salió','Saldo final'].map(x => T(x, 1))];
     ls.forEach(l => { const r = datosExport(l, false); filas.push([T(l.nom), T(l.mon), T(l.est === 'c' ? 'Cerrado' : 'Abierto'), N(serieFecha(l.fa), 3), N(r.filas.length), N(C(r.antes), 2), N(C(r.e), 6), N(C(r.s), 7), N(C(r.despues), 10)]); });
     hojas.push({ nombre:nombreHoja('Resumen', usados), filas, anchos:[26,9,10,11,10,15,15,15,15], cab:4, activa:true });
   }
@@ -2912,7 +3052,7 @@ function armarPDF(lz, W, H){
   const ids = lz.pags.map(ops => { const s = ops.join('\n'); const c = add('<< /Length ' + s.length + ' >>\nstream\n' + s + '\nendstream'); return add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] /Resources << ' + res + ' >> /Contents ' + c + ' 0 R >>'); });
   obj[0] = '<< /Type /Catalog /Pages 2 0 R >>';
   obj[1] = '<< /Type /Pages /Count ' + ids.length + ' /Kids [' + ids.map(i => i + ' 0 R').join(' ') + '] >>';
-  const info = add('<< /Title (' + txtPDF('Sencillo') + ') /Producer (Sencillo) >>');
+  const info = add('<< /Title (' + txtPDF('Apuntado') + ') /Producer (Apuntado) >>');
   let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'; const pos = [];
   obj.forEach((o, i) => { pos.push(out.length); out += (i + 1) + ' 0 obj\n' + o + '\nendobj\n'; });
   const x = out.length;
@@ -2930,7 +3070,7 @@ function exportarPDF(ls, completos){
 
   /* Portada de resumen si hay varios libros */
   if(ls.length > 1){
-    lz.texto('SENCILLO', M, y - 10, 9, K.t3, true); y -= 40;
+    lz.texto('APUNTADO', M, y - 10, 9, K.t3, true); y -= 40;
     lz.texto('Tus libros', M, y, 26, K.tinta, true, null, true); y -= 18;
     lz.texto('Resumen generado el ' + fLarga(hoy()), M, y, 10, K.t3); y -= 30;
     const cols = [[M, 'Libro', 'izq'], [M + 200, 'Estado', 'izq'], [M + 250, 'Asientos', 'der2'], [M + 330, 'Inicial', 'der'], [M + 400, 'Entró', 'der'], [M + 465, 'Salió', 'der'], [W - M, 'Saldo final', 'der']];
@@ -2960,7 +3100,7 @@ function exportarPDF(ls, completos){
     const r = datosExport(l, !completos && ls.length === 1);
     /* Cabecera del libro */
     lz.rect(0, H - 8, W, 8, l.col);
-    lz.texto('SENCILLO · INGRESOS Y GASTOS', M, y - 8, 7.5, K.t3, true);
+    lz.texto('APUNTADO · INGRESOS Y GASTOS', M, y - 8, 7.5, K.t3, true);
     lz.texto('Generado el ' + fCorta(hoy()), W - M, y - 8, 7.5, K.t3, false, 'der');
     y -= 36;
     lz.texto(cortarPDF(l.nom, 24, W - 2 * M - 80, true), M, y, 24, K.tinta, true, null, true);
@@ -3058,14 +3198,15 @@ function exportarPDF(ls, completos){
   });
   /* Pie con numeración, ahora que se sabe cuántas páginas hay */
   const total = lz.pags.length;
-  lz.pags.forEach((p, i) => { lz.p = p; lz.linea(M, 38, W - M, 38, K.regla, .5); lz.texto(ls.length === 1 ? ls[0].nom + ' · Sencillo' : 'Sencillo', M, 26, 7, K.t3); lz.texto('Página ' + (i + 1) + ' de ' + total, W - M, 26, 7, K.t3, false, 'der'); });
+  lz.pags.forEach((p, i) => { lz.p = p; lz.linea(M, 38, W - M, 38, K.regla, .5); lz.texto(ls.length === 1 ? ls[0].nom + ' · Apuntado' : 'Apuntado', M, 26, 7, K.t3); lz.texto('Página ' + (i + 1) + ' de ' + total, W - M, 26, 7, K.t3, false, 'der'); });
   descargar(armarPDF(lz, W, H), nombreArchivo(ls, 'pdf'));
   aviso('PDF descargado: ' + total + ' página' + (total === 1 ? '' : 's') + '.');
 }
 
 /* ---------- Respaldo ---------- */
 function respaldar(){
-  descargar(new Blob([JSON.stringify({ app:'cuentas-claras', v:1, fecha:new Date().toISOString(), libros:db.libros }, null, 1)], { type:'application/json' }), 'sencillo_respaldo_' + hoy() + '.json');
+  descargar(new Blob([JSON.stringify({ app:'cuentas-claras', v:1, fecha:new Date().toISOString(), libros:db.libros }, null, 1)], { type:'application/json' }), 'apuntado_respaldo_' + hoy() + '.json');
+  pref.respaldo = hoy(); guardarPref(); pintar();
   aviso('Respaldo descargado. Guárdalo en un sitio seguro.');
 }
 async function restaurar(file){
@@ -3077,7 +3218,7 @@ async function restaurar(file){
     if(!ok) return;
     db = mezclar(db, { libros:d.libros.map(sanearLibro) });
     guardar(); pintar(); aviso('Respaldo cargado.');
-  }catch(e){ aviso('Ese archivo no es un respaldo de Sencillo.'); }
+  }catch(e){ aviso('Ese archivo no es un respaldo de Apuntado.'); }
 }
 
 /* ==========================================================================
@@ -3212,7 +3353,7 @@ function pintarNube(){
       (kb > 80 ? '<div class="alerta" style="margin-top:12px">El plan gratis de JSONBin admite unos 100 KB por bin. Cuando te acerques, renueva los libros y borra los cerrados que ya tengas exportados.</div>' : '') +
       '<div class="fila-bt" style="justify-content:flex-start;margin-top:16px"><button class="bt tinta" id="nbAhora"><svg><use href="#i-renovar"/></svg>Sincronizar ahora</button><button class="bt" id="nbVerCodigo"><svg><use href="#i-movil"/></svg>Conectar otro aparato</button><button class="bt peligro" id="nbSalir">Desconectar</button></div>' +
       '<div id="nbCodigoCaja" class="oculto" style="margin-top:16px"><label class="et">Código de sincronización</label><div class="codigo" id="nbCodigo"></div>' +
-      '<p class="ayuda">En el otro aparato: abre Sencillo → Sincronizar → «Ya tengo un código», y pega esto. <b>Es como una llave</b>: quien lo tenga puede ver y cambiar tus libros. No lo compartas.</p>' +
+      '<p class="ayuda">En el otro aparato: abre Apuntado → Sincronizar → «Ya tengo un código», y pega esto. <b>Es como una llave</b>: quien lo tenga puede ver y cambiar tus libros. No lo compartas.</p>' +
       '<button class="bt chico" id="nbCopiar"><svg><use href="#i-copia"/></svg>Copiar</button></div>';
     $('nbAhora').onclick = () => sincronizar('manual');
     $('nbVerCodigo').onclick = () => { $('nbCodigo').textContent = codigoSync(); $('nbCodigoCaja').classList.remove('oculto'); };
@@ -3242,7 +3383,7 @@ function pintarNube(){
     try{
       nube = { k, b:binA || 'x' };
       if(!binA){
-        const j = await pedir('POST', JSONBIN, compacto(db.libros.length ? db : { libros:[] }), { 'X-Bin-Name':'sencillo', 'X-Bin-Private':'true' });
+        const j = await pedir('POST', JSONBIN, compacto(db.libros.length ? db : { libros:[] }), { 'X-Bin-Name':'apuntado', 'X-Bin-Private':'true' });
         if(!j || !j.metadata || !j.metadata.id) throw new Error('JSONBin respondió sin identificador de bin. Inténtalo otra vez.');
         nube.b = j.metadata.id;
       }
@@ -3323,7 +3464,7 @@ function menuApp(boton){
     { icono:'estante', txt:'Organizar estante', fn:abrirOrganizar, off:libros().length < 1 },
     { icono:'lapiz', txt:pref.nombre ? 'Tu nombre: ' + pref.nombre : 'Ponle tu nombre al saludo', fn:async () => { const v = await pedirTexto('¿Cómo te llamo?', 'Solo se guarda en este aparato, para saludarte.', pref.nombre || ''); if(v !== null){ pref.nombre = v; guardarPref(); pintarSaludo(); } } },
     { icono:'movil', txt:'Instalar en este aparato', fn:instalar },
-    { icono:'ayuda', txt:'Atajos de teclado', sub:'N asentar · V varios · / buscar · 1 2 3 vistas', fn:() => confirmar('Atajos de teclado', '<b>G</b> gasto · <b>I</b> ingreso · <b>N</b> anotar · <b>T</b> pasar a otro libro · <b>V</b> varios a la vez · <b>/</b> buscar · <b>1</b> Diario · <b>2</b> Cuenta T · <b>3</b> Mayor · <b>Esc</b> cerrar', { si:'Vale' }) }
+    { icono:'ayuda', txt:'Atajos de teclado', sub:'N asentar · V varios · / buscar · 1 2 3 vistas', fn:() => confirmar('Atajos de teclado', '<b>A</b> apunte rápido · <b>G</b> gasto · <b>I</b> ingreso · <b>N</b> anotar · <b>T</b> pasar a otro libro · <b>V</b> varios a la vez · <b>/</b> buscar · <b>1</b> Diario · <b>2</b> Cuenta T · <b>3</b> Mayor · <b>Esc</b> cerrar', { si:'Vale' }) }
   ]);
 }
 function init(){
@@ -3338,11 +3479,11 @@ function init(){
     const t = e.target;
     if(t.closest('[data-cerrar]')){ t.closest('dialog').close(); return; }
     const lomo = t.closest('[data-libro]');
-    if(lomo){ if(pref.libro !== lomo.dataset.libro){ pref.libro = lomo.dataset.libro; guardarPref(); seleccion.clear(); filtro = { per:'todo', desde:'', hasta:'', tipo:'', cat:'', med:'', q:'' }; pintar(); } return; }
+    if(lomo){ if(pref.libro !== lomo.dataset.libro){ pref.libro = lomo.dataset.libro; guardarPref(); seleccion.clear(); limiteLista = 150; filtro = { per:'todo', desde:'', hasta:'', tipo:'', cat:'', med:'', q:'' }; pintar(); } return; }
     if(t.closest('#btLomoNuevo')){ abrirLibro(); return; }
     const ir = t.closest('[data-ir]'); if(ir){ pref.libro = ir.dataset.ir; guardarPref(); pintar(); return; }
     const acc = t.closest('[data-accion]');
-    if(acc){ ({ asentar:() => abrirAsiento(), entra:() => abrirAsiento(null, { t:'e' }), sale:() => abrirAsiento(null, { t:'s' }), cuadrar:abrirCuadre, transferir:abrirTransferir, pres:abrirPres, fijos:abrirFijos, varios:abrirVarios, nuevoLibro:() => abrirLibro(), ejemplo:cargarEjemplo, nube:abrirNube })[acc.dataset.accion](); return; }
+    if(acc){ ({ asentar:() => abrirAsiento(), entra:() => abrirAsiento(null, { t:'e' }), sale:() => abrirAsiento(null, { t:'s' }), cuadrar:abrirCuadre, respaldo:respaldar, luego:() => { pref.avisoRespaldo = hoy(); guardarPref(); pintar(); }, transferir:abrirTransferir, pres:abrirPres, fijos:abrirFijos, varios:abrirVarios, nuevoLibro:() => abrirLibro(), ejemplo:cargarEjemplo, nube:abrirNube })[acc.dataset.accion](); return; }
     if(t.closest('#btAsentar') || t.closest('#fab')){ abrirAsiento(); return; }
     if(t.closest('#btVarios')){ abrirVarios(); return; }
     if(t.closest('#btExportar')){ menuExportar(t.closest('#btExportar')); return; }
@@ -3353,6 +3494,9 @@ function init(){
     if(t.closest('#pastillaNube')){ abrirNube(); if(nube) sincronizar('manual'); return; }
     if(t.closest('#btTema')){ ponerTema(pref.tema === 'noche' ? 'dia' : 'noche'); return; }
     const fjb = t.closest('[data-fijo]'); if(fjb){ anotarFijo(fjb.dataset.fijo); return; }
+    if(t.closest('#btApunte')){ guardarApunte(); return; }
+    if(t.closest('#btVoz')){ dictar(); return; }
+    if(t.closest('#btVerMas')){ limiteLista += 300; const y = scrollY; pintarLibro(); scrollTo(0, y); return; }
     if(t.closest('#btOjo')){ pref.oculto = !pref.oculto; guardarPref(); pintar(); return; }
     const ft = t.closest('[data-ftipo]'); if(ft){ filtro.tipo = ft.dataset.ftipo; pintarLibro(); return; }
     if(t.closest('#btOrden')){ pref.orden = pref.orden === 'desc' ? 'asc' : 'desc'; guardarPref(); pintarLibro(); return; }
@@ -3425,6 +3569,8 @@ function init(){
     else if(t.id === 'archivoRespaldo' && t.files[0]){ restaurar(t.files[0]); t.value = ''; }
   });
   let tBusca = null;
+  document.addEventListener('input', e => { if(e.target.id === 'apunteIn') pintarApunte(); });
+  document.addEventListener('keydown', e => { if(e.target.id === 'apunteIn' && e.key === 'Enter' && !e.isComposing){ e.preventDefault(); guardarApunte(); } });
   document.addEventListener('input', e => {
     if(e.target.id !== 'fQ') return;
     clearTimeout(tBusca);
@@ -3436,6 +3582,7 @@ function init(){
     if(e.ctrlKey || e.metaKey || e.altKey) return;
     const l = activo();
     if(e.key === 'n' || e.key === 'N'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(); } }
+    else if((e.key === 'a' || e.key === 'A') && $('apunteIn')){ e.preventDefault(); $('apunteIn').focus(); }
     else if(e.key === 'g' || e.key === 'G'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(null, { t:'s' }); } }
     else if(e.key === 'i' || e.key === 'I'){ if(l && l.est === 'a'){ e.preventDefault(); abrirAsiento(null, { t:'e' }); } }
     else if(e.key === 't' || e.key === 'T'){ if(l){ e.preventDefault(); abrirTransferir(); } }
@@ -3454,7 +3601,7 @@ function init(){
   $('fechaHoy').textContent = fh;
   const hora = new Date().getHours();
   pintarSaludo();
-  $('subSaludo').textContent = 'Sencillo · ' + fh;
+  $('subSaludo').textContent = 'Apuntado · ' + fh;
   document.addEventListener('pointermove', e => { if($('grafico')) tipGrafico(e); }, { passive:true });
   let tAncho = null, anchoAntes = innerWidth;
   window.addEventListener('resize', () => { clearTimeout(tAncho); tAncho = setTimeout(() => { if(innerWidth !== anchoAntes && pref.vista === 'mayor'){ anchoAntes = innerWidth; pintarLibro(); } }, 200); });

@@ -65,7 +65,7 @@ jobs:
           sed -i 's#<meta name="pap-sitio" content="0">#<meta name="pap-sitio" content="1">#' \
             sitio/index.html sitio/papotas-nuevo.html
           grep -q '"pap-sitio" content="1"' sitio/index.html
-          # Sencillo (antes Cuentas Claras), la app de ingresos y gastos, en su carpeta:
+          # Apuntado, la app de ingresos y gastos, en su carpeta:
           # https://<usuario>.github.io/PAPOTAS/cuentas/
           mkdir -p sitio/cuentas
           cp cuentas/index.html cuentas/sw.js cuentas/manifest.webmanifest cuentas/icono.svg sitio/cuentas/

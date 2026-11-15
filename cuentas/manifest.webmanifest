@@ -1,7 +1,7 @@
 {
-  "name": "Sencillo",
-  "short_name": "Sencillo",
-  "description": "Tus ingresos y gastos, fácil.",
+  "name": "Apuntado",
+  "short_name": "Apuntado",
+  "description": "Todo lo que entra y sale, apuntado.",
   "id": "./",
   "start_url": "./",
   "scope": "./",
