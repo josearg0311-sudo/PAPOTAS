@@ -24,7 +24,27 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
-## v7 · Apuntado (la actual)
+## v8 · más funciones (la actual)
+
+- **Seleccionar varios, a la vista**: botón «☑ Seleccionar» sobre la lista
+  (también en modo simple). Tocas los movimientos o «Marcar los N», y la barra
+  de abajo te deja **Borrar**, cambiar la **Categoría**, cambiar la **Fecha**,
+  **Mover** a otro libro o **Duplicar**. Todo con Deshacer. Marcar es
+  instantáneo (no redibuja la lista).
+- **Borrar un libro**, fácil de encontrar: en el `⋯` del libro (arriba del
+  todo dice su nombre y abajo «Borrar este libro»), manteniendo pulsada su
+  tarjeta (clic derecho en la computadora) o en «Ordenar o borrar libros»,
+  que ahora se ve siempre. Pide confirmación y se puede deshacer.
+- **📅 Calendario** del mes: cada día con lo que entró y salió, más naranja
+  cuanto más gastaste. Toca un día para ver sus movimientos.
+- **Proyección**: «A este ritmo cerrarás noviembre con unos S/ 2,964 de gastos».
+- **🎯 Meta de ahorro** por libro: cuánto llevas, el % y en cuántos meses
+  llegas a tu ritmo de los últimos tres meses.
+- **🔒 Candado con PIN** (menú ⋯): pide 4 números al abrir la app en ese
+  aparato. Es privacidad, no cifrado: si lo olvidas, los datos siguen en la
+  nube o en tu respaldo.
+
+## v7 · Apuntado
 
 - **Apunte rápido**: una barra donde escribes «-12.50 almuerzo», «+2500
   sueldo», «taxi 15 ayer» o «gasté 30 soles en pizza» y pulsas Enter. Debajo

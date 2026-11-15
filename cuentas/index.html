@@ -645,6 +645,33 @@ dialog.rapido .avanzado{display:none!important}
 .aviso-resp{display:flex;flex-direction:column;gap:10px;border-color:color-mix(in srgb,var(--aviso) 35%,transparent);background:linear-gradient(180deg,var(--aviso-s),var(--sup))}
 .aviso-resp b{display:block;font-size:14px}
 .aviso-resp small{display:block;color:var(--tinta3);font-size:12.5px;font-weight:600;margin-top:2px}
+.cal{padding:14px 16px 16px}
+.cal-cab{display:flex;align-items:center;justify-content:space-between}
+.cal-cab b{font:700 17px var(--display)}
+.cal-tot{display:flex;justify-content:center;gap:14px;font:700 13px var(--mono);margin:4px 0 12px;color:var(--tinta2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-ds{text-align:center;font-size:11px;font-weight:800;color:var(--tinta3);padding:4px 0}
+.cal-d{min-height:64px;border-radius:12px;border:1px solid var(--borde);background:color-mix(in srgb, var(--sale-g) calc(var(--i) * 32%), var(--sup2));display:flex;flex-direction:column;align-items:flex-start;padding:6px 7px;gap:1px;cursor:pointer;color:var(--tinta);text-align:left;min-width:0}
+.cal-d b{font:700 13px var(--display)}
+.cal-d small{font:700 10.5px var(--mono);line-height:1.2;max-width:100%;overflow:hidden}
+.cal-d.hoy{box-shadow:0 0 0 2px var(--entra)}
+.cal-d:hover{border-color:var(--borde2)}
+.meta-num{font-size:13px;color:var(--tinta3);font-weight:600}
+.meta-num .num{font:700 20px var(--display);color:var(--tinta);margin-right:4px}
+.meta-num b{color:var(--ok);margin-left:6px}
+.meta-barra{height:10px;border-radius:10px;background:var(--sup3);overflow:hidden;margin-top:10px}
+.meta-barra i{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,var(--entra-g),var(--ok))}
+.candado{position:fixed;inset:0;z-index:200;background:var(--fondo);display:flex;align-items:center;justify-content:center;padding:20px}
+.candado-caja{text-align:center;width:min(320px,100%)}
+.candado-caja h3{font:700 24px var(--display);margin:12px 0 4px}
+.candado-caja p{color:var(--tinta3);font-weight:600;margin:0 0 18px;min-height:20px}
+.pin-puntos{display:flex;justify-content:center;gap:14px;margin-bottom:24px}
+.pin-puntos i{width:14px;height:14px;border-radius:50%;border:2px solid var(--tinta3)}
+.pin-puntos i.si{background:var(--tinta);border-color:var(--tinta)}
+.teclado{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.teclado button{height:64px;border-radius:20px;border:1px solid var(--borde);background:var(--sup2);font:600 24px var(--display);color:var(--tinta)}
+.teclado button:active{background:var(--sup3);transform:scale(.96)}
+.sel-ayuda{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 18px;background:rgba(47,111,216,.1);border-bottom:1px solid var(--borde);font-size:13px;font-weight:600;color:var(--tinta2)}
 .ver-mas{display:flex;margin:14px auto 4px;gap:8px}
 .ver-mas small{color:var(--tinta3);font-weight:600}
 .pista-desliza{font-size:12px;color:var(--tinta3);text-align:center;margin:10px 0 0;font-weight:600}
@@ -711,7 +738,6 @@ dialog.rapido .avanzado{display:none!important}
   html.modo-simple .dos-botones{display:none}
   html.modo-simple .selbar{bottom:calc(86px + env(safe-area-inset-bottom))}
   html.modo-simple .lomo{height:96px;width:184px}
-  html.modo-simple #btOrganizar{display:none}
   html.modo-simple .estante-acc{padding-bottom:4px}
   html.modo-simple .lomo-nuevo{height:96px;width:110px}
   .simple-wrap .hero{padding:18px}
@@ -720,6 +746,10 @@ dialog.rapido .avanzado{display:none!important}
   .lista-cab h3{flex-basis:100%}
   .lista-cab .seg{flex:1}
   .lista-cab .seg button{flex:1}
+  .cal{padding:12px 8px}
+  .cal-grid{gap:3px}
+  .cal-d{min-height:54px;padding:4px;border-radius:9px}
+  .cal-d small{font-size:9px}
 }
 @media (max-width:720px){ .solo-ancho{display:none!important} dialog.rapido .dlg-pie .bt.tinta{flex:1;padding:15px} }
 @media (max-width:440px){ .pastilla span{display:none} .pastilla{padding:10px} .marca small{display:none} }
@@ -787,7 +817,7 @@ dialog.rapido .avanzado{display:none!important}
   <div class="estante" id="estante" role="tablist" aria-label="Tus libros"></div>
   <div class="estante-acc">
     <span class="placa-total" id="placaTotal"></span>
-    <button class="bt chico plano" id="btOrganizar"><svg><use href="#i-estante"/></svg>Organizar estante</button>
+    <button class="bt chico plano" id="btOrganizar"><svg><use href="#i-estante"/></svg>Ordenar o borrar libros</button>
   </div>
 </div>
 
@@ -1003,7 +1033,7 @@ dialog.rapido .avanzado{display:none!important}
 <dialog id="dlgOrganizar">
   <div class="dlg">
     <div class="dlg-cab">
-      <div class="crece"><h3>Organizar el estante</h3><p>Ordena tus libros y marca varios para renovarlos, exportarlos o borrarlos juntos.</p></div>
+      <div class="crece"><h3>Tus libros</h3><p>Ordénalos con las flechas. Marca uno o varios para renovarlos, exportarlos o <b>borrarlos</b>.</p></div>
       <button type="button" class="x" data-cerrar aria-label="Cerrar">×</button>
     </div>
     <div class="dlg-cuerpo" style="padding:0"><div id="orgLista"></div></div>
@@ -1388,7 +1418,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v7</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v8</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -1481,7 +1511,7 @@ function pintarEstante(){
       '<span class="ls">' + (saldo < 0 && !pref.oculto ? '−' : '') + '<small>' + esc(l.mon) + '</small>' + (pref.oculto ? '••••' : esc(cifra(saldo))) + '</span>' +
       (l.est === 'c' ? '<span class="chip-est">Cerrado</span>' : '') + '</button>';
   }).join('') + '<button class="lomo-nuevo" id="btLomoNuevo" title="Agregar un libro"><svg><use href="#i-mas"/></svg>Nuevo libro</button>';
-  $('btOrganizar').classList.toggle('oculto', ls.length < 2);
+  $('btOrganizar').classList.toggle('oculto', ls.length < 1);
   const porMon = new Map();
   ls.filter(l => l.est === 'a').forEach(l => { const t = diario(l); porMon.set(l.mon, (porMon.get(l.mon) || 0) + (t.length ? t[t.length-1].saldo : l.ini)); });
   const abiertos = ls.filter(l => l.est === 'a').length;
@@ -1612,16 +1642,19 @@ function pintarSimple(l, cont){
     h += '<div class="apunte"><div class="apunte-fila"><span class="apunte-ic">✎</span><input id="apunteIn" class="apunte-in" autocomplete="off" enterkeyhint="done" placeholder="Apunta: -12.50 almuerzo" aria-label="Apunte rápido">' +
       (Reconocer ? '<button class="apunte-voz" id="btVoz" title="Dictar" aria-label="Dictar por voz">🎙️</button>' : '') + '<button class="apunte-ok" id="btApunte" aria-label="Apuntar">↵</button></div><div class="apunte-vista" id="apunteVista"></div></div>';
   }
-  h += tarjetaRespaldo() + tarjetaFijos(l) + tarjetaMes(l);
+  h += tarjetaRespaldo() + tarjetaFijos(l) + tarjetaMeta(l) + tarjetaMes(l);
   h += '<div class="hoja principal' + (abre ? ' abre' : '') + '"><div class="lista-cab"><h3>Movimientos</h3>' +
     '<div class="seg" role="group" aria-label="Qué ver">' + [['', 'Todo'], ['e', 'Ingresos'], ['s', 'Gastos']].map(x => '<button data-ftipo="' + x[0] + '" aria-pressed="' + (filtro.tipo === x[0]) + '">' + x[1] + '</button>').join('') + '</div>' +
     '<label class="buscar"><svg><use href="#i-buscar"/></svg><input class="campo" id="fQ" type="search" placeholder="Buscar…" value="' + esc(filtro.q) + '"></label>' +
-    '<select class="campo" id="fPer" aria-label="Periodo">' + opcionesPeriodo(l) + '</select></div>';
+    '<select class="campo" id="fPer" aria-label="Periodo">' + opcionesPeriodo(l) + '</select>' +
+    (r.filas.length ? '<button class="bt chico' + (pref.cal ? ' tinta' : '') + '" id="btCal" title="Ver como calendario">📅' + (pref.cal ? ' Lista' : '') + '</button>' : '') +
+    (cerrado || !r.filas.length || pref.cal ? '' : '<button class="bt chico' + (modoSel ? ' tinta' : '') + '" id="btModoSel" title="Marcar varios para borrarlos, moverlos o cambiarlos">' + (modoSel ? '✓ Listo' : '☑ Seleccionar') + '</button>') + '</div>';
+  if(modoSel && lista.length) h += '<div class="sel-ayuda"><span>Toca los movimientos que quieras marcar.</span><button class="bt chico plano" id="selTodoLista">' + (lista.every(x => seleccion.has(x.m.id)) ? 'Desmarcar todo' : 'Marcar los ' + lista.length) + '</button></div>';
   if(filtro.per === 'rango') h += '<div class="filtros"><input type="date" class="campo" id="fDesde" value="' + esc(filtro.desde) + '" aria-label="Desde"><input type="date" class="campo" id="fHasta" value="' + esc(filtro.hasta) + '" aria-label="Hasta"></div>';
   if(filtro.cat || filtro.med || filtro.q) h += '<div class="filtros-activos">' + (filtro.cat ? chipF('cat', filtro.cat) : '') + (filtro.med ? chipF('med', filtro.med) : '') + (filtro.q ? chipF('q', '«' + filtro.q + '»') : '') + '</div>';
   if(!r.filas.length){
     h += '<div class="vacio"><div style="font-size:50px;line-height:1;margin-bottom:12px">👋</div><h3>Empieza anotando algo</h3><p>Toca <b>Gasto</b> cuando pagues algo e <b>Ingreso</b> cuando te paguen. Yo hago las cuentas.</p></div>';
-  } else h += vistaLista(l, r, lista);
+  } else h += pref.cal ? vistaCalendario(l) : vistaLista(l, r, lista);
   h += '</div></div>';
   const textoApunte = $('apunteIn') ? $('apunteIn').value : '', conFoco = document.activeElement && document.activeElement.id === 'apunteIn';
   cont.innerHTML = h;
@@ -1647,6 +1680,8 @@ function tarjetaMes(l){
     const pct = Math.round((total - antHasta) / antHasta * 100);
     comp = pct === 0 ? 'Vas igual que el mes pasado a estas alturas.' : (pct < 0 ? '👏 Vas <b class="e">' + (-pct) + '% menos</b>' : '👀 Vas <b class="s">' + pct + '% más</b>') + ' que a estas alturas de ' + MESES[ant.getMonth()] + ' (' + esc(dinero(antHasta, l.mon)) + ').';
   }
+  const dias = new Date(+ym.slice(0, 4), +ym.slice(5), 0).getDate();
+  if(dia >= 5 && dia < dias){ const proy = Math.round(total / dia * dias); comp += (comp ? '<br>' : '') + '📈 A este ritmo cerrarás ' + MESES[+ym.slice(5) - 1] + ' con unos <b>' + esc(dinero(proy, l.mon)) + '</b> de gastos.'; }
   const col = k => k === 'Otras' ? 'var(--tinta3)' : colorCat(k);
   return '<div class="tarjeta"><div class="tarjeta-cab"><b>¿En qué se fue ' + MESES[+ym.slice(5) - 1] + '?</b><span class="num faltan">' + (pref.oculto ? '•••' : esc(dinero(total, l.mon))) + '</span></div>' +
     '<div class="tira" role="img" aria-label="Gastos del mes por categoría">' + arr.map(([k, v]) => '<i style="flex:' + v + ';background:' + col(k) + '" title="' + esc((k || 'Sin categoría') + ': ' + cifra(v)) + '"></i>').join('') + '</div>' +
@@ -1896,10 +1931,12 @@ function pintarSelbar(){
   const movs = l.movs.filter(m => seleccion.has(m.id) && !m.borr);
   const t = totales(movs);
   bar.innerHTML = '<span><b>' + movs.length + '</b> marcado' + (movs.length === 1 ? '' : 's') + ' · <span class="num">' + esc(dinero(t.neto, l.mon, true)) + '</span></span>' +
+    '<button class="bt chico peligro" id="selBorrar"><svg><use href="#i-basura"/></svg>Borrar</button>' +
+    '<button class="bt chico" id="selCat">🏷️ Categoría</button>' +
+    '<button class="bt chico" id="selFecha">📅 Fecha</button>' +
     '<button class="bt chico" id="selMover"><svg><use href="#i-mover"/></svg>Mover</button>' +
     '<button class="bt chico" id="selDup"><svg><use href="#i-copia"/></svg>Duplicar</button>' +
-    '<button class="bt chico" id="selBorrar"><svg><use href="#i-basura"/></svg>Borrar</button>' +
-    '<button class="bt chico" id="selNada">Quitar marcas</button>';
+    '<button class="bt chico plano" id="selNada" title="Quitar marcas" aria-label="Quitar marcas">✕</button>';
   bar.classList.remove('oculto');
 }
 
@@ -2163,6 +2200,31 @@ function duplicarMovs(l, ids){
   const t = ahora();
   ids.forEach((id, i) => { const m = l.movs.find(x => x.id === id); if(m) l.movs.push(Object.assign({}, m, { id:uid(), k:t + i, upd:t, borr:undefined })); });
   tocar(l); guardar(); seleccion.clear(); pintar(); aviso(ids.length + ' duplicado' + (ids.length === 1 ? '' : 's') + '. Revisa las fechas si hace falta.');
+}
+/* Cambiar en lote la categoría o la fecha de lo marcado */
+async function cambiarCatSel(){
+  const l = activo(), ids = [...seleccion], movs = l.movs.filter(m => ids.includes(m.id) && !m.borr);
+  if(!movs.length) return;
+  const tipos = [...new Set(movs.map(m => m.t))];
+  const cats = [...new Set(tipos.flatMap(t => l.cats[t]))];
+  const ok = await confirmar('Cambiar categoría', 'A los <b>' + movs.length + '</b> movimientos marcados.' + (tipos.length > 1 ? ' Hay ingresos y gastos mezclados: elige una que tenga sentido para los dos.' : ''),
+    { si:'Cambiar', extra:'<select class="campo lleno" id="cfCat"><option value="">(sin categoría)</option>' + cats.map(c => '<option value="' + esc(c) + '">' + (iconoCat(c) ? iconoCat(c) + ' ' : '') + esc(c) + '</option>').join('') + '</select>' });
+  if(!ok) return;
+  const cat = $('cfCat').value, t = ahora(), antes = movs.map(m => [m, m.cat]);
+  movs.forEach(m => { m.cat = cat; m.upd = t; });
+  tocar(l); guardar(); seleccion.clear(); modoSel = false; pintar();
+  aviso(movs.length + ' movimientos ahora en ' + (cat || 'sin categoría') + '.', () => { const t2 = ahora(); antes.forEach(([m, c]) => { m.cat = c; m.upd = t2; }); tocar(l); guardar(); pintar(); });
+}
+async function cambiarFechaSel(){
+  const l = activo(), ids = [...seleccion], movs = l.movs.filter(m => ids.includes(m.id) && !m.borr);
+  if(!movs.length) return;
+  const ok = await confirmar('Cambiar fecha', 'A los <b>' + movs.length + '</b> movimientos marcados.', { si:'Cambiar', extra:'<input type="date" class="campo lleno" id="cfFecha" value="' + hoy() + '">' });
+  if(!ok) return;
+  const f = $('cfFecha').value; if(!f) return;
+  const t = ahora(), antes = movs.map(m => [m, m.f]);
+  movs.forEach(m => { m.f = f; m.upd = t; });
+  tocar(l); guardar(); seleccion.clear(); modoSel = false; pintar();
+  aviso(movs.length + ' movimientos pasados al ' + fCorta(f) + '.', () => { const t2 = ahora(); antes.forEach(([m, x]) => { m.f = x; m.upd = t2; }); tocar(l); guardar(); pintar(); });
 }
 function abrirMover(){
   const l = activo(), ids = [...seleccion];
@@ -2790,6 +2852,136 @@ function tarjetaRespaldo(){
     '<div class="fila-bt" style="justify-content:flex-start"><button class="bt chico tinta" data-accion="nube">Sincronizar</button><button class="bt chico" data-accion="respaldo">Descargar respaldo</button><button class="bt chico plano" data-accion="luego">Luego</button></div></div>';
 }
 
+
+/* ==========================================================================
+   CALENDARIO DEL MES
+   ========================================================================== */
+let calMes = null;   /* 'AAAA-MM' que se está viendo */
+function vistaCalendario(l){
+  const ym = calMes || hoy().slice(0, 7), [a, m] = ym.split('-').map(Number);
+  const dias = new Date(a, m, 0).getDate(), primero = (new Date(a, m - 1, 1).getDay() + 6) % 7;
+  const porDia = new Map();
+  vivos(l).forEach(x => { if(x.f.slice(0, 7) !== ym) return; const v = porDia.get(x.f) || { e:0, s:0, n:0 }; v[x.t] += x.m; v.n++; porDia.set(x.f, v); });
+  const maxS = Math.max(1, ...[...porDia.values()].map(v => v.s));
+  const tot = [...porDia.values()].reduce((t, v) => ({ e:t.e + v.e, s:t.s + v.s }), { e:0, s:0 });
+  let h = '<div class="cal"><div class="cal-cab"><button class="bt icono plano" data-calmes="-1" aria-label="Mes anterior">‹</button><b>' + nombreMes(ym) + '</b><button class="bt icono plano" data-calmes="1" aria-label="Mes siguiente">›</button></div>' +
+    '<div class="cal-tot"><span class="e">↑ ' + esc(cifra(tot.e)) + '</span><span class="s">↓ ' + esc(cifra(tot.s)) + '</span><span>= ' + esc(dinero(tot.e - tot.s, '', true)) + '</span></div>' +
+    '<div class="cal-grid">' + ['L','M','M','J','V','S','D'].map(d => '<span class="cal-ds">' + d + '</span>').join('');
+  for(let i = 0; i < primero; i++) h += '<span></span>';
+  for(let d = 1; d <= dias; d++){
+    const f = ym + '-' + String(d).padStart(2, '0'), v = porDia.get(f), esHoy = f === hoy();
+    const int = v ? Math.min(1, v.s / maxS) : 0;
+    h += '<button class="cal-d' + (esHoy ? ' hoy' : '') + (v ? ' con' : '') + '" data-caldia="' + f + '" style="--i:' + int.toFixed(2) + '"' + (v ? ' title="' + v.n + ' movimientos"' : '') + '><b>' + d + '</b>' +
+      (v ? (v.e ? '<small class="e">+' + abreviar(v.e) + '</small>' : '') + (v.s ? '<small class="s">−' + abreviar(v.s) + '</small>' : '') : '') + '</button>';
+  }
+  h += '</div><p class="faltan" style="margin:10px 4px 0">Toca un día para ver sus movimientos. Cuanto más naranja, más gastaste ese día.</p></div>';
+  return h;
+}
+
+/* ==========================================================================
+   META DE AHORRO
+   ========================================================================== */
+async function editarMeta(){
+  const l = activo();
+  const ok = await confirmar('Meta de ahorro', '¿Para qué ahorras en «' + esc(l.nom) + '» y cuánto quieres juntar? Te muestro cuánto te falta.', { si:'Guardar',
+    extra:'<input class="campo lleno" id="metaNom" maxlength="40" placeholder="Para qué: viaje, laptop, emergencia…" value="' + esc(l.meta ? l.meta.nom : '') + '" style="margin-bottom:10px">' +
+      '<div class="monto-caja"><span>' + esc(l.mon) + '</span><input id="metaMonto" inputmode="decimal" placeholder="0.00" value="' + (l.meta ? aTexto(l.meta.m) : '') + '"></div>' +
+      (l.meta ? '<button type="button" class="bt chico plano" id="metaQuitar" style="margin-top:10px">Quitar la meta</button>' : '') });
+  if(!ok) return;
+  if(window.__quitarMeta){ window.__quitarMeta = false; delete l.meta; tocar(l); guardar(); pintar(); aviso('Meta quitada.'); return; }
+  const mo = leerMontoCalc($('metaMonto').value);
+  if(!mo.ok){ aviso('El monto de la meta no es válido.'); return; }
+  l.meta = { m:mo.c, nom:($('metaNom').value || '').trim() || 'Mi meta' }; tocar(l); guardar(); pintar();
+  aviso('Meta guardada: ' + l.meta.nom + ' · ' + dinero(mo.c, l.mon) + '.');
+}
+function tarjetaMeta(l){
+  if(!l.meta || !l.meta.m) return '';
+  const sal = saldoDe(l), pct = Math.max(0, Math.min(100, sal / l.meta.m * 100)), falta = l.meta.m - sal;
+  /* A cuánto ahorras al mes, mirando los tres últimos meses completos */
+  const h0 = hoy(); let suma = 0, n = 0;
+  for(let i = 1; i <= 3; i++){ const ym = iso(new Date(+h0.slice(0, 4), +h0.slice(5, 7) - 1 - i, 1)).slice(0, 7); const mv = vivos(l).filter(m => m.f.slice(0, 7) === ym); if(mv.length){ const t = totales(mv); suma += t.neto; n++; } }
+  const ritmo = n ? suma / n : 0;
+  const cuando = falta <= 0 ? '🎉 ¡Meta cumplida!' : ritmo > 0 ? 'A tu ritmo (' + esc(dinero(Math.round(ritmo), l.mon)) + ' al mes) llegas en ~' + Math.ceil(falta / ritmo) + ' mes' + (Math.ceil(falta / ritmo) === 1 ? '' : 'es') + '.' : 'Te faltan ' + esc(dinero(falta, l.mon)) + '.';
+  return '<div class="tarjeta"><div class="tarjeta-cab"><b>🎯 ' + esc(l.meta.nom) + '</b><button class="bt chico plano" data-accion="meta">Editar</button></div>' +
+    '<div class="meta-num"><span class="num">' + (pref.oculto ? '••••' : esc(dinero(Math.max(0, sal), l.mon))) + '</span> de ' + esc(dinero(l.meta.m, l.mon)) + ' <b>' + Math.round(pct) + '%</b></div>' +
+    '<div class="meta-barra"><i style="width:' + pct.toFixed(1) + '%"></i></div><p class="comp">' + cuando + '</p></div>';
+}
+
+/* ==========================================================================
+   CANDADO CON PIN
+   Privacidad para quien coge tu teléfono. No cifra los datos: es una
+   puerta, no una caja fuerte.
+   ========================================================================== */
+async function hashPin(pin){
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('apuntado:' + pin));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function pedirPin(titulo, sub){
+  return new Promise(res => {
+    const c = document.createElement('div'); c.className = 'candado';
+    let pin = '';
+    const pinta = (err) => {
+      c.innerHTML = '<div class="candado-caja"><svg viewBox="0 0 64 64" width="54" height="54" aria-hidden="true">' + document.querySelector('.marca svg').innerHTML + '</svg>' +
+        '<h3>' + esc(titulo) + '</h3><p class="' + (err ? 's' : '') + '">' + esc(err || sub) + '</p><div class="pin-puntos">' + [0,1,2,3].map(i => '<i class="' + (i < pin.length ? 'si' : '') + '"></i>').join('') + '</div>' +
+        '<div class="teclado">' + ['1','2','3','4','5','6','7','8','9','', '0', '⌫'].map(k => k ? '<button data-k="' + k + '">' + k + '</button>' : '<span></span>').join('') + '</div>' +
+        (titulo.startsWith('Crea') || titulo.startsWith('Repite') ? '<button class="bt plano chico" data-k="x">Cancelar</button>' : '') + '</div>';
+    };
+    const tecla = k => {
+      if(k === 'x'){ c.remove(); document.removeEventListener('keydown', teclado); res(null); return; }
+      if(k === '⌫') pin = pin.slice(0, -1); else if(/\d/.test(k) && pin.length < 4) pin += k;
+      pinta();
+      if(pin.length === 4){ const p = pin; setTimeout(() => res({ pin:p, error:msg => { pin = ''; pinta(msg); }, cerrar:() => { c.remove(); document.removeEventListener('keydown', teclado); } }), 120); }
+    };
+    const teclado = e => { if(/^\d$/.test(e.key)) tecla(e.key); else if(e.key === 'Backspace') tecla('⌫'); };
+    c.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if(b) tecla(b.dataset.k); });
+    document.addEventListener('keydown', teclado);
+    pinta(); document.body.appendChild(c);
+  });
+}
+async function abrirCandado(){
+  if(!pref.pin) return;
+  try{ if(sessionStorage.getItem('apuntado_abierto') === pref.pin) return; }catch(e){}
+  await new Promise(fin => {
+    const c = document.createElement('div'); c.className = 'candado';
+    let pin = '', fallos = 0;
+    const pinta = err => {
+      c.innerHTML = '<div class="candado-caja"><svg viewBox="0 0 64 64" width="54" height="54" aria-hidden="true">' + document.querySelector('.marca svg').innerHTML + '</svg>' +
+        '<h3>Apuntado</h3><p class="' + (err ? 's' : '') + '">' + esc(err || 'Escribe tu PIN') + '</p><div class="pin-puntos">' + [0,1,2,3].map(i => '<i class="' + (i < pin.length ? 'si' : '') + '"></i>').join('') + '</div>' +
+        '<div class="teclado">' + ['1','2','3','4','5','6','7','8','9','', '0', '⌫'].map(k => k ? '<button data-k="' + k + '">' + k + '</button>' : '<span></span>').join('') + '</div></div>';
+    };
+    const tecla = async k => {
+      if(k === '⌫') pin = pin.slice(0, -1); else if(/\d/.test(k) && pin.length < 4) pin += k;
+      pinta();
+      if(pin.length === 4){
+        if(await hashPin(pin) === pref.pin){ c.remove(); document.removeEventListener('keydown', teclado); try{ sessionStorage.setItem('apuntado_abierto', pref.pin); }catch(e){} fin(); }
+        else { fallos++; pin = ''; pinta(fallos >= 3 ? 'PIN incorrecto. Si lo olvidaste, tus datos siguen en la nube o en tu respaldo.' : 'PIN incorrecto'); if(navigator.vibrate) navigator.vibrate([40, 40, 40]); }
+      }
+    };
+    const teclado = e => { if(/^\d$/.test(e.key)) tecla(e.key); else if(e.key === 'Backspace') tecla('⌫'); };
+    c.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if(b) tecla(b.dataset.k); });
+    document.addEventListener('keydown', teclado);
+    pinta(); document.body.appendChild(c);
+  });
+}
+async function configurarPin(){
+  if(!(window.crypto && crypto.subtle)){ aviso('El candado necesita abrir la app desde su dirección https.'); return; }
+  if(pref.pin){
+    const ok = await confirmar('Quitar el candado', 'La app ya no pedirá PIN al abrirse en este aparato.', { si:'Quitar', peligro:true });
+    if(ok){ delete pref.pin; guardarPref(); aviso('Candado quitado.'); }
+    return;
+  }
+  const a = await pedirPin('Crea un PIN', '4 números. Lo pediré cada vez que abras la app en este aparato.');
+  if(!a) return;
+  a.cerrar();
+  const b = await pedirPin('Repite el PIN', 'Para comprobar que no hubo un error.');
+  if(!b) return;
+  if(b.pin !== a.pin){ b.cerrar(); aviso('Los PIN no coinciden. Inténtalo otra vez.'); return; }
+  b.cerrar();
+  pref.pin = await hashPin(a.pin); guardarPref();
+  try{ sessionStorage.setItem('apuntado_abierto', pref.pin); }catch(e){}
+  aviso('🔒 Candado puesto. Si olvidas el PIN, tus datos siguen ahí: recupéralos con la sincronización o un respaldo en otro aparato.');
+}
+
 /* ---------- Ejemplo ---------- */
 function cargarEjemplo(){
   const a = new Date(), t = ahora();
@@ -2824,8 +3016,10 @@ function cargarEjemplo(){
   const ym = hoy().slice(0, 7);
   casa.movs.forEach(m => { if(m.f.slice(0, 7) !== ym) return; const fj = casa.fijos.find(x => x.c === m.c); if(fj) m.fj = fj.id; });
   const ahorro = nuevoLibro({ nom:'Ahorros', col:COLORES[2], ini:500000, fa:f(3, 1) });
+  ahorro.meta = { m:1200000, nom:'Viaje a Cusco' };
+  for(let i = 3; i >= 1; i--) ahorro.movs.push({ id:uid(), k:t + 900 + i, upd:t, f:f(i, 2), t:'e', m:60000, c:'Ahorro del mes', cat:'Otros ingresos', med:'Banco', doc:'', n:'' });
   pref.libro = casa.id; guardarPref(); guardar(); pintar();
-  aviso('Dos libros de ejemplo. Bórralos cuando quieras desde Organizar estante.');
+  aviso('Dos libros de ejemplo. Bórralos cuando quieras: mantén pulsada su tarjeta o usa «Ordenar o borrar libros».');
 }
 
 /* ==========================================================================
@@ -3435,6 +3629,7 @@ function menuExportar(boton){
 function menuLibro(boton){
   const l = activo(), ab = l.est === 'a';
   abrirMenu(boton, [
+    { tit:'«' + l.nom + '»' },
     ...(pref.modo !== 'completo' ? [
       { icono:'pdf', txt:'Descargar en PDF', fn:() => exportarPDF([l]) },
       { icono:'xls', txt:'Descargar en Excel', fn:() => exportarExcel([l]) },
@@ -3444,13 +3639,14 @@ function menuLibro(boton){
     { icono:'lista', txt:'Categorías y medios', sub:'Agregar o borrar varias a la vez', fn:abrirListas },
     { icono:'balanza', txt:'Cuadrar la caja', sub:'Comparar con el dinero real', fn:abrirCuadre },
     { icono:'check', txt:'Presupuesto del mes', sub:'Límite por categoría, con avisos', fn:abrirPres },
+    { icono:'check', txt:l.meta ? 'Meta: ' + l.meta.nom : 'Meta de ahorro', sub:'Cuánto quieres juntar en este libro', fn:editarMeta },
     { icono:'renovar', txt:'Movimientos fijos', sub:'Lo que se repite cada mes', fn:abrirFijos },
     { icono:'mover', txt:'Pasar dinero a otro libro', fn:abrirTransferir },
     '-',
     ab ? { icono:'renovar', txt:'Renovar el libro', sub:'Cerrar y abrir otro con el saldo', fn:() => abrirRenovar([l.id]) } : { icono:'renovar', txt:'Reabrir el libro', fn:() => reabrir(l) },
     { icono:'mas', txt:'Libro nuevo', fn:() => abrirLibro() },
     '-',
-    { icono:'basura', txt:'Borrar este libro', peligro:true, fn:() => borrarLibros([l.id]) }
+    { icono:'basura', txt:'Borrar este libro', sub:vivos(l).length + ' movimientos · se puede deshacer', peligro:true, fn:() => borrarLibros([l.id]) }
   ]);
 }
 function menuApp(boton){
@@ -3461,8 +3657,9 @@ function menuApp(boton){
     { icono:'guardar', txt:'Descargar respaldo', sub:'Un archivo con todos tus libros', fn:respaldar },
     { icono:'subir', txt:'Cargar un respaldo', sub:'Se mezcla con lo que ya tienes', fn:() => $('archivoRespaldo').click() },
     '-',
-    { icono:'estante', txt:'Organizar estante', fn:abrirOrganizar, off:libros().length < 1 },
+    { icono:'estante', txt:'Ordenar o borrar libros', fn:abrirOrganizar, off:libros().length < 1 },
     { icono:'lapiz', txt:pref.nombre ? 'Tu nombre: ' + pref.nombre : 'Ponle tu nombre al saludo', fn:async () => { const v = await pedirTexto('¿Cómo te llamo?', 'Solo se guarda en este aparato, para saludarte.', pref.nombre || ''); if(v !== null){ pref.nombre = v; guardarPref(); pintarSaludo(); } } },
+    { icono:'check', txt:pref.pin ? '🔒 Quitar el candado' : '🔒 Candado con PIN', sub:'Pide 4 números al abrir la app', fn:configurarPin },
     { icono:'movil', txt:'Instalar en este aparato', fn:instalar },
     { icono:'ayuda', txt:'Atajos de teclado', sub:'N asentar · V varios · / buscar · 1 2 3 vistas', fn:() => confirmar('Atajos de teclado', '<b>A</b> apunte rápido · <b>G</b> gasto · <b>I</b> ingreso · <b>N</b> anotar · <b>T</b> pasar a otro libro · <b>V</b> varios a la vez · <b>/</b> buscar · <b>1</b> Diario · <b>2</b> Cuenta T · <b>3</b> Mayor · <b>Esc</b> cerrar', { si:'Vale' }) }
   ]);
@@ -3483,7 +3680,7 @@ function init(){
     if(t.closest('#btLomoNuevo')){ abrirLibro(); return; }
     const ir = t.closest('[data-ir]'); if(ir){ pref.libro = ir.dataset.ir; guardarPref(); pintar(); return; }
     const acc = t.closest('[data-accion]');
-    if(acc){ ({ asentar:() => abrirAsiento(), entra:() => abrirAsiento(null, { t:'e' }), sale:() => abrirAsiento(null, { t:'s' }), cuadrar:abrirCuadre, respaldo:respaldar, luego:() => { pref.avisoRespaldo = hoy(); guardarPref(); pintar(); }, transferir:abrirTransferir, pres:abrirPres, fijos:abrirFijos, varios:abrirVarios, nuevoLibro:() => abrirLibro(), ejemplo:cargarEjemplo, nube:abrirNube })[acc.dataset.accion](); return; }
+    if(acc){ ({ asentar:() => abrirAsiento(), entra:() => abrirAsiento(null, { t:'e' }), sale:() => abrirAsiento(null, { t:'s' }), cuadrar:abrirCuadre, meta:editarMeta, respaldo:respaldar, luego:() => { pref.avisoRespaldo = hoy(); guardarPref(); pintar(); }, transferir:abrirTransferir, pres:abrirPres, fijos:abrirFijos, varios:abrirVarios, nuevoLibro:() => abrirLibro(), ejemplo:cargarEjemplo, nube:abrirNube })[acc.dataset.accion](); return; }
     if(t.closest('#btAsentar') || t.closest('#fab')){ abrirAsiento(); return; }
     if(t.closest('#btVarios')){ abrirVarios(); return; }
     if(t.closest('#btExportar')){ menuExportar(t.closest('#btExportar')); return; }
@@ -3494,6 +3691,10 @@ function init(){
     if(t.closest('#pastillaNube')){ abrirNube(); if(nube) sincronizar('manual'); return; }
     if(t.closest('#btTema')){ ponerTema(pref.tema === 'noche' ? 'dia' : 'noche'); return; }
     const fjb = t.closest('[data-fijo]'); if(fjb){ anotarFijo(fjb.dataset.fijo); return; }
+    if(t.closest('#btCal')){ pref.cal = !pref.cal; guardarPref(); modoSel = false; seleccion.clear(); calMes = null; pintar(); return; }
+    const cm = t.closest('[data-calmes]'); if(cm){ const [a, m] = (calMes || hoy().slice(0, 7)).split('-').map(Number); calMes = iso(new Date(a, m - 1 + +cm.dataset.calmes, 1)).slice(0, 7); pintarLibro(); return; }
+    const cd = t.closest('[data-caldia]'); if(cd){ filtro.per = 'rango'; filtro.desde = filtro.hasta = cd.dataset.caldia; pref.cal = false; guardarPref(); pintarLibro(); return; }
+    if(t.closest('#metaQuitar')){ window.__quitarMeta = true; $('cfSi').click(); return; }
     if(t.closest('#btApunte')){ guardarApunte(); return; }
     if(t.closest('#btVoz')){ dictar(); return; }
     if(t.closest('#btVerMas')){ limiteLista += 300; const y = scrollY; pintarLibro(); scrollTo(0, y); return; }
@@ -3515,16 +3716,38 @@ function init(){
     if(fila && window.__deslizo && Date.now() - window.__deslizo < 400) return;
     if(fila && !t.closest('.ckc')){
       const l = activo();
-      if(modoSel && fila.classList.contains('mov')){ const id = fila.dataset.mov; if(seleccion.has(id)) seleccion.delete(id); else seleccion.add(id); pintarLibro(); pintarSelbar(); return; }
+      if(modoSel && fila.classList.contains('mov')){ const id = fila.dataset.mov, si = !seleccion.has(id); if(si) seleccion.add(id); else seleccion.delete(id); fila.classList.toggle('sel', si); const ck = fila.querySelector('.ck'); if(ck && t !== ck) ck.checked = si; pintarSelbar(); return; }
       if(l.est === 'c'){ aviso('El libro está cerrado. Reábrelo para corregir.'); return; }
       abrirAsiento(fila.dataset.mov); return;
     }
-    if(t.closest('#selBorrar')){ borrarMovs(activo(), [...seleccion]); return; }
+    if(t.closest('#selCat')){ cambiarCatSel(); return; }
+    if(t.closest('#selFecha')){ cambiarFechaSel(); return; }
+    if(t.closest('#selTodoLista')){ const lista = filtrar(resumen(activo()).dentro); if(lista.every(x => seleccion.has(x.m.id))) seleccion.clear(); else lista.forEach(x => seleccion.add(x.m.id)); pintarLibro(); pintarSelbar(); return; }
+    if(t.closest('#selBorrar')){ const ids = [...seleccion]; if(ids.length >= 5){ confirmar('¿Borrar ' + ids.length + ' movimientos?', 'Tendrás unos segundos para deshacerlo.', { si:'Borrar', peligro:true }).then(ok => { if(ok){ borrarMovs(activo(), ids); modoSel = false; pintar(); } }); } else { borrarMovs(activo(), ids); modoSel = false; pintar(); } return; }
     if(t.closest('#selDup')){ duplicarMovs(activo(), [...seleccion]); return; }
     if(t.closest('#selMover')){ abrirMover(); return; }
-    if(t.closest('#selNada')){ seleccion.clear(); pintar(); return; }
+    if(t.closest('#selNada')){ seleccion.clear(); modoSel = false; pintar(); return; }
     if(t.closest('#toastBt')){ const f = deshacerFn; deshacerFn = null; $('toast').classList.remove('ver'); if(f) f(); return; }
   });
+  /* Clic derecho o mantener pulsada una tarjeta de libro: su menú (abrir, editar, renovar, borrar) */
+  const menuTarjeta = (el) => {
+    const l = libro(el.dataset.libro); if(!l) return;
+    abrirMenu(el, [
+      { tit:'«' + l.nom + '»' },
+      { icono:'libro', txt:'Abrir', fn:() => { pref.libro = l.id; guardarPref(); limiteLista = 150; pintar(); } },
+      { icono:'lapiz', txt:'Nombre, color y saldo inicial', fn:() => abrirLibro(l.id) },
+      l.est === 'a' ? { icono:'renovar', txt:'Renovar', fn:() => abrirRenovar([l.id]) } : { icono:'renovar', txt:'Reabrir', fn:() => reabrir(l) },
+      { icono:'pdf', txt:'Descargar en PDF', fn:() => exportarPDF([l], true) },
+      '-',
+      { icono:'basura', txt:'Borrar este libro', sub:vivos(l).length + ' movimientos · se puede deshacer', peligro:true, fn:() => borrarLibros([l.id]) }
+    ]);
+  };
+  document.addEventListener('contextmenu', e => { const el = e.target.closest('.lomo[data-libro]'); if(el){ e.preventDefault(); menuTarjeta(el); } });
+  let tTarjeta = null;
+  document.addEventListener('touchstart', e => { const el = e.target.closest('.lomo[data-libro]'); if(!el) return; tTarjeta = setTimeout(() => { tTarjeta = 'hecho'; if(navigator.vibrate) navigator.vibrate(12); menuTarjeta(el); }, 520); }, { passive:true });
+  document.addEventListener('touchmove', () => { if(tTarjeta && tTarjeta !== 'hecho') clearTimeout(tTarjeta); }, { passive:true });
+  document.addEventListener('touchend', e => { if(tTarjeta === 'hecho'){ e.preventDefault(); } else clearTimeout(tTarjeta); tTarjeta = null; });
+
   /* Deslizar un movimiento: a la izquierda lo borra, a la derecha lo repite hoy */
   let arrastre = null;
   document.addEventListener('touchstart', e => {
@@ -3609,6 +3832,7 @@ function init(){
   ponerEstado(nube ? 'busy' : 'off');
   if(nube) sincronizar('inicio');
   programarSondeo();
+  abrirCandado();
 
   if('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 }
