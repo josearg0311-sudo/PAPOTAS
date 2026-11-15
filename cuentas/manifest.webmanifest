@@ -1,0 +1,18 @@
+{
+  "name": "Cuentas Claras",
+  "short_name": "Cuentas",
+  "description": "Libros de ingresos y gastos, con PDF, Excel y sincronización.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ECE5D6",
+  "theme_color": "#ECE5D6",
+  "lang": "es",
+  "icons": [
+    { "src": "icono.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
