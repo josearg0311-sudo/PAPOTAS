@@ -104,6 +104,9 @@ button{cursor:pointer}
 .pastilla i{width:8px;height:8px;border-radius:50%;background:var(--tinta3)}
 .pastilla[data-e="ok"] i{background:var(--ok);box-shadow:0 0 0 4px var(--ok-s)}
 .pastilla[data-e="busy"] i{background:var(--aviso);animation:late 1s infinite}
+.pastilla[data-vivo="1"]{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,var(--borde2))}
+.pastilla[data-vivo="1"] i{display:block;background:var(--ok);animation:latido 2s ease-in-out infinite}
+@keyframes latido{0%,100%{box-shadow:0 0 0 0 rgba(76,195,138,.55)}50%{box-shadow:0 0 0 6px rgba(76,195,138,0)}}
 .pastilla[data-e="err"] i{background:var(--sale);box-shadow:0 0 0 4px var(--sale-s)}
 @keyframes late{50%{opacity:.3}}
 
@@ -1542,7 +1545,7 @@ function pintarSaludo(){
 }
 function pintarPie(){
   const n = libros().length, a = libros().reduce((s, l) => s + vivos(l).length, 0);
-  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v11</span>' : '';
+  $('pie').innerHTML = n ? '<span>' + n + ' libro' + (n === 1 ? '' : 's') + ' · ' + a + ' movimientos</span><span>Guardado en este aparato</span><span>' + (nube ? 'Sincronizado con JSONBin' : 'Sin sincronizar') + '</span><span>Apuntado v12</span>' : '';
 }
 let libroPintado = null;
 const memoCifras = {};
@@ -3562,7 +3565,10 @@ function hayNube(){ return !!nube; }
 function ponerEstado(e, err){
   nubeEstado = e; if(err !== undefined) nubeError = err;
   const p = $('pastillaNube'); p.dataset.e = e;
-  $('pastillaTxt').textContent = e === 'ok' ? 'Sincronizado' : e === 'busy' ? 'Sincronizando…' : e === 'err' ? 'Sin conexión' : 'Sin nube';
+  const enVivo = vivo.conectado && e !== 'err' && e !== 'off';
+  p.dataset.vivo = enVivo ? '1' : '0';
+  $('pastillaTxt').textContent = e === 'busy' ? 'Sincronizando…' : e === 'err' ? 'Sin conexión' : e === 'off' ? 'Sin nube' : enVivo ? 'En vivo' : 'Sincronizado';
+  p.title = enVivo ? 'Sincronizado en tiempo real con tus otros aparatos' : 'Sincronización entre dispositivos';
   if($('dlgNube').open) pintarNube();
   if($('pie')) pintarPie();
 }
@@ -3639,6 +3645,7 @@ async function sincronizar(motivo){
       const cuerpo = compacto(mezcla);
       nubeTam = cuerpo.length;
       await pedir('PUT', JSONBIN + '/' + nube.b, cuerpo);
+      tocarTimbre();
     } else nubeTam = compacto(mezcla).length;
     nubeUltima = ahora(); ponerEstado('ok', '');
   }catch(e){
@@ -3648,12 +3655,65 @@ async function sincronizar(motivo){
     if(nubePendiente){ nubePendiente = false; setTimeout(() => sincronizar('pendiente'), 300); }
   }
 }
-function nubeCambio(){ ultimaActividad = ahora(); if(!nube) return; clearTimeout(tSubida); ponerEstado('busy'); tSubida = setTimeout(() => sincronizar('cambio'), 900); }
+
+/* ==========================================================================
+   TIEMPO REAL
+   JSONBin guarda, pero no avisa. Para avisar se usa un «timbre»: un canal de
+   ntfy.sh (gratis, sin cuenta). Al guardar un cambio, este aparato toca el
+   timbre; los demás, que están escuchando, bajan el cambio al instante.
+   Por el timbre NO viaja ningún dato: solo «hubo un cambio» y de qué
+   aparato. El canal es secreto: sale de tu clave y tu bin con SHA-256, así
+   que todos tus aparatos llegan al mismo sin tener que pasarse nada nuevo.
+   ========================================================================== */
+const NTFY = 'https://ntfy.sh';
+const miAparato = (() => { try{ let id = localStorage.getItem('apuntado_aparato'); if(!id){ id = uid(); localStorage.setItem('apuntado_aparato', id); } return id; }catch(e){ return uid(); } })();
+const vivo = { es:null, canal:null, conectado:false, intentos:0, tReintento:null };
+async function canalDe(n){
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('apuntado-vivo|' + n.b + '|' + n.k));
+  return 'apuntado_' + [...new Uint8Array(b)].slice(0, 14).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+function vivoPosible(){ return !!(nube && window.EventSource && window.crypto && crypto.subtle && location.protocol !== 'file:'); }
+async function conectarVivo(){
+  desconectarVivo();
+  if(!vivoPosible()) return;
+  try{ vivo.canal = await canalDe(nube); }catch(e){ return; }
+  const es = new EventSource(NTFY + '/' + vivo.canal + '/sse');
+  vivo.es = es;
+  es.onopen = () => { vivo.conectado = true; vivo.intentos = 0; ponerEstado(nubeEstado); };
+  es.onerror = () => {
+    vivo.conectado = false; ponerEstado(nubeEstado);
+    /* EventSource se reconecta solo; si el navegador lo da por cerrado, se reintenta con espera creciente */
+    if(es.readyState === 2){ clearTimeout(vivo.tReintento); vivo.tReintento = setTimeout(conectarVivo, Math.min(60000, 2000 * Math.pow(2, vivo.intentos++))); }
+  };
+  es.onmessage = ev => {
+    let d; try{ d = JSON.parse(ev.data); }catch(e){ return; }
+    if(d.event && d.event !== 'message') return;
+    let m = {}; try{ m = JSON.parse(d.message || '{}'); }catch(e){}
+    if(m.de === miAparato) return;
+    sincronizar('vivo');
+  };
+}
+function desconectarVivo(){
+  clearTimeout(vivo.tReintento);
+  if(vivo.es){ vivo.es.onerror = null; vivo.es.close(); }
+  vivo.es = null; vivo.conectado = false;
+}
+function tocarTimbre(){
+  if(!vivo.canal) return;
+  fetch(NTFY + '/' + vivo.canal, { method:'POST', body:JSON.stringify({ de:miAparato, t:ahora() }) }).catch(() => {});
+}
+
+function nubeCambio(){ ultimaActividad = ahora(); if(!nube) return; clearTimeout(tSubida); ponerEstado('busy'); tSubida = setTimeout(() => sincronizar('cambio'), 450); }
 /* Pregunta cada 20 s mientras usas el programa; se calla si la pestaña está
    escondida o llevas 3 minutos sin tocar nada. Al volver, se pone al día. */
 function programarSondeo(){
   clearInterval(tSondeo);
-  tSondeo = setInterval(() => { if(nube && !document.hidden && ahora() - ultimaActividad < 180000) sincronizar('sondeo'); }, 20000);
+  tSondeo = setInterval(() => {
+    if(!nube || document.hidden) return;
+    if(vivo.conectado){ if(ahora() - nubeUltima > 300000) sincronizar('seguridad'); return; }
+    if(ahora() - ultimaActividad < 180000) sincronizar('sondeo');
+    if(vivoPosible() && !vivo.es) conectarVivo();
+  }, 20000);
 }
 function codigoSync(){ return 'CC1-' + btoa(JSON.stringify({ k:nube.k, b:nube.b })); }
 function leerCodigo(t){
@@ -3670,19 +3730,24 @@ function pintarNube(){
     const kb = (nubeTam || compacto(db).length) / 1024;
     c.innerHTML =
       '<div class="cuadro"><div class="fila"><span>Estado</span><b>' + ({ ok:'Sincronizado ✓', busy:'Sincronizando…', err:'Con problemas', off:'—' })[nubeEstado] + '</b></div>' +
+      '<div class="fila"><span>Tiempo real</span><b>' + (vivo.conectado ? '<span class="e">● En vivo</span>' : vivoPosible() ? 'Conectando…' : 'No disponible aquí') + '</b></div>' +
       '<div class="fila"><span>Última vez</span><b>' + (hace == null ? 'todavía no' : hace < 60 ? 'hace ' + hace + ' s' : 'hace ' + Math.round(hace / 60) + ' min') + '</b></div>' +
       '<div class="fila"><span>Bin</span><b style="font-size:12px">' + esc(nube.b) + '</b></div>' +
       '<div class="fila"><span>Tamaño de tus datos</span><b>' + kb.toFixed(1) + ' KB</b></div>' +
       '<div class="fila"><span>Peticiones de este aparato este mes</span><b>' + peticionesMes() + '</b></div></div>' +
       (nubeError ? '<div class="alerta mal" style="margin-top:12px">' + esc(nubeError) + '</div>' : '') +
+      '<p class="ayuda" style="margin-top:12px">' + (vivo.conectado ? 'Lo que apuntes aquí aparece en tus otros aparatos en un segundo, sin recargar. ' : 'Si el tiempo real no conecta (una red que bloquea ntfy.sh), sigue sincronizando cada 20 segundos. ') +
+      'El aviso viaja por un canal privado de ntfy.sh; tus datos siguen solo en tu JSONBin.</p>' +
       (kb > 80 ? '<div class="alerta" style="margin-top:12px">El plan gratis de JSONBin admite unos 100 KB por bin. Cuando te acerques, renueva los libros y borra los cerrados que ya tengas exportados.</div>' : '') +
       '<div class="fila-bt" style="justify-content:flex-start;margin-top:16px"><button class="bt tinta" id="nbAhora"><svg><use href="#i-renovar"/></svg>Sincronizar ahora</button><button class="bt" id="nbVerCodigo"><svg><use href="#i-movil"/></svg>Conectar otro aparato</button><button class="bt peligro" id="nbSalir">Desconectar</button></div>' +
       '<div id="nbCodigoCaja" class="oculto" style="margin-top:16px"><label class="et">Código de sincronización</label><div class="codigo" id="nbCodigo"></div>' +
       '<p class="ayuda">En el otro aparato: abre Apuntado → Sincronizar → «Ya tengo un código», y pega esto. <b>Es como una llave</b>: quien lo tenga puede ver y cambiar tus libros. No lo compartas.</p>' +
       '<button class="bt chico" id="nbCopiar"><svg><use href="#i-copia"/></svg>Copiar</button></div>';
     $('nbAhora').onclick = () => sincronizar('manual');
-    $('nbVerCodigo').onclick = () => { $('nbCodigo').textContent = codigoSync(); $('nbCodigoCaja').classList.remove('oculto'); };
-    $('nbSalir').onclick = async () => { if(await confirmar('¿Desconectar este aparato?', 'Tus libros se quedan aquí y en la nube; solo deja de sincronizar. Podrás volver a conectarlo con el código.', { si:'Desconectar' })){ nube = null; guardarNube(); ponerEstado('off', ''); pintarNube(); } };
+    $('nbVerCodigo').onclick = () => { codigoVisible = true; $('nbCodigo').textContent = codigoSync(); $('nbCodigoCaja').classList.remove('oculto'); };
+    /* Si el panel se redibuja (cambia el estado), el código sigue a la vista */
+    if(codigoVisible){ $('nbCodigo').textContent = codigoSync(); $('nbCodigoCaja').classList.remove('oculto'); }
+    $('nbSalir').onclick = async () => { if(await confirmar('¿Desconectar este aparato?', 'Tus libros se quedan aquí y en la nube; solo deja de sincronizar. Podrás volver a conectarlo con el código.', { si:'Desconectar' })){ desconectarVivo(); nube = null; guardarNube(); ponerEstado('off', ''); pintarNube(); } };
     $('nbCopiar').onclick = () => { navigator.clipboard && navigator.clipboard.writeText(codigoSync()).then(() => aviso('Código copiado.'), () => aviso('Selecciónalo y cópialo a mano.')); };
     return;
   }
@@ -3712,7 +3777,7 @@ function pintarNube(){
         if(!j || !j.metadata || !j.metadata.id) throw new Error('JSONBin respondió sin identificador de bin. Inténtalo otra vez.');
         nube.b = j.metadata.id;
       }
-      guardarNube(); await sincronizar('inicio');
+      guardarNube(); await sincronizar('inicio'); conectarVivo();
       if(nubeEstado === 'err') throw new Error(nubeError);
       pintarNube(); $('nbVerCodigo').click();
       aviso('Conectado. Ahora pasa el código a tus otros aparatos.');
@@ -3721,13 +3786,14 @@ function pintarNube(){
   $('nbConectar').onclick = async () => {
     const cfg = leerCodigo($('nbPegar').value);
     if(!cfg){ aviso('Ese código no es válido. Cópialo entero.'); return; }
-    nube = cfg; guardarNube();
+    nube = cfg; guardarNube(); conectarVivo();
     await sincronizar('inicio');
     if(nubeEstado === 'err'){ const m = nubeError; nube = null; guardarNube(); ponerEstado('off', ''); aviso(m); return; }
     pintarNube(); aviso('Conectado. Tus libros ya están aquí.');
   };
 }
-function abrirNube(){ pintarNube(); $('dlgNube').showModal(); }
+let codigoVisible = false;
+function abrirNube(){ codigoVisible = false; pintarNube(); $('dlgNube').showModal(); }
 
 /* ==========================================================================
    EVENTOS
@@ -3949,9 +4015,9 @@ function init(){
   document.addEventListener('visibilitychange', () => {
     if(document.hidden) return;
     pintarSaludo(); $('subSaludo').textContent = 'Apuntado · ' + new Date().toLocaleDateString('es-PE', { weekday:'long', day:'numeric', month:'long' });
-    if(nube){ ultimaActividad = ahora(); sincronizar('vuelta'); }
+    if(nube){ ultimaActividad = ahora(); sincronizar('vuelta'); if(!vivo.es || vivo.es.readyState === 2) conectarVivo(); }
   });
-  window.addEventListener('online', () => nube && sincronizar('red'));
+  window.addEventListener('online', () => { if(nube){ sincronizar('red'); conectarVivo(); } });
   /* Otra pestaña del mismo aparato cambió algo */
   window.addEventListener('storage', e => { if(e.key === K_DATOS){ cargar(); pintar(); } });
 
@@ -3964,7 +4030,7 @@ function init(){
   window.addEventListener('resize', () => { clearTimeout(tAncho); tAncho = setTimeout(() => { if(innerWidth !== anchoAntes && pref.vista === 'mayor'){ anchoAntes = innerWidth; pintarLibro(); } }, 200); });
   pintar();
   ponerEstado(nube ? 'busy' : 'off');
-  if(nube) sincronizar('inicio');
+  if(nube){ sincronizar('inicio'); conectarVivo(); }
   programarSondeo();
   abrirCandado();
 
