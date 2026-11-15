@@ -19,6 +19,23 @@ llevaban los libros a mano. De noche, una **pizarra** (botón de la luna).
   (Debe y Haber, con el saldo en el lado corto para que las sumas cuadren) y
   *Mayor* (por categoría, por medio y mes a mes).
 
+## v2 · los detalles
+
+- Tipografía de imprenta: **Fraunces** para títulos, **IBM Plex** para texto y
+  cifras (se guardan en el aparato la primera vez; sin internet usa las del sistema).
+- Papel con grano, lomos con dorados y placa, altura según cuántos asientos
+  tiene cada libro, sujetalibros, páginas apiladas y cinta marcapáginas del
+  color del libro.
+- La ecuación cuenta hacia su nuevo valor al cambiar, muestra qué parte de lo
+  movido fue entrada o salida, y una línea con la evolución del saldo.
+- El Diario se agrupa por **mes** con sus subtotales, enseña el día de la
+  semana, deja elegir el orden (antiguo o nuevo arriba) y tiene duplicar y
+  borrar a mano en cada fila.
+- Cada categoría lleva siempre su punto de color.
+- Mayor con un **gráfico mes a mes** (entró / salió), con detalle al pasar por encima.
+- El monto es **calculadora**: `12.50+3.80` o `3x12.50`.
+- Barra de avance de las cinco preguntas, y un pie con el estado del aparato.
+
 ## Anotar sin equivocarse
 
 El asiento se hace en cinco preguntas — entra o sale, cuánto, por qué, cuándo y
