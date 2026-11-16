@@ -36,7 +36,7 @@ S.machu_picchu = (t, d) => { sky(SKY.dawn); sun(400, 300, 50); mountains(321, 60
 S.bingham = (t, d) => { sky(['#1f3a28', '#2f5a36', '#4a7a42', '#2a4a2a']); const R = rng(331); for (let i = 0; i < 40; i++) { X.fillStyle = `rgba(20,${50 + R() * 50},20,.8)`; X.beginPath(); X.ellipse(R() * W, R() * 700, 80 + R() * 120, 40 + R() * 60, R(), 0, 7); X.fill(); }
   X.fillStyle = '#6a5a3a'; X.beginPath(); X.moveTo(0, 1080); X.quadraticCurveTo(700, 820, 1920, 700); X.lineTo(1920, 1080); X.fill();
   const k = ease(prog(t, 0, d)); person(lerp(700, 1000, k), lerp(930, 870, k), 330, { col: '#1a120a', hat: 'slouch', walk: t * 6, staff: true, arm: .2, rim: 'rgba(255,230,160,.7)' });
-  person(lerp(420, 720, k), lerp(980, 930, k), 360, { col: '#2a1a0e', hat: 'explorer', walk: t * 6, arm: .1, rim: 'rgba(255,230,160,.7)' });
+  person(lerp(420, 720, k), lerp(980, 930, k), 360, { expr: 'talk', col: '#2a1a0e', hat: 'explorer', walk: t * 6, arm: .1, rim: 'rgba(255,230,160,.7)' });
   rays(1600, 0, '#fff2c0', t, 8, 1400, .07); particles(t, 50, 332, '#fff7d0'); txt('1911', 1600, 200, 90, '#fff', { w: 900, stroke: 10 }); vignette(.5); };
 S.farmers = (t, d) => { S.machu_picchu(t, d); [[450, 830], [620, 870], [800, 910]].forEach(([x, y], i) => person(x, y, 130, { col: '#2a1a0e', hat: 'slouch', arm: Math.sin(t * 3 + i) * .6 + .3, dress: i === 1, dressCol: '#7a1a1a' }));
   [[980, 900], [1060, 905]].forEach(([x, y]) => { X.fillStyle = '#e8e0d0'; X.beginPath(); X.ellipse(x, y - 30, 30, 20, 0, 0, 7); X.fill(); X.fillRect(x + 15, y - 60, 10, 30); }); };
@@ -81,7 +81,7 @@ function tomato(x, y, r) { const g = X.createRadialGradient(x - r * .35, y - r *
   X.fillStyle = '#2f7a2a'; for (let i = 0; i < 5; i++) { X.save(); X.translate(x, y - r * .85); X.rotate(i / 5 * Math.PI * 2); X.beginPath(); X.ellipse(0, -r * .15, r * .08, r * .25, 0, 0, 7); X.fill(); X.restore(); } }
 S.doctor_tomato = (t, d) => { sky(SKY.indoor); X.fillStyle = '#4a2c16'; X.fillRect(0, 0, W, H); X.fillStyle = '#5a3a1e'; for (let i = 0; i < 5; i++) X.fillRect(1250, 200 + i * 140, 550, 20);
   for (let i = 0; i < 20; i++) { X.fillStyle = ['#7a2a2a', '#2a4a7a', '#4a6a2a', '#e8d8b0'][i % 4]; X.fillRect(1270 + (i % 5) * 105, 140 + Math.floor(i / 5) * 140, 50, 60); }
-  person(760, 1000, 640, { col: '#14100c', hat: 'top', arm: .9 + Math.sin(t * 2) * .05, rim: 'rgba(255,210,150,.8)', item: (a, b) => tomato(a, b - 14, 22) });
+  person(760, 1000, 640, { expr: 'talk', col: '#14100c', hat: 'top', arm: .9 + Math.sin(t * 2) * .05, rim: 'rgba(255,210,150,.8)', item: (a, b) => tomato(a, b - 14, 22) });
   txt('1830 · EE. UU.', 400, 200, 64, '#fff', { w: 900, stroke: 9 }); vignette(.55); };
 S.pills = (t, d) => { sky(['#2a1a10', '#3a2416', '#4a2c1a', '#1a0f08']); X.fillStyle = '#5a3a1e'; X.fillRect(0, 740, W, 340);
   for (let i = 0; i < 5; i++) { const x = 400 + i * 280; X.fillStyle = 'rgba(220,240,255,.2)'; X.beginPath(); X.roundRect(x - 80, 460, 160, 280, 20); X.fill(); X.fillStyle = '#e8dcc0'; X.fillRect(x - 60, 560, 120, 90); txt('TOMATE', x, 605, 26, '#a8160e', { w: 900 }); X.fillStyle = '#3a2412'; X.fillRect(x - 50, 430, 100, 34); }
@@ -103,9 +103,9 @@ S.fork_gold = (t, d) => { sky(['#14060a', '#2a0c14', '#3a1220', '#14060a']); X.f
 function banquetTable(t) { X.fillStyle = '#4a1a12'; X.fillRect(0, 0, W, H); X.fillStyle = '#6a2a1a'; for (let i = 0; i < 6; i++) { X.beginPath(); X.roundRect(100 + i * 300, 80, 200, 380, [100, 100, 0, 0]); X.fill(); }
   X.fillStyle = '#e8dcc0'; X.fillRect(0, 720, W, 360); X.fillStyle = '#c9a227'; for (let i = 0; i < 5; i++) { X.beginPath(); X.ellipse(300 + i * 330, 800, 90, 26, 0, 0, 7); X.fill(); }
   [[500, 700], [1400, 700]].forEach(([x, y]) => { X.fillStyle = '#efe0c0'; X.fillRect(x - 8, y - 70, 16, 70); glow(x, y - 85, 160, '#ffb347', .6); X.fillStyle = '#ffcf6b'; X.beginPath(); X.ellipse(x, y - 82, 7, 14 + Math.sin(t * 9 + x) * 2, 0, 0, 7); X.fill(); }); }
-S.banquet = (t, d) => { banquetTable(t); person(960, 960, 560, { col: '#1a0a12', hat: 'crown', hatCol: '#e0b03a', dress: true, dressCol: '#3a0f4a', rim: 'rgba(255,210,140,.9)', arm: .55 + Math.sin(t * 2) * .1, item: (a, b) => { X.save(); X.scale(.25, .25); fork(a * 4, b * 4 - 40, 1, -.3); X.restore(); } });
+S.banquet = (t, d) => { banquetTable(t); person(960, 960, 560, { expr: 'happy', col: '#1a0a12', hat: 'crown', hatCol: '#e0b03a', dress: true, dressCol: '#3a0f4a', rim: 'rgba(255,210,140,.9)', arm: .55 + Math.sin(t * 2) * .1, item: (a, b) => { X.save(); X.scale(.25, .25); fork(a * 4, b * 4 - 40, 1, -.3); X.restore(); } });
   txt('Venecia · ≈ año 1000', 960, 190, 60, '#fff', { w: 900, stroke: 9 }); vignette(.5); };
-S.clergy = (t, d) => { banquetTable(t); [[500, -1, 0], [760, 1, 1], [1180, -1, 2], [1440, 1, 3]].forEach(([x, f, i]) => person(x, 1000, 470 + (i % 2) * 30, { col: '#0e0a0a', hat: 'mitre', dress: true, dressCol: '#1a1414', face: f, arm: 1 + Math.sin(t * 6 + i) * .2, rim: 'rgba(255,200,140,.8)' }));
+S.clergy = (t, d) => { banquetTable(t); [[500, -1, 0], [760, 1, 1], [1180, -1, 2], [1440, 1, 3]].forEach(([x, f, i]) => person(x, 1000, 470 + (i % 2) * 30, { expr: 'surprised', col: '#0e0a0a', hat: 'mitre', dress: true, dressCol: '#1a1414', face: f, arm: 1 + Math.sin(t * 6 + i) * .2, rim: 'rgba(255,200,140,.8)' }));
   txt('!!', 960, 360 + Math.sin(t * 8) * 8, 160, '#ff3b3b', { w: 900, stroke: 12 }); vignette(.5); };
 S.hands_eat = (t, d) => { banquetTable(t); X.save(); X.translate(960, 760); X.fillStyle = '#8a5a2a'; X.beginPath(); X.ellipse(0, 0, 220, 60, 0, 0, 7); X.fill(); X.fillStyle = '#c47a3a'; X.beginPath(); X.ellipse(0, -40, 140, 70, 0, 0, 7); X.fill(); X.restore();
   [[-1, 640], [1, 1280]].forEach(([f, x]) => { X.save(); X.translate(x + Math.sin(t * 3) * 20 * f, 600 + Math.cos(t * 3) * 20); X.scale(f, 1); X.fillStyle = '#d9a07a'; X.beginPath(); X.roundRect(-160, -40, 200, 80, 30); X.fill(); for (let i = 0; i < 4; i++) { X.beginPath(); X.roundRect(30, -40 + i * 22, 70, 18, 9); X.fill(); } X.restore(); });
@@ -130,14 +130,14 @@ S.molasses_wave = (t, d) => { bostonBg(t, SKY.storm); const k = ease(prog(t, 0, 
   X.save(); const g = X.createLinearGradient(0, 400, 0, H); g.addColorStop(0, '#6a3410'); g.addColorStop(1, '#2a1004'); X.fillStyle = g; X.beginPath(); X.moveTo(W + 200, H); X.lineTo(W + 200, 500);
   for (let x = W + 200; x >= front; x -= 40) X.lineTo(x, 520 + Math.sin(x / 80 + t * 3) * 25 + (x - front < 300 ? (300 - (x - front)) * .4 : 0)); X.lineTo(front - 60, H); X.fill();
   X.fillStyle = 'rgba(255,200,140,.25)'; for (let x = front; x < W; x += 90) { X.beginPath(); X.ellipse(x, 540 + Math.sin(x / 80 + t * 3) * 25, 40, 8, 0, 0, 7); X.fill(); } X.restore();
-  for (let i = 0; i < 4; i++) { const x = front - 200 - i * 180; if (x > -100) person(x, 1000, 220, { col: '#1a1a1a', hat: 'cap', walk: t * 12 + i, face: -1, arm: 1.2 }); }
+  for (let i = 0; i < 4; i++) { const x = front - 200 - i * 180; if (x > -100) person(x, 1000, 220, { expr: 'surprised', col: '#1a1a1a', hat: 'cap', walk: t * 12 + i, face: -1, arm: 1.2 }); }
   txt('≈ 55 km/h', 1500, 230, 64, GOLD, { w: 900, stroke: 9 }); vignette(.5); };
 S.memorial = (t, d) => { sky(['#05060c', '#0c0f1c', '#141828', '#07080f']); for (let i = 0; i < 21; i++) { const x = 330 + (i % 7) * 210, y = 430 + Math.floor(i / 7) * 160, k = prog(t, i * .08, i * .08 + .5);
     if (k <= 0) continue; X.globalAlpha = k; X.fillStyle = '#efe6d0'; X.fillRect(x - 12, y, 24, 70); glow(x, y - 16, 70, '#ffb347', .7); X.fillStyle = '#ffcf6b'; X.beginPath(); X.ellipse(x, y - 14, 7, 15 + Math.sin(t * 8 + i) * 2, 0, 0, 7); X.fill(); X.globalAlpha = 1; }
   txt('21 víctimas', 960, 230, 84 * ease(prog(t, .5, 1.2)), '#fff', { w: 900, stroke: 10 }); vignette(.6); };
 S.boston_sun = (t, d) => { bostonBg(t, ['#ff9a3c', '#ffc46b', '#ffe0a0', '#fff2d0']); sun(1500, 200, 90, '#fff', '#ffb347'); X.fillStyle = 'rgba(255,170,60,.12)'; X.fillRect(0, 0, W, H);
   for (let i = 0; i < 8; i++) { const k = (t * .3 + i / 8) % 1; X.strokeStyle = `rgba(150,70,20,${.5 * (1 - k)})`; X.lineWidth = 6; X.beginPath(); const x = 300 + i * 200; X.moveTo(x, 900 - k * 500); X.bezierCurveTo(x - 30, 860 - k * 500, x + 30, 820 - k * 500, x, 780 - k * 500); X.stroke(); }
-  person(700, 1000, 300, { col: '#2a1a10', hat: 'top', arm: 1.1, face: 1 }); txt('Huele a… ¡dulce!', 960, 220, 70, '#5a2a0a', { w: 900, stroke: 6, sc: '#fff2d0' }); vignette(.35); };
+  person(700, 1000, 300, { expr: 'happy', col: '#2a1a10', hat: 'top', arm: 1.1, face: 1 }); txt('Huele a… ¡dulce!', 960, 220, 70, '#5a2a0a', { w: 900, stroke: 6, sc: '#fff2d0' }); vignette(.35); };
 
 // ---------- Estrasburgo 1518 ----------
 function strasBg(t) { sky(SKY.dawn); clouds(t, 381, 'rgba(255,230,210,.5)', 60, 260, 5, 8);
@@ -145,12 +145,12 @@ function strasBg(t) { sky(SKY.dawn); clouds(t, 381, 'rgba(255,230,210,.5)', 60, 
   for (let i = 0; i < 8; i++) { const x = i < 4 ? 40 + i * 190 : 1140 + (i - 4) * 190, h = 380 + (i * 37) % 100; X.fillStyle = '#efe2c8'; X.fillRect(x, 800 - h, 170, h); X.strokeStyle = '#4a2a18'; X.lineWidth = 8;
     X.strokeRect(x, 800 - h, 170, h); X.beginPath(); X.moveTo(x, 800 - h); X.lineTo(x + 170, 800 - h / 2); X.moveTo(x + 170, 800 - h); X.lineTo(x, 800 - h / 2); X.stroke(); X.fillStyle = '#7a2a1a'; X.beginPath(); X.moveTo(x - 10, 800 - h); X.lineTo(x + 85, 800 - h - 120); X.lineTo(x + 180, 800 - h); X.fill(); }
   ground(800, '#8a7a6a', '#4a4036'); }
-S.strasbourg = (t, d) => { strasBg(t); txt('Estrasburgo · 1518', 960, 900 - 700, 64, '#fff', { w: 900, stroke: 9 }); crowd(1000, 8, 391, 200, 240, { col: '#1a120c', hats: ['cap', 'veil', 'none'], walking: true }, t); vignette(.4); };
+S.strasbourg = (t, d) => { strasBg(t); txt('Estrasburgo · 1518', 1400, 230, 64, '#fff', { w: 900, stroke: 9 }); crowd(1000, 8, 391, 200, 240, { col: '#1a120c', hats: ['cap', 'veil', 'none'], walking: true }, t); vignette(.4); };
 S.woman_dance = (t, d) => { strasBg(t); crowd(1020, 10, 392, 220, 260, { col: '#120c08', hats: ['cap', 'veil'] }, 0);
-  X.save(); X.translate(960, 980); X.rotate(Math.sin(t * 4) * .15); person(0, 0, 420, { col: '#1a0e14', hat: 'veil', dress: true, dressCol: '#6a1a2a', arm: Math.sin(t * 5) * .9 + .2, walk: t * 8, rim: 'rgba(255,210,170,.9)' }); X.restore();
+  X.save(); X.translate(960, 980); X.rotate(Math.sin(t * 4) * .15); person(0, 0, 420, { expr: 'laugh', col: '#1a0e14', hat: 'veil', dress: true, dressCol: '#6a1a2a', arm: Math.sin(t * 5) * .9 + .2, walk: t * 8, rim: 'rgba(255,210,170,.9)' }); X.restore();
   txt('¡Días bailando sin parar!', 960, 200, 60, GOLD, { w: 900, stroke: 9 }); vignette(.45); };
 S.crowd_dance = (t, d) => { strasBg(t); const R = rng(393); for (let i = 0; i < 26; i++) { const x = R() * W, y = 880 + R() * 160, h = 200 + R() * 120; X.save(); X.translate(x, y); X.rotate(Math.sin(t * 4 + i) * .2);
-    person(0, 0, h, { col: '#140c08', hat: R() > .5 ? 'veil' : 'cap', dress: R() > .5, dressCol: '#3a1a1a', arm: Math.sin(t * 5 + i) * .9 + .2, walk: t * 8 + i }); X.restore(); }
+    person(0, 0, h, { expr: i % 2 ? 'laugh' : 'happy', col: '#140c08', hat: R() > .5 ? 'veil' : 'cap', dress: R() > .5, dressCol: '#3a1a1a', arm: Math.sin(t * 5 + i) * .9 + .2, walk: t * 8 + i }); X.restore(); }
   for (let i = 0; i < 2; i++) person(150 + i * 1620, 1000, 260, { col: '#0e0a06', hat: 'cap', arm: Math.sin(t * 9) * .3 + .6, item: (a, b) => { X.fillStyle = '#8a5a2a'; X.beginPath(); X.ellipse(a, b, 14, 26, .5, 0, 7); X.fill(); } });
   vignette(.45); };
 S.historian = (t, d) => { S.library(t, d); X.save(); X.translate(960, 600); const k = back(prog(t, .3, .9)); X.scale(k, k); X.fillStyle = '#f3e6c8'; X.fillRect(-300, -200, 600, 400); X.strokeStyle = '#3a2a1a'; X.lineWidth = 4;
@@ -195,7 +195,7 @@ function cinemaScreen(t) { X.fillStyle = '#05050a'; X.fillRect(0, 0, W, H); X.fi
   globe(1450, 520, 160, t); const sx = 400 + (t * 120) % 1000; X.fillStyle = '#c8ccd4'; X.beginPath(); X.moveTo(sx, 300); X.lineTo(sx + 260, 330); X.lineTo(sx, 360); X.fill(); X.fillStyle = '#7a8090'; X.fillRect(sx - 40, 320, 50, 20);
   for (let i = 0; i < 3; i++) { const k = (t * 2 + i / 3) % 1; X.strokeStyle = i % 2 ? '#ff3b3b' : '#3bff6b'; X.lineWidth = 6; X.beginPath(); X.moveTo(sx + 260 + k * 500, 330 - i * 20); X.lineTo(sx + 330 + k * 500, 330 - i * 20); X.stroke(); } X.restore();
   glow(960, 390, 900, '#8aa8ff', .12); }
-S.cinema = (t, d) => { cinemaScreen(t); crowd(1060, 40, 461, 220, 280, { col: '#030305', cheer: t > 1.5 }, t); vignette(.4); };
+S.cinema = (t, d) => { cinemaScreen(t); crowd(1060, 40, 461, 220, 280, { col: '#030305', cheer: t > 1.5, expr: 'surprised' }, t); vignette(.4); };
 S.split_cinema = (t, d) => { X.save(); X.beginPath(); X.rect(0, 0, W / 2, H); X.clip(); X.translate(-480, 0); S.cinema(t, d); X.restore(); X.save(); X.beginPath(); X.rect(W / 2, 0, W / 2, H); X.clip(); X.translate(480, 0); S.guillotine(t, d); X.restore();
   X.fillStyle = GOLD; X.fillRect(W / 2 - 4, 0, 8, H); panel(W / 2 - 200, 70, 400, 110, 24); txt('MISMO AÑO', W / 2, 125, 58 * ease(prog(t, 0, .8)), GOLD, { w: 900 }); vignette(.4); };
 

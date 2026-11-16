@@ -2,7 +2,7 @@
 let TL = null, LOGO = null;
 
 function logoBg(t) { sky(['#0b0716', '#1a0f24', '#2a1630', '#0e0814']); rays(W / 2, H / 2 - 60, '#ffbe3c', t, 18, 1600, .16); stars(150, 501, t); particles(t, 60, 502, '#ffd98a'); vignette(.55); }
-function drawLogo(cx, cy, size) { if (!LOGO) return; glow(cx, cy, size * .95, '#ffbe3c', .45); X.drawImage(LOGO, cx - size / 2, cy - size / 2, size, size); }
+function drawLogo(cx, cy, size) { if (!LOGO || size < 4) return; glow(cx, cy, size * .95, '#ffbe3c', .45); X.drawImage(LOGO, cx - size / 2, cy - size / 2, size, size); }
 S.logo_intro = (t, d) => { logoBg(t); const s = back(prog(t, 0, .6)) * (1 + .02 * Math.sin(t * 3)); drawLogo(W / 2, H / 2 - 70, 560 * s);
   X.globalAlpha = ease(prog(t, .5, 1)); txt(TL.title.split(' · ')[0], W / 2, H / 2 + 270, 44, GOLD, { stroke: 7 }); X.globalAlpha = 1; };
 S.title_card = (t, d) => { logoBg(t); const s = back(prog(t, 0, .6)); drawLogo(W / 2, H / 2 - 90, 520 * s);
@@ -52,7 +52,7 @@ let OFF = null, OX = null;
 function drawScene(sc, t) { const lt = t - sc.t, d = sc.end - sc.t, f = S[sc.key];
   X.save(); if (!sc.key.startsWith('logo') && sc.key !== 'title_card') { const z = 1 + .06 * (lt / Math.max(d, 1)); X.translate(W / 2, H / 2); X.scale(z, z); X.translate(-W / 2, -H / 2); }
   if (f) f(lt, d); else { sky(SKY.night); txt('escena pendiente: ' + sc.key, W / 2, H / 2, 50, '#f55'); } X.restore(); }
-function frame(t) { const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i;
+function frame(t) { NOW = t; const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i;
   const cur = sc[k], fade = .35; drawScene(cur, t);
   if (k > 0 && t < cur.t + fade) { if (!OFF) { OFF = document.createElement('canvas'); OFF.width = W; OFF.height = H; } const main = X; X = OFF.getContext('2d'); drawScene(sc[k - 1], t); X = main;
     X.globalAlpha = 1 - ease(prog(t, cur.t, cur.t + fade)); X.drawImage(OFF, 0, 0); X.globalAlpha = 1; }

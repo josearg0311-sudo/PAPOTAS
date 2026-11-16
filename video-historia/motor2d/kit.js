@@ -30,7 +30,7 @@ const SKY = {
   indoor: ['#1a0f08', '#2e1a0d', '#4a2c16', '#2a170b'],
   stage: ['#050208', '#14061a', '#2a0b2a', '#120410'],
 };
-function sun(x, y, r, col = '#fff1b8', glow = '#ffb347') {
+function sun(x, y, r, col = '#fff1b8', glow = '#ffb347') { r = Math.max(1, r);
   const g = X.createRadialGradient(x, y, 0, x, y, r * 6);
   g.addColorStop(0, rgba('#ffffff', 0.9)); g.addColorStop(0.15, rgba(glow, 0.55)); g.addColorStop(1, rgba(glow, 0));
   X.fillStyle = g; X.fillRect(x - r * 6, y - r * 6, r * 12, r * 12);
@@ -70,7 +70,7 @@ function rays(x, y, col, t, n = 14, len = 1600, a = .12) { X.save(); X.globalCom
     X.fillStyle = rgba(col, a * (.6 + .4 * Math.sin(t * .8 + i * 1.7))); X.beginPath(); X.moveTo(x, y);
     X.lineTo(x + Math.cos(ang - w) * len, y + Math.sin(ang - w) * len); X.lineTo(x + Math.cos(ang + w) * len, y + Math.sin(ang + w) * len); X.fill(); }
   X.restore(); }
-function glow(x, y, r, col, a = .5) { const g = X.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0)); X.fillStyle = g; X.fillRect(x - r, y - r, 2 * r, 2 * r); }
+function glow(x, y, r, col, a = .5) { r = Math.max(1, r); const g = X.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, rgba(col, a)); g.addColorStop(1, rgba(col, 0)); X.fillStyle = g; X.fillRect(x - r, y - r, 2 * r, 2 * r); }
 function vignette(a = .55) { const g = X.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * 1.05); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, `rgba(0,0,0,${a})`); X.fillStyle = g; X.fillRect(0, 0, W, H); }
 function smoke(x, y, t, s = 1, col = '#555') { for (let i = 0; i < 8; i++) { const k = (t * .4 + i / 8) % 1; X.fillStyle = rgba(col, .35 * (1 - k));
   X.beginPath(); X.arc(x + Math.sin(i * 3 + t) * 20 * s + k * 120 * s, y - k * 300 * s, (20 + k * 80) * s, 0, 7); X.fill(); } }

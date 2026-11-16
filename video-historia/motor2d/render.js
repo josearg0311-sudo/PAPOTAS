@@ -12,7 +12,7 @@ const stills = (process.argv.find(a => a.startsWith('--frames=')) || '').slice(9
   const font = 'data:font/woff;base64,' + fs.readFileSync(path.join(D, '../fuentes/montserrat-latin-800-normal.woff')).toString('base64');
   const font9 = 'data:font/woff;base64,' + fs.readFileSync(path.join(D, '../fuentes/montserrat-latin-900-normal.woff')).toString('base64');
   const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(D, '../img/logo.png')).toString('base64');
-  const js = ['kit.js', 'escenas1.js', 'escenas2.js', 'capas.js'].filter(f => fs.existsSync(path.join(D, f))).map(f => fs.readFileSync(path.join(D, f), 'utf8')).join('\n');
+  const js = ['kit.js', 'personajes.js', 'escenas1.js', 'escenas2.js', 'capas.js'].filter(f => fs.existsSync(path.join(D, f))).map(f => fs.readFileSync(path.join(D, f), 'utf8')).join('\n');
   await p.setContent(`<html><head><style>@font-face{font-family:Mont;font-weight:800;src:url(${font})}@font-face{font-family:Mont;font-weight:900;src:url(${font9})}body{margin:0}</style></head>
     <body><canvas id=c width=1920 height=1080></canvas><script>${js}
     setCtx(document.getElementById('c').getContext('2d'));
