@@ -15,7 +15,7 @@ function frameV(t, n, t0, t1) {
   // 1) escena horizontal (sin capas de texto) en un lienzo aparte
   X = SHX; NOW = t; const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i;
   drawScene(sc[k], t); if (k > 0 && t < sc[k].t + .35) { if (!OFF) { OFF = document.createElement('canvas'); OFF.width = W; OFF.height = H; } const m2 = X; X = OFF.getContext('2d'); drawScene(sc[k - 1], t); X = m2; X.globalAlpha = 1 - ease(prog(t, sc[k].t, sc[k].t + .35)); X.drawImage(OFF, 0, 0); X.globalAlpha = 1; }
-  finish(t); chispaLayer(t);
+  finish(t);
   X = MAIN;
   // 2) fondo: la misma escena ampliada, desenfocada y oscurecida
   const b = SHB.getContext('2d'); b.filter = 'blur(6px) brightness(.45) saturate(1.2)'; b.drawImage(SH, 420, 0, 1080, 1080, -20, -20, 310, 520); b.filter = 'none';
@@ -36,7 +36,10 @@ function frameV(t, n, t0, t1) {
       r.forEach(([w, ww]) => { const on = w.s - .04 <= t && t < w.e + .06; X.lineWidth = 16; X.lineJoin = 'round'; X.strokeStyle = '#000'; X.strokeText(w.w, x, y); X.fillStyle = on ? GOLD : '#fff'; X.fillText(w.w, x, y); x += ww + sp; }); });
     X.restore(); }
   // 6) pie: logo + nombre del canal
-  drawLogo(VW / 2 - 290, 1800, 120); txt('¿Acaso lo sabías?', VW / 2 + 50, 1800, 52, '#fff', { w: 900, stroke: 10 });
+  drawLogo(150, 1800, 120); txt('¿Acaso lo sabías?', 470, 1800, 52, '#fff', { w: 900, stroke: 10 });
+  // Chispa junto al pie, con su comentario
+  { const lt2 = t - t0 - .3; chispa(VW - 120, 1790, .45, { expr: lt2 > 4.6 && lt2 < 7.2 ? 'talk' : (lt2 < 4.6 ? 'surprised' : 'happy'), look: -1 });
+    bubble(VW - 170, 1700, CHISPA_FRASES[n] || '¡Wow!', prog(lt2, 4.6, 5) * (1 - prog(lt2, 7, 7.3)), -1, 40); }
   // 7) barra de progreso del short
   X.fillStyle = 'rgba(255,255,255,.25)'; X.fillRect(0, 0, VW, 10); X.fillStyle = GOLD; X.fillRect(0, 0, VW * prog(t, t0, t1), 10);
   const fa = Math.min(prog(t, t0, t0 + .25), 1 - prog(t, t1 - .4, t1)); if (fa < 1) { X.fillStyle = `rgba(0,0,0,${1 - fa})`; X.fillRect(0, 0, VW, VH); }
