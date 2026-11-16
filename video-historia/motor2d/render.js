@@ -26,7 +26,7 @@ const stills = (process.argv.find(a => a.startsWith('--frames=')) || '').slice(9
     await b.close(); return;
   }
   const ff = spawn('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-r', String(FPS), '-i', '-',
-    '-ss', String(t0), '-t', String(t1 - t0), '-i', path.join(D, `audio_${vid}.wav`),
+    '-ss', String(t0), '-t', String(t1 - t0), '-i', fs.existsSync(path.join(D, `audio_${vid}_mix.wav`)) ? path.join(D, `audio_${vid}_mix.wav`) : path.join(D, `audio_${vid}.wav`),
     '-c:v', 'libx264', '-preset', 'medium', '-crf', '19', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '192k', '-shortest', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const n0 = Math.round(t0 * FPS), n1 = Math.round(t1 * FPS);
   for (let i = n0; i < n1; i++) {
