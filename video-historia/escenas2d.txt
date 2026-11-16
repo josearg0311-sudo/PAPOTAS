@@ -1,0 +1,102 @@
+# id | frase donde empieza | escena (función en motor2d/escenas*.js)
+v1_01 | Cleopatra vivió más cerca de nuestra | egypt_cleo
+v1_02 | Hubo una guerra que duró | zanzibar_fire
+v1_03 | Y otra… que la ganaron | emu_victory
+v1_04 | Parece inventado, ¿verdad? | book_magic
+v1_05 | Hoy te traigo veinte datos | classroom
+v1_06 | Y quédate hasta el final | hourglass_scene
+v1_07 | ¡Holaa! | logo_intro
+v1_08 | ¿Qué pasó primero: | versus
+v1_09 | Dato número uno: Cleopatra | egypt_cleo2
+v1_10 | la llegada del hombre a la Luna | moon_landing
+v1_11 | La pirámide se terminó | timeline_cleo
+v1_12 | Para ella, las pirámides | pyramid_ruins
+v1_13 | como para nosotros lo son | colosseum
+v1_14 | Dato número dos: | oxford
+v1_15 | más antigua que el Imperio azteca | aztec_temple
+v1_16 | En Oxford ya se daban clases | timeline_oxford
+v1_17 | Y la gran ciudad azteca, | tenochtitlan
+v1_18 | Cuando nacieron los aztecas | library
+v1_19 | Dato número tres: | mammoths
+v1_20 | En una pequeña isla del Ártico | wrangel_map
+v1_21 | Es decir: mientras los egipcios | split_pyr_mammoth
+v1_22 | Hay cosas que todo el mundo cree… | myth
+v1_23 | Dato número cuatro: | napoleon
+v1_24 | Medía alrededor de un metro | height_chart
+v1_25 | El mito nació por una confusión | inches
+v1_26 | y por las caricaturas | caricature
+v1_27 | Además, lo rodeaban sus guardias, | guards
+v1_28 | Dato número cinco: | viking_ship
+v1_29 | Los arqueólogos no han encontrado | excavation
+v1_30 | Esa imagen tan famosa | opera
+v1_31 | Imagínate pelear con cuernos | viking_stuck
+v1_32 | ¿Sabías que hubo una guerra | stopwatch
+v1_33 | Dato número seis: | zanzibar_palace
+v1_34 | Los barcos británicos abrieron fuego | zanzibar_fire
+v1_35 | en unos treinta y ocho minutos, | clock38
+v1_36 | Dato número siete: | emus_field
+v1_37 | En mil novecientos treinta y dos | emus_wheat
+v1_38 | El ejército mandó soldados | emu_war
+v1_39 | Al final, los soldados | emu_victory
+v1_40 | Dato número ocho: | bucket
+v1_41 | Según cuenta la leyenda, | bucket_theft
+v1_42 | La disputa terminó en una batalla | battle
+v1_43 | ¿Y el balde? | bucket_tower
+v1_44 | Ahora vamos a una de las civilizaciones | andes
+v1_45 | Dato número nueve: | inca_emperor
+v1_46 | En su lugar usaban los quipus: | quipu
+v1_47 | Según el color, la posición | quipu_decode
+v1_48 | Una especie de computadora… | quipu_computer
+v1_49 | Dato número diez: | chasqui
+v1_50 | Los chasquis eran corredores | relay
+v1_51 | Así podían recorrer cientos | relay_map
+v1_52 | Cuentan los cronistas | fish_cusco
+v1_53 | Ahora dime en los comentarios: | logo_comments
+v1_54 | Si te gustó este viaje | logo_subscribe
+v2_01 | ¡Holaa! | logo_intro
+v2_02 | Dato número once: | inca_road
+v2_03 | Se llama el Qhapaq Ñan | road_map
+v2_04 | atravesando desiertos, | rope_bridge
+v2_05 | Hoy es Patrimonio | unesco
+v2_06 | Dato número doce: | machu_picchu
+v2_07 | Cuando el explorador Hiram Bingham | bingham
+v2_08 | y algunas familias vivían | farmers
+v2_09 | Bingham lo dio a conocer | camera_photo
+v2_10 | Hay costumbres del pasado | rome_street
+v2_11 | Dato número trece: | fullonica
+v2_12 | y hasta para blanquear los dientes. | teeth
+v2_13 | Era tan útil que el emperador | vespasian
+v2_14 | Cuando su hijo se quejó, | coin_quote
+v2_15 | Dato número catorce: | ketchup_medicine
+v2_16 | En los años mil ochocientos treinta, | doctor_tomato
+v2_17 | y se vendieron píldoras | pills
+v2_18 | Hoy está en tus papas fritas, | fries
+v2_19 | estaba en la farmacia. | pharmacy
+v2_20 | Dato número quince: | fork_gold
+v2_21 | Hace unos mil años, | banquet
+v2_22 | algunos religiosos lo consideraron | clergy
+v2_23 | Para ellos, Dios nos había dado | hands_eat
+v2_24 | Pasaron siglos hasta que | forks_table
+v2_25 | Algunos sucesos de la historia | projector
+v2_26 | Dato número dieciséis: | boston
+v2_27 | Un tanque gigante, | tank_burst
+v2_28 | La ola, de varios metros | molasses_wave
+v2_29 | Fue una tragedia: | memorial
+v2_30 | Y dicen que en los días de calor, | boston_sun
+v2_31 | Dato número diecisiete: | strasbourg
+v2_32 | Todo empezó con una mujer | woman_dance
+v2_33 | En pocas semanas, | crowd_dance
+v2_34 | Se le conoce como | historian
+v2_35 | Y para terminar, | timeline_glow
+v2_36 | Dato número dieciocho: | fax_machine
+v2_37 | El primer invento para enviar | timeline_fax
+v2_38 | Dato número diecinueve: | hanafuda
+v2_39 | Antes de Mario y de las consolas, | console
+v2_40 | Es decir, Nintendo es más antigua | timeline_nintendo
+v2_41 | Y llegamos al último. | dark_paris
+v2_42 | Dato número veinte: | guillotine
+v2_43 | Ese mismo año se estrenó | cinema
+v2_44 | Así que, mientras unos veían | split_cinema
+v2_45 | El pasado está mucho más cerca | hourglass_scene
+v2_46 | Ahora dime en los comentarios: | logo_comments
+v2_47 | Si te gustó este viaje | logo_subscribe
