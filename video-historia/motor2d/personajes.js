@@ -1,7 +1,7 @@
 // Personajes estilo dibujo animado: caras expresivas, parpadeo, respiración, contorno y ropa de color.
 // Sustituye a person(), hat(), emu() y mammoth() del kit (se carga después).
 let NOW = 0;               // tiempo global (lo fija frame())
-const INK = '#2a1810';     // color del contorno
+const INK = '#111111';     // color del contorno
 const LOOK = {             // vestuario por tipo de sombrero
   nemes:    { skin: '#c98a5c', cloth: '#f6f0e0', trim: '#e2b23a', hair: '#1b1210', pants: '#c98a5c' },
   crown:    { skin: '#eab78e', cloth: '#7b2d8e', trim: '#f2c440', hair: '#3a2214', pants: '#5a1f6a' },
@@ -37,7 +37,7 @@ function person(x, y, h, o = {}) {
   X.save(); X.translate(x, y);
   X.fillStyle = 'rgba(0,0,0,.22)'; X.beginPath(); X.ellipse(0, 0, 34 * s, 8 * s, 0, 0, 7); X.fill();
   X.scale(s * f, s); X.translate(0, -bob);
-  const lw = tiny ? 5 : 3.6;
+  const lw = tiny ? 7 : 5.6;
   // capa (detrás)
   if (o.cape) { X.beginPath(); X.moveTo(-26, -118); X.bezierCurveTo(-48, -80, -56 - Math.sin(wp) * 6, -30, -50, -2); X.lineTo(10, -8); X.lineTo(22, -118); X.closePath(); blob(o.cape.startsWith('#') && parseInt(o.cape.slice(1, 3), 16) > 60 ? o.cape : L.trim === '#f2c440' ? '#a8262a' : shade(L.cloth, -.25), lw); }
   // piernas
@@ -69,7 +69,7 @@ function person(x, y, h, o = {}) {
   X.save(); X.translate(0, hb);
   X.beginPath(); X.ellipse(0, -128, 8, 8, 0, 0, 7); X.fillStyle = L.skin; X.fill();
   if (o.hat === 'nemes' || o.hat === 'veil') { X.beginPath(); X.moveTo(-36, -170); X.quadraticCurveTo(-44, -120, -30, -108); X.lineTo(30, -108); X.quadraticCurveTo(44, -120, 36, -170); blob(o.hat === 'nemes' ? L.hair : L.hair, lw); }
-  X.beginPath(); X.ellipse(0, -160, 33, 36, 0, 0, 7); blob(L.skin, lw);
+  X.beginPath(); X.moveTo(-38, -168); X.bezierCurveTo(-42, -214, 42, -214, 38, -168); X.bezierCurveTo(40, -128, 20, -122, 4, -121); X.bezierCurveTo(-18, -122, -40, -130, -38, -168); blob(L.skin, lw);
   // pelo
   if (!['bearskin', 'top', 'mitre', 'horned', 'viking', 'nemes', 'explorer', 'slouch'].includes(o.hat)) { X.beginPath(); X.ellipse(-2, -184, 31, 17, -.1, Math.PI * .95, Math.PI * 2.05); blob(L.hair, lw); }
   if (L.beard) { X.beginPath(); X.moveTo(-26, -158); X.quadraticCurveTo(-28, -112, 0, -108); X.quadraticCurveTo(28, -112, 26, -158); X.quadraticCurveTo(0, -136, -26, -158); blob(L.beard, lw); }
@@ -82,13 +82,13 @@ function person(x, y, h, o = {}) {
 }
 function face(expr, L, seed) {
   const blink = ((NOW + (seed % 97) * .37) % 3.7) < .13;
-  const ey = -164, lx = -9, rx = 14, look = 3;
+  const ey = -170, lx = -12, rx = 15, look = 3;
   const surprised = expr === 'surprised', angry = expr === 'angry';
   // mejillas
   X.fillStyle = 'rgba(255,110,110,.35)'; X.beginPath(); X.arc(-20, -146, 7, 0, 7); X.arc(26, -146, 7, 0, 7); X.fill();
   [lx, rx].forEach(ex => { if (blink && !surprised) { outline(3.2); X.beginPath(); X.moveTo(ex - 7, ey); X.quadraticCurveTo(ex, ey + 4, ex + 7, ey); X.stroke(); return; }
-    const ry = surprised ? 12 : 10; X.beginPath(); X.ellipse(ex, ey, 8, ry, 0, 0, 7); blob('#ffffff', 2.4);
-    X.fillStyle = '#2a1a12'; X.beginPath(); X.ellipse(ex + look, ey + 1, 4.6, 6, 0, 0, 7); X.fill(); X.fillStyle = '#fff'; X.beginPath(); X.arc(ex + look + 1.6, ey - 2, 1.8, 0, 7); X.fill(); });
+    const ry = surprised ? 17 : 14; X.beginPath(); X.ellipse(ex, ey - 2, 12, ry, 0, 0, 7); blob('#ffffff', 3.6);
+    X.fillStyle = '#111'; X.beginPath(); X.arc(ex + look + 1, ey, surprised ? 3 : 4.2, 0, 7); X.fill(); });
   // cejas
   outline(3.4); const by = ey - 15 - (surprised ? 5 : 0);
   X.beginPath(); X.moveTo(lx - 8, by + (angry ? -3 : 1)); X.lineTo(lx + 7, by + (angry ? 4 : expr === 'sad' ? -4 : -1)); X.moveTo(rx - 7, by + (angry ? 4 : expr === 'sad' ? -4 : -1)); X.lineTo(rx + 8, by + (angry ? -3 : 1)); X.stroke();

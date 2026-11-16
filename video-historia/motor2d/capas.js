@@ -4,17 +4,20 @@ let TL = null, LOGO = null;
 function logoBg(t) { sky(['#0b0716', '#1a0f24', '#2a1630', '#0e0814']); rays(W / 2, H / 2 - 60, '#ffbe3c', t, 18, 1600, .16); stars(150, 501, t); particles(t, 60, 502, '#ffd98a'); vignette(.55); }
 function drawLogo(cx, cy, size) { if (!LOGO || size < 4) return; glow(cx, cy, size * .95, '#ffbe3c', .45); X.drawImage(LOGO, cx - size / 2, cy - size / 2, size, size); }
 S.logo_intro = (t, d) => { logoBg(t); const s = back(prog(t, 0, .6)) * (1 + .02 * Math.sin(t * 3)); drawLogo(W / 2, H / 2 - 70, 560 * s);
-  X.globalAlpha = ease(prog(t, .5, 1)); txt(TL.title.split(' · ')[0], W / 2, H / 2 + 270, 44, GOLD, { stroke: 7 }); X.globalAlpha = 1; };
-S.title_card = (t, d) => { logoBg(t); const s = back(prog(t, 0, .6)); drawLogo(W / 2, H / 2 - 90, 520 * s);
+  X.globalAlpha = ease(prog(t, .5, 1)); txt(TL.title.split(' · ')[0], W / 2, H / 2 + 270, 44, GOLD, { stroke: 7 }); X.globalAlpha = 1;
+  const ck = ease(prog(t, .6, 1.2)); chispa(lerp(2200, 1480, ck), 560, .95, { expr: 'talk', wave: true, look: -1 }); bubble(1400, 380, '¡Hola!', prog(t, 1, 1.3), -1, 52); };
+S.title_card = (t, d) => { logoBg(t); const s = back(prog(t, 0, .6)); drawLogo(W / 2, H / 2 - 90, 520 * s); chispa(lerp(2200, 1500, ease(prog(t, .4, 1))), 560, .9, { expr: 'happy', wave: true, look: -1 });
   const k = back(prog(t, .7, 1.2)); if (k > 0) { panel(W / 2 - 230 * k, H / 2 + 220, 460 * k, 120, 30, '#e53935', null); txt('PARTE 2', W / 2, H / 2 + 282, 72 * k, '#fff', { w: 900 }); } };
 S.logo_comments = (t, d) => { logoBg(t); drawLogo(W / 2, H / 2 - 150, 420 * back(prog(t, 0, .5)));
   const k = ease(prog(t, .4, .9)); txt('¿Cuál de estos datos no conocías?', W / 2, H / 2 + 150, 64 * Math.max(k, .05), '#fff', { w: 900, stroke: 9 });
-  txt('¡Te leo en los comentarios! 💬'.replace(' 💬', ''), W / 2, H / 2 + 240, 44 * Math.max(k, .05), GOLD, { stroke: 7 }); };
+  txt('¡Te leo en los comentarios! 💬'.replace(' 💬', ''), W / 2, H / 2 + 240, 44 * Math.max(k, .05), GOLD, { stroke: 7 });
+  chispa(lerp(2200, 1560, ease(prog(t, .3, .9))), 520, .9, { expr: 'talk', look: -1 }); };
 S.logo_subscribe = (t, d) => { logoBg(t); drawLogo(W / 2, H / 2 - 170, 400 * back(prog(t, 0, .5)));
   const bs = back(prog(t, .4, 1)) * (1 + .04 * Math.sin(t * 6)), subs = t > 3.2;
   if (bs > .05) { panel(W / 2 - 280 * bs, H / 2 + 90 - 60 * bs, 560 * bs, 120 * bs, 28 * bs, subs ? '#5a5a5a' : '#e53935', null); txt(subs ? 'SUSCRITO ✓' : 'SUSCRÍBETE', W / 2, H / 2 + 92, 56 * bs, '#fff', { w: 900 });
     // campana
     X.save(); X.translate(W / 2 + 360 * bs, H / 2 + 90); X.rotate(Math.sin(t * 12) * .25 * (t > 4 && t < 6 ? 1 : 0)); X.fillStyle = GOLD; X.beginPath(); X.moveTo(-40 * bs, 30 * bs); X.quadraticCurveTo(-40 * bs, -50 * bs, 0, -50 * bs); X.quadraticCurveTo(40 * bs, -50 * bs, 40 * bs, 30 * bs); X.fill(); X.beginPath(); X.arc(0, 40 * bs, 12 * bs, 0, 7); X.fill(); X.restore(); }
+  chispa(lerp(-300, 400, ease(prog(t, .3, .9))), 600, .95, { expr: t > 3.2 ? 'happy' : 'talk', point: 1, look: 1 }); if (t > 3.3 && t < 5.5) bubble(500, 420, '¡Gracias!', prog(t, 3.3, 3.6) * (1 - prog(t, 5.2, 5.5)), 1, 48);
   if (TL.vid === 'v1' && t > 5) { const k = back(prog(t, 5, 5.6)); panel(W / 2 - 400 * k, H - 200, 800 * k, 100, 24); txt('▶  PARTE 2: datos 11 al 20', W / 2, H - 150, 46 * k, '#fff', { w: 900 }); } };
 S.book_magic = (t, d) => { sky(SKY.indoor); X.fillStyle = '#3a2210'; X.fillRect(0, 760, W, 320); book(960, 800, 1.2, t);
   const R = rng(511); for (let i = 0; i < 8; i++) { const k = (t * .25 + i / 8) % 1, x = 960 + (R() - .5) * 800 * k, y = 600 - k * 520; X.globalAlpha = 1 - k; X.save(); X.translate(x, y); X.rotate((R() - .5) * k);
@@ -57,7 +60,7 @@ function frame(t) { NOW = t; const sc = TL.scenes; let k = 0; for (let i = 0; i 
   if (k > 0 && t < cur.t + fade) { if (!OFF) { OFF = document.createElement('canvas'); OFF.width = W; OFF.height = H; } const main = X; X = OFF.getContext('2d'); drawScene(sc[k - 1], t); X = main;
     X.globalAlpha = 1 - ease(prog(t, cur.t, cur.t + fade)); X.drawImage(OFF, 0, 0); X.globalAlpha = 1; }
   grain(t);
-  progressBar(t); datoBadge(t); likeOverlay(t); subtitles(t);
+  chispaLayer(t); progressBar(t); datoBadge(t); likeOverlay(t); subtitles(t);
   const a = Math.min(prog(t, 0, .4), 1 - prog(t, TL.dur - .8, TL.dur)); if (a < 1) { X.fillStyle = `rgba(0,0,0,${1 - a})`; X.fillRect(0, 0, W, H); } }
 
 let GR = null;
