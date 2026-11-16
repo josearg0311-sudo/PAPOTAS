@@ -84,3 +84,39 @@ datos históricos, curiosidades de la historia, datos curiosos, sabías que, aca
 - **Pantalla final:** en los últimos ~15 s (cuando Chispa dice "¡Gracias!") añade en YouTube Studio el elemento de **vídeo siguiente** apuntando a la otra parte, y el de **suscribirse**.
 - **Lista de reproducción:** crea una lista "Datos que parecen mentira" con las dos partes en orden.
 - **Publica la Parte 2** unos días después de la Parte 1 y añade un comentario fijado en la Parte 1 con el enlace a la Parte 2.
+
+---
+
+## SHORTS (20 vídeos verticales, carpeta `shorts/`)
+
+Descripción para todos (cambia solo la primera línea por el título):
+```
+<TÍTULO DEL SHORT>
+👉 Los 20 datos completos en el vídeo largo de mi canal.
+#shorts #historia #curiosidades #sabiasque #acasolosabias
+```
+
+| Archivo | Título del Short |
+|---|---|
+| short_dato_01.mp4 | Cleopatra vivió más cerca de la LLEGADA A LA LUNA que de las pirámides 🤯 |
+| short_dato_02.mp4 | Oxford es MÁS ANTIGUA que el Imperio azteca 😳 |
+| short_dato_03.mp4 | Cuando se construían las pirámides… ¡AÚN HABÍA MAMUTS! 🦣 |
+| short_dato_04.mp4 | Napoleón NO era bajito (el mito explicado) 📏 |
+| short_dato_05.mp4 | Los vikingos NUNCA usaron cascos con cuernos ⚔️ |
+| short_dato_06.mp4 | La guerra MÁS CORTA de la historia: 38 minutos ⏱️ |
+| short_dato_07.mp4 | Australia PERDIÓ una guerra… contra PÁJAROS 🐦 |
+| short_dato_08.mp4 | Una batalla con miles de soldados… ¡POR UN BALDE! 🪣 |
+| short_dato_09.mp4 | La "computadora" de los incas estaba hecha de HILO 🧶 |
+| short_dato_10.mp4 | El correo inca era MÁS RÁPIDO que un caballo 🏃 |
+| short_dato_11.mp4 | Los incas construyeron 30.000 KM de caminos 🏔️ |
+| short_dato_12.mp4 | Machu Picchu NUNCA estuvo perdido 🤫 |
+| short_dato_13.mp4 | En la antigua Roma, la ORINA valía dinero 💰 |
+| short_dato_14.mp4 | El kétchup se vendía en la FARMACIA como medicina 💊 |
+| short_dato_15.mp4 | Usar TENEDOR fue un escándalo 🍴 |
+| short_dato_16.mp4 | Una OLA DE MELAZA arrasó una ciudad 🌊 |
+| short_dato_17.mp4 | La epidemia de BAILE que nadie podía parar 💃 |
+| short_dato_18.mp4 | El FAX se inventó antes que el teléfono 📠 |
+| short_dato_19.mp4 | Nintendo existe desde 1889 (¡antes que el avión!) 🎴 |
+| short_dato_20.mp4 | Francia usó la guillotina hasta 1977… el año de Star Wars 😱 |
+
+**Consejo:** publica 1 o 2 Shorts al día, empezando por los más llamativos (7, 20, 13, 1, 14). En cada uno, fija un comentario con el enlace al vídeo largo.
