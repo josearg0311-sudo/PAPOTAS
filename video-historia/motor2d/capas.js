@@ -18,7 +18,7 @@ S.logo_subscribe = (t, d) => { logoBg(t); drawLogo(W / 2, H / 2 - 170, 400 * bac
     // campana
     X.save(); X.translate(W / 2 + 360 * bs, H / 2 + 90); X.rotate(Math.sin(t * 12) * .25 * (t > 4 && t < 6 ? 1 : 0)); X.fillStyle = GOLD; X.beginPath(); X.moveTo(-40 * bs, 30 * bs); X.quadraticCurveTo(-40 * bs, -50 * bs, 0, -50 * bs); X.quadraticCurveTo(40 * bs, -50 * bs, 40 * bs, 30 * bs); X.fill(); X.beginPath(); X.arc(0, 40 * bs, 12 * bs, 0, 7); X.fill(); X.restore(); }
   chispa(lerp(-300, 400, ease(prog(t, .3, .9))), 600, .95, { expr: t > 3.2 ? 'happy' : 'talk', point: 1, look: 1 }); if (t > 3.3 && t < 5.5) bubble(500, 420, '¡Gracias!', prog(t, 3.3, 3.6) * (1 - prog(t, 5.2, 5.5)), 1, 48);
-  if (TL.vid === 'v1' && t > 5) { const k = back(prog(t, 5, 5.6)); panel(W / 2 - 400 * k, H - 200, 800 * k, 100, 24); txt('▶  PARTE 2: datos 11 al 20', W / 2, H - 150, 46 * k, '#fff', { w: 900 }); } };
+  if (TL.vid === 'v1' && t > 5) { const k = back(prog(t, 5, 5.6)); panel(W / 2 - 400 * k, 720, 800 * k, 96, 24); txt('▶  PARTE 2: datos 11 al 20', W / 2, 768, 46 * k, '#fff', { w: 900 }); } };
 S.book_magic = (t, d) => { sky(SKY.indoor); X.fillStyle = '#3a2210'; X.fillRect(0, 760, W, 320); book(960, 800, 1.2, t);
   const R = rng(511); for (let i = 0; i < 8; i++) { const k = (t * .25 + i / 8) % 1, x = 960 + (R() - .5) * 800 * k, y = 600 - k * 520; X.globalAlpha = 1 - k; X.save(); X.translate(x, y); X.rotate((R() - .5) * k);
     ['🏛', '⚔', '👑', '🗿'].length; X.fillStyle = '#f3e3c0'; X.fillRect(-60, -40, 120, 80); X.strokeStyle = '#8a6a3a'; X.lineWidth = 3; X.strokeRect(-60, -40, 120, 80); X.fillStyle = '#8a6a3a'; X.beginPath(); X.moveTo(-40, 25); X.lineTo(0, -25); X.lineTo(40, 25); X.fill(); X.restore(); X.globalAlpha = 1; }

@@ -20,11 +20,12 @@ dur_audio = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "fo
 END = words[-1]["e"] + 1.2
 if VID == "v1":
     PRE = 0.0
-    SEGS = [(0.0, words[last(17)]["e"] + 0.5), (words[first(31)]["s"] - 0.3, min(END, dur_audio))]
+    SEGS = [(0.0, min(words[last(17)]["e"] + 0.5, words[first(18)]["s"] - 0.06)), (max(words[first(31)]["s"] - 0.3, words[last(30)]["e"] + 0.06), min(END, dur_audio))]
     TITLE = "20 datos históricos que no te enseñaron en el colegio"
 else:
     PRE = 3.0
-    SEGS = [(words[first(2)]["s"] - 0.25, words[last(2)]["e"] + 0.45), (words[first(18)]["s"] - 0.3, min(END, dur_audio))]
+    SEGS = [(max(words[first(2)]["s"] - 0.25, words[last(1)]["e"] + 0.06), min(words[last(2)]["e"] + 0.45, words[first(3)]["s"] - 0.06)),
+            (max(words[first(18)]["s"] - 0.3, words[last(17)]["e"] + 0.06), min(END, dur_audio))]
     TITLE = "20 datos históricos que no te enseñaron en el colegio · PARTE 2"
 def a2v(t):
     off = PRE

@@ -104,12 +104,12 @@ S.napoleon = (t, d) => { sky(SKY.storm); clouds(t, 43, 'rgba(40,40,50,.6)', 60, 
   X.save(); X.translate(1300, 300); X.strokeStyle = '#111'; X.lineWidth = 6; X.beginPath(); X.moveTo(0, 560); X.lineTo(0, 0); X.stroke(); const wv = t * 3;
   ['#002395', '#ffffff', '#ed2939'].forEach((c, i) => { X.fillStyle = c; X.beginPath(); X.moveTo(i * 70, 0 + Math.sin(wv + i) * 8); X.lineTo(i * 70 + 70, Math.sin(wv + i + 1) * 8); X.lineTo(i * 70 + 70, 150 + Math.sin(wv + i + 1) * 8); X.lineTo(i * 70, 150 + Math.sin(wv + i) * 8); X.fill(); }); X.restore();
   horse(820, 900, 2.1, 1); person(860, 700, 330, { expr: 'talk', col: '#0d0d12', hat: 'bicorne', cape: '#1a1a22', rim: 'rgba(255,220,170,.6)', arm: .9 }); vignette(.6); };
-S.height_chart = (t, d) => { sky(['#121a2e', '#1d2a4a', '#1a2440', '#0e1424']); title('¿Cuánto medía Napoleón?', prog(t, 0, .6), 120);
-  const k = prog(t, .3, 2.2); const base = 800; X.strokeStyle = 'rgba(255,255,255,.15)'; X.lineWidth = 2;
-  for (let cm = 140; cm <= 200; cm += 10) { const y = base - (cm - 120) * 7; X.beginPath(); X.moveTo(300, y); X.lineTo(1650, y); X.stroke(); txt(cm + ' cm', 230, y, 28, 'rgba(255,255,255,.5)'); }
-  const ppl = [{ x: 620, cm: 169, lab: 'Napoleón', hat: 'bicorne', col: GOLD }, { x: 1000, cm: 165, lab: 'Francés promedio', hat: 'none', col: '#9ecbff' }, { x: 1380, cm: 185, lab: 'Su guardia', hat: 'bearskin', col: '#ff8a65' }];
-  ppl.forEach((p, i) => { const kk = ease(prog(k, i * .25, .5 + i * .25)); const hpx = (p.cm - 120) * 7 * 1.05 * kk + 1; person(p.x, base, hpx * 180 / 175, { col: '#0d0f18', hat: kk > .5 ? p.hat : null, rim: rgba(p.col, .9) });
-    txt(p.lab, p.x, base + 60, 40, p.col, { stroke: 7 }); txt((p.cm / 100).toFixed(2).replace('.', ',') + ' m', p.x, base - hpx - 70, 46 * kk, '#fff', { stroke: 8 }); });
+S.height_chart = (t, d) => { sky(['#121a2e', '#1d2a4a', '#1a2440', '#0e1424']); title('¿Cuánto medía Napoleón?', prog(t, 0, .6), 175);
+  const k = prog(t, .3, 2.2); const base = 770; X.strokeStyle = 'rgba(255,255,255,.15)'; X.lineWidth = 2;
+  for (let cm = 140; cm <= 200; cm += 10) { const y = base - (cm - 120) * 6; X.beginPath(); X.moveTo(300, y); X.lineTo(1650, y); X.stroke(); txt(cm + ' cm', 230, y, 28, 'rgba(255,255,255,.5)'); }
+  const ppl = [{ x: 560, cm: 169, lab: 'Napoleón', hat: 'bicorne', col: GOLD }, { x: 920, cm: 165, lab: 'Francés promedio', hat: 'none', col: '#9ecbff' }, { x: 1280, cm: 185, lab: 'Su guardia', hat: 'bearskin', col: '#ff8a65' }];
+  ppl.forEach((p, i) => { const kk = ease(prog(k, i * .25, .5 + i * .25)); const hpx = (p.cm - 120) * 6 * 1.05 * kk + 1; person(p.x, base, hpx * 180 / 175, { col: '#0d0f18', hat: kk > .5 ? p.hat : null, rim: rgba(p.col, .9) });
+    txt(p.lab, p.x, base + 46, 36, p.col, { stroke: 7 }); txt((p.cm / 100).toFixed(2).replace('.', ',') + ' m', p.x, base - hpx - 70, 46 * kk, '#fff', { stroke: 8 }); });
   vignette(.4); };
 S.inches = (t, d) => { sky(SKY.indoor); X.fillStyle = '#5a3a1f'; X.fillRect(0, 300, W, 780); X.fillStyle = 'rgba(0,0,0,.15)'; for (let i = 0; i < 14; i++) X.fillRect(0, 320 + i * 55, W, 3);
   const ruler = (y, unit, lab, col, k) => { const L = 12 * unit * ease(k); X.fillStyle = col; X.fillRect(300, y, L, 90); X.strokeStyle = '#3a2a10'; X.lineWidth = 3;
