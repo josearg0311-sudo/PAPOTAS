@@ -2,7 +2,7 @@
 id: S01
 serie: TITANIC: LO QUE NO TE CONTARON
 estilo: stopmotion
-publicar: 2026-12-17 19:00
+publicar: 2026-11-19 19:00
 color: #3D8BFF
 lugar: OCÉANO ATLÁNTICO | 15 DE ABRIL DE 1912
 miniatura: SOBREVIVIÓ A | 3 BARCOS

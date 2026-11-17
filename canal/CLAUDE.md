@@ -24,6 +24,6 @@ Canal de YouTube en español de curiosidades e historias reales. El dueño del c
 8. **Publicación: la hace el usuario** (no hay conexión con YouTube). Cada guion lleva `publicar: AAAA-MM-DD HH:MM` (según `../narrador/plan/plan_2_meses.md`); el `youtube.txt` incluye fecha, lista y checklist. Entregar un paquete semanal (7 Shorts + largo) y recordarle `GUIA_PUBLICAR.md`.
 
 ## Plan del canal
-**Lanzamiento:** un único Short de gancho del Titanic (S01, jue 17 dic); desde el viernes, cada día un tema distinto (el usuario NO quiere semanas monotemáticas). S02–S05 y L01 del Titanic quedan en reserva. Primer largo: sáb 19 dic "5 historias REALES que parecen inventadas". Pendiente sin coste: adaptar la fábrica a vídeo largo horizontal 16:9.
+**Lanzamiento:** el usuario se suscribe a Creator el 17 nov 2026. Estreno jue 19 nov 19:00 con un único Short de gancho del Titanic (S01); desde el viernes, cada día un tema distinto (el usuario NO quiere semanas monotemáticas). S02–S05 y L01 del Titanic en reserva. Primer largo: sáb 28 nov "5 historias REALES que parecen inventadas". Orden de trabajo: 1) prueba de plastilina, 2) Shorts del 19–25 nov, 3) adaptar la fábrica a 16:9 antes del 28 nov.
 `../narrador/estrategia.md` y `../narrador/plan/plan_2_meses.md` (1 Short diario 19:00, 1 vídeo largo los sábados 18:00, series y calendario).
 Flujo de ElevenLabs: `KDrAk6ZHNGEx01qJibzF`.
