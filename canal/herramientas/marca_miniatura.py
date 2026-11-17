@@ -2,7 +2,7 @@
 import sys, math, os
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 src, l1, l2, serie, col, out = sys.argv[1:7]
-W, H = 1280, 720; F = os.path.join(os.path.dirname(__file__), '../../video-historia/fuentes/montserrat-latin-{}-normal.woff')
+W, H = 1280, 720; F = os.path.join(os.path.dirname(__file__), '../recursos/fuentes/montserrat-latin-{}-normal.woff')
 f = lambda s, w=900: ImageFont.truetype(F.format(w), s)
 INK, CREAM, GOLD = (13, 12, 11), (243, 233, 210), (255, 201, 60)
 im = Image.open(src).convert('RGB'); sc = max(W * .62 / im.width, H / im.height); im = im.resize((int(im.width * sc), int(im.height * sc)), Image.LANCZOS)

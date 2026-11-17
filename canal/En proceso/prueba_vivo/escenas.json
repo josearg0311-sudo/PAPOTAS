@@ -1,0 +1,9 @@
+{"dur": 52.6, "estilo": "vivo",
+ "scenes": [
+  {"t": 0.0,  "img": "comic_02.jpg", "move": "in", "amb": "salpicaduras"},
+  {"t": 9.75, "img": "comic_01.jpg", "move": "up", "amb": "polvo", "luz": true},
+  {"t": 23.0, "img": "comic_01.jpg", "move": "in_fast", "amb": "polvo"},
+  {"t": 27.8, "img": "comic_02.jpg", "move": "out", "amb": "salpicaduras"},
+  {"t": 38.1, "img": "comic_03.jpg", "move": "in", "amb": "polvo"}],
+ "fx": {"sello": 5.85, "salto": 9.75, "lugar": {"t": 10.4, "l1": "BOSTON, EE. UU.", "l2": "15 DE ENERO DE 1919"},
+        "serie": "DESASTRES INSÓLITOS", "color": "#E0483B", "shake": [27.8], "fin": 49.3}}

@@ -15,5 +15,5 @@ for i, w in enumerate(W):
 if cur: chunks.append({'s': cur[0]['s'], 'e': cur[-1]['e'], 'w': cur})
 esc = json.load(open(os.path.join(D, 'escenas.json')))
 dur = esc.get('dur', W[-1]['e'] + 1.6)
-json.dump({'dur': dur, 'chunks': chunks, 'scenes': esc['scenes'], 'fx': esc.get('fx', {})}, open(os.path.join(D, 'tl.json'), 'w'), ensure_ascii=False)
+json.dump({'dur': dur, 'estilo': esc.get('estilo', 'vivo'), 'chunks': chunks, 'scenes': esc['scenes'], 'fx': esc.get('fx', {})}, open(os.path.join(D, 'tl.json'), 'w'), ensure_ascii=False)
 print('dur', round(dur, 2), 'chunks', len(chunks))

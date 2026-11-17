@@ -7,7 +7,7 @@ const DIR = path.resolve(process.argv[2]), out = process.argv[3], FPS = 30;
 const TL = JSON.parse(fs.readFileSync(path.join(DIR, 'tl.json'), 'utf8'));
 const stills = (process.argv.find(a => a.startsWith('--frames=')) || '').slice(9);
 const b64 = (f, m) => `data:${m};base64,` + fs.readFileSync(f).toString('base64');
-const RAIZ = path.join(__dirname, '../../video-historia');
+const RAIZ = path.join(__dirname, '../recursos');
 
 const PAGE = `
 const W = 1080, H = 1920; let X, TL, IMG = {}, LOGO;
@@ -20,8 +20,28 @@ const MOVES = { in: [1.04, 1.14, 0, 0], in_fast: [1.0, 1.2, 0, 0], out: [1.16, 1
 let SHAKE = 0;
 function drawImg(sc, t, end, ctx) { const im = IMG[sc.img]; const k = ease(prog(t, sc.t, end)); const [z0, z1, dx, dy] = MOVES[sc.move] || MOVES.in;
   let z = lerp(z0, z1, k), ox = lerp(-dx, dx, k), oy = lerp(-dy, dy, k);
+  if (TL.estilo === 'vivo') { const lt = t - sc.t, pu = Math.exp(-lt * 5) * .07; z += pu; ox += Math.sin(t * .9) * 10 + Math.sin(t * 2.3) * 4; oy += Math.cos(t * .7) * 9; }
   for (const sh of TL.fx.shake || []) if (t > sh && t < sh + 1.2) { const a = (1 - prog(t, sh, sh + 1.2)) * 28; ox += Math.sin(t * 90) * a; oy += Math.cos(t * 73) * a; z += .03 * (1 - prog(t, sh, sh + 1.2)); }
-  const s = Math.max(W / im.width, H / im.height) * z; ctx.drawImage(im, W / 2 - im.width * s / 2 + ox, H / 2 - im.height * s / 2 + oy, im.width * s, im.height * s); }
+  const s = Math.max(W / im.width, H / im.height) * z; ctx.save(); if (TL.estilo === 'vivo') { ctx.translate(W / 2, H / 2); ctx.rotate(Math.sin(t * .5) * .008); ctx.translate(-W / 2, -H / 2); }
+  if (sc.layout === 'vinetas') vinetas(ctx, im, sc, t, end); else ctx.drawImage(im, W / 2 - im.width * s / 2 + ox, H / 2 - im.height * s / 2 + oy, im.width * s, im.height * s); ctx.restore(); }
+// 2) VIÑETAS: la escena se arma como una página de cómic (plano general + dos detalles)
+function vinetas(ctx, im, sc, t, end) { const d = end - sc.t, lt = t - sc.t; const s0 = Math.max(W / im.width, H / im.height) * 1.15;
+  ctx.save(); ctx.filter = 'blur(14px) brightness(.45)'; ctx.drawImage(im, W / 2 - im.width * s0 / 2, H / 2 - im.height * s0 / 2, im.width * s0, im.height * s0); ctx.restore();
+  const P = [ { r: [40, 110, W - 80, 820], c: [0, .05, 1, .5], t0: 0 }, { r: [40, 950, W / 2 - 55, 820], c: [.05, .45, .5, .5], t0: Math.min(.7, d * .15) }, { r: [W / 2 + 15, 950, W / 2 - 55, 820], c: [.5, .5, .5, .5], t0: Math.min(1.3, d * .28) } ];
+  P.forEach((p, i) => { const a = prog(lt, p.t0, p.t0 + .35); if (a <= 0) return; const [x, y, w, h] = p.r, sl = (1 - back(a)) * (i === 0 ? -300 : 300);
+    ctx.save(); ctx.translate(sl * (i === 2 ? 1 : i === 1 ? -1 : 0), i === 0 ? sl * .6 : 0); ctx.globalAlpha = clamp(a * 2);
+    ctx.fillStyle = INK; ctx.fillRect(x - 10, y - 10, w + 20, h + 20); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    const [cx, cy, cw, ch] = p.c, pz = 1 + .08 * prog(lt, p.t0, d), sw = im.width * cw, sh = im.height * ch, sca = Math.max(w / sw, h / sh) * pz;
+    ctx.drawImage(im, im.width * cx, im.height * cy, sw, sh, x + w / 2 - sw * sca / 2 + Math.sin(lt * .6 + i) * 8, y + h / 2 - sh * sca / 2, sw * sca, sh * sca); ctx.restore(); }); }
+// 3) partículas de ambiente según la escena (lluvia, brasas, polvo, salpicaduras)
+function ambiente(t) { const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i; const tipo = sc[k].amb; if (!tipo || TL.estilo !== 'vivo') return;
+  const R = rng(k * 7 + 3); X.save();
+  for (let i = 0; i < (tipo === 'lluvia' ? 140 : 70); i++) { const sx = R() * W, sy = R() * H, sp = .4 + R() * .8;
+    if (tipo === 'lluvia') { const y = (sy + t * 1900 * sp) % H, x = (sx + t * 160 * sp) % W; X.strokeStyle = 'rgba(220,230,255,.35)'; X.lineWidth = 2; X.beginPath(); X.moveTo(x, y); X.lineTo(x + 9, y + 42); X.stroke(); }
+    else if (tipo === 'brasas') { const y = H - ((sy + t * 120 * sp) % H), x = sx + Math.sin(t * 2 + i) * 30; X.fillStyle = 'rgba(255,' + (140 + R() * 90 | 0) + ',60,' + (.4 + .5 * Math.abs(Math.sin(t * 3 + i))) + ')'; X.beginPath(); X.arc(x, y, 2 + R() * 3, 0, 6.283); X.fill(); }
+    else if (tipo === 'salpicaduras') { const y = (sy + t * 900 * sp) % H, x = sx + Math.sin(t + i) * 40; X.fillStyle = 'rgba(70,40,20,.55)'; X.beginPath(); X.ellipse(x, y, 5 + R() * 6, 8 + R() * 10, .3, 0, 6.283); X.fill(); }
+    else { const y = (sy - t * 25 * sp + H) % H, x = (sx + Math.sin(t * .4 + i) * 40 + W) % W; X.fillStyle = 'rgba(255,240,210,' + (.15 + .25 * Math.abs(Math.sin(t + i))) + ')'; X.beginPath(); X.arc(x, y, 1.5 + R() * 2.5, 0, 6.283); X.fill(); } }
+  X.restore(); if (sc[k].luz) { const f = .06 + .05 * Math.sin(t * 13) * Math.sin(t * 7.1); X.fillStyle = 'rgba(255,170,80,' + f + ')'; X.fillRect(0, 0, W, H); } }
 // Transición de marca: mancha de tinta que se expande y descubre la escena nueva
 function blob(ctx, cx, cy, r, seed) { const R = rng(seed); ctx.beginPath(); const n = 40;
   for (let i = 0; i <= n; i++) { const a = i / n * 6.283, rr = r * (1 + .16 * Math.sin(a * 5 + seed) + .1 * Math.sin(a * 11 + seed * 2) + .05 * (R() - .5)); const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
@@ -41,7 +61,7 @@ function texture(t) { if (!HALF) { HALF = document.createElement('canvas'); HALF
     for (let y = 0; y < H; y += 9) for (let x = (y / 9 % 2) * 4.5; x < W; x += 9) { h.beginPath(); h.arc(x, y, 1.6, 0, 6.283); h.fill(); }
     GRN = []; for (let f = 0; f < 4; f++) { const c = document.createElement('canvas'); c.width = 540; c.height = 960; const g = c.getContext('2d'), R = rng(f + 1), im = g.createImageData(540, 960);
       for (let i = 0; i < im.data.length; i += 4) { const v = 128 + (R() - .5) * 90; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; } g.putImageData(im, 0, 0); GRN.push(c); } }
-  X.save(); X.globalCompositeOperation = 'multiply'; X.globalAlpha = .1; X.drawImage(HALF, 0, 0); X.globalCompositeOperation = 'overlay'; X.globalAlpha = .16; X.drawImage(GRN[Math.floor(t * 12) % 4], 0, 0, W, H); X.restore();
+  X.save(); X.globalCompositeOperation = 'multiply'; X.globalAlpha = .05; X.drawImage(HALF, 0, 0); X.globalCompositeOperation = 'overlay'; X.globalAlpha = .16; X.drawImage(GRN[Math.floor(t * 12) % 4], 0, 0, W, H); X.restore();
   const v = X.createRadialGradient(W / 2, H * .45, H * .22, W / 2, H * .5, H * .78); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.62)'); X.fillStyle = v; X.fillRect(0, 0, W, H);
   const g = X.createLinearGradient(0, H * .62, 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.55)'); X.fillStyle = g; X.fillRect(0, H * .62, W, H * .38); }
 // Marco de viñeta de cómic (firma visual permanente)
@@ -89,7 +109,7 @@ function fin(t) { const f = TL.fx.fin; if (!f || t < f) return; const k = ease(p
   const b = back(prog(t, f + .9, f + 1.3)); X.save(); X.translate(W / 2, 1560); X.scale(b, b); X.fillStyle = GOLD; X.beginPath(); X.roundRect(-250, -60, 500, 120, 60); X.fill();
   X.fillStyle = INK; X.font = '900 54px Mont'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText('SUSCRÍBETE', 0, 4); X.restore(); }
 function barra(t) { const p = t / TL.dur; X.fillStyle = 'rgba(243,233,210,.2)'; X.fillRect(26, H - 40, W - 52, 10); X.fillStyle = GOLD; X.fillRect(26, H - 40, (W - 52) * p, 10); }
-function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); scenes(t); texture(t);
+function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); scenes(t); ambiente(t); texture(t);
   if (!(TL.fx.fin && t > TL.fx.fin + .35)) { serie(t); lugar(t); sello(t, W / 2, H * .42); subs(t); } salto(t); fin(t); panel(); barra(t);
   const a = Math.min(prog(t, 0, .25), 1 - prog(t, TL.dur - .4, TL.dur)); if (a < 1) { X.fillStyle = 'rgba(0,0,0,' + (1 - a) + ')'; X.fillRect(0, 0, W, H); } }
 `;
@@ -104,7 +124,7 @@ function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); scenes(t); textur
     window.render = t => { frame(t); return document.getElementById('c').toDataURL('image/jpeg', .92); };</script></body></html>`);
   p.on('pageerror', e => { console.error('ERROR en página:', e.message); process.exit(1); });
   const imgs = Object.fromEntries(TL.scenes.map(s => [s.img, b64(path.join(DIR, s.img), 'image/jpeg')]));
-  await p.evaluate(([tl, im, lg]) => init(tl, im, lg), [TL, imgs, b64(path.join(RAIZ, 'img/logo.png'), 'image/png')]);
+  await p.evaluate(([tl, im, lg]) => init(tl, im, lg), [TL, imgs, b64(path.join(RAIZ, 'logo.png'), 'image/png')]);
   if (stills) { for (const s of stills.split(',')) { const d = await p.evaluate(t => render(t), +s); fs.writeFileSync(`${out}_${s}.jpg`, Buffer.from(d.split(',')[1], 'base64')); } await b.close(); return; }
   const audio = fs.existsSync(path.join(DIR, 'mezcla.wav')) ? path.join(DIR, 'mezcla.wav') : path.join(DIR, 'voz.mp3');
   const ff = spawn('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-r', String(FPS), '-i', '-', '-i', audio,

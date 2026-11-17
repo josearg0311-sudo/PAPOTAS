@@ -33,7 +33,7 @@ import wave
 with wave.open(os.path.join(D, 'sfx.wav'), 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes((st * 32767 * .8).astype('<i2').tobytes())
 voz = os.path.join(D, 'voz_recortada.wav') if os.path.exists(os.path.join(D, 'voz_recortada.wav')) else os.path.join(D, 'voz.mp3')
-mus = os.path.join(os.path.dirname(__file__), '../../video-historia/sonido/musica_v2.wav')
+mus = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../recursos/musica.mp3')
 fin = fx.get('fin', TL['dur']); dur = TL['dur']
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', voz, '-stream_loop', '-1', '-i', mus, '-i', os.path.join(D, 'sfx.wav'), '-filter_complex',
   f"[0]aresample={SR},aformat=channel_layouts=stereo,apad=whole_dur={dur},asplit=2[v][sc];"
