@@ -1,0 +1,10 @@
+{"scenes": [
+  {"t": 0.0,  "img": "tommy_01.jpg", "move": "in"},
+  {"t": 7.3,  "img": "tommy_02.jpg", "move": "in_fast"},
+  {"t": 10.0, "img": "tommy_03.jpg", "move": "up"},
+  {"t": 23.0, "img": "tommy_04.jpg", "move": "in"},
+  {"t": 27.8, "img": "tommy_05.jpg", "move": "out"},
+  {"t": 38.1, "img": "tommy_06.jpg", "move": "down"},
+  {"t": 42.6, "img": "tommy_07.jpg", "move": "in"},
+  {"t": 49.0, "img": "tommy_08.jpg", "move": "out"}],
+ "fx": {"teleport": 9.75, "shake": 27.8, "title": [5.85, 7.3], "name": 49.0}}
