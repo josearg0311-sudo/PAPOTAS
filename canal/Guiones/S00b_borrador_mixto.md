@@ -1,4 +1,4 @@
-# BORRADOR estilo mixto - Una OLA DE MELAZA arrasó una ciudad
+# BORRADOR stop-motion - Una OLA DE MELAZA arrasó una ciudad
 id: S00b
 serie: DESASTRES INSÓLITOS
 color: #E0483B
