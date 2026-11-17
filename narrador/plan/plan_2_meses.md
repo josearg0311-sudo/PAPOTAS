@@ -67,7 +67,7 @@ Short ≈ 3.400 créditos · vídeo largo ≈ 800 (reutiliza sus 5 historias).
 | 02/01 | Sáb | 12:00 | Short | 🌋 Desastres insólitos | El año en que NEVÓ en pleno verano (1816) | 3.400 |
 | 02/01 | Sáb | 18:00 | **LARGO (5 min)** | 🌋 Desastres insólitos | **5 desastres tan raros que parecen mentira** | 800 |
 | 03/01 | Dom | 19:00 | Short | 🔍 Misterios sin resolver | Alguien vivía escondido en la casa de sus víctimas (Hinterkaifeck, 1922) | 3.400 |
-| 04/01 | Lun | 19:00 | Short | 🕰️ Historias que parecen mentira | La guerra que duró 335 años… sin un solo disparo (islas Sorlingas) | 3.400 |
+| 04/01 | Lun | 19:00 | Short | 🕰️ Historias que parecen mentira | Cayó desde 10.000 metros sin paracaídas… y sobrevivió (Vesna Vulović, 1972) | 3.400 |
 | 05/01 | Mar | 19:00 | Short | 🐾 Animales extremos | El tardígrado: el animal casi indestructible | 3.400 |
 | 06/01 | Mié | 19:00 | Short | 🕵️ Crímenes y estafas legendarias | El robo que hizo FAMOSA a la Mona Lisa (1911) | 3.400 |
 | 07/01 | Jue | 19:00 | Short | 🧠 Tu cuerpo es increíble | Una barra de hierro le atravesó la cabeza… y siguió hablando (Phineas Gage, 1848) | 3.400 |
@@ -110,9 +110,9 @@ Short ≈ 3.400 créditos · vídeo largo ≈ 800 (reutiliza sus 5 historias).
 | 08/02 | Lun | 19:00 | Short | 💡 El origen de… | Una chocolatina derretida inventó el microondas (1945) | 3.400 |
 | 09/02 | Mar | 19:00 | Short | ❓ ¿Qué pasaría si…? | ¿Qué pasaría si la Tierra dejara de girar? | 3.400 |
 | 10/02 | Mié | 19:00 | Short | 🌍 Lugares prohibidos | Una isla nacida de un volcán en 1963 donde solo entran científicos (Surtsey) | 3.400 |
-| 11/02 | Jue | 19:00 | Short | 🤪 La historia más absurda | Pagaban una CASA por un bulbo de tulipán (1637) | 3.400 |
+| 11/02 | Jue | 19:00 | Short | 🤪 La historia más absurda | Pagaban FORTUNAS por un bulbo de tulipán (1637) | 3.400 |
 | 12/02 | Vie | 19:00 | Short | 💘 Especial San Valentín | La leyenda detrás de San Valentín | 3.400 |
 | 13/02 | Sáb | 12:00 | Short | 💡 El origen de… | Unas semillas pegadas al perro inventaron el velcro (1941) | 3.400 |
 | 13/02 | Sáb | 18:00 | **LARGO (5 min)** | 💡 El origen de… | **5 inventos que nacieron por ACCIDENTE** | 800 |
-| 14/02 | Dom | 19:00 | Short | 🤪 La historia más absurda | El verano en que Londres olía tan mal que el Parlamento casi huyó (Gran Hedor, 1858) | 3.400 |
+| 14/02 | Dom | 19:00 | Short | 🤪 La historia más absurda | El verano en que Londres olía tan mal que el Parlamento tuvo que actuar (Gran Hedor, 1858) | 3.400 |
 | 15/02 | Lun | 19:00 | Short | 💡 El origen de… | Una luz misteriosa descubrió los rayos X (1895) | 3.400 |
