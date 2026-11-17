@@ -6,7 +6,7 @@ Objetivo: que cualquiera que vea 1 segundo de un Short, un vídeo o una miniatur
 
 | # | Firma | Qué es | Dónde |
 |---|---|---|---|
-| 1 | **Blanco y negro + oro** | Todas las ilustraciones en tinta blanco/negro cálida; **solo lo dorado conserva color** (luces, fuego, oro, el objeto clave de la historia) | Todas las imágenes (`marca_img.py`) |
+| 1 | **Cómic en viñetas, a todo color** | Ilustraciones de cómic oscuro en color; las escenas tranquilas se arman como **página de cómic** (plano general + 2 viñetas de detalle que entran deslizando); gancho y clímax a pantalla completa. El objeto clave de la historia, en **dorado** | Todas las escenas |
 | 2 | **El sello "¿?"** | Sello dorado circular con "¿?" y el texto "¿ACASO LO SABÍAS?" alrededor, que golpea la pantalla con la frase de marca | Segundos 5–9 de cada Short, intro de los largos, esquina de las miniaturas |
 | 3 | **El salto por la interrogación** | Un "?" dorado gigante crece hasta llenar la pantalla y nos lleva a la historia | Tras "…ahora te lo cuento" |
 | 4 | **Rótulo de lugar y fecha** | Cinta negra con barra dorada, letras de máquina de escribir: "BOSTON, EE. UU. / 15 DE ENERO DE 1919" | Inicio de cada historia |
@@ -38,7 +38,7 @@ Montserrat 900 (titulares, subtítulos, sello) y 800 (textos secundarios). Siemp
 ## Estructura del Short
 | Tiempo | Qué pasa |
 |---|---|
-| 0–5 s | Imagen más fuerte + dato en una frase |
+| 0–5 s | Imagen más fuerte a pantalla completa + dato en una frase |
 | 5–9 s | Sello "¿?" + frase de marca (logo sonoro) |
 | 9–10 s | Salto por la interrogación |
 | 10–13 s | Rótulo de lugar y fecha |
@@ -46,17 +46,18 @@ Montserrat 900 (titulares, subtítulos, sello) y 800 (textos secundarios). Siemp
 | últimos 3 s | Cierre de marca: logo + "¿Y TÚ, LO SABÍAS?" + SUSCRÍBETE |
 
 ## Miniaturas (vídeos largos)
-Izquierda negra con semitono: etiqueta de serie, 1 línea crema + **1 palabra gigante dorada**. Derecha: la ilustración en blanco y negro + oro. Esquina: sello "¿?". Marco crema fino. (`marca_miniatura.py`)
+Izquierda negra con semitono: etiqueta de serie, 1 línea crema + **1 palabra gigante dorada**. Derecha: la ilustración a color. Esquina: sello "¿?". Marco crema fino. (`marca_miniatura.py`)
 
 ## Regla para generar ilustraciones
 Añadir siempre a cada prompt:
 > "Dark 2D comic illustration for adults, thick black ink outlines, gritty paper texture, expressive caricatured faces, graphic-novel atmosphere. **The key element of the story is rendered in vivid golden yellow; everything else in muted dark tones.** No text, no letters, no logos."
 
-Así, al aplicar el look blanco y negro + oro, el objeto clave de cada historia queda resaltado en dorado.
+Así el objeto clave de cada historia destaca siempre en dorado, el color del canal.
+Para escenas en viñetas se generan además 2 imágenes de detalle (b: primer plano de un rostro, c: detalle de un objeto) con el mismo estilo.
 
 ## Archivos
-- `motor/marca_img.py` — look blanco y negro + oro
-- `motor/render_marca.js` — montaje con todas las firmas
-- `motor/marca_audio.py` — logo sonoro, clics, transiciones y mezcla final (−14 LUFS)
-- `motor/marca_miniatura.py` — plantilla de miniatura
-- `demo_marca/demo_marca_boston.mp4` — ejemplo completo
+- `herramientas/fabricar.py` — guion → vídeo terminado (orquesta todo)
+- `herramientas/render_marca.js` — montaje con todas las firmas (estilo viñetas)
+- `herramientas/marca_audio.py` — logo sonoro, clics, transiciones y mezcla final (−14 LUFS)
+- `herramientas/marca_miniatura.py` — plantilla de miniatura
+- `Guiones/S00_boston_melaza.md` → `Vídeos listos/` — ejemplo completo

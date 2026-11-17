@@ -1,0 +1,5 @@
+# vídeos y audios pesados: no se suben al repositorio
+*.mp4
+*.wav
+*.mp3
+!recursos/musica.mp3

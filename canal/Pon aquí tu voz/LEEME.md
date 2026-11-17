@@ -1,0 +1,3 @@
+Pon aquí tu narración si la grabas tú. El nombre del archivo debe ser el id del guion: `S01.mp3`, `S02.wav`, `S03.m4a`…
+Graba en un sitio silencioso, con el móvil cerca de la boca, y lee el texto de la sección "Narración" del guion.
+Si no hay archivo aquí, la voz se genera con ElevenLabs (voz "David C – Viral Storytelling").

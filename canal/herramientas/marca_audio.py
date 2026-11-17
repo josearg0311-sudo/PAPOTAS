@@ -32,7 +32,7 @@ sfx = np.clip(sfx, -1, 1); st = np.stack([sfx, sfx], 1)
 import wave
 with wave.open(os.path.join(D, 'sfx.wav'), 'wb') as w:
     w.setnchannels(2); w.setsampwidth(2); w.setframerate(SR); w.writeframes((st * 32767 * .8).astype('<i2').tobytes())
-voz = os.path.join(D, 'voz_recortada.wav') if os.path.exists(os.path.join(D, 'voz_recortada.wav')) else os.path.join(D, 'voz.mp3')
+voz = next(os.path.join(D, f) for f in ['voz_recortada.wav', 'voz.mp3', 'voz.wav', 'voz.m4a'] if os.path.exists(os.path.join(D, f)))
 mus = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../recursos/musica.mp3')
 fin = fx.get('fin', TL['dur']); dur = TL['dur']
 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', voz, '-stream_loop', '-1', '-i', mus, '-i', os.path.join(D, 'sfx.wav'), '-filter_complex',
