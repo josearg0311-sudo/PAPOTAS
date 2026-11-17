@@ -3,3 +3,7 @@
 *.wav
 *.mp3
 !recursos/musica.mp3
+# material generado por Short (imágenes, fotogramas, estados de ElevenLabs): pesa demasiado para el repo
+En proceso/S*/
+En proceso/status/
+En proceso/log_*.txt
