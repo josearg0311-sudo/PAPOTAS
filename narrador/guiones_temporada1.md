@@ -11,6 +11,38 @@ Formato de cada Short (45–55 s):
 
 ---
 
+## Estructura del canal: listas de reproducción (series)
+
+Todas comparten la misma marca (Tommy, "¿Acaso lo sabías?", estilo cómic oscuro), pero cada serie tiene su propio color de acento y su sello en la miniatura.
+
+| Serie (lista) | De qué trata | Color | Ejemplos |
+|---|---|---|---|
+| 🕰️ **Historias que parecen mentira** | Hechos históricos reales e increíbles | Dorado | Onoda, ola de cerveza, Yamaguchi |
+| 🔍 **Misterios sin resolver** | Casos que nadie ha podido explicar | Verde | Mary Celeste, paso Dyatlov, Hinterkaifeck |
+| 🧠 **Tu cuerpo es increíble** | Ciencia y cuerpo humano | Azul | Phineas Gage, por qué soñamos, el hipo |
+| 🐾 **Animales extremos** | Animales reales que parecen ficción | Verde lima | La medusa inmortal, el tardígrado, el pulpo |
+| 🌋 **Desastres insólitos** | Tragedias raras de la naturaleza o el ser humano | Rojo | Lago Nyos, gran niebla de Londres, melaza de Boston |
+| 💡 **El origen de…** | De dónde salen cosas cotidianas | Naranja | El ketchup, el tenedor, los videojuegos, el chicle |
+| 🕵️ **Crímenes y estafas legendarias** | Estafadores y crímenes históricos (sin morbo) | Morado | Victor Lustig, Michael Malloy, el robo de la Mona Lisa |
+| 🌍 **Lugares prohibidos** | Sitios reales a los que casi nadie puede entrar | Gris | Isla Sentinel del Norte, Isla de las Serpientes, Bóveda Global de Semillas |
+| 🎮 **Detrás del juego** | Curiosidades de videojuegos y cultura pop (con imágenes propias, sin usar arte oficial) | Cian | Cómo nació Nintendo, juegos que casi no salen, leyendas urbanas gamer |
+| ❓ **¿Qué pasaría si…?** | Ciencia imaginaria | Blanco | Si la Luna desapareciera, si dejaras de dormir |
+
+### Calendario semanal sugerido
+| Día | Contenido |
+|---|---|
+| Lunes | Short – Historias que parecen mentira |
+| Martes | Short – Animales extremos / Tu cuerpo es increíble |
+| Miércoles | Short – Misterios sin resolver |
+| Jueves | Short – El origen de… / Detrás del juego |
+| Viernes | **Vídeo largo (5 min)** – rota cada semana entre series |
+| Sábado | Short – Desastres insólitos / Crímenes y estafas |
+| Domingo | Short – ¿Qué pasaría si…? / Lugares prohibidos |
+
+Regla: cada mes, mirar qué serie tuvo más vistas y darle 2 días en vez de 1.
+
+---
+
 ## Lista de 20 historias (ordenadas por potencial viral)
 
 | # | Historia | Gancho | Tono |
