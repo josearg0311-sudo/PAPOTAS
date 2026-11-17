@@ -21,8 +21,8 @@ Y lo más increíble: dicen que durante décadas, en los días de calor, el barr
 ## Escenas
 | # | Desde la frase | Diseño | Movimiento | Efecto | Imagen principal (prompt) | Detalles en viñetas (prompts b / c) |
 |---|---|---|---|---|---|---|
-| 1 | ¿Sabías que | completa | in | | Ola de melaza arrasando la calle (gancho) | |
-| 2 | Ya estoy aquí | viñetas | up | | Calle de Boston con el tanque gigante | |
-| 3 | Escucha | viñetas | in_fast | | El tanque con remaches saltando | |
-| 4 | Revienta | completa | out | temblor | La ola de melaza | |
-| 5 | Murieron | viñetas | in | | Rescatista entre la melaza | |
+| 1 | ¿Sabías que | completa | in | salpicaduras | Ola de melaza arrasando la calle (gancho) | |
+| 2 | Ya estoy aquí | completa | up | polvo luz | Calle de Boston con el tanque gigante | |
+| 3 | Escucha | completa | in_fast | polvo | El tanque con remaches saltando | |
+| 4 | Revienta | completa | out | temblor salpicaduras | La ola de melaza | |
+| 5 | Murieron | completa | in | polvo | Rescatista entre la melaza | |

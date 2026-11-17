@@ -6,7 +6,7 @@ Objetivo: que cualquiera que vea 1 segundo de un Short, un vídeo o una miniatur
 
 | # | Firma | Qué es | Dónde |
 |---|---|---|---|
-| 1 | **Cómic en viñetas, a todo color** | Ilustraciones de cómic oscuro en color; las escenas tranquilas se arman como **página de cómic** (plano general + 2 viñetas de detalle que entran deslizando); gancho y clímax a pantalla completa. El objeto clave de la historia, en **dorado** | Todas las escenas |
+| 1 | **Cómic a todo color con cámara viva** | Ilustraciones de cómic oscuro en color a pantalla completa; la cámara deriva como a mano, da un golpe de zoom al entrar cada escena y hay partículas de ambiente (polvo, lluvia, brasas, salpicaduras). El objeto clave de la historia, en **dorado** | Todas las escenas |
 | 2 | **El sello "¿?"** | Sello dorado circular con "¿?" y el texto "¿ACASO LO SABÍAS?" alrededor, que golpea la pantalla con la frase de marca | Segundos 5–9 de cada Short, intro de los largos, esquina de las miniaturas |
 | 3 | **El salto por la interrogación** | Un "?" dorado gigante crece hasta llenar la pantalla y nos lleva a la historia | Tras "…ahora te lo cuento" |
 | 4 | **Rótulo de lugar y fecha** | Cinta negra con barra dorada, letras de máquina de escribir: "BOSTON, EE. UU. / 15 DE ENERO DE 1919" | Inicio de cada historia |
@@ -53,11 +53,11 @@ Añadir siempre a cada prompt:
 > "Dark 2D comic illustration for adults, thick black ink outlines, gritty paper texture, expressive caricatured faces, graphic-novel atmosphere. **The key element of the story is rendered in vivid golden yellow; everything else in muted dark tones.** No text, no letters, no logos."
 
 Así el objeto clave de cada historia destaca siempre en dorado, el color del canal.
-Para escenas en viñetas se generan además 2 imágenes de detalle (b: primer plano de un rostro, c: detalle de un objeto) con el mismo estilo.
+
 
 ## Archivos
 - `herramientas/fabricar.py` — guion → vídeo terminado (orquesta todo)
-- `herramientas/render_marca.js` — montaje con todas las firmas (estilo viñetas)
+- `herramientas/render_marca.js` — montaje con todas las firmas (cámara viva, partículas, temblor)
 - `herramientas/marca_audio.py` — logo sonoro, clics, transiciones y mezcla final (−14 LUFS)
 - `herramientas/marca_miniatura.py` — plantilla de miniatura
 - `Guiones/S00_boston_melaza.md` → `Vídeos listos/` — ejemplo completo

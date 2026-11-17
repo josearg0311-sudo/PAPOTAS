@@ -101,11 +101,12 @@ def main():
             t = salto
         t_prev = t + .1
         sc = {'t': round(t, 3), 'img': f"escena_{e['n']:02d}.jpg", 'move': e['mov']}
-        if e['diseno'].startswith('vi'):
-            sc['layout'] = 'vinetas'
-            det = [f"escena_{e['n']:02d}_{x}.jpg" for x in 'bc']
-            if all(os.path.exists(os.path.join(trabajo, d)) for d in det):
-                sc['det'] = det
+        det = [f"escena_{e['n']:02d}_{x}.jpg" for x in 'bc']
+        if e['diseno'].startswith('vi') and all(os.path.exists(os.path.join(trabajo, d)) for d in det):
+            sc['layout'] = 'vinetas'; sc['det'] = det   # viñetas solo con imágenes de detalle reales (nunca recortes repetidos)
+        for amb in ('polvo', 'lluvia', 'brasas', 'salpicaduras'):
+            if amb in e['efecto']: sc['amb'] = amb
+        if 'luz' in e['efecto']: sc['luz'] = True
         if 'temblor' in e['efecto']:
             shakes.append(sc['t'])
         scenes.append(sc)
@@ -117,7 +118,7 @@ def main():
         cur.append(w); gap = words[i + 1]['s'] - w['e'] if i + 1 < len(words) else 9
         if w['w'][-1] in '.,?!:;…' or len(cur) >= 3 or gap > .35:
             chunks.append({'s': cur[0]['s'], 'e': cur[-1]['e'], 'w': cur}); cur = []
-    json.dump({'dur': round(fin + 3.3, 3), 'estilo': 'vinetas', 'chunks': chunks, 'scenes': scenes, 'fx': fx},
+    json.dump({'dur': round(fin + 3.3, 3), 'estilo': g.get('estilo', 'vivo'), 'chunks': chunks, 'scenes': scenes, 'fx': fx},
               open(os.path.join(trabajo, 'tl.json'), 'w'), ensure_ascii=False)
     if not voz.startswith(trabajo):
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', voz, os.path.join(trabajo, 'voz.mp3')], check=True)

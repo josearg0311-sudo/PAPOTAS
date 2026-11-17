@@ -17,9 +17,9 @@ comentario: Pregunta concreta para los comentarios 👇
 | # | Desde la frase | Diseño | Movimiento | Efecto | Imagen principal (prompt) | Detalles en viñetas (prompts b / c) |
 |---|---|---|---|---|---|---|
 | 1 | ¿Sabías que | completa | in | | La imagen más impactante (gancho) | |
-| 2 | (primeras palabras de la frase) | viñetas | up | | Plano general del lugar | b: primer plano de un rostro · c: detalle de un objeto |
+| 2 | (primeras palabras de la frase) | completa | up | polvo | Plano general del lugar | |
 | 3 | ... | completa | out | temblor | El clímax | |
 
-Diseño: `completa` (imagen a pantalla completa) o `viñetas` (página de cómic: plano general + 2 viñetas de detalle).
-Movimiento: `in`, `in_fast`, `out`, `up`, `down`. Efecto: `temblor` o vacío.
+Diseño: `completa` (siempre). Movimiento: `in`, `in_fast`, `out`, `up`, `down`.
+Efecto (se pueden combinar): `polvo`, `lluvia`, `brasas`, `salpicaduras`, `luz`, `temblor`.
 "Desde la frase" = las primeras palabras exactas de la narración donde empieza la escena (evitar números).
