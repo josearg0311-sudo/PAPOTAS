@@ -2,7 +2,7 @@
 id: L01
 tipo: vídeo largo (≈5 min, horizontal 16:9)
 serie: TITANIC: LO QUE NO TE CONTARON
-publicar: 2026-12-19 18:00
+publicar: reserva
 miniatura: 5 SECRETOS DEL | TITANIC
 
 > Vídeo de lanzamiento del canal. Se monta con las 5 historias de los Shorts S01–S05 (mismas imágenes y voz) + intro y cierre propios.
