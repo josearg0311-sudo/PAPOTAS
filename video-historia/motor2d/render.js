@@ -12,14 +12,17 @@ const stills = (process.argv.find(a => a.startsWith('--frames=')) || '').slice(9
   const font = 'data:font/woff;base64,' + fs.readFileSync(path.join(D, '../fuentes/montserrat-latin-800-normal.woff')).toString('base64');
   const font9 = 'data:font/woff;base64,' + fs.readFileSync(path.join(D, '../fuentes/montserrat-latin-900-normal.woff')).toString('base64');
   const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(D, '../img/logo.png')).toString('base64');
-  const js = ['kit.js', 'personajes.js', 'mascota.js', 'escenas1.js', 'escenas2.js', 'estructuras.js', 'pulido.js', 'capas.js'].filter(f => fs.existsSync(path.join(D, f))).map(f => fs.readFileSync(path.join(D, f), 'utf8')).join('\n');
+  const FD = path.join(D, '../img/fondos'); const fondosData = fs.existsSync(FD) ? Object.fromEntries(fs.readdirSync(FD).filter(f => f.endsWith('.png')).map(f => [f.replace('.png', ''), 'data:image/png;base64,' + fs.readFileSync(path.join(FD, f)).toString('base64')])) : {};
+  const js = ['kit.js', 'personajes.js', 'mascota.js', 'escenas1.js', 'escenas2.js', 'estructuras.js', 'pulido.js', 'fondos.js', 'capas.js'].filter(f => fs.existsSync(path.join(D, f))).map(f => fs.readFileSync(path.join(D, f), 'utf8')).join('\n');
   await p.setContent(`<html><head><style>@font-face{font-family:Mont;font-weight:800;src:url(${font})}@font-face{font-family:Mont;font-weight:900;src:url(${font9})}body{margin:0}</style></head>
     <body><canvas id=c width=1920 height=1080></canvas><script>${js}
     setCtx(document.getElementById('c').getContext('2d'));
     window.init = async (tl, logo) => { TL = tl; await document.fonts.load('800 40px Mont'); await document.fonts.load('900 40px Mont');
-      LOGO = new Image(); LOGO.src = logo; await LOGO.decode(); };
+      LOGO = new Image(); LOGO.src = logo; await LOGO.decode();
+      for (const [k, v] of Object.entries(window.__fondos || {})) { const im = new Image(); im.src = v; await im.decode(); FONDOS[k] = im; } };
     window.render = (t, q) => { frame(t); return document.getElementById('c').toDataURL('image/jpeg', q); };</script></body></html>`);
   p.on('pageerror', e => { console.error('ERROR en página:', e.message); process.exit(1); });
+  await p.evaluate(fd => { window.__fondos = fd; }, fondosData);
   await p.evaluate(([tl, lg]) => init(tl, lg), [TL, logo]);
   if (stills) {
     for (const s of stills.split(',')) { const d = await p.evaluate(t => render(t, .9), parseFloat(s)); fs.writeFileSync(`${out}_${s}.jpg`, Buffer.from(d.split(',')[1], 'base64')); }

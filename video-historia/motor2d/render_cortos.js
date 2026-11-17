@@ -12,12 +12,14 @@ const tramos = TL.datos.map(([ts, n]) => { const w0 = words.find(w => Math.abs(w
   const f8 = 'data:font/woff;base64,' + fs.readFileSync(path.join(D, '../fuentes/montserrat-latin-800-normal.woff')).toString('base64');
   const f9 = 'data:font/woff;base64,' + fs.readFileSync(path.join(D, '../fuentes/montserrat-latin-900-normal.woff')).toString('base64');
   const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(D, '../img/logo.png')).toString('base64');
-  const js = ['kit.js', 'personajes.js', 'mascota.js', 'escenas1.js', 'escenas2.js', 'estructuras.js', 'pulido.js', 'capas.js', 'cortos.js'].map(f => fs.readFileSync(path.join(D, f), 'utf8')).join('\n');
+  const FD = path.join(D, '../img/fondos'); const fondosData = fs.existsSync(FD) ? Object.fromEntries(fs.readdirSync(FD).filter(f => f.endsWith('.png')).map(f => [f.replace('.png', ''), 'data:image/png;base64,' + fs.readFileSync(path.join(FD, f)).toString('base64')])) : {};
+  const js = ['kit.js', 'personajes.js', 'mascota.js', 'escenas1.js', 'escenas2.js', 'estructuras.js', 'pulido.js', 'fondos.js', 'capas.js', 'cortos.js'].map(f => fs.readFileSync(path.join(D, f), 'utf8')).join('\n');
   await p.setContent(`<html><head><style>@font-face{font-family:Mont;font-weight:800;src:url(${f8})}@font-face{font-family:Mont;font-weight:900;src:url(${f9})}body{margin:0}</style></head><body><canvas id=c width=1080 height=1920></canvas><script>${js}
     setCtx(document.getElementById('c').getContext('2d'));
-    window.init = async (tl, lg) => { TL = tl; await document.fonts.load('800 40px Mont'); await document.fonts.load('900 40px Mont'); LOGO = new Image(); LOGO.src = lg; await LOGO.decode(); };
+    window.init = async (tl, lg) => { TL = tl; await document.fonts.load('800 40px Mont'); await document.fonts.load('900 40px Mont'); LOGO = new Image(); LOGO.src = lg; await LOGO.decode(); for (const [k, v] of Object.entries(window.__fondos || {})) { const im = new Image(); im.src = v; await im.decode(); FONDOS[k] = im; } };
     window.render = (t, n, t0, t1) => { frameV(t, n, t0, t1); return document.getElementById('c').toDataURL('image/jpeg', .92); };</script></body></html>`);
   p.on('pageerror', e => { console.error('ERROR:', e.message); process.exit(1); });
+  await p.evaluate(fd => { window.__fondos = fd; }, fondosData);
   await p.evaluate(([tl, lg]) => init(tl, lg), [TL, logo]);
   const audio = fs.existsSync(path.join(D, `audio_${vid}_mix.wav`)) ? path.join(D, `audio_${vid}_mix.wav`) : path.join(D, `audio_${vid}.wav`);
   for (const { n, t0, t1 } of tramos) {
