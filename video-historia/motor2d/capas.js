@@ -57,13 +57,13 @@ function drawScene(sc, t) { const lt = t - sc.t, d = sc.end - sc.t, f = S[sc.key
     const moves = [[1.0, 1.08, 0, 0], [1.1, 1.02, 0, 0], [1.07, 1.07, -50, 50], [1.07, 1.07, 50, -50], [1.02, 1.1, 30, 20]];
     const [z0, z1, dx, dy] = moves[m | 0] || moves[0], z = lerp(z0, z1, k);
     X.translate(W / 2 + lerp(-dx, dx, k), H / 2 + lerp(-dy, dy, k) * .5); X.rotate(Math.sin(NOW * .3) * .004); X.scale(z, z); X.translate(-W / 2, -H / 2); }
-  if (f) f(lt, d); else { sky(SKY.night); txt('escena pendiente: ' + sc.key, W / 2, H / 2, 50, '#f55'); } X.restore(); }
+  if (realScene(sc)) {} else if (f) f(lt, d); else { sky(SKY.night); txt('escena pendiente: ' + sc.key, W / 2, H / 2, 50, '#f55'); } X.restore(); }
 function frame(t) { NOW = t; const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i;
   const cur = sc[k], fade = .35; drawScene(cur, t);
   if (k > 0 && t < cur.t + fade) { if (!OFF) { OFF = document.createElement('canvas'); OFF.width = W; OFF.height = H; } const main = X; X = OFF.getContext('2d'); drawScene(sc[k - 1], t); X = main;
     X.globalAlpha = 1 - ease(prog(t, cur.t, cur.t + fade)); X.drawImage(OFF, 0, 0); X.globalAlpha = 1; }
   finish(t); grain(t);
-  chispaLayer(t); progressBar(t); datoBadge(t); likeOverlay(t); subtitles(t);
+  if (!realOn()) chispaLayer(t); progressBar(t); datoBadge(t); likeOverlay(t); subtitles(t);
   const a = Math.min(prog(t, 0, .4), 1 - prog(t, TL.dur - .8, TL.dur)); if (a < 1) { X.fillStyle = `rgba(0,0,0,${1 - a})`; X.fillRect(0, 0, W, H); } }
 
 let GR = null;
@@ -76,13 +76,13 @@ let BL = null, PAPER = null;
 function finish(t) {
   if (!BL) { BL = document.createElement('canvas'); BL.width = 480; BL.height = 270; }
   const b = BL.getContext('2d'); b.filter = 'brightness(.85) contrast(2.6) saturate(1.3) blur(6px)'; b.clearRect(0, 0, 480, 270); b.drawImage(X.canvas, 0, 0, 480, 270);
-  X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = .22; X.drawImage(BL, 0, 0, W, H); X.restore();
+  X.save(); X.globalCompositeOperation = 'screen'; X.globalAlpha = realOn() ? .12 : .22; X.drawImage(BL, 0, 0, W, H); X.restore();
   // grading: luces cálidas, sombras frías y un poco más de contraste
   X.save(); X.globalCompositeOperation = 'soft-light'; const g = X.createLinearGradient(0, 0, W, H); g.addColorStop(0, 'rgba(255,180,100,.22)'); g.addColorStop(1, 'rgba(30,60,140,.25)'); X.fillStyle = g; X.fillRect(0, 0, W, H); X.restore();
   if (!PAPER) { PAPER = document.createElement('canvas'); PAPER.width = 960; PAPER.height = 540; const p = PAPER.getContext('2d'), R = rng(77);
     p.fillStyle = '#808080'; p.fillRect(0, 0, 960, 540); for (let i = 0; i < 9000; i++) { const v = 100 + R() * 60; p.fillStyle = `rgba(${v},${v},${v},.35)`; p.fillRect(R() * 960, R() * 540, 1 + R() * 3, 1 + R() * 3); }
     p.filter = 'blur(.6px)'; p.drawImage(PAPER, 0, 0); }
-  X.save(); X.globalCompositeOperation = 'overlay'; X.globalAlpha = .12; X.drawImage(PAPER, 0, 0, W, H); X.restore();
+  if (!realOn()) { X.save(); X.globalCompositeOperation = 'overlay'; X.globalAlpha = .12; X.drawImage(PAPER, 0, 0, W, H); X.restore(); }
   // luz que entra (light leak) muy sutil
   X.save(); X.globalCompositeOperation = 'screen'; const lx = W * (.2 + .6 * (.5 + .5 * Math.sin(t * .07))); const lg = X.createRadialGradient(lx, -100, 0, lx, -100, 900); lg.addColorStop(0, 'rgba(255,200,120,.16)'); lg.addColorStop(1, 'rgba(255,200,120,0)'); X.fillStyle = lg; X.fillRect(0, 0, W, H); X.restore();
 }

@@ -38,7 +38,7 @@ function frameV(t, n, t0, t1) {
   // 6) pie: logo + nombre del canal
   drawLogo(150, 1800, 120); txt('¿Acaso lo sabías?', 470, 1800, 52, '#fff', { w: 900, stroke: 10 });
   // Chispa junto al pie, con su comentario
-  { const lt2 = t - t0 - .3; chispa(VW - 120, 1790, .45, { expr: lt2 > 4.6 && lt2 < 7.2 ? 'talk' : (lt2 < 4.6 ? 'surprised' : 'happy'), look: -1 });
+  if (!realOn()) { const lt2 = t - t0 - .3; chispa(VW - 120, 1790, .45, { expr: lt2 > 4.6 && lt2 < 7.2 ? 'talk' : (lt2 < 4.6 ? 'surprised' : 'happy'), look: -1 });
     bubble(VW - 170, 1700, CHISPA_FRASES[n] || '¡Wow!', prog(lt2, 4.6, 5) * (1 - prog(lt2, 7, 7.3)), -1, 40); }
   // 7) barra de progreso del short
   X.fillStyle = 'rgba(255,255,255,.25)'; X.fillRect(0, 0, VW, 10); X.fillStyle = GOLD; X.fillRect(0, 0, VW * prog(t, t0, t1), 10);
