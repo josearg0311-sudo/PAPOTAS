@@ -23,6 +23,10 @@ Canal de YouTube en español de curiosidades e historias reales. El dueño del c
 7. Revisar fotogramas del resultado (subtítulos, sello, rótulo, cierre) y entregar desde `Vídeos listos/`.
 8. **Publicación: la hace el usuario** (no hay conexión con YouTube). Cada guion lleva `publicar: AAAA-MM-DD HH:MM` (según `../narrador/plan/plan_2_meses.md`); el `youtube.txt` incluye fecha, lista y checklist. Entregar un paquete semanal (7 Shorts + largo) y recordarle `GUIA_PUBLICAR.md`.
 
+## Portadas (pedido expreso del usuario: "portadas creativas")
+- **Vídeos largos:** generar 2 imágenes propias para la miniatura (16:9, plastilina): primer plano exagerado de un personaje (sorpresa/miedo) + el elemento clave en dorado, fondo simple y con espacio a la izquierda para el texto (~126 créditos). Montar con `herramientas/marca_miniatura.py` (2–4 palabras, 1 palabra gigante en dorado) y entregar las 2 opciones.
+- **Shorts:** la fábrica crea `… - portada.jpg` (vertical) con `marca_portada.py`: usa el campo `portada:` del guion ("LÍNEA PEQUEÑA | PALABRA GIGANTE") o, si no hay, `miniatura:`. Personaje recortado grande con contorno crema + sello ¿?.
+
 ## Plan del canal
 **Lanzamiento:** el usuario se suscribe a Creator el 17 nov 2026. Estreno jue 19 nov 19:00 con un único Short de gancho del Titanic (S01); desde el viernes, cada día un tema distinto (el usuario NO quiere semanas monotemáticas). S02–S05 y L01 del Titanic en reserva. Primer largo: sáb 28 nov "5 historias REALES que parecen inventadas". Orden de trabajo: 1) prueba de plastilina, 2) Shorts del 19–25 nov, 3) adaptar la fábrica a 16:9 antes del 28 nov.
 `../narrador/estrategia.md` y `../narrador/plan/plan_2_meses.md` (1 Short diario 19:00, 1 vídeo largo los sábados 18:00, series y calendario).

@@ -151,6 +151,11 @@ def main():
         m1, _, m2 = g['miniatura'].partition('|')
         subprocess.run([sys.executable, os.path.join(HERR, 'marca_miniatura.py'), os.path.join(trabajo, scenes[0]['img']), m1.strip(), m2.strip(),
                         g.get('serie', ''), g.get('color', '#FFC93C'), os.path.join(listos, f'{vid} - miniatura.jpg')], check=True)
+    # portada vertical del Short (gancho en 2 líneas): usa la primera escena con personaje si existe
+    pj = next((sc for sc in scenes if sc.get('pj')), None); base = scenes[0]['img'] if not pj else pj['fondo']
+    p1, _, p2 = (g.get('portada') or g.get('miniatura') or g['titulo']).partition('|')
+    subprocess.run([sys.executable, os.path.join(HERR, 'marca_portada.py'), os.path.join(trabajo, base), p1.strip(), (p2 or '').strip() or p1.strip(),
+                    g.get('serie', ''), g.get('color', '#FFC93C'), os.path.join(listos, f'{vid} - portada.jpg')] + ([os.path.join(trabajo, pj['pj'])] if pj else []), check=True)
     with open(os.path.join(listos, f'{vid} - youtube.txt'), 'w', encoding='utf-8') as f:
         f.write(f"PUBLICAR: {g.get('publicar', '(pendiente de fecha)')} (hora de México)\nLISTA DE REPRODUCCIÓN: {g.get('serie', '').title()}\n\n"
                 f"TÍTULO:\n{g['titulo']}\n\nDESCRIPCIÓN:\n{g.get('descripcion', '')}\n\n{g.get('hashtags', '')}\n\nCOMENTARIO FIJADO:\n{g.get('comentario', '')}\n\n"

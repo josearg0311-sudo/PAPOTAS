@@ -6,6 +6,7 @@ publicar: 2026-12-XX 19:00
 color: #FFC93C
 lugar: CIUDAD, PAÍS | DÍA DE MES DE AÑO
 miniatura: LÍNEA PEQUEÑA | PALABRA GIGANTE
+portada: LÍNEA PEQUEÑA | PALABRA GIGANTE
 descripcion: 2 líneas que enganchen. ¿Acaso lo sabías? 🕰️ Historias reales que no te enseñaron en el colegio.
 hashtags: #historia #sabiasque #curiosidades #acasolosabias #shorts
 comentario: Pregunta concreta para los comentarios 👇
