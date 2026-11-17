@@ -1,7 +1,7 @@
 # Peleó 29 AÑOS en una guerra que ya había terminado 😳
-id: S01
+id: S06
 serie: HISTORIAS QUE PARECEN MENTIRA
-publicar: 2026-12-17 19:00
+publicar: (ver plan)
 color: #FFC93C
 lugar: ISLA DE LUBANG, FILIPINAS | DICIEMBRE DE 1944
 miniatura: PELEÓ 29 AÑOS EN UNA | GUERRA
@@ -9,7 +9,7 @@ descripcion: En 1945 terminó la Segunda Guerra Mundial… pero Hiroo Onoda sigu
 hashtags: #historia #sabiasque #curiosidades #acasolosabias #shorts
 comentario: ¿Tú habrías creído los panfletos? 👇
 
-> Estreno: jueves 17 dic, 19:00 (México). Datos verificados: Onoda llega a Lubang en dic. 1944 con orden de no rendirse; desde 1945 se lanzan panfletos que él toma por propaganda; durante décadas asalta granjas y se enfrenta a habitantes de la isla (hubo víctimas); feb. 1974 lo encuentra el viajero Norio Suzuki; mar. 1974 su antiguo superior, el mayor Yoshimi Taniguchi, viaja a Lubang y le releva del servicio.
+> Datos verificados: Onoda llega a Lubang en dic. 1944 con orden de no rendirse; desde 1945 se lanzan panfletos que él toma por propaganda; durante décadas asalta granjas y se enfrenta a habitantes de la isla (hubo víctimas); feb. 1974 lo encuentra el viajero Norio Suzuki; mar. 1974 su antiguo superior, el mayor Yoshimi Taniguchi, viaja a Lubang y le releva del servicio.
 > Estilo MIXTO. Coste estimado: ~4.850 créditos. Nodos en ElevenLabs (flujo KDrAk6ZHNGEx01qJibzF):
 > - Clip esc. 1: imagen tdl8sQhud3png1iGQr2W → clip PqUotTYAPYlH0XRNmTqT · Clip esc. 3: imagen 3fIHtEFYBZrf8l9OJbaa → clip YjRBS4zAU9P3onkGSxZ1
 > - Capas (fondo / personaje → recorte): esc. 2 vEqoZG9tK67jggB4VLFj / Es5n6jfZskes4Q6P2pEK → pHMWJdv3mqDJXxh1GhQ1 · esc. 4 hzrDSaP2EwU3yl999jv5 / tHnbigrpxdCrJbZItufY → iYxpdVZxmbFdgKGGs85R · esc. 5 yvhtZhovISLGyYYHVdQq / iGKkgJCW5lMkyrnr7qzL → wOnm1tk52obZLOURlSth · esc. 6 5ZeM3uX4lz4gYE5sevw9 / V8XHuVsrg8DqgMBakelr → nzH22f2Qmm3mFhoNe5ym · esc. 7 LXNiTPBbEAgmRzsaPrEQ / B4JyZocTD5uJ1CwBmDZZ → btkDuIMnH8PYClod6Nuu
