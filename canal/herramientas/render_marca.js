@@ -36,7 +36,8 @@ function capas(ctx, sc, t, end, z, ox, oy) { const lt = t - sc.t, bg = IMG[sc.fo
   if (sc.niebla) { ctx.save(); ctx.filter = 'blur(45px)'; ctx.globalAlpha = .22; ctx.fillStyle = '#c9c2bb'; for (let i = 0; i < 6; i++) { const x = ((i * 300 + t * 60) % (W + 600)) - 300; ctx.beginPath(); ctx.ellipse(x, H * (.55 + .07 * Math.sin(i)), 380, 90, 0, 0, 6.283); ctx.fill(); } ctx.restore(); }
   const ent = back(prog(lt, 0, .55)), dir = sc.entra === 'der' ? 1 : -1, br = 1 + .014 * Math.sin(t * 2.4), sway = Math.sin(t * 1.3) * .012;
   const nerv = sc.nervio ? Math.sin(t * 37) * 2.5 : 0, zz = z * 1.04 + .05 * prog(lt, 0, end - sc.t), s = Math.max(W / pj.width, H / pj.height) * zz;
-  ctx.save(); ctx.translate(W / 2 + ox * 1.5 + (1 - ent) * dir * 500 + nerv, H + oy * 1.2); ctx.rotate(sway); ctx.scale(1, br);
+  const fade = sc.entra === 'fade', mv = fade ? .35 : 1.5; ctx.save(); if (fade) ctx.globalAlpha = prog(lt, 0, .5);
+  ctx.translate(W / 2 + ox * mv + (fade ? 0 : (1 - ent) * dir * 500) + nerv, H + oy * (fade ? .3 : 1.2)); ctx.rotate(fade ? sway * .5 : sway); ctx.scale(1, br);
   ctx.drawImage(pj, -pj.width * s / 2, -H / 2 - pj.height * s / 2, pj.width * s, pj.height * s); ctx.restore(); }
 // 2) VIÑETAS: la escena se arma como una página de cómic (plano general + dos detalles)
 function vinetas(ctx, im, sc, t, end) { const d = end - sc.t, lt = t - sc.t; const s0 = Math.max(W / im.width, H / im.height) * 1.15;

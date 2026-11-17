@@ -114,7 +114,7 @@ def main():
         n = f"escena_{e['n']:02d}"
         sc = {'t': round(t, 3), 'img': n + '.jpg', 'move': e['mov']}
         if e['diseno'] == 'capas':
-            sc.update({'img': n + '_fondo.jpg', 'fondo': n + '_fondo.jpg', 'pj': n + '_personaje.png', 'entra': 'der' if 'derecha' in e['efecto'] else 'izq'})
+            sc.update({'img': n + '_fondo.jpg', 'fondo': n + '_fondo.jpg', 'pj': n + '_personaje.png', 'entra': 'fade' if 'aparece' in e['efecto'] else ('der' if 'derecha' in e['efecto'] else 'izq')})
             if 'nervio' in e['efecto'] or 'temblor' in e['efecto']: sc['nervio'] = True
             if 'niebla' in e['efecto']: sc['niebla'] = True
         elif e['diseno'] == 'clip':
