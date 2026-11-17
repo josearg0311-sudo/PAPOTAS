@@ -1,0 +1,7 @@
+{"scenes": [
+  {"t": 0.0,  "img": "comic_02.jpg", "move": "in"},
+  {"t": 10.0, "img": "comic_01.jpg", "move": "up"},
+  {"t": 23.0, "img": "comic_01.jpg", "move": "in_fast"},
+  {"t": 27.8, "img": "comic_02.jpg", "move": "out"},
+  {"t": 38.1, "img": "comic_03.jpg", "move": "in"}],
+ "fx": {"teleport": 9.75, "shake": 27.8, "title": [5.85, 7.3], "name": 999}}
