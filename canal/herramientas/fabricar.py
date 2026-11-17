@@ -152,7 +152,9 @@ def main():
         subprocess.run([sys.executable, os.path.join(HERR, 'marca_miniatura.py'), os.path.join(trabajo, scenes[0]['img']), m1.strip(), m2.strip(),
                         g.get('serie', ''), g.get('color', '#FFC93C'), os.path.join(listos, f'{vid} - miniatura.jpg')], check=True)
     with open(os.path.join(listos, f'{vid} - youtube.txt'), 'w', encoding='utf-8') as f:
-        f.write(f"TÍTULO:\n{g['titulo']}\n\nDESCRIPCIÓN:\n{g.get('descripcion', '')}\n\n{g.get('hashtags', '')}\n\nCOMENTARIO FIJADO:\n{g.get('comentario', '')}\n")
+        f.write(f"PUBLICAR: {g.get('publicar', '(pendiente de fecha)')} (hora de México)\nLISTA DE REPRODUCCIÓN: {g.get('serie', '').title()}\n\n"
+                f"TÍTULO:\n{g['titulo']}\n\nDESCRIPCIÓN:\n{g.get('descripcion', '')}\n\n{g.get('hashtags', '')}\n\nCOMENTARIO FIJADO:\n{g.get('comentario', '')}\n\n"
+                "CHECKLIST: subir · título · descripción · lista de reproducción · 'no es para niños' · programar fecha/hora · (al publicarse) comentario fijado\n")
     print('✅ Listo:', os.path.relpath(salida, RAIZ))
 
 

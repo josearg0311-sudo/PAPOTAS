@@ -1,6 +1,7 @@
 # Peleó 29 AÑOS en una guerra que ya había terminado 😳
 id: S01
 serie: HISTORIAS QUE PARECEN MENTIRA
+publicar: 2026-12-17 19:00
 color: #FFC93C
 lugar: ISLA DE LUBANG, FILIPINAS | DICIEMBRE DE 1944
 miniatura: PELEÓ 29 AÑOS EN UNA | GUERRA

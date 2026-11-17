@@ -21,6 +21,7 @@ Canal de YouTube en español de curiosidades e historias reales. El dueño del c
 5. Descargar a `En proceso/S0X/`: clips como `escena_01.mp4`; capas como `escena_02_fondo.jpg` + `escena_02_personaje.png` (el recorte con transparencia); y la voz como `voz.mp3` (o usar `Pon aquí tu voz/S0X.mp3` si existe).
 6. Ejecutar `python3 herramientas/fabricar.py Guiones/S0X_tema.md` desde `canal/`.
 7. Revisar fotogramas del resultado (subtítulos, sello, rótulo, cierre) y entregar desde `Vídeos listos/`.
+8. **Publicación: la hace el usuario** (no hay conexión con YouTube). Cada guion lleva `publicar: AAAA-MM-DD HH:MM` (según `../narrador/plan/plan_2_meses.md`); el `youtube.txt` incluye fecha, lista y checklist. Entregar un paquete semanal (7 Shorts + largo) y recordarle `GUIA_PUBLICAR.md`.
 
 ## Plan del canal
 `../narrador/estrategia.md` y `../narrador/plan/plan_2_meses.md` (1 Short diario 19:00, 1 vídeo largo los sábados 18:00, series y calendario).

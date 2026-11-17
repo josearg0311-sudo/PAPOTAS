@@ -2,6 +2,7 @@
 id: S0X
 serie: HISTORIAS QUE PARECEN MENTIRA
 estilo: stopmotion
+publicar: 2026-12-XX 19:00
 color: #FFC93C
 lugar: CIUDAD, PAÍS | DÍA DE MES DE AÑO
 miniatura: LÍNEA PEQUEÑA | PALABRA GIGANTE
