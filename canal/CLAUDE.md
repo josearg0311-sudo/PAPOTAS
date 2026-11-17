@@ -24,6 +24,7 @@ Canal de YouTube en español de curiosidades e historias reales. El dueño del c
 8. **Publicación: la hace el usuario** (no hay conexión con YouTube). Cada guion lleva `publicar: AAAA-MM-DD HH:MM` (según `../narrador/plan/plan_2_meses.md`); el `youtube.txt` incluye fecha, lista y checklist. Entregar un paquete semanal (7 Shorts + largo) y recordarle `GUIA_PUBLICAR.md`.
 
 ## Portadas (pedido expreso del usuario: "portadas creativas")
+- ⚠️ Al usuario NO le gustó la plantilla actual (texto arriba + personaje recortado + sello). Quiere algo **más creativo**: rediseñarlo con él antes de usarla (pendiente, "luego lo vemos").
 - **Vídeos largos:** generar 2 imágenes propias para la miniatura (16:9, plastilina): primer plano exagerado de un personaje (sorpresa/miedo) + el elemento clave en dorado, fondo simple y con espacio a la izquierda para el texto (~126 créditos). Montar con `herramientas/marca_miniatura.py` (2–4 palabras, 1 palabra gigante en dorado) y entregar las 2 opciones.
 - **Shorts:** la fábrica crea `… - portada.jpg` (vertical) con `marca_portada.py`: usa el campo `portada:` del guion ("LÍNEA PEQUEÑA | PALABRA GIGANTE") o, si no hay, `miniatura:`. Personaje recortado grande con contorno crema + sello ¿?.
 
