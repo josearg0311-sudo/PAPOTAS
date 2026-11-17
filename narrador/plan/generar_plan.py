@@ -62,6 +62,20 @@ SUELTOS = {  # martes y viernes (series ligeras y especiales)
  '2027-02-09': ('❓ ¿Qué pasaría si…?', '¿Qué pasaría si la Tierra dejara de girar?'),
  '2027-02-12': ('💘 Especial San Valentín', 'La leyenda detrás de San Valentín'),
 }
+NOTAS = {  # cómo se cuenta lo que no se puede comprobar del todo
+ 'Dyatlov': 'Misterio real; estudios recientes apuntan a una avalancha (se menciona)',
+ 'Hinterkaifeck': 'Crimen real sin resolver; lo del escondido viene de testimonios (se dice así)',
+ 'Torre Eiffel': 'Estafa documentada; el segundo intento se cuenta como "se dice"',
+ 'microondas': 'Versión contada por el propio inventor',
+ 'San Valentín': 'Se cuenta como leyenda',
+ 'Hugh Glass': 'Ataque real; algunos detalles del viaje son leyenda (se aclara)',
+ 'Tarrare': 'Caso médico real del siglo XVIII; algunos relatos de la época exageran (se aclara)',
+ 'siglos': 'Edad estimada por científicos (entre 270 y 500 años)',
+ 'Voynich': 'Manuscrito real; su significado sigue sin descifrarse',
+ 'Roanoke': 'Hecho real; el destino de los colonos no se conoce',
+ 'tulipán': 'Precios muy altos documentados; se evita exagerar',
+}
+def nota(t): return next((v for k, v in NOTAS.items() if k.lower() in t.lower()), 'Documentado')
 d0 = dt.date(2026, 12, 17); filas = []
 largos = {dt.date.fromisoformat(f): (s, t, h) for f, s, t, h in LARGOS}
 fechas_largo = sorted(largos)
@@ -70,7 +84,7 @@ fechas_largo = sorted(largos)
 pend = {f: [(largos[f][0], x) for x in largos[f][2]] for f in fechas_largo}
 uso = {}  # serie -> último día publicado
 def pub(d, hora, serie, titulo, tipo='Short', c=None):
-    filas.append((d.isoformat(), DIAS[d.weekday()], hora, tipo, serie, titulo, *(c or (SHORT, SHORT_VP)))); uso[serie] = d
+    filas.append((d.isoformat(), DIAS[d.weekday()], hora, tipo, serie, titulo, *(c or (SHORT, SHORT_VP)), nota(titulo) if tipo == 'Short' else '')); uso[serie] = d
 for n in range(61):
     d = d0 + dt.timedelta(n); iso = d.isoformat()
     if d in largos and pend[d]:            # sábado: avance del largo a las 12:00 + el largo a las 18:00
@@ -84,15 +98,15 @@ for n in range(61):
     s, t = pend[f].pop(0); pub(d, '19:00', s, t)
 banco = [(largos[f][0], t) for f in fechas_largo for _, t in pend[f]]
 with open(os.path.join(D, 'plan_2_meses.csv'), 'w', newline='', encoding='utf-8-sig') as f:
-    w = csv.writer(f); w.writerow(['Fecha', 'Día', 'Hora (México)', 'Tipo', 'Serie', 'Título / historia', 'Créditos (voz ElevenLabs)', 'Créditos (voz propia)'])
+    w = csv.writer(f); w.writerow(['Fecha', 'Día', 'Hora (México)', 'Tipo', 'Serie', 'Título / historia', 'Créditos (voz ElevenLabs)', 'Créditos (voz propia)', 'Verificación'])
     w.writerows(filas)
 mes = lambda a, b: (sum(x[6] for x in filas if a <= x[0] <= b), sum(x[7] for x in filas if a <= x[0] <= b))
 m1, m2 = mes('2026-12-10', '2027-01-16'), mes('2027-01-10', '2027-02-22')
 nS = sum(1 for x in filas if x[3] == 'Short'); nL = sum(1 for x in filas if x[3] != 'Short')
 with open(os.path.join(D, 'calendario_tabla.md'), 'w', encoding='utf-8') as f:
-    f.write('| Fecha | Día | Hora | Tipo | Serie | Título | Créditos |\n|---|---|---|---|---|---|---|\n')
+    f.write('| Fecha | Día | Hora | Tipo | Serie | Título | Créditos | Verificación |\n|---|---|---|---|---|---|---|---|\n')
     for x in filas:
         b = '**' if x[3] != 'Short' else ''
-        f.write(f'| {x[0][8:]}/{x[0][5:7]} | {x[1]} | {x[2]} | {b}{x[3]}{b} | {x[4]} | {b}{x[5]}{b} | ' + f'{x[6]:,}'.replace(',', '.') + ' |\n')
+        f.write(f'| {x[0][8:]}/{x[0][5:7]} | {x[1]} | {x[2]} | {b}{x[3]}{b} | {x[4]} | {b}{x[5]}{b} | ' + f'{x[6]:,}'.replace(',', '.') + f' | {x[8]} |\n')
 open(os.path.join(D, 'banco.txt'), 'w', encoding='utf-8').write('\n'.join(f'{a} — {b}' for a, b in banco))
 print('Banco', len(banco), 'Shorts', nS, 'Largos', nL, 'Mes1', m1, 'Mes2', m2, 'Total', m1[0] + m2[0], m1[1] + m2[1])
