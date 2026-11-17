@@ -1,7 +1,7 @@
 # Estrategia del canal "¿Acaso lo sabías?"
 
 **Ritmo:** 1 Short diario de calidad + 1 vídeo largo (≈5 min) cada semana.
-**Identidad:** Tommy Charted, viajero del tiempo · estilo cómic oscuro 2D · frase de marca "¿Acaso lo sabías? Pues si no lo sabías… ahora te lo cuento".
+**Identidad:** narrador en off (voz "David C") · estilo cómic oscuro 2D · frase de marca "¿Acaso lo sabías? Pues si no lo sabías… ahora te lo cuento".
 **Meta 1:** 1.000 suscriptores + 4.000 horas (o 10 M de vistas en Shorts en 90 días) → monetización.
 
 ---
@@ -39,22 +39,22 @@ Los 2 Shorts nuevos de cada semana van de las series "ligeras": Animales extremo
 
 **Short (45–55 s):**
 - 0–2 s: la imagen más fuerte + el dato en una frase (nunca logo ni saludo).
-- 2–8 s: Tommy: "¿Acaso lo sabías? Pues si no lo sabías… ahora te lo cuento" + destello.
-- Historia en primera persona, cambio de imagen cada 4–6 s, un giro a mitad.
+- 2–8 s: "¿Acaso lo sabías? Pues si no lo sabías… ahora te lo cuento" + destello.
+- Historia contada en tercera persona, como un narrador de misterio, cambio de imagen cada 4–6 s, un giro a mitad.
 - Remate sorprendente + pregunta concreta para comentarios.
-- Cierre de 2 s: "Soy Tommy Charted… y esto es ¿Acaso lo sabías?"
+- Cierre de 2 s: "Esto es… ¿Acaso lo sabías?" + logo.
 
-**Vídeo largo (≈5 min):** intro de Tommy (15 s) → 5 historias unidas por "y ahora viajamos a…" → cierre con pregunta + "suscríbete para el próximo viaje".
+**Vídeo largo (≈5 min):** intro de marca (10 s: logo + "¿Acaso lo sabías?") → 5 historias unidas por "y ahora viajamos a…" → cierre con pregunta + "suscríbete para el próximo viaje".
 
 **Títulos:** curiosidad + dato concreto, 1–2 palabras en mayúsculas. Ej.: "Peleó 29 AÑOS en una guerra que ya había terminado".
-**Miniaturas (largos):** Tommy con expresión exagerada + el elemento de la historia gigante + 3–4 palabras + color de la serie.
+**Miniaturas (largos):** personaje de la historia con expresión exagerada + el elemento de la historia gigante + 3–4 palabras + color de la serie.
 **Descripción:** 2 líneas de gancho + capítulos + 3–5 hashtags (#historia #curiosidades #sabiasque + serie).
 
 ## 4. Producción (lo hace Claude)
 
 1. Guion verificado (fechas y cifras comprobadas).
-2. Ilustraciones en ElevenLabs (estilo cómic oscuro, ~63 créditos cada una; Tommy con referencia ~305).
-3. Voz de Tommy (ElevenLabs, voz "David C – Viral Storytelling").
+2. Ilustraciones en ElevenLabs (estilo cómic oscuro, ~63 créditos cada una).
+3. Voz del narrador (ElevenLabs, voz "David C – Viral Storytelling").
 4. Montaje en el motor propio: movimiento de cámara, destello, temblores, subtítulos karaoke, música y efectos, volumen −14 LUFS.
 5. Revisión fotograma a fotograma y entrega con título, descripción y hashtags.
 
@@ -77,10 +77,10 @@ Los 2 Shorts nuevos de cada semana van de las series "ligeras": Animales extremo
 
 Ya hay material para publicar **1 Short diario durante ~3 semanas**:
 - 20 Shorts de "20 datos históricos" (`video-historia/shorts/`), títulos en `video-historia/youtube_textos.md`.
-- Short de Tommy en 3D (Boston) y demo en cómic (Boston).
+- Demo en cómic (Boston).
 - 2 vídeos largos: Parte 1 (sábado de la semana 1) y Parte 2 (sábado de la semana 2).
 
-El **17 de diciembre** se lanza la **nueva temporada** en estilo cómic con Tommy ("Temporada 1"), presentada con un Short especial: "Tommy Charted viaja por el tiempo para contarte lo que no sabías".
+El **17 de diciembre** se lanza la **nueva temporada** en estilo cómic ("Temporada 1").
 
 ### Calendario concreto (Shorts a las 19:00, largos a las 18:00, hora de México)
 
@@ -107,7 +107,7 @@ El **17 de diciembre** se lanza la **nueva temporada** en estilo cómic con Tomm
 | Dom 6 dic | short_dato_10 – El correo inca |
 | Lun 7 dic | short_dato_11 – 30.000 km de caminos |
 | 8–14 dic | Sin material nuevo: Shorts de la Temporada 1 si hay créditos (Creator o voz propia); si no, pausa corta |
-| Mar 15 dic | Teaser: Short de Tommy en 3D ("Algo nuevo llega…") |
+| Mar 15 dic | Teaser: demo en cómic de Boston ("Algo nuevo llega…") |
 | **Jue 17 dic** | **Estreno Temporada 1:** Short S01 – El soldado que peleó 29 años (Onoda) |
 
 Títulos y descripciones de los 20 Shorts: `video-historia/youtube_textos.md`.

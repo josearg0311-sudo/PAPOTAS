@@ -1,8 +1,8 @@
 """Genera el plan de 2 meses (CSV + Markdown): python3 generar_plan.py"""
 import csv, datetime as dt, os
 D = os.path.dirname(os.path.abspath(__file__))
-SHORT, LARGO, TOMMY_UNICA = 1550, 500, 490          # créditos (voz ElevenLabs incluida)
-SHORT_VP, LARGO_VP = 630, 200                         # créditos si la voz la grabas tú
+SHORT, LARGO, TOMMY_UNICA = 1500, 500, 0          # créditos (voz ElevenLabs incluida)
+SHORT_VP, LARGO_VP = 600, 200                         # créditos si la voz la grabas tú
 DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 LARGOS = [  # (fecha sábado, serie, título, [5 historias])
@@ -77,7 +77,7 @@ for n in range(61):
     filas.append((iso, DIAS[wd], hora, 'Short', s, t, SHORT, SHORT_VP))
     if d in largos:
         s, t, _ = largos[d]; filas.append((iso, DIAS[wd], '18:00', 'LARGO (5 min)', s, t, LARGO, LARGO_VP))
-filas[0] = filas[0][:6] + (SHORT + TOMMY_UNICA, SHORT_VP + TOMMY_UNICA)  # S01 incluye las 2 escenas de Tommy reutilizables
+filas[0] = filas[0][:6] + (SHORT + TOMMY_UNICA, SHORT_VP + TOMMY_UNICA)  # (sin personaje: no hay escenas únicas)
 with open(os.path.join(D, 'plan_2_meses.csv'), 'w', newline='', encoding='utf-8-sig') as f:
     w = csv.writer(f); w.writerow(['Fecha', 'Día', 'Hora (México)', 'Tipo', 'Serie', 'Título / historia', 'Créditos (voz ElevenLabs)', 'Créditos (voz propia)'])
     w.writerows(filas)
