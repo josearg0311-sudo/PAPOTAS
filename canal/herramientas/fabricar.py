@@ -85,9 +85,20 @@ def main():
         sys.exit(f'Falta la voz: pon "{vid}.mp3" en "Pon aquí tu voz/" o "voz.mp3" en "En proceso/{vid}/".')
     voz = voces[0]; print('Voz:', os.path.relpath(voz, RAIZ))
     for e in g['escenas']:
-        f = os.path.join(trabajo, f"escena_{e['n']:02d}.jpg")
-        if not os.path.exists(f):
-            sys.exit(f'Falta la imagen {os.path.relpath(f, RAIZ)}')
+        n = f"escena_{e['n']:02d}"
+        if e['diseno'] == 'capas':
+            nec = [n + '_fondo.jpg', n + '_personaje.png']
+        elif e['diseno'] == 'clip':
+            nec = [n + '.mp4']
+        else:
+            nec = [n + '.jpg']
+        for f in nec:
+            if not os.path.exists(os.path.join(trabajo, f)):
+                sys.exit(f'Falta {os.path.relpath(os.path.join(trabajo, f), RAIZ)} (escena {e["n"]}, diseño {e["diseno"]})')
+        if e['diseno'] == 'clip':  # extrae los fotogramas del clip animado
+            carp = os.path.join(trabajo, n + '_clip'); os.makedirs(carp, exist_ok=True)
+            if not os.listdir(carp):
+                subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(trabajo, n + '.mp4'), '-vf', 'fps=24,scale=720:-2', '-q:v', '4', os.path.join(carp, '%04d.jpg')], check=True)
     print('Transcribiendo y sincronizando…')
     words = corregir(transcribir(voz, os.path.join(trabajo, 'whisper.json')), g['narracion'])
     a = [norm(w['w']) for w in words]
@@ -100,7 +111,15 @@ def main():
         if 0 < t - salto < 1.2 or abs(t - salto) < .4:
             t = salto
         t_prev = t + .1
-        sc = {'t': round(t, 3), 'img': f"escena_{e['n']:02d}.jpg", 'move': e['mov']}
+        n = f"escena_{e['n']:02d}"
+        sc = {'t': round(t, 3), 'img': n + '.jpg', 'move': e['mov']}
+        if e['diseno'] == 'capas':
+            sc.update({'img': n + '_fondo.jpg', 'fondo': n + '_fondo.jpg', 'pj': n + '_personaje.png', 'entra': 'der' if 'derecha' in e['efecto'] else 'izq'})
+            if 'nervio' in e['efecto'] or 'temblor' in e['efecto']: sc['nervio'] = True
+            if 'niebla' in e['efecto']: sc['niebla'] = True
+        elif e['diseno'] == 'clip':
+            fr = sorted(os.listdir(os.path.join(trabajo, n + '_clip')))
+            sc.update({'img': f'{n}_clip/{fr[0]}', 'frames': [f'{n}_clip/{x}' for x in fr], 'fps': 24})
         det = [f"escena_{e['n']:02d}_{x}.jpg" for x in 'bc']
         if e['diseno'].startswith('vi') and all(os.path.exists(os.path.join(trabajo, d)) for d in det):
             sc['layout'] = 'vinetas'; sc['det'] = det   # viñetas solo con imágenes de detalle reales (nunca recortes repetidos)
@@ -130,7 +149,7 @@ def main():
     subprocess.run(['node', os.path.join(HERR, 'render_marca.js'), trabajo, salida], check=True)
     if g.get('miniatura'):
         m1, _, m2 = g['miniatura'].partition('|')
-        subprocess.run([sys.executable, os.path.join(HERR, 'marca_miniatura.py'), os.path.join(trabajo, 'escena_01.jpg'), m1.strip(), m2.strip(),
+        subprocess.run([sys.executable, os.path.join(HERR, 'marca_miniatura.py'), os.path.join(trabajo, scenes[0]['img']), m1.strip(), m2.strip(),
                         g.get('serie', ''), g.get('color', '#FFC93C'), os.path.join(listos, f'{vid} - miniatura.jpg')], check=True)
     with open(os.path.join(listos, f'{vid} - youtube.txt'), 'w', encoding='utf-8') as f:
         f.write(f"TÍTULO:\n{g['titulo']}\n\nDESCRIPCIÓN:\n{g.get('descripcion', '')}\n\n{g.get('hashtags', '')}\n\nCOMENTARIO FIJADO:\n{g.get('comentario', '')}\n")

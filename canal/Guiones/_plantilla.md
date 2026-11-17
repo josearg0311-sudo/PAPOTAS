@@ -16,10 +16,10 @@ comentario: Pregunta concreta para los comentarios 👇
 ## Escenas
 | # | Desde la frase | Diseño | Movimiento | Efecto | Imagen principal (prompt) | Detalles en viñetas (prompts b / c) |
 |---|---|---|---|---|---|---|
-| 1 | ¿Sabías que | completa | in | | La imagen más impactante (gancho) | |
-| 2 | (primeras palabras de la frase) | completa | up | polvo | Plano general del lugar | |
-| 3 | ... | completa | out | temblor | El clímax | |
+| 1 | ¿Sabías que | clip | in | lluvia | La imagen más impactante (gancho) + cómo se mueve | |
+| 2 | (primeras palabras de la frase) | capas | up | polvo | Fondo: el lugar sin personas · Personaje: quién y qué hace | |
+| 3 | ... | clip | out | temblor | El clímax + cómo se mueve | |
 
-Diseño: `completa` (siempre). Movimiento: `in`, `in_fast`, `out`, `up`, `down`.
-Efecto (se pueden combinar): `polvo`, `lluvia`, `brasas`, `salpicaduras`, `luz`, `temblor`.
+Diseño: `clip` (animado con IA: gancho y clímax) o `capas` (fondo + personaje recortado). Movimiento: `in`, `in_fast`, `out`, `up`, `down`.
+Efecto (se pueden combinar): `polvo`, `lluvia`, `brasas`, `salpicaduras`, `niebla`, `luz`, `temblor`, `nervio`, `derecha`.
 "Desde la frase" = las primeras palabras exactas de la narración donde empieza la escena (evitar números).

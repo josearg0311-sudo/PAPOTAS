@@ -9,7 +9,10 @@ hashtags: #historia #sabiasque #curiosidades #acasolosabias #shorts
 comentario: ¿Tú habrías creído los panfletos? 👇
 
 > Estreno: jueves 17 dic, 19:00 (México). Datos verificados: Onoda llega a Lubang en dic. 1944 con orden de no rendirse; desde 1945 se lanzan panfletos que él toma por propaganda; durante décadas asalta granjas y se enfrenta a habitantes de la isla (hubo víctimas); feb. 1974 lo encuentra el viajero Norio Suzuki; mar. 1974 su antiguo superior, el mayor Yoshimi Taniguchi, viaja a Lubang y le releva del servicio.
-> Nodos ya creados en ElevenLabs (imagen principal): 1 tdl8sQhud3png1iGQr2W · 2 74a9nYBOeeHKiwmqUvID · 3 3fIHtEFYBZrf8l9OJbaa · 4 kbGI8GTAFDt4g2i8QftI · 5 LnDx3trPdieYTTEzFA2z · 6 61R2E53FWXEQCiJYljKy · 7 0uiUKewoCh2XfiJiI7GD · voz 6eUpsFXbagygrE8MkEnh.
+> Estilo MIXTO. Coste estimado: ~4.850 créditos. Nodos en ElevenLabs (flujo KDrAk6ZHNGEx01qJibzF):
+> - Clip esc. 1: imagen tdl8sQhud3png1iGQr2W → clip PqUotTYAPYlH0XRNmTqT · Clip esc. 3: imagen 3fIHtEFYBZrf8l9OJbaa → clip YjRBS4zAU9P3onkGSxZ1
+> - Capas (fondo / personaje → recorte): esc. 2 vEqoZG9tK67jggB4VLFj / Es5n6jfZskes4Q6P2pEK → pHMWJdv3mqDJXxh1GhQ1 · esc. 4 hzrDSaP2EwU3yl999jv5 / tHnbigrpxdCrJbZItufY → iYxpdVZxmbFdgKGGs85R · esc. 5 yvhtZhovISLGyYYHVdQq / iGKkgJCW5lMkyrnr7qzL → wOnm1tk52obZLOURlSth · esc. 6 5ZeM3uX4lz4gYE5sevw9 / V8XHuVsrg8DqgMBakelr → nzH22f2Qmm3mFhoNe5ym · esc. 7 LXNiTPBbEAgmRzsaPrEQ / B4JyZocTD5uJ1CwBmDZZ → btkDuIMnH8PYClod6Nuu
+> - Voz: 6eUpsFXbagygrE8MkEnh. Orden: 1) imágenes y voz, 2) recortes y clips.
 
 ## Narración
 [curious] ¿Sabías que un soldado siguió peleando una guerra durante veintinueve años... porque nadie le dijo que había terminado? [playful] ¿Acaso lo sabías? [confident] Pues si no lo sabías... ahora te lo cuento.
@@ -22,10 +25,10 @@ comentario: ¿Tú habrías creído los panfletos? 👇
 ## Escenas
 | # | Desde la frase | Diseño | Movimiento | Efecto | Imagen principal (prompt) | Notas |
 |---|---|---|---|---|---|---|
-| 1 | ¿Sabías que | completa | in | lluvia | Soldado demacrado apuntando desde la selva; oro: rayo de sol en sus ojos |  |
-| 2 | Isla de Lubang | completa | up | polvo | Joven teniente recibe órdenes en la playa (1944); oro: el papel de las órdenes |  |
-| 3 | la guerra termina | completa | out | polvo | Avión lanzando panfletos sobre la selva; oro: los panfletos |  |
-| 4 | pero él cree | completa | in_fast | polvo | Soldado agachado mira un panfleto con desconfianza; oro: el panfleto |  |
-| 5 | Pasan los años | completa | in | lluvia | Soldado envejecido marcando rayas en un tronco bajo la lluvia; oro: las rayas |  |
-| 6 | un joven viajero | completa | in | brasas luz | Viajero de 1974 junto a una fogata frente al soldado que le apunta; oro: la fogata |  |
-| 7 | Y así fue | completa | out | polvo | Antiguo comandante lee una orden; Onoda saluda con lágrimas; oro: la orden |  |
+| 1 | ¿Sabías que | clip | in | lluvia | Soldado demacrado apuntando desde la selva; oro: rayo de sol en sus ojos |  |
+| 2 | Isla de Lubang | capas | up | polvo | Joven teniente recibe órdenes en la playa (1944); oro: el papel de las órdenes |  |
+| 3 | la guerra termina | clip | out | polvo | Avión lanzando panfletos sobre la selva; oro: los panfletos |  |
+| 4 | pero él cree | capas | in_fast | polvo nervio | Soldado agachado mira un panfleto con desconfianza; oro: el panfleto |  |
+| 5 | Pasan los años | capas | in | lluvia niebla | Soldado envejecido marcando rayas en un tronco bajo la lluvia; oro: las rayas |  |
+| 6 | un joven viajero | capas | in | brasas luz derecha | Viajero de 1974 junto a una fogata frente al soldado que le apunta; oro: la fogata |  |
+| 7 | Y así fue | capas | out | polvo niebla | Antiguo comandante lee una orden; Onoda saluda con lágrimas; oro: la orden |  |

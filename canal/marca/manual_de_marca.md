@@ -6,7 +6,7 @@ Objetivo: que cualquiera que vea 1 segundo de un Short, un vídeo o una miniatur
 
 | # | Firma | Qué es | Dónde |
 |---|---|---|---|
-| 1 | **Cómic a todo color con cámara viva** | Ilustraciones de cómic oscuro en color a pantalla completa; la cámara deriva como a mano, da un golpe de zoom al entrar cada escena y hay partículas de ambiente (polvo, lluvia, brasas, salpicaduras). El objeto clave de la historia, en **dorado** | Todas las escenas |
+| 1 | **Cómic a todo color, animado** | Gancho y clímax con **clips animados por IA**; el resto en **capas 2.5D**: el fondo se mueve lento y el personaje recortado entra, respira y se balancea por delante. Partículas de ambiente (polvo, lluvia, brasas, niebla). El objeto clave de la historia, en **dorado** | Todas las escenas |
 | 2 | **El sello "¿?"** | Sello dorado circular con "¿?" y el texto "¿ACASO LO SABÍAS?" alrededor, que golpea la pantalla con la frase de marca | Segundos 5–9 de cada Short, intro de los largos, esquina de las miniaturas |
 | 3 | **El salto por la interrogación** | Un "?" dorado gigante crece hasta llenar la pantalla y nos lleva a la historia | Tras "…ahora te lo cuento" |
 | 4 | **Rótulo de lugar y fecha** | Cinta negra con barra dorada, letras de máquina de escribir: "BOSTON, EE. UU. / 15 DE ENERO DE 1919" | Inicio de cada historia |

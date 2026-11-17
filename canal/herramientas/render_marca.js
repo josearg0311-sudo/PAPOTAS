@@ -23,7 +23,21 @@ function drawImg(sc, t, end, ctx) { const im = IMG[sc.img]; const k = ease(prog(
   if (TL.estilo === 'vivo') { const lt = t - sc.t, pu = Math.exp(-lt * 5) * .07; z += pu; ox += Math.sin(t * .9) * 10 + Math.sin(t * 2.3) * 4; oy += Math.cos(t * .7) * 9; }
   for (const sh of TL.fx.shake || []) if (t > sh && t < sh + 1.2) { const a = (1 - prog(t, sh, sh + 1.2)) * 28; ox += Math.sin(t * 90) * a; oy += Math.cos(t * 73) * a; z += .03 * (1 - prog(t, sh, sh + 1.2)); }
   const s = Math.max(W / im.width, H / im.height) * z; ctx.save(); if (TL.estilo === 'vivo') { ctx.translate(W / 2, H / 2); ctx.rotate(Math.sin(t * .5) * .008); ctx.translate(-W / 2, -H / 2); }
-  if (sc.layout === 'vinetas') vinetas(ctx, im, sc, t, end); else ctx.drawImage(im, W / 2 - im.width * s / 2 + ox, H / 2 - im.height * s / 2 + oy, im.width * s, im.height * s); ctx.restore(); }
+  if (sc.frames) clip(ctx, sc, t);
+  else if (sc.fondo) capas(ctx, sc, t, end, z, ox, oy);
+  else if (sc.layout === 'vinetas') vinetas(ctx, im, sc, t, end); else ctx.drawImage(im, W / 2 - im.width * s / 2 + ox, H / 2 - im.height * s / 2 + oy, im.width * s, im.height * s); ctx.restore(); }
+function cover(ctx, im, z, ox, oy) { const s = Math.max(W / im.width, H / im.height) * z; ctx.drawImage(im, W / 2 - im.width * s / 2 + ox, H / 2 - im.height * s / 2 + oy, im.width * s, im.height * s); }
+// CLIP animado con IA: secuencia de fotogramas (se congela en el último si la escena dura más)
+function clip(ctx, sc, t) { const lt = t - sc.t, n = sc.frames.length, i = Math.min(n - 1, Math.max(0, Math.floor(lt * (sc.fps || 24))));
+  const extra = Math.max(0, lt - n / (sc.fps || 24)); cover(ctx, IMG[sc.frames[i]], 1.02 + extra * .02, 0, 0); }
+// CAPAS 2.5D: fondo lento + personaje recortado con movimiento propio (entra, respira, se balancea, tiembla)
+function capas(ctx, sc, t, end, z, ox, oy) { const lt = t - sc.t, bg = IMG[sc.fondo], pj = IMG[sc.pj];
+  cover(ctx, bg, 1.03 + (z - 1) * .5, ox * .4, oy * .4);
+  if (sc.niebla) { ctx.save(); ctx.filter = 'blur(45px)'; ctx.globalAlpha = .22; ctx.fillStyle = '#c9c2bb'; for (let i = 0; i < 6; i++) { const x = ((i * 300 + t * 60) % (W + 600)) - 300; ctx.beginPath(); ctx.ellipse(x, H * (.55 + .07 * Math.sin(i)), 380, 90, 0, 0, 6.283); ctx.fill(); } ctx.restore(); }
+  const ent = back(prog(lt, 0, .55)), dir = sc.entra === 'der' ? 1 : -1, br = 1 + .014 * Math.sin(t * 2.4), sway = Math.sin(t * 1.3) * .012;
+  const nerv = sc.nervio ? Math.sin(t * 37) * 2.5 : 0, zz = z * 1.04 + .05 * prog(lt, 0, end - sc.t), s = Math.max(W / pj.width, H / pj.height) * zz;
+  ctx.save(); ctx.translate(W / 2 + ox * 1.5 + (1 - ent) * dir * 500 + nerv, H + oy * 1.2); ctx.rotate(sway); ctx.scale(1, br);
+  ctx.drawImage(pj, -pj.width * s / 2, -H / 2 - pj.height * s / 2, pj.width * s, pj.height * s); ctx.restore(); }
 // 2) VIÑETAS: la escena se arma como una página de cómic (plano general + dos detalles)
 function vinetas(ctx, im, sc, t, end) { const d = end - sc.t, lt = t - sc.t; const s0 = Math.max(W / im.width, H / im.height) * 1.15;
   ctx.save(); ctx.filter = 'blur(14px) brightness(.45)'; ctx.drawImage(im, W / 2 - im.width * s0 / 2, H / 2 - im.height * s0 / 2, im.width * s0, im.height * s0); ctx.restore();
@@ -124,7 +138,7 @@ function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); scenes(t); ambien
       for (const [k, v] of Object.entries(imgs)) { const im = new Image(); im.src = v; await im.decode(); IMG[k] = im; } LOGO = new Image(); LOGO.src = lg; await LOGO.decode(); };
     window.render = t => { frame(t); return document.getElementById('c').toDataURL('image/jpeg', .92); };</script></body></html>`);
   p.on('pageerror', e => { console.error('ERROR en página:', e.message); process.exit(1); });
-  const imgs = Object.fromEntries(TL.scenes.flatMap(s => [s.img, ...(s.det || [])]).map(f => [f, b64(path.join(DIR, f), 'image/jpeg')]));
+  const imgs = Object.fromEntries(TL.scenes.flatMap(s => [s.img, ...(s.det || []), ...(s.frames || []), s.fondo, s.pj]).filter(Boolean).map(f => [f, b64(path.join(DIR, f), f.endsWith('.png') ? 'image/png' : 'image/jpeg')]));
   await p.evaluate(([tl, im, lg]) => init(tl, im, lg), [TL, imgs, b64(path.join(RAIZ, 'logo.png'), 'image/png')]);
   if (stills) { for (const s of stills.split(',')) { const d = await p.evaluate(t => render(t), +s); fs.writeFileSync(`${out}_${s}.jpg`, Buffer.from(d.split(',')[1], 'base64')); } await b.close(); return; }
   const audio = fs.existsSync(path.join(DIR, 'mezcla.wav')) ? path.join(DIR, 'mezcla.wav') : path.join(DIR, 'voz.mp3');
