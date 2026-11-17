@@ -98,7 +98,7 @@ def main():
         if e['diseno'] == 'clip':  # extrae los fotogramas del clip animado
             carp = os.path.join(trabajo, n + '_clip'); os.makedirs(carp, exist_ok=True)
             if not os.listdir(carp):
-                subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(trabajo, n + '.mp4'), '-vf', 'fps=24,scale=720:-2', '-q:v', '4', os.path.join(carp, '%04d.jpg')], check=True)
+                subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(trabajo, n + '.mp4'), '-vf', ('fps=12' if g.get('estilo', 'stopmotion') == 'stopmotion' else 'fps=24') + ',scale=720:-2', '-q:v', '4', os.path.join(carp, '%04d.jpg')], check=True)
     print('Transcribiendo y sincronizando…')
     words = corregir(transcribir(voz, os.path.join(trabajo, 'whisper.json')), g['narracion'])
     a = [norm(w['w']) for w in words]
@@ -119,7 +119,7 @@ def main():
             if 'niebla' in e['efecto']: sc['niebla'] = True
         elif e['diseno'] == 'clip':
             fr = sorted(os.listdir(os.path.join(trabajo, n + '_clip')))
-            sc.update({'img': f'{n}_clip/{fr[0]}', 'frames': [f'{n}_clip/{x}' for x in fr], 'fps': 24})
+            sc.update({'img': f'{n}_clip/{fr[0]}', 'frames': [f'{n}_clip/{x}' for x in fr], 'fps': 12 if g.get('estilo', 'stopmotion') == 'stopmotion' else 24})
         det = [f"escena_{e['n']:02d}_{x}.jpg" for x in 'bc']
         if e['diseno'].startswith('vi') and all(os.path.exists(os.path.join(trabajo, d)) for d in det):
             sc['layout'] = 'vinetas'; sc['det'] = det   # viñetas solo con imágenes de detalle reales (nunca recortes repetidos)
@@ -137,7 +137,7 @@ def main():
         cur.append(w); gap = words[i + 1]['s'] - w['e'] if i + 1 < len(words) else 9
         if w['w'][-1] in '.,?!:;…' or len(cur) >= 3 or gap > .35:
             chunks.append({'s': cur[0]['s'], 'e': cur[-1]['e'], 'w': cur}); cur = []
-    json.dump({'dur': round(fin + 3.3, 3), 'estilo': g.get('estilo', 'vivo'), 'chunks': chunks, 'scenes': scenes, 'fx': fx},
+    json.dump({'dur': round(fin + 3.3, 3), 'estilo': g.get('estilo', 'stopmotion'), 'chunks': chunks, 'scenes': scenes, 'fx': fx},
               open(os.path.join(trabajo, 'tl.json'), 'w'), ensure_ascii=False)
     if not voz.startswith(trabajo):
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', voz, os.path.join(trabajo, 'voz.mp3')], check=True)

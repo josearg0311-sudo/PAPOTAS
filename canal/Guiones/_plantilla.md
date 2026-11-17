@@ -1,6 +1,7 @@
 # Título del Short (con 1–2 palabras en MAYÚSCULAS) 😳
 id: S0X
 serie: HISTORIAS QUE PARECEN MENTIRA
+estilo: stopmotion
 color: #FFC93C
 lugar: CIUDAD, PAÍS | DÍA DE MES DE AÑO
 miniatura: LÍNEA PEQUEÑA | PALABRA GIGANTE

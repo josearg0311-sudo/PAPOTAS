@@ -20,9 +20,9 @@ const MOVES = { in: [1.04, 1.14, 0, 0], in_fast: [1.0, 1.2, 0, 0], out: [1.16, 1
 let SHAKE = 0;
 function drawImg(sc, t, end, ctx) { const im = IMG[sc.img]; const k = ease(prog(t, sc.t, end)); const [z0, z1, dx, dy] = MOVES[sc.move] || MOVES.in;
   let z = lerp(z0, z1, k), ox = lerp(-dx, dx, k), oy = lerp(-dy, dy, k);
-  if (TL.estilo === 'vivo') { const lt = t - sc.t, pu = Math.exp(-lt * 5) * .07; z += pu; ox += Math.sin(t * .9) * 10 + Math.sin(t * 2.3) * 4; oy += Math.cos(t * .7) * 9; }
+  if (TL.estilo === 'vivo' || TL.estilo === 'stopmotion') { const lt = t - sc.t, pu = Math.exp(-lt * 5) * .07; z += pu; ox += Math.sin(t * .9) * 10 + Math.sin(t * 2.3) * 4; oy += Math.cos(t * .7) * 9; }
   for (const sh of TL.fx.shake || []) if (t > sh && t < sh + 1.2) { const a = (1 - prog(t, sh, sh + 1.2)) * 28; ox += Math.sin(t * 90) * a; oy += Math.cos(t * 73) * a; z += .03 * (1 - prog(t, sh, sh + 1.2)); }
-  const s = Math.max(W / im.width, H / im.height) * z; ctx.save(); if (TL.estilo === 'vivo') { ctx.translate(W / 2, H / 2); ctx.rotate(Math.sin(t * .5) * .008); ctx.translate(-W / 2, -H / 2); }
+  const s = Math.max(W / im.width, H / im.height) * z; ctx.save(); if (TL.estilo === 'vivo' || TL.estilo === 'stopmotion') { ctx.translate(W / 2, H / 2); ctx.rotate(Math.sin(t * .5) * .008); ctx.translate(-W / 2, -H / 2); }
   if (sc.frames) clip(ctx, sc, t);
   else if (sc.fondo) capas(ctx, sc, t, end, z, ox, oy);
   else if (sc.layout === 'vinetas') vinetas(ctx, im, sc, t, end); else ctx.drawImage(im, W / 2 - im.width * s / 2 + ox, H / 2 - im.height * s / 2 + oy, im.width * s, im.height * s); ctx.restore(); }
@@ -50,7 +50,7 @@ function vinetas(ctx, im, sc, t, end) { const d = end - sc.t, lt = t - sc.t; con
     const pz = 1 + .08 * prog(lt, p.t0, d), sw = src.width * cw, sh = src.height * ch, sca = Math.max(w / sw, h / sh) * pz;
     ctx.drawImage(src, src.width * cx, src.height * cy, sw, sh, x + w / 2 - sw * sca / 2 + Math.sin(lt * .6 + i) * 8, y + h / 2 - sh * sca / 2, sw * sca, sh * sca); ctx.restore(); }); }
 // 3) partículas de ambiente según la escena (lluvia, brasas, polvo, salpicaduras)
-function ambiente(t) { const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i; const tipo = sc[k].amb; if (!tipo || TL.estilo !== 'vivo') return;
+function ambiente(t) { const sc = TL.scenes; let k = 0; for (let i = 0; i < sc.length; i++) if (sc[i].t <= t) k = i; const tipo = sc[k].amb; if (!tipo || TL.estilo === 'vinetas') return;
   const R = rng(k * 7 + 3); X.save();
   for (let i = 0; i < (tipo === 'lluvia' ? 140 : 70); i++) { const sx = R() * W, sy = R() * H, sp = .4 + R() * .8;
     if (tipo === 'lluvia') { const y = (sy + t * 1900 * sp) % H, x = (sx + t * 160 * sp) % W; X.strokeStyle = 'rgba(220,230,255,.35)'; X.lineWidth = 2; X.beginPath(); X.moveTo(x, y); X.lineTo(x + 9, y + 42); X.stroke(); }
@@ -125,7 +125,12 @@ function fin(t) { const f = TL.fx.fin; if (!f || t < f) return; const k = ease(p
   const b = back(prog(t, f + .9, f + 1.3)); X.save(); X.translate(W / 2, 1560); X.scale(b, b); X.fillStyle = GOLD; X.beginPath(); X.roundRect(-250, -60, 500, 120, 60); X.fill();
   X.fillStyle = INK; X.font = '900 54px Mont'; X.textAlign = 'center'; X.textBaseline = 'middle'; X.fillText('SUSCRÍBETE', 0, 4); X.restore(); }
 function barra(t) { const p = t / TL.dur; X.fillStyle = 'rgba(243,233,210,.2)'; X.fillRect(26, H - 40, W - 52, 10); X.fillStyle = GOLD; X.fillRect(26, H - 40, (W - 52) * p, 10); }
-function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); scenes(t); ambiente(t); texture(t);
+// STOP-MOTION: la imagen avanza "a pasos" (12 por segundo) con un leve temblor de cámara hecho a mano;
+// los textos de marca y subtítulos siguen fluidos para leerse bien.
+function paso(t) { return TL.estilo === 'stopmotion' ? Math.floor(t * 12) / 12 : t; }
+function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); const tq = paso(t);
+  X.save(); if (TL.estilo === 'stopmotion') { const R = rng(Math.floor(t * 12) + 7); X.translate(W / 2 + (R() - .5) * 5, H / 2 + (R() - .5) * 5); X.rotate((R() - .5) * .004); X.translate(-W / 2, -H / 2); }
+  scenes(tq); ambiente(tq); X.restore(); texture(t);
   if (!(TL.fx.fin && t > TL.fx.fin + .35)) { serie(t); lugar(t); sello(t, W / 2, H * .42); subs(t); } salto(t); fin(t); panel(); barra(t);
   const a = Math.min(prog(t, 0, .25), 1 - prog(t, TL.dur - .4, TL.dur)); if (a < 1) { X.fillStyle = 'rgba(0,0,0,' + (1 - a) + ')'; X.fillRect(0, 0, W, H); } }
 `;
