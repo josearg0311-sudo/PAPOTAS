@@ -13,7 +13,7 @@ LARGOS = [  # (fecha sábado, serie, título, [5 historias])
  ('2026-12-26', '🕰️ Historias que parecen mentira', '5 historias REALES que parecen inventadas',
   ['Peleó 29 AÑOS en una guerra que ya había terminado (Hiroo Onoda)', 'Sobrevivió a las DOS bombas atómicas (Tsutomu Yamaguchi)',
    'Una OLA DE CERVEZA mató a 8 personas en Londres (1814)', 'Un jinete MUERTO ganó una carrera (Frank Hayes, 1923)',
-   'Sobrevivió al Titanic… y a sus barcos hermanos (Violet Jessop)']),
+   'La guerra que duró 335 años… sin un solo disparo (islas Sorlingas)']),
  ('2027-01-02', '🔍 Misterios sin resolver', '5 misterios que NADIE ha podido explicar',
   ['El barco que apareció SIN NADIE a bordo (Mary Celeste, 1872)', '9 excursionistas huyeron de su tienda en plena noche (paso Dyatlov, 1959)',
    'Alguien vivía escondido en la casa de sus víctimas (Hinterkaifeck, 1922)', 'El libro que NADIE puede leer (manuscrito Voynich)',
@@ -65,32 +65,38 @@ SUELTOS = {  # martes y viernes (series ligeras y especiales)
  '2027-02-09': ('❓ ¿Qué pasaría si…?', '¿Qué pasaría si la Tierra dejara de girar?'),
  '2027-02-12': ('💘 Especial San Valentín', 'La leyenda detrás de San Valentín'),
 }
-d0 = dt.date(2026, 12, 17); filas = []; cola = []
+d0 = dt.date(2026, 12, 17); filas = []
 largos = {dt.date.fromisoformat(f): (s, t, h) for f, s, t, h in LARGOS}
 fechas_largo = sorted(largos)
-def historias_de(i): s, t, h = largos[fechas_largo[i]]; return [(s, x) for x in h]
-# Semana de estreno: jue-dom = historias 1-4 del largo 1; desde el lunes, la 5.ª del anterior y luego mié/jue/sáb/dom del siguiente
-cola = historias_de(0); k = 1
+# VARIEDAD: cada largo mantiene su tema, pero sus 5 historias se reparten como Shorts a lo largo de varias semanas,
+# intercaladas con otras series. Cada día se elige la serie usada hace más tiempo (nunca dos días seguidos el mismo tema).
+pend = {f: [(largos[f][0], x) for x in largos[f][2]] for f in fechas_largo}
+uso = {}  # serie -> último día publicado
+def pub(d, hora, serie, titulo, tipo='Short', c=None):
+    filas.append((d.isoformat(), DIAS[d.weekday()], hora, tipo, serie, titulo, *(c or (SHORT, SHORT_VP)))); uso[serie] = d
 for n in range(68):
-    d = d0 + dt.timedelta(n); wd = d.weekday(); iso = d.isoformat()
+    d = d0 + dt.timedelta(n); iso = d.isoformat()
+    if d in largos and pend[d]:            # sábado: avance del largo a las 12:00 + el largo a las 18:00
+        s, t = pend[d].pop(0); pub(d, '12:00', s, t); pub(d, '18:00', largos[d][0], largos[d][1], 'LARGO (5 min)', (LARGO, LARGO_VP)); continue
     if iso in SUELTOS:
-        s, t = SUELTOS[iso]; filas.append((iso, DIAS[wd], '19:00', 'Short', s, t, SHORT, SHORT_VP)); continue
-    if wd == 2 and k < len(fechas_largo) and d < fechas_largo[k]: cola += historias_de(k); k += 1
-    if not cola: continue
-    s, t = cola.pop(0); hora = '12:00' if wd == 5 else '19:00'
-    filas.append((iso, DIAS[wd], hora, 'Short', s, t, SHORT, SHORT_VP))
-    if d in largos:
-        s, t, _ = largos[d]; filas.append((iso, DIAS[wd], '18:00', 'LARGO (5 min)', s, t, LARGO, LARGO_VP))
-filas[0] = filas[0][:6] + (SHORT + TOMMY_UNICA, SHORT_VP + TOMMY_UNICA)  # (sin personaje: no hay escenas únicas)
+        s, t = SUELTOS[iso]; pub(d, '19:00', s, t); continue
+    disp = [f for f in fechas_largo if f - dt.timedelta(16) <= d and pend[f]]
+    if d == d0: disp = disp[:1]                              # estreno: el Titanic
+    if not disp: continue
+    ayer = filas[-1][4] if filas else None
+    f = min(disp, key=lambda f: (largos[f][0] == ayer, uso.get(largos[f][0], dt.date(2000, 1, 1)), f))
+    s, t = pend[f].pop(0); pub(d, '19:00', s, t)
+banco = [(largos[f][0], t) for f in fechas_largo for _, t in pend[f]]
 with open(os.path.join(D, 'plan_2_meses.csv'), 'w', newline='', encoding='utf-8-sig') as f:
     w = csv.writer(f); w.writerow(['Fecha', 'Día', 'Hora (México)', 'Tipo', 'Serie', 'Título / historia', 'Créditos (voz ElevenLabs)', 'Créditos (voz propia)'])
     w.writerows(filas)
 mes = lambda a, b: (sum(x[6] for x in filas if a <= x[0] <= b), sum(x[7] for x in filas if a <= x[0] <= b))
-m1, m2 = mes('2026-12-24', '2027-01-16'), mes('2027-01-24', '2027-02-15')
+m1, m2 = mes('2026-12-17', '2027-01-16'), mes('2027-01-17', '2027-02-22')
 nS = sum(1 for x in filas if x[3] == 'Short'); nL = sum(1 for x in filas if x[3] != 'Short')
 with open(os.path.join(D, 'calendario_tabla.md'), 'w', encoding='utf-8') as f:
     f.write('| Fecha | Día | Hora | Tipo | Serie | Título | Créditos |\n|---|---|---|---|---|---|---|\n')
     for x in filas:
         b = '**' if x[3] != 'Short' else ''
         f.write(f'| {x[0][8:]}/{x[0][5:7]} | {x[1]} | {x[2]} | {b}{x[3]}{b} | {x[4]} | {b}{x[5]}{b} | ' + f'{x[6]:,}'.replace(',', '.') + ' |\n')
-print('Shorts', nS, 'Largos', nL, 'Mes1', m1, 'Mes2', m2, 'Total', m1[0] + m2[0], m1[1] + m2[1])
+open(os.path.join(D, 'banco.txt'), 'w', encoding='utf-8').write('\n'.join(f'{a} — {b}' for a, b in banco))
+print('Banco', len(banco), 'Shorts', nS, 'Largos', nL, 'Mes1', m1, 'Mes2', m2, 'Total', m1[0] + m2[0], m1[1] + m2[1])

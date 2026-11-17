@@ -2,7 +2,7 @@
 id: S03
 serie: TITANIC: LO QUE NO TE CONTARON
 estilo: stopmotion
-publicar: 2026-12-19 12:00
+publicar: 2026-12-23 19:00
 color: #3D8BFF
 lugar: OCÉANO ATLÁNTICO | 15 DE ABRIL DE 1912
 miniatura: 12 PERSONAS EN UN BOTE | PARA 40

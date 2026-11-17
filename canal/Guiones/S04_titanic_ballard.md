@@ -2,7 +2,7 @@
 id: S04
 serie: TITANIC: LO QUE NO TE CONTARON
 estilo: stopmotion
-publicar: 2026-12-20 19:00
+publicar: 2026-12-28 19:00
 color: #3D8BFF
 lugar: OCÉANO ATLÁNTICO NORTE | 1 DE SEPTIEMBRE DE 1985
 miniatura: UNA MISIÓN | SECRETA

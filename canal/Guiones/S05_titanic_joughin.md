@@ -2,7 +2,7 @@
 id: S05
 serie: TITANIC: LO QUE NO TE CONTARON
 estilo: stopmotion
-publicar: 2026-12-21 19:00
+publicar: 2027-01-04 19:00
 color: #3D8BFF
 lugar: OCÉANO ATLÁNTICO | 15 DE ABRIL DE 1912
 miniatura: 2 HORAS EN EL | AGUA HELADA

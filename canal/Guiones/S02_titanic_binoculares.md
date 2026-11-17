@@ -2,7 +2,7 @@
 id: S02
 serie: TITANIC: LO QUE NO TE CONTARON
 estilo: stopmotion
-publicar: 2026-12-18 19:00
+publicar: 2026-12-19 12:00
 color: #3D8BFF
 lugar: SOUTHAMPTON, INGLATERRA | ABRIL DE 1912
 miniatura: UNA LLAVE | OLVIDADA
