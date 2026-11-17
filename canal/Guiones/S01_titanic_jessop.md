@@ -4,7 +4,7 @@ serie: ESTRENO
 estilo: stopmotion
 publicar: 2026-11-19 19:00
 color: #3D8BFF
-lugar: OCÉANO ATLÁNTICO | 15 DE ABRIL DE 1912
+lugar: OCÉANO ATLÁNTICO | DE 1911 A 1916
 miniatura: SOBREVIVIÓ A | 3 BARCOS
 portada: SOBREVIVIÓ A | 3 BARCOS
 descripcion: Violet Jessop estuvo en el choque del Olympic, en el hundimiento del Titanic y en el del Britannic… y sobrevivió a los tres. ¿Acaso lo sabías? 🕰️ Historias reales que no te enseñaron en el colegio.
