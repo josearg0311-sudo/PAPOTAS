@@ -1,0 +1,6 @@
+cd "$(dirname "$0")/.."
+python3 herramientas/fabricar.py Guiones/S33_db_cooper.md; echo "fin S33 $?"
+python3 herramientas/largo.py Largos/L04.json; echo "fin L04 $?"
+python3 herramientas/miniatura_largo.py Largos/L04.json; python3 herramientas/avance.py Largos/L04.json; echo "fin extras $?"
+python3 herramientas/recopilatorio.py S28 S31 S27 S29 S26 S30 S33 --vertical --id=L04; echo "fin RL04 $?"
+python3 herramientas/entrega.py; python3 herramientas/calendario.py; cp CALENDARIO.md "Entrega/00 CALENDARIO.md"; echo "fin TODO"
