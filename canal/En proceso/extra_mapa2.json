@@ -1,0 +1,76 @@
+{
+"S33": {
+"voz": "SZPneKC1XFQXpkKlLBCS",
+"capas": [
+{
+"n": 1,
+"fondo": "1bdtuNU1lV3bAFHjR5l0",
+"pj": "osV9NjdW73RTjsb39d0x",
+"recorte": "JQMvk92iRWrqodrsqsX2"
+},
+{
+"n": 2,
+"fondo": "MH0V774OxfPYDELAMLhi",
+"pj": "HXQobzAnJAxH6gH8sWgV",
+"recorte": "VZJJkgJgpddA3Umg51oq"
+},
+{
+"n": 3,
+"fondo": "evr4hOs8nwNBGGJklCDw",
+"pj": "aqdduDpNvfTd7n9PPmHf",
+"recorte": "QAWrPpddwDdCwbToBtDO"
+},
+{
+"n": 4,
+"fondo": "uMM12Voq2RSVwY6A4mzz",
+"pj": "z88WzOkoAQwfudi9n8LU",
+"recorte": "RJ5Mbp7ceZxB8LVBTzkI"
+},
+{
+"n": 5,
+"fondo": "OiK9TYCRnfc2nocqP8AQ",
+"pj": "BKBDawAGIdgDzLW4DAOB",
+"recorte": "oycHdAeT6vThEGnY2vNc"
+},
+{
+"n": 6,
+"fondo": "GCBtXrKtZ44PwwstUyVR",
+"pj": "7MF8xfl1cvjEen3vLRRY",
+"recorte": "E4FmG4WCChfisHJ1dqRo"
+}
+]
+},
+"archivos": {
+"y7rP81xO3H5S5e6zBK9x": "S28/ancho_02.jpg",
+"fXFBBFsLyIIbEZXtsOCM": "S28/ancho_03.jpg",
+"NYGELuGJabk2MrLvOyue": "S28/ancho_04.jpg",
+"5QdfFe2DGkDejayz4tbL": "S28/ancho_05.jpg",
+"HMCYblPWw1PotzlAjabf": "S28/ancho_06.jpg",
+"G9Z0vK96cP942wjxXhXu": "S31/ancho_02.jpg",
+"lBCeHr0VoS4iMLF6fUL4": "S31/ancho_03.jpg",
+"ZiiB9iwaciWOpksAtxx1": "S31/ancho_04.jpg",
+"tuKyD9fRVmoNpEvcn2Bt": "S31/ancho_05.jpg",
+"Zg6CkqgDaWBYqu8mQXFS": "S31/ancho_06.jpg",
+"iDpAOZHB6CDtx7Tp2UEh": "S27/ancho_02.jpg",
+"lnnnlE7sRxRZfAbsb1IE": "S27/ancho_03.jpg",
+"tNiDJwb6fzbtm09kkZ2R": "S27/ancho_04.jpg",
+"mBy5bn1ulCBjKlghcb90": "S27/ancho_05.jpg",
+"pA7TnArDzOfWs638244n": "S27/ancho_06.jpg",
+"NhqmcOca2cMwkXl9Lugu": "S29/ancho_02.jpg",
+"ZaWWXLJ2au07bXwa8C5I": "S29/ancho_03.jpg",
+"KEGueKI105pw9gx8AuNl": "S29/ancho_04.jpg",
+"2iPvsQQXc81Qf3oOxCMp": "S29/ancho_05.jpg",
+"3F5GNNxqM6S1KddsepBi": "S29/ancho_06.jpg",
+"GksT8puGgq6wHguPlySW": "S26/ancho_02.jpg",
+"m4afh18IjCbo2d4FpM5T": "S26/ancho_03.jpg",
+"DvnY5JBtYVRQyaHoqA5B": "S26/ancho_04.jpg",
+"OZSQSPqEbP7pgdj8m1dD": "S26/ancho_05.jpg",
+"Rm9VrAVbOISJs4YLTBQu": "S26/ancho_06.jpg",
+"rPLuEJydrQWrDZihZgro": "S30/ancho_02.jpg",
+"LItXvB6XyK1Cil1CF3QW": "S30/ancho_03.jpg",
+"TJ8x5YbsuTAY0HgBBnxR": "S30/ancho_04.jpg",
+"BXeArpszG8R8yI2Kfn33": "S30/ancho_05.jpg",
+"hrpzZviOF0loMMMqju95": "S30/ancho_06.jpg",
+"6VJ6q8fwW8oDCdovv15Z": "L04/voz.mp3"
+}
+}

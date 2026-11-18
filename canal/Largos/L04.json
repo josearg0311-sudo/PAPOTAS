@@ -1,0 +1,26 @@
+{
+ "id": "L04",
+ "titulo": "7 cosas que (seguro) no sabías",
+ "publicar": "2026-12-19 18:00",
+ "historias": [
+  "S28",
+  "S31",
+  "S27",
+  "S29",
+  "S26",
+  "S30",
+  "S33"
+ ],
+ "voz": "En proceso/L04/voz.mp3",
+ "frases": {
+  "intro": "¡Hola! Hoy te traigo siete historias reales increíbles, y la última es un misterio exclusivo de este vídeo. Quédate hasta el final, porque es la número uno.",
+  "S28": "Empezamos con uno de los primeros videojuegos de la historia.",
+  "S31": "Ahora, algo que te ha pasado a ti: el hipo.",
+  "S27": "Un robo que convirtió un cuadro en el más famoso del mundo.",
+  "S29": "Un guardabosques al que le cayeron siete rayos.",
+  "S26": "Ya en el podio: una colonia entera que desapareció sin dejar rastro.",
+  "S30": "Casi en lo más alto: el hombre que sobrevivió a una barra de hierro en la cabeza.",
+  "S33": "Y la número uno, un misterio exclusivo que no verás en nuestros Shorts: el hombre que saltó de un avión y nunca apareció.",
+  "cierre": "¿Cuál te sorprendió más? Déjame el número en los comentarios, y suscríbete para descubrir algo nuevo cada día."
+ }
+}

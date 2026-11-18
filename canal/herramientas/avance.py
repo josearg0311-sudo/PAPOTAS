@@ -50,7 +50,7 @@ def main(ruta):
     t2 = tarjeta([('HOY', F(120), CREMA), ('18:00', F(230), ORO), ('VÍDEO COMPLETO', F(80), CREMA), ('EN EL CANAL', F(80), CREMA)], fondo1, 'c2.jpg')
     for k, (img, dur) in enumerate(((t1, 2.2), (t2, 3.0))):
         out = os.path.join(TMP, f'c{k}.mp4')
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-loop', '1', '-t', str(dur), '-i', img, '-vf',
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', img, '-vf',
                         f"scale={W}:{H},zoompan=z='1+0.0008*on':d={int(dur * FPS)}:s={W}x{H}:fps={FPS},fade=t=in:d=0.15",
                         '-c:v', 'libx264', '-pix_fmt', 'yuv420p', out], check=True)
         partes.append(out)

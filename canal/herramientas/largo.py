@@ -223,6 +223,30 @@ def main(ruta, prueba=None):
     if prueba: total = min(total, prueba)
     print(f'Duración: {total / 60:.1f} min', flush=True)
 
+    # ── textos para YouTube con capítulos ──
+    tt, caps = 0.0, []
+    for tipo, dur, dat in plan:
+        if tipo == 'intro': caps.append((tt, 'Intro'))
+        elif tipo == 'puente':
+            tit = open(glob.glob(os.path.join(R, 'Guiones', dat.vid + '_*.md'))[0], encoding='utf-8').readline().lstrip('# ').strip()
+            caps.append((tt, f'#{dat.num} · {tit}'))
+        elif tipo == 'cierre': caps.append((tt, '¿Cuál te sorprendió más?'))
+        tt += dur
+    fmt = lambda s: f'{int(s // 60)}:{int(s % 60):02d}'
+    resumen = ', '.join(open(glob.glob(os.path.join(R, 'Guiones', h.vid + '_*.md'))[0], encoding='utf-8').readline().lstrip('# ').strip() for h in hs[::-1][:3])
+    open(os.path.join(VL, f"{cfg['id']} - youtube.txt"), 'w', encoding='utf-8').write(
+        f"PUBLICAR: {cfg.get('publicar', '')} (programar en YouTube Studio)\n"
+        f"LISTA: Recopilatorios · 7 cosas que no sabías\n"
+        f"MINIATURA: '{cfg['id']} - miniatura A.jpg' o '{cfg['id']} - miniatura B.jpg' (puedes probar las dos con 'Probar y comparar')\n\n"
+        f"TÍTULO:\n7 cosas que (seguro) NO sabías 🤯 Historias reales increíbles\n\n"
+        f"DESCRIPCIÓN:\n7 historias reales que parecen inventadas: {resumen}... ¿Cuál te sorprendió más? Déjame el número en los comentarios 👇\n\n"
+        + '\n'.join(f'{fmt(t)} {c}' for t, c in caps) +
+        "\n\n¿Acaso lo sabías? 🕰️ Historias reales que no te enseñaron en el colegio. Suscríbete para descubrir algo nuevo cada día.\n"
+        "#sabiasque #curiosidades #historiasreales #acasolosabias\n\n"
+        "COMENTARIO FIJADO:\n¿Cuál te sorprendió más: del #7 al #1? 👇\n\n"
+        "CHECKLIST: subir · título · descripción (con los capítulos) · miniatura · lista · 'No es para niños' · Contenido alterado: No · programar\n")
+    if '--textos' in sys.argv: print('textos ok'); return
+
     # ── audio ──
     mus = os.path.join(REC, 'musica.mp3'); partes = []
     for k, (tipo, dur, dat) in enumerate(plan):

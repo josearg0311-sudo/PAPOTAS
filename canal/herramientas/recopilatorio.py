@@ -169,7 +169,8 @@ def main(ids):
     cierre = tarjeta('cierre', [('¿CUÁL TE SORPRENDIÓ MÁS?', fuente(900, 84), ORO), ('Déjame el número en los comentarios', f8, CREMA),
                                 ('', f8, CREMA), ('SÍGUEME PARA MÁS' if VERT else 'SUSCRÍBETE PARA MÁS', fuente(900, 60), CREMA)], portada)
     p = os.path.join(TMP, 'p_cierre.mp4'); clip_tarjeta(cierre, 5, p, musica_desde=60); partes.append(p)
-    salida = (os.path.join(VL, 'TikTok', f'RECOPILATORIO - {n} cosas que (seguro) no sabías.mp4') if VERT
+    etq = next((a.split('=', 1)[1] + ' ' for a in sys.argv if a.startswith('--id=')), '')
+    salida = (os.path.join(VL, 'TikTok', f'RECOPILATORIO {etq}- {n} cosas que (seguro) no sabías.mp4') if VERT
               else os.path.join(VL, f'PRUEBA EXPRESS - {n} cosas que (seguro) no sabías.mp4'))
     unir(partes, salida)
     print('✅', salida)
