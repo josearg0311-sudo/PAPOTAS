@@ -1,5 +1,6 @@
 """Recopilatorio semanal "EXPRESS" en horizontal (16:9) a partir de los Shorts ya montados. 0 créditos.
 Uso: python3 herramientas/recopilatorio.py S10 S07 S08 S11 S06 S09 S01   (orden de la cuenta atrás: #7 … #1)
+     añade --vertical para la versión 9:16 de TikTok (va a "Vídeos listos/TikTok/").
 Cada Short se recorta: se queda la pregunta "¿Sabías que…?" + la historia, y se quitan
 "¿Acaso lo sabías? Pues si no lo sabías…", la pregunta final y el cierre (se dicen una sola vez al final).
 """
@@ -8,7 +9,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 R = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 EP, VL, REC = os.path.join(R, 'En proceso'), os.path.join(R, 'Vídeos listos'), os.path.join(R, 'recursos')
-W, H, FPS = 1920, 1080, 30
+VERT = '--vertical' in sys.argv          # versión vertical 9:16 para TikTok
+W, H, FPS = (1080, 1920, 30) if VERT else (1920, 1080, 30)
 ORO, TINTA, CREMA = '#FFC93C', '#0D0C0B', '#F3E9D2'
 TMP = tempfile.mkdtemp(prefix='recop_')
 
@@ -89,6 +91,8 @@ def tarjeta(nombre, lineas, fondo=None):
         im = Image.new('RGB', (W, H), TINTA)
     d = ImageDraw.Draw(im)
     alto = sum(f.size + 24 for _, f, _ in lineas); y = (H - alto) / 2
+    lineas = [(l, f, c) for s, f, c in lineas for l in (envolver(d, s, f, W - 140) or [''])]
+    alto = sum(f.size + 24 for _, f, _ in lineas); y = (H - alto) / 2
     for s, f, c in lineas:
         texto_centrado(d, y, s, f, c); y += f.size + 24
     logo = Image.open(os.path.join(REC, 'logo.png')).convert('RGBA'); logo.thumbnail((150, 150))
@@ -114,16 +118,26 @@ def clip_tarjeta(png, dur, salida, musica_desde=0.0):
        f"[1:a]volume=0.55,afade=t=in:d=0.3,afade=t=out:st={dur-0.4}:d=0.4[a]", '-map', '[v]', '-map', '[a]', *ENC, '-shortest', salida)
 
 
+def insignia(n):
+    """Vertical: etiqueta "#N" bajo el logo del Short."""
+    im = Image.new('RGBA', (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im); f = fuente(900, 72)
+    w = d.textlength(f'#{n}', font=f)
+    d.rounded_rectangle((34, 150, 34 + w + 56, 150 + 104), radius=26, fill=ORO, outline=TINTA, width=5)
+    d.text((62, 202), f'#{n}', font=f, fill=TINTA, anchor='lm')
+    return im
+
+
 def segmento(vid, n, salida):
     mp4 = glob.glob(os.path.join(VL, vid + ' - *.mp4'))[0]
-    capa = os.path.join(TMP, f'lat_{vid}.png'); lateral(n, guion(vid)).save(capa)
+    capa = os.path.join(TMP, f'lat_{vid}.png'); (insignia(n) if VERT else lateral(n, guion(vid))).save(capa)
+    vf = ("[0:v][1:v]overlay=0:0," if VERT else
+          f"[0:v]split[a][b];[a]scale={W}:-2,crop={W}:{H},boxblur=40:3,eq=brightness=-0.28:saturation=0.8[bg];"
+          f"[b]scale=-2:{H-44}[fg];[bg][fg]overlay=(W-w)/2:22[m];[m][1:v]overlay=0:0,")
     trozos = []
     for k, (a, b) in enumerate(cortes(vid)):
         t = os.path.join(TMP, f'{vid}_{k}.mp4'); d = b - a
         ff('-ss', f'{a:.2f}', '-t', f'{d:.2f}', '-i', mp4, '-i', capa, '-filter_complex',
-           f"[0:v]split[a][b];[a]scale={W}:-2,crop={W}:{H},boxblur=40:3,eq=brightness=-0.28:saturation=0.8[bg];"
-           f"[b]scale=-2:{H-44}[fg];[bg][fg]overlay=(W-w)/2:22[m];[m][1:v]overlay=0:0,"
-           f"fade=t=in:d=0.2,fade=t=out:st={d-0.2:.2f}:d=0.2[v];"
+           vf + f"fade=t=in:d=0.2,fade=t=out:st={d-0.2:.2f}:d=0.2[v];"
            f"[0:a]afade=t=in:d=0.08,afade=t=out:st={d-0.12:.2f}:d=0.12[au]",
            '-map', '[v]', '-map', '[au]', *ENC, t)
         trozos.append(t)
@@ -153,12 +167,13 @@ def main(ids):
         p = os.path.join(TMP, f'p_seg_{vid}.mp4'); segmento(vid, num, p); partes.append(p)
         print('ok', f'#{num}', vid, flush=True)
     cierre = tarjeta('cierre', [('¿CUÁL TE SORPRENDIÓ MÁS?', fuente(900, 84), ORO), ('Déjame el número en los comentarios', f8, CREMA),
-                                ('', f8, CREMA), ('SUSCRÍBETE PARA MÁS', fuente(900, 60), CREMA)], portada)
+                                ('', f8, CREMA), ('SÍGUEME PARA MÁS' if VERT else 'SUSCRÍBETE PARA MÁS', fuente(900, 60), CREMA)], portada)
     p = os.path.join(TMP, 'p_cierre.mp4'); clip_tarjeta(cierre, 5, p, musica_desde=60); partes.append(p)
-    salida = os.path.join(VL, f'PRUEBA EXPRESS - {n} cosas que (seguro) no sabías.mp4')
+    salida = (os.path.join(VL, 'TikTok', f'RECOPILATORIO - {n} cosas que (seguro) no sabías.mp4') if VERT
+              else os.path.join(VL, f'PRUEBA EXPRESS - {n} cosas que (seguro) no sabías.mp4'))
     unir(partes, salida)
     print('✅', salida)
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:] or ['S10', 'S07', 'S08', 'S11', 'S06', 'S09', 'S01'])
+    main([a for a in sys.argv[1:] if not a.startswith('--')] or ['S10', 'S07', 'S08', 'S11', 'S06', 'S09', 'S01'])
