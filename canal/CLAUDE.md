@@ -32,3 +32,6 @@ Canal de YouTube en español de curiosidades e historias reales. El dueño del c
 **Lanzamiento:** el usuario se suscribe a Creator el 17 nov 2026. Estreno jue 19 nov 19:00 con un único Short de gancho del Titanic (S01); desde el viernes, cada día un tema distinto (el usuario NO quiere semanas monotemáticas). S02–S05 y L01 del Titanic en reserva. Primer largo: sáb 28 nov "5 historias REALES que parecen inventadas". Orden de trabajo: 1) prueba de plastilina, 2) Shorts del 19–25 nov, 3) adaptar la fábrica a 16:9 antes del 28 nov.
 `../narrador/estrategia.md` y `../narrador/plan/plan_2_meses.md` (1 Short diario 19:00, 1 vídeo largo los sábados 18:00, series y calendario).
 Flujo de ElevenLabs: `KDrAk6ZHNGEx01qJibzF`.
+
+**Mes 1 (decidido 18 nov):** ver `../narrador/plan/presupuesto_mes1.md`. Los sábados NO hay Short: sale el LARGO (18:00) "7 cosas que (seguro) no sabías" a pantalla completa 16:9 (recopila los Shorts de la semana + voz de presentación/puentes; si hay 6, se añade 1 historia exclusiva) y un avance vertical gratis a mediodía. Herramientas: `herramientas/recopilatorio.py` (versión Express, 0 créditos, ya probada) y `herramientas/tiktok.py` (versión TikTok de cada Short: cierre "SÍGUEME" + `tiktok.txt`). Presupuesto: Short ≈ 3.230 · largo ≈ 5.230 · exclusiva ≈ 1.800. Mantener ≈ 10 % de margen.
+
