@@ -63,6 +63,7 @@ class Historia:
         d = os.path.join(EP, vid); self.d = d
         self.tl = json.load(open(os.path.join(d, 'tl.json')))
         self.info = guion(vid)
+        if self.info['serie'].upper() == 'ESTRENO': self.info.update(serie='HISTORIAS QUE PARECEN MENTIRA', color='#FFC93C')
         self.cortes = cortes(vid)
         self.dur = sum(b - a for a, b in self.cortes)
         self.col = hexrgb(self.info['color'] or '#FFC93C')
