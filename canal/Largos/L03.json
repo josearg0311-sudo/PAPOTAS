@@ -1,0 +1,26 @@
+{
+ "id": "L03",
+ "titulo": "7 cosas que (seguro) no sabías",
+ "publicar": "2026-12-12 18:00",
+ "historias": [
+  "S22",
+  "S25",
+  "S20",
+  "S23",
+  "S24",
+  "S21",
+  "S32"
+ ],
+ "voz": "En proceso/L03/voz.mp3",
+ "frases": {
+  "intro": "¡Hola! Hoy te traigo siete historias reales increíbles, y una de ellas es exclusiva de este vídeo. Quédate hasta el final, porque es la número uno.",
+  "S22": "Empezamos con una pregunta: ¿qué pasaría si la Luna desapareciera?",
+  "S25": "Ahora, un tiburón que puede vivir más que nadie.",
+  "S20": "Un año entero en el que el verano nunca llegó.",
+  "S23": "Una estafa que salió muy mal... para los estafadores.",
+  "S24": "Ya en el podio: una chica que cayó sobre la selva y sobrevivió.",
+  "S21": "Casi en lo más alto: la azafata que cayó desde diez mil metros.",
+  "S32": "Y la número uno, una historia exclusiva que no verás en nuestros Shorts: la gran explosión de Halifax.",
+  "cierre": "¿Cuál te sorprendió más? Déjame el número en los comentarios, y suscríbete para descubrir algo nuevo cada día."
+ }
+}

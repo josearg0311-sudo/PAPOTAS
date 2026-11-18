@@ -13,6 +13,8 @@ LOGS = glob.glob('/root/.claude/projects/-home-user-PAPOTAS/*.jsonl') + \
 
 mapa = json.load(open(sys.argv[1]))
 destino = {}
+for nodo, rel in mapa.pop('archivos', {}).items():   # formato libre: {"archivos": {nodo: "S10/ancho_02.jpg"}}
+    destino[nodo] = tuple(rel.split('/', 1))
 for vid, v in mapa.items():
     if v.get('clip_img'): destino[v['clip_img']] = (vid, 'escena_01_img.png')
     if v.get('clip'): destino[v['clip']] = (vid, 'escena_01.mp4')

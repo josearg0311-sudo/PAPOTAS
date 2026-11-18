@@ -191,7 +191,9 @@ def trozos_voz(cfg):
     """Devuelve {clave: (inicio, fin)} dentro de cfg['voz'], localizando cada frase con Whisper."""
     from faster_whisper import WhisperModel
     m = WhisperModel('medium', device='cpu', compute_type='int8')
-    segs, _ = m.transcribe(cfg['voz'], language='es', word_timestamps=True, vad_filter=True)
+    pcm = subprocess.run(['ffmpeg', '-v', 'error', '-i', cfg['voz'], '-f', 's16le', '-ac', '1', '-ar', '16000', '-'], capture_output=True, check=True).stdout
+    audio = np.frombuffer(pcm, np.int16).astype(np.float32) / 32768
+    segs, _ = m.transcribe(audio, language='es', word_timestamps=True, vad_filter=True)
     pal = [(w.word.strip().lower().strip('¿?¡!.,…"'), w.start, w.end) for s in segs for w in s.words]
     claves = list(cfg['frases']); res = {}; j = 0
     norm = lambda x: re.sub(r'[^a-záéíóúñü0-9 ]', '', x.lower())

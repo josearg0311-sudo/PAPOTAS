@@ -1,7 +1,7 @@
 """Lista (en grupos de 20) las sesiones de ElevenLabs lanzadas para un mapa cuyo resultado aún no está en los registros."""
 import glob, json, re, sys
 mapa = json.load(open(sys.argv[1]))
-nodos = set()
+nodos = set(mapa.pop('archivos', {}))
 for v in mapa.values():
     nodos |= {v.get('clip_img'), v.get('clip'), v.get('voz')} | {c[k] for c in v.get('capas', []) for k in ('fondo', 'pj', 'recorte')}
 LOGS = glob.glob('/root/.claude/projects/-home-user-PAPOTAS/*.jsonl') + glob.glob('/root/.claude/projects/-home-user-PAPOTAS/*/tool-results/*.txt')

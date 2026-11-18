@@ -1,0 +1,26 @@
+{
+ "id": "L02",
+ "titulo": "7 cosas que (seguro) no sabías",
+ "publicar": "2026-12-05 18:00",
+ "historias": [
+  "S16",
+  "S13",
+  "S15",
+  "S12",
+  "S18",
+  "S14",
+  "S17"
+ ],
+ "voz": "En proceso/L02/voz.mp3",
+ "frases": {
+  "intro": "¡Hola! Esta semana te traigo siete historias reales que parecen sacadas de una película. Quédate hasta el final, porque la número uno es la más difícil de creer.",
+  "S16": "Empezamos con un videojuego que nació en la Unión Soviética.",
+  "S13": "Ahora, el animal más resistente del planeta.",
+  "S15": "Una niebla tan espesa que paralizó una ciudad entera.",
+  "S12": "Un lago tranquilo... que una noche exhaló.",
+  "S18": "Ya en el podio: el estafador que vendió la Torre Eiffel.",
+  "S14": "Casi en lo más alto: una casa donde alguien vivía escondido.",
+  "S17": "Y la número uno... un jinete que ganó una carrera sin estar vivo.",
+  "cierre": "¿Cuál te sorprendió más? Déjame el número en los comentarios, y suscríbete para descubrir algo nuevo cada día."
+ }
+}
