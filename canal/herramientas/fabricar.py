@@ -23,7 +23,7 @@ def norm(w):
 def leer_guion(ruta):
     txt = open(ruta, encoding='utf-8').read()
     g = {'titulo': re.search(r'^#\s+(.+)$', txt, re.M).group(1).strip()}
-    for k, v in re.findall(r'^(\w+):\s*(.+)$', txt.split('##')[0], re.M):
+    for k, v in re.findall(r'^(\w+):[ \t]*(.+)$', txt.split('##')[0], re.M):
         g[k.lower()] = v.strip()
     narr = re.search(r'##\s*Narraci[oó]n\s*\n(.*?)(?=\n##|\Z)', txt, re.S).group(1)
     g['narracion'] = re.sub(r'\[[^\]]*\]', '', narr).strip()
