@@ -34,13 +34,13 @@ Cada vídeo tiene al lado su `youtube.txt` / `tiktok.txt` con título, descripci
 | vie 11/12 | 19:00 | Short | S25 | El tiburón que puede vivir MÁS DE 270 AÑOS 🦈 | ✅ YouTube · ✅ TikTok |
 | sáb 12/12 | 12:00 | Avance | L03 | 7 cosas… ¿adivinas la #1? (vertical) | ✅ YouTube Shorts + TikTok |
 | sáb 12/12 | 18:00 | **LARGO** | L03 | 7 cosas que (seguro) no sabías — S22 · S25 · S20 · S23 · S24 · S21 · S32 | ✅ YouTube (16:9) |
-| sáb 12/12 | 20:00 | Recopilatorio | L03 | Las 7 de la semana en vertical | ⏳ solo TikTok |
+| sáb 12/12 | 20:00 | Recopilatorio | L03 | Las 7 de la semana en vertical | ✅ solo TikTok |
 | dom 13/12 | 19:00 | Short | S26 | Una colonia entera DESAPARECIÓ y solo dejó una palabra 🪵 | ✅ YouTube · ✅ TikTok |
 | lun 14/12 | 19:00 | Short | S27 | El robo que hizo FAMOSA a la Mona Lisa 🖼️ | ✅ YouTube · ✅ TikTok |
 | mar 15/12 | 19:00 | Short | S28 | Uno de los PRIMEROS videojuegos se jugaba en un osciloscopio 🎾 | ✅ YouTube · ✅ TikTok |
 | mié 16/12 | 19:00 | Short | S29 | Le cayeron 7 RAYOS… y sobrevivió a todos ⚡ | ✅ YouTube · ✅ TikTok |
 | jue 17/12 | 19:00 | Short | S30 | Una barra de hierro le ATRAVESÓ la cabeza… y siguió hablando 😳 | ✅ YouTube · ✅ TikTok |
 | vie 18/12 | 19:00 | Short | S31 | ¿Por qué nos da HIPO? Un hombre lo tuvo 68 años 😵 | ✅ YouTube · ✅ TikTok |
-| sáb 19/12 | 12:00 | Avance | L04 | 7 cosas… ¿adivinas la #1? (vertical) | ⏳ YouTube Shorts + TikTok |
-| sáb 19/12 | 18:00 | **LARGO** | L04 | 7 cosas que (seguro) no sabías — S28 · S31 · S27 · S29 · S26 · S30 · S33 | ⏳ YouTube (16:9) |
-| sáb 19/12 | 20:00 | Recopilatorio | L04 | Las 7 de la semana en vertical | ⏳ solo TikTok |
+| sáb 19/12 | 12:00 | Avance | L04 | 7 cosas… ¿adivinas la #1? (vertical) | ✅ YouTube Shorts + TikTok |
+| sáb 19/12 | 18:00 | **LARGO** | L04 | 7 cosas que (seguro) no sabías — S28 · S31 · S27 · S29 · S26 · S30 · S33 | ✅ YouTube (16:9) |
+| sáb 19/12 | 20:00 | Recopilatorio | L04 | Las 7 de la semana en vertical | ✅ solo TikTok |
