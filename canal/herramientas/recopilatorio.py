@@ -19,7 +19,7 @@ def fuente(peso, tam):
 
 def guion(vid):
     g = open(glob.glob(os.path.join(R, 'Guiones', vid + '_*.md'))[0], encoding='utf-8').read()
-    campo = lambda k: (re.search(rf'^{k}:\s*(.*)$', g, re.M) or [None, ''])[1].strip()
+    campo = lambda k: (re.search(rf'^{k}:[ \t]*(.*)$', g, re.M) or [None, ''])[1].strip()
     return {'serie': campo('serie'), 'color': campo('color') or ORO, 'lugar': campo('lugar'), 'mini': campo('miniatura')}
 
 
@@ -45,7 +45,7 @@ def envolver(d, s, f, maxw):
     for p in s.split():
         if d.textlength((l + ' ' + p).strip(), font=f) <= maxw: l = (l + ' ' + p).strip()
         else: lineas.append(l); l = p
-    return lineas + [l]
+    return [x for x in lineas + [l] if x]
 
 
 def lateral(n, info):
@@ -53,7 +53,9 @@ def lateral(n, info):
     im = Image.new('RGBA', (W, H), (0, 0, 0, 0)); d = ImageDraw.Draw(im)
     # izquierda: número gigante + serie
     d.text((90, 250), f'#{n}', font=fuente(900, 260), fill=ORO, stroke_width=6, stroke_fill=TINTA)
-    fs = fuente(800, 34); sy = 590
+    tam = 34
+    while d.textlength(info['serie'], font=fuente(800, tam)) > 500: tam -= 2
+    fs = fuente(800, tam); sy = 590
     d.rectangle((96, sy, 96 + d.textlength(info['serie'], font=fs) + 30, sy + 56), fill=TINTA)
     d.rectangle((96, sy + 56, 96 + d.textlength(info['serie'], font=fs) + 30, sy + 62), fill=info['color'])
     d.text((111, sy + 9), info['serie'], font=fs, fill=CREMA)
@@ -63,15 +65,17 @@ def lateral(n, info):
     y = 330
     for l in envolver(d, a.strip(), fuente(800, 52), maxw):
         d.text((x0, y), l, font=fuente(800, 52), fill=CREMA, stroke_width=4, stroke_fill=TINTA); y += 64
-    for l in envolver(d, b.strip(), fuente(900, 96), maxw):
-        d.text((x0, y), l, font=fuente(900, 96), fill=ORO, stroke_width=5, stroke_fill=TINTA); y += 108
+    tb = 96
+    while max([d.textlength(p, font=fuente(900, tb)) for p in b.split()] or [0]) > maxw: tb -= 4
+    for l in envolver(d, b.strip(), fuente(900, tb), maxw):
+        d.text((x0, y), l, font=fuente(900, tb), fill=ORO, stroke_width=5, stroke_fill=TINTA); y += tb + 12
     if info['lugar'].strip():
         lug, fecha = (info['lugar'].split('|') + [''])[:2]
         y += 30; d.rectangle((x0, y, x0 + 6, y + 92), fill=ORO)
         d.text((x0 + 24, y), lug.strip(), font=fuente(800, 32), fill=CREMA, stroke_width=3, stroke_fill=TINTA)
         d.text((x0 + 24, y + 50), fecha.strip(), font=fuente(800, 28), fill=ORO, stroke_width=3, stroke_fill=TINTA)
     # marco del panel central
-    px, pw = (W - 576) // 2, 576
+    pw = round((H - 44) * 1080 / 1920); px = (W - pw) // 2
     d.rounded_rectangle((px - 8, 22, px + pw + 8, H - 22), radius=26, outline=ORO, width=6)
     return im
 
