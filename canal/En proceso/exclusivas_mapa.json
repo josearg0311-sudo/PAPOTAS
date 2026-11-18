@@ -1,0 +1,43 @@
+{
+ "S32": {
+  "voz": "aCYUSDC0dkeR99UkZKqO",
+  "capas": [
+   {
+    "n": 1,
+    "fondo": "UUjJIZtc7xLwd6n59gZG",
+    "pj": "wEsVKVz1FJkswrfVscqR",
+    "recorte": "jb8eEzc1AyJUl3rvZwj4"
+   },
+   {
+    "n": 2,
+    "fondo": "VdxMinWfGTOYUOZdiTSB",
+    "pj": "HbnHKsNOebq9idHOiz7B",
+    "recorte": "DS4ZfVjczL3PAAihGU0E"
+   },
+   {
+    "n": 3,
+    "fondo": "PG4VDK2fUQ7BRZO9f7CR",
+    "pj": "kbk0yBXT5bePxLf4NDPU",
+    "recorte": "4vGrb3G5byClBLS9rmjo"
+   },
+   {
+    "n": 4,
+    "fondo": "7RqfHdIwwtXm9kZXedRk",
+    "pj": "Yie7cOdPjwvFH6uWZJUC",
+    "recorte": "4cK0SNmpwXRh7UxsvQKF"
+   },
+   {
+    "n": 5,
+    "fondo": "yhM4IYYmtM5NgqtkpeCP",
+    "pj": "GR0Urd3UDCT98z0a0yCq",
+    "recorte": "6LY0q2C5pjfqURloVikP"
+   },
+   {
+    "n": 6,
+    "fondo": "orASFgWrNQ9QwimvrXld",
+    "pj": "1sHXTsmdisNFrhr3PCT5",
+    "recorte": "Cg5clbMysHyfB5vshanE"
+   }
+  ]
+ }
+}

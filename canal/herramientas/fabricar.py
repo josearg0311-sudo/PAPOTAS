@@ -101,7 +101,14 @@ def main():
                 subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', os.path.join(trabajo, n + '.mp4'), '-vf', ('fps=12' if g.get('estilo', 'stopmotion') == 'stopmotion' else 'fps=24') + ',scale=720:-2', '-q:v', '4', os.path.join(carp, '%04d.jpg')], check=True)
     print('Transcribiendo y sincronizando…')
     words = corregir(transcribir(voz, os.path.join(trabajo, 'whisper.json')), g['narracion'])
-    a = [norm(w['w']) for w in words]
+    # une cifras partidas por Whisper ("1" + ".700" → "1.700")
+    unidas = []
+    for w in words:
+        if unidas and re.match(r'^[.,]\d', w['w']) and re.search(r'\d$', unidas[-1]['w']):
+            unidas[-1] = dict(unidas[-1], w=unidas[-1]['w'] + w['w'], e=w['e'])
+        else: unidas.append(w)
+    words = unidas
+    a =[norm(w['w']) for w in words]
     sello = next(w['s'] for w, n in zip(words, a) if n == 'acaso')
     salto = next(w['e'] for w, n in zip(words, a) if n == 'cuento' and w['s'] > sello) + .05
     fin = words[-1]['e'] + .35
