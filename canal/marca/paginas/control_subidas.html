@@ -1,0 +1,150 @@
+<title>Control de subidas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: una columna de días agrupados por semana; barra de progreso fija arriba */
+:root{
+  --bg:#f6f3ec; --card:#fffdf8; --ink:#16130e; --muted:#6d6658; --line:#e4ddcd;
+  --gold:#e6a800; --gold-soft:#fff1c2; --done:#2f8a57; --done-soft:#e3f3e8;
+  --yt:#d6332b; --tt:#111; --tt2:#25c6d6;
+  --f-disp:"Montserrat",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#13110d; --card:#1d1a14; --ink:#f3ecdc; --muted:#a69d8a; --line:#332e24;
+  --gold:#ffc93c; --gold-soft:#3a2f10; --done:#55c487; --done-soft:#173523;
+  --yt:#ff5a4f; --tt:#f3ecdc; --tt2:#3fe0ee; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#13110d; --card:#1d1a14; --ink:#f3ecdc; --muted:#a69d8a; --line:#332e24;
+  --gold:#ffc93c; --gold-soft:#3a2f10; --done:#55c487; --done-soft:#173523;
+  --yt:#ff5a4f; --tt:#f3ecdc; --tt2:#3fe0ee; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:720px;margin:0 auto}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:16px 12px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--f-disp);font-weight:900;font-size:1.55rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 span{color:var(--gold)}
+.sub{color:var(--muted);font-size:.9rem;margin:4px 0 12px}
+.bar{height:12px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .3s}
+.stats{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:.88rem;font-variant-numeric:tabular-nums}
+.stats b{font-family:var(--f-disp)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tools button{font:600 .82rem var(--f-body);border:1px solid var(--line);background:var(--card);color:var(--ink);padding:7px 12px;border-radius:99px;cursor:pointer}
+.tools button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.note{font-size:.8rem;color:var(--muted);margin-top:8px}
+.week{margin-top:26px}
+.week h2{font-family:var(--f-disp);font-weight:800;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;display:flex;justify-content:space-between}
+.day{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.day.today{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft)}
+.dh{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--line)}
+.dh .d{font-family:var(--f-disp);font-weight:800;font-size:1rem;text-transform:capitalize}
+.dh .tag{font:700 .68rem var(--f-body);letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:5px;background:var(--gold);color:#16130e}
+.dh .ok{margin-left:auto;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.day.full .dh .ok{color:var(--done);font-weight:600}
+label.it{display:grid;grid-template-columns:28px auto 1fr;gap:10px;align-items:center;padding:11px 14px;cursor:pointer;border-top:1px solid var(--line)}
+label.it:first-of-type{border-top:0}
+label.it input{width:24px;height:24px;accent-color:var(--done);margin:0;cursor:pointer}
+label.it:focus-within{outline:2px solid var(--gold);outline-offset:-2px}
+.pl{font:700 .72rem var(--f-body);padding:4px 8px;border-radius:6px;white-space:nowrap;min-width:72px;text-align:center}
+.pl.YouTube{background:var(--yt);color:#fff}
+.pl.TikTok{background:var(--tt);color:var(--bg);box-shadow:2px 0 0 var(--tt2)}
+.tx{min-width:0}
+.tx .t{font-weight:500;line-height:1.3}
+.tx .m{font-size:.78rem;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+label.it.hecho{background:var(--done-soft)}
+label.it.hecho .t{text-decoration:line-through;color:var(--muted)}
+.hide-done label.it.hecho{display:none}
+.hide-done .day.full{display:none}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <h1>¿Acaso lo sabías? · <span>control de subidas</span></h1>
+  <p class="sub">Marca cada vídeo cuando lo subas o lo dejes programado.</p>
+  <div class="bar" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100"><i id="barra"></i></div>
+  <div class="stats"><span><b id="hechos">0</b> de <b id="total">0</b> subidos</span><span id="prox"></span></div>
+  <div class="tools">
+    <button id="btnOcultar" type="button" aria-pressed="false">Ocultar lo ya subido</button>
+    <button id="btnHoy" type="button">Ir a hoy</button>
+  </div>
+  <p class="note" id="nota">Cargando tus marcas…</p>
+</header>
+<main id="lista"></main>
+</div>
+
+<script>
+const DIAS = [{"f": "2026-11-19", "i": [{"k": "S01-yt", "h": "19:00", "p": "YouTube", "t": "Sobrevivió al TITANIC… y a sus dos barcos hermanos 😳", "q": "Short"}, {"k": "S01-tt", "h": "19:00", "p": "TikTok", "t": "Sobrevivió al TITANIC… y a sus dos barcos hermanos 😳", "q": "Short"}]}, {"f": "2026-11-20", "i": [{"k": "S07-yt", "h": "19:00", "p": "YouTube", "t": "La medusa que puede volver a ser JOVEN 🪼", "q": "Short"}, {"k": "S07-tt", "h": "19:00", "p": "TikTok", "t": "La medusa que puede volver a ser JOVEN 🪼", "q": "Short"}]}, {"f": "2026-11-21", "i": [{"k": "S06-yt", "h": "19:00", "p": "YouTube", "t": "Peleó 29 AÑOS en una guerra que ya había terminado 😳", "q": "Short"}, {"k": "S06-tt", "h": "19:00", "p": "TikTok", "t": "Peleó 29 AÑOS en una guerra que ya había terminado 😳", "q": "Short"}]}, {"f": "2026-11-22", "i": [{"k": "S08-yt", "h": "19:00", "p": "YouTube", "t": "Encontraron un barco navegando SOLO… sin nadie a bordo 👻", "q": "Short"}, {"k": "S08-tt", "h": "19:00", "p": "TikTok", "t": "Encontraron un barco navegando SOLO… sin nadie a bordo 👻", "q": "Short"}]}, {"f": "2026-11-23", "i": [{"k": "S09-yt", "h": "19:00", "p": "YouTube", "t": "Sobrevivió a las DOS bombas atómicas 😳", "q": "Short"}, {"k": "S09-tt", "h": "19:00", "p": "TikTok", "t": "Sobrevivió a las DOS bombas atómicas 😳", "q": "Short"}]}, {"f": "2026-11-24", "i": [{"k": "S10-yt", "h": "19:00", "p": "YouTube", "t": "Naciste con casi 100 HUESOS más que ahora 🦴", "q": "Short"}, {"k": "S10-tt", "h": "19:00", "p": "TikTok", "t": "Naciste con casi 100 HUESOS más que ahora 🦴", "q": "Short"}]}, {"f": "2026-11-25", "i": [{"k": "S11-yt", "h": "19:00", "p": "YouTube", "t": "9 excursionistas HUYERON de su tienda en plena noche helada 🏔️", "q": "Short"}, {"k": "S11-tt", "h": "19:00", "p": "TikTok", "t": "9 excursionistas HUYERON de su tienda en plena noche helada 🏔️", "q": "Short"}]}, {"f": "2026-11-26", "i": [{"k": "S12-yt", "h": "19:00", "p": "YouTube", "t": "Un lago \"EXHALÓ\" y dejó sin vida a todo un valle 😶‍🌫️", "q": "Short"}, {"k": "S12-tt", "h": "19:00", "p": "TikTok", "t": "Un lago \"EXHALÓ\" y dejó sin vida a todo un valle 😶‍🌫️", "q": "Short"}]}, {"f": "2026-11-27", "i": [{"k": "S13-yt", "h": "19:00", "p": "YouTube", "t": "El animal que sobrevive hasta en el ESPACIO 🐻", "q": "Short"}, {"k": "S13-tt", "h": "19:00", "p": "TikTok", "t": "El animal que sobrevive hasta en el ESPACIO 🐻", "q": "Short"}]}, {"f": "2026-11-28", "i": [{"k": "L01-av-yt", "h": "12:00", "p": "YouTube", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L01-av-tt", "h": "12:00", "p": "TikTok", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L01-yt", "h": "18:00", "p": "YouTube", "t": "7 cosas que (seguro) no sabías", "q": "Vídeo largo"}, {"k": "L01-rec-tt", "h": "20:00", "p": "TikTok", "t": "Recopilatorio de la semana", "q": "Recopilatorio"}]}, {"f": "2026-11-29", "i": [{"k": "S14-yt", "h": "19:00", "p": "YouTube", "t": "Alguien vivía ESCONDIDO en la casa… y nadie lo sabía 😨", "q": "Short"}, {"k": "S14-tt", "h": "19:00", "p": "TikTok", "t": "Alguien vivía ESCONDIDO en la casa… y nadie lo sabía 😨", "q": "Short"}]}, {"f": "2026-11-30", "i": [{"k": "S15-yt", "h": "19:00", "p": "YouTube", "t": "La NIEBLA que paralizó Londres durante 5 días 🌫️", "q": "Short"}, {"k": "S15-tt", "h": "19:00", "p": "TikTok", "t": "La NIEBLA que paralizó Londres durante 5 días 🌫️", "q": "Short"}]}, {"f": "2026-12-01", "i": [{"k": "S16-yt", "h": "19:00", "p": "YouTube", "t": "El videojuego más famoso nació en la URSS 🧱", "q": "Short"}, {"k": "S16-tt", "h": "19:00", "p": "TikTok", "t": "El videojuego más famoso nació en la URSS 🧱", "q": "Short"}]}, {"f": "2026-12-02", "i": [{"k": "S17-yt", "h": "19:00", "p": "YouTube", "t": "Ganó una carrera de caballos… sin estar VIVO 🏇", "q": "Short"}, {"k": "S17-tt", "h": "19:00", "p": "TikTok", "t": "Ganó una carrera de caballos… sin estar VIVO 🏇", "q": "Short"}]}, {"f": "2026-12-03", "i": [{"k": "S18-yt", "h": "19:00", "p": "YouTube", "t": "El hombre que \"VENDIÓ\" la Torre Eiffel 🗼", "q": "Short"}, {"k": "S18-tt", "h": "19:00", "p": "TikTok", "t": "El hombre que \"VENDIÓ\" la Torre Eiffel 🗼", "q": "Short"}]}, {"f": "2026-12-04", "i": [{"k": "S19-yt", "h": "19:00", "p": "YouTube", "t": "Los jeans se inventaron para TRABAJAR en las minas 👖", "q": "Short"}, {"k": "S19-tt", "h": "19:00", "p": "TikTok", "t": "Los jeans se inventaron para TRABAJAR en las minas 👖", "q": "Short"}]}, {"f": "2026-12-05", "i": [{"k": "L02-av-yt", "h": "12:00", "p": "YouTube", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L02-av-tt", "h": "12:00", "p": "TikTok", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L02-yt", "h": "18:00", "p": "YouTube", "t": "7 cosas que (seguro) no sabías", "q": "Vídeo largo"}, {"k": "L02-rec-tt", "h": "20:00", "p": "TikTok", "t": "Recopilatorio de la semana", "q": "Recopilatorio"}]}, {"f": "2026-12-06", "i": [{"k": "S20-yt", "h": "19:00", "p": "YouTube", "t": "El año en que NEVÓ en pleno verano ❄️", "q": "Short"}, {"k": "S20-tt", "h": "19:00", "p": "TikTok", "t": "El año en que NEVÓ en pleno verano ❄️", "q": "Short"}]}, {"f": "2026-12-07", "i": [{"k": "S21-yt", "h": "19:00", "p": "YouTube", "t": "Cayó desde 10.000 metros SIN paracaídas… y sobrevivió 😱", "q": "Short"}, {"k": "S21-tt", "h": "19:00", "p": "TikTok", "t": "Cayó desde 10.000 metros SIN paracaídas… y sobrevivió 😱", "q": "Short"}]}, {"f": "2026-12-08", "i": [{"k": "S22-yt", "h": "19:00", "p": "YouTube", "t": "¿Qué pasaría si la LUNA desapareciera? 🌙", "q": "Short"}, {"k": "S22-tt", "h": "19:00", "p": "TikTok", "t": "¿Qué pasaría si la LUNA desapareciera? 🌙", "q": "Short"}]}, {"f": "2026-12-09", "i": [{"k": "S23-yt", "h": "19:00", "p": "YouTube", "t": "El hombre al que NO pudieron eliminar 😳", "q": "Short"}, {"k": "S23-tt", "h": "19:00", "p": "TikTok", "t": "El hombre al que NO pudieron eliminar 😳", "q": "Short"}]}, {"f": "2026-12-10", "i": [{"k": "S24-yt", "h": "19:00", "p": "YouTube", "t": "Cayó de un avión sobre la selva… y sobrevivió 11 días 🌴", "q": "Short"}, {"k": "S24-tt", "h": "19:00", "p": "TikTok", "t": "Cayó de un avión sobre la selva… y sobrevivió 11 días 🌴", "q": "Short"}]}, {"f": "2026-12-11", "i": [{"k": "S25-yt", "h": "19:00", "p": "YouTube", "t": "El tiburón que puede vivir MÁS DE 270 AÑOS 🦈", "q": "Short"}, {"k": "S25-tt", "h": "19:00", "p": "TikTok", "t": "El tiburón que puede vivir MÁS DE 270 AÑOS 🦈", "q": "Short"}]}, {"f": "2026-12-12", "i": [{"k": "L03-av-yt", "h": "12:00", "p": "YouTube", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L03-av-tt", "h": "12:00", "p": "TikTok", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L03-yt", "h": "18:00", "p": "YouTube", "t": "7 cosas que (seguro) no sabías", "q": "Vídeo largo"}, {"k": "L03-rec-tt", "h": "20:00", "p": "TikTok", "t": "Recopilatorio de la semana", "q": "Recopilatorio"}]}, {"f": "2026-12-13", "i": [{"k": "S26-yt", "h": "19:00", "p": "YouTube", "t": "Una colonia entera DESAPARECIÓ y solo dejó una palabra 🪵", "q": "Short"}, {"k": "S26-tt", "h": "19:00", "p": "TikTok", "t": "Una colonia entera DESAPARECIÓ y solo dejó una palabra 🪵", "q": "Short"}]}, {"f": "2026-12-14", "i": [{"k": "S27-yt", "h": "19:00", "p": "YouTube", "t": "El robo que hizo FAMOSA a la Mona Lisa 🖼️", "q": "Short"}, {"k": "S27-tt", "h": "19:00", "p": "TikTok", "t": "El robo que hizo FAMOSA a la Mona Lisa 🖼️", "q": "Short"}]}, {"f": "2026-12-15", "i": [{"k": "S28-yt", "h": "19:00", "p": "YouTube", "t": "Uno de los PRIMEROS videojuegos se jugaba en un osciloscopio 🎾", "q": "Short"}, {"k": "S28-tt", "h": "19:00", "p": "TikTok", "t": "Uno de los PRIMEROS videojuegos se jugaba en un osciloscopio 🎾", "q": "Short"}]}, {"f": "2026-12-16", "i": [{"k": "S29-yt", "h": "19:00", "p": "YouTube", "t": "Le cayeron 7 RAYOS… y sobrevivió a todos ⚡", "q": "Short"}, {"k": "S29-tt", "h": "19:00", "p": "TikTok", "t": "Le cayeron 7 RAYOS… y sobrevivió a todos ⚡", "q": "Short"}]}, {"f": "2026-12-17", "i": [{"k": "S30-yt", "h": "19:00", "p": "YouTube", "t": "Una barra de hierro le ATRAVESÓ la cabeza… y siguió hablando 😳", "q": "Short"}, {"k": "S30-tt", "h": "19:00", "p": "TikTok", "t": "Una barra de hierro le ATRAVESÓ la cabeza… y siguió hablando 😳", "q": "Short"}]}, {"f": "2026-12-18", "i": [{"k": "S31-yt", "h": "19:00", "p": "YouTube", "t": "¿Por qué nos da HIPO? Un hombre lo tuvo 68 años 😵", "q": "Short"}, {"k": "S31-tt", "h": "19:00", "p": "TikTok", "t": "¿Por qué nos da HIPO? Un hombre lo tuvo 68 años 😵", "q": "Short"}]}, {"f": "2026-12-19", "i": [{"k": "L04-av-yt", "h": "12:00", "p": "YouTube", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L04-av-tt", "h": "12:00", "p": "TikTok", "t": "Avance: ¿adivinas la #1?", "q": "Avance"}, {"k": "L04-yt", "h": "18:00", "p": "YouTube", "t": "7 cosas que (seguro) no sabías", "q": "Vídeo largo"}, {"k": "L04-rec-tt", "h": "20:00", "p": "TikTok", "t": "Recopilatorio de la semana", "q": "Recopilatorio"}]}];
+const DSEM=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const MES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+let marcas = {};
+const lista=document.getElementById('lista'), nota=document.getElementById('nota');
+const fecha=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const hoyISO=(()=>{const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`})();
+const lunes=d=>{const x=new Date(d);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+
+function construir(){
+  const semanas=[];let cur=null,n=0;
+  for(const d of DIAS){const l=lunes(fecha(d.f)).getTime();if(!cur||cur.l!==l){cur={l,dias:[],n:++n};semanas.push(cur)}cur.dias.push(d)}
+  lista.innerHTML='';
+  for(const s of semanas){
+    const sec=document.createElement('section');sec.className='week';
+    const a=fecha(s.dias[0].f),b=fecha(s.dias[s.dias.length-1].f);
+    sec.innerHTML=`<h2><span>Semana ${s.n} · ${a.getDate()} ${MES[a.getMonth()]} – ${b.getDate()} ${MES[b.getMonth()]}</span><span class="wk" data-w="${s.n}"></span></h2>`;
+    for(const d of s.dias){
+      const f=fecha(d.f),dv=document.createElement('div');dv.className='day';dv.id='d'+d.f;
+      if(d.f===hoyISO)dv.classList.add('today');
+      const sab=d.i.some(x=>x.q==='Vídeo largo');
+      dv.innerHTML=`<div class="dh"><span class="d">${DSEM[f.getDay()]} ${f.getDate()} ${MES[f.getMonth()]}</span>${d.f===hoyISO?'<span class="tag">Hoy</span>':''}${sab?'<span class="tag">Largo</span>':''}<span class="ok"></span></div>`;
+      for(const it of d.i){
+        const lb=document.createElement('label');lb.className='it';lb.dataset.k=it.k;
+        lb.innerHTML=`<input type="checkbox" id="c-${it.k}"><span class="pl ${it.p}">${it.p}</span><span class="tx"><div class="t"></div><div class="m">${it.h} · ${it.q}</div></span>`;
+        lb.querySelector('.t').textContent=it.t;
+        lb.querySelector('input').addEventListener('change',e=>{marcas[it.k]=e.target.checked;if(!e.target.checked)delete marcas[it.k];pintar();guardar()});
+        dv.appendChild(lb)}
+      sec.appendChild(dv)}
+    lista.appendChild(sec)}
+}
+function pintar(){
+  let h=0,t=0,prox=null;
+  for(const d of DIAS){let dh=0;
+    for(const it of d.i){t++;const ok=!!marcas[it.k];if(ok){h++;dh++}else if(!prox)prox={d,it};
+      const lb=lista.querySelector(`label[data-k="${it.k}"]`);lb.classList.toggle('hecho',ok);lb.querySelector('input').checked=ok}
+    const dv=document.getElementById('d'+d.f);dv.classList.toggle('full',dh===d.i.length);
+    dv.querySelector('.ok').textContent=dh===d.i.length?'✓ Todo subido':`${dh}/${d.i.length}`}
+  document.getElementById('hechos').textContent=h;document.getElementById('total').textContent=t;
+  const pc=Math.round(h*100/t);document.getElementById('barra').style.width=pc+'%';
+  document.querySelector('.bar').setAttribute('aria-valuenow',pc);
+  const f=prox&&fecha(prox.d.f);
+  document.getElementById('prox').textContent=prox?`Siguiente: ${prox.it.p} · ${DSEM[f.getDay()]} ${f.getDate()} ${MES[f.getMonth()]}`:'¡Todo el mes subido! 🎉';
+}
+document.getElementById('btnOcultar').addEventListener('click',e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);lista.classList.toggle('hide-done',on);try{localStorage.setItem('ocultar',on?'1':'')}catch(_){}});
+document.getElementById('btnHoy').addEventListener('click',()=>{const el=document.getElementById('d'+hoyISO)||[...document.querySelectorAll('.day')].find(x=>x.id.slice(1)>=hoyISO);if(el)el.scrollIntoView({behavior:'smooth',block:'center'})});
+try{if(localStorage.getItem('ocultar')){document.getElementById('btnOcultar').setAttribute('aria-pressed','true');lista.classList.add('hide-done')}}catch(_){}
+
+/* guardado: db compartido (se ve igual en el móvil y en el ordenador); si no está, solo en este dispositivo */
+let ref=null,ocupado=false,pendiente=false;
+async function guardar(){
+  if(!ref){try{localStorage.setItem('marcas',JSON.stringify(marcas))}catch(_){}return}
+  if(ocupado){pendiente=true;return}
+  ocupado=true;
+  try{await ref.set({marcas:{...marcas},actualizado:new Date().toISOString()});nota.textContent='Guardado ✓ · se ve igual en el móvil y en el ordenador.'}
+  catch(e){nota.textContent=e&&e.code==='invalid_argument'?'Solo el dueño puede marcar esta lista.':'No se pudo guardar. Revisa la conexión y vuelve a marcar.'}
+  ocupado=false;if(pendiente){pendiente=false;guardar()}
+}
+construir();
+try{marcas=JSON.parse(localStorage.getItem('marcas')||'{}')}catch(_){marcas={}}
+pintar();
+(async()=>{
+  const db=window.claude?await claude.use('db'):null;
+  if(!db){nota.textContent='Tus marcas se guardan en este dispositivo.';return}
+  ref=db.doc('control/subidas');
+  const t=setTimeout(()=>{nota.textContent='No se pueden cargar tus marcas todavía. Revisa la conexión.'},10000);
+  ref.onSnapshot(s=>{
+    if(!s.metadata.fromCache){clearTimeout(t);nota.textContent='Guardado en tu cuenta · se ve igual en el móvil y en el ordenador.'}
+    if(s.exists&&!s.metadata.hasPendingWrites){marcas={...(s.data().marcas||{})};pintar()}
+  },e=>{clearTimeout(t);ref=null;nota.textContent='Tus marcas se guardan en este dispositivo.'});
+})();
+</script>
