@@ -1,0 +1,26 @@
+{
+ "id": "L08",
+ "titulo": "7 cosas que (seguro) no sabías",
+ "publicar": "2027-01-16 18:00",
+ "historias": [
+  "S56",
+  "S53",
+  "S55",
+  "S57",
+  "S54",
+  "S52",
+  "S61"
+ ],
+ "voz": "En proceso/L08/voz.mp3",
+ "frases": {
+  "intro": "¡Hola! Hoy te traigo siete historias reales increíbles, y la última es exclusiva de este vídeo. Quédate hasta el final, porque es la número uno.",
+  "S56": "Empezamos desmontando un mito: la altura de Napoleón.",
+  "S53": "Ahora, unas piedras que se mueven solas en el desierto.",
+  "S55": "La mujer a la que le cayó un meteorito encima.",
+  "S57": "La guerra más corta de la historia.",
+  "S54": "Ya en el podio: el falsificador que engañó a un jefe nazi.",
+  "S52": "Casi en lo más alto: un ejército de tanques hinchables.",
+  "S61": "Y la número uno, una historia exclusiva que no verás en nuestros Shorts: setenta y dos días en la cordillera de los Andes.",
+  "cierre": "¿Cuál te sorprendió más? Déjame el número en los comentarios, y suscríbete para descubrir algo nuevo cada día."
+ }
+}

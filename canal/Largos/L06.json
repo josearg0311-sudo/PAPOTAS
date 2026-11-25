@@ -1,0 +1,26 @@
+{
+ "id": "L06",
+ "titulo": "7 cosas que (seguro) no sabías",
+ "publicar": "2027-01-02 18:00",
+ "historias": [
+  "S45",
+  "S44",
+  "S42",
+  "S41",
+  "S40",
+  "S43",
+  "S59"
+ ],
+ "voz": "En proceso/L06/voz.mp3",
+ "frases": {
+  "intro": "¡Feliz año! Para empezar, siete historias reales que parecen mentira. La última es exclusiva de este vídeo, así que quédate hasta el final.",
+  "S45": "Empezamos con un fin del mundo que nunca llegó... y unas píldoras muy curiosas.",
+  "S44": "Ahora, dos islas vecinas que viven en días distintos.",
+  "S42": "El estafador que le dio su nombre a una estafa.",
+  "S41": "Cinco aviones que desaparecieron en el Triángulo de las Bermudas.",
+  "S40": "Ya en el podio: doce niños atrapados en una cueva inundada.",
+  "S43": "Casi en lo más alto: el soldado que salvó a setenta y cinco compañeros sin disparar.",
+  "S59": "Y la número uno, un misterio exclusivo que no verás en nuestros Shorts: la princesa que muchos creyeron viva.",
+  "cierre": "¿Cuál te sorprendió más? Déjame el número en los comentarios, y suscríbete para descubrir algo nuevo cada día."
+ }
+}

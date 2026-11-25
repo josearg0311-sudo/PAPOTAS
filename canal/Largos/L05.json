@@ -1,0 +1,26 @@
+{
+ "id": "L05",
+ "titulo": "7 cosas que (seguro) no sabías",
+ "publicar": "2026-12-26 18:00",
+ "historias": [
+  "S38",
+  "S35",
+  "S39",
+  "S37",
+  "S34",
+  "S36",
+  "S58"
+ ],
+ "voz": "En proceso/L05/voz.mp3",
+ "frases": {
+  "intro": "¡Hola! Hoy te traigo siete historias reales increíbles, y la última es exclusiva de este vídeo. Quédate hasta el final, porque es la número uno.",
+  "S38": "Empezamos con algo que seguro tienes en casa estos días: las luces del árbol de Navidad.",
+  "S35": "Ahora, tres astronautas que pasaron la Nochebuena dando vueltas a la Luna.",
+  "S39": "Un hombre solo, una balsa hinchable... y setenta y seis días en medio del océano.",
+  "S37": "El panadero del Titanic que aguantó horas en el agua helada.",
+  "S34": "Ya en el podio: una Navidad en la que los enemigos dejaron las armas.",
+  "S36": "Casi en lo más alto: veintiocho hombres atrapados en el hielo de la Antártida.",
+  "S58": "Y la número uno, una historia exclusiva que no verás en nuestros Shorts: treinta y tres mineros atrapados bajo tierra.",
+  "cierre": "¿Cuál te sorprendió más? Déjame el número en los comentarios, y suscríbete para descubrir algo nuevo cada día."
+ }
+}
