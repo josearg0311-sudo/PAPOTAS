@@ -142,10 +142,16 @@ function frame(t) { X.fillStyle = INK; X.fillRect(0, 0, W, H); const tq = paso(t
     X = document.getElementById('c').getContext('2d');
     window.init = async (tl, imgs, lg) => { TL = tl; await document.fonts.load('900 40px Mont'); await document.fonts.load('800 40px Mont');
       for (const [k, v] of Object.entries(imgs)) { const im = new Image(); im.src = v; await im.decode(); IMG[k] = im; } LOGO = new Image(); LOGO.src = lg; await LOGO.decode(); };
+    window.addImgs = async (imgs) => { for (const [k, v] of Object.entries(imgs)) { const im = new Image(); im.src = v; await im.decode(); IMG[k] = im; } };
     window.render = t => { frame(t); return document.getElementById('c').toDataURL('image/jpeg', .92); };</script></body></html>`);
   p.on('pageerror', e => { console.error('ERROR en página:', e.message); process.exit(1); });
-  const imgs = Object.fromEntries(TL.scenes.flatMap(s => [s.img, ...(s.det || []), ...(s.frames || []), s.fondo, s.pj]).filter(Boolean).map(f => [f, b64(path.join(DIR, f), f.endsWith('.png') ? 'image/png' : 'image/jpeg')]));
-  await p.evaluate(([tl, im, lg]) => init(tl, im, lg), [TL, imgs, b64(path.join(RAIZ, 'logo.png'), 'image/png')]);
+  // las imágenes se envían por tandas: con muchos clips animados, enviarlas todas juntas supera el límite del navegador
+  const lista = [...new Set(TL.scenes.flatMap(s => [s.img, ...(s.det || []), ...(s.frames || []), s.fondo, s.pj]).filter(Boolean))];
+  await p.evaluate(([tl, im, lg]) => init(tl, im, lg), [TL, {}, b64(path.join(RAIZ, 'logo.png'), 'image/png')]);
+  for (let i = 0; i < lista.length; i += 60) {
+    const tanda = Object.fromEntries(lista.slice(i, i + 60).map(f => [f, b64(path.join(DIR, f), f.endsWith('.png') ? 'image/png' : 'image/jpeg')]));
+    await p.evaluate(im => addImgs(im), tanda);
+  }
   if (stills) { for (const s of stills.split(',')) { const d = await p.evaluate(t => render(t), +s); fs.writeFileSync(`${out}_${s}.jpg`, Buffer.from(d.split(',')[1], 'base64')); } await b.close(); return; }
   const audio = fs.existsSync(path.join(DIR, 'mezcla.wav')) ? path.join(DIR, 'mezcla.wav') : path.join(DIR, 'voz.mp3');
   const ff = spawn('ffmpeg', ['-loglevel', 'error', '-y', '-f', 'image2pipe', '-c:v', 'mjpeg', '-r', String(FPS), '-i', '-', '-i', audio,
