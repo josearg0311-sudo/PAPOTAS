@@ -507,6 +507,13 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
   .acard.add { min-width: 0; padding: 6px 12px; border-radius: 99px; font-size: 12px; }
   .goals { display: none; }
 }
+
+.sync { cursor: default; }
+body:not(.in-claude) .sync { cursor: pointer; }
+.code-box { font: 800 20px var(--font-body); letter-spacing: .08em; text-align: center; padding: 14px; border-radius: 18px; background: var(--raise); border: 1px dashed var(--accent); color: var(--accent); margin: 10px 0 12px; user-select: all; overflow-wrap: anywhere; }
+.code-in { display: flex; gap: 8px; }
+.code-in input { flex: 1; min-width: 0; font: 700 15px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--raise); border: 1px solid var(--line-2); border-radius: 16px; padding: 10px 12px; }
+.code-in .opt { flex: none; }
 </style>
 </head>
 <body>
@@ -1494,6 +1501,7 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
     nuevorecuento: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.5v7M8.5 12h7"/>',
     nuevameta: '<circle cx="12" cy="12" r="8"/><path d="M12 8.5v7M8.5 12h7"/>',
     ayuda: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .9-1 1.6v.5M12 17h.01"/>',
+    sincronizar: '<path d="M20 11a8 8 0 0 0-14.6-4.4M4 4v3.6h3.6M4 13a8 8 0 0 0 14.6 4.4M20 20v-3.6h-3.6"/>',
     deshacer: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
     eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
     eyeoff: '<path d="m3 3 18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
@@ -1511,7 +1519,7 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
   const ACTIONS = {
     gasto: "Registrar gasto", ingreso: "Registrar ingreso", transferir: "Transferir", cuentas: "Mis cuentas",
     resumen: "Resumen", reportes: "PDF y Excel", metas: "Metas", topes: "Topes", recuentos: "Recuentos",
-    tc: "Tipo de cambio", nuevacuenta: "Nueva cuenta", nuevameta: "Nueva meta", nuevorecuento: "Nuevo recuento", deshacer: "Deshacer", ayuda: "Ayuda",
+    tc: "Tipo de cambio", sincronizar: "Sincronizar", nuevacuenta: "Nueva cuenta", nuevameta: "Nueva meta", nuevorecuento: "Nuevo recuento", deshacer: "Deshacer", ayuda: "Ayuda",
   };
 
   // ---------- receipts ----------
@@ -1703,6 +1711,7 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
       case "nuevameta": return startFlow("meta");
       case "tc": return startFlow("tc");
       case "recuentos": return openSheet("libros");
+      case "sincronizar": return syncSheet();
       case "cuentas": return say2("Mis cuentas", { cmd: "cuentas" });
       case "resumen": return say2("Resumen", { cmd: "resumen" });
       case "metas": return say2("Metas", { cmd: "metas" });
@@ -1719,7 +1728,7 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
     const body = $("sheetBody");
     if (kind === "acciones") {
       $("sheetTitle").textContent = "¿Qué quieres hacer?";
-      body.innerHTML = `<div class="opts grid">${["gasto", "ingreso", "transferir", "cuentas", "resumen", "reportes", "metas", "nuevameta", "topes", "recuentos", "nuevacuenta", "tc"].map((k) =>
+      body.innerHTML = `<div class="opts grid">${["gasto", "ingreso", "transferir", "cuentas", "resumen", "reportes", "metas", "nuevameta", "topes", "recuentos", "nuevacuenta", "tc", ...(window.claude ? [] : ["sincronizar"])].map((k) =>
         `<button class="opt" type="button" data-action="${k}"><span class="ic">${svgI(k)}</span><span>${esc(ACTIONS[k])}</span></button>`).join("")}</div>`;
     } else {
       $("sheetTitle").textContent = "Tus recuentos";
@@ -1956,12 +1965,123 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
       async remove(id) { movs = movs.filter((m) => m.id !== id); persist(); render(); },
     };
   }
+  // ---------- sync outside claude.ai (JS Bin): Supabase + secret code ----------
+  const SYNC = { url: "https://mhhsuobgseczbppkokyj.supabase.co", key: "" };
+  const syncReady = () => !window.claude && SYNC.url && SYNC.key;
+  const getCode = () => { try { return localStorage.getItem("caja-sync-code") || ""; } catch (e) { return ""; } };
+  const setCode = (c) => { try { c ? localStorage.setItem("caja-sync-code", c) : localStorage.removeItem("caja-sync-code"); } catch (e) {} };
+  function newCode() {
+    const abc = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", a = new Uint8Array(20); crypto.getRandomValues(a);
+    const raw = Array.from(a, (x) => abc[x % abc.length]).join("");
+    return raw.match(/.{1,5}/g).join("-");
+  }
+  const cleanCode = (c) => String(c || "").toUpperCase().replace(/[^A-Z0-9]/g, "").match(/.{1,5}/g)?.join("-") || "";
+  async function rpc(fn, args) {
+    const r = await fetch(`${SYNC.url}/rest/v1/rpc/${fn}`, { method: "POST", headers: { apikey: SYNC.key, Authorization: `Bearer ${SYNC.key}`, "Content-Type": "application/json" }, body: JSON.stringify(args) });
+    if (!r.ok) throw new Error("servidor " + r.status);
+    const t = await r.text(); return t ? JSON.parse(t) : null;
+  }
+  // a tiny document store with the same shape CAJA already uses (collection.onSnapshot, doc.set, doc.delete)
+  function remoteDb(code) {
+    let docs = {}, version = 0, subs = [], errs = [], pending = [], flushing = false;
+    try { const c = JSON.parse(localStorage.getItem("caja-sync-cache") || "null"); if (c && c.code === code) { docs = c.docs || {}; version = c.version || 0; } } catch (e) {}
+    const cache = () => { try { localStorage.setItem("caja-sync-cache", JSON.stringify({ code, docs, version })); } catch (e) {} };
+    const view = () => { const d = { ...docs }; for (const o of pending) { if (o.del) delete d[o.id]; else d[o.id] = o.v; } return d; };
+    const emit = () => { const d = view(); const snap = { docs: Object.entries(d).map(([id, v]) => ({ id, data: () => v })), metadata: { hasPendingWrites: pending.length > 0 } }; subs.forEach((f) => f(snap)); };
+    async function pull() {
+      try {
+        const rows = await rpc("caja_leer", { p_codigo: code });
+        const row = Array.isArray(rows) ? rows[0] : null;
+        if (row && row.version !== version) { docs = row.datos || {}; version = row.version; cache(); emit(); }
+        else if (!row && !Object.keys(docs).length) emit();
+        setSync("on", "Sincronizado");
+      } catch (e) { setSync("err", "Sin conexión"); if (!Object.keys(docs).length) emit(); }
+    }
+    async function flush() {
+      if (flushing) return; flushing = true;
+      try {
+        while (pending.length) {
+          const ops = pending.slice(), next = { ...docs };
+          for (const o of ops) { if (o.del) delete next[o.id]; else next[o.id] = o.v; }
+          const v = await rpc("caja_guardar", { p_codigo: code, p_datos: next, p_version: version });
+          if (v == null) { const rows = await rpc("caja_leer", { p_codigo: code }); const row = rows && rows[0]; if (row) { docs = row.datos || {}; version = row.version; } continue; }
+          docs = next; version = v; pending.splice(0, ops.length); cache(); emit(); setSync("on", "Sincronizado");
+        }
+      } catch (e) { setSync("err", "Sin conexión · reintentando"); setTimeout(flush, 5000); }
+      finally { flushing = false; }
+    }
+    const queue = (op) => { pending.push(op); emit(); setSync("on", "Guardando…"); flush(); return Promise.resolve(); };
+    setInterval(() => { if (document.visibilityState === "visible" && !pending.length) pull(); }, 6000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pull(); });
+    return {
+      collection: () => ({
+        onSnapshot(fn, err) { subs.push(fn); if (err) errs.push(err); setTimeout(() => { if (Object.keys(docs).length) emit(); pull(); }, 0); return () => {}; },
+        doc: (id) => ({ set: (v) => queue({ id, v: JSON.parse(JSON.stringify(v)) }), delete: () => queue({ id, del: true }) }),
+      }),
+      pull, flush, hasData: () => Object.keys(docs).length > 0,
+      seed(all) { for (const [id, v] of Object.entries(all)) pending.push({ id, v }); emit(); return flush(); },
+    };
+  }
+  // current local data as the documents the synced store keeps
+  function localDocs() {
+    syncActive();
+    const out = { libros: { lista: libros } };
+    if (tc) out.tc = tc;
+    for (const l of libros) {
+      const d = data[l.id]; if (!d) continue;
+      out[ajId(l.id)] = { cuentas: d.cuentas, metas: d.metas, limites: d.limites };
+      for (const m of d.movs) { const doc = movDoc(m); if (l.id !== "principal") doc.libro = l.id; out[m.id] = doc; }
+    }
+    return out;
+  }
+  function syncSheet() {
+    const code = getCode();
+    $("sheetTitle").textContent = "Sincronizar tus dispositivos";
+    const b = $("sheetBody");
+    if (!syncReady()) {
+      b.innerHTML = window.claude
+        ? `<p class="sheet-note" style="font-size:14px;color:var(--ink)">Aquí en claude.ai ya está sincronizado con tu cuenta. Abre este mismo link en tus otros dispositivos.</p>`
+        : `<p class="sheet-note" style="font-size:14px;color:var(--ink)">La sincronización todavía no está activada en esta copia. Falta conectar la base de datos.</p>`;
+    } else if (code) {
+      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0">Este dispositivo está sincronizado. Para usar CAJA en otro, ábrela allí, toca “Sincronizar” y escribe este código:</p>
+        <div class="code-box" id="codeBox">${esc(code)}</div>
+        <div class="opts row"><button class="opt primary" type="button" id="copyCode">Copiar código</button><button class="opt" type="button" id="unlink">Desconectar</button></div>
+        <p class="sheet-note">Guárdalo en un lugar seguro: quien tenga este código puede ver y cambiar tus cuentas.</p>`;
+      $("copyCode").onclick = async () => { try { await navigator.clipboard.writeText(code); $("copyCode").textContent = "Copiado"; } catch (e) { const r = document.createRange(); r.selectNodeContents($("codeBox")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("copyCode").textContent = "Selecciónalo y cópialo"; } };
+      $("unlink").onclick = () => { setCode(""); try { localStorage.removeItem("caja-sync-cache"); } catch (e) {} location.reload(); };
+    } else {
+      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0">Con un código secreto, tus cuentas se ven igual en el celular, la laptop y donde abras CAJA.</p>
+        <div class="opts"><button class="opt primary" type="button" id="mkCode">Crear mi código (primer dispositivo)</button></div>
+        <p class="sheet-note">¿Ya creaste uno en otro dispositivo? Escríbelo aquí:</p>
+        <div class="code-in"><input id="codeIn" placeholder="XXXXX-XXXXX-XXXXX-XXXXX" autocomplete="off" autocapitalize="characters" aria-label="Código de sincronización"><button class="opt primary" type="button" id="useCode">Conectar</button></div>
+        <p class="sheet-note" id="codeMsg"></p>`;
+      $("mkCode").onclick = async () => {
+        const c = newCode(); $("mkCode").textContent = "Subiendo tus datos…";
+        try { const r = remoteDb(c); await r.seed(localDocs()); setCode(c); location.reload(); }
+        catch (e) { $("mkCode").textContent = "No se pudo conectar. Inténtalo otra vez."; }
+      };
+      $("useCode").onclick = async () => {
+        const c = cleanCode($("codeIn").value);
+        if (c.replace(/-/g, "").length < 20) { $("codeMsg").textContent = "Ese código está incompleto. Tiene 20 letras y números."; return; }
+        $("useCode").textContent = "Conectando…";
+        try {
+          const rows = await rpc("caja_leer", { p_codigo: c });
+          if (!rows || !rows.length) { $("codeMsg").textContent = "No encontré ese código. Revisa que esté bien escrito."; $("useCode").textContent = "Conectar"; return; }
+          setCode(c); location.reload();
+        } catch (e) { $("codeMsg").textContent = "No se pudo conectar. Revisa tu internet."; $("useCode").textContent = "Conectar"; }
+      };
+    }
+    $("sheet").hidden = false; $("scrim").hidden = false;
+    requestAnimationFrame(() => { $("sheet").classList.add("open"); $("scrim").classList.add("open"); });
+  }
+
   async function connect() {
     let db = null, user = null;
     try { if (window.claude && window.claude.use) [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } catch (e) {}
     if (user) { try { const me = await user.me(); userName = String((me && me.name) || "").trim().split(/\s+/)[0] || ""; greeting(); } catch (e) {} }
-    const uid = db && user ? await user.id().catch(() => null) : null;
-    if (!db || !uid) { store = localStore(); render(); return; }
+    let uid = db && user ? await user.id().catch(() => null) : null;
+    if (!db && syncReady() && getCode()) { db = remoteDb(getCode()); uid = "sync"; }
+    if (!db || !uid) { store = localStore(); if (!window.claude) setSync("local", syncReady() ? "Solo este equipo · toca para sincronizar" : "Solo este equipo"); render(); return; }
     const col = db.collection("data/users/" + uid);
     const timer = setTimeout(() => setSync("err", "Sin conexión"), 10000);
     col.onSnapshot((snap) => {
@@ -2013,6 +2133,7 @@ form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6
   $("collapse").addEventListener("click", () => { collapsed = !collapsed; try { localStorage.setItem("caja-col", collapsed ? "1" : "0"); } catch (e) {} applyPrefs(); });
   $("plus").addEventListener("click", () => ($("sheet").hidden ? openSheet("acciones") : closeSheet()));
   $("bookPill").addEventListener("click", () => openSheet("libros"));
+  $("sync").addEventListener("click", () => { if (!window.claude) syncSheet(); });
   $("scrim").addEventListener("click", closeSheet);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
   $("tc").addEventListener("click", () => runAction("tc"));
