@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='6' r='4.6' fill='%23ffd25a' stroke='%238a5a00'/%3E%3Cpath d='M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z' fill='%23f5b82a' stroke='%232a1d04' stroke-width='2'/%3E%3Crect x='3' y='11' width='42' height='9.2' rx='4.6' fill='%23ffd968' stroke='%232a1d04' stroke-width='2'/%3E%3Crect x='17.4' y='13.9' width='13.2' height='3.2' rx='1.6' fill='%232a1d04'/%3E%3Cellipse cx='17.5' cy='30' rx='2.7' ry='3.2' fill='%232a1d04'/%3E%3Cellipse cx='30.5' cy='30' rx='2.7' ry='3.2' fill='%232a1d04'/%3E%3Cpath d='M20 36.4q4 3.4 8 0' fill='none' stroke='%232a1d04' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
-<meta name="theme-color" content="#1c1e22">
+<meta name="theme-color" content="#16181b">
 <style>html, body { margin: 0; } :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; height: 100%; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
 <title>CAJA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -565,6 +565,80 @@ body:not(.in-claude) .sync { cursor: pointer; }
 .cat-pick i { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--accent) 13%, transparent); }
 .cat-pick:hover { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .caji.hopnow, .caji-say.pop, .sum-main.slide-l, .sum-main.slide-r, .rc-more-info { animation: none !important; } }
+
+/* ---------- contrast pass ---------- */
+:root {
+  --bg: #16181b;
+  --surface: #24272d;
+  --raise: #2f333a;
+  --raise-2: #363a42;
+  --line: #3b4049;
+  --line-2: #4b515b;
+  --ink: #f5f6f8;
+  --muted: #b9bfc9;
+  --faint: #8d94a1;
+  --green: #74e3b1;
+  --red: #ff8c97;
+  --c2: #8fd0ff; --c3: #74e3b1; --c4: #ffab8c; --c5: #c6b4ff;
+}
+body { background:
+  radial-gradient(70% 45% at 85% -5%, rgb(255 203 71 / .13), transparent 70%),
+  radial-gradient(60% 40% at -10% 30%, rgb(143 208 255 / .07), transparent 70%),
+  var(--bg); }
+.summary { background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--acct) 20%, transparent), transparent 55%), linear-gradient(160deg, #353940, #2a2d33 75%); border-color: color-mix(in srgb, var(--acct) 40%, var(--line-2)); box-shadow: 0 14px 34px -22px rgb(0 0 0 / .9); }
+.msg.bot { background: var(--surface); border: 1px solid var(--line); }
+.msg.me { background: #463c1f; border: 1px solid rgb(255 203 71 / .35); color: #fff7e0; }
+.msg.me .meta { color: #d9c999; }
+.msg .meta { color: var(--faint); }
+.rc-t small, .tk-sub, .tk-foot { color: var(--muted); }
+.daily, .daily span { color: var(--muted); }
+.daily b { color: var(--ink); }
+.eyebrow { color: var(--muted); }
+.insight, .welcome-insight { color: var(--ink); background: color-mix(in srgb, var(--acct, var(--accent)) 14%, #1f2226); }
+.acard { background: color-mix(in srgb, var(--cc) 14%, #1d2024); border-color: color-mix(in srgb, var(--cc) 45%, transparent); }
+.acard[aria-pressed="true"] { background: color-mix(in srgb, var(--cc) 28%, #1d2024); border-color: var(--cc); }
+.ac-sub { color: var(--muted); }
+.opt { background: var(--raise); border-color: var(--line-2); color: var(--ink); }
+.opts.stale .opt { opacity: .5; }
+.chip { color: var(--ink); background: var(--surface); border-color: var(--line-2); }
+.stamp { opacity: 1; background: color-mix(in srgb, var(--cc) 10%, transparent); }
+.rc-ic { background: var(--raise); }
+.rc:has(.rc-amt.out) .rc-ic { background: rgb(255 140 151 / .16); }
+.rc:has(.rc-amt.in) .rc-ic { background: rgb(116 227 177 / .16); }
+.acct-tag { background: color-mix(in srgb, var(--cc) 18%, transparent); border-color: color-mix(in srgb, var(--cc) 50%, transparent); }
+.day, .chat .day { color: var(--faint); }
+form { background: var(--surface); border-color: var(--line-2); }
+#entrada::placeholder { color: var(--faint); }
+.book-pill, .tc { background: rgb(0 0 0 / .25); border-color: var(--line-2); color: var(--ink); }
+.tc { color: var(--muted); }
+.sheet { background: #23262c; }
+.sheet-note { color: var(--muted); }
+.lib-row, .cat-pick { background: var(--raise); }
+
+/* ---------- cajita v3 ---------- */
+.caji { overflow: visible; }
+.caji .c-shadow { fill: #000; opacity: .32; }
+.caji .c-foot { fill: #f0aa1f; stroke: #3a2705; stroke-width: 1.6; }
+.caji .c-body { fill: url(#cjBody); stroke: #3a2705; stroke-width: 1.7; }
+.caji .c-side { fill: #8a5800; opacity: .28; }
+.caji .c-hinge { stroke: #8a5800; stroke-width: 1.4; opacity: .55; }
+.caji .c-lid { fill: url(#cjLid); stroke: #3a2705; stroke-width: 1.7; }
+.caji .c-lidshine { stroke: #fff; stroke-width: 1.6; stroke-linecap: round; opacity: .7; }
+.caji .c-slot { fill: #3a2705; }
+.caji .c-latch { fill: url(#cjCoin); stroke: #3a2705; stroke-width: 1.3; }
+.caji .c-key { stroke: #3a2705; stroke-width: 1.4; stroke-linecap: round; }
+.caji .c-eyes, .caji .c-happy, .caji .c-sleep, .caji .c-m, .caji .c-brows { stroke-color: #3a2705; }
+.caji .c-eyes { fill: #2a1d04; }
+.caji .c-arms-down, .caji .c-arms-up { fill: none; stroke-linecap: round; }
+.caji .arm-o { stroke: #3a2705; stroke-width: 4.6; }
+.caji .arm-i { stroke: #f3b42c; stroke-width: 2.4; }
+.caji .c-arms-up { display: none; }
+.caji.big .c-arms-up { display: block; }
+.caji.big .c-arms-down { display: none; }
+.caji.sleep .c-arms-down { opacity: .6; }
+.caji.worry .c-arms-down { transform: translateY(-1px); }
+.row .mini .caji .c-arms-down, .row .mini .caji .c-arms-up, .row .mini .caji .c-shadow, .row .mini .caji .c-latch, .row .mini .caji .c-key { display: none; }
+.caji-wrap::after { display: none; }
 </style>
 </head>
 <body>
@@ -573,7 +647,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
 
 <div class="app" id="app">
   <header class="bar">
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="cjBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd968"/><stop offset="1" stop-color="#f0aa1f"/></linearGradient><linearGradient id="cjLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset="1" stop-color="#f6c143"/></linearGradient><radialGradient id="cjCoin" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff6d6"/><stop offset=".55" stop-color="#ffd25a"/><stop offset="1" stop-color="#d99a12"/></radialGradient></defs></svg><button class="caji-wrap" id="cajiBtn" type="button" aria-label="Habla con CAJA"><svg class="caji smile" id="caji" viewBox="0 0 48 48" aria-hidden="true"><circle class="coin" id="coin" cx="24" cy="5.8" r="4.6"></circle><circle class="coin-ring" cx="24" cy="5.8" r="2.5"></circle><path class="c-body" d="M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z"></path><path class="c-glare" d="M9.6 34V23.8c0-1.4.9-2.3 2.3-2.3h3.4"></path><rect class="c-lid" x="3" y="11" width="42" height="9.2" rx="4.6"></rect><rect class="c-slot" x="17.4" y="13.9" width="13.2" height="3.2" rx="1.6"></rect><g class="c-eyes"><ellipse cx="17.5" cy="30" rx="2.7" ry="3.2"></ellipse><ellipse cx="30.5" cy="30" rx="2.7" ry="3.2"></ellipse><circle class="c-spark" cx="18.5" cy="28.7" r=".95"></circle><circle class="c-spark" cx="31.5" cy="28.7" r=".95"></circle></g><g class="c-happy"><path d="M14.6 31.2q2.9-3.6 5.8 0M27.6 31.2q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 30.5h5.4M27.8 30.5h5.4"></path></g><circle class="c-cheek" cx="12" cy="35.4" r="2.3"></circle><circle class="c-cheek" cx="36" cy="35.4" r="2.3"></circle><path class="c-m c-smile" d="M20 36.4q4 3.4 8 0"></path><path class="c-m c-big" d="M19 35.4h10q-.6 5.2-5 5.2t-5-5.2z"></path><path class="c-m c-worry" d="M20 38.8q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="37.6" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M14.5 24.6l5-1.6M33.5 24.6l-5-1.6"></path><text class="c-z" x="40" y="10">z</text></svg></button><div class="caji-say" id="cajiSay" role="status" hidden></div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="cjBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd968"/><stop offset="1" stop-color="#f0aa1f"/></linearGradient><linearGradient id="cjLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset="1" stop-color="#f6c143"/></linearGradient><radialGradient id="cjCoin" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff6d6"/><stop offset=".55" stop-color="#ffd25a"/><stop offset="1" stop-color="#d99a12"/></radialGradient></defs></svg><button class="caji-wrap" id="cajiBtn" type="button" aria-label="Habla con CAJA"><svg class="caji smile" id="caji" viewBox="0 0 48 48" aria-hidden="true"><ellipse class="c-shadow" cx="24" cy="46.6" rx="15" ry="1.7"></ellipse><g class="c-arms-down"><path class="arm-o" d="M6.2 30.4q-3.4 2.4-2.6 6.4M41.8 30.4q3.4 2.4 2.6 6.4"></path><path class="arm-i" d="M6.2 30.4q-3.4 2.4-2.6 6.4M41.8 30.4q3.4 2.4 2.6 6.4"></path></g><g class="c-arms-up"><path class="arm-o" d="M6.2 29.4q-4.6-2.2-4-8M41.8 29.4q4.6-2.2 4-8"></path><path class="arm-i" d="M6.2 29.4q-4.6-2.2-4-8M41.8 29.4q4.6-2.2 4-8"></path></g><rect class="c-foot" x="12" y="41.8" width="8" height="4.8" rx="2.4"></rect><rect class="c-foot" x="28" y="41.8" width="8" height="4.8" rx="2.4"></rect><circle class="coin" id="coin" cx="24" cy="5.8" r="4.6"></circle><circle class="coin-ring" cx="24" cy="5.8" r="2.5"></circle><path class="c-body" d="M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z"></path><path class="c-side" d="M37.4 19h2.2a2 2 0 0 1 2 2v13.4c0 4.2-2.5 7.2-6.2 8.3 1.3-2.2 2-5 2-8.4z"></path><path class="c-glare" d="M9.6 34V23.8c0-1.4.9-2.3 2.3-2.3h3.4"></path><path class="c-hinge" d="M7 21h34"></path><rect class="c-lid" x="3" y="11" width="42" height="9.2" rx="4.6"></rect><path class="c-lidshine" d="M7.5 13.3h12"></path><rect class="c-slot" x="17.4" y="13.9" width="13.2" height="3.2" rx="1.6"></rect><rect class="c-latch" x="21" y="19.2" width="6" height="5.6" rx="1.6"></rect><path class="c-key" d="M24 21v2"></path><g class="c-eyes"><ellipse cx="17.5" cy="30.4" rx="2.7" ry="3.2"></ellipse><ellipse cx="30.5" cy="30.4" rx="2.7" ry="3.2"></ellipse><circle class="c-spark" cx="18.5" cy="29.1" r=".95"></circle><circle class="c-spark" cx="31.5" cy="29.1" r=".95"></circle></g><g class="c-happy"><path d="M14.6 31.6q2.9-3.6 5.8 0M27.6 31.6q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 30.9h5.4M27.8 30.9h5.4"></path></g><circle class="c-cheek" cx="12" cy="35.6" r="2.3"></circle><circle class="c-cheek" cx="36" cy="35.6" r="2.3"></circle><path class="c-m c-smile" d="M20 36.6q4 3.4 8 0"></path><path class="c-m c-big" d="M19 35.6h10q-.6 5.2-5 5.2t-5-5.2z"></path><path class="c-m c-worry" d="M20 39q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="37.8" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M13.6 25.6l5-1.4M34.4 25.6l-5-1.4"></path><text class="c-z" x="40" y="10">z</text></svg></button><div class="caji-say" id="cajiSay" role="status" hidden></div>
     <div class="who"><b id="hello">Hola</b><span class="sub"><span class="brand">CAJA</span><span class="sync" id="sync">Conectando…</span></span></div>
     <button class="icon-btn" id="eye" type="button" aria-label="Ocultar saldos" aria-pressed="false"></button>
   </header>
@@ -1566,7 +1640,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
   };
   const svgI = (k, w = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
-  const LOGO = `<svg class="caji smile" viewBox="0 0 48 48" aria-hidden="true"><circle class="coin" cx="24" cy="5.8" r="4.6"></circle><circle class="coin-ring" cx="24" cy="5.8" r="2.5"></circle><path class="c-body" d="M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z"></path><path class="c-glare" d="M9.6 34V23.8c0-1.4.9-2.3 2.3-2.3h3.4"></path><rect class="c-lid" x="3" y="11" width="42" height="9.2" rx="4.6"></rect><rect class="c-slot" x="17.4" y="13.9" width="13.2" height="3.2" rx="1.6"></rect><g class="c-eyes"><ellipse cx="17.5" cy="30" rx="2.7" ry="3.2"></ellipse><ellipse cx="30.5" cy="30" rx="2.7" ry="3.2"></ellipse><circle class="c-spark" cx="18.5" cy="28.7" r=".95"></circle><circle class="c-spark" cx="31.5" cy="28.7" r=".95"></circle></g><g class="c-happy"><path d="M14.6 31.2q2.9-3.6 5.8 0M27.6 31.2q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 30.5h5.4M27.8 30.5h5.4"></path></g><circle class="c-cheek" cx="12" cy="35.4" r="2.3"></circle><circle class="c-cheek" cx="36" cy="35.4" r="2.3"></circle><path class="c-m c-smile" d="M20 36.4q4 3.4 8 0"></path><path class="c-m c-big" d="M19 35.4h10q-.6 5.2-5 5.2t-5-5.2z"></path><path class="c-m c-worry" d="M20 38.8q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="37.6" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M14.5 24.6l5-1.6M33.5 24.6l-5-1.6"></path></svg>`;
+  const LOGO = `<svg class="caji smile" viewBox="0 0 48 48" aria-hidden="true"><ellipse class="c-shadow" cx="24" cy="46.6" rx="15" ry="1.7"></ellipse><g class="c-arms-down"><path class="arm-o" d="M6.2 30.4q-3.4 2.4-2.6 6.4M41.8 30.4q3.4 2.4 2.6 6.4"></path><path class="arm-i" d="M6.2 30.4q-3.4 2.4-2.6 6.4M41.8 30.4q3.4 2.4 2.6 6.4"></path></g><g class="c-arms-up"><path class="arm-o" d="M6.2 29.4q-4.6-2.2-4-8M41.8 29.4q4.6-2.2 4-8"></path><path class="arm-i" d="M6.2 29.4q-4.6-2.2-4-8M41.8 29.4q4.6-2.2 4-8"></path></g><rect class="c-foot" x="12" y="41.8" width="8" height="4.8" rx="2.4"></rect><rect class="c-foot" x="28" y="41.8" width="8" height="4.8" rx="2.4"></rect><circle class="coin" cx="24" cy="5.8" r="4.6"></circle><circle class="coin-ring" cx="24" cy="5.8" r="2.5"></circle><path class="c-body" d="M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z"></path><path class="c-side" d="M37.4 19h2.2a2 2 0 0 1 2 2v13.4c0 4.2-2.5 7.2-6.2 8.3 1.3-2.2 2-5 2-8.4z"></path><path class="c-glare" d="M9.6 34V23.8c0-1.4.9-2.3 2.3-2.3h3.4"></path><path class="c-hinge" d="M7 21h34"></path><rect class="c-lid" x="3" y="11" width="42" height="9.2" rx="4.6"></rect><path class="c-lidshine" d="M7.5 13.3h12"></path><rect class="c-slot" x="17.4" y="13.9" width="13.2" height="3.2" rx="1.6"></rect><rect class="c-latch" x="21" y="19.2" width="6" height="5.6" rx="1.6"></rect><path class="c-key" d="M24 21v2"></path><g class="c-eyes"><ellipse cx="17.5" cy="30.4" rx="2.7" ry="3.2"></ellipse><ellipse cx="30.5" cy="30.4" rx="2.7" ry="3.2"></ellipse><circle class="c-spark" cx="18.5" cy="29.1" r=".95"></circle><circle class="c-spark" cx="31.5" cy="29.1" r=".95"></circle></g><g class="c-happy"><path d="M14.6 31.6q2.9-3.6 5.8 0M27.6 31.6q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 30.9h5.4M27.8 30.9h5.4"></path></g><circle class="c-cheek" cx="12" cy="35.6" r="2.3"></circle><circle class="c-cheek" cx="36" cy="35.6" r="2.3"></circle><path class="c-m c-smile" d="M20 36.6q4 3.4 8 0"></path><path class="c-m c-big" d="M19 35.6h10q-.6 5.2-5 5.2t-5-5.2z"></path><path class="c-m c-worry" d="M20 39q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="37.8" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M13.6 25.6l5-1.4M34.4 25.6l-5-1.4"></path></svg>`;
   const ACTIONS = {
     gasto: "Registrar gasto", ingreso: "Registrar ingreso", transferir: "Transferir", cuentas: "Mis cuentas",
     resumen: "Resumen", reportes: "PDF y Excel", metas: "Metas", topes: "Topes", recuentos: "Recuentos",
