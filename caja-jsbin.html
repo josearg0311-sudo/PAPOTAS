@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='6' r='4.6' fill='%23ffd25a' stroke='%238a5a00'/%3E%3Cpath d='M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z' fill='%23f5b82a' stroke='%232a1d04' stroke-width='2'/%3E%3Crect x='3' y='11' width='42' height='9.2' rx='4.6' fill='%23ffd968' stroke='%232a1d04' stroke-width='2'/%3E%3Crect x='17.4' y='13.9' width='13.2' height='3.2' rx='1.6' fill='%232a1d04'/%3E%3Cellipse cx='17.5' cy='30' rx='2.7' ry='3.2' fill='%232a1d04'/%3E%3Cellipse cx='30.5' cy='30' rx='2.7' ry='3.2' fill='%232a1d04'/%3E%3Cpath d='M20 36.4q4 3.4 8 0' fill='none' stroke='%232a1d04' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#1c1e22">
 <style>html, body { margin: 0; } :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; height: 100%; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
 <title>CAJA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -515,6 +517,54 @@ body:not(.in-claude) .sync { cursor: pointer; }
 .code-in input { flex: 1; min-width: 0; font: 700 15px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--raise); border: 1px solid var(--line-2); border-radius: 16px; padding: 10px 12px; }
 .code-in .opt { flex: none; }
 .code-box.small { font-size: 12px; letter-spacing: 0; text-align: left; max-height: 96px; overflow-y: auto; }
+
+/* ---------- logo v2 ---------- */
+.caji .c-body { fill: url(#cjBody); stroke: #2a1d04; stroke-width: 1.8; }
+.caji .c-lid { fill: url(#cjLid); stroke: #2a1d04; stroke-width: 1.8; }
+.caji .c-slot { fill: #2a1d04; }
+.caji .c-glare { fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; opacity: .45; }
+.caji .coin { fill: url(#cjCoin); stroke: #8a5a00; stroke-width: 1.2; }
+.caji .coin-ring { fill: none; stroke: #b07a0c; stroke-width: .9; opacity: .8; transform-box: view-box; }
+.caji .c-eyes { fill: #2a1d04; }
+.caji .c-eyes .c-spark { fill: #fff; }
+.caji .c-cheek { fill: #ff8a6b; opacity: .5; }
+.caji.hopnow { animation: hop .55s cubic-bezier(.3, 1.6, .5, 1) !important; }
+.caji-wrap { cursor: pointer; border: 0; background: transparent; padding: 0; border-radius: 16px; width: 50px; height: 50px; }
+.caji-wrap:active .caji { transform: scale(.92); }
+.bar { position: relative; }
+.caji-say { position: absolute; left: 4px; top: 58px; z-index: 15; max-width: min(290px, 82vw); font-size: 13.5px; font-weight: 700; line-height: 1.4; color: #1c1505; background: var(--accent); border-radius: 6px 18px 18px 18px; padding: 9px 13px; box-shadow: 0 10px 26px -10px rgb(0 0 0 / .6); }
+.caji-say.pop { animation: sayIn .3s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes sayIn { from { opacity: 0; transform: translateY(-6px) scale(.9); } }
+.who .sub { display: inline-flex; align-items: center; gap: 8px; }
+.who .brand { font: 900 11px var(--font-body); letter-spacing: .16em; color: var(--accent); }
+
+/* ---------- interactive bits ---------- */
+#saldo { cursor: pointer; user-select: none; }
+#spark { cursor: pointer; }
+.sum-main.slide-l { animation: slideL .32s ease-out; } .sum-main.slide-r { animation: slideR .32s ease-out; }
+@keyframes slideL { from { opacity: 0; transform: translateX(26px); } }
+@keyframes slideR { from { opacity: 0; transform: translateX(-26px); } }
+.rc[data-rc] { cursor: pointer; }
+.rc-more-info { display: grid; gap: 6px; padding-top: 8px; margin-top: 2px; border-top: 1px solid var(--line); animation: enter .25s ease-out; }
+.rc-more-info .tk-foot b { font-weight: 700; text-align: right; }
+.rc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 4px; }
+.rc-actions .opt { text-align: center; min-height: 36px; padding: 7px 10px; border-radius: 99px; }
+.opt.danger { color: var(--red); border-color: rgb(255 122 134 / .35); }
+.chip.filter { color: var(--accent); border-color: rgb(255 203 71 / .4); }
+.chart { position: relative; margin: 4px 0 6px; padding-top: 30px; }
+.chart svg { width: 100%; height: 160px; display: block; touch-action: none; cursor: crosshair; }
+.chart .c-area { fill: color-mix(in srgb, var(--acct) 16%, transparent); }
+.chart .c-line { fill: none; stroke: var(--acct); stroke-width: 2.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.chart .c-cursor { stroke: var(--line-2); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 3; }
+.chart .c-dot { fill: var(--acct); stroke: var(--surface); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.chart-tip { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; font-size: 12.5px; font-weight: 800; color: #1c1505; background: var(--acct); border-radius: 99px; padding: 4px 11px; }
+.chart-ax { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--faint); margin-top: 4px; }
+.sheet-h4 { margin: 16px 0 8px; font: 800 14px var(--font-body); }
+.cat-pick { position: relative; overflow: hidden; width: 100%; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line-2); background: var(--raise); border-radius: 16px; padding: 10px 13px; margin-bottom: 6px; font-weight: 700; font-size: 13.5px; text-align: left; }
+.cat-pick span, .cat-pick b { position: relative; z-index: 1; }
+.cat-pick i { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.cat-pick:hover { border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .caji.hopnow, .caji-say.pop, .sum-main.slide-l, .sum-main.slide-r, .rc-more-info { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -523,8 +573,8 @@ body:not(.in-claude) .sync { cursor: pointer; }
 
 <div class="app" id="app">
   <header class="bar">
-    <div class="caji-wrap"><svg class="caji smile" id="caji" viewBox="0 0 48 48" aria-hidden="true"><circle class="coin" id="coin" cx="24" cy="6.5" r="4.6"></circle><path class="c-body" d="M24 12.5c9.5 0 16.5 1.6 17.6 8.6.9 5.8.9 11.6-.4 15.6-1.6 5-8.2 6.8-17.2 6.8s-15.6-1.8-17.2-6.8c-1.3-4-1.3-9.8-.4-15.6 1.1-7 8.1-8.6 17.6-8.6z"></path><rect class="c-slot" x="17" y="11.6" width="14" height="3.6" rx="1.8"></rect><g class="c-eyes"><ellipse cx="17.5" cy="27" rx="2.7" ry="3.3"></ellipse><ellipse cx="30.5" cy="27" rx="2.7" ry="3.3"></ellipse></g><g class="c-happy"><path d="M14.6 28.2q2.9-3.6 5.8 0M27.6 28.2q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 27.5h5.4M27.8 27.5h5.4"></path></g><circle class="c-cheek" cx="12" cy="32.5" r="2.3"></circle><circle class="c-cheek" cx="36" cy="32.5" r="2.3"></circle><path class="c-m c-smile" d="M20 33.6q4 3.4 8 0"></path><path class="c-m c-big" d="M19 32.6h10q-.6 5.4-5 5.4t-5-5.4z"></path><path class="c-m c-worry" d="M20 36q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="35" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M14.5 21.6l5-1.6M33.5 21.6l-5-1.6"></path><text class="c-z" x="38" y="11">z</text></svg></div>
-    <div class="who"><b id="hello">Hola</b><span class="sync" id="sync">Conectando…</span></div>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="cjBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd968"/><stop offset="1" stop-color="#f0aa1f"/></linearGradient><linearGradient id="cjLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset="1" stop-color="#f6c143"/></linearGradient><radialGradient id="cjCoin" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff6d6"/><stop offset=".55" stop-color="#ffd25a"/><stop offset="1" stop-color="#d99a12"/></radialGradient></defs></svg><button class="caji-wrap" id="cajiBtn" type="button" aria-label="Habla con CAJA"><svg class="caji smile" id="caji" viewBox="0 0 48 48" aria-hidden="true"><circle class="coin" id="coin" cx="24" cy="5.8" r="4.6"></circle><circle class="coin-ring" cx="24" cy="5.8" r="2.5"></circle><path class="c-body" d="M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z"></path><path class="c-glare" d="M9.6 34V23.8c0-1.4.9-2.3 2.3-2.3h3.4"></path><rect class="c-lid" x="3" y="11" width="42" height="9.2" rx="4.6"></rect><rect class="c-slot" x="17.4" y="13.9" width="13.2" height="3.2" rx="1.6"></rect><g class="c-eyes"><ellipse cx="17.5" cy="30" rx="2.7" ry="3.2"></ellipse><ellipse cx="30.5" cy="30" rx="2.7" ry="3.2"></ellipse><circle class="c-spark" cx="18.5" cy="28.7" r=".95"></circle><circle class="c-spark" cx="31.5" cy="28.7" r=".95"></circle></g><g class="c-happy"><path d="M14.6 31.2q2.9-3.6 5.8 0M27.6 31.2q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 30.5h5.4M27.8 30.5h5.4"></path></g><circle class="c-cheek" cx="12" cy="35.4" r="2.3"></circle><circle class="c-cheek" cx="36" cy="35.4" r="2.3"></circle><path class="c-m c-smile" d="M20 36.4q4 3.4 8 0"></path><path class="c-m c-big" d="M19 35.4h10q-.6 5.2-5 5.2t-5-5.2z"></path><path class="c-m c-worry" d="M20 38.8q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="37.6" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M14.5 24.6l5-1.6M33.5 24.6l-5-1.6"></path><text class="c-z" x="40" y="10">z</text></svg></button><div class="caji-say" id="cajiSay" role="status" hidden></div>
+    <div class="who"><b id="hello">Hola</b><span class="sub"><span class="brand">CAJA</span><span class="sync" id="sync">Conectando…</span></span></div>
     <button class="icon-btn" id="eye" type="button" aria-label="Ocultar saldos" aria-pressed="false"></button>
   </header>
 
@@ -1516,7 +1566,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
     x: '<path d="M6 6l12 12M18 6 6 18"/>',
   };
   const svgI = (k, w = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
-  const LOGO = `<svg class="caji smile" viewBox="0 0 48 48" aria-hidden="true"><circle class="coin" cx="24" cy="6.5" r="4.6"></circle><path class="c-body" d="M24 12.5c9.5 0 16.5 1.6 17.6 8.6.9 5.8.9 11.6-.4 15.6-1.6 5-8.2 6.8-17.2 6.8s-15.6-1.8-17.2-6.8c-1.3-4-1.3-9.8-.4-15.6 1.1-7 8.1-8.6 17.6-8.6z"></path><rect class="c-slot" x="17" y="11.6" width="14" height="3.6" rx="1.8"></rect><g class="c-eyes"><ellipse cx="17.5" cy="27" rx="2.7" ry="3.3"></ellipse><ellipse cx="30.5" cy="27" rx="2.7" ry="3.3"></ellipse></g><g class="c-happy"><path d="M14.6 28.2q2.9-3.6 5.8 0M27.6 28.2q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 27.5h5.4M27.8 27.5h5.4"></path></g><circle class="c-cheek" cx="12" cy="32.5" r="2.3"></circle><circle class="c-cheek" cx="36" cy="32.5" r="2.3"></circle><path class="c-m c-smile" d="M20 33.6q4 3.4 8 0"></path><path class="c-m c-big" d="M19 32.6h10q-.6 5.4-5 5.4t-5-5.4z"></path><path class="c-m c-worry" d="M20 36q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="35" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M14.5 21.6l5-1.6M33.5 21.6l-5-1.6"></path></svg>`;
+  const LOGO = `<svg class="caji smile" viewBox="0 0 48 48" aria-hidden="true"><circle class="coin" cx="24" cy="5.8" r="4.6"></circle><circle class="coin-ring" cx="24" cy="5.8" r="2.5"></circle><path class="c-body" d="M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z"></path><path class="c-glare" d="M9.6 34V23.8c0-1.4.9-2.3 2.3-2.3h3.4"></path><rect class="c-lid" x="3" y="11" width="42" height="9.2" rx="4.6"></rect><rect class="c-slot" x="17.4" y="13.9" width="13.2" height="3.2" rx="1.6"></rect><g class="c-eyes"><ellipse cx="17.5" cy="30" rx="2.7" ry="3.2"></ellipse><ellipse cx="30.5" cy="30" rx="2.7" ry="3.2"></ellipse><circle class="c-spark" cx="18.5" cy="28.7" r=".95"></circle><circle class="c-spark" cx="31.5" cy="28.7" r=".95"></circle></g><g class="c-happy"><path d="M14.6 31.2q2.9-3.6 5.8 0M27.6 31.2q2.9-3.6 5.8 0"></path></g><g class="c-sleep"><path d="M14.8 30.5h5.4M27.8 30.5h5.4"></path></g><circle class="c-cheek" cx="12" cy="35.4" r="2.3"></circle><circle class="c-cheek" cx="36" cy="35.4" r="2.3"></circle><path class="c-m c-smile" d="M20 36.4q4 3.4 8 0"></path><path class="c-m c-big" d="M19 35.4h10q-.6 5.2-5 5.2t-5-5.2z"></path><path class="c-m c-worry" d="M20 38.8q4-2.6 8 0"></path><ellipse class="c-m c-o" cx="24" cy="37.6" rx="2" ry="2.3"></ellipse><path class="c-brows" d="M14.5 24.6l5-1.6M33.5 24.6l-5-1.6"></path></svg>`;
   const ACTIONS = {
     gasto: "Registrar gasto", ingreso: "Registrar ingreso", transferir: "Transferir", cuentas: "Mis cuentas",
     resumen: "Resumen", reportes: "PDF y Excel", metas: "Metas", topes: "Topes", recuentos: "Recuentos",
@@ -1531,19 +1581,25 @@ body:not(.in-claude) .sync { cursor: pointer; }
     const word = m.tipo === "out" ? "Pagado" : m.tipo === "in" ? "Recibido" : "Transferido";
     const ok = `<span class="stamp${fresh ? " fresh" : ""}" style="--cc:${m.tipo === "out" ? "var(--red)" : m.tipo === "in" ? "var(--green)" : "var(--c2)"}">${word}</span>`;
     const more = `<button class="rc-more" type="button" data-mov="${esc(m.id)}" aria-label="Opciones del movimiento">${svgI("more", 2.4)}</button>`;
+    const open = expanded.has(m.id);
+    const when = new Date(m.ts).toLocaleString("es-PE", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+    const details = open ? `<div class="rc-more-info"><div class="tk-foot"><span>Fecha</span><b>${esc(when)}</b></div>` +
+      (m.orig ? `<div class="tk-foot"><span>Monto original</span><b>${esc(fmt(m.orig.monto, m.orig.moneda))} · TC ${esc(m.orig.tc.toFixed(3))}</b></div>` : "") +
+      `<div class="tk-foot"><span>Operación</span><b>${opCode(m.ts)}</b></div>` +
+      `<div class="rc-actions"><button class="opt" type="button" data-dup="${esc(m.id)}">↻ Repetir hoy</button><button class="opt danger" type="button" data-mov="${esc(m.id)}">Eliminar</button></div></div>` : "";
     if (m.tipo === "tr") {
       const cd = accCur(m.desde), ch = accCur(m.hacia);
-      return `<div class="rc"><div class="rc-head"><span class="rc-ic">🔁</span><span class="rc-t"><b>Transferencia</b><small>${accTag(m.desde)} → ${accTag(m.hacia)}</small></span><span class="rc-amt">${esc(fmt(m.monto, cd))}</span></div>` +
+      return `<div class="rc${open ? " open" : ""}" data-rc="${esc(m.id)}"><div class="rc-head"><span class="rc-ic">🔁</span><span class="rc-t"><b>Transferencia</b><small>${accTag(m.desde)} → ${accTag(m.hacia)}</small></span><span class="rc-amt">${esc(fmt(m.monto, cd))}</span></div>` +
         (cd !== ch && m.montoDest != null ? `<div class="tk-sub">Llegan ${esc(fmt(m.montoDest, ch))} · TC ${esc(m.orig && m.orig.tc ? m.orig.tc.toFixed(3) : "")}</div>` : "") +
-        `<div class="rc-foot">${ok}<span class="sal">${esc(accName(m.hacia))} <b>${esc(fmt(b[m.hacia] || 0, ch))}</b></span>${more}</div></div>`;
+        `<div class="rc-foot">${ok}<span class="sal">${esc(accName(m.hacia))} <b>${esc(fmt(b[m.hacia] || 0, ch))}</b></span>${more}</div>${details}</div>`;
     }
     const cur = accCur(m.cuenta);
     const label = m.desc || (m.tipo === "in" ? "Ingreso" : "Gasto");
     const conv = m.orig ? `<div class="tk-sub">${esc(fmt(m.orig.monto, m.orig.moneda))} × TC ${esc(m.orig.tc.toFixed(3))}</div>` : "";
-    return `<div class="rc"><div class="rc-head"><span class="rc-ic">${catEmoji(m.cat)}</span><span class="rc-t"><b>${esc(label)}</b><small>${esc(m.cat)} ${accTag(m.cuenta)}</small></span>` +
+    return `<div class="rc${open ? " open" : ""}" data-rc="${esc(m.id)}"><div class="rc-head"><span class="rc-ic">${catEmoji(m.cat)}</span><span class="rc-t"><b>${esc(label)}</b><small>${esc(m.cat)} ${accTag(m.cuenta)}</small></span>` +
       `<span class="rc-amt ${m.tipo}">${m.tipo === "out" ? "−" : "+"}${esc(fmt(m.monto, cur))}</span></div>${conv}` +
       (m.tipo === "out" ? limitLine(m.cat, m.ts).replace('<div class="tk-hr"></div>', "") : "") +
-      `<div class="rc-foot">${ok}<span class="sal">Saldo <b>${esc(fmt(b[m.cuenta] || 0, cur))}</b></span>${more}</div></div>`;
+      `<div class="rc-foot">${ok}<span class="sal">Saldo <b>${esc(fmt(b[m.cuenta] || 0, cur))}</b></span>${more}</div>${details}</div>`;
   }
 
   // ---------- guided flows (bank-style) ----------
@@ -1693,7 +1749,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
     const o = flow.opts[i];
     if (!o) return;
     const it = ephemeral.find((e) => e.step === step); if (it) it.chosen = i;
-    echo(o.label);
+    echo(o.label); buzz(o.val === "ok" ? 20 : 8);
     answer(o.val);
   }
   function runAction(a) {
@@ -1747,6 +1803,85 @@ body:not(.in-claude) .sync { cursor: pointer; }
     if ($("sheet").hidden) return;
     $("sheet").classList.remove("open"); $("scrim").classList.remove("open"); $("plus").classList.remove("on");
     sheetT = setTimeout(() => { $("sheet").hidden = true; $("scrim").hidden = true; }, 220);
+  }
+
+  // ---------- interactivity ----------
+  let showAlt = false, filterCat = null, keepScroll = false;
+  const expanded = new Set();
+  const buzz = (ms = 12) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+  let sayIdx = 0, sayT = null;
+  function cajiTalk() {
+    const T = cuentas.length && sel !== "all" ? totals(sel) : null;
+    const lines = [insight()];
+    if (T) {
+      lines.push(`Hoy llevas ${fmt(T.hoy, T.cur)} en gastos desde ${accName(sel)}.`);
+      lines.push(`Para lo que queda del mes tienes ${fmt(Math.max(0, T.saldo / daysLeft()), T.cur)} por día en ${accName(sel)}.`);
+    }
+    const g = metas.find((x) => x.ahorrado < x.objetivo);
+    if (g) lines.push(`Tu meta ${g.nombre} va en ${Math.round((g.ahorrado / g.objetivo) * 100)}%. ¡Sigue así!`);
+    lines.push("Desliza el resumen a los lados para cambiar de cuenta.", "Toca la gráfica para ver tu saldo día por día.", "Toca un comprobante para repetirlo o borrarlo.");
+    const el = $("cajiSay");
+    el.textContent = lines[sayIdx++ % lines.length]; el.hidden = false;
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+    clearTimeout(sayT); sayT = setTimeout(() => { el.hidden = true; }, 4200);
+    setMood("big", 1400); buzz(8);
+    const c = $("caji"); c.classList.remove("hopnow"); void c.getBBox(); c.classList.add("hopnow");
+  }
+  function sparkPoints(days) {
+    const pts = [], now = new Date();
+    for (let k = days - 1; k >= 0; k--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - k);
+      const end = Math.min(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime(), Date.now());
+      const bb = balances(end);
+      pts.push({ d, v: sel === "all" ? cuentas.reduce((s, c) => s + toPEN(bb[c.id] || 0, c.moneda), 0) : bb[sel] || 0 });
+    }
+    return pts;
+  }
+  function switchAccount(dir) {
+    if (cuentas.length < 2 || flow) return;
+    const i = cuentas.findIndex((c) => c.id === sel);
+    const next = cuentas[(i + dir + cuentas.length) % cuentas.length];
+    const sm = document.querySelector(".sum-main");
+    sm.classList.remove("slide-l", "slide-r"); void sm.offsetWidth; sm.classList.add(dir > 0 ? "slide-l" : "slide-r");
+    filterCat = null; buzz(8); setSel(next.id);
+    const card = document.querySelector(`.acard[data-id="${CSS.escape(next.id)}"]`); if (card) card.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }
+  function chartSheet() {
+    if (!cuentas.length) return;
+    const cur = accCur(sel), pts = sparkPoints(30);
+    const W = 320, H = 150, pad = 10;
+    const vs = pts.map((p) => p.v), min = Math.min(...vs), max = Math.max(...vs), span = max - min || 1;
+    const xy = pts.map((p, i) => [i * (W / 29), H - pad - ((p.v - min) / span) * (H - 2 * pad)]);
+    const line = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const ms = monthStart(), cats = {};
+    let tot = 0;
+    for (const m of movs) if (m.tipo === "out" && m.cuenta === sel && m.ts >= ms) { cats[m.cat] = (cats[m.cat] || 0) + m.monto; tot += m.monto; }
+    const rows = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+    $("sheetTitle").textContent = `${accName(sel)} · últimos 30 días`;
+    $("sheetBody").innerHTML = `<div class="chart" id="chart" style="--acct:${accColor(sel)}">
+        <div class="chart-tip" id="chartTip"></div>
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Saldo de los últimos 30 días">
+          <path class="c-area" d="${line} L${W} ${H} L0 ${H}Z"></path><path class="c-line" d="${line}"></path>
+          <line class="c-cursor" id="chartCur" x1="${xy[29][0]}" x2="${xy[29][0]}" y1="0" y2="${H}"></line>
+          <circle class="c-dot" id="chartDot" cx="${xy[29][0]}" cy="${xy[29][1]}" r="4"></circle>
+        </svg>
+        <div class="chart-ax"><span>${esc(pts[0].d.toLocaleDateString("es-PE", { day: "numeric", month: "short" }))}</span><span>Hoy</span></div>
+      </div>
+      <h4 class="sheet-h4">Gastos de este mes · ${esc(fmt(tot, cur))}</h4>
+      ${rows.length ? rows.map(([k, v]) => `<button class="cat-pick" type="button" data-filtercat="${esc(k)}"><span>${catEmoji(k)} ${esc(k)}</span><b>${esc(fmt(v, cur))}</b><i style="width:${Math.max(4, (v / rows[0][1]) * 100).toFixed(1)}%"></i></button>`).join("") : `<p class="sheet-note">Aún no hay gastos este mes en ${esc(accName(sel))}.</p>`}
+      <p class="sheet-note">Desliza el dedo sobre la gráfica para ver cada día. Toca una categoría para ver solo esos movimientos en el chat.</p>`;
+    const chart = $("chart"), svg = chart.querySelector("svg");
+    const show = (i) => {
+      const [x, y] = xy[i]; $("chartCur").setAttribute("x1", x); $("chartCur").setAttribute("x2", x); $("chartDot").setAttribute("cx", x); $("chartDot").setAttribute("cy", y);
+      const tip = $("chartTip"); tip.textContent = `${pts[i].d.toLocaleDateString("es-PE", { weekday: "short", day: "numeric", month: "short" })} · ${fmt(pts[i].v, cur)}`;
+      tip.style.left = Math.min(Math.max((x / W) * 100, 18), 82) + "%";
+    };
+    const at = (ev) => { const r = svg.getBoundingClientRect(); return Math.round(Math.min(Math.max((ev.clientX - r.left) / r.width, 0), 1) * 29); };
+    svg.addEventListener("pointermove", (ev) => show(at(ev)));
+    svg.addEventListener("pointerdown", (ev) => { svg.setPointerCapture(ev.pointerId); show(at(ev)); });
+    show(29);
+    $("sheet").hidden = false; $("scrim").hidden = false;
+    requestAnimationFrame(() => { $("sheet").classList.add("open"); $("scrim").classList.add("open"); });
   }
 
   // ---------- render ----------
@@ -1805,7 +1940,10 @@ body:not(.in-claude) .sync { cursor: pointer; }
     $("bookName").textContent = (libro(activo) || {}).nombre || "Recuento";
     $("heroLabel").textContent = empty ? "Aún no tienes cuentas" : "En " + accName(sel) + " tienes";
     $("summary").style.setProperty("--acct", empty ? "var(--accent)" : accColor(sel));
-    if (empty) { shown = null; paintBig(0, T.cur); } else countTo(T.saldo, T.cur);
+    const alt = showAlt && rate() && !empty;
+    const dv = alt ? (T.cur === "PEN" ? T.saldo / rate() : T.saldo * rate()) : T.saldo, dc = alt ? (T.cur === "PEN" ? "USD" : "PEN") : T.cur;
+    $("saldo").title = rate() ? "Toca para ver en " + (dc === "PEN" ? "dólares" : "soles") : "";
+    if (empty) { shown = null; paintBig(0, T.cur); } else countTo(dv, dc);
     drawSpark();
     const daily = $("daily"); daily.textContent = "";
     const item = (label, value, cls) => { const s = document.createElement("span"); s.append(label + " "); const b = document.createElement("b"); b.textContent = value; if (cls) b.className = cls; s.append(b); daily.append(s); return s; };
@@ -1851,6 +1989,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
     const chips = $("chips"); chips.textContent = "";
     const add = (html, attrs, cls = "") => { const b = document.createElement("button"); b.type = "button"; b.className = "chip " + cls; b.innerHTML = html; for (const [k, v] of Object.entries(attrs)) b.dataset[k] = v; chips.append(b); };
     if (flow) { add(svgI("x") + "Cancelar", { cancel: "1" }, "cancel"); return; }
+    if (filterCat) add(`${catEmoji(filterCat)} Solo ${esc(filterCat.toLowerCase())} · ver todo ✕`, { clearfilter: "1" }, "filter");
     const list = cuentas.length ? ["gasto", "ingreso", "transferir", "resumen", "reportes", "cuentas", "deshacer"] : ["nuevacuenta", "recuentos", "ayuda"];
     for (const k of list) add(svgI(k) + esc(ACTIONS[k]), { action: k });
   }
@@ -1867,6 +2006,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
     const items = [];
     for (const m of movs) {
       if (sel !== "all" && !touches(m, sel)) continue;
+      if (filterCat && m.cat !== filterCat) continue;
       items.push({ ts: m.ts, who: "me", html: esc(m.texto) });
       items.push({ ts: m.ts + 0.5, who: "bot", html: movReply(m), pending: m.ts === freshTs && Date.now() - freshTs < 420 });
     }
@@ -1892,9 +2032,10 @@ body:not(.in-claude) .sync { cursor: pointer; }
       prev = it.who;
     }
     const chat = $("chat");
+    const prevTop = chat.scrollTop;
     chat.innerHTML = html;
     seenTs = maxTs;
-    chat.scrollTop = chat.scrollHeight;
+    if (keepScroll) { chat.scrollTop = prevTop; keepScroll = false; } else chat.scrollTop = chat.scrollHeight;
   }
 
   // ---------- data shape (migrates earlier versions) ----------
@@ -2157,6 +2298,30 @@ body:not(.in-claude) .sync { cursor: pointer; }
   $("scrim").addEventListener("click", closeSheet);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
   $("tc").addEventListener("click", () => runAction("tc"));
+  $("cajiBtn").addEventListener("click", cajiTalk);
+  $("saldo").addEventListener("click", () => { if (!rate()) return; showAlt = !showAlt; shown = null; buzz(6); render(); });
+  $("spark").addEventListener("click", chartSheet);
+  // swipe the summary to move between accounts
+  let sx = null, sy = null;
+  $("summary").addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  $("summary").addEventListener("touchend", (e) => {
+    if (sx == null) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5 && !e.target.closest(".cards")) switchAccount(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  document.addEventListener("keydown", (e) => {
+    if ((e.target instanceof Element && e.target.closest("input, textarea, select")) || !$("sheet").hidden) return;
+    if (e.key === "ArrowRight") switchAccount(1); else if (e.key === "ArrowLeft") switchAccount(-1);
+  });
+  // tap a receipt to open its details
+  $("chat").addEventListener("click", (e) => {
+    if (e.target.closest("button")) return;
+    const rc = e.target.closest(".rc[data-rc]"); if (!rc) return;
+    const id = rc.dataset.rc; const opening = !expanded.has(id);
+    opening ? expanded.add(id) : expanded.delete(id);
+    keepScroll = true; buzz(6); render();
+    if (opening) { const el = document.querySelector(`.rc[data-rc="${CSS.escape(id)}"]`); if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  });
 
   $("form").addEventListener("submit", (ev) => {
     ev.preventDefault();
@@ -2177,6 +2342,14 @@ body:not(.in-claude) .sync { cursor: pointer; }
     const t = ev.target.closest("button");
     if (!t || !$("app").contains(t)) return;
     if (t.dataset.dl) return download(t.dataset.dl);
+    if (t.dataset.clearfilter) { filterCat = null; return render(); }
+    if (t.dataset.filtercat) { filterCat = t.dataset.filtercat; closeSheet(); return render(); }
+    if (t.dataset.dup) {
+      const m = movs.find((x) => x.id === t.dataset.dup); if (!m || !store) return;
+      expanded.delete(m.id); buzz(15);
+      if (m.tipo === "tr") return handle(m.texto, null, { cmd: "tr", monto: m.monto, cur: null, desde: m.desde, hacia: m.hacia });
+      return handle(m.texto, null, { cmd: "mov", tipo: m.tipo, monto: m.monto, cur: null, desc: m.desc, cat: m.cat, ids: [m.cuenta] });
+    }
     if (t.dataset.opt != null && t.dataset.step) return chooseOpt(+t.dataset.opt, +t.dataset.step);
     if (t.dataset.action) return runAction(t.dataset.action);
     if (t.dataset.cancel) return cancelFlow();
@@ -2184,7 +2357,7 @@ body:not(.in-claude) .sync { cursor: pointer; }
     if (t.dataset.libro) { closeSheet(); if (t.dataset.libro !== activo) setLibro(t.dataset.libro); return; }
     if (t.dataset.meta && store) { clearTmp(); return handle("meta " + t.dataset.meta); }
     if (t.dataset.pick && store && pendingText) { const p = pendingText; clearTmp(); return handle(p, t.dataset.pick); }
-    if (t.classList.contains("acard") && t.dataset.id) return setSel(t.dataset.id);
+    if (t.classList.contains("acard") && t.dataset.id) { filterCat = null; buzz(6); return setSel(t.dataset.id); }
   });
 
   // voice dictation where the viewer's browser supports it
