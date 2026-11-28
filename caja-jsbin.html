@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='6' r='4.6' fill='%23ffd25a' stroke='%238a5a00'/%3E%3Cpath d='M8.5 17.5h31a3.5 3.5 0 0 1 3.5 3.5v13.5c0 5.6-4.4 9.3-10 9.3H15c-5.6 0-10-3.7-10-9.3V21a3.5 3.5 0 0 1 3.5-3.5z' fill='%23f5b82a' stroke='%232a1d04' stroke-width='2'/%3E%3Crect x='3' y='11' width='42' height='9.2' rx='4.6' fill='%23ffd968' stroke='%232a1d04' stroke-width='2'/%3E%3Crect x='17.4' y='13.9' width='13.2' height='3.2' rx='1.6' fill='%232a1d04'/%3E%3Cellipse cx='17.5' cy='30' rx='2.7' ry='3.2' fill='%232a1d04'/%3E%3Cellipse cx='30.5' cy='30' rx='2.7' ry='3.2' fill='%232a1d04'/%3E%3Cpath d='M20 36.4q4 3.4 8 0' fill='none' stroke='%232a1d04' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E">
-<meta name="theme-color" content="#16181b">
+<meta name="theme-color" content="#131518">
 <style>html, body { margin: 0; } :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; height: 100%; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
 <title>CAJA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -641,6 +641,41 @@ form { background: var(--surface); border-color: var(--line-2); }
 .caji.worry .c-arms-down { transform: translateY(-1px); }
 .row .mini .caji .c-arms-down, .row .mini .caji .c-arms-up, .row .mini .caji .c-shadow, .row .mini .caji .c-latch, .row .mini .caji .c-key { display: none; }
 .caji-wrap::after { display: none; }
+
+/* ---------- final color pass ---------- */
+:root {
+  --bg: #131518;
+  --surface: #202329;
+  --raise: #2a2e35;
+  --raise-2: #333840;
+  --line: #363b44;
+  --line-2: #464c56;
+  --accent: #ffc93c;
+  --accent-ink: #1d1604;
+}
+body { background:
+  radial-gradient(80% 50% at 90% -8%, rgb(255 201 60 / .16), transparent 65%),
+  radial-gradient(60% 45% at -10% 35%, rgb(143 208 255 / .08), transparent 70%),
+  radial-gradient(70% 45% at 50% 115%, rgb(116 227 177 / .06), transparent 70%),
+  var(--bg); }
+.summary { background:
+  radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--acct) 24%, transparent), transparent 55%),
+  linear-gradient(165deg, #343840, #24272d 80%);
+  border: 1px solid color-mix(in srgb, var(--acct) 45%, #464c56);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / .95), inset 0 1px 0 rgb(255 255 255 / .06); }
+.msg.me { background: linear-gradient(155deg, #ffd660, #f4b52b); color: #1d1604; border: 0; box-shadow: 0 8px 18px -12px rgb(255 201 60 / .7); font-weight: 600; }
+.msg.me .meta { color: rgb(29 22 4 / .6); }
+.msg.bot { background: linear-gradient(180deg, #23262c, #1f2227); border: 1px solid var(--line); box-shadow: 0 10px 24px -20px rgb(0 0 0 / .9); }
+.msg.bot b { color: #fff; }
+.chip { background: rgb(255 255 255 / .04); }
+.chip:hover { background: rgb(255 201 60 / .08); }
+form { background: #1e2126; box-shadow: 0 -12px 30px -22px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .04); }
+.send, .opt.primary, .dl { background: linear-gradient(155deg, #ffd660, #f4b52b); color: #1d1604; box-shadow: 0 8px 18px -10px rgb(255 201 60 / .55); }
+.opt.primary { border-color: transparent; }
+.acard { box-shadow: inset 0 1px 0 rgb(255 255 255 / .05); }
+.insight, .welcome-insight { border: 1px solid color-mix(in srgb, var(--acct, var(--accent)) 25%, transparent); }
+.sheet { background: linear-gradient(180deg, #262a31, #1f2227); }
+@media (min-width: 960px) { .chat { background: rgb(32 35 41 / .55); } }
 </style>
 </head>
 <body>
@@ -859,6 +894,7 @@ form { background: var(--surface); border-color: var(--line-2); }
     if (/^(mis )?(limites|topes)\??$/.test(low)) return { cmd: "limites" };
     if (/^(saldo|cuanto tengo|cuanto me queda)\??$/.test(low)) return { cmd: "saldo" };
     if (/^(ayuda|help|\?|que puedes hacer)\??$/.test(low)) return { cmd: "ayuda" };
+    if (/^(hola|holi|buenas|buenos dias|buenas tardes|buenas noches|hey|que tal|gracias|ok|listo)\b[!. ]*$/.test(low)) return { cmd: "hola", gracias: /gracias/.test(low) };
     if (/^(tc|t\.?c\.?|tipo de cambio|(el )?dolar( esta)?( a| en)?)\??$/.test(low)) return { cmd: "tc?" };
     let m = low.match(/^(?:tc|t\.c\.?|tipo de cambio|(?:el )?dolar(?: esta)?(?: a| en)?)\s*(?:s\/\.?)?\s*(\d+(?:[.,]\d+)?)$/);
     if (m) return { cmd: "tc", valor: parseFloat(m[1].replace(",", ".")) };
@@ -917,6 +953,7 @@ form { background: var(--surface); border-color: var(--line-2); }
     const ids = accountsIn(t);
     const cur = curIn(t);
     if (TR_WORDS.test(low) && ids.length >= 2) return { cmd: "tr", monto: a.v, cur, desde: ids[0], hacia: ids[1] };
+    if (TR_WORDS.test(low) && ids.length === 1 && words(t).split(words(accName(ids[0]))).length > 2) return { cmd: "tr", monto: a.v, cur, desde: ids[0], hacia: ids[0] };
     if (INI_WORDS.test(low) && !IN_WORDS.test(low)) return { cmd: "inicial", monto: a.v, ids };
     const tipo = IN_WORDS.test(low) || /^\+/.test(t) ? "in" : "out";
     return { cmd: "mov", tipo, monto: a.v, cur, desc: cleanDesc(t, a.raw), ids };
@@ -985,17 +1022,16 @@ form { background: var(--surface); border-color: var(--line-2); }
   function librosHtml() {
     let total = 0;
     const rows = libros.map((l) => {
-      const [t, n] = l.id === activo ? [totals("all").saldo, movs.length] : withLibro(l.id, () => [totals("all").saldo, movs.length]);
-      total += t;
-      return `<div class="tk-foot"><span>${l.id === activo ? "● " : ""}${esc(l.nombre)} · ${n} mov.</span><b>${esc(fmt(t))}</b></div>`;
+      const [c, n] = l.id === activo ? [cuentas.length, movs.length] : withLibro(l.id, () => [cuentas.length, movs.length]);
+      return `<div class="tk-foot"><span>${l.id === activo ? "● " : ""}${esc(l.nombre)}</span><b>${c} cuenta${c === 1 ? "" : "s"} · ${n} mov.</b></div>`;
     }).join("");
-    return `<div class="tk"><span class="tk-title">Tus recuentos</span>${rows}<div class="tk-hr"></div><div class="tk-row"><span>Total</span><span class="amt">${esc(fmt(total))}</span></div><div class="tk-sub">Cambia con los botones de arriba o escribe <b>cambiar a</b> y el nombre.</div></div>`;
+    return `<div class="tk"><span class="tk-title">Tus recuentos</span>${rows}<div class="tk-hr"></div><div class="tk-sub">Cambia con los botones de arriba o escribe <b>cambiar a</b> y el nombre.</div></div>`;
   }
   function metaHtml(g) {
     const pct = g.objetivo ? (g.ahorrado / g.objetivo) * 100 : 0;
     const falta = Math.max(0, g.objetivo - g.ahorrado);
     return `<div class="cat-line"><span>${esc(g.nombre)}</span><span class="amt">${esc(num(g.ahorrado))}/${esc(num(g.objetivo))}</span>${barHtml(pct, "green")}</div>` +
-      `<div class="tk-sub">${pct >= 100 ? "Meta cumplida" : `Te faltan ${esc(fmt(falta))} · ${Math.round(pct)}%`}</div>`;
+      `<div class="tk-sub">${pct >= 100 ? `Meta cumplida 🎉${g.ahorrado > g.objetivo ? " · " + esc(fmt(g.ahorrado - g.objetivo)) + " de más" : ""}` : `Te faltan ${esc(fmt(falta))} · ${Math.round(pct)}%`}</div>`;
   }
   function metasHtml() {
     if (!metas.length) return `Aún no tienes metas. Prueba <b>meta PS5 2500</b> o <b>meta viaje a Cusco 1800</b>.`;
@@ -1025,7 +1061,7 @@ form { background: var(--surface); border-color: var(--line-2); }
       `<div class="tk-foot"><span>Ingresos</span><b class="in">+${esc(fmt(T.inn, T.cur))}</b></div>` +
       `<div class="tk-foot"><span>Gastaste (${pct}%)</span><b class="out">−${esc(fmt(T.out, T.cur))}</b></div>` +
       `<div class="tk-hr"></div><div class="tk-row"><span>Tienes</span><span class="amt">${esc(fmt(T.saldo, T.cur))}</span></div>` +
-      (scope === "all" ? `<div class="tk-sub">Te alcanza para ${esc(fmt(diario()))} diarios hasta fin de mes</div>` : "") +
+      (scope !== "all" ? `<div class="tk-sub">Te alcanza para ${esc(fmt(Math.max(0, T.saldo / daysLeft()), T.cur))} diarios hasta fin de mes</div>` : "") +
       (bars ? `<div class="tk-hr"></div><span class="tk-sub">En qué se va</span>${bars}` : "") +
       (top ? `<div class="tk-quip">${esc(top)}</div>` : "") + `</div>`;
   }
@@ -1043,7 +1079,7 @@ form { background: var(--surface); border-color: var(--line-2); }
   const AYUDA = `Escríbeme como hablas:
 • <b>pagué 18 de menú</b> · <b>uber 12 con BCP</b>
 • <b>me yapearon 50</b> · <b>me pagaron la quincena 1800</b>
-• <b>spotify 5.99 dólares</b> → lo paso a soles solo
+• <b>spotify 5.99 dólares</b> → lo convierto a la moneda de la cuenta
 • <b>pasé 200 de BCP a efectivo</b>
 • <b>meta PS5 2500</b> · <b>ahorré 200 para PS5</b>
 • <b>tope salidas 300</b> → te aviso si te pasas
@@ -1052,7 +1088,10 @@ form { background: var(--surface); border-color: var(--line-2); }
 • <b>exportar pdf</b> · <b>excel de noviembre</b> · <b>pdf todo</b>
 • <b>pdf general</b> · <b>excel general</b> junta todos los recuentos
 • <b>resumen</b> · <b>cuentas</b> · <b>metas</b> · <b>deshacer</b>
-• <b>nueva cuenta Ahorros dólares 500</b> · <b>tc 3.46</b>`;
+• <b>nueva cuenta Ahorros dólares 500</b> · <b>tc 3.46</b>
+• <b>renombrar BCP a Sueldo</b> · <b>borrar cuenta BCP</b>
+
+También puedes tocar: a mí para un consejo, el saldo para verlo en dólares, la gráfica para ver cada día, y cualquier comprobante para repetirlo o borrarlo. Desliza el resumen para cambiar de cuenta.`;
 
   function say(html) { ephemeral.push({ ts: Date.now() + 0.5, who: "bot", html, pending: true }); render(); settle(); }
   function askPick(q) { ephemeral.push({ ts: Date.now() + 0.5, who: "bot", html: pickHtml(q), tmp: true, pending: true }); render(); settle(); }
@@ -1132,7 +1171,7 @@ form { background: var(--surface); border-color: var(--line-2); }
     try {
       switch (r.cmd) {
         case "tc?":
-          say(rate() ? `El dólar está a <b>S/ ${esc(rate().toFixed(3))}</b>\n<span class="tk-sub">${esc(tc.fuente || "manual")} · ${esc(tc.fecha || "")}</span>\nPara cambiarlo: <b>tc 3.46</b>` : `Aún no hay tipo de cambio. Escribe <b>tc 3.45</b>.`);
+          say(rate() ? `El dólar está a <b>S/ ${esc(rate().toFixed(3))}</b>\n<span class="tk-sub">${esc(tc.fuente || "manual")} · ${esc(shortDate(tc.fecha))}</span>\nPara cambiarlo: <b>tc 3.46</b>` : `Aún no hay tipo de cambio. Escribe <b>tc 3.45</b>.`);
           break;
         case "tc":
           if (!(r.valor > 1 && r.valor < 20)) { say("Ese tipo de cambio se ve raro. Ejemplo: <b>tc 3.45</b>."); break; }
@@ -1170,7 +1209,7 @@ form { background: var(--surface); border-color: var(--line-2); }
           break;
         }
         case "alcanza": {
-          if (!r.monto) { say(`Dime cuánto, por ejemplo <b>¿me alcanza para 250?</b>\nHoy te alcanza para <b>${esc(fmt(diario()))}</b> diarios hasta fin de mes.`); break; }
+          if (!r.monto) { say(`Dime cuánto, por ejemplo <b>¿me alcanza para 250?</b>\n${cuentas.length && sel !== "all" ? (totals(sel).saldo > 0 ? `En ${esc(accName(sel))} te alcanza para <b>${esc(fmt(totals(sel).saldo / daysLeft(), accCur(sel)))}</b> diarios hasta fin de mes.` : `${esc(accName(sel))} está en rojo, así que por ahora no hay margen para gastar desde ahí.`) : ""}`); break; }
           const v = inSoles(r.monto, r.cur); if (v == null) { needTc(); break; }
           say(alcanzaHtml(v));
           break;
@@ -1220,7 +1259,7 @@ form { background: var(--surface); border-color: var(--line-2); }
           coin(r.sign > 0 ? "drop" : "pop");
           const g = next.find((x) => x.id === id);
           if (done) confetti();
-          say(`<div class="tk"><span class="tk-title">${r.sign > 0 ? "Apartado" : "Sacaste de la meta"}</span>${metaHtml(g)}${done ? `<div class="tk-quip">Meta cumplida</div>` : ""}<div class="tk-sub">Lo apartado no se gasta: no cuenta en tu “por día”.</div></div>`);
+          say(`<div class="tk"><span class="tk-title">${r.sign > 0 ? "Apartado" : "Sacaste de la meta"}</span>${metaHtml(g)}${done ? `<div class="tk-quip">¡Lo lograste!</div>` : ""}</div>`);
           break;
         }
         case "meta-del": {
@@ -1254,6 +1293,7 @@ form { background: var(--surface); border-color: var(--line-2); }
           await ensureDefault();
           const id = targetAccount(r.ids);
           if (!id) { echo(text, true); pendingText = text; askPick("¿De qué cuenta? (también puedes escribir “…con BCP”)"); break; }
+          if (sel !== id) { sel = id; filterCat = null; try { localStorage.setItem("caja-sel", id); } catch (e) {} }
           const ac = accCur(id);
           let monto = r.monto, orig = null;
           if (r.cur && r.cur !== ac) {
@@ -1269,7 +1309,8 @@ form { background: var(--surface); border-color: var(--line-2); }
           break;
         }
         case "tr": {
-          if (r.desde === r.hacia) { echo(text); say("Las dos cuentas son la misma."); break; }
+          if (r.desde === r.hacia) { echo(text); say("Las dos cuentas son la misma. Elige una cuenta de origen y otra de destino."); break; }
+          if (sel !== r.desde && sel !== r.hacia) { sel = r.desde; filterCat = null; try { localStorage.setItem("caja-sel", sel); } catch (e) {} }
           const cd = accCur(r.desde), ch = accCur(r.hacia);
           let monto = r.monto;
           if (r.cur && r.cur !== cd) { const v = convert(r.monto, r.cur, cd); if (v == null) { echo(text); needTc(); break; } monto = Math.round(v * 100) / 100; }
@@ -1284,6 +1325,7 @@ form { background: var(--surface); border-color: var(--line-2); }
         case "saldo": say(sel === "all" ? cuentasHtml() : `En <b>${esc(accName(sel))}</b> tienes <b>${esc(fmt(totals(sel).saldo, accCur(sel)))}</b>`); break;
         case "resumen": say(resumenHtml()); break;
         case "ayuda": say(AYUDA); break;
+        case "hola": say(r.gracias ? "¡De nada! Aquí estoy cuando registres algo." : `¡Hola${userName ? ", " + esc(userName) : ""}! Cuéntame qué gastaste o qué te entró, o toca un botón de abajo.`); setMood("big", 1500); break;
         case "undo": {
           const last = movs.filter((m) => sel === "all" || touches(m, sel)).sort((a, b) => b.ts - a.ts)[0];
           if (!last) { say("No hay nada que deshacer aquí."); break; }
@@ -1866,8 +1908,8 @@ form { background: var(--surface); border-color: var(--line-2); }
     } else {
       $("sheetTitle").textContent = "Tus recuentos";
       body.innerHTML = libros.map((l) => {
-        const t = l.id === activo ? totals("all").saldo : withLibro(l.id, () => totals("all").saldo);
-        return `<button class="lib-row${l.id === activo ? " on" : ""}" type="button" data-libro="${esc(l.id)}"><b>${esc(l.nombre)}</b><small>${esc(fmt(t))}</small></button>`;
+        const c = l.id === activo ? cuentas.length : withLibro(l.id, () => cuentas.length);
+        return `<button class="lib-row${l.id === activo ? " on" : ""}" type="button" data-libro="${esc(l.id)}"><b>${esc(l.nombre)}</b><small>${c} cuenta${c === 1 ? "" : "s"}</small></button>`;
       }).join("") + `<button class="lib-row add" type="button" data-action="nuevorecuento">+ Nuevo recuento</button>` +
         `<div class="sheet-note">Para renombrar o borrar uno, escribe por ejemplo “renombrar recuento Viaje a Cusco” o “borrar recuento Viaje”.</div>`;
     }
@@ -1897,7 +1939,8 @@ form { background: var(--surface); border-color: var(--line-2); }
     if (g) lines.push(`Tu meta ${g.nombre} va en ${Math.round((g.ahorrado / g.objetivo) * 100)}%. ¡Sigue así!`);
     lines.push("Desliza el resumen a los lados para cambiar de cuenta.", "Toca la gráfica para ver tu saldo día por día.", "Toca un comprobante para repetirlo o borrarlo.");
     const el = $("cajiSay");
-    el.textContent = lines[sayIdx++ % lines.length]; el.hidden = false;
+    const safe = $("app").classList.contains("privacy") ? ["Tus saldos están ocultos. Toca el ojo de arriba para verlos.", "Desliza el resumen a los lados para cambiar de cuenta.", "Toca un comprobante para repetirlo o borrarlo."] : lines;
+    el.textContent = safe[sayIdx++ % safe.length]; el.hidden = false;
     el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
     clearTimeout(sayT); sayT = setTimeout(() => { el.hidden = true; }, 4200);
     setMood("big", 1400); buzz(8);
