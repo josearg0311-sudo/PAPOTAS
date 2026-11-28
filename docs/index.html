@@ -1,0 +1,2584 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#131518">
+<meta name="description" content="CAJA: tus finanzas en soles y dólares, en un chat.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CAJA">
+<style>html, body { margin: 0; } :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); box-sizing: border-box; height: 100%; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
+<title>CAJA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap">
+<style>
+/* Layout: charcoal banking assistant — app bar, graphite balance board with yellow corner, flat account cards, chat of receipts, composer, bottom sheet */
+:root {
+  --bg: #0d0e10;
+  --surface: #16181b;
+  --raise: #1e2125;
+  --raise-2: #24272c;
+  --line: #2a2d33;
+  --line-2: #363a42;
+  --ink: #f1f2f4;
+  --muted: #9aa0aa;
+  --faint: #626873;
+  --accent: #ffcb47;
+  --accent-2: #f2b62a;
+  --accent-soft: rgb(255 203 71 / .12);
+  --accent-ink: #1c1505;
+  --gold: #ffc83d;
+  --sand: #ffc83d;
+  --green: #62d5a1;
+  --red: #ff7a86;
+  --amber: #ffc83d;
+  --c1: #ffcb47; --c2: #7cc4ff; --c3: #62d5a1; --c4: #ff9a7a; --c5: #b9a4ff; --c6: #e8d3a8;
+  --font-display: "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-mono: "Nunito", ui-rounded, system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; overflow: hidden; }
+button { font: inherit; color: inherit; }
+svg { display: block; }
+.aurora, .grain { display: none; }
+.app {
+  height: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; position: relative;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 10px; box-sizing: border-box;
+}
+.icon-btn { cursor: pointer; flex: none; width: 36px; height: 36px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); display: grid; place-items: center; transition: color .15s, border-color .15s, transform .1s; }
+.icon-btn svg { width: 19px; height: 19px; }
+.icon-btn:hover { color: var(--ink); border-color: var(--line-2); }
+.icon-btn:active { transform: scale(.95); }
+.icon-btn.on { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+
+/* app bar */
+.bar { display: flex; align-items: center; gap: 11px; }
+.avatar { width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center; background: var(--accent); }
+.avatar svg { width: 20px; height: 20px; overflow: visible; }
+.logo-box { fill: none; stroke: var(--accent-ink); stroke-width: 2.4; stroke-linejoin: round; }
+.logo-slot { stroke: var(--accent-ink); stroke-width: 2.4; stroke-linecap: round; }
+.coin { fill: var(--accent-ink); transform-box: view-box; }
+.row .mini .logo-box, .row .mini .logo-slot { stroke: var(--accent-ink); }
+.row .mini .coin { fill: var(--accent-ink); }
+.coin.drop { animation: drop .55s ease-in; }
+.coin.pop { animation: pop .55s ease-out; }
+@keyframes drop { 0% { transform: translateY(-2px); } 70% { transform: translateY(9px); opacity: 1; } 71% { opacity: 0; } 100% { opacity: 1; transform: none; } }
+@keyframes pop { 0% { transform: translateY(8px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.who { display: grid; line-height: 1.25; min-width: 0; }
+.who b { font-family: var(--font-display); font-weight: 800; letter-spacing: .03em; font-size: 15px; }
+.sync { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.sync::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--faint); }
+.sync.on::before { background: var(--green); }
+.sync.local::before { background: var(--accent); }
+.sync.err::before { background: var(--red); }
+.bar .icon-btn:first-of-type { margin-left: auto; }
+
+/* balance board */
+.summary { position: relative; overflow: hidden; background: linear-gradient(160deg, #2a2d33, #1d1f23 70%); border: 1px solid var(--line-2); border-radius: 18px; padding: 10px 12px 11px; display: grid; gap: 8px; }
+.summary::before { content: ""; position: absolute; right: -32px; top: -32px; width: 68px; height: 68px; background: var(--accent); transform: rotate(45deg); border-radius: 18px; pointer-events: none; }
+.summary > * { position: relative; }
+.sum-top { display: flex; align-items: center; gap: 8px; padding-right: 34px; }
+.book-pill { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-2); background: rgb(0 0 0 / .3); border-radius: 99px; padding: 4px 8px 4px 10px; font-size: 12.5px; font-weight: 700; max-width: 55%; }
+.book-pill::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--accent); flex: none; }
+.book-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.book-pill svg { width: 15px; height: 15px; color: var(--muted); flex: none; }
+.tc { cursor: pointer; margin-left: auto; border: 1px solid var(--line-2); background: rgb(0 0 0 / .25); color: var(--muted); border-radius: 8px; padding: 3px 7px; font: 11px var(--font-mono); }
+.tc.stale { border-color: color-mix(in srgb, var(--accent) 60%, transparent); color: var(--accent); }
+.collapse-btn { position: absolute; right: -6px; top: -7px; width: 28px; height: 28px; border-radius: 10px; background: transparent; color: var(--accent-ink); border: 0; }
+.collapse-btn:hover { color: var(--accent-ink); }
+.collapse-btn svg { width: 16px; height: 16px; transition: transform .2s; }
+.summary.collapsed .collapse-btn svg { transform: rotate(180deg); }
+.sum-main { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.eyebrow { font-size: 10.5px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; font-weight: 700; margin-bottom: 3px; }
+.big { font-family: var(--font-display); font-weight: 700; font-size: clamp(23px, 6.6vw, 28px); line-height: 1.05; font-variant-numeric: tabular-nums; letter-spacing: -.01em; overflow-wrap: anywhere; color: var(--ink); }
+.big .cur { font-size: .48em; margin-right: .25em; color: var(--accent); font-weight: 600; }
+.big.neg { color: var(--red); }
+.spark { width: 92px; height: 32px; flex: none; overflow: visible; }
+.spark .area { fill: url(#sparkFill); }
+.spark .lineS { fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; stroke-linecap: round; }
+.spark .end { fill: var(--accent); stroke: var(--raise-2); stroke-width: 1.5; }
+.spark .base { stroke: var(--line-2); stroke-dasharray: 2 3; }
+.daily { font-size: 11.5px; color: var(--muted); display: flex; gap: 12px; margin-top: -2px; font-variant-numeric: tabular-nums; overflow-x: auto; scrollbar-width: none; white-space: nowrap; }
+.daily span { color: var(--muted); }
+.daily b { color: var(--ink); font-weight: 700; }
+.daily .pace { color: var(--accent); }
+.sum-main { align-items: center; }
+
+/* account cards */
+.cards { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x mandatory; scroll-padding: 3px; padding: 3px; margin: -3px; }
+.acard { --cc: var(--c1); scroll-snap-align: start; flex: none; cursor: pointer; min-width: 112px; box-sizing: border-box; border-radius: 11px; padding: 7px 10px 6px; text-align: left; display: grid; gap: 3px;
+  background: rgb(0 0 0 / .28); border: 1px solid var(--line-2); transition: border-color .15s, transform .12s; }
+.acard:hover { transform: translateY(-1px); }
+.acard[aria-pressed="true"] { border-color: color-mix(in srgb, var(--cc) 75%, transparent); background: color-mix(in srgb, var(--cc) 10%, rgb(0 0 0 / .28)); }
+.ac-top { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.ac-top::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--cc); flex: none; }
+.ac-top b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-top em { margin-left: auto; font: normal 600 9.5px var(--font-mono); color: var(--c2); border: 1px solid color-mix(in srgb, var(--c2) 45%, transparent); border-radius: 4px; padding: 0 4px; }
+.ac-bal { font: 600 13px var(--font-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+.ac-bal.neg { color: var(--red); }
+.ac-share { height: 2px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.ac-share i { display: block; height: 100%; background: var(--cc); }
+.acard.add { border-style: dashed; border-color: rgb(255 203 71 / .4); color: var(--accent); place-content: center; text-align: center; min-width: 78px; font-size: 12px; font-weight: 700; background: transparent; }
+.goals { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.goal { flex: none; cursor: pointer; border: 1px solid var(--line-2); border-radius: 9px; padding: 3px 9px; font-size: 11.5px; font-weight: 600; display: inline-flex; gap: 8px; align-items: center; color: var(--ink);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, transparent) var(--p), rgb(0 0 0 / .25) var(--p)); }
+.goal .ring { font: 600 11px var(--font-mono); color: var(--accent); }
+.summary.collapsed .cards, .summary.collapsed .goals, .summary.collapsed .daily, .summary.collapsed .spark { display: none; }
+.summary.collapsed { gap: 8px; }
+
+/* chat */
+.chat { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; padding: 4px 1px 10px; scroll-behavior: smooth; }
+.row { display: flex; gap: 8px; align-items: flex-end; }
+.row.me { justify-content: flex-end; }
+.row .mini { width: 24px; height: 24px; border-radius: 8px; flex: none; display: grid; place-items: center; background: var(--accent); }
+.row .mini svg { width: 14px; height: 14px; }
+.row .gap { width: 24px; flex: none; }
+.msg { max-width: min(86%, 450px); line-height: 1.5; overflow-wrap: anywhere; min-width: 0; }
+.msg .meta { display: block; font: 10px var(--font-mono); color: var(--faint); margin-top: 6px; text-align: right; }
+.msg.me { background: #272a30; border: 1px solid var(--line-2); color: var(--ink); padding: 9px 13px; border-radius: 16px 16px 4px 16px; white-space: pre-wrap; }
+.msg.me .meta { color: var(--muted); }
+.msg.bot { background: var(--surface); border: 1px solid var(--line); padding: 12px 14px; border-radius: 16px 16px 16px 4px; white-space: pre-wrap; }
+.msg.bot b { color: #fff; }
+.enter { animation: enter .28s cubic-bezier(.2, .8, .3, 1) both; }
+@keyframes enter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.typing { display: inline-flex; gap: 4px; padding: 4px 2px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1s infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes blink { 0%, 100% { opacity: .25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+.day { align-self: center; font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 3px 11px; }
+
+/* option buttons */
+.opts { display: grid; gap: 7px; margin-top: 11px; white-space: normal; }
+.opts.grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.opts.amounts { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); }
+.opts.row { grid-template-columns: 1fr 1fr; }
+.opts.row .opt:nth-child(3) { grid-column: 1 / -1; background: transparent; border-style: dashed; color: var(--muted); }
+.opts.chips { display: flex; flex-wrap: wrap; }
+.opts.cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opt { cursor: pointer; border: 1px solid var(--line-2); background: var(--raise); border-radius: 11px; padding: 9px 11px; font-size: 13px; font-weight: 600; text-align: left; display: grid; gap: 2px; align-content: center; min-height: 40px; transition: border-color .15s, background .15s, transform .1s; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt:active:not(:disabled) { transform: scale(.97); }
+.opt small { font: 11px var(--font-mono); color: var(--muted); font-weight: 400; }
+.opt.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 800; text-align: center; }
+.opts.row .opt, .opts.amounts .opt { text-align: center; }
+.opts.amounts .opt { font-family: var(--font-mono); font-weight: 500; }
+.opts.chips .opt { border-radius: 99px; padding: 7px 13px; min-height: 0; }
+.opts.grid .opt { text-align: center; justify-items: center; padding: 12px 6px; gap: 7px; }
+.opt .ic { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; color: var(--muted); background: var(--surface); border: 1px solid var(--line-2); }
+.opt[data-action="ingreso"] .ic { color: var(--green); border-color: rgb(98 213 161 / .3); background: rgb(98 213 161 / .08); }
+.opt[data-action="transferir"] .ic, .opt[data-action="recuentos"] .ic, .opt[data-action="tc"] .ic { color: var(--c2); border-color: rgb(124 196 255 / .3); background: rgb(124 196 255 / .08); }
+.opt[data-action="metas"] .ic, .opt[data-action="nuevameta"] .ic { color: var(--c5); border-color: rgb(185 164 255 / .3); background: rgb(185 164 255 / .08); }
+.opt .ic svg { width: 19px; height: 19px; }
+.opt[data-action="gasto"] .ic { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.opts.stale .opt { opacity: .4; cursor: default; }
+.opts.stale .opt.chosen { opacity: 1; border-color: var(--accent); }
+
+/* receipts and info cards */
+.tk { display: grid; gap: 5px; white-space: normal; font-variant-numeric: tabular-nums; }
+.tk-row { display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }
+.amt { font: 500 14px var(--font-mono); white-space: nowrap; }
+.tk-sub { font-size: 12px; color: var(--muted); }
+.tk-hr { border-top: 1px dashed var(--line-2); margin: 6px 0 3px; }
+.tk-foot { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; color: var(--muted); }
+.tk-foot b { color: var(--ink); font: 500 12.5px var(--font-mono); }
+.tk-title { font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: .01em; }
+.tk-quip { font-size: 12.5px; color: var(--muted); }
+.bar-l { height: 5px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar-l i { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
+.bar-l.green i { background: var(--green); }
+.bar-l.warn i { background: #ff9f43; }
+.bar-l.over i { background: var(--red); }
+.cat-line { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 13px; }
+.cat-line .bar-l { grid-column: 1 / -1; }
+.out { color: var(--red); }
+.in { color: var(--green); }
+.rc { display: grid; gap: 9px; white-space: normal; min-width: 236px; }
+.rc-head { display: grid; grid-template-columns: auto 1fr auto; gap: 11px; align-items: center; }
+.rc-ic { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; font-size: 18px; background: var(--raise); border: 1px solid var(--line); }
+.rc:has(.rc-amt.out) .rc-ic { background: rgb(255 122 134 / .1); border-color: rgb(255 122 134 / .22); }
+.rc:has(.rc-amt.in) .rc-ic { background: rgb(98 213 161 / .1); border-color: rgb(98 213 161 / .22); }
+.rc-t { display: grid; min-width: 0; }
+.rc-t b { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rc-t small { font-size: 12px; color: var(--muted); }
+.rc-amt { font: 600 15px var(--font-mono); white-space: nowrap; }
+.rc-foot { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--muted); border-top: 1px dashed var(--line-2); padding-top: 9px; }
+.rc-foot .ok { display: inline-flex; align-items: center; gap: 5px; color: var(--green); font-family: var(--font-mono); }
+.rc-foot .ok svg { width: 14px; height: 14px; }
+.rc-foot .ok.fresh path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: draw .5s .15s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.rc-foot .sal { margin-left: auto; }
+.rc-foot .sal b { color: var(--ink); font: 500 12px var(--font-mono); }
+.rc-more { cursor: pointer; border: 0; background: transparent; color: var(--faint); width: 26px; height: 22px; border-radius: 7px; display: grid; place-items: center; }
+.rc-more:hover { color: var(--ink); background: var(--raise); }
+.rc-more svg { width: 16px; height: 16px; }
+.cf-amt { font: 800 24px var(--font-display); margin: 2px 0 6px; }
+.dl { cursor: pointer; margin-top: 10px; border: 0; border-radius: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 800; font-size: 13.5px; padding: 11px 12px; display: inline-flex; gap: 8px; align-items: center; justify-content: center; }
+.dl svg { width: 16px; height: 16px; }
+.msg.bot .pick { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; white-space: normal; }
+
+/* quick actions + composer */
+.chips { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 1px; }
+.chip { flex: none; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 99px; padding: 6px 13px 6px 10px; transition: border-color .15s; }
+.chip svg { width: 15px; height: 15px; color: var(--muted); }
+.chip[data-action="gasto"] svg { color: var(--accent); } .chip[data-action="ingreso"] svg { color: var(--green); } .chip[data-action="transferir"] svg { color: var(--c2); }
+.chip:hover { border-color: var(--accent); }
+.chip.cancel svg { color: var(--red); }
+form { display: flex; gap: 8px; align-items: center; padding: 6px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
+form .icon-btn { width: 38px; height: 38px; border-radius: 12px; background: var(--raise); border-color: transparent; }
+#entrada { flex: 1; min-width: 0; font: inherit; font-size: 16px; color: var(--ink); background: transparent; border: 0; padding: 9px 4px; }
+#entrada:focus { outline: none; }
+form:focus-within { border-color: var(--line-2); }
+#entrada::placeholder { color: var(--faint); }
+.send { cursor: pointer; border: 0; border-radius: 12px; width: 44px; height: 40px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; transition: transform .1s; }
+.send:active { transform: scale(.94); }
+.send svg { width: 18px; height: 18px; }
+#plus svg { transition: transform .2s; }
+#plus.on { color: var(--accent); }
+#plus.on svg { transform: rotate(45deg); }
+#mic.on { color: var(--red); border-color: var(--red); animation: pulse 1.2s infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--red) 22%, transparent); } }
+
+/* bottom sheet */
+.scrim { position: fixed; inset: 0; background: rgb(0 0 0 / .6); z-index: 20; opacity: 0; transition: opacity .2s; }
+.scrim.open { opacity: 1; }
+.sheet { position: fixed; z-index: 21; left: 50%; bottom: 0; width: min(640px, 100%); transform: translate(-50%, 100%); transition: transform .26s cubic-bezier(.2, .8, .3, 1); box-sizing: border-box;
+  background: var(--surface); border: 1px solid var(--line-2); border-bottom: 0; border-radius: 24px 24px 0 0;
+  padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(18px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); max-height: 80%; overflow-y: auto; }
+.sheet.open { transform: translate(-50%, 0); }
+.grab { width: 42px; height: 4px; border-radius: 99px; background: var(--line-2); margin: 0 auto 14px; }
+.sheet h3 { margin: 0 0 14px; font: 600 15px var(--font-display); }
+.sheet .opts { margin-top: 0; }
+.lib-row { cursor: pointer; width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; border: 1px solid var(--line-2); background: var(--raise); border-radius: 13px; padding: 13px 14px; margin-bottom: 7px; }
+.lib-row::before { content: ""; width: 9px; height: 9px; border-radius: 2px; background: var(--faint); }
+.lib-row b { font-weight: 700; }
+.lib-row small { margin-left: auto; font: 12px var(--font-mono); color: var(--muted); }
+.lib-row.on { border-color: var(--accent); }
+.lib-row.on::before { background: var(--accent); }
+.lib-row.add { color: var(--accent); border-style: dashed; background: transparent; }
+.lib-row.add::before { display: none; }
+.sheet-note { font-size: 12px; color: var(--faint); margin-top: 10px; }
+
+
+/* each account owns a color: the board, its card and its tags take it */
+.summary { --acct: var(--accent); background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--acct) 16%, transparent), transparent 55%), linear-gradient(160deg, #26292e, #1b1d21 75%); border-color: color-mix(in srgb, var(--acct) 28%, var(--line-2)); transition: border-color .3s; }
+.summary::before { background: var(--acct); transition: background .3s; }
+.big .cur { color: var(--acct); }
+.daily b, .daily .pace { color: var(--ink); }
+.daily span:first-child b { color: var(--acct); }
+.spark .lineS { stroke: var(--acct); }
+.spark .end { fill: var(--acct); }
+.spark .area { fill: color-mix(in srgb, var(--acct) 16%, transparent); }
+.eyebrow { display: flex; align-items: center; gap: 6px; color: var(--ink); letter-spacing: .06em; }
+.eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--acct); }
+.book-pill::before { background: var(--accent); }
+.acard { background: color-mix(in srgb, var(--cc) 9%, rgb(0 0 0 / .3)); border-color: color-mix(in srgb, var(--cc) 30%, transparent); min-width: 118px; position: relative; overflow: hidden; }
+.acard::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--cc); }
+.acard[aria-pressed="true"] { border-color: var(--cc); background: color-mix(in srgb, var(--cc) 20%, rgb(0 0 0 / .3)); box-shadow: 0 6px 16px -10px var(--cc); }
+.acard.add::after { display: none; }
+.ac-top { color: var(--ink); }
+.ac-top::before { display: none; }
+.ac-sub { font-size: 10px; color: var(--muted); letter-spacing: .04em; }
+.acct-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--cc); background: color-mix(in srgb, var(--cc) 12%, transparent); border: 1px solid color-mix(in srgb, var(--cc) 30%, transparent); border-radius: 6px; padding: 0 6px; margin-left: 4px; vertical-align: 1px; }
+.acct-tag::before { content: ""; width: 6px; height: 6px; border-radius: 2px; background: var(--cc); }
+.tk-foot span .acct-tag { margin-left: 0; font-size: 12px; }
+.rc-t small { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; }
+.msg.bot { background: linear-gradient(180deg, #1a1c20, #16181b); }
+.chat .day { background: transparent; border: 0; color: var(--faint); text-transform: capitalize; }
+.chat .day::before, .chat .day::after { content: ""; display: inline-block; width: 28px; height: 1px; background: var(--line-2); vertical-align: middle; margin: 0 8px; }
+form { box-shadow: 0 -10px 30px -18px rgb(0 0 0 / .9); }
+
+/* ---------- soul: mascot, greeting, texture, stamps, confetti ---------- */
+body { background:
+  radial-gradient(80% 50% at 50% -10%, rgb(255 203 71 / .09), transparent 70%),
+  radial-gradient(rgb(255 255 255 / .045) 1px, transparent 1.3px) 0 0 / 18px 18px,
+  var(--bg); }
+.caji-wrap { width: 46px; height: 46px; flex: none; display: grid; place-items: center; position: relative; }
+.caji-wrap::after { content: ""; position: absolute; inset: auto 6px 0; height: 6px; border-radius: 50%; background: rgb(0 0 0 / .45); filter: blur(2px); }
+.caji { width: 44px; height: 44px; overflow: visible; position: relative; z-index: 1; }
+.bar .caji { animation: bob 3.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-2px); } }
+.caji .c-body { fill: var(--accent); stroke: #1c1505; stroke-width: 2.2; }
+.caji .c-slot { fill: #1c1505; }
+.caji .coin { fill: #fff3cf; stroke: #1c1505; stroke-width: 1.8; }
+.caji .c-eyes { fill: #1c1505; transform-box: fill-box; transform-origin: center; }
+.caji .c-eyes.blink { animation: blinkEye .22s ease-in-out; }
+@keyframes blinkEye { 50% { transform: scaleY(.1); } }
+.caji .c-happy, .caji .c-sleep { fill: none; stroke: #1c1505; stroke-width: 2.2; stroke-linecap: round; display: none; }
+.caji .c-cheek { fill: #ff8f6b; opacity: .45; }
+.caji .c-m { display: none; fill: none; stroke: #1c1505; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.caji .c-big { fill: #1c1505; } .caji .c-o { fill: #1c1505; stroke: none; }
+.caji .c-brows { display: none; fill: none; stroke: #1c1505; stroke-width: 2; stroke-linecap: round; }
+.caji .c-z { display: none; font: 800 9px var(--font-display); fill: var(--muted); }
+.caji.smile .c-smile, .caji.big .c-big, .caji.worry .c-worry, .caji.o .c-o, .caji.sleep .c-smile { display: block; }
+.caji.big .c-eyes, .caji.sleep .c-eyes { display: none; }
+.caji.big .c-happy { display: block; }
+.caji.sleep .c-sleep, .caji.sleep .c-z { display: block; }
+.caji.worry .c-brows { display: block; }
+.caji.worry .c-cheek { opacity: 0; }
+.bar .caji.big { animation: hop .5s ease-out 2; }
+@keyframes hop { 40% { transform: translateY(-6px) rotate(-4deg); } }
+.row .mini { background: transparent; width: 26px; height: 26px; }
+.row .mini .caji { width: 26px; height: 26px; }
+.who b { font: 800 17px var(--font-display); letter-spacing: -.01em; }
+.insight { font-size: 12.5px; line-height: 1.4; color: var(--ink); background: rgb(0 0 0 / .28); border: 1px solid var(--line); border-left: 3px solid var(--acct); border-radius: 10px; padding: 7px 10px; }
+.summary.collapsed .insight { display: none; }
+.big { font-family: var(--font-display); font-weight: 800; letter-spacing: -.03em; font-size: clamp(26px, 7.6vw, 32px); }
+.tk-title, .cf-amt, .sheet h3 { font-family: var(--font-display); }
+.cf-amt { font-weight: 800; letter-spacing: -.02em; }
+.stamp { display: inline-block; white-space: nowrap; flex: none; font: 800 10px var(--font-display); letter-spacing: .1em; text-transform: uppercase; color: var(--cc); border: 1.6px solid var(--cc); border-radius: 5px; padding: 2px 6px 1px; transform: rotate(-7deg); opacity: .85; }
+.stamp.fresh { animation: stampIn .45s cubic-bezier(.2, 1.6, .4, 1) both; }
+@keyframes stampIn { from { transform: rotate(-16deg) scale(1.9); opacity: 0; } to { transform: rotate(-7deg) scale(1); opacity: .85; } }
+.rc-foot .op { font: 11px var(--font-mono); color: var(--faint); }
+.rc-foot .op, .rc-foot .sal { white-space: nowrap; }
+.rc-foot { flex-wrap: wrap; row-gap: 6px; }
+.confetti { position: fixed; z-index: 30; pointer-events: none; width: 0; height: 0; }
+.confetti i { position: absolute; width: 7px; height: 11px; border-radius: 2px; animation: burst 1.2s cubic-bezier(.15, .7, .3, 1) forwards; }
+.confetti i:nth-child(3n) { width: 8px; height: 8px; border-radius: 50%; }
+@keyframes burst { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) rotate(var(--r)); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .bar .caji, .caji .c-eyes.blink, .stamp.fresh { animation: none; } }
+.privacy .big, .privacy .ac-bal, .privacy .amt, .privacy .rc-amt, .privacy .tk-foot b, .privacy .rc-foot .sal b, .privacy .lib-row small, .privacy .opt small, .privacy .daily b, .privacy .cf-amt { filter: blur(7px); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .enter, .coin.drop, .coin.pop, .typing i, #mic.on, .rc-foot .ok.fresh path { animation: none; stroke-dashoffset: 0; } .sheet, .scrim { transition: none; } }
+@media (max-width: 380px) { .opts.grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .spark { width: 78px; } }
+
+/* ---------- organic pass: rounded type, soft shapes, no machine details ---------- */
+body { font-family: var(--font-body); font-size: 15.5px; background:
+  radial-gradient(70% 45% at 85% -5%, rgb(255 203 71 / .10), transparent 70%),
+  radial-gradient(60% 40% at -10% 30%, rgb(124 196 255 / .06), transparent 70%),
+  radial-gradient(70% 50% at 50% 110%, rgb(98 213 161 / .05), transparent 70%),
+  var(--bg); }
+.big, .amt, .rc-amt, .ac-bal, .tk-foot b, .rc-foot .sal b, .daily, .cf-amt, .tc, .opt small, .lib-row small, .msg .meta { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
+.big { font-weight: 900; letter-spacing: -.02em; font-size: clamp(28px, 8vw, 34px); }
+.big .cur { font-weight: 800; }
+.who b { font-weight: 900; font-size: 18px; letter-spacing: 0; }
+.eyebrow { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 700; color: var(--muted); }
+.eyebrow::before { width: 9px; height: 9px; border-radius: 50%; }
+.msg .meta { font-size: 11px; font-weight: 600; }
+.summary { border-radius: 30px; padding: 14px 16px 15px; border-width: 1px; }
+.summary::before { right: -40px; top: -46px; width: 96px; height: 88px; transform: rotate(-18deg); border-radius: 58% 42% 55% 45% / 52% 60% 40% 48%; opacity: .9; }
+.collapse-btn { right: -4px; top: -4px; border-radius: 50%; }
+.book-pill { border-radius: 99px; font-weight: 800; }
+.book-pill::before, .ac-top::before, .lib-row::before { border-radius: 50%; }
+.tc { border-radius: 99px; font-size: 12px; font-weight: 700; padding: 3px 10px; }
+.daily { gap: 4px 14px; font-size: 13px; font-weight: 600; flex-wrap: wrap; overflow: visible; white-space: normal; }
+.daily span { white-space: nowrap; }
+.insight { border: 0; border-radius: 18px; background: color-mix(in srgb, var(--acct) 9%, rgb(0 0 0 / .25)); padding: 9px 13px; font-weight: 600; position: relative; }
+.insight::before { content: "💬"; margin-right: 6px; }
+.acard { border-radius: 20px; padding: 9px 13px 8px; min-width: 124px; }
+.acard::after { display: none; }
+.acard .ac-top b::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--cc); margin-right: 6px; vertical-align: 1px; }
+.ac-bal { font-size: 15px; font-weight: 800; }
+.ac-sub { font-size: 11px; }
+.acard.add { border-radius: 20px; }
+.goal { border-radius: 99px; }
+.msg.me { border-radius: 22px 22px 6px 22px; border: 0; background: #2b2e35; padding: 10px 15px; }
+.msg.bot { border-radius: 22px 22px 22px 6px; border: 0; background: #1b1d21; padding: 13px 15px; }
+.opt { border-radius: 16px; font-weight: 700; }
+.opts.grid .opt, .sheet .opt { border-radius: 20px; }
+.opt .ic { border-radius: 50%; }
+.opts.amounts .opt { font-family: var(--font-body); font-weight: 800; border-radius: 99px; }
+.opts.row .opt:nth-child(3) { border-radius: 99px; }
+.tk-hr, .rc-foot { border-top: 0; }
+.tk-hr { height: 1px; background: linear-gradient(90deg, transparent, var(--line-2), transparent); margin: 6px 0 4px; }
+.rc { gap: 10px; }
+.rc-ic { border-radius: 50%; border: 0; width: 42px; height: 42px; }
+.rc-foot { padding-top: 2px; }
+.stamp { font-family: var(--font-body); font-weight: 900; letter-spacing: .06em; border-radius: 99px; padding: 2px 9px; transform: rotate(-4deg); font-size: 10.5px; }
+@keyframes stampIn { from { transform: rotate(-12deg) scale(1.8); opacity: 0; } to { transform: rotate(-4deg) scale(1); opacity: .85; } }
+.acct-tag { border-radius: 99px; padding: 0 8px; font-weight: 800; }
+.acct-tag::before { border-radius: 50%; }
+.day, .chat .day { text-transform: none; font-weight: 700; }
+.chat .day::before, .chat .day::after { background: linear-gradient(90deg, transparent, var(--line-2)); }
+.chat .day::after { background: linear-gradient(90deg, var(--line-2), transparent); }
+.chip { border-radius: 99px; font-weight: 700; padding: 7px 14px 7px 11px; }
+form { border-radius: 26px; padding: 6px 6px 6px 8px; }
+form .icon-btn, .send, .icon-btn { border-radius: 50%; }
+.send { width: 44px; height: 44px; }
+.sheet { border-radius: 32px 32px 0 0; }
+.lib-row { border-radius: 20px; }
+.tk-title { font-weight: 900; font-size: 15px; }
+.cf-amt { font-weight: 900; }
+.bar .caji { animation: sway 4.5s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes sway { 25% { transform: rotate(-4deg) translateY(-1px); } 75% { transform: rotate(4deg) translateY(-1px); } }
+.caji .c-body { stroke-width: 2; }
+@media (prefers-reduced-motion: reduce) { .bar .caji { animation: none; } }
+
+/* ---------- lighter graphite (less black) ---------- */
+:root {
+  --bg: #1c1e22;
+  --surface: #25282d;
+  --raise: #2d3036;
+  --raise-2: #33373e;
+  --line: #3a3e46;
+  --line-2: #474c55;
+  --muted: #a6acb6;
+  --faint: #737a86;
+}
+body { background:
+  radial-gradient(70% 45% at 85% -5%, rgb(255 203 71 / .12), transparent 70%),
+  radial-gradient(60% 40% at -10% 30%, rgb(124 196 255 / .07), transparent 70%),
+  radial-gradient(70% 50% at 50% 110%, rgb(98 213 161 / .06), transparent 70%),
+  var(--bg); }
+.summary { background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--acct) 18%, transparent), transparent 55%), linear-gradient(160deg, #34383f, #2a2d33 75%); }
+.msg.bot { background: var(--surface); }
+.msg.me { background: #3b3f47; }
+.acard { background: color-mix(in srgb, var(--cc) 10%, rgb(0 0 0 / .18)); }
+.acard[aria-pressed="true"] { background: color-mix(in srgb, var(--cc) 22%, rgb(0 0 0 / .18)); }
+.insight { background: color-mix(in srgb, var(--acct) 10%, rgb(0 0 0 / .16)); }
+.book-pill, .tc { background: rgb(0 0 0 / .18); }
+.opt { background: var(--raise); }
+form { background: var(--surface); box-shadow: 0 -10px 30px -20px rgb(0 0 0 / .6); }
+.caji-wrap::after { background: rgb(0 0 0 / .3); }
+
+/* ---------- small phones ---------- */
+@media (max-width: 370px) {
+  .who b { font-size: 16px; }
+  .big { font-size: 26px; }
+  .spark { width: 70px; }
+  .acard { min-width: 112px; }
+  .chips .chip { font-size: 12px; }
+}
+
+/* ---------- tablets ---------- */
+@media (min-width: 640px) {
+  .app { max-width: 760px; padding-block: 16px; }
+  .msg { max-width: min(78%, 520px); }
+}
+
+/* ---------- laptops and desktops: accounts on the left, chat on the right ---------- */
+@media (min-width: 960px) {
+  body { overflow: hidden; }
+  .app {
+    max-width: 1220px; display: grid; column-gap: 28px; row-gap: 12px; padding-block: 22px;
+    grid-template-columns: minmax(330px, 380px) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "bar chat" "sum chat" "sum chips" "sum form";
+  }
+  .bar { grid-area: bar; align-self: start; }
+  .summary { grid-area: sum; align-self: stretch; overflow-y: auto; scrollbar-width: none; align-content: start; gap: 14px; padding: 18px 18px 20px; }
+  .chat { grid-area: chat; background: color-mix(in srgb, var(--surface) 55%, transparent); border: 1px solid var(--line); border-radius: 30px; padding: 18px 22px 14px; }
+  .chips { grid-area: chips; }
+  form { grid-area: form; }
+  /* the side panel always shows everything */
+  .summary.collapsed .cards, .summary.collapsed .goals, .summary.collapsed .daily, .summary.collapsed .spark, .summary.collapsed .insight { display: flex; }
+  .summary.collapsed .insight { display: block; }
+  .collapse-btn { display: none; }
+  .big { font-size: 40px; }
+  .spark { width: 120px; height: 44px; }
+  .cards { flex-direction: column; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
+  .acard { min-width: 0; width: 100%; grid-template-columns: 1fr auto; grid-template-areas: "top bal" "sub bal"; align-items: center; padding: 12px 16px; }
+  .acard .ac-top { grid-area: top; font-size: 14px; }
+  .acard .ac-bal { grid-area: bal; font-size: 17px; }
+  .acard .ac-sub { grid-area: sub; }
+  .acard.add { width: 100%; min-height: 46px; display: grid; place-content: center; grid-template-areas: none; grid-template-columns: none; }
+  .goals { flex-wrap: wrap; overflow: visible; }
+  .msg { max-width: min(70%, 560px); }
+  .opts.grid { grid-template-columns: repeat(3, minmax(0, 160px)); }
+  /* menus open as a centered window */
+  .sheet { top: 50%; bottom: auto; width: min(560px, 92vw); border: 1px solid var(--line-2); border-radius: 28px; transform: translate(-50%, -46%) scale(.97); opacity: 0; transition: transform .22s, opacity .22s; padding: 18px 20px 22px; }
+  .sheet.open { transform: translate(-50%, -50%); opacity: 1; }
+  .grab { display: none; }
+}
+@media (min-width: 1280px) {
+  .app { grid-template-columns: 400px minmax(0, 1fr); }
+}
+
+.welcome-insight { display: none; margin-top: 10px; font-size: 13.5px; font-weight: 600; color: var(--ink); background: color-mix(in srgb, var(--acct, var(--accent)) 10%, rgb(0 0 0 / .16)); border-radius: 16px; padding: 9px 12px; white-space: normal; }
+@media (max-width: 639px) { .summary .insight { display: none !important; } .welcome-insight { display: block; } }
+
+/* ---------- phone: compact summary ---------- */
+@media (max-width: 639px) {
+  .summary { padding: 9px 12px 10px; gap: 6px; border-radius: 22px; }
+  .summary::before { right: -34px; top: -40px; width: 74px; height: 68px; }
+  .sum-top { padding-right: 28px; gap: 6px; }
+  .collapse-btn { width: 26px; height: 26px; right: -6px; top: -5px; }
+  .book-pill { padding: 3px 8px 3px 9px; font-size: 12px; }
+  .tc { font-size: 10.5px; padding: 2px 7px; }
+  .eyebrow { font-size: 12px; margin-bottom: 0; }
+  .big { font-size: 26px; }
+  .spark { width: 70px; height: 26px; }
+  .daily { font-size: 12px; gap: 2px 10px; margin-top: -4px; }
+  .daily span:nth-child(3) { display: none; }
+  .cards { gap: 6px; padding: 2px; margin: -2px; }
+  .acard { min-width: 0; display: flex; align-items: center; gap: 8px; padding: 6px 11px; border-radius: 99px; }
+  .acard .ac-sub { display: none; }
+  .acard .ac-top { font-size: 12px; }
+  .acard .ac-top em { display: none; }
+  .acard .ac-bal { font-size: 12.5px; font-weight: 800; }
+  .acard.add { min-width: 0; padding: 6px 12px; border-radius: 99px; font-size: 12px; }
+  .goals { display: none; }
+}
+
+.sync { cursor: default; }
+body:not(.in-claude) .sync { cursor: pointer; }
+.code-box { font: 800 20px var(--font-body); letter-spacing: .08em; text-align: center; padding: 14px; border-radius: 18px; background: var(--raise); border: 1px dashed var(--accent); color: var(--accent); margin: 10px 0 12px; user-select: all; overflow-wrap: anywhere; }
+.code-in { display: flex; gap: 8px; }
+.code-in input { flex: 1; min-width: 0; font: 700 15px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--raise); border: 1px solid var(--line-2); border-radius: 16px; padding: 10px 12px; }
+.code-in .opt { flex: none; }
+.code-in #keyIn { text-transform: none; letter-spacing: 0; }
+.steps { margin: 12px 0 4px; padding-left: 20px; color: var(--ink); font-size: 13.5px; line-height: 1.55; display: grid; gap: 4px; }
+.code-box.small { font-size: 12px; letter-spacing: 0; text-align: left; max-height: 96px; overflow-y: auto; }
+
+/* ---------- logo v2 ---------- */
+.caji .c-body { fill: url(#cjBody); stroke: #2a1d04; stroke-width: 1.8; }
+.caji .c-lid { fill: url(#cjLid); stroke: #2a1d04; stroke-width: 1.8; }
+.caji .c-slot { fill: #2a1d04; }
+.caji .c-glare { fill: none; stroke: #fff; stroke-width: 1.8; stroke-linecap: round; opacity: .45; }
+.caji .coin { fill: url(#cjCoin); stroke: #8a5a00; stroke-width: 1.2; }
+.caji .coin-ring { fill: none; stroke: #b07a0c; stroke-width: .9; opacity: .8; transform-box: view-box; }
+.caji .c-eyes { fill: #2a1d04; }
+.caji .c-eyes .c-spark { fill: #fff; }
+.caji .c-cheek { fill: #ff8a6b; opacity: .5; }
+.caji.hopnow { animation: hop .55s cubic-bezier(.3, 1.6, .5, 1) !important; }
+.caji-wrap { cursor: pointer; border: 0; background: transparent; padding: 0; border-radius: 16px; width: 50px; height: 50px; }
+.caji-wrap:active .caji { transform: scale(.92); }
+.bar { position: relative; }
+.caji-say { position: absolute; left: 4px; top: 58px; z-index: 15; max-width: min(290px, 82vw); font-size: 13.5px; font-weight: 700; line-height: 1.4; color: #1c1505; background: var(--accent); border-radius: 6px 18px 18px 18px; padding: 9px 13px; box-shadow: 0 10px 26px -10px rgb(0 0 0 / .6); }
+.caji-say.pop { animation: sayIn .3s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes sayIn { from { opacity: 0; transform: translateY(-6px) scale(.9); } }
+.who .sub { display: inline-flex; align-items: center; gap: 8px; }
+.who .brand { font: 900 11px var(--font-body); letter-spacing: .16em; color: var(--accent); }
+
+/* ---------- interactive bits ---------- */
+#saldo { cursor: pointer; user-select: none; }
+#spark { cursor: pointer; }
+.sum-main.slide-l { animation: slideL .32s ease-out; } .sum-main.slide-r { animation: slideR .32s ease-out; }
+@keyframes slideL { from { opacity: 0; transform: translateX(26px); } }
+@keyframes slideR { from { opacity: 0; transform: translateX(-26px); } }
+.rc[data-rc] { cursor: pointer; }
+.rc-more-info { display: grid; gap: 6px; padding-top: 8px; margin-top: 2px; border-top: 1px solid var(--line); animation: enter .25s ease-out; }
+.rc-more-info .tk-foot b { font-weight: 700; text-align: right; }
+.rc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 4px; }
+.rc-actions .opt { text-align: center; min-height: 36px; padding: 7px 10px; border-radius: 99px; }
+.opt.danger { color: var(--red); border-color: rgb(255 122 134 / .35); }
+.chip.install { border-color: var(--accent); color: var(--accent); }
+.chip.filter { color: var(--accent); border-color: rgb(255 203 71 / .4); }
+.chart { position: relative; margin: 4px 0 6px; padding-top: 30px; }
+.chart svg { width: 100%; height: 160px; display: block; touch-action: none; cursor: crosshair; }
+.chart .c-area { fill: color-mix(in srgb, var(--acct) 16%, transparent); }
+.chart .c-line { fill: none; stroke: var(--acct); stroke-width: 2.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.chart .c-cursor { stroke: var(--line-2); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 3 3; }
+.chart .c-dot { fill: var(--acct); stroke: var(--surface); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.chart-tip { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; font-size: 12.5px; font-weight: 800; color: #1c1505; background: var(--acct); border-radius: 99px; padding: 4px 11px; }
+.chart-ax { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--faint); margin-top: 4px; }
+.sheet-h4 { margin: 16px 0 8px; font: 800 14px var(--font-body); }
+.cat-pick { position: relative; overflow: hidden; width: 100%; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; border: 1px solid var(--line-2); background: var(--raise); border-radius: 16px; padding: 10px 13px; margin-bottom: 6px; font-weight: 700; font-size: 13.5px; text-align: left; }
+.cat-pick span, .cat-pick b { position: relative; z-index: 1; }
+.cat-pick i { position: absolute; left: 0; top: 0; bottom: 0; background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.cat-pick:hover { border-color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { .caji.hopnow, .caji-say.pop, .sum-main.slide-l, .sum-main.slide-r, .rc-more-info { animation: none !important; } }
+
+/* ---------- contrast pass ---------- */
+:root {
+  --bg: #16181b;
+  --surface: #24272d;
+  --raise: #2f333a;
+  --raise-2: #363a42;
+  --line: #3b4049;
+  --line-2: #4b515b;
+  --ink: #f5f6f8;
+  --muted: #b9bfc9;
+  --faint: #8d94a1;
+  --green: #74e3b1;
+  --red: #ff8c97;
+  --c2: #8fd0ff; --c3: #74e3b1; --c4: #ffab8c; --c5: #c6b4ff;
+}
+body { background:
+  radial-gradient(70% 45% at 85% -5%, rgb(255 203 71 / .13), transparent 70%),
+  radial-gradient(60% 40% at -10% 30%, rgb(143 208 255 / .07), transparent 70%),
+  var(--bg); }
+.summary { background: radial-gradient(120% 90% at 100% 0%, color-mix(in srgb, var(--acct) 20%, transparent), transparent 55%), linear-gradient(160deg, #353940, #2a2d33 75%); border-color: color-mix(in srgb, var(--acct) 40%, var(--line-2)); box-shadow: 0 14px 34px -22px rgb(0 0 0 / .9); }
+.msg.bot { background: var(--surface); border: 1px solid var(--line); }
+.msg.me { background: #463c1f; border: 1px solid rgb(255 203 71 / .35); color: #fff7e0; }
+.msg.me .meta { color: #d9c999; }
+.msg .meta { color: var(--faint); }
+.rc-t small, .tk-sub, .tk-foot { color: var(--muted); }
+.daily, .daily span { color: var(--muted); }
+.daily b { color: var(--ink); }
+.eyebrow { color: var(--muted); }
+.insight, .welcome-insight { color: var(--ink); background: color-mix(in srgb, var(--acct, var(--accent)) 14%, #1f2226); }
+.acard { background: color-mix(in srgb, var(--cc) 14%, #1d2024); border-color: color-mix(in srgb, var(--cc) 45%, transparent); }
+.acard[aria-pressed="true"] { background: color-mix(in srgb, var(--cc) 28%, #1d2024); border-color: var(--cc); }
+.ac-sub { color: var(--muted); }
+.opt { background: var(--raise); border-color: var(--line-2); color: var(--ink); }
+.opts.stale .opt { opacity: .5; }
+.chip { color: var(--ink); background: var(--surface); border-color: var(--line-2); }
+.stamp { opacity: 1; background: color-mix(in srgb, var(--cc) 10%, transparent); }
+.rc-ic { background: var(--raise); }
+.rc:has(.rc-amt.out) .rc-ic { background: rgb(255 140 151 / .16); }
+.rc:has(.rc-amt.in) .rc-ic { background: rgb(116 227 177 / .16); }
+.acct-tag { background: color-mix(in srgb, var(--cc) 18%, transparent); border-color: color-mix(in srgb, var(--cc) 50%, transparent); }
+.day, .chat .day { color: var(--faint); }
+form { background: var(--surface); border-color: var(--line-2); }
+#entrada::placeholder { color: var(--faint); }
+.book-pill, .tc { background: rgb(0 0 0 / .25); border-color: var(--line-2); color: var(--ink); }
+.tc { color: var(--muted); }
+.sheet { background: #23262c; }
+.sheet-note { color: var(--muted); }
+.lib-row, .cat-pick { background: var(--raise); }
+
+/* ---------- cajita v3 ---------- */
+.caji { overflow: visible; }
+.caji .c-shadow { fill: #000; opacity: .32; }
+.caji .c-foot { fill: #f0aa1f; stroke: #3a2705; stroke-width: 1.6; }
+.caji .c-body { fill: url(#cjBody); stroke: #3a2705; stroke-width: 1.7; }
+.caji .c-side { fill: #8a5800; opacity: .28; }
+.caji .c-hinge { stroke: #8a5800; stroke-width: 1.4; opacity: .55; }
+.caji .c-lid { fill: url(#cjLid); stroke: #3a2705; stroke-width: 1.7; }
+.caji .c-lidshine { stroke: #fff; stroke-width: 1.6; stroke-linecap: round; opacity: .7; }
+.caji .c-slot { fill: #3a2705; }
+.caji .c-latch { fill: url(#cjCoin); stroke: #3a2705; stroke-width: 1.3; }
+.caji .c-key { stroke: #3a2705; stroke-width: 1.4; stroke-linecap: round; }
+.caji .c-eyes, .caji .c-happy, .caji .c-sleep, .caji .c-m, .caji .c-brows { stroke-color: #3a2705; }
+.caji .c-eyes { fill: #2a1d04; }
+.caji .c-arms-down, .caji .c-arms-up { fill: none; stroke-linecap: round; }
+.caji .arm-o { stroke: #3a2705; stroke-width: 4.6; }
+.caji .arm-i { stroke: #f3b42c; stroke-width: 2.4; }
+.caji .c-arms-up { display: none; }
+.caji.big .c-arms-up { display: block; }
+.caji.big .c-arms-down { display: none; }
+.caji.sleep .c-arms-down { opacity: .6; }
+.caji.worry .c-arms-down { transform: translateY(-1px); }
+.row .mini .caji .c-arms-down, .row .mini .caji .c-arms-up, .row .mini .caji .c-shadow, .row .mini .caji .c-latch, .row .mini .caji .c-key { display: none; }
+.caji-wrap::after { display: none; }
+
+/* ---------- final color pass ---------- */
+:root {
+  --bg: #131518;
+  --surface: #202329;
+  --raise: #2a2e35;
+  --raise-2: #333840;
+  --line: #363b44;
+  --line-2: #464c56;
+  --accent: #ffc93c;
+  --accent-ink: #1d1604;
+}
+body { background:
+  radial-gradient(80% 50% at 90% -8%, rgb(255 201 60 / .16), transparent 65%),
+  radial-gradient(60% 45% at -10% 35%, rgb(143 208 255 / .08), transparent 70%),
+  radial-gradient(70% 45% at 50% 115%, rgb(116 227 177 / .06), transparent 70%),
+  var(--bg); }
+.summary { background:
+  radial-gradient(130% 100% at 100% 0%, color-mix(in srgb, var(--acct) 24%, transparent), transparent 55%),
+  linear-gradient(165deg, #343840, #24272d 80%);
+  border: 1px solid color-mix(in srgb, var(--acct) 45%, #464c56);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / .95), inset 0 1px 0 rgb(255 255 255 / .06); }
+.msg.me { background: linear-gradient(155deg, #ffd660, #f4b52b); color: #1d1604; border: 0; box-shadow: 0 8px 18px -12px rgb(255 201 60 / .7); font-weight: 600; }
+.msg.me .meta { color: rgb(29 22 4 / .6); }
+.msg.bot { background: linear-gradient(180deg, #23262c, #1f2227); border: 1px solid var(--line); box-shadow: 0 10px 24px -20px rgb(0 0 0 / .9); }
+.msg.bot b { color: #fff; }
+.chip { background: rgb(255 255 255 / .04); }
+.chip:hover { background: rgb(255 201 60 / .08); }
+form { background: #1e2126; box-shadow: 0 -12px 30px -22px rgb(0 0 0 / .9), inset 0 1px 0 rgb(255 255 255 / .04); }
+.send, .opt.primary, .dl { background: linear-gradient(155deg, #ffd660, #f4b52b); color: #1d1604; box-shadow: 0 8px 18px -10px rgb(255 201 60 / .55); }
+.opt.primary { border-color: transparent; }
+.acard { box-shadow: inset 0 1px 0 rgb(255 255 255 / .05); }
+.insight, .welcome-insight { border: 1px solid color-mix(in srgb, var(--acct, var(--accent)) 25%, transparent); }
+.sheet { background: linear-gradient(180deg, #262a31, #1f2227); }
+@media (min-width: 960px) { .chat { background: rgb(32 35 41 / .55); } }
+
+/* ---------- brand logo (open box) ---------- */
+.caji-wrap { width: 50px; height: 50px; border-radius: 15px; }
+.brand-logo { width: 48px; height: 48px; border-radius: 14px; overflow: visible; filter: drop-shadow(0 8px 14px rgb(255 190 40 / .28)); }
+.bar .caji.brand-logo { animation: logoFloat 4.5s ease-in-out infinite; transform-origin: 50% 70%; }
+@keyframes logoFloat { 50% { transform: translateY(-2px); } }
+.bar .caji.brand-logo.hopnow { animation: logoHop .55s cubic-bezier(.3, 1.6, .5, 1) !important; }
+@keyframes logoHop { 40% { transform: translateY(-6px) scale(1.06) rotate(-3deg); } }
+.brand-logo .coin { transform-box: view-box; }
+.brand-logo .coin.drop { animation: logoDrop .7s cubic-bezier(.5, 0, .7, .4); }
+.brand-logo .coin.pop { animation: logoPop .6s ease-out; }
+@keyframes logoDrop { 0% { transform: translateY(-80px); opacity: 0; } 30% { opacity: 1; } 75% { transform: translateY(40px); opacity: 1; } 76% { opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes logoPop { 0% { transform: translateY(30px) scale(.6); opacity: 0; } 100% { transform: none; opacity: 1; } }
+.row .mini { width: 26px; height: 26px; background: transparent; border: 0; }
+.logo-mini { width: 26px; height: 26px; border-radius: 8px; display: block; }
+.who .brand { background: linear-gradient(90deg, #ffe58f, #f5b52a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@media (prefers-reduced-motion: reduce) { .bar .caji.brand-logo, .brand-logo .coin.drop, .brand-logo .coin.pop { animation: none !important; } }
+</style>
+</head>
+<body>
+
+
+
+<div class="app" id="app">
+  <header class="bar">
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="cjBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd968"/><stop offset="1" stop-color="#f0aa1f"/></linearGradient><linearGradient id="cjLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9a3"/><stop offset="1" stop-color="#f6c143"/></linearGradient><radialGradient id="cjCoin" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff6d6"/><stop offset=".55" stop-color="#ffd25a"/><stop offset="1" stop-color="#d99a12"/></radialGradient></defs></svg><button class="caji-wrap" id="cajiBtn" type="button" aria-label="Habla con CAJA"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="caji brand-logo smile" id="caji" aria-hidden="true"><defs><radialGradient id="lhbg" cx=".5" cy=".42" r=".8"><stop offset="0" stop-color="#2b2f36"/><stop offset=".6" stop-color="#131518"/><stop offset="1" stop-color="#07080a"/></radialGradient>
+<radialGradient id="lhglow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffc93c" stop-opacity=".42"/><stop offset="1" stop-color="#ffc93c" stop-opacity="0"/></radialGradient>
+<radialGradient id="lhcoin" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#fffbe6"/><stop offset=".5" stop-color="#ffd453"/><stop offset="1" stop-color="#a86d02"/></radialGradient>
+<linearGradient id="lhgA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b2"/><stop offset="1" stop-color="#f2b52a"/></linearGradient>
+<linearGradient id="lhgB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4b52a"/><stop offset="1" stop-color="#b57805"/></linearGradient>
+<linearGradient id="lhgC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c88a0c"/><stop offset="1" stop-color="#7a4d02"/></linearGradient>
+<linearGradient id="lhgIn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b2603"/><stop offset="1" stop-color="#120b01"/></linearGradient>
+<filter id="lhblur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="16"/></filter></defs><rect width="512" height="512" rx="114" fill="url(#lhbg)"/><circle cx="256" cy="300" r="200" fill="url(#lhglow)"/>
+<ellipse cx="256" cy="440" rx="150" ry="18" fill="#000" opacity=".55" filter="url(#lhblur)"/>
+<path d="M142 258 256 200 226 150 108 208z" fill="url(#lhgB)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M256 200 370 258 404 208 286 150z" fill="url(#lhgC)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M142 258 256 200 370 258 256 316z" fill="url(#lhgIn)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M142 258 256 200 256 262 142 320z" fill="#000" opacity=".25"/>
+<g class="coin" id="coin"><circle cx="256" cy="246" r="40" fill="url(#lhcoin)" stroke="#5c3b00" stroke-width="4.8"/><circle cx="256" cy="246" r="27.2" fill="none" stroke="#a06a04" stroke-width="2.4"/><text x="256" y="260.4" text-anchor="middle" font-family="DejaVu Sans,Arial" font-weight="bold" font-size="38" fill="#6b4500">S/</text></g>
+<path d="M142 258 256 316v112L142 370z" fill="url(#lhgB)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M370 258 256 316v112l114-58z" fill="url(#lhgC)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M142 258 256 316 210 352 92 292z" fill="url(#lhgA)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M370 258 256 316 302 352 420 292z" fill="url(#lhgB)" stroke="#2a1a02" stroke-width="5" stroke-linejoin="round"/>
+<path d="M156 300v62" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".4"/>
+<path d="M118 286l70 34" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".55"/>
+<g stroke="#ffe08a" stroke-width="6" stroke-linecap="round" opacity=".7"><path d="M256 150v-34M226 160l-14-26M286 160l14-26"/></g></svg></button><div class="caji-say" id="cajiSay" role="status" hidden></div>
+    <div class="who"><b id="hello">Hola</b><span class="sub"><span class="brand">CAJA</span><span class="sync" id="sync">Conectando…</span></span></div>
+    <button class="icon-btn" id="eye" type="button" aria-label="Ocultar saldos" aria-pressed="false"></button>
+  </header>
+
+  <section class="summary" id="summary" aria-label="Saldo">
+    <div class="sum-top">
+      <button class="book-pill" id="bookPill" type="button" aria-label="Cambiar de recuento"><span id="bookName">Personal</span></button>
+      <button class="tc" id="tc" type="button" title="Tipo de cambio del dólar">TC —</button>
+      <button class="icon-btn collapse-btn" id="collapse" type="button" aria-label="Contraer resumen"></button>
+    </div>
+    <div class="sum-main">
+      <div>
+        <div class="eyebrow" id="heroLabel">Saldo</div>
+        <div class="big" id="saldo"><span class="cur">S/</span>—</div>
+      </div>
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc83d" stop-opacity=".28"/><stop offset="1" stop-color="#ffc83d" stop-opacity="0"/></linearGradient></defs></svg>
+      <svg class="spark" id="spark" viewBox="0 0 104 38" preserveAspectRatio="none" aria-label="Saldo de los últimos 30 días"></svg>
+    </div>
+    <div class="daily" id="daily"></div>
+    <div class="insight" id="insight"></div>
+    <div class="cards" id="tabs" aria-label="Cuentas"></div>
+    <div class="goals" id="goals" aria-label="Metas" hidden></div>
+  </section>
+
+  <div class="chat" id="chat" aria-live="polite"></div>
+
+  <div class="chips" id="chips"></div>
+  <form id="form" autocomplete="off">
+    <button class="icon-btn" id="plus" type="button" aria-label="Más acciones"></button>
+    <input id="entrada" placeholder="Escribe o elige una acción" aria-label="Mensaje">
+    <button class="icon-btn" id="mic" type="button" aria-label="Dictar" hidden></button>
+    <button class="send" type="submit" aria-label="Enviar"></button>
+  </form>
+
+  <div class="scrim" id="scrim" hidden></div>
+  <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+    <div class="grab"></div>
+    <h3 id="sheetTitle"></h3>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  // ---------- state ----------
+  let cuentas = [];   // {id, nombre, inicial, moneda:'PEN'|'USD'}
+  let metas = [];     // {id, nombre, objetivo, ahorrado}  (soles)
+  let limites = {};   // {Categoria: monto mensual en soles}
+  let movs = [];
+  let tc = null;      // {valor, fecha, fuente}
+  let libros = [{ id: "principal", nombre: "Personal" }];   // recuentos
+  let activo = "principal";
+  let data = {};      // recuento id -> {cuentas, metas, limites, movs}
+  try { activo = localStorage.getItem("caja-libro") || "principal"; } catch (e) {}
+  let ephemeral = [];
+  let store = null;
+  let pendingReset = false, pendingDelete = null, pendingText = null;
+  let sel = "all";
+  try { sel = localStorage.getItem("caja-sel") || "all"; } catch (e) {}
+
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const SYM = { PEN: "S/", USD: "US$" };
+  const num = (n) => (Math.round(n * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmt = (n, cur = "PEN") => (n < 0 ? "−" : "") + SYM[cur] + " " + num(Math.abs(n));
+  const norm = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim();
+  const words = (s) => " " + norm(s).replace(/[^a-z0-9ñ ]/g, " ").replace(/\s+/g, " ").trim() + " ";
+  const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+  const acc = (id) => cuentas.find((c) => c.id === id);
+  const accName = (id) => (acc(id) || { nombre: "Cuenta borrada" }).nombre;
+  const accCur = (id) => (acc(id) || { moneda: "PEN" }).moneda;
+  const newId = (p = "c") => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+  const rate = () => (tc && tc.valor > 0 ? tc.valor : null);
+  const toPEN = (v, cur) => (cur === "USD" ? v * (rate() || 0) : v);
+  const convert = (v, from, to) => { if (from === to) return v; const r = rate(); if (!r) return null; return from === "USD" ? v * r : v / r; };
+  const libro = (id) => libros.find((l) => l.id === id);
+  // a recuento named in the text: full name first, then a partial match ("viaje" -> "Viaje a Cusco")
+  function libroIn(text) {
+    const exact = namesIn(text, libros)[0];
+    if (exact) return exact;
+    const q = norm(text).replace(/^(el|la|recuento|caja)\s+/, "");
+    if (q.length < 3) return undefined;
+    const hit = libros.find((l) => norm(l.nombre).includes(q)) || libros.find((l) => q.includes(norm(l.nombre).split(" ")[0]));
+    return hit && hit.id;
+  }
+  function syncActive() { data[activo] = { cuentas, metas, limites, movs }; }
+  function loadActive() {
+    if (!libro(activo)) activo = libros[0].id;
+    const d = data[activo] || { cuentas: [], metas: [], limites: {}, movs: [] };
+    cuentas = d.cuentas; metas = d.metas; limites = d.limites; movs = d.movs;
+    if (activo === "principal") adoptOrphans();
+  }
+  // run fn with another recuento's state loaded, then restore the active one
+  function withLibro(id, fn) {
+    syncActive(); const keep = activo; activo = id; loadActive();
+    try { return fn(); } finally { syncActive(); activo = keep; loadActive(); }
+  }
+  const pickBy = (arr, seed) => arr[Math.abs(Math.floor(seed)) % arr.length];
+  const monthStart = (t = Date.now()) => { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
+  const daysLeft = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate() - d.getDate() + 1; };
+
+  // ---------- categories ----------
+  const CATS = [
+    ["Servicios", "💡", "luz agua internet cable gas telefono celular recarga movistar claro entel bitel sedapal enel calidda plan"],
+    ["Viajes", "✈️", "hotel hostal hospedaje airbnb vuelo vuelos avion aereo latam sky jetsmart booking tour excursion"],
+    ["Transporte", "🚕", "taxi uber cabify didi indriver bus combi pasaje pasajes gasolina grifo metropolitano peaje cochera estacionamiento corredor"],
+    ["Comida", "🍔", "menu almuerzo cena desayuno pizza pollo polleria chifa comida restaurante cafe rappi pedidosya ceviche hamburguesa lonche salchipapa delivery sanguche anticuchos kfc bembos"],
+    ["Mercado", "🛒", "super supermercado mercado plaza vea tottus wong metro bodega abarrotes viveres makro mass"],
+    ["Casa", "🏠", "alquiler renta depa departamento cuarto mantenimiento jato"],
+    ["Suscripciones", "📺", "netflix spotify disney hbo max prime youtube icloud chatgpt claude xbox playstation psn gamepass"],
+    ["Salud", "💊", "farmacia inkafarma mifarma doctor clinica medicina medicinas dentista seguro gimnasio gym smartfit proteina"],
+    ["Salidas", "🍻", "cine chelas cerveza chela salida concierto juerga tono bar discoteca previa trago tragos karaoke"],
+    ["Compras", "👟", "ropa zapatillas polo regalo amazon falabella ripley oechsle saga aliexpress temu"],
+    ["Gaming", "🎮", "juego juegos steam ps5 nintendo skins pase fortnite valorant"],
+    ["Educación", "📚", "curso universidad libro libros pension matricula udemy platzi certificacion"],
+    ["Deudas", "💳", "tarjeta prestamo cuota deuda credito"],
+  ].map(([n, e, w]) => ({ n, e, w: w.split(" ") }));
+  function catOf(desc, tipo) {
+    if (tipo === "in") return "Ingreso";
+    const ws = norm(desc).split(/[^a-z0-9ñ]+/);
+    for (const c of CATS) if (c.w.some((w) => ws.includes(w))) return c.n;
+    return "Otros";
+  }
+  const catEmoji = (n) => n === "Ingreso" ? "💸" : n === "Transferencia" ? "🔁" : ((CATS.find((c) => c.n === n) || {}).e || "🧾");
+  function catFromWord(w) {
+    const n = norm(w);
+    const c = CATS.find((c) => norm(c.n) === n || norm(c.n).startsWith(n) || c.w.includes(n));
+    return c ? c.n : n === "otros" ? "Otros" : null;
+  }
+
+  // ---------- parsing ----------
+  function parseAmount(raw) {
+    let s = raw.replace(/\s/g, "");
+    const hasC = s.includes(","), hasD = s.includes(".");
+    if (hasC && hasD) {
+      const dec = s.lastIndexOf(",") > s.lastIndexOf(".") ? "," : ".";
+      s = s.split(dec === "," ? "." : ",").join("").replace(dec, ".");
+    } else if (hasC || hasD) {
+      const sep = hasC ? "," : ".";
+      const parts = s.split(sep);
+      const thousands = parts.length > 2 || (parts.length === 2 && parts[1].length === 3);
+      s = thousands ? parts.join("") : parts.join(".");
+    }
+    return parseFloat(s);
+  }
+  const NUM = /(\d[\d.,]*(?:\s\d{3})*)\s*(k|mil\b|lucas?\b)?/i;
+  // pick the amount: the number next to a currency mark wins, otherwise the largest one
+  function amountIn(t) {
+    const src = t.replace(/\bps5\b/gi, " ");
+    const re = /(s\/\.?\s*|us\$\s*|\$\s*)?(\d[\d.,]*(?:\s\d{3})*)\s*(k\b|mil\b|lucas?\b|soles?\b|d[oó]lares?\b|usd\b)?/gi;
+    let best = null, mk;
+    while ((mk = re.exec(src))) {
+      let v = parseAmount(mk[2]);
+      if (mk[3] && /^(k|mil)/i.test(mk[3])) v *= 1000;
+      if (!isFinite(v) || v <= 0) continue;
+      const tagged = !!(mk[1] || mk[3]);
+      const c = { v, raw: mk[0].trim(), tagged };
+      if (!best || (tagged && !best.tagged) || (tagged === best.tagged && v > best.v)) best = c;
+    }
+    return best;
+  }
+  function curIn(t) {
+    const l = norm(t);
+    if (/us\$|\busd\b|\bdolar(es)?\b|(^|[^s\/])\$/.test(l)) return "USD";
+    if (/s\/|\bsoles?\b|\bpen\b|\blucas?\b/.test(l)) return "PEN";
+    return null;
+  }
+  const CUR_WORDS = /(?<![\p{L}])(en\s+)?(d[oó]lares|d[oó]lar|usd|soles|sol|pen|lucas|luca)(?![\p{L}])/giu;
+  const stripCur = (s) => s.replace(/us\$|s\/\.?|\$/gi, " ").replace(CUR_WORDS, " ");
+  const IN_WORDS = /\b(deposit\w*|cobr[éeoa]\w*|recib\w*|ingres\w*|me pagaron|me pagó|me pago|entr[óo]|sueldo|salario|quincena|ganancia|gané|gane|me dieron|me transfirieron|me yapearon|me plinearon|me devolvieron|abono|cachuelo)/i;
+  const TR_WORDS = /\b(pas[ée]|pasar|transfer\w*|mov[ií]|mover|traspas\w*|cambi[ée])\b/i;
+  const INI_WORDS = /\b(saldo inicial|inicial|empiezo con|comienzo con|tengo)\b/i;
+  const FILLER = /(?<![\p{L}\d])(se\s+pag[óo]|pagu[ée]|pag[óo]|pago|gast[ée]|gast[óo]|gasto|compr[ée]|compr[óo]|compra|yape[ée]|plin[ée]|deposit\w*|me\s+pagaron|me\s+pag[óo]|cobr[ée]\w*|recib\w*|ingres\w*|entr[óo]|me\s+dieron|me\s+transfirieron|me\s+yapearon|me\s+plinearon|me\s+devolvieron|abono|un|una|el|la|los|las|de|del|desde|en|por|para|con|a|al|monto|k|mil|hoy|ayer|me|se|cuenta)(?![\p{L}\d])/giu;
+
+  function namesIn(text, list) {
+    const t = words(text);
+    const hits = [];
+    for (const c of [...list].sort((a, b) => b.nombre.length - a.nombre.length)) {
+      const n = words(c.nombre);
+      const i = t.indexOf(n);
+      if (i >= 0 && !hits.some((h) => i < h.i + h.len && h.i < i + n.length)) hits.push({ id: c.id, i, len: n.length });
+    }
+    return hits.sort((a, b) => a.i - b.i).map((h) => h.id);
+  }
+  const accountsIn = (t) => namesIn(t, cuentas);
+  const metasIn = (t) => namesIn(t, metas);
+  function stripNames(text, list) {
+    let d = text;
+    for (const c of list) d = d.replace(new RegExp("(?<![\\p{L}\\d])" + c.nombre.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?![\\p{L}\\d])", "giu"), " ");
+    return d;
+  }
+  const cleanDesc = (text, numRaw) => cap(stripCur(stripNames(text.replace(numRaw, " "), cuentas)).replace(/[+\-]/g, " ").replace(FILLER, " ").replace(/\s+/g, " ").trim());
+  const cleanName = (s, a) => cap(stripCur(a ? s.replace(a.raw, " ") : s).replace(/\s+(con|de|por|a)\s*$/i, "").replace(/\s+/g, " ").trim());
+
+  function interpret(text) {
+    const t = text.trim();
+    const low = norm(t);
+    if (!t) return null;
+    if (/^si,? ?reiniciar$/.test(low)) return { cmd: "reset-ok" };
+    if (/^si,? ?borrar$/.test(low)) return { cmd: "del-ok" };
+    if (/^(reiniciar|borrar todo|empezar de nuevo)$/.test(low)) return { cmd: "reset" };
+    if (/^(deshacer|borra el ultimo|borrar ultimo|undo|me equivoque)$/.test(low)) return { cmd: "undo" };
+    if (/^(resumen|reporte|balance|como voy)\??/.test(low)) return { cmd: "resumen" };
+    if (/^(mis )?cuentas\??$/.test(low)) return { cmd: "cuentas" };
+    if (/^(mis )?metas\??$/.test(low)) return { cmd: "metas" };
+    if (/^(mis )?(limites|topes)\??$/.test(low)) return { cmd: "limites" };
+    if (/^(saldo|cuanto tengo|cuanto me queda)\??$/.test(low)) return { cmd: "saldo" };
+    if (/^(ayuda|help|\?|que puedes hacer)\??$/.test(low)) return { cmd: "ayuda" };
+    if (/^(hola|holi|buenas|buenos dias|buenas tardes|buenas noches|hey|que tal|gracias|ok|listo)\b[!. ]*$/.test(low)) return { cmd: "hola", gracias: /gracias/.test(low) };
+    if (/^(tc|t\.?c\.?|tipo de cambio|(el )?dolar( esta)?( a| en)?)\??$/.test(low)) return { cmd: "tc?" };
+    let m = low.match(/^(?:tc|t\.c\.?|tipo de cambio|(?:el )?dolar(?: esta)?(?: a| en)?)\s*(?:s\/\.?)?\s*(\d+(?:[.,]\d+)?)$/);
+    if (m) return { cmd: "tc", valor: parseFloat(m[1].replace(",", ".")) };
+
+    // recuentos
+    if (/^(mis )?(recuentos|cajas|libros)\??$/.test(low)) return { cmd: "lib-list" };
+    m = t.match(/^(?:nuevo recuento|nueva caja|nuevo libro|crear recuento|crea recuento|agregar recuento|agrega recuento|otro recuento)\s+(.+)$/i);
+    if (m) return { cmd: "lib-new", nombre: cap(m[1].trim()) };
+    m = t.match(/^renombrar (?:recuento|caja|libro)\s+(.+?)\s+(?:a|por)\s+(.+)$/i);
+    if (m) return { cmd: "lib-ren", id: libroIn(m[1]), nombre: cap(m[2].trim()) };
+    m = t.match(/^(?:borrar|eliminar) (?:recuento|caja|libro)\s+(.+)$/i);
+    if (m) return { cmd: "lib-del", id: libroIn(m[1]) };
+    m = t.match(/^(?:cambiar a|cambia a|ir a|abrir|abre|ver|usar)\s+(?:recuento\s+|caja\s+)?(.+)$/i);
+    if (m && libroIn(m[1])) return { cmd: "lib-go", id: libroIn(m[1]) };
+
+    // exports
+    { const f = low.match(/\b(pdf|excel|xlsx|hoja de calculo)\b/); if (f && !amountIn(t.replace(/\b20\d\d\b/g, ""))) return { cmd: "export", fmt: f[1] === "pdf" ? "pdf" : "xlsx", low }; }
+    // affordability
+    if (/(me alcanza|alcanza para|puedo gastar|me da para|puedo comprar)/.test(low)) {
+      const a = amountIn(t);
+      return { cmd: "alcanza", monto: a ? a.v : null, cur: curIn(t) };
+    }
+    // limits
+    m = t.match(/^(?:sin|quitar|borrar)\s+(?:limite|límite|tope)\s+(?:de\s+|para\s+)?(\S+)/i);
+    if (m) return { cmd: "limite-off", cat: catFromWord(m[1]) };
+    m = t.match(/^(?:limite|límite|tope|presupuesto)\s+(?:de\s+|para\s+|en\s+)?(\S+)\s+(.+)$/i);
+    if (m) { const a = amountIn(m[2]); return { cmd: "limite", cat: catFromWord(m[1]), word: m[1], monto: a ? a.v : null }; }
+    // goals
+    m = t.match(/^(?:borrar|eliminar|quitar)\s+meta\s+(.+)$/i);
+    if (m) return { cmd: "meta-del", ids: metasIn(m[1]) };
+    m = t.match(/^(?:nueva meta|crear meta|meta)\s+(.+)$/i);
+    if (m) {
+      const a = amountIn(m[1]);
+      const ids = metasIn(m[1]);
+      if (!a && ids.length) return { cmd: "meta-ver", id: ids[0] };
+      return { cmd: "meta-nueva", nombre: cleanName(m[1], a), monto: a ? a.v : null, cur: curIn(m[1]) };
+    }
+    if (/^(ahorr|apart|guard|separ|meti|meto|junte|junté)/.test(low)) {
+      const a = amountIn(t);
+      return { cmd: "meta-add", monto: a ? a.v : null, cur: curIn(t), ids: metasIn(t), sign: 1 };
+    }
+    if (/^(saque|retire|use|tome)\b/.test(low) && metasIn(t).length && !accountsIn(t).length) {
+      const a = amountIn(t);
+      return { cmd: "meta-add", monto: a ? a.v : null, cur: curIn(t), ids: metasIn(t), sign: -1 };
+    }
+    // accounts
+    m = t.match(/^(?:nueva cuenta|crear cuenta|crea cuenta|agregar cuenta|agrega cuenta|abrir cuenta)\s+(.+)$/i);
+    if (m) { const a = amountIn(m[1]); return { cmd: "nueva", nombre: cleanName(m[1], a), moneda: curIn(m[1]) || "PEN", monto: a ? a.v : null }; }
+    m = t.match(/^(?:borrar|eliminar|cerrar) cuenta\s+(.+)$/i);
+    if (m) return { cmd: "del", ids: accountsIn(m[1]) };
+    m = t.match(/^(?:renombrar|cambiar nombre)\s+(.+?)\s+(?:a|por)\s+(.+)$/i);
+    if (m) return { cmd: "ren", ids: accountsIn(m[1]), nombre: cap(m[2].trim()) };
+
+    const a = amountIn(t);
+    if (!a) return { cmd: "nada" };
+    const ids = accountsIn(t);
+    const cur = curIn(t);
+    if (TR_WORDS.test(low) && ids.length >= 2) return { cmd: "tr", monto: a.v, cur, desde: ids[0], hacia: ids[1] };
+    if (TR_WORDS.test(low) && ids.length === 1 && words(t).split(words(accName(ids[0]))).length > 2) return { cmd: "tr", monto: a.v, cur, desde: ids[0], hacia: ids[0] };
+    if (INI_WORDS.test(low) && !IN_WORDS.test(low)) return { cmd: "inicial", monto: a.v, ids };
+    const tipo = IN_WORDS.test(low) || /^\+/.test(t) ? "in" : "out";
+    return { cmd: "mov", tipo, monto: a.v, cur, desc: cleanDesc(t, a.raw), ids };
+  }
+
+  // ---------- numbers ----------
+  function balances(upTo) {
+    const b = {};
+    for (const c of cuentas) b[c.id] = c.inicial || 0;
+    for (const m of [...movs].sort((x, y) => x.ts - y.ts)) {
+      if (upTo != null && m.ts > upTo) break;
+      if (m.tipo === "tr") {
+        if (m.desde in b) b[m.desde] -= m.monto;
+        if (m.hacia in b) b[m.hacia] += m.montoDest != null ? m.montoDest : m.monto;
+      } else if (m.cuenta in b) b[m.cuenta] += m.tipo === "in" ? m.monto : -m.monto;
+    }
+    return b;
+  }
+  function totals(scope) {
+    const all = scope === "all";
+    const ids = all ? cuentas.map((c) => c.id) : [scope];
+    const cur = all ? "PEN" : accCur(scope);
+    const conv = (v, c) => (all ? toPEN(v, c) : v);
+    const b = balances();
+    let ini = 0, out = 0, inn = 0, saldo = 0, hoy = 0;
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    for (const id of ids) { ini += conv((acc(id) || {}).inicial || 0, accCur(id)); saldo += conv(b[id] || 0, accCur(id)); }
+    for (const m of movs) {
+      if (m.tipo === "tr" || !ids.includes(m.cuenta)) continue;
+      const v = conv(m.monto, accCur(m.cuenta));
+      if (m.tipo === "out") { out += v; if (m.ts >= t0.getTime()) hoy += v; } else inn += v;
+    }
+    return { cur, ini, out, inn, saldo, hoy };
+  }
+  const apartado = () => metas.reduce((s, g) => s + (g.ahorrado || 0), 0);
+  const libre = () => totals("all").saldo - apartado();
+  const diario = (l = libre()) => l / daysLeft();
+  function spentInCat(cat, upTo = Infinity) {
+    const from = monthStart(upTo === Infinity ? Date.now() : upTo);
+    let s = 0;
+    for (const m of movs) if (m.tipo === "out" && m.cat === cat && m.ts >= from && m.ts <= upTo) s += toPEN(m.monto, accCur(m.cuenta));
+    return s;
+  }
+  const touches = (m, id) => m.cuenta === id || m.desde === id || m.hacia === id;
+  const hasUSD = () => cuentas.some((c) => c.moneda === "USD");
+  const barHtml = (pct, cls = "") => `<div class="bar-l ${cls}"><i style="width:${Math.max(2, Math.min(100, pct)).toFixed(1)}%"></i></div>`;
+
+  // ---------- replies (receipts) ----------
+  const hhmm = (d) => new Date(d).toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit" });
+  function limitLine(cat, upTo) {
+    const lim = limites[cat];
+    if (!lim) return "";
+    const s = spentInCat(cat, upTo);
+    const pct = (s / lim) * 100;
+    const cls = pct > 100 ? "over" : pct >= 80 ? "warn" : "";
+    const msg = pct > 100 ? `Superaste el tope de ${cat}` : pct >= 80 ? `Ojo: ya vas ${Math.round(pct)}% del tope de ${cat}` : `${cat} este mes`;
+    return `<div class="tk-hr"></div><div class="tk-foot"><span>${esc(msg)}</span><b>${esc(num(s))}/${esc(num(lim))}</b></div>${barHtml(pct, cls)}`;
+  }
+  function cuentasHtml() {
+    if (!cuentas.length) return `Aún no tienes cuentas. Escribe <b>nueva cuenta BCP 3000</b>.`;
+    const b = balances();
+    const rows = cuentas.map((c) => `<div class="tk-foot"><span>${accTag(c.id)}</span><b class="${b[c.id] < 0 ? "out" : ""}">${esc(fmt(b[c.id], c.moneda))}</b></div>`).join("");
+    return `<div class="tk"><span class="tk-title">Tus cuentas</span>${rows}` +
+      (hasUSD() ? `<div class="tk-sub">${rate() ? "dólares a TC " + esc(rate().toFixed(3)) : "falta el tipo de cambio: escribe tc 3.45"}</div>` : "") + `</div>`;
+  }
+  function librosHtml() {
+    let total = 0;
+    const rows = libros.map((l) => {
+      const [c, n] = l.id === activo ? [cuentas.length, movs.length] : withLibro(l.id, () => [cuentas.length, movs.length]);
+      return `<div class="tk-foot"><span>${l.id === activo ? "● " : ""}${esc(l.nombre)}</span><b>${c} cuenta${c === 1 ? "" : "s"} · ${n} mov.</b></div>`;
+    }).join("");
+    return `<div class="tk"><span class="tk-title">Tus recuentos</span>${rows}<div class="tk-hr"></div><div class="tk-sub">Cambia con los botones de arriba o escribe <b>cambiar a</b> y el nombre.</div></div>`;
+  }
+  function metaHtml(g) {
+    const pct = g.objetivo ? (g.ahorrado / g.objetivo) * 100 : 0;
+    const falta = Math.max(0, g.objetivo - g.ahorrado);
+    return `<div class="cat-line"><span>${esc(g.nombre)}</span><span class="amt">${esc(num(g.ahorrado))}/${esc(num(g.objetivo))}</span>${barHtml(pct, "green")}</div>` +
+      `<div class="tk-sub">${pct >= 100 ? `Meta cumplida 🎉${g.ahorrado > g.objetivo ? " · " + esc(fmt(g.ahorrado - g.objetivo)) + " de más" : ""}` : `Te faltan ${esc(fmt(falta))} · ${Math.round(pct)}%`}</div>`;
+  }
+  function metasHtml() {
+    if (!metas.length) return `Aún no tienes metas. Prueba <b>meta PS5 2500</b> o <b>meta viaje a Cusco 1800</b>.`;
+    return `<div class="tk"><span class="tk-title">Tus metas</span>${metas.map(metaHtml).join("")}<div class="tk-hr"></div><div class="tk-foot"><span>Total apartado</span><b>${esc(fmt(apartado()))}</b></div></div>`;
+  }
+  function limitesHtml() {
+    const ks = Object.keys(limites);
+    if (!ks.length) return `No tienes topes. Prueba <b>tope salidas 300</b> o <b>tope comida 600</b> al mes.`;
+    return `<div class="tk"><span class="tk-title">Topes del mes</span>${ks.map((k) => {
+      const s = spentInCat(k), p = (s / limites[k]) * 100;
+      return `<div class="cat-line"><span>${catEmoji(k)} ${esc(k)}</span><span class="amt">${esc(num(s))}/${esc(num(limites[k]))}</span>${barHtml(p, p > 100 ? "over" : p >= 80 ? "warn" : "")}</div>`;
+    }).join("")}</div>`;
+  }
+  function resumenHtml() {
+    const scope = sel;
+    const T = totals(scope);
+    const list = movs.filter((m) => scope === "all" || touches(m, scope));
+    const cats = {};
+    for (const m of list) if (m.tipo === "out" && (scope === "all" || m.cuenta === scope)) cats[m.cat] = (cats[m.cat] || 0) + (scope === "all" ? toPEN(m.monto, accCur(m.cuenta)) : m.monto);
+    const entries = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+    const max = entries.length ? entries[0][1] : 1;
+    const bars = entries.slice(0, 6).map(([k, v]) => `<div class="cat-line"><span>${catEmoji(k)} ${esc(k)}</span><span class="amt">${esc(fmt(v, T.cur))}</span>${barHtml((v / max) * 100)}</div>`).join("");
+    const pct = T.ini + T.inn > 0 ? Math.round((T.out / (T.ini + T.inn)) * 100) : 0;
+    const top = entries[0] ? `Tu mayor gasto: ${entries[0][0].toLowerCase()} ${catEmoji(entries[0][0])}` : "";
+    return `<div class="tk"><span class="tk-title">Resumen · ${esc(scope === "all" ? "todo" : accName(scope))}</span>` +
+      `<div class="tk-foot"><span>Inicial</span><b>${esc(fmt(T.ini, T.cur))}</b></div>` +
+      `<div class="tk-foot"><span>Ingresos</span><b class="in">+${esc(fmt(T.inn, T.cur))}</b></div>` +
+      `<div class="tk-foot"><span>Gastaste (${pct}%)</span><b class="out">−${esc(fmt(T.out, T.cur))}</b></div>` +
+      `<div class="tk-hr"></div><div class="tk-row"><span>Tienes</span><span class="amt">${esc(fmt(T.saldo, T.cur))}</span></div>` +
+      (scope !== "all" ? `<div class="tk-sub">Te alcanza para ${esc(fmt(Math.max(0, T.saldo / daysLeft()), T.cur))} diarios hasta fin de mes</div>` : "") +
+      (bars ? `<div class="tk-hr"></div><span class="tk-sub">En qué se va</span>${bars}` : "") +
+      (top ? `<div class="tk-quip">${esc(top)}</div>` : "") + `</div>`;
+  }
+  function alcanzaHtml(monto) {
+    const l = sel === "all" ? libre() : toPEN(totals(sel).saldo, accCur(sel)), d0 = diario(l), rest = l - monto, d1 = diario(rest);
+    let verdict, emoji;
+    if (rest < 0) { verdict = "No te alcanza. Te faltarían " + fmt(-rest) + "."; emoji = ""; }
+    else if (d1 < d0 * 0.6) { verdict = "Te alcanza, pero quedas justo el resto del mes."; emoji = ""; }
+    else { verdict = "Sí te alcanza."; emoji = ""; }
+    return `<div class="tk"><span class="tk-title">¿Me alcanza para ${esc(fmt(monto))}?</span><div>${esc(verdict)}</div><div class="tk-hr"></div>` +
+      `<div class="tk-foot"><span>Libre ahora</span><b>${esc(fmt(l))}</b></div><div class="tk-foot"><span>Después</span><b class="${rest < 0 ? "out" : ""}">${esc(fmt(rest))}</b></div>` +
+      `<div class="tk-foot"><span>Por día ahora</span><b>${esc(fmt(d0))}</b></div><div class="tk-foot"><span>Por día después</span><b>${esc(fmt(Math.max(0, d1)))}</b></div><div class="tk-sub">Quedan ${daysLeft()} días del mes</div></div>`;
+  }
+  const pickHtml = (q) => `${q}<div class="pick">${cuentas.map((c) => `<button class="chip" type="button" data-pick="${esc(c.id)}">${esc(c.nombre)} · ${esc(SYM[c.moneda])}</button>`).join("")}</div>`;
+  const AYUDA = `Escríbeme como hablas:
+• <b>pagué 18 de menú</b> · <b>uber 12 con BCP</b>
+• <b>me yapearon 50</b> · <b>me pagaron la quincena 1800</b>
+• <b>spotify 5.99 dólares</b> → lo convierto a la moneda de la cuenta
+• <b>pasé 200 de BCP a efectivo</b>
+• <b>meta PS5 2500</b> · <b>ahorré 200 para PS5</b>
+• <b>tope salidas 300</b> → te aviso si te pasas
+• <b>¿me alcanza para 250?</b>
+• <b>nuevo recuento Viaje a Cusco</b> · <b>recuentos</b> · <b>cambiar a Viaje</b>
+• <b>exportar pdf</b> · <b>excel de noviembre</b> · <b>pdf todo</b>
+• <b>pdf general</b> · <b>excel general</b> junta todos los recuentos
+• <b>resumen</b> · <b>cuentas</b> · <b>metas</b> · <b>deshacer</b>
+• <b>nueva cuenta Ahorros dólares 500</b> · <b>tc 3.46</b>
+• <b>renombrar BCP a Sueldo</b> · <b>borrar cuenta BCP</b>
+
+También puedes tocar: a mí para un consejo, el saldo para verlo en dólares, la gráfica para ver cada día, y cualquier comprobante para repetirlo o borrarlo. Desliza el resumen para cambiar de cuenta.`;
+
+  function say(html) { ephemeral.push({ ts: Date.now() + 0.5, who: "bot", html, pending: true }); render(); settle(); }
+  function askPick(q) { ephemeral.push({ ts: Date.now() + 0.5, who: "bot", html: pickHtml(q), tmp: true, pending: true }); render(); settle(); }
+  function echo(text, tmp) { ephemeral.push({ ts: Date.now(), who: "me", html: esc(text), tmp }); }
+  // ---------- CAJA's personality: mood, greeting, celebrations ----------
+  let moodUntil = 0, moodTemp = null, userName = "";
+  function baseMood() {
+    const h = new Date().getHours();
+    if (cuentas.length && sel !== "all" && totals(sel).saldo < 0) return "worry";
+    if (Object.keys(limites).some((k) => spentInCat(k) > limites[k])) return "worry";
+    if (h < 6) return "sleep";
+    return "smile";
+  }
+  function paintMood() {
+    const m = Date.now() < moodUntil && moodTemp ? moodTemp : baseMood();
+    const c = $("caji"); c.setAttribute("class", "caji " + m);
+  }
+  function setMood(m, ms) { moodTemp = m; moodUntil = Date.now() + ms; paintMood(); setTimeout(paintMood, ms + 30); }
+  function greeting() {
+    const h = new Date().getHours();
+    const g = h < 6 ? "Buenas noches" : h < 12 ? "Buenos días" : h < 19 ? "Buenas tardes" : "Buenas noches";
+    $("hello").textContent = userName ? `${g}, ${userName}` : g;
+  }
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const host = $("summary"), r = host.getBoundingClientRect();
+    const layer = document.createElement("div"); layer.className = "confetti";
+    layer.style.left = r.left + r.width / 2 + "px"; layer.style.top = r.top + 40 + "px";
+    const cols = ["#ffcb47", "#7cc4ff", "#62d5a1", "#ff9a7a", "#b9a4ff", "#ffffff"];
+    for (let i = 0; i < 34; i++) {
+      const b = document.createElement("i");
+      const ang = Math.random() * Math.PI * 2, dist = 70 + Math.random() * 120;
+      b.style.setProperty("--x", Math.cos(ang) * dist + "px"); b.style.setProperty("--y", Math.sin(ang) * dist * .7 + 60 + "px");
+      b.style.setProperty("--r", (Math.random() * 720 - 360) + "deg"); b.style.background = cols[i % cols.length];
+      b.style.animationDelay = Math.random() * 80 + "ms";
+      layer.append(b);
+    }
+    document.body.append(layer); setTimeout(() => layer.remove(), 1400);
+  }
+  function insight() {
+    if (!cuentas.length || sel === "all") return "Crea tu primera cuenta y empezamos.";
+    const T = totals(sel), name = accName(sel), cur = accCur(sel);
+    if (T.saldo < 0) return `${name} está en rojo. Registra un ingreso o transfiere desde otra cuenta.`;
+    const over = Object.keys(limites).map((k) => [k, spentInCat(k) / limites[k]]).sort((a, b) => b[1] - a[1])[0];
+    if (over && over[1] >= .8) return over[1] > 1 ? `Te pasaste del tope de ${over[0].toLowerCase()} este mes.` : `Ojo: llevas ${Math.round(over[1] * 100)}% del tope de ${over[0].toLowerCase()}.`;
+    const ms = monthStart(); const out = {}; let tot = 0;
+    for (const m of movs) if (m.tipo === "out" && m.cuenta === sel && m.ts >= ms) { out[m.cat] = (out[m.cat] || 0) + m.monto; tot += m.monto; }
+    const g = metas.find((x) => x.ahorrado < x.objetivo);
+    if (T.hoy === 0 && new Date().getHours() >= 12) return `Hoy no has gastado nada desde ${name}. Bien ahí.`;
+    if (tot > 0) { const top = Object.entries(out).sort((a, b) => b[1] - a[1])[0]; return `Este mes van ${fmt(tot, cur)} en gastos desde ${name}; lo que más pesa es ${top[0].toLowerCase()}.`; }
+    if (g) return `Te faltan ${fmt(g.objetivo - g.ahorrado)} para tu meta ${g.nombre}.`;
+    return `Todo en orden en ${name}. Cuéntame cuando gastes o te entre algo.`;
+  }
+  function coin(kind) {
+    const c = $("coin"); c.classList.remove("drop", "pop"); void c.getBBox(); c.classList.add(kind);
+    setMood(kind === "drop" ? "big" : "o", kind === "drop" ? 2400 : 1300);
+  }
+  function targetAccount(ids) {
+    if (ids && ids.length) return ids[0];
+    if (sel !== "all" && acc(sel)) return sel;
+    if (cuentas.length === 1) return cuentas[0].id;
+    return null;
+  }
+  async function ensureDefault() { if (!cuentas.length) await store.save({ cuentas: [{ id: newId(), nombre: "Efectivo", inicial: null, moneda: "PEN" }] }); }
+  const needTc = () => say(`Para convertir necesito el tipo de cambio. Escribe <b>tc 3.45</b>.`);
+  const inSoles = (v, cur) => (cur === "USD" ? convert(v, "USD", "PEN") : v);
+
+  // ---------- handle input ----------
+  async function handle(text, forcedAcc, pre) {
+    const r = pre ? { ...pre } : interpret(text);
+    if (!r) return;
+    if (r.cmd !== "reset-ok") pendingReset = false;
+    if (r.cmd !== "del-ok") pendingDelete = null;
+    if (forcedAcc) r.ids = [forcedAcc];
+    const stored = r.cmd === "mov" || r.cmd === "tr";
+    if (!stored && !forcedAcc && !r.silent) echo(text);
+    try {
+      switch (r.cmd) {
+        case "tc?":
+          say(rate() ? `El dólar está a <b>S/ ${esc(rate().toFixed(3))}</b>\n<span class="tk-sub">${esc(tc.fuente || "manual")} · ${esc(shortDate(tc.fecha))}</span>\nPara cambiarlo: <b>tc 3.46</b>` : `Aún no hay tipo de cambio. Escribe <b>tc 3.45</b>.`);
+          break;
+        case "tc":
+          if (!(r.valor > 1 && r.valor < 20)) { say("Ese tipo de cambio se ve raro. Ejemplo: <b>tc 3.45</b>."); break; }
+          await store.saveTc({ valor: r.valor, fecha: today(), fuente: "manual" });
+          say(`Listo, dólar a <b>S/ ${esc(r.valor.toFixed(3))}</b>.`);
+          break;
+        case "export":
+          try { await exportar(r.fmt, r.low); }
+          catch (e) { ephemeral = ephemeral.filter((x) => !/Preparando/.test(x.html)); say(`No pude generar el archivo (${esc((e && e.message) || "error")}). Revisa tu conexión e inténtalo otra vez.`); }
+          break;
+        case "lib-list": say(librosHtml()); break;
+        case "lib-new": {
+          if (!r.nombre) { say("Dime el nombre, por ejemplo <b>nuevo recuento Viaje a Cusco</b>."); break; }
+          if (libros.some((l) => norm(l.nombre) === norm(r.nombre))) { say(`Ya tienes un recuento llamado <b>${esc(r.nombre)}</b>.`); break; }
+          const l = { id: newId("l"), nombre: r.nombre };
+          await store.saveLibros([...libros, l]);
+          setLibro(l.id);
+          say(`Recuento <b>${esc(l.nombre)}</b> creado. Lleva sus propias cuentas, movimientos, metas y topes, separado de los demás.\nEmpieza con <b>nueva cuenta Efectivo 500</b>.`);
+          break;
+        }
+        case "lib-go": setLibro(r.id); say(`Ahora estás en <b>${esc(libro(r.id).nombre)}</b>.`); break;
+        case "lib-ren": {
+          if (!r.id || !r.nombre) { say("No encontré ese recuento. Escribe <b>recuentos</b> para ver los nombres."); break; }
+          const old = libro(r.id).nombre;
+          await store.saveLibros(libros.map((l) => (l.id === r.id ? { ...l, nombre: r.nombre } : l)));
+          say(`El recuento <b>${esc(old)}</b> ahora se llama <b>${esc(r.nombre)}</b>.`);
+          break;
+        }
+        case "lib-del": {
+          if (!r.id) { say("No encontré ese recuento. Escribe <b>recuentos</b> para ver los nombres."); break; }
+          if (libros.length === 1) { say("Es tu único recuento. Para vaciarlo escribe <b>reiniciar</b>."); break; }
+          pendingDelete = { libro: r.id };
+          const n = withLibro(r.id, () => movs.length);
+          say(`¿Borrar el recuento <b>${esc(libro(r.id).nombre)}</b> con todas sus cuentas y ${n} movimiento${n === 1 ? "" : "s"}? No se puede deshacer.\nEscribe <b>sí, borrar</b> para confirmar.`);
+          break;
+        }
+        case "alcanza": {
+          if (!r.monto) { say(`Dime cuánto, por ejemplo <b>¿me alcanza para 250?</b>\n${cuentas.length && sel !== "all" ? (totals(sel).saldo > 0 ? `En ${esc(accName(sel))} te alcanza para <b>${esc(fmt(totals(sel).saldo / daysLeft(), accCur(sel)))}</b> diarios hasta fin de mes.` : `${esc(accName(sel))} está en rojo, así que por ahora no hay margen para gastar desde ahí.`) : ""}`); break; }
+          const v = inSoles(r.monto, r.cur); if (v == null) { needTc(); break; }
+          say(alcanzaHtml(v));
+          break;
+        }
+        case "limite": {
+          if (!r.cat) { say(`No reconocí la categoría “${esc(r.word)}”. Usa una de estas: ${CATS.map((c) => c.n.toLowerCase()).join(", ")}.`); break; }
+          if (!r.monto) { say(`Dime el monto, por ejemplo <b>tope ${esc(r.cat.toLowerCase())} 300</b>.`); break; }
+          await store.save({ limites: { ...limites, [r.cat]: r.monto } });
+          say(`Tope de <b>${esc(r.cat)}</b>: ${esc(fmt(r.monto))} al mes. Te aviso cuando vayas por el 80%.\n<span class="tk-sub">Este mes llevas ${esc(fmt(spentInCat(r.cat)))}</span>`);
+          break;
+        }
+        case "limite-off": {
+          if (!r.cat || !limites[r.cat]) { say("No tenías ese tope."); break; }
+          const l = { ...limites }; delete l[r.cat];
+          await store.save({ limites: l });
+          say(`Listo, sin tope para <b>${esc(r.cat)}</b>.`);
+          break;
+        }
+        case "limites": say(limitesHtml()); break;
+        case "metas": say(metasHtml()); break;
+        case "meta-ver": say(`<div class="tk">${metaHtml(metas.find((g) => g.id === r.id))}</div>`); break;
+        case "meta-nueva": {
+          if (!r.nombre) { say("Dime qué quieres lograr, por ejemplo <b>meta PS5 2500</b>."); break; }
+          if (!r.monto) { say(`¿Cuánto necesitas? Escribe <b>meta ${esc(r.nombre)} 1500</b>.`); break; }
+          if (metas.some((g) => norm(g.nombre) === norm(r.nombre))) { say(`Ya tienes la meta <b>${esc(r.nombre)}</b>.`); break; }
+          const obj = inSoles(r.monto, r.cur); if (obj == null) { needTc(); break; }
+          const g = { id: newId("g"), nombre: r.nombre, objetivo: Math.round(obj * 100) / 100, ahorrado: 0 };
+          await store.save({ metas: [...metas, g] });
+          const porDia = g.objetivo / 90;
+          say(`Meta <b>${esc(g.nombre)}</b>: ${esc(fmt(g.objetivo))}\nSi apartas ${esc(fmt(porDia * 7))} por semana, la logras en 3 meses. Escribe <b>ahorré 100 para ${esc(g.nombre)}</b> cuando separes algo.`);
+          break;
+        }
+        case "meta-add": {
+          if (!metas.length) { say("Primero crea una meta: <b>meta PS5 2500</b>."); break; }
+          const id = r.ids[0] || (metas.length === 1 ? metas[0].id : null);
+          if (!id) { say(`¿Para cuál meta? Escribe por ejemplo <b>ahorré ${r.monto ? esc(num(r.monto)) : "100"} para ${esc(metas[0].nombre)}</b>.`); break; }
+          if (!r.monto) { say("¿Cuánto? Ejemplo: <b>ahorré 100 para " + esc(metas.find((g) => g.id === id).nombre) + "</b>."); break; }
+          const v = inSoles(r.monto, r.cur); if (v == null) { needTc(); break; }
+          let done = false;
+          const next = metas.map((g) => {
+            if (g.id !== id) return g;
+            const ah = Math.max(0, Math.round((g.ahorrado + r.sign * v) * 100) / 100);
+            done = r.sign > 0 && g.ahorrado < g.objetivo && ah >= g.objetivo;
+            return { ...g, ahorrado: ah };
+          });
+          await store.save({ metas: next });
+          coin(r.sign > 0 ? "drop" : "pop");
+          const g = next.find((x) => x.id === id);
+          if (done) confetti();
+          say(`<div class="tk"><span class="tk-title">${r.sign > 0 ? "Apartado" : "Sacaste de la meta"}</span>${metaHtml(g)}${done ? `<div class="tk-quip">¡Lo lograste!</div>` : ""}</div>`);
+          break;
+        }
+        case "meta-del": {
+          const id = r.ids[0];
+          if (!id) { say("No encontré esa meta. Escribe <b>metas</b> para verlas."); break; }
+          const g = metas.find((x) => x.id === id);
+          await store.save({ metas: metas.filter((x) => x.id !== id) });
+          say(`Borré la meta <b>${esc(g.nombre)}</b>. Lo apartado (${esc(fmt(g.ahorrado))}) vuelve a estar libre.`);
+          break;
+        }
+        case "nueva": {
+          if (!r.nombre) { say("Dime el nombre, por ejemplo <b>nueva cuenta Efectivo 200</b>."); break; }
+          if (cuentas.some((c) => norm(c.nombre) === norm(r.nombre))) { say(`Ya tienes una cuenta llamada <b>${esc(r.nombre)}</b>.`); break; }
+          const c = { id: newId(), nombre: r.nombre, inicial: r.monto, moneda: r.moneda };
+          await store.save({ cuentas: [...cuentas, c] });
+          setSel(c.id); coin("drop");
+          say(`Cuenta <b>${esc(c.nombre)}</b> en ${c.moneda === "USD" ? "dólares" : "soles"}${r.monto != null ? ` con <b>${esc(fmt(r.monto, c.moneda))}</b>` : ""}.` +
+            (r.monto == null ? `\nPonle saldo: <b>saldo inicial ${esc(c.nombre)} 1000</b>.` : "") +
+            (c.moneda === "USD" && !rate() ? `\nY dime el tipo de cambio: <b>tc 3.45</b>.` : ""));
+          break;
+        }
+        case "inicial": {
+          await ensureDefault();
+          const id = targetAccount(r.ids);
+          if (!id) { pendingText = text; askPick("¿A qué cuenta le pongo ese saldo inicial?"); break; }
+          await store.save({ cuentas: cuentas.map((c) => (c.id === id ? { ...c, inicial: r.monto } : c)) });
+          say(`<b>${esc(accName(id))}</b> arranca con ${esc(fmt(r.monto, accCur(id)))}\nAhora tiene <b>${esc(fmt(balances()[id], accCur(id)))}</b>`);
+          break;
+        }
+        case "mov": {
+          await ensureDefault();
+          const id = targetAccount(r.ids);
+          if (!id) { echo(text, true); pendingText = text; askPick("¿De qué cuenta? (también puedes escribir “…con BCP”)"); break; }
+          if (sel !== id) { sel = id; filterCat = null; try { localStorage.setItem("caja-sel", id); } catch (e) {} }
+          const ac = accCur(id);
+          let monto = r.monto, orig = null;
+          if (r.cur && r.cur !== ac) {
+            const v = convert(r.monto, r.cur, ac);
+            if (v == null) { echo(text); needTc(); break; }
+            orig = { monto: r.monto, moneda: r.cur, tc: rate() };
+            monto = Math.round(v * 100) / 100;
+          }
+          const ts0 = Date.now(); markFresh(ts0);
+          await store.add({ ts: ts0, tipo: r.tipo, monto, orig, desc: r.desc, cat: r.cat || catOf(r.desc, r.tipo), texto: text.trim(), cuenta: id });
+          coin(r.tipo === "in" ? "drop" : "pop");
+          if (r.tipo === "in") confetti();
+          break;
+        }
+        case "tr": {
+          if (r.desde === r.hacia) { echo(text); say("Las dos cuentas son la misma. Elige una cuenta de origen y otra de destino."); break; }
+          if (sel !== r.desde && sel !== r.hacia) { sel = r.desde; filterCat = null; try { localStorage.setItem("caja-sel", sel); } catch (e) {} }
+          const cd = accCur(r.desde), ch = accCur(r.hacia);
+          let monto = r.monto;
+          if (r.cur && r.cur !== cd) { const v = convert(r.monto, r.cur, cd); if (v == null) { echo(text); needTc(); break; } monto = Math.round(v * 100) / 100; }
+          let montoDest = null, orig = null;
+          if (cd !== ch) { const v = convert(monto, cd, ch); if (v == null) { echo(text); needTc(); break; } montoDest = Math.round(v * 100) / 100; orig = { monto, moneda: cd, tc: rate() }; }
+          const ts1 = Date.now(); markFresh(ts1);
+          await store.add({ ts: ts1, tipo: "tr", monto, montoDest, orig, desc: "", cat: "Transferencia", texto: text.trim(), desde: r.desde, hacia: r.hacia });
+          coin("drop");
+          break;
+        }
+        case "cuentas": say(cuentasHtml()); break;
+        case "saldo": say(sel === "all" ? cuentasHtml() : `En <b>${esc(accName(sel))}</b> tienes <b>${esc(fmt(totals(sel).saldo, accCur(sel)))}</b>`); break;
+        case "resumen": say(resumenHtml()); break;
+        case "ayuda": say(AYUDA); break;
+        case "hola": say(r.gracias ? "¡De nada! Aquí estoy cuando registres algo." : `¡Hola${userName ? ", " + esc(userName) : ""}! Cuéntame qué gastaste o qué te entró, o toca un botón de abajo.`); setMood("big", 1500); break;
+        case "undo": {
+          const last = movs.filter((m) => sel === "all" || touches(m, sel)).sort((a, b) => b.ts - a.ts)[0];
+          if (!last) { say("No hay nada que deshacer aquí."); break; }
+          await store.remove(last.id);
+          say(`Borrado: ${esc(last.texto)}`);
+          break;
+        }
+        case "ren": {
+          const id = r.ids[0];
+          if (!id || !r.nombre) { say("No encontré esa cuenta. Escribe <b>cuentas</b> para ver los nombres."); break; }
+          const old = accName(id);
+          await store.save({ cuentas: cuentas.map((c) => (c.id === id ? { ...c, nombre: r.nombre } : c)) });
+          say(`<b>${esc(old)}</b> ahora es <b>${esc(r.nombre)}</b>.`);
+          break;
+        }
+        case "del": {
+          const id = r.ids[0];
+          if (!id) { say("No encontré esa cuenta. Escribe <b>cuentas</b> para ver los nombres."); break; }
+          pendingDelete = id;
+          const n = movs.filter((m) => touches(m, id)).length;
+          say(`¿Borro <b>${esc(accName(id))}</b> y sus ${n} movimiento${n === 1 ? "" : "s"}?\nEscribe <b>sí, borrar</b> para confirmar.`);
+          break;
+        }
+        case "del-ok": {
+          if (!pendingDelete) { say("Primero escribe <b>borrar cuenta</b> y el nombre."); break; }
+          if (pendingDelete.libro) {
+            const id = pendingDelete.libro; pendingDelete = null;
+            const name = libro(id).nombre;
+            if (id === activo) setLibro(libros.find((l) => l.id !== id).id);
+            syncActive();
+            await store.deleteLibro(id);
+            say(`Borré el recuento <b>${esc(name)}</b>.`);
+            break;
+          }
+          const id = pendingDelete; pendingDelete = null;
+          const name = accName(id);
+          for (const m of movs.filter((m) => touches(m, id))) await store.remove(m.id);
+          await store.save({ cuentas: cuentas.filter((c) => c.id !== id) });
+          if (sel === id) setSel("all");
+          say(`Borré la cuenta <b>${esc(name)}</b>.`);
+          break;
+        }
+        case "reset": pendingReset = true; say(`¿Seguro? En <b>${esc(libro(activo).nombre)}</b> se borran ${cuentas.length} cuentas, ${movs.length} movimientos, tus metas y topes.\nEscribe <b>sí, reiniciar</b> para confirmar.`); break;
+        case "reset-ok":
+          if (!pendingReset) { say("Primero escribe <b>reiniciar</b>."); break; }
+          pendingReset = false;
+          for (const m of [...movs]) await store.remove(m.id);
+          await store.save({ cuentas: [], metas: [], limites: {} });
+          ephemeral = []; setSel("all");
+          say("Caja vacía. Arranca con <b>nueva cuenta Efectivo 200</b>.");
+          break;
+        default: say(`No encontré un monto.\nPrueba <b>pagué 12 de taxi</b> o escribe <b>ayuda</b>.`);
+      }
+    } catch (e) {
+      say(`No pude guardar eso (${esc((e && (e.message || e.code)) || "error")}). Inténtalo otra vez.`);
+    }
+  }
+
+  // ---------- exports (PDF / Excel) ----------
+  const LIBS = {
+    excel: ["https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"],
+    pdf: ["https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js", "https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"],
+  };
+  const loaded = {};
+  function loadScript(src) {
+    if (!loaded[src]) loaded[src] = new Promise((ok, ko) => {
+      const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = () => { delete loaded[src]; ko(new Error("No pude cargar la librería")); };
+      document.head.append(s);
+    });
+    return loaded[src];
+  }
+  const loadLibs = async (k) => { for (const u of LIBS[k]) await loadScript(u); };
+  const MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  function parsePeriod(low) {
+    const now = new Date();
+    if (/\b(todo|completo|historial|total)\b/.test(low.replace(/todos los recuentos/, ""))) return { from: 0, to: Infinity, label: "Todo el historial", slug: "historial" };
+    let y = now.getFullYear(), mo = now.getMonth();
+    const ym = low.match(/\b(20\d\d)\b/);
+    const mi = MESES.findIndex((m) => low.includes(m) || (m === "septiembre" && low.includes("setiembre")));
+    if (/mes pasado|mes anterior/.test(low)) { mo -= 1; if (mo < 0) { mo = 11; y -= 1; } }
+    else if (mi >= 0) { mo = mi; if (ym) y = +ym[1]; else if (mi > now.getMonth()) y -= 1; }
+    else if (ym && !/mes/.test(low)) return { from: new Date(+ym[1], 0, 1).getTime(), to: new Date(+ym[1] + 1, 0, 1).getTime(), label: "Año " + ym[1], slug: ym[1] };
+    return { from: new Date(y, mo, 1).getTime(), to: new Date(y, mo + 1, 1).getTime(), label: cap(MESES[mo]) + " " + y, slug: MESES[mo] + "-" + y, month: true };
+  }
+  // one recuento's report (runs against the active recuento's state)
+  function reportData(per) {
+    const b = {};
+    for (const c of cuentas) b[c.id] = c.inicial || 0;
+    const rows = [];
+    for (const m of [...movs].sort((x, y) => x.ts - y.ts)) {
+      if (m.tipo === "tr") { if (m.desde in b) b[m.desde] -= m.monto; if (m.hacia in b) b[m.hacia] += m.montoDest != null ? m.montoDest : m.monto; }
+      else if (m.cuenta in b) b[m.cuenta] += m.tipo === "in" ? m.monto : -m.monto;
+      if (m.ts < per.from || m.ts >= per.to) continue;
+      const cur = m.tipo === "tr" ? accCur(m.desde) : accCur(m.cuenta);
+      const signed = m.tipo === "out" ? -m.monto : m.monto;
+      rows.push({
+        fecha: new Date(m.ts), tipo: m.tipo === "out" ? "Gasto" : m.tipo === "in" ? "Ingreso" : "Transferencia",
+        cuenta: m.tipo === "tr" ? `${accName(m.desde)} a ${accName(m.hacia)}` : accName(m.cuenta),
+        cat: m.cat, desc: m.desc || m.texto, monto: signed, moneda: cur,
+        soles: m.tipo === "tr" ? 0 : Math.round(toPEN(signed, cur) * 100) / 100,
+        saldo: m.tipo === "tr" ? b[m.desde] : b[m.cuenta],
+        nota: m.orig ? `${SYM[m.orig.moneda]} ${num(m.orig.monto)} a TC ${m.orig.tc.toFixed(3)}` : "",
+      });
+    }
+    let inn = 0, out = 0; const cats = {};
+    for (const r of rows) { if (r.tipo === "Ingreso") inn += r.soles; if (r.tipo === "Gasto") { out += -r.soles; (cats[r.cat] = cats[r.cat] || { v: 0, n: 0 }); cats[r.cat].v += -r.soles; cats[r.cat].n++; } }
+    const catRows = Object.entries(cats).sort((a, c) => c[1].v - a[1].v).map(([k, x]) => ({ cat: k, v: x.v, n: x.n, pct: out ? x.v / out : 0, tope: per.month ? limites[k] || null : null }));
+    const bal = balances();
+    const cuentasRows = cuentas.map((c) => ({ nombre: c.nombre, moneda: c.moneda, saldo: bal[c.id], soles: toPEN(bal[c.id], c.moneda) }));
+    return { per, libro: (libro(activo) || {}).nombre || "Recuento", rows, inn, out, neto: inn - out, catRows, cuentasRows, total: totals("all").saldo, metas: metas.slice() };
+  }
+  const fechaLarga = (d) => d.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const sheetName = (s, used) => { let n = String(s).replace(/[\\\/\?\*\[\]:]/g, " ").trim().slice(0, 28) || "Recuento"; let k = n, i = 2; while (used.has(k.toLowerCase())) k = n.slice(0, 25) + " " + i++; used.add(k.toLowerCase()); return k; };
+
+  async function buildExcel(Rs, per, general) {
+    await loadLibs("excel");
+    const wb = new window.ExcelJS.Workbook();
+    const now = new Date();
+    wb.creator = "CAJA"; wb.created = now;
+    const MONEY = '#,##0.00;[Red]-#,##0.00';
+    const INK = "FF1B1F27", MUTED = "FF6A7080", HEAD = "FF4B57C9", BAND = "FFF3F4FA";
+    const head = (row) => { row.font = { bold: true, color: { argb: "FFFFFFFF" } }; row.eachCell({ includeEmpty: false }, (c) => { c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEAD } }; c.alignment = { vertical: "middle" }; }); row.height = 20; };
+    const section = (ws, text) => { ws.addRow([]); const r = ws.addRow([text]); r.font = { bold: true, size: 12, color: { argb: INK } }; r.height = 20; };
+    const band = (row, cols) => { for (let i = 1; i <= cols; i++) row.getCell(i).fill = { type: "pattern", pattern: "solid", fgColor: { argb: BAND } }; };
+    const titleBlock = (ws, t) => {
+      ws.addRow([t]).font = { bold: true, size: 16, color: { argb: INK } };
+      ws.addRow([`Periodo: ${per.label}`]).font = { color: { argb: MUTED } };
+      ws.addRow([`Generado: ${fechaLarga(now)}` + (rate() ? `  ·  Tipo de cambio: S/ ${rate().toFixed(3)}` : "")]).font = { color: { argb: MUTED } };
+    };
+    const used = new Set();
+
+    function resumen(ws, R) {
+      section(ws, "Totales del periodo (S/)");
+      head(ws.addRow(["Concepto", "Monto S/"]));
+      [["Ingresos", R.inn], ["Gastos", -R.out], ["Neto", R.neto]].forEach(([k, v], i) => { const r = ws.addRow([k, v]); r.getCell(2).numFmt = MONEY; if (i === 2) r.font = { bold: true }; });
+      section(ws, "Saldo actual por cuenta");
+      head(ws.addRow(["Cuenta", "Moneda", "Saldo", "Saldo en S/"]));
+      R.cuentasRows.forEach((c, i) => { const r = ws.addRow([c.nombre, c.moneda === "USD" ? "Dólares" : "Soles", c.saldo, c.soles]); r.getCell(3).numFmt = MONEY; r.getCell(4).numFmt = MONEY; if (i % 2) band(r, 4); });
+      const tr = ws.addRow(["Total", "", "", R.total]); tr.font = { bold: true }; tr.getCell(4).numFmt = MONEY;
+      section(ws, "Gastos por categoría");
+      head(ws.addRow(["Categoría", "Monto S/", "% del gasto", "Movimientos", "Tope mensual"]));
+      R.catRows.forEach((c, i) => { const r = ws.addRow([c.cat, c.v, c.pct, c.n, c.tope]); r.getCell(2).numFmt = MONEY; r.getCell(3).numFmt = "0.0%"; r.getCell(5).numFmt = MONEY; if (i % 2) band(r, 5); });
+      if (!R.catRows.length) ws.addRow(["Sin gastos en este periodo"]).font = { italic: true, color: { argb: MUTED } };
+      if (R.metas.length) {
+        section(ws, "Metas de ahorro");
+        head(ws.addRow(["Meta", "Objetivo S/", "Ahorrado S/", "Avance"]));
+        R.metas.forEach((g) => { const r = ws.addRow([g.nombre, g.objetivo, g.ahorrado, g.objetivo ? g.ahorrado / g.objetivo : 0]); r.getCell(2).numFmt = MONEY; r.getCell(3).numFmt = MONEY; r.getCell(4).numFmt = "0%"; });
+      }
+    }
+    function movimientos(ws, R) {
+      ws.columns = [
+        { header: "Fecha", key: "fecha", width: 17 }, { header: "Tipo", key: "tipo", width: 14 }, { header: "Cuenta", key: "cuenta", width: 22 },
+        { header: "Categoría", key: "cat", width: 15 }, { header: "Descripción", key: "desc", width: 32 }, { header: "Monto", key: "monto", width: 13 },
+        { header: "Moneda", key: "moneda", width: 9 }, { header: "Monto en S/", key: "soles", width: 14 }, { header: "Saldo de la cuenta", key: "saldo", width: 18 }, { header: "Nota", key: "nota", width: 26 },
+      ];
+      head(ws.getRow(1));
+      R.rows.forEach((r) => {
+        const row = ws.addRow({ ...r, fecha: new Date(r.fecha.getTime() - r.fecha.getTimezoneOffset() * 60000), moneda: r.moneda === "USD" ? "US$" : "S/", soles: r.tipo === "Transferencia" ? null : r.soles });
+        row.getCell("fecha").numFmt = "dd/mm/yyyy hh:mm";
+        ["monto", "soles", "saldo"].forEach((k) => (row.getCell(k).numFmt = MONEY));
+      });
+      if (R.rows.length) {
+        ws.autoFilter = { from: "A1", to: "J1" };
+        const n = R.rows.length + 1;
+        const t = ws.addRow({ desc: "Neto del periodo (S/)" });
+        t.getCell("soles").value = { formula: `SUM(H2:H${n})`, result: Math.round(R.neto * 100) / 100 };
+        t.getCell("soles").numFmt = MONEY; t.font = { bold: true };
+      }
+    }
+
+    if (general) {
+      const ws = wb.addWorksheet(sheetName("General", used), { views: [{ showGridLines: false }] });
+      ws.columns = [{ width: 28 }, { width: 16 }, { width: 16 }, { width: 16 }, { width: 18 }, { width: 14 }];
+      titleBlock(ws, "CAJA · Reporte general");
+      section(ws, "Recuentos");
+      head(ws.addRow(["Recuento", "Ingresos S/", "Gastos S/", "Neto S/", "Saldo actual S/", "Movimientos"]));
+      Rs.forEach((R, i) => { const r = ws.addRow([R.libro, R.inn, -R.out, R.neto, R.total, R.rows.length]); [2, 3, 4, 5].forEach((k) => (r.getCell(k).numFmt = MONEY)); if (i % 2) band(r, 6); });
+      const s = (k) => Rs.reduce((a, R) => a + R[k], 0);
+      const tr = ws.addRow(["Total", s("inn"), -s("out"), s("neto"), s("total"), Rs.reduce((a, R) => a + R.rows.length, 0)]);
+      tr.font = { bold: true }; [2, 3, 4, 5].forEach((k) => (tr.getCell(k).numFmt = MONEY));
+    }
+    for (const R of Rs) {
+      const ws = wb.addWorksheet(sheetName(general ? R.libro : "Resumen", used), { views: [{ showGridLines: false }] });
+      ws.columns = [{ width: 30 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 14 }];
+      titleBlock(ws, `CAJA · ${R.libro}`);
+      resumen(ws, R);
+      const wm = wb.addWorksheet(sheetName(general ? R.libro + " mov" : "Movimientos", used), { views: [{ state: "frozen", ySplit: 1 }] });
+      movimientos(wm, R);
+    }
+    const buf = await wb.xlsx.writeBuffer();
+    return new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  }
+
+  async function buildPdf(Rs, per, general) {
+    await loadLibs("pdf");
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const clean = (s) => String(s).replace(/−/g, "-").replace(/→/g, "a").replace(/[^\x20-\xFF\n]/g, "").trim();
+    const money = (v, cur = "PEN") => clean(fmt(v, cur));
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight(), M = 40;
+    const ACC = [75, 87, 201], INK = [27, 31, 39], MUTED = [106, 112, 128], LINE = [226, 228, 236], RED = [196, 60, 76], GREEN = [26, 135, 90];
+    const now = new Date();
+    const base = { theme: "plain", margin: { left: M, right: M, top: 50, bottom: 46 },
+      styles: { font: "helvetica", fontSize: 9, textColor: INK, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, lineColor: LINE },
+      headStyles: { fillColor: ACC, textColor: 255, fontStyle: "bold" }, alternateRowStyles: { fillColor: [246, 247, 251] },
+      didParseCell: (d) => { if (d.section !== "body") { const cs = (d.table.styles.columnStyles || {})[d.column.index]; if (cs && cs.halign) d.cell.styles.halign = cs.halign; } } };
+    const title = (t, y) => { doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(...INK); doc.text(clean(t), M, y); doc.setFont("helvetica", "normal"); };
+    const room = (y, need) => { if (y + need > H - 60) { doc.addPage(); return 56; } return y; };
+    function header(sub) {
+      doc.setDrawColor(...ACC); doc.setLineWidth(1.4); doc.roundedRect(M, 40, 14, 12, 2, 2, "S"); doc.line(M + 4, 40, M + 10, 40);
+      doc.setFillColor(214, 170, 100); doc.circle(M + 7, 35, 3, "F");
+      doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(...INK); doc.text("CAJA", M + 22, 51);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9.5); doc.setTextColor(...MUTED);
+      doc.text(clean(sub), W - M, 44, { align: "right" }); doc.text(clean(per.label), W - M, 56, { align: "right" });
+      doc.setDrawColor(...LINE); doc.setLineWidth(.6); doc.line(M, 68, W - M, 68);
+    }
+    function strip(y, items) {
+      const bw = (W - 2 * M) / items.length;
+      items.forEach(([k, v, col], i) => {
+        const x = M + i * bw;
+        doc.setFontSize(8.5); doc.setTextColor(...MUTED); doc.text(k, x, y);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(...(col || INK)); doc.text(v, x, y + 17); doc.setFont("helvetica", "normal");
+      });
+      return y + 30;
+    }
+    function recuento(R, y) {
+      y = strip(y, [["Ingresos", money(R.inn), GREEN], ["Gastos", money(-R.out), RED], ["Neto", money(R.neto)], ["Saldo actual", money(R.total)]]);
+      y = room(y + 10, 80); title("Saldo por cuenta", y);
+      doc.autoTable({ ...base, startY: y + 8, head: [["Cuenta", "Moneda", "Saldo", "Saldo en S/"]],
+        body: R.cuentasRows.length ? R.cuentasRows.map((c) => [clean(c.nombre), c.moneda === "USD" ? "Dólares" : "Soles", money(c.saldo, c.moneda), money(c.soles)]) : [["Sin cuentas", "", "", ""]],
+        foot: [["Total", "", "", money(R.total)]], footStyles: { fontStyle: "bold", fillColor: [238, 240, 251] },
+        columnStyles: { 2: { halign: "right" }, 3: { halign: "right" } } });
+      y = room(doc.lastAutoTable.finalY + 24, 80); title("Gastos por categoría", y);
+      doc.autoTable({ ...base, startY: y + 8, head: [["Categoría", "Monto", "% del gasto", "Movs.", "Tope"]],
+        body: R.catRows.length ? R.catRows.map((c) => [c.cat, money(c.v), (c.pct * 100).toFixed(1) + "%", c.n, c.tope ? money(c.tope) : "-"]) : [["Sin gastos en este periodo", "", "", "", ""]],
+        columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" } } });
+      y = doc.lastAutoTable.finalY + 24;
+      if (R.metas.length) {
+        y = room(y, 70); title("Metas de ahorro", y);
+        doc.autoTable({ ...base, startY: y + 8, head: [["Meta", "Objetivo", "Ahorrado", "Avance"]],
+          body: R.metas.map((g) => [clean(g.nombre), money(g.objetivo), money(g.ahorrado), Math.round(g.objetivo ? (g.ahorrado / g.objetivo) * 100 : 0) + "%"]),
+          columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" } } });
+        y = doc.lastAutoTable.finalY + 24;
+      }
+      y = room(y, 70); title(`Movimientos (${R.rows.length})`, y);
+      doc.autoTable({ ...base, startY: y + 8, styles: { ...base.styles, fontSize: 8 },
+        head: [["Fecha", "Cuenta", "Categoría", "Descripción", "Monto", "Saldo"]],
+        body: R.rows.length ? R.rows.map((r) => [
+          r.fecha.toLocaleDateString("es-PE", { day: "2-digit", month: "2-digit" }) + " " + r.fecha.toLocaleTimeString("es-PE", { hour: "2-digit", minute: "2-digit", hour12: false }),
+          clean(r.cuenta), r.cat, clean(r.desc) + (r.nota ? "\n" + clean(r.nota) : ""), money(r.monto, r.moneda), money(r.saldo, r.moneda)]) : [["", "", "", "Sin movimientos en este periodo", "", ""]],
+        columnStyles: { 0: { cellWidth: 62 }, 4: { halign: "right", cellWidth: 74 }, 5: { halign: "right", cellWidth: 74, textColor: MUTED } },
+        didParseCell: (d) => { base.didParseCell(d); if (d.section === "body" && d.column.index === 4 && R.rows[d.row.index]) { const t = R.rows[d.row.index].tipo; if (t === "Gasto") d.cell.styles.textColor = RED; if (t === "Ingreso") d.cell.styles.textColor = GREEN; } } });
+      return doc.lastAutoTable.finalY;
+    }
+
+    if (general) {
+      header("Reporte general");
+      const s = (k) => Rs.reduce((a, R) => a + R[k], 0);
+      let y = strip(90, [["Ingresos", money(s("inn")), GREEN], ["Gastos", money(-s("out")), RED], ["Neto", money(s("neto"))], ["Saldo total", money(s("total"))]]);
+      doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+      doc.text(clean(`Generado el ${fechaLarga(now)}` + (rate() ? ` · Tipo de cambio S/ ${rate().toFixed(3)}` : "") + " · Montos en soles salvo indicación"), M, y + 2);
+      title("Recuentos", y + 26);
+      doc.autoTable({ ...base, startY: y + 34, head: [["Recuento", "Ingresos", "Gastos", "Neto", "Saldo actual", "Movs."]],
+        body: Rs.map((R) => [clean(R.libro), money(R.inn), money(-R.out), money(R.neto), money(R.total), R.rows.length]),
+        foot: [["Total", money(s("inn")), money(-s("out")), money(s("neto")), money(s("total")), Rs.reduce((a, R) => a + R.rows.length, 0)]], footStyles: { fontStyle: "bold", fillColor: [238, 240, 251] },
+        columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" }, 4: { halign: "right" }, 5: { halign: "right" } } });
+      for (const R of Rs) {
+        doc.addPage(); header(R.libro);
+        recuento(R, 90);
+      }
+    } else {
+      const R = Rs[0];
+      header(R.libro);
+      doc.setFontSize(8.5); doc.setTextColor(...MUTED);
+      doc.text(clean(`Generado el ${fechaLarga(now)}` + (rate() ? ` · Tipo de cambio S/ ${rate().toFixed(3)}` : "") + " · Montos en soles salvo indicación"), M, 84);
+      recuento(R, 104);
+    }
+    const pages = doc.getNumberOfPages();
+    for (let i = 1; i <= pages; i++) {
+      doc.setPage(i); doc.setFontSize(8); doc.setTextColor(...MUTED);
+      doc.text(clean("CAJA · " + (general ? "Reporte general" : Rs[0].libro) + " · " + per.label), M, H - 24);
+      doc.text(`Página ${i} de ${pages}`, W - M, H - 24, { align: "right" });
+    }
+    return doc.output("blob");
+  }
+
+  const files = {};
+  const slugify = (s) => norm(s).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "recuento";
+  async function exportar(kind, low) {
+    const per = parsePeriod(low);
+    const general = libros.length > 1 && /(general|todos los recuentos|todas las cajas|consolidado|todo junto)/.test(low);
+    const Rs = general ? libros.map((l) => withLibro(l.id, () => reportData(per))) : [reportData(per)];
+    const label = kind === "pdf" ? "PDF" : "Excel";
+    say(`Preparando tu ${label}${general ? " general" : ""} de ${esc(per.label.toLowerCase())}…`);
+    const blob = kind === "pdf" ? await buildPdf(Rs, per, general) : await buildExcel(Rs, per, general);
+    const name = `CAJA-${general ? "general" : slugify(Rs[0].libro)}-${per.slug}.${kind === "pdf" ? "pdf" : "xlsx"}`;
+    const key = "f" + Date.now();
+    files[key] = { name, blob };
+    ephemeral.pop();
+    const inn = Rs.reduce((a, R) => a + R.inn, 0), out = Rs.reduce((a, R) => a + R.out, 0), n = Rs.reduce((a, R) => a + R.rows.length, 0);
+    const icon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>`;
+    say(`<div class="tk"><span class="tk-title">${label} listo · ${esc(general ? "General" : Rs[0].libro)} · ${esc(per.label)}</span>` +
+      (general ? `<div class="tk-foot"><span>Recuentos</span><b>${Rs.length}</b></div>` : "") +
+      `<div class="tk-foot"><span>Movimientos</span><b>${n}</b></div>` +
+      `<div class="tk-foot"><span>Ingresos</span><b>${esc(fmt(inn))}</b></div><div class="tk-foot"><span>Gastos</span><b>${esc(fmt(-out))}</b></div>` +
+      `<div class="tk-sub">${kind === "pdf" ? (general ? "Portada con todos los recuentos y una sección por cada uno." : "Resumen, cuentas, categorías, metas y el detalle de cada movimiento.") : (general ? "Hoja General más resumen y movimientos de cada recuento." : "Hojas: Resumen y Movimientos, con filtros y montos en soles.")}</div>` +
+      `<div class="tk-sub">${esc(name)}</div><button class="dl" type="button" data-dl="${key}">${icon}Descargar ${label}</button></div>`);
+  }
+  async function download(key) {
+    const f = files[key];
+    if (!f) return;
+    let dl = null;
+    try { dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch (e) {}
+    if (!dl && !window.claude) {
+      const link = document.createElement("a"); link.href = URL.createObjectURL(f.blob); link.download = f.name;
+      document.body.append(link); link.click(); setTimeout(() => { URL.revokeObjectURL(link.href); link.remove(); }, 1500); return;
+    }
+    if (!dl) { say("La descarga no está disponible en esta vista. Abre CAJA en claude.ai desde el navegador para guardar el archivo."); return; }
+    try { await dl.save({ filename: f.name, data: f.blob }); }
+    catch (e) {
+      const c = e && e.code;
+      if (c === "declined") return;
+      say(c === "rate_limited" ? "Ya hay una descarga abierta. Espera un momento y vuelve a tocar el botón."
+        : c === "host_unavailable" ? "Esta app no puede guardar archivos. Abre CAJA en el navegador o en una computadora."
+        : `No pude guardar el archivo (${esc(c || "error")}).`);
+    }
+  }
+
+  // ---------- icons ----------
+  const ICONS = {
+    gasto: '<path d="M7 17 17 7M9 7h8v8"/>',
+    ingreso: '<path d="M17 7 7 17M15 17H7V9"/>',
+    transferir: '<path d="M4 8h14l-3-3M20 16H6l3 3"/>',
+    cuentas: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10.5h18M7 15h4"/>',
+    resumen: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
+    reportes: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+    metas: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/>',
+    topes: '<path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="M9 12h6"/>',
+    recuentos: '<rect x="4" y="4" width="16" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="16" height="6.5" rx="1.6"/>',
+    tc: '<path d="M12 3v18M16.5 7.5C15.9 6 14.1 5 12 5c-2.5 0-4.5 1.4-4.5 3.3 0 4.2 9 2.6 9 6.9 0 1.9-2 3.3-4.5 3.3-2.1 0-3.9-1.1-4.5-2.5"/>',
+    nuevacuenta: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M12 9.5v6M9 12.5h6"/>',
+    nuevorecuento: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.5v7M8.5 12h7"/>',
+    nuevameta: '<circle cx="12" cy="12" r="8"/><path d="M12 8.5v7M8.5 12h7"/>',
+    ayuda: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .9-1 1.6v.5M12 17h.01"/>',
+    sincronizar: '<path d="M20 11a8 8 0 0 0-14.6-4.4M4 4v3.6h3.6M4 13a8 8 0 0 0 14.6 4.4M20 20v-3.6h-3.6"/>',
+    deshacer: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+    eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    eyeoff: '<path d="m3 3 18 18M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+    send: '<path d="M4 12h15M13 6l6 6-6 6"/>',
+    down: '<path d="m6 9 6 6 6-6"/>',
+    up: '<path d="m6 15 6-6 6 6"/>',
+    check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+    more: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  };
+  const svgI = (k, w = 1.8) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k]}</svg>`;
+  const LOGO = `<img class="logo-mini" alt="" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+PGRlZnM+PHJhZGlhbEdyYWRpZW50IGlkPSJiZyIgY3g9Ii41IiBjeT0iLjQyIiByPSIuOCI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMmIyZjM2Ii8+PHN0b3Agb2Zmc2V0PSIuNiIgc3RvcC1jb2xvcj0iIzEzMTUxOCIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA3MDgwYSIvPjwvcmFkaWFsR3JhZGllbnQ+CjxyYWRpYWxHcmFkaWVudCBpZD0iZ2xvdyIgY3g9Ii41IiBjeT0iLjUiIHI9Ii41Ij48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmM5M2MiIHN0b3Atb3BhY2l0eT0iLjQyIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjZmZjOTNjIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9ImNvaW4iIGN4PSIuMzUiIGN5PSIuMyIgcj0iLjg1Ij48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmZmZiZTYiLz48c3RvcCBvZmZzZXQ9Ii41IiBzdG9wLWNvbG9yPSIjZmZkNDUzIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjYTg2ZDAyIi8+PC9yYWRpYWxHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJnQSIgeDE9IjAiIHkxPSIwIiB4Mj0iMSIgeTI9IjEiPjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iI2ZmZjBiMiIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2YyYjUyYSIvPjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0iZ0IiIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiNmNGI1MmEiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNiNTc4MDUiLz48L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9ImdDIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjYzg4YTBjIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjN2E0ZDAyIi8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJnSW4iIHgxPSIwIiB5MT0iMCIgeDI9IjAiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMzYjI2MDMiLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMxMjBiMDEiLz48L2xpbmVhckdyYWRpZW50Pgo8ZmlsdGVyIGlkPSJibHVyIiB4PSItNTAlIiB5PSItNTAlIiB3aWR0aD0iMjAwJSIgaGVpZ2h0PSIyMDAlIj48ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxNiIvPjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExNCIgZmlsbD0idXJsKCNiZykiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIzMDAiIHI9IjIwMCIgZmlsbD0idXJsKCNnbG93KSIvPgo8ZWxsaXBzZSBjeD0iMjU2IiBjeT0iNDQwIiByeD0iMTUwIiByeT0iMTgiIGZpbGw9IiMwMDAiIG9wYWNpdHk9Ii41NSIgZmlsdGVyPSJ1cmwoI2JsdXIpIi8+CjxwYXRoIGQ9Ik0xNDIgMjU4IDI1NiAyMDAgMjI2IDE1MCAxMDggMjA4eiIgZmlsbD0idXJsKCNnQikiIHN0cm9rZT0iIzJhMWEwMiIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0yNTYgMjAwIDM3MCAyNTggNDA0IDIwOCAyODYgMTUweiIgZmlsbD0idXJsKCNnQykiIHN0cm9rZT0iIzJhMWEwMiIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0xNDIgMjU4IDI1NiAyMDAgMzcwIDI1OCAyNTYgMzE2eiIgZmlsbD0idXJsKCNnSW4pIiBzdHJva2U9IiMyYTFhMDIiIHN0cm9rZS13aWR0aD0iNSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8cGF0aCBkPSJNMTQyIDI1OCAyNTYgMjAwIDI1NiAyNjIgMTQyIDMyMHoiIGZpbGw9IiMwMDAiIG9wYWNpdHk9Ii4yNSIvPgo8Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNDYiIHI9IjQwIiBmaWxsPSJ1cmwoI2NvaW4pIiBzdHJva2U9IiM1YzNiMDAiIHN0cm9rZS13aWR0aD0iNC44Ii8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjQ2IiByPSIyNy4yIiBmaWxsPSJub25lIiBzdHJva2U9IiNhMDZhMDQiIHN0cm9rZS13aWR0aD0iMi40Ii8+PHRleHQgeD0iMjU2IiB5PSIyNjAuNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkRlamFWdSBTYW5zLEFyaWFsIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1zaXplPSIzOCIgZmlsbD0iIzZiNDUwMCI+Uy88L3RleHQ+CjxwYXRoIGQ9Ik0xNDIgMjU4IDI1NiAzMTZ2MTEyTDE0MiAzNzB6IiBmaWxsPSJ1cmwoI2dCKSIgc3Ryb2tlPSIjMmExYTAyIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTM3MCAyNTggMjU2IDMxNnYxMTJsMTE0LTU4eiIgZmlsbD0idXJsKCNnQykiIHN0cm9rZT0iIzJhMWEwMiIgc3Ryb2tlLXdpZHRoPSI1IiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CjxwYXRoIGQ9Ik0xNDIgMjU4IDI1NiAzMTYgMjEwIDM1MiA5MiAyOTJ6IiBmaWxsPSJ1cmwoI2dBKSIgc3Ryb2tlPSIjMmExYTAyIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTM3MCAyNTggMjU2IDMxNiAzMDIgMzUyIDQyMCAyOTJ6IiBmaWxsPSJ1cmwoI2dCKSIgc3Ryb2tlPSIjMmExYTAyIiBzdHJva2Utd2lkdGg9IjUiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPHBhdGggZD0iTTE1NiAzMDB2NjIiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSI3IiBzdHJva2UtbGluZWNhcD0icm91bmQiIG9wYWNpdHk9Ii40Ii8+CjxwYXRoIGQ9Ik0xMTggMjg2bDcwIDM0IiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNTUiLz4KPGcgc3Ryb2tlPSIjZmZlMDhhIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iLjciPjxwYXRoIGQ9Ik0yNTYgMTUwdi0zNE0yMjYgMTYwbC0xNC0yNk0yODYgMTYwbDE0LTI2Ii8+PC9nPjwvc3ZnPg==">`;
+  const ACTIONS = {
+    gasto: "Registrar gasto", ingreso: "Registrar ingreso", transferir: "Transferir", cuentas: "Mis cuentas",
+    resumen: "Resumen", reportes: "PDF y Excel", metas: "Metas", topes: "Topes", recuentos: "Recuentos",
+    tc: "Tipo de cambio", sincronizar: "JSONBin", nuevacuenta: "Nueva cuenta", nuevameta: "Nueva meta", nuevorecuento: "Nuevo recuento", deshacer: "Deshacer", ayuda: "Ayuda",
+  };
+
+  // ---------- receipts ----------
+  const opCode = (ts) => String((Math.imul(Math.floor(ts / 7) ^ 0x5bd1e995, 2654435761) >>> 0) % 1000000).padStart(6, "0");
+  function movReply(m) {
+    const b = balances(m.ts);
+    const fresh = Date.now() - m.ts < 4000;
+    const word = m.tipo === "out" ? "Pagado" : m.tipo === "in" ? "Recibido" : "Transferido";
+    const ok = `<span class="stamp${fresh ? " fresh" : ""}" style="--cc:${m.tipo === "out" ? "var(--red)" : m.tipo === "in" ? "var(--green)" : "var(--c2)"}">${word}</span>`;
+    const more = `<button class="rc-more" type="button" data-mov="${esc(m.id)}" aria-label="Opciones del movimiento">${svgI("more", 2.4)}</button>`;
+    const open = expanded.has(m.id);
+    const when = new Date(m.ts).toLocaleString("es-PE", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" });
+    const details = open ? `<div class="rc-more-info"><div class="tk-foot"><span>Fecha</span><b>${esc(when)}</b></div>` +
+      (m.orig ? `<div class="tk-foot"><span>Monto original</span><b>${esc(fmt(m.orig.monto, m.orig.moneda))} · TC ${esc(m.orig.tc.toFixed(3))}</b></div>` : "") +
+      `<div class="tk-foot"><span>Operación</span><b>${opCode(m.ts)}</b></div>` +
+      `<div class="rc-actions"><button class="opt" type="button" data-dup="${esc(m.id)}">↻ Repetir hoy</button><button class="opt danger" type="button" data-mov="${esc(m.id)}">Eliminar</button></div></div>` : "";
+    if (m.tipo === "tr") {
+      const cd = accCur(m.desde), ch = accCur(m.hacia);
+      return `<div class="rc${open ? " open" : ""}" data-rc="${esc(m.id)}"><div class="rc-head"><span class="rc-ic">🔁</span><span class="rc-t"><b>Transferencia</b><small>${accTag(m.desde)} → ${accTag(m.hacia)}</small></span><span class="rc-amt">${esc(fmt(m.monto, cd))}</span></div>` +
+        (cd !== ch && m.montoDest != null ? `<div class="tk-sub">Llegan ${esc(fmt(m.montoDest, ch))} · TC ${esc(m.orig && m.orig.tc ? m.orig.tc.toFixed(3) : "")}</div>` : "") +
+        `<div class="rc-foot">${ok}<span class="sal">${esc(accName(m.hacia))} <b>${esc(fmt(b[m.hacia] || 0, ch))}</b></span>${more}</div>${details}</div>`;
+    }
+    const cur = accCur(m.cuenta);
+    const label = m.desc || (m.tipo === "in" ? "Ingreso" : "Gasto");
+    const conv = m.orig ? `<div class="tk-sub">${esc(fmt(m.orig.monto, m.orig.moneda))} × TC ${esc(m.orig.tc.toFixed(3))}</div>` : "";
+    return `<div class="rc${open ? " open" : ""}" data-rc="${esc(m.id)}"><div class="rc-head"><span class="rc-ic">${catEmoji(m.cat)}</span><span class="rc-t"><b>${esc(label)}</b><small>${esc(m.cat)} ${accTag(m.cuenta)}</small></span>` +
+      `<span class="rc-amt ${m.tipo}">${m.tipo === "out" ? "−" : "+"}${esc(fmt(m.monto, cur))}</span></div>${conv}` +
+      (m.tipo === "out" ? limitLine(m.cat, m.ts).replace('<div class="tk-hr"></div>', "") : "") +
+      `<div class="rc-foot">${ok}<span class="sal">Saldo <b>${esc(fmt(b[m.cuenta] || 0, cur))}</b></span>${more}</div>${details}</div>`;
+  }
+
+  // ---------- guided flows (bank-style) ----------
+  let flow = null, stepSeq = 0, settleT = null, collapsed = false;
+  const collapsedPref = () => collapsed;
+  function settle() { if (Date.now() > moodUntil) setMood("o", 420); clearTimeout(settleT); settleT = setTimeout(() => { for (const e of ephemeral) e.pending = false; render(); }, 420); }
+  function ask(html, opts = [], layout = "chips", input = null) {
+    flow.step = ++stepSeq; flow.opts = opts; flow.input = input;
+    ephemeral.push({ ts: Date.now() + 0.5, who: "bot", html, opts, layout, step: flow.step, pending: true });
+    $("entrada").placeholder = input === "amount" ? "Escribe el monto, ej. 25.50" : input === "text" ? "Escribe aquí…" : "Elige una opción o escribe";
+    render(); settle();
+  }
+  function endFlow() { flow = null; $("entrada").placeholder = "Escribe o elige una acción"; render(); }
+  function cancelFlow() { if (!flow) return; endFlow(); say("Operación cancelada."); }
+  const amountOpts = (list) => list.map((n) => ({ label: fmt(n).replace(".00", ""), val: n }));
+  const accountOpts = (except) => cuentas.filter((c) => c.id !== except).map((c) => ({ label: c.nombre, sub: fmt(balances()[c.id], c.moneda), val: c.id }));
+  const row = (k, v, cls = "") => `<div class="tk-foot"><span>${esc(k)}</span><b class="${cls}">${esc(v)}</b></div>`;
+  const amtTxt = (d, acCur) => (d.cur && d.cur !== acCur ? fmt(d.monto, d.cur) : fmt(d.monto, acCur || "PEN"));
+
+  const FLOWS = {
+    mov: {
+      next(f) {
+        const d = f.d, gasto = f.tipo === "out";
+        if (d.monto == null) return ask(`¿Cuánto ${gasto ? "gastaste" : "recibiste"}?<div class="tk-sub">Elige o escribe el monto. Para dólares escribe, por ejemplo, “20 dólares”.</div>`, amountOpts(gasto ? [10, 20, 50, 100, 200, 500] : [100, 500, 1000, 1500, 2000, 3000]), "amounts", "amount");
+        if (!d.cuenta) return ask(gasto ? "¿De qué cuenta sale?" : "¿A qué cuenta entra?", accountOpts(), "cards");
+        if (gasto && !d.cat) return ask("¿En qué categoría?", [...CATS.map((c) => ({ label: `${c.e} ${c.n}`, val: c.n })), { label: "🧾 Otros", val: "Otros" }], "grid");
+        if (!gasto && d.desc == null) return ask("¿De dónde vino?", ["Sueldo", "Yape / Plin", "Cachuelo", "Venta", "Devolución", "Otro"].map((x) => ({ label: x, val: x === "Otro" ? "" : x })), "chips", "text");
+        if (gasto && d.desc == null) {
+          const c = CATS.find((x) => x.n === d.cat);
+          const sug = c ? c.w.slice(0, 4).map((w) => cap(w)) : [];
+          return ask("¿Quieres agregar una nota?", [...sug.map((s) => ({ label: s, val: s })), { label: "Omitir", val: "" }], "chips", "text");
+        }
+        const cur = accCur(d.cuenta);
+        return ask(`<div class="tk"><span class="tk-title">Confirma tu ${gasto ? "gasto" : "ingreso"}</span><div class="cf-amt ${gasto ? "out" : "in"}">${gasto ? "−" : "+"}${esc(amtTxt(d, cur))}</div>` +
+          `<div class="tk-foot"><span>Cuenta</span>${accTag(d.cuenta)}</div>` + (gasto ? row("Categoría", d.cat) : "") + row(gasto ? "Nota" : "Origen", d.desc || "—") +
+          (d.cur && d.cur !== cur && rate() ? row("Se registra como", fmt(convert(d.monto, d.cur, cur), cur)) : "") + `</div>`,
+          [{ label: "Confirmar", val: "ok", primary: true }, { label: "Cancelar", val: "no" }, ...(cuentas.length > 1 ? [{ label: "Cambiar cuenta", val: "acct" }] : [])], "row");
+      },
+      async commit(f) {
+        const d = f.d, gasto = f.tipo === "out";
+        const text = `${gasto ? "Gasto" : "Ingreso"} de ${amtTxt(d, accCur(d.cuenta))}${d.desc ? " · " + d.desc : ""}`;
+        endFlow();
+        await handle(text, null, { cmd: "mov", tipo: f.tipo, monto: d.monto, cur: d.cur, desc: d.desc ? cap(d.desc) : "", cat: gasto ? d.cat : "Ingreso", ids: [d.cuenta] });
+      },
+    },
+    transferir: {
+      next(f) {
+        const d = f.d;
+        if (d.monto == null) return ask("¿Cuánto quieres transferir?", amountOpts([50, 100, 200, 500, 1000]), "amounts", "amount");
+        if (!d.desde) return ask("¿Desde qué cuenta?", accountOpts(), "cards");
+        if (!d.hacia) return ask("¿A qué cuenta?", accountOpts(d.desde), "cards");
+        const cd = accCur(d.desde), ch = accCur(d.hacia);
+        const src = d.cur && d.cur !== cd ? convert(d.monto, d.cur, cd) : d.monto;
+        return ask(`<div class="tk"><span class="tk-title">Confirma la transferencia</span><div class="cf-amt">${esc(amtTxt(d, cd))}</div>` + row("Desde", accName(d.desde)) + row("Hacia", accName(d.hacia)) +
+          (cd !== ch && rate() && src != null ? row("Llegan", fmt(convert(src, cd, ch), ch)) : "") + `</div>`,
+          [{ label: "Confirmar", val: "ok", primary: true }, { label: "Cancelar", val: "no" }], "row");
+      },
+      async commit(f) {
+        const d = f.d; endFlow();
+        await handle(`Transferencia de ${amtTxt(d, accCur(d.desde))}: ${accName(d.desde)} → ${accName(d.hacia)}`, null, { cmd: "tr", monto: d.monto, cur: d.cur, desde: d.desde, hacia: d.hacia });
+      },
+    },
+    reporte: {
+      next(f) {
+        const d = f.d;
+        if (!d.kind) return ask("¿En qué formato lo quieres?", [{ label: "📄 PDF", val: "pdf" }, { label: "📊 Excel", val: "xlsx" }], "row");
+        if (!d.per) return ask("¿De qué periodo?", [{ label: "Este mes", val: "este mes" }, { label: "Mes pasado", val: "mes pasado" }, { label: "Todo el historial", val: "todo" }], "chips");
+        if (libros.length > 1 && !d.scope) return ask("¿Qué recuentos incluyo?", [{ label: "Solo " + libro(activo).nombre, val: "uno" }, { label: "Todos (general)", val: "general" }], "row");
+        f.done = true; return FLOWS.reporte.commit(f);
+      },
+      async commit(f) {
+        const d = f.d; endFlow();
+        try { await exportar(d.kind, d.per + (d.scope === "general" ? " general" : "")); }
+        catch (e) { ephemeral = ephemeral.filter((x) => !/Preparando/.test(x.html)); say(`No pude generar el archivo (${esc((e && e.message) || "error")}). Revisa tu conexión e inténtalo otra vez.`); }
+      },
+    },
+    cuenta: {
+      next(f) {
+        const d = f.d;
+        if (!d.nombre) return ask("¿Cómo se llama la cuenta?", ["Efectivo", "BCP", "Interbank", "BBVA", "Ahorros", "Tarjeta"].filter((n) => !cuentas.some((c) => norm(c.nombre) === norm(n))).map((x) => ({ label: x, val: x })), "chips", "text");
+        if (!d.moneda) return ask(`¿En qué moneda está <b>${esc(d.nombre)}</b>?`, [{ label: "Soles (S/)", val: "PEN" }, { label: "Dólares (US$)", val: "USD" }], "row");
+        if (d.monto == null) return ask("¿Con cuánto empieza?", [{ label: "Empieza en 0", val: 0 }, ...amountOpts([100, 500, 1000])], "amounts", "amount");
+        f.done = true; return FLOWS.cuenta.commit(f);
+      },
+      async commit(f) { const d = f.d; endFlow(); await handle("", null, { cmd: "nueva", nombre: cap(d.nombre), moneda: d.moneda, monto: d.monto, silent: true }); },
+    },
+    recuento: {
+      next(f) { if (!f.d.nombre) return ask("¿Cómo se llama el nuevo recuento?<div class=\"tk-sub\">Tendrá sus propias cuentas, movimientos, metas y topes.</div>", ["Viaje", "Negocio", "Casa", "Universidad"].map((x) => ({ label: x, val: x })), "chips", "text"); f.done = true; return FLOWS.recuento.commit(f); },
+      async commit(f) { const n = f.d.nombre; endFlow(); await handle("", null, { cmd: "lib-new", nombre: cap(n), silent: true }); },
+    },
+    meta: {
+      next(f) {
+        if (!f.d.nombre) return ask("¿Qué quieres lograr?", ["Laptop", "Viaje", "Fondo de emergencia", "Celular"].map((x) => ({ label: x, val: x })), "chips", "text");
+        if (f.d.monto == null) return ask(`¿Cuánto necesitas para <b>${esc(f.d.nombre)}</b>?`, amountOpts([500, 1000, 2500, 5000]), "amounts", "amount");
+        f.done = true; return FLOWS.meta.commit(f);
+      },
+      async commit(f) { const d = f.d; endFlow(); await handle("", null, { cmd: "meta-nueva", nombre: cap(d.nombre), monto: d.monto, cur: d.cur, silent: true }); },
+    },
+    tc: {
+      next(f) { if (f.d.monto == null) return ask(`¿A cuánto está el dólar hoy?${rate() ? `<div class="tk-sub">Ahora uso S/ ${esc(rate().toFixed(3))}${tc && tc.fecha ? " del " + esc(shortDate(tc.fecha)) : ""}.</div>` : ""}`, [], "chips", "amount"); f.done = true; return FLOWS.tc.commit(f); },
+      async commit(f) { const v = f.d.monto; endFlow(); await handle("", null, { cmd: "tc", valor: v, silent: true }); },
+    },
+    delmov: {
+      next(f) {
+        const m = movs.find((x) => x.id === f.d.id);
+        if (!m) { endFlow(); return say("Ese movimiento ya no existe."); }
+        return ask(`¿Eliminar este movimiento?<div class="tk-sub">${esc(m.texto)} · Op. ${opCode(m.ts)}</div>`, [{ label: "Eliminar", val: "ok", primary: true }, { label: "Cancelar", val: "no" }], "row");
+      },
+      async commit(f) { const id = f.d.id; endFlow(); await store.remove(id); say("Movimiento eliminado. El saldo ya se recalculó."); },
+    },
+  };
+  function startFlow(kind, extra = {}) {
+    if (!store) return;
+    closeSheet();
+    ephemeral = ephemeral.filter((e) => !e.tmp);
+    flow = { kind, d: {}, ...extra };
+    FLOWS[kind].next(flow);
+  }
+  async function answer(v) {
+    const f = flow;
+    if (!f) return;
+    const def = FLOWS[f.kind];
+    if (f.d.monto == null && f.input === "amount") {
+      if (typeof v === "number") { f.d.monto = v; f.d.cur = null; } else { f.d.monto = v.monto; f.d.cur = v.cur; }
+      if (f.kind === "mov" || f.kind === "transferir") await ensureDefault();
+      if (f.kind === "mov" && cuentas.length === 1) f.d.cuenta = cuentas[0].id;
+      if (f.kind === "mov" && sel !== "all" && acc(sel)) f.d.cuenta = sel;
+      return def.next(f);
+    }
+    const last = ephemeral.filter((e) => e.step === f.step)[0];
+    const q = last ? last.html : "";
+    if (v === "acct") { f.d.cuenta = null; return def.next(f); }
+    if (v === "ok" || v === "no") { if (v === "no") return cancelFlow(); return def.commit(f); }
+    if (f.kind === "mov") {
+      if (!f.d.cuenta) f.d.cuenta = v;
+      else if (f.tipo === "out" && !f.d.cat) f.d.cat = v;
+      else f.d.desc = v;
+    } else if (f.kind === "transferir") { if (!f.d.desde) f.d.desde = v; else f.d.hacia = v; }
+    else if (f.kind === "reporte") { if (!f.d.kind) f.d.kind = v; else if (!f.d.per) f.d.per = v; else f.d.scope = v; }
+    else if (f.kind === "cuenta") { if (!f.d.nombre) f.d.nombre = v; else f.d.moneda = v; }
+    else if (f.kind === "recuento" || f.kind === "meta") { if (!f.d.nombre) f.d.nombre = v; }
+    void q;
+    return def.next(f);
+  }
+  function chooseOpt(i, step) {
+    if (!flow || flow.step !== step) return;
+    const o = flow.opts[i];
+    if (!o) return;
+    const it = ephemeral.find((e) => e.step === step); if (it) it.chosen = i;
+    echo(o.label); buzz(o.val === "ok" ? 20 : 8);
+    answer(o.val);
+  }
+  function runAction(a) {
+    closeSheet();
+    if (!store) return;
+    const say2 = (label, pre) => { flow = null; handle(label, null, pre); };
+    switch (a) {
+      case "gasto": return cuentas.length || true ? startFlow("mov", { tipo: "out" }) : null;
+      case "ingreso": return startFlow("mov", { tipo: "in" });
+      case "transferir":
+        if (cuentas.length < 2) { echo(ACTIONS[a]); return say(`Para transferir necesitas al menos dos cuentas.<div class="opts row"><button class="opt primary" type="button" data-action="nuevacuenta">Crear cuenta</button></div>`); }
+        return startFlow("transferir");
+      case "reportes": return startFlow("reporte");
+      case "nuevacuenta": return startFlow("cuenta");
+      case "nuevorecuento": return startFlow("recuento");
+      case "nuevameta": return startFlow("meta");
+      case "tc": return startFlow("tc");
+      case "recuentos": return openSheet("libros");
+      case "sincronizar": return syncSheet();
+      case "cuentas": return say2("Mis cuentas", { cmd: "cuentas" });
+      case "resumen": return say2("Resumen", { cmd: "resumen" });
+      case "metas": return say2("Metas", { cmd: "metas" });
+      case "topes": return say2("Topes", { cmd: "limites" });
+      case "deshacer": return say2("Deshacer", { cmd: "undo" });
+      case "ayuda": return say2("Ayuda", { cmd: "ayuda" });
+    }
+  }
+
+  // ---------- bottom sheet ----------
+  let sheetT = null;
+  function openSheet(kind) {
+    clearTimeout(sheetT);
+    const body = $("sheetBody");
+    if (kind === "acciones") {
+      $("sheetTitle").textContent = "¿Qué quieres hacer?";
+      body.innerHTML = `<div class="opts grid">${["gasto", "ingreso", "transferir", "cuentas", "resumen", "reportes", "metas", "nuevameta", "topes", "recuentos", "nuevacuenta", "tc", "sincronizar"].map((k) =>
+        `<button class="opt" type="button" data-action="${k}"><span class="ic">${svgI(k)}</span><span>${esc(ACTIONS[k])}</span></button>`).join("")}</div>`;
+    } else {
+      $("sheetTitle").textContent = "Tus recuentos";
+      body.innerHTML = libros.map((l) => {
+        const c = l.id === activo ? cuentas.length : withLibro(l.id, () => cuentas.length);
+        return `<button class="lib-row${l.id === activo ? " on" : ""}" type="button" data-libro="${esc(l.id)}"><b>${esc(l.nombre)}</b><small>${c} cuenta${c === 1 ? "" : "s"}</small></button>`;
+      }).join("") + `<button class="lib-row add" type="button" data-action="nuevorecuento">+ Nuevo recuento</button>` +
+        `<div class="sheet-note">Para renombrar o borrar uno, escribe por ejemplo “renombrar recuento Viaje a Cusco” o “borrar recuento Viaje”.</div>`;
+    }
+    $("sheet").hidden = false; $("scrim").hidden = false;
+    $("plus").classList.toggle("on", kind === "acciones");
+    requestAnimationFrame(() => { $("sheet").classList.add("open"); $("scrim").classList.add("open"); });
+  }
+  function closeSheet() {
+    if ($("sheet").hidden) return;
+    $("sheet").classList.remove("open"); $("scrim").classList.remove("open"); $("plus").classList.remove("on");
+    sheetT = setTimeout(() => { $("sheet").hidden = true; $("scrim").hidden = true; }, 220);
+  }
+
+  // ---------- interactivity ----------
+  let showAlt = false, filterCat = null, keepScroll = false;
+  const expanded = new Set();
+  const buzz = (ms = 12) => { try { navigator.vibrate && navigator.vibrate(ms); } catch (e) {} };
+  let sayIdx = 0, sayT = null;
+  function cajiTalk() {
+    const T = cuentas.length && sel !== "all" ? totals(sel) : null;
+    const lines = [insight()];
+    if (T) {
+      lines.push(`Hoy llevas ${fmt(T.hoy, T.cur)} en gastos desde ${accName(sel)}.`);
+      lines.push(`Para lo que queda del mes tienes ${fmt(Math.max(0, T.saldo / daysLeft()), T.cur)} por día en ${accName(sel)}.`);
+    }
+    const g = metas.find((x) => x.ahorrado < x.objetivo);
+    if (g) lines.push(`Tu meta ${g.nombre} va en ${Math.round((g.ahorrado / g.objetivo) * 100)}%. ¡Sigue así!`);
+    lines.push("Desliza el resumen a los lados para cambiar de cuenta.", "Toca la gráfica para ver tu saldo día por día.", "Toca un comprobante para repetirlo o borrarlo.");
+    const el = $("cajiSay");
+    const safe = $("app").classList.contains("privacy") ? ["Tus saldos están ocultos. Toca el ojo de arriba para verlos.", "Desliza el resumen a los lados para cambiar de cuenta.", "Toca un comprobante para repetirlo o borrarlo."] : lines;
+    el.textContent = safe[sayIdx++ % safe.length]; el.hidden = false;
+    el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop");
+    clearTimeout(sayT); sayT = setTimeout(() => { el.hidden = true; }, 4200);
+    setMood("big", 1400); buzz(8);
+    const c = $("caji"); c.classList.remove("hopnow"); void c.getBBox(); c.classList.add("hopnow");
+  }
+  function sparkPoints(days) {
+    const pts = [], now = new Date();
+    for (let k = days - 1; k >= 0; k--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - k);
+      const end = Math.min(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999).getTime(), Date.now());
+      const bb = balances(end);
+      pts.push({ d, v: sel === "all" ? cuentas.reduce((s, c) => s + toPEN(bb[c.id] || 0, c.moneda), 0) : bb[sel] || 0 });
+    }
+    return pts;
+  }
+  function switchAccount(dir) {
+    if (cuentas.length < 2 || flow) return;
+    const i = cuentas.findIndex((c) => c.id === sel);
+    const next = cuentas[(i + dir + cuentas.length) % cuentas.length];
+    const sm = document.querySelector(".sum-main");
+    sm.classList.remove("slide-l", "slide-r"); void sm.offsetWidth; sm.classList.add(dir > 0 ? "slide-l" : "slide-r");
+    filterCat = null; buzz(8); setSel(next.id);
+    const card = document.querySelector(`.acard[data-id="${CSS.escape(next.id)}"]`); if (card) card.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
+  }
+  function chartSheet() {
+    clearTimeout(sheetT); $("plus").classList.remove("on");
+    if (!cuentas.length) return;
+    const cur = accCur(sel), pts = sparkPoints(30);
+    const W = 320, H = 150, pad = 10;
+    const vs = pts.map((p) => p.v), min = Math.min(...vs), max = Math.max(...vs), span = max - min || 1;
+    const xy = pts.map((p, i) => [i * (W / 29), H - pad - ((p.v - min) / span) * (H - 2 * pad)]);
+    const line = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const ms = monthStart(), cats = {};
+    let tot = 0;
+    for (const m of movs) if (m.tipo === "out" && m.cuenta === sel && m.ts >= ms) { cats[m.cat] = (cats[m.cat] || 0) + m.monto; tot += m.monto; }
+    const rows = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+    $("sheetTitle").textContent = `${accName(sel)} · últimos 30 días`;
+    $("sheetBody").innerHTML = `<div class="chart" id="chart" style="--acct:${accColor(sel)}">
+        <div class="chart-tip" id="chartTip"></div>
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Saldo de los últimos 30 días">
+          <path class="c-area" d="${line} L${W} ${H} L0 ${H}Z"></path><path class="c-line" d="${line}"></path>
+          <line class="c-cursor" id="chartCur" x1="${xy[29][0]}" x2="${xy[29][0]}" y1="0" y2="${H}"></line>
+          <circle class="c-dot" id="chartDot" cx="${xy[29][0]}" cy="${xy[29][1]}" r="4"></circle>
+        </svg>
+        <div class="chart-ax"><span>${esc(pts[0].d.toLocaleDateString("es-PE", { day: "numeric", month: "short" }))}</span><span>Hoy</span></div>
+      </div>
+      <h4 class="sheet-h4">Gastos de este mes · ${esc(fmt(tot, cur))}</h4>
+      ${rows.length ? rows.map(([k, v]) => `<button class="cat-pick" type="button" data-filtercat="${esc(k)}"><span>${catEmoji(k)} ${esc(k)}</span><b>${esc(fmt(v, cur))}</b><i style="width:${Math.max(4, (v / rows[0][1]) * 100).toFixed(1)}%"></i></button>`).join("") : `<p class="sheet-note">Aún no hay gastos este mes en ${esc(accName(sel))}.</p>`}
+      <p class="sheet-note">Desliza el dedo sobre la gráfica para ver cada día. Toca una categoría para ver solo esos movimientos en el chat.</p>`;
+    const chart = $("chart"), svg = chart.querySelector("svg");
+    const show = (i) => {
+      const [x, y] = xy[i]; $("chartCur").setAttribute("x1", x); $("chartCur").setAttribute("x2", x); $("chartDot").setAttribute("cx", x); $("chartDot").setAttribute("cy", y);
+      const tip = $("chartTip"); tip.textContent = `${pts[i].d.toLocaleDateString("es-PE", { weekday: "short", day: "numeric", month: "short" })} · ${fmt(pts[i].v, cur)}`;
+      tip.style.left = Math.min(Math.max((x / W) * 100, 18), 82) + "%";
+    };
+    const at = (ev) => { const r = svg.getBoundingClientRect(); return Math.round(Math.min(Math.max((ev.clientX - r.left) / r.width, 0), 1) * 29); };
+    svg.addEventListener("pointermove", (ev) => show(at(ev)));
+    svg.addEventListener("pointerdown", (ev) => { svg.setPointerCapture(ev.pointerId); show(at(ev)); });
+    show(29);
+    $("sheet").hidden = false; $("scrim").hidden = false;
+    requestAnimationFrame(() => { $("sheet").classList.add("open"); $("scrim").classList.add("open"); });
+  }
+
+  // ---------- render ----------
+  const color = (i) => `var(--c${(i % 6) + 1})`;
+  const accColor = (id) => { const i = cuentas.findIndex((c) => c.id === id); return i < 0 ? "var(--faint)" : color(i); };
+  const accTag = (id) => `<span class="acct-tag" style="--cc:${accColor(id)}">${esc(accName(id))}</span>`;
+  let seenTs = Date.now(), freshTs = 0;
+  function markFresh(ts) { freshTs = ts; setTimeout(render, 430); }
+  function setSel(id) { sel = id; try { localStorage.setItem("caja-sel", id); } catch (e) {} render(); }
+  function setSync(kind, text) { const s = $("sync"); s.className = "sync " + kind; s.textContent = text; }
+  function setLibro(id) {
+    syncActive(); activo = id; loadActive(); sel = "all"; ephemeral = []; pendingText = null; flow = null;
+    try { localStorage.setItem("caja-libro", id); } catch (e) {}
+    render();
+  }
+  function shortDate(f) { if (!f) return ""; const [y, m, d] = f.split("-").map(Number); return new Date(y, m - 1, d).toLocaleDateString("es-PE", { day: "numeric", month: "short" }); }
+  function drawSpark() {
+    const svg = $("spark");
+    if (!cuentas.length) { svg.innerHTML = ""; return; }
+    const pts = [], now = new Date();
+    for (let k = 29; k >= 0; k--) {
+      const end = Math.min(new Date(now.getFullYear(), now.getMonth(), now.getDate() - k, 23, 59, 59, 999).getTime(), Date.now());
+      const bb = balances(end);
+      pts.push(sel === "all" ? cuentas.reduce((s, c) => s + toPEN(bb[c.id] || 0, c.moneda), 0) : bb[sel] || 0);
+    }
+    const min = Math.min(...pts), max = Math.max(...pts), span = max - min;
+    const W = 104, H = 38, pad = 4;
+    const xy = pts.map((v, i) => [i * (W / 29), span ? H - pad - ((v - min) / span) * (H - 2 * pad) : H / 2]);
+    const line = xy.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1)).join(" ");
+    const [lx, ly] = xy[xy.length - 1];
+    svg.innerHTML = `<line class="base" x1="0" x2="${W}" y1="${H - .5}" y2="${H - .5}"></line><path class="area" d="${line} L${W} ${H} L0 ${H}Z"></path><path class="lineS" d="${line}"></path><circle class="end" cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="2.6"></circle>`;
+  }
+  // balance counts up/down to the new value
+  let shown = null, shownCur = null, countRaf = 0;
+  function paintBig(v, cur) {
+    const big = $("saldo"); big.textContent = "";
+    const c = document.createElement("span"); c.className = "cur"; c.textContent = (v < 0 ? "−" : "") + SYM[cur];
+    big.append(c, document.createTextNode(num(Math.abs(v))));
+    big.classList.toggle("neg", v < 0);
+  }
+  function countTo(target, cur) {
+    if (shown === null || shownCur !== cur || matchMedia("(prefers-reduced-motion: reduce)").matches) { shown = target; shownCur = cur; cancelAnimationFrame(countRaf); return paintBig(target, cur); }
+    if (Math.abs(target - shown) < 0.005) return paintBig(target, cur);
+    const from = shown, t0 = performance.now(), dur = 650;
+    cancelAnimationFrame(countRaf);
+    const step = (t) => {
+      const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+      shown = from + (target - from) * e; paintBig(shown, cur);
+      if (k < 1) countRaf = requestAnimationFrame(step); else shown = target;
+    };
+    countRaf = requestAnimationFrame(step);
+  }
+  function renderSummary() {
+    const T = totals(sel);
+    const empty = !cuentas.length;
+    $("bookName").textContent = (libro(activo) || {}).nombre || "Recuento";
+    $("heroLabel").textContent = empty ? "Aún no tienes cuentas" : "En " + accName(sel) + " tienes";
+    $("summary").style.setProperty("--acct", empty ? "var(--accent)" : accColor(sel));
+    const alt = showAlt && rate() && !empty;
+    const dv = alt ? (T.cur === "PEN" ? T.saldo / rate() : T.saldo * rate()) : T.saldo, dc = alt ? (T.cur === "PEN" ? "USD" : "PEN") : T.cur;
+    $("saldo").title = rate() ? "Toca para ver en " + (dc === "PEN" ? "dólares" : "soles") : "";
+    if (empty) { shown = null; paintBig(0, T.cur); } else countTo(dv, dc);
+    drawSpark();
+    const daily = $("daily"); daily.textContent = "";
+    const item = (label, value, cls) => { const s = document.createElement("span"); s.append(label + " "); const b = document.createElement("b"); b.textContent = value; if (cls) b.className = cls; s.append(b); daily.append(s); return s; };
+    if (!empty) {
+      item("Por día", fmt(Math.max(0, T.saldo / daysLeft()), T.cur), "pace").append(` · ${daysLeft()} días`);
+      item("Hoy", fmt(-T.hoy, T.cur));
+      if (rate()) item("≈", T.cur === "PEN" ? fmt(T.saldo / rate(), "USD") : fmt(T.saldo * rate(), "PEN"));
+    }
+    $("insight").textContent = insight();
+    greeting(); paintMood();
+    const tcb = $("tc"), stale = !tc || tc.fecha !== today();
+    tcb.classList.toggle("stale", stale && hasUSD());
+    tcb.textContent = rate() ? `$ ${rate().toFixed(3)}${stale ? " · " + shortDate(tc.fecha) : " · hoy"}` : "TC —";
+    // account cards
+    const bal = balances();
+    const totalPos = cuentas.reduce((s, a) => s + Math.max(0, toPEN(bal[a.id] || 0, a.moneda)), 0) || 1;
+    const cards = $("tabs"); cards.textContent = "";
+    const mk = (id, name, amount, cur, col, share, badge) => {
+      const el = document.createElement("button");
+      el.type = "button"; el.className = "acard"; el.dataset.id = id; el.style.setProperty("--cc", col);
+      el.setAttribute("aria-pressed", String(sel === id));
+      const top = document.createElement("span"); top.className = "ac-top";
+      const n = document.createElement("b"); n.textContent = name; top.append(n);
+      if (badge) { const e = document.createElement("em"); e.textContent = badge; top.append(e); }
+      const v = document.createElement("span"); v.className = "ac-bal" + (amount < 0 ? " neg" : ""); v.textContent = fmt(amount, cur);
+      const sub = document.createElement("span"); sub.className = "ac-sub"; sub.textContent = cur === "USD" ? "Dólares" : "Soles";
+      el.append(top, v, sub); cards.append(el);
+    };
+    cuentas.forEach((a, i) => mk(a.id, a.nombre, bal[a.id], a.moneda, color(i), (Math.max(0, toPEN(bal[a.id] || 0, a.moneda)) / totalPos) * 100, a.moneda === "USD" ? "US$" : ""));
+    const add = document.createElement("button"); add.type = "button"; add.className = "acard add"; add.dataset.action = "nuevacuenta"; add.textContent = "+ Cuenta"; cards.append(add);
+    // goals
+    const g = $("goals"); g.textContent = ""; g.hidden = !metas.length;
+    for (const m of metas) {
+      const pct = m.objetivo ? Math.min(100, (m.ahorrado / m.objetivo) * 100) : 0;
+      const b = document.createElement("button"); b.type = "button"; b.className = "goal"; b.dataset.meta = m.nombre; b.style.setProperty("--p", pct + "%");
+      const n = document.createElement("span"); n.textContent = "Meta · " + m.nombre;
+      const p = document.createElement("span"); p.className = "ring"; p.textContent = Math.round(pct) + "%";
+      b.append(n, p); g.append(b);
+    }
+  }
+  function renderChips() {
+    $("summary").classList.toggle("collapsed", collapsedPref() || !!flow);
+    const chips = $("chips"); chips.textContent = "";
+    const add = (html, attrs, cls = "") => { const b = document.createElement("button"); b.type = "button"; b.className = "chip " + cls; b.innerHTML = html; for (const [k, v] of Object.entries(attrs)) b.dataset[k] = v; chips.append(b); };
+    if (flow) { add(svgI("x") + "Cancelar", { cancel: "1" }, "cancel"); return; }
+    if (window.__cajaInstall && window.__cajaInstall()) add(svgI("down", 2) + "Instalar app", { install: "1" }, "install");
+    if (filterCat) add(`${catEmoji(filterCat)} Solo ${esc(filterCat.toLowerCase())} · ver todo ✕`, { clearfilter: "1" }, "filter");
+    const list = cuentas.length ? ["gasto", "ingreso", "transferir", "resumen", "reportes", "cuentas", "deshacer"] : ["nuevacuenta", "recuentos", "ayuda"];
+    for (const k of list) add(svgI(k) + esc(ACTIONS[k]), { action: k });
+  }
+  function optsHtml(it) {
+    if (!it.opts || !it.opts.length) return "";
+    const live = flow && flow.step === it.step;
+    return `<div class="opts ${it.layout}${live ? "" : " stale"}">` + it.opts.map((o, i) =>
+      `<button class="opt${o.primary ? " primary" : ""}${it.chosen === i ? " chosen" : ""}" type="button" data-opt="${i}" data-step="${it.step}"${live ? "" : " disabled"}><span>${esc(o.label)}</span>${o.sub ? `<small>${esc(o.sub)}</small>` : ""}</button>`).join("") + `</div>`;
+  }
+  function render() {
+    if (sel !== "all" && !acc(sel)) sel = "all";
+    if (sel === "all" && cuentas.length) sel = cuentas[0].id;
+    renderSummary(); renderChips();
+    const items = [];
+    for (const m of movs) {
+      if (sel !== "all" && !touches(m, sel)) continue;
+      if (filterCat && m.cat !== filterCat) continue;
+      items.push({ ts: m.ts, who: "me", html: esc(m.texto) });
+      items.push({ ts: m.ts + 0.5, who: "bot", html: movReply(m), pending: m.ts === freshTs && Date.now() - freshTs < 420 });
+    }
+    for (const e of ephemeral) items.push(e);
+    items.sort((a, b) => a.ts - b.ts);
+    const L = libro(activo);
+    const menu = `<div class="opts grid menu">${["gasto", "ingreso", "transferir", "cuentas", "resumen", "reportes"].map((k) =>
+      `<button class="opt" type="button" data-action="${k}"><span class="ic">${svgI(k)}</span><span>${esc(ACTIONS[k])}</span></button>`).join("")}</div>`;
+    let html = `<div class="row"><span class="mini">${LOGO}</span><div class="msg bot">Hola, aquí CAJA. Te ayudo a llevar tus cuentas de <b>${esc(L ? L.nombre : "")}</b>. ¿Qué anotamos hoy?${menu}<div class="welcome-insight">💬 ${esc(insight())}</div><div class="tk-sub" style="margin-top:8px">También puedes escribirme normal: “pagué 18 de menú con BCP”.</div></div></div>`;
+    let lastDay = "", prev = "bot";
+    let maxTs = seenTs;
+    for (const it of items) {
+      const day = new Date(it.ts).toLocaleDateString("es-PE", { weekday: "long", day: "numeric", month: "short" });
+      if (day !== lastDay) { html += `<div class="day">${esc(day)}</div>`; lastDay = day; prev = ""; }
+      const anim = it.ts > seenTs ? " enter" : "";
+      if (it.who === "me") html += `<div class="row me${anim}"><div class="msg me">${it.html}<span class="meta">${esc(hhmm(it.ts))}</span></div></div>`;
+      else {
+        const lead = prev !== "bot" ? `<span class="mini">${LOGO}</span>` : `<span class="gap"></span>`;
+        const body = it.pending ? `<span class="typing"><i></i><i></i><i></i></span>` : `${it.html}${optsHtml(it)}<span class="meta">${esc(hhmm(it.ts))}</span>`;
+        html += `<div class="row${anim}">${lead}<div class="msg bot">${body}</div></div>`;
+      }
+      if (!it.pending) maxTs = Math.max(maxTs, it.ts);
+      prev = it.who;
+    }
+    const chat = $("chat");
+    const prevTop = chat.scrollTop;
+    chat.innerHTML = html;
+    seenTs = maxTs;
+    if (keepScroll) { chat.scrollTop = prevTop; keepScroll = false; } else chat.scrollTop = chat.scrollHeight;
+  }
+
+  // ---------- data shape (migrates earlier versions) ----------
+  function readAjustes(v) {
+    let cs = [];
+    if (Array.isArray(v.cuentas)) cs = v.cuentas.filter((c) => c && typeof c.id === "string").map((c) => ({ id: c.id, nombre: String(c.nombre || "Cuenta"), inicial: typeof c.inicial === "number" ? c.inicial : null, moneda: c.moneda === "USD" ? "USD" : "PEN" }));
+    else if (typeof v.inicial === "number") cs = [{ id: "general", nombre: "General", inicial: v.inicial, moneda: "PEN" }];
+    const ms = Array.isArray(v.metas) ? v.metas.filter((g) => g && typeof g.id === "string" && typeof g.objetivo === "number").map((g) => ({ id: g.id, nombre: String(g.nombre || "Meta"), objetivo: g.objetivo, ahorrado: typeof g.ahorrado === "number" ? g.ahorrado : 0 })) : [];
+    const ls = {};
+    if (v.limites && typeof v.limites === "object") for (const [k, x] of Object.entries(v.limites)) if (typeof x === "number" && x > 0) ls[String(k)] = x;
+    return { cuentas: cs, metas: ms, limites: ls };
+  }
+  function readMov(id, v) {
+    if (v.kind !== "mov" || typeof v.monto !== "number") return null;
+    const tipo = v.tipo === "in" || v.tipo === "tr" ? v.tipo : "out";
+    const desc = String(v.desc || "");
+    const o = v.orig && typeof v.orig.monto === "number" && typeof v.orig.tc === "number" ? { monto: v.orig.monto, moneda: v.orig.moneda === "USD" ? "USD" : "PEN", tc: v.orig.tc } : null;
+    return { id, ts: Number(v.ts) || 0, tipo, monto: v.monto, desc, texto: String(v.texto || ""), orig: o,
+      cat: typeof v.cat === "string" ? v.cat : tipo === "tr" ? "Transferencia" : catOf(desc, tipo),
+      cuenta: typeof v.cuenta === "string" ? v.cuenta : "general",
+      desde: v.desde ? String(v.desde) : undefined, hacia: v.hacia ? String(v.hacia) : undefined,
+      montoDest: typeof v.montoDest === "number" ? v.montoDest : null };
+  }
+  const readTc = (v) => (v && typeof v.valor === "number" ? { valor: v.valor, fecha: String(v.fecha || ""), fuente: String(v.fuente || "") } : null);
+  const readLibros = (v) => (v && Array.isArray(v.lista) ? v.lista.filter((x) => x && typeof x.id === "string").map((x) => ({ id: x.id, nombre: String(x.nombre || "Recuento") })) : []);
+  function adoptOrphans() {
+    if (movs.some((m) => m.tipo !== "tr" && m.cuenta === "general") && !acc("general"))
+      cuentas = [{ id: "general", nombre: "General", inicial: null, moneda: "PEN" }, ...cuentas];
+  }
+  function movDoc(m) {
+    const d = { kind: "mov", ts: m.ts, tipo: m.tipo, monto: m.monto, desc: m.desc, cat: m.cat, texto: m.texto };
+    if (m.orig) d.orig = m.orig;
+    if (m.tipo === "tr") { d.desde = m.desde; d.hacia = m.hacia; if (m.montoDest != null) d.montoDest = m.montoDest; } else d.cuenta = m.cuenta;
+    return d;
+  }
+  function apply(a) { cuentas = a.cuentas; metas = a.metas; limites = a.limites; }
+  const emptyBook = () => ({ cuentas: [], metas: [], limites: {}, movs: [] });
+  const ajId = (id) => (id === "principal" ? "ajustes" : "ajustes-" + id);
+
+  // ---------- storage ----------
+  function localStore() {
+    const KEY = "caja-v5";
+    try {
+      const s5 = JSON.parse(localStorage.getItem(KEY) || "null");
+      const readBook = (d) => ({ ...readAjustes(d), movs: (d.movs || []).map((m) => readMov(m.id, { kind: "mov", ...m })).filter(Boolean) });
+      if (s5) {
+        const ls = readLibros({ lista: s5.libros }); if (ls.length) libros = ls;
+        for (const [id, d] of Object.entries(s5.data || {})) data[id] = readBook(d);
+        tc = readTc(s5.tc);
+      } else {
+        const s = JSON.parse(localStorage.getItem("caja-v4") || localStorage.getItem("caja-v3") || localStorage.getItem("caja-chat-v1") || "null");
+        if (s) { data.principal = readBook(s.cuentas ? s : { ...(s.cfg || {}), movs: s.movs }); if (!s.cuentas) data.principal.movs = (s.movs || []).map((m) => readMov(m.id, { kind: "mov", ...m })).filter(Boolean); tc = readTc(s.tc); }
+      }
+    } catch (e) {}
+    loadActive();
+    const persist = () => {
+      syncActive();
+      const out = {};
+      for (const [id, d] of Object.entries(data)) out[id] = { cuentas: d.cuentas, metas: d.metas, limites: d.limites, movs: d.movs.map((m) => ({ id: m.id, ...movDoc(m) })) };
+      try { localStorage.setItem(KEY, JSON.stringify({ libros, data: out, tc })); } catch (e) {}
+    };
+    setSync("local", "Solo este equipo");
+    return {
+      async save(p) { apply({ cuentas, metas, limites, ...p }); persist(); render(); },
+      async saveTc(t) { tc = t; persist(); render(); },
+      async saveLibros(l) { libros = l; persist(); render(); },
+      async deleteLibro(id) { delete data[id]; libros = libros.filter((x) => x.id !== id); persist(); render(); },
+      async add(m) { movs.push({ ...m, id: "m" + m.ts }); persist(); render(); },
+      async remove(id) { movs = movs.filter((m) => m.id !== id); persist(); render(); },
+    };
+  }
+  // ---------- sync outside claude.ai: JSONBin.io (the key stays only on this device) ----------
+  const JB = "https://api.jsonbin.io/v3";
+  const getJb = () => { try { return JSON.parse(localStorage.getItem("caja-jsonbin") || "null"); } catch (e) { return null; } };
+  const setJb = (c) => { try { c ? localStorage.setItem("caja-jsonbin", JSON.stringify(c)) : localStorage.removeItem("caja-jsonbin"); } catch (e) {} };
+  const syncReady = () => !window.claude;
+  const linkCode = (c) => "CAJA-" + btoa(unescape(encodeURIComponent(JSON.stringify({ k: c.key, b: c.bin, h: c.hdr })))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  function readLink(t) {
+    try {
+      let s = String(t || "").trim().replace(/^CAJA-/i, "").replace(/-/g, "+").replace(/_/g, "/");
+      while (s.length % 4) s += "=";
+      const o = JSON.parse(decodeURIComponent(escape(atob(s))));
+      return o && o.k && o.b ? { key: o.k, bin: o.b, hdr: o.h || "X-Master-Key" } : null;
+    } catch (e) { return null; }
+  }
+  async function jb(method, path, cfg, body, extra = {}) {
+    const headers = { [cfg.hdr || "X-Master-Key"]: cfg.key, ...extra };
+    if (body !== undefined) headers["Content-Type"] = "application/json";
+    const r = await fetch(JB + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+    const t = await r.text();
+    let j = null; try { j = t ? JSON.parse(t) : null; } catch (e) {}
+    if (!r.ok) { const err = new Error((j && j.message) || ("JSONBin " + r.status)); err.status = r.status; throw err; }
+    return j;
+  }
+  // a tiny document store with the same shape CAJA already uses (collection.onSnapshot, doc.set, doc.delete)
+  function remoteDb(cfg) {
+    let docs = {}, version = 0, wtag = "", subs = [], pending = [], flushing = false;
+    try { const c = JSON.parse(localStorage.getItem("caja-sync-cache") || "null"); if (c && c.bin === cfg.bin) { docs = c.docs || {}; version = c.version || 0; wtag = c.w || ""; } } catch (e) {}
+    const cache = () => { try { localStorage.setItem("caja-sync-cache", JSON.stringify({ bin: cfg.bin, docs, version, w: wtag })); } catch (e) {} };
+    const view = () => { const d = { ...docs }; for (const o of pending) { if (o.del) delete d[o.id]; else d[o.id] = o.v; } return d; };
+    const emit = () => { const d = view(); const snap = { docs: Object.entries(d).map(([id, v]) => ({ id, data: () => v })), metadata: { hasPendingWrites: pending.length > 0 } }; subs.forEach((f) => f(snap)); };
+    const latest = async () => { const rec = await jb("GET", `/b/${cfg.bin}/latest`, cfg, undefined, { "X-Bin-Meta": "false" }); return { docs: (rec && rec.docs) || {}, v: (rec && rec.v) || 0, w: (rec && rec.w) || "" }; };
+    async function pull() {
+      try {
+        const s = await latest();
+        if (s.w !== wtag || s.v !== version) { docs = s.docs; version = s.v; wtag = s.w; cache(); emit(); } else if (!subs.length || !Object.keys(docs).length) emit();
+        setSync("on", "Sincronizado");
+      } catch (e) { setSync("err", e.status === 401 || e.status === 403 ? "Llave sin permiso" : "Sin conexión"); emit(); }
+    }
+    async function flush() {
+      if (flushing) return; flushing = true;
+      try {
+        while (pending.length) {
+          const ops = pending.slice();
+          const s = await latest();                       // read first, so changes from other devices are kept
+          const next = { ...s.docs };
+          for (const o of ops) { if (o.del) delete next[o.id]; else next[o.id] = o.v; }
+          const w = Math.random().toString(36).slice(2) + Date.now().toString(36);
+          await jb("PUT", `/b/${cfg.bin}`, cfg, { app: "CAJA", v: s.v + 1, w, docs: next });
+          // check our write is the one that stayed; if another device wrote over it, apply our changes again on top
+          await new Promise((ok) => setTimeout(ok, 350 + Math.random() * 400));
+          const chk = await latest();
+          if (chk.w !== w) { docs = chk.docs; version = chk.v; wtag = chk.w; continue; }
+          docs = next; version = s.v + 1; wtag = w; pending.splice(0, ops.length); cache(); emit(); setSync("on", "Sincronizado");
+        }
+      } catch (e) { setSync("err", "Sin conexión · reintentando"); setTimeout(flush, 15000); }
+      finally { flushing = false; }
+    }
+    const queue = (op) => { pending.push(op); emit(); setSync("on", "Guardando…"); flush(); return Promise.resolve(); };
+    setInterval(() => { if (document.visibilityState === "visible" && !pending.length) pull(); }, 60000);
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && !pending.length) pull(); });
+    return {
+      collection: () => ({
+        onSnapshot(fn) { subs.push(fn); setTimeout(() => { if (Object.keys(docs).length) emit(); pull(); }, 0); return () => {}; },
+        doc: (id) => ({ set: (v) => queue({ id, v: JSON.parse(JSON.stringify(v)) }), delete: () => queue({ id, del: true }) }),
+      }),
+    };
+  }
+  // current local data as the documents the synced store keeps
+  function localDocs() {
+    syncActive();
+    const out = { libros: { lista: libros } };
+    if (tc) out.tc = tc;
+    for (const l of libros) {
+      const d = data[l.id]; if (!d) continue;
+      out[ajId(l.id)] = { cuentas: d.cuentas, metas: d.metas, limites: d.limites };
+      for (const m of d.movs) { const doc = movDoc(m); if (l.id !== "principal") doc.libro = l.id; out[m.id] = doc; }
+    }
+    return out;
+  }
+  async function createBin(key) {
+    let last = null;
+    for (const hdr of ["X-Master-Key", "X-Access-Key"]) {
+      try {
+        const r = await jb("POST", "/b", { key, hdr }, { app: "CAJA", v: 1, docs: localDocs() }, { "X-Bin-Name": "CAJA", "X-Bin-Private": "true" });
+        return { key, hdr, bin: r.metadata.id };
+      } catch (e) { last = e; if (e.status !== 401 && e.status !== 403) break; }
+    }
+    throw last;
+  }
+  function syncSheet() {
+    clearTimeout(sheetT); $("plus").classList.remove("on");
+    const cfg = getJb();
+    $("sheetTitle").textContent = "Sincronizar con JSONBin";
+    const b = $("sheetBody");
+    if (window.claude) {
+      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0">Esta versión de CAJA está en claude.ai y ya se sincroniza sola con tu cuenta de Claude: abre este mismo link en tu celular y tu laptop.</p>
+        <p class="sheet-note" style="font-size:14px;color:var(--ink)">claude.ai no deja que sus páginas se conecten a otros sitios, así que <b>JSONBin funciona en la versión independiente de CAJA</b>, la que abres en JS Bin o en tu navegador.</p>
+        <div class="opts"><button class="opt primary" type="button" id="getJsbin">Descargar CAJA con JSONBin</button></div>
+        <ol class="steps"><li>Abre el archivo en tu navegador, o pégalo en el panel HTML de jsbin.com.</li><li>Toca “Solo este equipo · sincronizar” arriba.</li><li>Pega tu X-Master-Key de jsonbin.io y toca Conectar.</li><li>En tus otros dispositivos, pega el código de enlace que te muestra.</li></ol>
+        <p class="sheet-note" id="getMsg"></p>`;
+      $("getJsbin").onclick = async () => {
+        $("getJsbin").textContent = "Preparando…";
+        try {
+          const blob = await (await fetch("caja-jsbin.html")).blob();
+          const dl = await window.claude.use("downloads");
+          if (!dl) throw { code: "unavailable" };
+          await dl.save({ filename: "caja-jsonbin.html", data: blob });
+          $("getJsbin").textContent = "Descargar CAJA con JSONBin";
+        } catch (e) {
+          $("getJsbin").textContent = "Descargar CAJA con JSONBin";
+          if (e && e.code === "declined") return;
+          $("getMsg").textContent = e && e.code === "host_unavailable" ? "Esta app no puede guardar archivos. Ábrela en el navegador o en una computadora." : "No se pudo descargar ahora. Inténtalo otra vez.";
+        }
+      };
+    } else if (cfg) {
+      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0">Este dispositivo guarda tus cuentas en tu JSONBin (bin <b>${esc(cfg.bin)}</b>).</p>
+        <p class="sheet-note">Para conectar otro dispositivo, abre CAJA allí, toca “Sincronizar” y pega este código de enlace:</p>
+        <div class="code-box small" id="codeBox">${esc(linkCode(cfg))}</div>
+        <div class="opts row"><button class="opt primary" type="button" id="copyCode">Copiar código</button><button class="opt" type="button" id="unlink">Desconectar</button></div>
+        <p class="sheet-note">El código lleva tu llave de JSONBin. No lo compartas con nadie.</p>`;
+      $("copyCode").onclick = async () => { try { await navigator.clipboard.writeText(linkCode(cfg)); $("copyCode").textContent = "Copiado"; } catch (e) { const r = document.createRange(); r.selectNodeContents($("codeBox")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("copyCode").textContent = "Selecciónalo y cópialo"; } };
+      $("unlink").onclick = () => { setJb(null); try { localStorage.removeItem("caja-sync-cache"); } catch (e) {} location.reload(); };
+    } else {
+      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0"><b>Primer dispositivo:</b> pega tu X-Master-Key de JSONBin (la ves en jsonbin.io → API Keys). CAJA crea un bin privado con tus datos.</p>
+        <div class="code-in"><input id="keyIn" type="password" placeholder="$2a$10$…" autocomplete="off" aria-label="X-Master-Key de JSONBin"><button class="opt primary" type="button" id="mkBin">Conectar</button></div>
+        <p class="sheet-note" style="margin-top:16px"><b>¿Ya lo conectaste en otro dispositivo?</b> Pega aquí el código de enlace que te mostró:</p>
+        <div class="code-in"><input id="codeIn" placeholder="CAJA-…" autocomplete="off" aria-label="Código de enlace"><button class="opt primary" type="button" id="useCode">Conectar</button></div>
+        <p class="sheet-note" id="codeMsg"></p>
+        <p class="sheet-note">Tu llave se guarda solo en este navegador. No se sube a ningún otro lado.</p>`;
+      $("mkBin").onclick = async () => {
+        const key = $("keyIn").value.trim();
+        if (key.length < 20) { $("codeMsg").textContent = "Esa llave está incompleta. Cópiala completa desde jsonbin.io."; return; }
+        $("mkBin").textContent = "Creando…";
+        try { const c = await createBin(key); setJb(c); try { localStorage.removeItem("caja-sync-cache"); } catch (e) {} location.reload(); }
+        catch (e) { $("mkBin").textContent = "Conectar"; $("codeMsg").textContent = e.status === 401 || e.status === 403 ? "JSONBin no aceptó esa llave. Revisa que sea la X-Master-Key." : "No se pudo conectar con JSONBin (" + (e.message || "error") + ")."; }
+      };
+      $("useCode").onclick = async () => {
+        const c = readLink($("codeIn").value);
+        if (!c) { $("codeMsg").textContent = "Ese código no es válido. Cópialo completo desde el otro dispositivo."; return; }
+        $("useCode").textContent = "Conectando…";
+        try { await jb("GET", `/b/${c.bin}/latest`, c, undefined, { "X-Bin-Meta": "false" }); setJb(c); try { localStorage.removeItem("caja-sync-cache"); } catch (e) {} location.reload(); }
+        catch (e) { $("useCode").textContent = "Conectar"; $("codeMsg").textContent = "No pude abrir tus datos con ese código (" + (e.message || "error") + ")."; }
+      };
+    }
+    $("sheet").hidden = false; $("scrim").hidden = false;
+    requestAnimationFrame(() => { $("sheet").classList.add("open"); $("scrim").classList.add("open"); });
+  }
+
+  async function connect() {
+    let db = null, user = null;
+    try { if (window.claude && window.claude.use) [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]); } catch (e) {}
+    if (user) { try { const me = await user.me(); userName = String((me && me.name) || "").trim().split(/\s+/)[0] || ""; greeting(); } catch (e) {} }
+    let uid = db && user ? await user.id().catch(() => null) : null;
+    if (!db && syncReady() && getJb()) { db = remoteDb(getJb()); uid = "sync"; }
+    if (!db || !uid) { store = localStore(); if (!window.claude) setSync("local", "Solo este equipo · sincronizar"); render(); return; }
+    const col = db.collection("data/users/" + uid);
+    const timer = setTimeout(() => setSync("err", "Sin conexión"), 10000);
+    col.onSnapshot((snap) => {
+      clearTimeout(timer);
+      const d = {}; let ls = null, t = null;
+      const book = (id) => (d[id] = d[id] || emptyBook());
+      for (const doc of snap.docs) {
+        const v = doc.data() || {};
+        if (doc.id === "tc") t = readTc(v);
+        else if (doc.id === "libros") ls = readLibros(v);
+        else if (doc.id === "ajustes") Object.assign(book("principal"), readAjustes(v));
+        else if (doc.id.startsWith("ajustes-")) Object.assign(book(doc.id.slice(8)), readAjustes(v));
+        else { const m = readMov(doc.id, v); if (m) book(typeof v.libro === "string" ? v.libro : "principal").movs.push(m); }
+      }
+      if (ls && ls.length) libros = ls;
+      data = d; tc = t; loadActive();
+      setSync("on", "Sincronizado");
+      render();
+    }, (e) => { clearTimeout(timer); setSync("err", "Sin conexión (" + ((e && e.code) || "error") + ")"); });
+    store = {
+      async save(p) { apply({ cuentas, metas, limites, ...p }); render(); await col.doc(ajId(activo)).set({ cuentas, metas, limites }); },
+      async saveTc(t) { tc = t; render(); await col.doc("tc").set(t); },
+      async saveLibros(l) { libros = l; render(); await col.doc("libros").set({ lista: l }); },
+      async deleteLibro(id) {
+        for (const m of (data[id] || emptyBook()).movs) await col.doc(m.id).delete();
+        await col.doc(ajId(id)).delete().catch(() => {});
+        libros = libros.filter((x) => x.id !== id);
+        await col.doc("libros").set({ lista: libros });
+      },
+      async add(m) { const doc = movDoc(m); if (activo !== "principal") doc.libro = activo; await col.doc("m" + m.ts).set(doc); },
+      async remove(id) { await col.doc(id).delete(); },
+    };
+  }
+
+  // ---------- wire up ----------
+  const clearTmp = () => { pendingText = null; ephemeral = ephemeral.filter((e) => !e.tmp); };
+  $("eye").innerHTML = svgI("eye"); $("plus").innerHTML = svgI("plus", 2); $("mic").innerHTML = svgI("mic");
+  document.querySelector(".send").innerHTML = svgI("send", 2.4);
+  $("collapse").innerHTML = svgI("up", 2); $("bookPill").insertAdjacentHTML("beforeend", svgI("down", 2));
+  let privacy = false;
+  try { privacy = localStorage.getItem("caja-priv") === "1"; collapsed = localStorage.getItem("caja-col") === "1"; } catch (e) {}
+  function applyPrefs() {
+    $("app").classList.toggle("privacy", privacy);
+    $("eye").innerHTML = svgI(privacy ? "eyeoff" : "eye"); $("eye").classList.toggle("on", privacy);
+    $("eye").setAttribute("aria-pressed", String(privacy)); $("eye").setAttribute("aria-label", privacy ? "Mostrar saldos" : "Ocultar saldos");
+    $("summary").classList.toggle("collapsed", collapsed || !!flow);
+  }
+  $("eye").addEventListener("click", () => { privacy = !privacy; try { localStorage.setItem("caja-priv", privacy ? "1" : "0"); } catch (e) {} applyPrefs(); });
+  $("collapse").addEventListener("click", () => { collapsed = !collapsed; try { localStorage.setItem("caja-col", collapsed ? "1" : "0"); } catch (e) {} applyPrefs(); });
+  $("plus").addEventListener("click", () => ($("sheet").hidden ? openSheet("acciones") : closeSheet()));
+  $("bookPill").addEventListener("click", () => openSheet("libros"));
+  $("sync").addEventListener("click", syncSheet);
+  $("scrim").addEventListener("click", closeSheet);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
+  $("tc").addEventListener("click", () => runAction("tc"));
+  $("cajiBtn").addEventListener("click", cajiTalk);
+  $("saldo").addEventListener("click", () => { if (!rate()) return; showAlt = !showAlt; shown = null; buzz(6); render(); });
+  $("spark").addEventListener("click", chartSheet);
+  // swipe the summary to move between accounts
+  let sx = null, sy = null;
+  $("summary").addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  $("summary").addEventListener("touchend", (e) => {
+    if (sx == null) return;
+    const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+    if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5 && !e.target.closest(".cards")) switchAccount(dx < 0 ? 1 : -1);
+  }, { passive: true });
+  document.addEventListener("keydown", (e) => {
+    if ((e.target instanceof Element && e.target.closest("input, textarea, select")) || !$("sheet").hidden) return;
+    if (e.key === "ArrowRight") switchAccount(1); else if (e.key === "ArrowLeft") switchAccount(-1);
+  });
+  // tap a receipt to open its details
+  $("chat").addEventListener("click", (e) => {
+    if (e.target.closest("button")) return;
+    const rc = e.target.closest(".rc[data-rc]"); if (!rc) return;
+    const id = rc.dataset.rc; const opening = !expanded.has(id);
+    opening ? expanded.add(id) : expanded.delete(id);
+    keepScroll = true; buzz(6); render();
+    if (opening) { const el = document.querySelector(`.rc[data-rc="${CSS.escape(id)}"]`); if (el) el.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  });
+
+  $("form").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const v = $("entrada").value;
+    if (!v.trim() || !store) return;
+    $("entrada").value = "";
+    clearTmp();
+    if (flow) {
+      if (/^(cancelar|cancela|salir)$/.test(norm(v))) { echo(v); cancelFlow(); return; }
+      if (flow.input === "amount") { const a = amountIn(v); if (a) { echo(v); answer({ monto: a.v, cur: curIn(v) }); return; } }
+      else if (flow.input === "text") { echo(v); answer(v.trim()); return; }
+      endFlow();
+    }
+    handle(v);
+  });
+  // one delegated handler for every button the app draws
+  document.addEventListener("click", (ev) => {
+    const t = ev.target.closest("button");
+    if (!t || !$("app").contains(t)) return;
+    if (t.dataset.dl) return download(t.dataset.dl);
+    if (t.dataset.clearfilter) { filterCat = null; return render(); }
+    if (t.dataset.filtercat) { filterCat = t.dataset.filtercat; closeSheet(); return render(); }
+    if (t.dataset.dup) {
+      const m = movs.find((x) => x.id === t.dataset.dup); if (!m || !store) return;
+      expanded.delete(m.id); buzz(15);
+      if (m.tipo === "tr") return handle(m.texto, null, { cmd: "tr", monto: m.monto, cur: null, desde: m.desde, hacia: m.hacia });
+      return handle(m.texto, null, { cmd: "mov", tipo: m.tipo, monto: m.monto, cur: null, desc: m.desc, cat: m.cat, ids: [m.cuenta] });
+    }
+    if (t.dataset.opt != null && t.dataset.step) return chooseOpt(+t.dataset.opt, +t.dataset.step);
+    if (t.dataset.action) return runAction(t.dataset.action);
+    if (t.dataset.cancel) return cancelFlow();
+    if (t.dataset.mov) return startFlow("delmov", { d: { id: t.dataset.mov } });
+    if (t.dataset.libro) { closeSheet(); if (t.dataset.libro !== activo) setLibro(t.dataset.libro); return; }
+    if (t.dataset.meta && store) { clearTmp(); return handle("meta " + t.dataset.meta); }
+    if (t.dataset.pick && store && pendingText) { const p = pendingText; clearTmp(); return handle(p, t.dataset.pick); }
+    if (t.classList.contains("acard") && t.dataset.id) { filterCat = null; buzz(6); return setSel(t.dataset.id); }
+  });
+
+  // voice dictation where the viewer's browser supports it
+  let dict = null, dictBase = "";
+  (async () => {
+    try { dict = window.claude && window.claude.use ? await window.claude.use("dictation") : null; } catch (e) { dict = null; }
+    if (!dict) return;
+    $("mic").hidden = false;
+    dict.onPartial(({ text }) => { $("entrada").value = dictBase + text; });
+    dict.onFinal(({ text }) => { dictBase += text + " "; $("entrada").value = dictBase; });
+    dict.onState(({ state }) => { $("mic").classList.toggle("on", state === "listening"); });
+  })();
+  $("mic").addEventListener("click", () => {
+    if (!dict) return;
+    if ($("mic").classList.contains("on")) { dict.stop().catch(() => {}); return; }
+    dictBase = $("entrada").value ? $("entrada").value + " " : "";
+    dict.start().catch((e) => { if (e && e.code === "not_granted") $("mic").hidden = true; });
+  });
+
+  setInterval(() => { const e = document.querySelectorAll(".caji .c-eyes"); e.forEach((x) => { x.classList.remove("blink"); void x.getBBox(); x.classList.add("blink"); }); }, 4200);
+  // "Instalar app" chip when the browser offers it (hosted standalone version)
+  let installEvt = null;
+  window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); installEvt = e; renderChips(); });
+  window.addEventListener("appinstalled", () => { installEvt = null; renderChips(); say("¡CAJA quedó instalada! Ábrela desde tu pantalla de inicio."); });
+  document.addEventListener("click", async (e) => {
+    const t = e.target.closest("[data-install]"); if (!t || !installEvt) return;
+    installEvt.prompt(); try { await installEvt.userChoice; } catch (er) {} installEvt = null; renderChips();
+  });
+  window.__cajaInstall = () => installEvt;
+  applyPrefs();
+  render();
+  connect();
+})();
+</script>
+
+<script>if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));</script>
+</body>
+</html>
