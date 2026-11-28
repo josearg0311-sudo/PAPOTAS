@@ -516,6 +516,8 @@ body:not(.in-claude) .sync { cursor: pointer; }
 .code-in { display: flex; gap: 8px; }
 .code-in input { flex: 1; min-width: 0; font: 700 15px var(--font-body); letter-spacing: .05em; text-transform: uppercase; color: var(--ink); background: var(--raise); border: 1px solid var(--line-2); border-radius: 16px; padding: 10px 12px; }
 .code-in .opt { flex: none; }
+.code-in #keyIn { text-transform: none; letter-spacing: 0; }
+.steps { margin: 12px 0 4px; padding-left: 20px; color: var(--ink); font-size: 13.5px; line-height: 1.55; display: grid; gap: 4px; }
 .code-box.small { font-size: 12px; letter-spacing: 0; text-align: left; max-height: 96px; overflow-y: auto; }
 
 /* ---------- logo v2 ---------- */
@@ -1644,7 +1646,7 @@ form { background: var(--surface); border-color: var(--line-2); }
   const ACTIONS = {
     gasto: "Registrar gasto", ingreso: "Registrar ingreso", transferir: "Transferir", cuentas: "Mis cuentas",
     resumen: "Resumen", reportes: "PDF y Excel", metas: "Metas", topes: "Topes", recuentos: "Recuentos",
-    tc: "Tipo de cambio", sincronizar: "Sincronizar", nuevacuenta: "Nueva cuenta", nuevameta: "Nueva meta", nuevorecuento: "Nuevo recuento", deshacer: "Deshacer", ayuda: "Ayuda",
+    tc: "Tipo de cambio", sincronizar: "JSONBin", nuevacuenta: "Nueva cuenta", nuevameta: "Nueva meta", nuevorecuento: "Nuevo recuento", deshacer: "Deshacer", ayuda: "Ayuda",
   };
 
   // ---------- receipts ----------
@@ -1859,7 +1861,7 @@ form { background: var(--surface); border-color: var(--line-2); }
     const body = $("sheetBody");
     if (kind === "acciones") {
       $("sheetTitle").textContent = "¿Qué quieres hacer?";
-      body.innerHTML = `<div class="opts grid">${["gasto", "ingreso", "transferir", "cuentas", "resumen", "reportes", "metas", "nuevameta", "topes", "recuentos", "nuevacuenta", "tc", ...(window.claude ? [] : ["sincronizar"])].map((k) =>
+      body.innerHTML = `<div class="opts grid">${["gasto", "ingreso", "transferir", "cuentas", "resumen", "reportes", "metas", "nuevameta", "topes", "recuentos", "nuevacuenta", "tc", "sincronizar"].map((k) =>
         `<button class="opt" type="button" data-action="${k}"><span class="ic">${svgI(k)}</span><span>${esc(ACTIONS[k])}</span></button>`).join("")}</div>`;
     } else {
       $("sheetTitle").textContent = "Tus recuentos";
@@ -1921,6 +1923,7 @@ form { background: var(--surface); border-color: var(--line-2); }
     const card = document.querySelector(`.acard[data-id="${CSS.escape(next.id)}"]`); if (card) card.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "smooth" });
   }
   function chartSheet() {
+    clearTimeout(sheetT); $("plus").classList.remove("on");
     if (!cuentas.length) return;
     const cur = accCur(sel), pts = sparkPoints(30);
     const W = 320, H = 150, pad = 10;
@@ -2271,11 +2274,30 @@ form { background: var(--surface); border-color: var(--line-2); }
     throw last;
   }
   function syncSheet() {
+    clearTimeout(sheetT); $("plus").classList.remove("on");
     const cfg = getJb();
     $("sheetTitle").textContent = "Sincronizar con JSONBin";
     const b = $("sheetBody");
     if (window.claude) {
-      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink)">Aquí en claude.ai ya está sincronizado con tu cuenta. Abre este mismo link en tus otros dispositivos.</p>`;
+      b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0">Esta versión de CAJA está en claude.ai y ya se sincroniza sola con tu cuenta de Claude: abre este mismo link en tu celular y tu laptop.</p>
+        <p class="sheet-note" style="font-size:14px;color:var(--ink)">claude.ai no deja que sus páginas se conecten a otros sitios, así que <b>JSONBin funciona en la versión independiente de CAJA</b>, la que abres en JS Bin o en tu navegador.</p>
+        <div class="opts"><button class="opt primary" type="button" id="getJsbin">Descargar CAJA con JSONBin</button></div>
+        <ol class="steps"><li>Abre el archivo en tu navegador, o pégalo en el panel HTML de jsbin.com.</li><li>Toca “Solo este equipo · toca para sincronizar” arriba.</li><li>Pega tu X-Master-Key de jsonbin.io y toca Conectar.</li><li>En tus otros dispositivos, pega el código de enlace que te muestra.</li></ol>
+        <p class="sheet-note" id="getMsg"></p>`;
+      $("getJsbin").onclick = async () => {
+        $("getJsbin").textContent = "Preparando…";
+        try {
+          const blob = await (await fetch("caja-jsbin.html")).blob();
+          const dl = await window.claude.use("downloads");
+          if (!dl) throw { code: "unavailable" };
+          await dl.save({ filename: "caja-jsonbin.html", data: blob });
+          $("getJsbin").textContent = "Descargar CAJA con JSONBin";
+        } catch (e) {
+          $("getJsbin").textContent = "Descargar CAJA con JSONBin";
+          if (e && e.code === "declined") return;
+          $("getMsg").textContent = e && e.code === "host_unavailable" ? "Esta app no puede guardar archivos. Ábrela en el navegador o en una computadora." : "No se pudo descargar ahora. Inténtalo otra vez.";
+        }
+      };
     } else if (cfg) {
       b.innerHTML = `<p class="sheet-note" style="font-size:14px;color:var(--ink);margin-top:0">Este dispositivo guarda tus cuentas en tu JSONBin (bin <b>${esc(cfg.bin)}</b>).</p>
         <p class="sheet-note">Para conectar otro dispositivo, abre CAJA allí, toca “Sincronizar” y pega este código de enlace:</p>
@@ -2368,7 +2390,7 @@ form { background: var(--surface); border-color: var(--line-2); }
   $("collapse").addEventListener("click", () => { collapsed = !collapsed; try { localStorage.setItem("caja-col", collapsed ? "1" : "0"); } catch (e) {} applyPrefs(); });
   $("plus").addEventListener("click", () => ($("sheet").hidden ? openSheet("acciones") : closeSheet()));
   $("bookPill").addEventListener("click", () => openSheet("libros"));
-  $("sync").addEventListener("click", () => { if (!window.claude) syncSheet(); });
+  $("sync").addEventListener("click", syncSheet);
   $("scrim").addEventListener("click", closeSheet);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
   $("tc").addEventListener("click", () => runAction("tc"));
